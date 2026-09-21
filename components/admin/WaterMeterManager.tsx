@@ -45,7 +45,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
   const [activeTab, setActiveTab] = useState<'recap' | 'batch' | 'verification' | 'settings' | 'installation'>('recap');
   
   // PDAM Installation Tracking States
-  const [pdamStatusFilter, setPdamStatusFilter] = useState<'all' | 'Belum Terpasang' | 'Terpasang' | 'Dalam Proses Pengajuan' | 'Bermasalah / Rusak'>('all');
+  const [pdamStatusFilter, setPdamStatusFilter] = useState<'all' | 'Belum Terpasang' | 'Hilang' | 'Terpasang' | 'Dalam Proses Pengajuan' | 'Bermasalah / Rusak'>('all');
   const [pdamBlockFilter, setPdamBlockFilter] = useState<string>('all');
   const [pdamSearchQuery, setPdamSearchQuery] = useState<string>('');
   const [editingPdamHouse, setEditingPdamHouse] = useState<House | null>(null);
@@ -55,7 +55,8 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     meterNumber: '',
     notes: '',
     installDate: '',
-    submissionDate: ''
+    submissionDate: '',
+    lostDate: ''
   });
   const [isSavingPdam, setIsSavingPdam] = useState(false);
   const [readings, setReadings] = useState<WaterMeterReading[]>([]);
@@ -229,10 +230,12 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     let notInstalled = 0;
     let inProgress = 0;
     let broken = 0;
+    let lost = 0;
 
     houses.forEach(h => {
       const s = h.pdamStatus || 'Terpasang';
       if (s === 'Belum Terpasang') notInstalled++;
+      else if (s === 'Hilang') lost++;
       else if (s === 'Dalam Proses Pengajuan') inProgress++;
       else if (s === 'Bermasalah / Rusak') broken++;
       else installed++;
@@ -242,6 +245,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       total: houses.length,
       installed,
       notInstalled,
+      lost,
       inProgress,
       broken,
       installedPercentage: Math.round((installed / (houses.length || 1)) * 100)
@@ -278,7 +282,8 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       meterNumber: house.pdamMeterNumber || '',
       notes: house.pdamNotes || '',
       installDate: house.pdamInstallDate || '',
-      submissionDate: house.pdamSubmissionDate || ''
+      submissionDate: house.pdamSubmissionDate || '',
+      lostDate: house.pdamLostDate || ''
     });
     setIsPdamModalOpen(true);
   };
@@ -293,7 +298,8 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         pdamMeterNumber: pdamForm.meterNumber,
         pdamNotes: pdamForm.notes,
         pdamInstallDate: pdamForm.installDate,
-        pdamSubmissionDate: pdamForm.submissionDate
+        pdamSubmissionDate: pdamForm.submissionDate,
+        pdamLostDate: pdamForm.status === 'Hilang' ? pdamForm.lostDate : ''
       });
       toast.success(`Status meteran PDAM rumah Blok ${editingPdamHouse.block}-${editingPdamHouse.number} berhasil diperbarui!`);
       setIsPdamModalOpen(false);
@@ -321,8 +327,29 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         if (blockComp !== 0) return blockComp;
         return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true, sensitivity: 'base' });
       });
-    const lines = uninstalled.map((h, i) => `${i + 1}. Blok ${h.block}-${h.number} - ${h.headOfFamily || 'Warga'} (HP: ${h.phone || '-'})`);
-    const message = `Halo Pelayanan Pelanggan PDAM Kota Palu,\n\nKami dari Pengurus RT 002 / RW 020 Perumahan Huntap Tondo 2 ingin mengajukan koordinasi permohonan pemasangan baru unit meteran air bagi ${uninstalled.length} rumah warga kami yang saat ini BELUM TERPASANG:\n\n${lines.join('\n')}\n\nMohon arahan dan penjadwalan survei lapangan dari tim teknis PDAM Kota Palu. Terima kasih.\n\nPengurus RT 002 Huntap Tondo 2`;
+
+    const lostMeters = houses
+      .filter(h => h.pdamStatus === 'Hilang')
+      .sort((a, b) => {
+        const blockComp = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true, sensitivity: 'base' });
+        if (blockComp !== 0) return blockComp;
+        return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true, sensitivity: 'base' });
+      });
+
+    let message = `Halo Pelayanan Pelanggan PDAM Kota Palu,\n\nKami dari Pengurus RT 002 / RW 020 Perumahan Huntap Tondo 2 ingin menyampaikan pendataan resmi utilitas air di lingkungan kami:\n\n`;
+
+    if (uninstalled.length > 0) {
+      const lines = uninstalled.map((h, i) => `${i + 1}. Blok ${h.block}-${h.number} - ${h.headOfFamily || 'Warga'} (HP: ${h.phone || '-'})`);
+      message += `📌 *A. PERMOHONAN PEMASANGAN BARU (${uninstalled.length} RUMAH)*:\n${lines.join('\n')}\n\n`;
+    }
+
+    if (lostMeters.length > 0) {
+      const lostLines = lostMeters.map((h, i) => `${i + 1}. Blok ${h.block}-${h.number} - ${h.headOfFamily || 'Warga'} (No. Seri Lama: ${h.pdamMeterNumber || 'Tidak Tercatat'}, Tgl Hilang: ${h.pdamLostDate || '-'})`);
+      message += `🚨 *B. LAPORAN METERAN HILANG / PERMOHONAN UNIT PENGGANTI (${lostMeters.length} UNIT)*:\n${lostLines.join('\n')}\n*Catatan*: Stop kran pipa distribusi telah diamankan sementara untuk menghindari kebocoran tanpa meteran.\n\n`;
+    }
+
+    message += `Mohon arahan dan penjadwalan survei lapangan dari tim teknis PDAM Kota Palu. Terima kasih.\n\nPengurus RT 002 Huntap Tondo 2`;
+
     navigator.clipboard.writeText(message);
     toast.success('Draf pengajuan WhatsApp ke PDAM Kota Palu berhasil disalin!');
   };
@@ -851,6 +878,11 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           {pdamStats.notInstalled > 0 && (
             <span className="px-2 py-0.5 text-[10px] font-black bg-rose-500 text-white rounded-full">
               {pdamStats.notInstalled} Belum Ada
+            </span>
+          )}
+          {pdamStats.lost > 0 && (
+            <span className="px-2 py-0.5 text-[10px] font-black bg-purple-600 text-white rounded-full animate-pulse">
+              {pdamStats.lost} Hilang
             </span>
           )}
         </button>
@@ -1558,16 +1590,29 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 type="button"
                 onClick={() => generatePDAMInstallationReportPDF(houses, 'Belum Terpasang')}
                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-900/30 transition-all cursor-pointer active:scale-95"
+                title="Cetak surat permohonan pemasangan baru unit meteran PDAM"
               >
                 <Download size={14} />
-                <span>Cetak PDF Permohonan</span>
+                <span>PDF Permohonan Baru</span>
               </button>
+
+              {pdamStats.lost > 0 && (
+                <button
+                  type="button"
+                  onClick={() => generatePDAMInstallationReportPDF(houses, 'Hilang')}
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-purple-900/30 transition-all cursor-pointer active:scale-95 animate-pulse"
+                  title="Cetak berita acara & surat permohonan penggantian meteran hilang ke PDAM Kota Palu"
+                >
+                  <Download size={14} />
+                  <span>PDF Meteran Hilang ({pdamStats.lost})</span>
+                </button>
+              )}
 
               <button
                 type="button"
                 onClick={handleCopyPDAMWhatsApp}
                 className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
-                title="Salin daftar rumah belum terpasang untuk dikirim ke petugas PDAM via WA"
+                title="Salin daftar rumah belum terpasang dan meteran hilang untuk dikirim ke petugas PDAM via WA"
               >
                 <Send size={14} className="text-cyan-300" />
                 <span>Salin Draf WA</span>
@@ -1576,71 +1621,88 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           </div>
 
           {/* Metric KPI Cards for PDAM */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-5 border-rose-200/80 bg-gradient-to-br from-rose-50/60 to-white shadow-xs">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+            <Card className="p-4 sm:p-5 border-rose-200/80 bg-gradient-to-br from-rose-50/60 to-white shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-rose-700 uppercase tracking-wider">Belum Terpasang</span>
-                <div className="p-2 rounded-xl bg-rose-100 text-rose-600 font-bold text-xs">
+                <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">Belum Terpasang</span>
+                <div className="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 font-bold text-[10px]">
                   Prioritas
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-3xl font-black text-rose-600">
-                  {pdamStats.notInstalled} <span className="text-sm font-semibold text-slate-500">Rumah</span>
+                <div className="text-2xl sm:text-3xl font-black text-rose-600">
+                  {pdamStats.notInstalled} <span className="text-xs font-semibold text-slate-500">Rumah</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 font-medium">
-                  Perlu pengajuan meteran baru
+                <p className="text-[10px] text-slate-500 mt-1 font-medium">
+                  Belum pernah ada meteran
                 </p>
               </div>
             </Card>
 
-            <Card className="p-5 border-amber-200/80 bg-gradient-to-br from-amber-50/60 to-white shadow-xs">
+            <Card className="p-4 sm:p-5 border-purple-200/80 bg-gradient-to-br from-purple-50/70 to-white shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">Dalam Pengajuan</span>
-                <div className="p-2 rounded-xl bg-amber-100 text-amber-600 font-bold text-xs">
+                <span className="text-[11px] font-bold text-purple-800 uppercase tracking-wider">Meteran Hilang</span>
+                <div className="px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 font-bold text-[10px] flex items-center gap-1">
+                  🚨 Ganti Unit
+                </div>
+              </div>
+              <div className="mt-2.5">
+                <div className="text-2xl sm:text-3xl font-black text-purple-700">
+                  {pdamStats.lost} <span className="text-xs font-semibold text-slate-500">Unit</span>
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1 font-medium">
+                  Raib / dicuri, tutup stop kran
+                </p>
+              </div>
+            </Card>
+
+            <Card className="p-4 sm:p-5 border-amber-200/80 bg-gradient-to-br from-amber-50/60 to-white shadow-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">Dalam Pengajuan</span>
+                <div className="px-2 py-0.5 rounded-lg bg-amber-100 text-amber-700 font-bold text-[10px]">
                   Proses
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-3xl font-black text-amber-600">
-                  {pdamStats.inProgress} <span className="text-sm font-semibold text-slate-500">Rumah</span>
+                <div className="text-2xl sm:text-3xl font-black text-amber-600">
+                  {pdamStats.inProgress} <span className="text-xs font-semibold text-slate-500">Rumah</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 font-medium">
-                  Menunggu survei &amp; pemasangan
+                <p className="text-[10px] text-slate-500 mt-1 font-medium">
+                  Survei &amp; antrean pasang
                 </p>
               </div>
             </Card>
 
-            <Card className="p-5 border-blue-200/80 bg-gradient-to-br from-blue-50/60 to-white shadow-xs">
+            <Card className="p-4 sm:p-5 border-blue-200/80 bg-gradient-to-br from-blue-50/60 to-white shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Sudah Terpasang</span>
-                <div className="p-2 rounded-xl bg-blue-100 text-blue-600 font-bold text-xs">
+                <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wider">Sudah Terpasang</span>
+                <div className="px-2 py-0.5 rounded-lg bg-blue-100 text-blue-700 font-bold text-[10px]">
                   Aktif
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-3xl font-black text-blue-600">
-                  {pdamStats.installed} <span className="text-sm font-semibold text-slate-500">({pdamStats.installedPercentage}%)</span>
+                <div className="text-2xl sm:text-3xl font-black text-blue-600">
+                  {pdamStats.installed} <span className="text-xs font-semibold text-slate-500">({pdamStats.installedPercentage}%)</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 font-medium">
-                  Tercatat &amp; memiliki meteran
+                <p className="text-[10px] text-slate-500 mt-1 font-medium">
+                  Fisik meteran ada &amp; aktif
                 </p>
               </div>
             </Card>
 
-            <Card className="p-5 border-slate-200 bg-white shadow-xs">
+            <Card className="p-4 sm:p-5 border-slate-200 bg-white shadow-xs col-span-2 lg:col-span-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Meteran Bermasalah</span>
-                <div className="p-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Meter Rusak</span>
+                <div className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 font-bold text-[10px]">
                   Teknis
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-3xl font-black text-slate-700">
-                  {pdamStats.broken} <span className="text-sm font-semibold text-slate-500">Rumah</span>
+                <div className="text-2xl sm:text-3xl font-black text-slate-700">
+                  {pdamStats.broken} <span className="text-xs font-semibold text-slate-500">Rumah</span>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 font-medium">
-                  Bocor, pecah, atau buram
+                <p className="text-[10px] text-slate-500 mt-1 font-medium">
+                  Pecah, bocor, atau buram
                 </p>
               </div>
             </Card>
@@ -1680,6 +1742,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
               >
                 <option value="all">Semua Status Meteran</option>
                 <option value="Belum Terpasang">Belum Terpasang ({pdamStats.notInstalled})</option>
+                <option value="Hilang">🚨 Meteran Hilang / Raib ({pdamStats.lost})</option>
                 <option value="Dalam Proses Pengajuan">Dalam Pengajuan ({pdamStats.inProgress})</option>
                 <option value="Terpasang">Sudah Terpasang ({pdamStats.installed})</option>
                 <option value="Bermasalah / Rusak">Bermasalah / Rusak ({pdamStats.broken})</option>
@@ -1706,12 +1769,15 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                     filteredPdamHouses.map((house) => {
                       const status = house.pdamStatus || 'Terpasang';
                       const isUninstalled = status === 'Belum Terpasang';
+                      const isLost = status === 'Hilang';
                       const isProgress = status === 'Dalam Proses Pengajuan';
 
                       return (
                         <tr 
                           key={house.id} 
-                          className={`hover:bg-slate-50/80 transition-colors ${isUninstalled ? 'bg-rose-50/20' : isProgress ? 'bg-amber-50/20' : ''}`}
+                          className={`hover:bg-slate-50/80 transition-colors ${
+                            isLost ? 'bg-purple-50/30' : isUninstalled ? 'bg-rose-50/20' : isProgress ? 'bg-amber-50/20' : ''
+                          }`}
                         >
                           <td className="py-3.5 px-4 font-black text-slate-800 whitespace-nowrap">
                             <span className="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono text-[11px] shadow-xs">
@@ -1726,35 +1792,79 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl font-black text-[10px] uppercase tracking-wide border ${
                               status === 'Terpasang' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                               status === 'Belum Terpasang' ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 animate-pulse' :
+                              status === 'Hilang' ? 'bg-purple-50 text-purple-700 border-purple-300 ring-2 ring-purple-500/10 animate-pulse' :
                               status === 'Dalam Proses Pengajuan' ? 'bg-amber-50 text-amber-700 border-amber-300' :
-                              'bg-purple-50 text-purple-700 border-purple-200'
+                              'bg-slate-100 text-slate-700 border-slate-300'
                             }`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${
                                 status === 'Terpasang' ? 'bg-blue-500' :
                                 status === 'Belum Terpasang' ? 'bg-rose-500' :
+                                status === 'Hilang' ? 'bg-purple-600' :
                                 status === 'Dalam Proses Pengajuan' ? 'bg-amber-500' :
-                                'bg-purple-500'
+                                'bg-slate-500'
                               }`} />
-                              {status}
+                              {status === 'Hilang' ? '🚨 Meteran Hilang' : status}
                             </span>
+                            {isLost && house.pdamLostDate && (
+                              <div className="text-[10px] text-purple-600 font-semibold mt-1">
+                                Raib: {house.pdamLostDate}
+                              </div>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 font-mono font-bold text-slate-600 whitespace-nowrap">
-                            {house.pdamMeterNumber || (isUninstalled ? <span className="text-slate-300 italic">- Belum Ada -</span> : <span className="text-slate-400 italic">Belum Dicatat</span>)}
+                            {house.pdamMeterNumber || (
+                              isLost ? <span className="text-purple-400 italic">Ex: {house.pdamMeterNumber || 'Tidak Ada Data'}</span> :
+                              isUninstalled ? <span className="text-slate-300 italic">- Belum Ada -</span> : 
+                              <span className="text-slate-400 italic">Belum Dicatat</span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-slate-500 max-w-xs truncate">
-                            {house.pdamNotes || <span className="text-slate-300 italic">Tidak ada catatan</span>}
+                            {house.pdamNotes || (
+                              isLost 
+                                ? <span className="text-purple-500 italic">Pipa perlu ditutup/didop</span> 
+                                : <span className="text-slate-300 italic">Tidak ada catatan</span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 text-center whitespace-nowrap">
                             <div className="flex items-center justify-center gap-1.5">
                               {isUninstalled ? (
-                                <button
-                                  type="button"
-                                  onClick={() => handleQuickPdamStatus(house, 'Dalam Proses Pengajuan')}
-                                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-all cursor-pointer"
-                                  title="Tandai sedang diajukan ke PDAM"
-                                >
-                                  Tandai Diajukan
-                                </button>
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickPdamStatus(house, 'Dalam Proses Pengajuan')}
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-all cursor-pointer"
+                                    title="Tandai sedang diajukan ke PDAM"
+                                  >
+                                    Diajukan
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickPdamStatus(house, 'Hilang')}
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-all cursor-pointer"
+                                    title="Tandai meteran hilang/dicuri"
+                                  >
+                                    Set Hilang
+                                  </button>
+                                </>
+                              ) : isLost ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickPdamStatus(house, 'Dalam Proses Pengajuan')}
+                                    className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-all cursor-pointer"
+                                    title="Tandai sudah diajukan permohonan ganti ke PDAM"
+                                  >
+                                    Ajukan Ganti
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickPdamStatus(house, 'Terpasang')}
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-all cursor-pointer"
+                                    title="Tandai meteran baru sudah dipasang"
+                                  >
+                                    Ganti Selesai
+                                  </button>
+                                </>
                               ) : isProgress ? (
                                 <button
                                   type="button"
@@ -1765,14 +1875,24 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                                   Tandai Terpasang
                                 </button>
                               ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => handleQuickPdamStatus(house, 'Belum Terpasang')}
-                                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-all cursor-pointer"
-                                  title="Tandai belum terpasang meteran"
-                                >
-                                  Set Belum Pasang
-                                </button>
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickPdamStatus(house, 'Belum Terpasang')}
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-all cursor-pointer"
+                                    title="Tandai belum terpasang meteran"
+                                  >
+                                    Belum Pasang
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleQuickPdamStatus(house, 'Hilang')}
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-all cursor-pointer"
+                                    title="Tandai meteran hilang / dicuri"
+                                  >
+                                    Hilang
+                                  </button>
+                                </>
                               )}
 
                               <button
@@ -1827,10 +1947,11 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
               <label className="block text-xs font-bold text-slate-700 mb-1">
                 Status Instalasi Meteran PDAM *
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {[
                   { id: 'Belum Terpasang', label: 'Belum Terpasang', desc: 'Perlu meteran baru' },
-                  { id: 'Dalam Proses Pengajuan', label: 'Dalam Pengajuan', desc: 'Menunggu survei/unit' },
+                  { id: 'Hilang', label: '🚨 Meteran Hilang', desc: 'Unit raib / dicuri' },
+                  { id: 'Dalam Proses Pengajuan', label: 'Dalam Pengajuan', desc: 'Menunggu survei / unit' },
                   { id: 'Terpasang', label: 'Sudah Terpasang', desc: 'Fisik meteran ada' },
                   { id: 'Bermasalah / Rusak', label: 'Bermasalah / Rusak', desc: 'Bocor, pecah, dll.' },
                 ].map(item => (
@@ -1840,7 +1961,9 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                     onClick={() => setPdamForm(prev => ({ ...prev, status: item.id as any }))}
                     className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                       pdamForm.status === item.id
-                        ? 'border-blue-600 bg-blue-50/80 text-blue-900 ring-2 ring-blue-500/20 shadow-xs'
+                        ? item.id === 'Hilang'
+                          ? 'border-purple-600 bg-purple-50/80 text-purple-900 ring-2 ring-purple-500/20 shadow-xs'
+                          : 'border-blue-600 bg-blue-50/80 text-blue-900 ring-2 ring-blue-500/20 shadow-xs'
                         : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-600'
                     }`}
                   >
@@ -1851,23 +1974,63 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Nomor Seri / ID Pelanggan PDAM (Jika Ada)
-              </label>
-              <input
-                type="text"
-                placeholder="Contoh: PLU-2026-08892 atau nomor fisik meter"
-                value={pdamForm.meterNumber}
-                onChange={(e) => setPdamForm(prev => ({ ...prev, meterNumber: e.target.value }))}
-                className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+            {pdamForm.status === 'Hilang' && (
+              <div className="p-3 bg-purple-50/90 border border-purple-200 rounded-2xl text-purple-900 text-xs space-y-1">
+                <div className="font-black flex items-center gap-1.5 text-purple-800">
+                  <AlertTriangle size={15} className="text-purple-600 shrink-0" />
+                  Peringatan Darurat Pengamanan Pipa:
+                </div>
+                <p className="text-[11px] text-purple-700 leading-relaxed">
+                  Segera pastikan <strong>stop kran pipa distribusi hunian telah ditutup rapat atau didop (disumbat)</strong>. Hal ini penting untuk mencegah timbulnya aliran air tak tercatat, genangan, atau denda tagihan estimasi dari PDAM Kota Palu.
+                </p>
+              </div>
+            )}
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tgl Permohonan / Usulan
+                  {pdamForm.status === 'Hilang' ? 'Nomor Seri Meteran Lama (Jika Sempat Tercatat)' : 'Nomor Seri / ID Pelanggan PDAM'}
+                </label>
+                <input
+                  type="text"
+                  placeholder="Contoh: PLU-2026-08892"
+                  value={pdamForm.meterNumber}
+                  onChange={(e) => setPdamForm(prev => ({ ...prev, meterNumber: e.target.value }))}
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {pdamForm.status === 'Hilang' ? (
+                <div>
+                  <label className="block text-xs font-bold text-purple-800 mb-1">
+                    Perkiraan Tgl Hilang / Raib *
+                  </label>
+                  <input
+                    type="date"
+                    value={pdamForm.lostDate}
+                    onChange={(e) => setPdamForm(prev => ({ ...prev, lostDate: e.target.value }))}
+                    className="w-full p-2.5 bg-purple-50 border border-purple-300 rounded-xl text-xs font-bold text-purple-900 outline-none focus:ring-2 focus:ring-purple-500"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Tgl Realisasi Pasang
+                  </label>
+                  <input
+                    type="date"
+                    value={pdamForm.installDate}
+                    onChange={(e) => setPdamForm(prev => ({ ...prev, installDate: e.target.value }))}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  {pdamForm.status === 'Hilang' ? 'Tgl Usulan Penggantian' : 'Tgl Permohonan / Usulan'}
                 </label>
                 <input
                   type="date"
@@ -1877,17 +2040,19 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tgl Realisasi Pasang
-                </label>
-                <input
-                  type="date"
-                  value={pdamForm.installDate}
-                  onChange={(e) => setPdamForm(prev => ({ ...prev, installDate: e.target.value }))}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              {pdamForm.status === 'Hilang' && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                    Tgl Realisasi Pasang Unit Baru (Nanti)
+                  </label>
+                  <input
+                    type="date"
+                    value={pdamForm.installDate}
+                    onChange={(e) => setPdamForm(prev => ({ ...prev, installDate: e.target.value }))}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
             </div>
 
             <div>

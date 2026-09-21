@@ -640,12 +640,13 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         <div className="space-y-3">
                           <div>
                             <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Meteran Hunian</label>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                               {[
                                 { id: 'Terpasang', label: 'Terpasang', color: 'blue' },
-                                { id: 'Belum Terpasang', label: 'Belum Terpasang', color: 'rose' },
+                                { id: 'Belum Terpasang', label: 'Belum Ada', color: 'rose' },
+                                { id: 'Hilang', label: '🚨 Hilang', color: 'purple' },
                                 { id: 'Dalam Proses Pengajuan', label: 'Pengajuan', color: 'amber' },
-                                { id: 'Bermasalah / Rusak', label: 'Rusak', color: 'purple' },
+                                { id: 'Bermasalah / Rusak', label: 'Rusak', color: 'slate' },
                               ].map(item => (
                                 <button
                                   key={item.id}
@@ -653,7 +654,9 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                   onClick={() => setFormData({ ...formData, pdamStatus: item.id as any })}
                                   className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${
                                     (formData.pdamStatus || 'Terpasang') === item.id
-                                      ? 'bg-blue-50 border-blue-500 text-blue-800 ring-1 ring-blue-500/30'
+                                      ? item.id === 'Hilang'
+                                        ? 'bg-purple-50 border-purple-500 text-purple-800 ring-1 ring-purple-500/30'
+                                        : 'bg-blue-50 border-blue-500 text-blue-800 ring-1 ring-blue-500/30'
                                       : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                                   }`}
                                 >
@@ -663,8 +666,22 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             </div>
                           </div>
 
+                          {formData.pdamStatus === 'Hilang' && (
+                            <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
+                              <span className="text-[11px] font-bold text-purple-800 block">
+                                ⚠️ Meteran Raib: Pastikan stop kran pipa distribusi telah ditutup/didop agar tidak bocor.
+                              </span>
+                              <FormField 
+                                label="Perkiraan Tanggal Hilang (YYYY-MM-DD)" 
+                                type="date"
+                                value={formData.pdamLostDate || ''} 
+                                onChange={(v: any) => setFormData({...formData, pdamLostDate: v})} 
+                              />
+                            </div>
+                          )}
+
                           <FormField 
-                            label="Nomor ID / Seri Meteran PDAM (Opsional)" 
+                            label={formData.pdamStatus === 'Hilang' ? "Nomor ID / Seri Meteran Lama (Jika Sempat Tercatat)" : "Nomor ID / Seri Meteran PDAM (Opsional)"} 
                             placeholder="Contoh: PLU-2026-XXXX"
                             value={formData.pdamMeterNumber || ''} 
                             onChange={(v: any) => setFormData({...formData, pdamMeterNumber: v})} 
@@ -672,7 +689,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
                           <FormField 
                             label="Catatan Teknis Pipa / Kendala Lapangan" 
-                            placeholder="Misal: Pipa cabang siap belum ada meter, kran rusak..."
+                            placeholder="Misal: Pipa cabang siap belum ada meter, kran rusak, kronologi hilang..."
                             value={formData.pdamNotes || ''} 
                             onChange={(v: any) => setFormData({...formData, pdamNotes: v})} 
                           />

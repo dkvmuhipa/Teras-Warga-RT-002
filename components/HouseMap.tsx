@@ -424,21 +424,41 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
 
                                 {/* 4 Live Utility & Sanitation Chips */}
                                 <div className="grid grid-cols-2 gap-2">
-                                    <div className="p-2.5 sm:p-3 bg-sky-50/80 border border-sky-100 rounded-2xl flex flex-col justify-between gap-1.5">
+                                    <div className={`p-2.5 sm:p-3 rounded-2xl flex flex-col justify-between gap-1.5 border ${
+                                        house.pdamStatus === 'Hilang'
+                                            ? 'bg-purple-50/90 border-purple-200'
+                                            : house.pdamStatus === 'Belum Terpasang'
+                                            ? 'bg-rose-50/80 border-rose-200'
+                                            : 'bg-sky-50/80 border-sky-100'
+                                    }`}>
                                         <div className="flex items-center gap-1.5 min-w-0">
-                                            <div className="p-1.5 bg-sky-500 text-white rounded-lg shadow-2xs shrink-0">
+                                            <div className={`p-1.5 text-white rounded-lg shadow-2xs shrink-0 ${
+                                                house.pdamStatus === 'Hilang'
+                                                    ? 'bg-purple-600'
+                                                    : house.pdamStatus === 'Belum Terpasang'
+                                                    ? 'bg-rose-500'
+                                                    : 'bg-sky-500'
+                                            }`}>
                                                 <Droplets size={13} />
                                             </div>
-                                            <span className="text-[9px] font-black text-sky-900 uppercase tracking-tight truncate">Air SPAM</span>
+                                            <span className="text-[9px] font-black text-slate-800 uppercase tracking-tight truncate">Air PDAM</span>
                                         </div>
                                         <div className="flex items-center justify-between pt-0.5">
-                                            <span className="text-[10px] text-slate-500 font-bold">PDAM</span>
+                                            <span className="text-[10px] text-slate-500 font-bold">Meteran</span>
                                             <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                                                statusAir === PaymentStatus.PAID 
+                                                house.pdamStatus === 'Hilang'
+                                                    ? 'bg-purple-100 text-purple-800 animate-pulse'
+                                                    : house.pdamStatus === 'Belum Terpasang'
+                                                    ? 'bg-rose-100 text-rose-800'
+                                                    : statusAir === PaymentStatus.PAID 
                                                     ? 'bg-emerald-100 text-emerald-800' 
-                                                    : 'bg-rose-100 text-rose-800'
+                                                    : 'bg-amber-100 text-amber-800'
                                             }`}>
-                                                {statusAir === PaymentStatus.PAID ? 'Lancar' : 'Menunggak'}
+                                                {house.pdamStatus === 'Hilang'
+                                                    ? '🚨 Hilang'
+                                                    : house.pdamStatus === 'Belum Terpasang'
+                                                    ? 'Belum Ada'
+                                                    : statusAir === PaymentStatus.PAID ? 'Terpasang' : 'Tercatat'}
                                             </span>
                                         </div>
                                     </div>

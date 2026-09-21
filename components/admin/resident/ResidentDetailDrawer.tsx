@@ -276,10 +276,14 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     isUrgent={selectedResident.pbbStatus !== 'Sudah Diambil'} 
                   />
                   <DetailItem 
-                    icon={<Droplets size={13} className="text-blue-500" />} 
+                    icon={<Droplets size={13} className={selectedResident.pdamStatus === 'Hilang' ? 'text-purple-600' : 'text-blue-500'} />} 
                     label="Meteran PDAM Palu" 
-                    value={`${selectedResident.pdamStatus || 'Terpasang'}${selectedResident.pdamMeterNumber ? ` (ID: ${selectedResident.pdamMeterNumber})` : ''}`} 
-                    isUrgent={(selectedResident.pdamStatus || 'Terpasang') === 'Belum Terpasang'} 
+                    value={
+                      selectedResident.pdamStatus === 'Hilang'
+                        ? `🚨 Meteran Hilang${selectedResident.pdamLostDate ? ` (Tgl: ${selectedResident.pdamLostDate})` : ''} - Stop Kran Wajib Ditutup`
+                        : `${selectedResident.pdamStatus || 'Terpasang'}${selectedResident.pdamMeterNumber ? ` (ID: ${selectedResident.pdamMeterNumber})` : ''}`
+                    } 
+                    isUrgent={selectedResident.pdamStatus === 'Belum Terpasang' || selectedResident.pdamStatus === 'Hilang'} 
                   />
                   <DetailItem icon={<FileText size={13} />} label="Nomor NIK" value={selectedResident.nik || '-'} isMain />
                   <DetailItem icon={<Users size={13} />} label="Nomor KK" value={selectedResident.kkNumber || '-'} isMain />

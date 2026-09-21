@@ -5210,14 +5210,17 @@ export const generateDigitalReceiptPDF = async (
 };
 
 // ==========================================
-// DOKUMEN PERMOHONAN KOLEKTIF PEMASANGAN METERAN PDAM KOTA PALU
+// DOKUMEN PERMOHONAN KOLEKTIF PEMASANGAN & PENGGANTIAN METERAN PDAM KOTA PALU
 // ==========================================
 export const generatePDAMInstallationReportPDF = async (
   houses: House[],
-  filterType: 'Semua' | 'Belum Terpasang' | 'Dalam Proses Pengajuan' = 'Belum Terpasang',
+  filterType: 'Semua' | 'Belum Terpasang' | 'Dalam Proses Pengajuan' | 'Hilang' | 'Belum Terpasang & Hilang' = 'Belum Terpasang',
   customConfig?: PdfConfig
 ) => {
   const config = customConfig || DEFAULT_PDF_CONFIG;
+  const isLostOnly = filterType === 'Hilang';
+  const isCombined = filterType === 'Belum Terpasang & Hilang';
+
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -5235,6 +5238,8 @@ export const generatePDAMInstallationReportPDF = async (
       const status = h.pdamStatus || 'Terpasang';
       if (filterType === 'Belum Terpasang') return status === 'Belum Terpasang';
       if (filterType === 'Dalam Proses Pengajuan') return status === 'Dalam Proses Pengajuan';
+      if (filterType === 'Hilang') return status === 'Hilang';
+      if (filterType === 'Belum Terpasang & Hilang') return status === 'Belum Terpasang' || status === 'Hilang';
       return true;
     })
     .sort((a, b) => {
@@ -5273,15 +5278,22 @@ export const generatePDAMInstallationReportPDF = async (
   const romanMonths = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
   const currentMonthRoman = romanMonths[new Date().getMonth()];
   const currentYear = new Date().getFullYear();
-  const letterNo = `048/RT-02/TONDO-II/PDAM/${currentMonthRoman}/${currentYear}`;
+  const letterCode = isLostOnly ? 'HILANG' : 'PDAM';
+  const letterNo = `048/RT-02/TONDO-II/${letterCode}/${currentMonthRoman}/${currentYear}`;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(15, 23, 42);
 
+  const subjectText = isLostOnly
+    ? 'Laporan Kehilangan & Permohonan Penggantian Unit Meteran Air PDAM'
+    : isCombined
+    ? 'Permohonan Pemasangan Baru & Penggantian Unit Meteran Air PDAM'
+    : 'Permohonan Pemasangan Baru Unit Meteran Air PDAM';
+
   doc.text(`Nomor     : ${letterNo}`, margin, y);
   doc.text(`Lampiran  : 1 (Satu) Berkas Rekapitulasi`, margin, y + 4.5);
-  doc.text(`Perihal     : Permohonan Pemasangan Baru Unit Meteran Air PDAM`, margin, y + 9);
+  doc.text(`Perihal     : ${subjectText}`, margin, y + 9);
 
   const dateStr = `Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`;
   doc.text(dateStr, pageWidth - margin, y, { align: "right" });
@@ -5292,7 +5304,7 @@ export const generatePDAMInstallationReportPDF = async (
   doc.setFont("helvetica", "bold");
   doc.text("Kepada Yth.", margin, y);
   doc.setFont("helvetica", "normal");
-  doc.text("Direktur Utama / Bagian Hubungan Langganan", margin, y + 4.5);
+  doc.text("Direktur Utama / Bagian Hubungan Langganan & Penertiban", margin, y + 4.5);
   doc.text("Perumda Air Minum (PDAM) Kota Palu", margin, y + 9);
   doc.text("di Tempat", margin, y + 13.5);
 
@@ -5301,56 +5313,105 @@ export const generatePDAMInstallationReportPDF = async (
   // Paragraf Pengantar
   doc.text("Dengan hormat,", margin, y);
   y += 4.5;
-  const introText = `Sehubungan dengan proses pemenuhan sarana air bersih dan penataan utilitas warga di Perumahan Huntap Tondo 2, kami selaku Pengurus RT 002 / RW 020 Kelurahan Tondo mengajukan permohonan pemasangan baru unit meteran air PDAM secara kolektif bagi warga hunian yang hingga saat ini belum terpasang meteran resmi.`;
+  const introText = isLostOnly
+    ? `Sehubungan dengan adanya laporan warga terkait kehilangan fisik unit meteran air PDAM di lingkungan Perumahan Huntap Tondo 2, kami selaku Pengurus RT 002 / RW 020 Kelurahan Tondo menyampaikan laporan kehilangan resmi sekaligus memohon penerbitan unit pengganti serta survei teknis lapangan. Hal ini demi ketertiban administrasi langganan dan mencegah kebocoran air tanpa meteran serta menghindari beban estimasi tagihan bagi warga terdampak.`
+    : isCombined
+    ? `Sehubungan dengan pemenuhan sarana air bersih warga di Perumahan Huntap Tondo 2, kami selaku Pengurus RT 002 / RW 020 Kelurahan Tondo mengajukan permohonan kolektif bagi warga hunian yang belum terpasang meteran air maupun yang memerlukan penggantian unit akibat meteran hilang/raib.`
+    : `Sehubungan dengan proses pemenuhan sarana air bersih dan penataan utilitas warga di Perumahan Huntap Tondo 2, kami selaku Pengurus RT 002 / RW 020 Kelurahan Tondo mengajukan permohonan pemasangan baru unit meteran air PDAM secara kolektif bagi warga hunian yang hingga saat ini belum terpasang meteran resmi.`;
+
   const splitIntro = doc.splitTextToSize(introText, pageWidth - (margin * 2));
   doc.text(splitIntro, margin, y);
   y += (splitIntro.length * 4.2) + 3;
 
-  doc.text(`Adapun daftar nama kepala keluarga dan lokasi hunian warga yang diusulkan adalah sebagai berikut:`, margin, y);
+  doc.text(`Adapun daftar rincian kepala keluarga dan lokasi hunian yang diajukan adalah sebagai berikut:`, margin, y);
   y += 5;
 
-  // 3. Tabel Data Usulan Pemasangan
-  const tableData = targetHouses.map((h, i) => [
-    (i + 1).toString(),
-    `Blok ${h.block}-${h.number}`,
-    h.headOfFamily && h.headOfFamily !== '-' ? h.headOfFamily : (h.ownerName || 'Hunian Warga'),
-    h.nik ? h.nik : '-',
-    h.phone || '-',
-    h.residenceType || (h.status === 'Occupied' ? 'Dihuni Tetap' : h.status),
-    h.pdamStatus || 'Belum Terpasang',
-    h.pdamNotes || 'Menunggu sambungan meteran baru'
-  ]);
+  // 3. Tabel Data Usulan Pemasangan / Penggantian
+  if (isLostOnly) {
+    const tableData = targetHouses.map((h, i) => [
+      (i + 1).toString(),
+      `Blok ${h.block}-${h.number}`,
+      h.headOfFamily && h.headOfFamily !== '-' ? h.headOfFamily : (h.ownerName || 'Hunian Warga'),
+      h.phone || '-',
+      h.pdamMeterNumber || 'Tidak Tercatat',
+      h.pdamLostDate || 'Sebelum 2026',
+      h.pdamNotes || 'Stop kran pipa distribusi telah ditutup sementara'
+    ]);
 
-  autoTable(doc, {
-    startY: y,
-    margin: { left: margin, right: margin },
-    head: [['No', 'Blok/No', 'Kepala Keluarga', 'NIK', 'No. WhatsApp', 'Kepenghunian', 'Status PDAM', 'Catatan / Kondisi Pipa']],
-    body: tableData.length > 0 ? tableData : [['-', '-', 'Tidak ada data rumah pada kategori ini', '-', '-', '-', '-', '-']],
-    theme: 'grid',
-    styles: {
-      fontSize: 7.5,
-      cellPadding: 2,
-      textColor: [15, 23, 42],
-      lineColor: [203, 213, 225],
-      lineWidth: 0.2
-    },
-    headStyles: {
-      fillColor: [30, 58, 138],
-      textColor: [255, 255, 255],
-      fontStyle: 'bold',
-      halign: 'center'
-    },
-    columnStyles: {
-      0: { halign: 'center', cellWidth: 8 },
-      1: { halign: 'center', fontStyle: 'bold', cellWidth: 20 },
-      2: { cellWidth: 38 },
-      3: { cellWidth: 26, halign: 'center' },
-      4: { cellWidth: 24, halign: 'center' },
-      5: { cellWidth: 22, halign: 'center' },
-      6: { halign: 'center', cellWidth: 22 },
-      7: { cellWidth: 'auto' }
-    }
-  });
+    autoTable(doc, {
+      startY: y,
+      margin: { left: margin, right: margin },
+      head: [['No', 'Blok/No', 'Kepala Keluarga', 'No. WhatsApp', 'No. Seri Lama', 'Tgl Hilang', 'Kronologi / Kondisi Pengamanan Pipa']],
+      body: tableData.length > 0 ? tableData : [['-', '-', 'Tidak ada data meteran hilang', '-', '-', '-', '-']],
+      theme: 'grid',
+      styles: {
+        fontSize: 7.5,
+        cellPadding: 2,
+        textColor: [15, 23, 42],
+        lineColor: [203, 213, 225],
+        lineWidth: 0.2
+      },
+      headStyles: {
+        fillColor: [190, 24, 93], // Rose/crimson theme for lost meters
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 8 },
+        1: { halign: 'center', fontStyle: 'bold', cellWidth: 22 },
+        2: { cellWidth: 40 },
+        3: { cellWidth: 26, halign: 'center' },
+        4: { cellWidth: 26, halign: 'center' },
+        5: { cellWidth: 22, halign: 'center' },
+        6: { cellWidth: 'auto' }
+      }
+    });
+  } else {
+    const tableData = targetHouses.map((h, i) => [
+      (i + 1).toString(),
+      `Blok ${h.block}-${h.number}`,
+      h.headOfFamily && h.headOfFamily !== '-' ? h.headOfFamily : (h.ownerName || 'Hunian Warga'),
+      h.nik ? h.nik : '-',
+      h.phone || '-',
+      h.residenceType || (h.status === 'Occupied' ? 'Dihuni Tetap' : h.status),
+      h.pdamStatus || 'Belum Terpasang',
+      h.pdamStatus === 'Hilang'
+        ? `🚨 Meteran Hilang (Tgl: ${h.pdamLostDate || '-'}) - ${h.pdamNotes || 'Perlu ganti unit'}`
+        : (h.pdamNotes || 'Menunggu sambungan meteran baru')
+    ]);
+
+    autoTable(doc, {
+      startY: y,
+      margin: { left: margin, right: margin },
+      head: [['No', 'Blok/No', 'Kepala Keluarga', 'NIK', 'No. WhatsApp', 'Kepenghunian', 'Status PDAM', 'Catatan / Kondisi Pipa']],
+      body: tableData.length > 0 ? tableData : [['-', '-', 'Tidak ada data rumah pada kategori ini', '-', '-', '-', '-', '-']],
+      theme: 'grid',
+      styles: {
+        fontSize: 7.5,
+        cellPadding: 2,
+        textColor: [15, 23, 42],
+        lineColor: [203, 213, 225],
+        lineWidth: 0.2
+      },
+      headStyles: {
+        fillColor: [30, 58, 138],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        halign: 'center'
+      },
+      columnStyles: {
+        0: { halign: 'center', cellWidth: 8 },
+        1: { halign: 'center', fontStyle: 'bold', cellWidth: 20 },
+        2: { cellWidth: 38 },
+        3: { cellWidth: 26, halign: 'center' },
+        4: { cellWidth: 24, halign: 'center' },
+        5: { cellWidth: 22, halign: 'center' },
+        6: { halign: 'center', cellWidth: 22 },
+        7: { cellWidth: 'auto' }
+      }
+    });
+  }
 
   y = (doc as any).lastAutoTable?.finalY ? (doc as any).lastAutoTable.finalY + 6 : y + 30;
 
@@ -5363,9 +5424,17 @@ export const generatePDAMInstallationReportPDF = async (
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(30, 41, 59);
-  doc.text(`Total Hunian Belum Terpasang yang Diajukan: ${targetHouses.length} Rumah.`, margin, y);
+
+  const countSummary = isLostOnly
+    ? `Total Unit Meteran Hilang yang Diajukan Penggantian: ${targetHouses.length} Unit.`
+    : `Total Hunian yang Diajukan: ${targetHouses.length} Rumah.`;
+
+  doc.text(countSummary, margin, y);
   y += 4.5;
-  const closingText = `Demikian surat permohonan ini kami sampaikan, besar harapan kami pihak PDAM Kota Palu dapat segera menjadwalkan survei teknis dan realisasi pemasangan meteran demi ketertiban serta kenyamanan warga dalam mengakses air bersih. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.`;
+  const closingText = isLostOnly
+    ? `Demikian laporan dan surat permohonan ini kami sampaikan. Kami sangat mengharapkan tindak lanjut cepat dari PDAM Kota Palu untuk pemasangan unit meteran pengganti serta penerbitan berita acara resmi demi perlindungan hak konsumen warga RT 02 Huntap Tondo 2. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.`
+    : `Demikian surat permohonan ini kami sampaikan, besar harapan kami pihak PDAM Kota Palu dapat segera menjadwalkan survei teknis dan realisasi pemasangan meteran demi ketertiban serta kenyamanan warga dalam mengakses air bersih. Atas perhatian dan kerjasamanya kami ucapkan terima kasih.`;
+
   const splitClosing = doc.splitTextToSize(closingText, pageWidth - (margin * 2));
   doc.text(splitClosing, margin, y);
   y += (splitClosing.length * 4.2) + 8;
@@ -5401,9 +5470,10 @@ export const generatePDAMInstallationReportPDF = async (
   doc.setTextColor(148, 163, 184);
   doc.text(`Dicetak melalui Sistem Informasi Teras Warga RT 02 Huntap Tondo 2 pada ${new Date().toLocaleString('id-ID')}`, margin, pageHeight - 8);
 
-  const filename = `Surat_Permohonan_Meteran_PDAM_RT02_${new Date().toISOString().split('T')[0]}.pdf`;
+  const filePrefix = isLostOnly ? 'Surat_Penggantian_Meteran_Hilang_PDAM' : 'Surat_Permohonan_Meteran_PDAM';
+  const filename = `${filePrefix}_RT02_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(filename);
-  toast.success(`Dokumen resmi permohonan PDAM (${targetHouses.length} rumah) berhasil diunduh!`);
+  toast.success(`Dokumen resmi PDAM (${targetHouses.length} rumah) berhasil diunduh!`);
 };
 
 

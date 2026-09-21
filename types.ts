@@ -162,11 +162,12 @@ export interface House {
   useManualDemographics?: boolean; // NEW: Allow manual override of auto counts
 
   // PDAM Meter Installation & Tracking (Kota Palu)
-  pdamStatus?: 'Terpasang' | 'Belum Terpasang' | 'Dalam Proses Pengajuan' | 'Bermasalah / Rusak';
+  pdamStatus?: 'Terpasang' | 'Belum Terpasang' | 'Hilang' | 'Bermasalah / Rusak' | 'Dalam Proses Pengajuan';
   pdamMeterNumber?: string;       // No. ID Pelanggan / No. Seri Meteran Fisik PDAM
   pdamInstallDate?: string;       // Tanggal Pemasangan Fisik (YYYY-MM-DD)
   pdamSubmissionDate?: string;    // Tanggal Diajukan ke PDAM (YYYY-MM-DD)
-  pdamNotes?: string;             // Catatan Teknis (kondisi pipa, stop kran, dll.)
+  pdamLostDate?: string;          // Perkiraan Tanggal Hilang / Raib
+  pdamNotes?: string;             // Catatan Teknis (kronologi hilang, kondisi pipa, stop kran, dll.)
 
   // Family Members
   familyMembers?: {

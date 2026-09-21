@@ -1470,7 +1470,9 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                     <Droplets size={20} />
                   </div>
                   <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
-                    (currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
+                    currentHouse?.pdamStatus === 'Hilang'
+                      ? 'bg-purple-50 text-purple-700 border-purple-300 ring-2 ring-purple-500/10 animate-pulse'
+                      : (currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
                       ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 animate-pulse'
                       : currentWaterReading 
                         ? (currentWaterReading.status === 'Terverifikasi' 
@@ -1478,14 +1480,18 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                             : 'bg-amber-500/20 text-amber-700 border-amber-500/30')
                         : 'bg-rose-500/20 text-rose-700 border-rose-500/30'
                   }`}>
-                    {(currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
+                    {currentHouse?.pdamStatus === 'Hilang'
+                      ? '🚨 Meteran Hilang'
+                      : (currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
                       ? 'Belum Ada Meteran'
                       : currentWaterReading ? (currentWaterReading.status === 'Terverifikasi' ? '✓ Sah' : 'Menunggu') : 'Belum Catat'}
                   </span>
                 </div>
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Meter Air Mandiri</h4>
                 <p className="text-xl font-black text-slate-800">
-                  {(currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
+                  {currentHouse?.pdamStatus === 'Hilang'
+                    ? 'Penggantian Unit'
+                    : (currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
                     ? 'Menunggu PDAM'
                     : currentWaterReading ? `${currentWaterReading.usage} m³ • Rp ${currentWaterReading.totalAmount.toLocaleString('id-ID')}` : 'Catat Pemakaian'}
                 </p>
@@ -2386,6 +2392,44 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             exit={{ opacity: 0, y: -20 }}
             className="space-y-6 text-left"
           >
+            {/* Notice jika meteran air hilang */}
+            {currentHouse?.pdamStatus === 'Hilang' && (
+              <div className="p-5 rounded-3xl bg-gradient-to-r from-purple-50 via-pink-50 to-rose-50 border-2 border-purple-300 shadow-sm text-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3.5">
+                  <div className="p-3 bg-purple-600 text-white rounded-2xl shrink-0 shadow-md shadow-purple-600/25 animate-bounce">
+                    <AlertTriangle size={22} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-purple-700 text-white">
+                        🚨 Laporan: Meteran Fisik Hilang / Raib
+                      </span>
+                      {currentHouse.pdamLostDate && (
+                        <span className="text-[11px] font-bold text-purple-700">
+                          Tercatat: {currentHouse.pdamLostDate}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="font-black text-slate-900 text-sm">Pengamanan Pipa &amp; Pengajuan Penggantian Unit Meteran Baru</h4>
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed max-w-2xl">
+                      Rumah Anda terdata dalam berkas laporan meteran hilang RT 02 ke PDAM Kota Palu untuk permohonan unit meter pengganti. <strong>PENTING:</strong> Mohon pastikan stop kran pipa distribusi telah ditutup rapat/didop agar tidak terjadi kebocoran atau aliran air tanpa meteran.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = encodeURIComponent(`Halo Pengurus RT 002, saya dari Blok ${currentHouse?.block}-${currentHouse?.number} ingin konfirmasi tindak lanjut laporan penggantian meteran PDAM yang hilang di rumah kami.`);
+                    window.open(`https://wa.me/?text=${text}`, '_blank');
+                  }}
+                  className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md transition-all active:scale-95 whitespace-nowrap cursor-pointer"
+                >
+                  Konfirmasi Pengurus RT
+                </button>
+              </div>
+            )}
+
             {/* Notice jika rumah belum terpasang meteran PDAM */}
             {(currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang' && (
               <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border-2 border-rose-200 shadow-sm text-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
