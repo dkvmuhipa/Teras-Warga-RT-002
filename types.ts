@@ -180,6 +180,29 @@ export interface House {
     birthDate?: string;
     job?: string;
   }[];
+
+  // Occupant History (Rekam Jejak Penghuni Lampau)
+  occupantHistory?: OccupantHistoryItem[];
+}
+
+export interface OccupantHistoryItem {
+  id: string;
+  headOfFamily: string;
+  nik?: string;
+  kkNumber?: string;
+  phone?: string;
+  occupants?: number;
+  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
+  startDate?: string;
+  endDate: string;
+  moveOutReason: 'Pindah Keluar (Tanpa Pamit)' | 'Pindah Keluar (Resmi)' | 'Selesai Kontrak/Sewa' | 'Pindah Rumah Lain' | 'Lainnya';
+  moveOutNotes?: string;
+  familyMembers?: {
+    name: string;
+    relation: string;
+    nik?: string;
+    gender?: 'Laki-laki' | 'Perempuan';
+  }[];
 }
 
 export interface ResidentRegistration {

@@ -428,7 +428,67 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   </div>
 
                   {/* Historical Records */}
-                  {selectedResident.occupancyHistory && selectedResident.occupancyHistory.length > 0 ? (
+                  {selectedResident.occupantHistory && selectedResident.occupantHistory.length > 0 ? (
+                    selectedResident.occupantHistory.map((history) => {
+                      const isTanpaPamit = history.moveOutReason === 'Pindah Keluar (Tanpa Pamit)';
+                      return (
+                        <div key={history.id} className="relative">
+                          <div className={`absolute -left-[21px] top-1 w-3.5 h-3.5 rounded-full border-2 border-white ${
+                            isTanpaPamit ? 'bg-rose-500 ring-2 ring-rose-100' : 'bg-slate-400'
+                          }`}></div>
+                          <div className={`p-3.5 rounded-xl border transition-all ${
+                            isTanpaPamit 
+                              ? 'bg-rose-50/40 border-rose-200' 
+                              : 'bg-slate-50 border-slate-200/80'
+                          }`}>
+                            <div className="flex justify-between items-start gap-2">
+                              <div>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <p className="text-xs font-bold text-slate-800">{history.headOfFamily}</p>
+                                  {isTanpaPamit ? (
+                                    <span className="px-1.5 py-0.5 bg-rose-100 text-rose-700 border border-rose-200 rounded text-[8px] font-black uppercase tracking-wider flex items-center gap-0.5">
+                                      <AlertTriangle size={9} className="text-rose-600" />
+                                      Pindah Tanpa Pamit
+                                    </span>
+                                  ) : (
+                                    <span className="px-1.5 py-0.5 bg-slate-200 text-slate-700 rounded text-[8px] font-bold uppercase tracking-wider">
+                                      {history.moveOutReason || 'Pindah'}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[9px] font-semibold text-slate-500 uppercase mt-0.5">
+                                  {history.residenceType || 'Warga'} • {history.occupants || 1} Jiwa
+                                  {history.phone && history.phone !== '-' ? ` • Telp: ${history.phone}` : ''}
+                                </p>
+                              </div>
+                              <span className="text-[9px] font-bold text-slate-400 shrink-0 text-right">
+                                {history.startDate ? history.startDate.split('T')[0] : '?'} s/d {history.endDate || '-'}
+                              </span>
+                            </div>
+                            {history.moveOutNotes && (
+                              <p className={`text-[10px] mt-2 p-2 rounded-lg font-medium leading-relaxed ${
+                                isTanpaPamit 
+                                  ? 'bg-rose-100/60 text-rose-900 border border-rose-200/60' 
+                                  : 'bg-white text-slate-600 border border-slate-200/60'
+                              }`}>
+                                <span className="font-bold">Kronologi:</span> {history.moveOutNotes}
+                              </p>
+                            )}
+                            {history.familyMembers && history.familyMembers.length > 0 && (
+                              <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center gap-1 flex-wrap">
+                                <span className="text-[8px] font-bold text-slate-400 uppercase">Keluarga:</span>
+                                {history.familyMembers.map((m, idx) => (
+                                  <span key={idx} className="text-[9px] bg-white px-1.5 py-0.5 rounded border border-slate-200 text-slate-600 font-medium">
+                                    {m.name} ({m.relation})
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : selectedResident.occupancyHistory && selectedResident.occupancyHistory.length > 0 ? (
                     selectedResident.occupancyHistory.map((history) => (
                       <div key={history.id} className="relative">
                         <div className="absolute -left-[21px] top-1 w-3.5 h-3.5 bg-slate-300 rounded-full border-2 border-white"></div>

@@ -829,6 +829,78 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                     <HistoryItem icon={ShieldCheck} title="Pemeriksaan Sanitasi" desc="Verifikasi 5 Pilar STBM & Biotank PUPR" date="Terkini" color="teal" />
                                     <HistoryItem icon={Edit} title="Pembaruan Data Kependudukan" desc="Penyelarasan database RT 002/RW 020" date="Terdata" color="indigo" />
                                 </div>
+
+                                {/* Rekam Jejak Penghuni Rumah (Smart Occupant History) */}
+                                <div className="p-4 bg-slate-50 border border-slate-200/90 rounded-2xl space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-1.5">
+                                            <Users size={14} className="text-indigo-600" />
+                                            <span className="text-[11px] font-black text-slate-800 uppercase tracking-wider">
+                                                Riwayat Penghuni Lampau
+                                            </span>
+                                        </div>
+                                        <span className="text-[9px] font-extrabold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+                                            {house.occupantHistory?.length || 0} Riwayat
+                                        </span>
+                                    </div>
+
+                                    {house.occupantHistory && house.occupantHistory.length > 0 ? (
+                                        <div className="space-y-2.5">
+                                            {house.occupantHistory.map((item) => {
+                                                const isTanpaPamit = item.moveOutReason === 'Pindah Keluar (Tanpa Pamit)';
+                                                return (
+                                                    <div 
+                                                        key={item.id} 
+                                                        className={`p-3 rounded-xl border transition-all ${
+                                                            isTanpaPamit 
+                                                                ? 'bg-rose-50/60 border-rose-200' 
+                                                                : 'bg-white border-slate-200/80 shadow-2xs'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div>
+                                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                                    <p className="text-xs font-bold text-slate-900">{item.headOfFamily}</p>
+                                                                    {isTanpaPamit ? (
+                                                                        <span className="px-1.5 py-0.5 bg-rose-100 text-rose-700 border border-rose-200 rounded text-[8px] font-black uppercase tracking-wider flex items-center gap-0.5">
+                                                                            <AlertTriangle size={9} className="text-rose-600" />
+                                                                            Pindah Tanpa Pamit
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded text-[8px] font-bold uppercase tracking-wider">
+                                                                            {item.moveOutReason || 'Pindah'}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                                                                    {item.residenceType || 'Warga'} • {item.occupants || 1} Jiwa
+                                                                    {item.phone && item.phone !== '-' ? ` • Telp: ${item.phone}` : ''}
+                                                                </p>
+                                                            </div>
+                                                            <span className="text-[9px] font-bold text-slate-400 shrink-0 text-right">
+                                                                {item.startDate ? item.startDate.split('T')[0] : '?'} s/d {item.endDate || '-'}
+                                                            </span>
+                                                        </div>
+                                                        {item.moveOutNotes && (
+                                                            <p className={`text-[10px] mt-2 p-2 rounded-lg font-medium leading-relaxed ${
+                                                                isTanpaPamit 
+                                                                    ? 'bg-rose-100/70 text-rose-900 border border-rose-200' 
+                                                                    : 'bg-slate-50 text-slate-600 border border-slate-150'
+                                                            }`}>
+                                                                <span className="font-bold">Catatan:</span> {item.moveOutNotes}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <p className="text-[11px] text-slate-400 italic text-center py-2 bg-white rounded-xl border border-dashed border-slate-200">
+                                            Belum ada rekam jejak penghuni lampau tercatat di sistem.
+                                        </p>
+                                    )}
+                                </div>
+
                                 {house.specialNotes && (
                                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl relative overflow-hidden">
                                         <div className="absolute top-0 right-0 p-3 opacity-10"><Info size={40} className="text-amber-600" /></div>

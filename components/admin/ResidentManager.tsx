@@ -32,7 +32,8 @@ import {
   PieChart as PieChartIcon, ChevronDown, Settings, MoreVertical, FileClock, FileEdit,
   ShieldAlert, Briefcase
 } from 'lucide-react';
-import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role } from '../../types';
+import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role, OccupantHistoryItem } from '../../types';
+import { OccupantTransitionModal } from './resident/OccupantTransitionModal';
 import { HouseMap } from '../HouseMap';
 import { 
   generateResidentReportPDF, 
@@ -264,6 +265,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     useManualDemographics: false,
     accessCode: ''
   });
+
+  // State dialog deteksi transisi pergantian penghuni
+  const [transitionModalData, setTransitionModalData] = useState<{
+    oldHouse: House;
+    newFormData: any;
+  } | null>(null);
 
   // Auto calculate demographics based on family members
   useEffect(() => {
@@ -1099,18 +1106,41 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setIsModalOpen(true);
   };
 
-  const handleSaveHouse = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Fungsi eksekusi penyimpanan rumah (setelah konfirmasi transisi atau penyimpanan normal)
+  const executeSaveHouse = async (
+    data: any, 
+    oldHouse: House | null,
+    transitionOptions?: {
+      moveOutReason?: OccupantHistoryItem['moveOutReason'];
+      moveOutNotes?: string;
+      moveOutDate?: string;
+    }
+  ) => {
     try {
-      const oldHouse = editingHouseId ? houses.find(h => h.id === editingHouseId) : null;
-      const houseId = formatHouseId(`${formData.block}-${formData.number}`);
-      const data = {
-        ...formData,
-        id: houseId,
-        location: oldHouse?.location || { x: 0, y: 0 },
-        // Use the joiningDate from formData which can be modified by the user
-        joiningDate: formData.joiningDate || (oldHouse?.joiningDate || new Date().toISOString())
-      };
+      const houseId = data.id;
+
+      // Jika terjadi transisi pergantian penghuni, arsipkan profil warga lama ke occupantHistory
+      if (transitionOptions && oldHouse) {
+        const moveDate = transitionOptions.moveOutDate || new Date().toISOString().split('T')[0];
+        const reason = transitionOptions.moveOutReason || 'Pindah Keluar (Tanpa Pamit)';
+        const notes = transitionOptions.moveOutNotes || 'Pindah tanpa pamit/lapor ke pengurus RT, digantikan penghuni baru.';
+
+        const oldOccupantItem: OccupantHistoryItem = {
+          id: `hist-${Date.now()}`,
+          headOfFamily: oldHouse.headOfFamily,
+          nik: oldHouse.nik,
+          kkNumber: oldHouse.kkNumber,
+          phone: oldHouse.phone,
+          occupants: oldHouse.occupants,
+          residenceType: oldHouse.residenceType,
+          startDate: oldHouse.joiningDate,
+          endDate: moveDate,
+          moveOutReason: reason,
+          moveOutNotes: notes,
+          familyMembers: oldHouse.familyMembers
+        };
+        data.occupantHistory = [oldOccupantItem, ...(oldHouse.occupantHistory || [])];
+      }
 
       if (editingHouseId) {
         // If ID changed (block or number changed), migrate related data
@@ -1120,8 +1150,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           for (const p of housePayments) {
             await updateIuranPaymentInDb(p.id, { 
               houseId: houseId,
-              block: formData.block,
-              number: formData.number
+              block: data.block,
+              number: data.number
             });
           }
 
@@ -1140,10 +1170,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           // 4. Delete old house
           await deleteHouseFromDb(editingHouseId);
         }
-        await addHouse(data); // Using addHouse because it handles setDoc with ID
+
+        // Simpan data rumah
+        await addHouse(data);
         await logAction('Update Warga', `Update data warga di rumah ${houseId}`);
         if (selectedResident?.id === editingHouseId) {
-            setSelectedResident({ ...selectedResident, ...data, id: houseId } as House);
+          setSelectedResident({ ...selectedResident, ...data, id: houseId } as House);
         }
       } else {
         await addHouse(data);
@@ -1193,8 +1225,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         }
       }
 
-      // --- AUTO GENERATE LOG MUTASI ---
-      const logDate = data.joiningDate.split('T')[0];
+      // --- LOG MUTASI & REKAM JEJAK PENGHUNI ---
+      const logDate = data.joiningDate ? data.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0];
       
       const vulnerability = [];
       if (data.isPKH) vulnerability.push('PKH');
@@ -1203,21 +1235,43 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       if (data.isBansosLain) vulnerability.push(data.bansosLainName || 'Bansos Lainnya');
       if (data.isDisability) vulnerability.push('Disabilitas');
       if (data.isOrphan) vulnerability.push('Yatim/Piatu');
-      
-      if (!oldHouse && data.status === 'Occupied') {
-        // 1. New house added and immediately occupied
+
+      // Kasus 1: Terjadi Transisi Pergantian Penghuni (Warga Lama Pindah)
+      if (transitionOptions && oldHouse) {
+        const moveDate = transitionOptions.moveOutDate || new Date().toISOString().split('T')[0];
+        const reason = transitionOptions.moveOutReason || 'Pindah Keluar (Tanpa Pamit)';
+        const notes = transitionOptions.moveOutNotes || 'Pindah tanpa pamit/lapor ke pengurus RT, digantikan penghuni baru.';
+
+        // A. Catat Mutasi Keluar (MovedOut) untuk Warga Lama
         await addPopulationLogToDb({
-          id: Date.now().toString(),
+          id: `moveout-${Date.now()}`,
+          type: 'MovedOut',
+          name: oldHouse.headOfFamily || 'Warga Lama',
+          phone: oldHouse.phone || '-',
+          houseId: data.id,
+          date: moveDate,
+          description: `Warga pindah keluar: ${reason}`,
+          details: {
+            previousAddress: `Blok ${oldHouse.block} No. ${oldHouse.number}`,
+            reasonForMoving: reason,
+            notes: notes,
+            familyCount: oldHouse.occupants || (1 + (oldHouse.familyMembers?.length || 0)),
+            familyMembers: oldHouse.familyMembers || []
+          }
+        });
+
+        // B. Catat Mutasi Masuk (Newcomer) untuk Warga Baru
+        await addPopulationLogToDb({
+          id: `newcomer-${Date.now() + 1}`,
           type: 'Newcomer',
           name: data.headOfFamily,
-          phone: data.phone,
+          phone: data.phone || '-',
           houseId: data.id,
           date: logDate,
-          description: data.isInitialData ? 'Registrasi Awal (Admin)' : 'Warga Baru (Input Admin)',
-          isGenerated: data.isInitialData, // If it's initial data, mark as already generated so it doesn't show in mutation reports
+          description: `Warga Baru (Menggantikan ${oldHouse.headOfFamily || 'penghuni lama'})`,
           details: {
             previousAddress: '-',
-            reasonForMoving: 'Registrasi Awal',
+            reasonForMoving: 'Pergantian Penghuni Rumah',
             familyCount: data.occupants || 1,
             familyMembers: data.familyMembers || [],
             residenceType: data.residenceType || 'Tetap',
@@ -1232,9 +1286,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             education: data.education || '-'
           }
         });
-      } else if (oldHouse) {
-        if (oldHouse.status === 'Empty' && data.status === 'Occupied') {
-          // 2. House status changed from Empty to Occupied
+
+        toast.success(`Data warga baru berhasil disimpan! Warga lama (${oldHouse.headOfFamily}) otomatis tercatat pindah keluar.`);
+      } else {
+        // Kasus Normal (Bukan pergantian penghuni)
+        if (!oldHouse && data.status === 'Occupied') {
+          // 1. Rumah baru langsung dihuni
           await addPopulationLogToDb({
             id: Date.now().toString(),
             type: 'Newcomer',
@@ -1242,10 +1299,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             phone: data.phone,
             houseId: data.id,
             date: logDate,
-            description: 'Rumah kosong diisi oleh warga baru',
+            description: data.isInitialData ? 'Registrasi Awal (Admin)' : 'Warga Baru (Input Admin)',
+            isGenerated: data.isInitialData,
             details: {
               previousAddress: '-',
-              reasonForMoving: '-',
+              reasonForMoving: 'Registrasi Awal',
               familyCount: data.occupants || 1,
               familyMembers: data.familyMembers || [],
               residenceType: data.residenceType || 'Tetap',
@@ -1260,101 +1318,149 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               education: data.education || '-'
             }
           });
-        } else if (oldHouse.status === 'Occupied' && data.status === 'Empty') {
-          // 3. House status changed from Occupied to Empty
-          await addPopulationLogToDb({
-            id: Date.now().toString(),
-            type: 'MovedOut',
-            name: oldHouse.headOfFamily,
-            phone: oldHouse.phone,
-            houseId: data.id,
-            date: new Date().toISOString().split('T')[0], // Use current date for moving out
-            description: 'Warga pindah keluar (Update Data Warga)',
-            details: {
-              newAddress: '-',
-              reasonForMoving: '-',
-              familyCount: oldHouse.occupants || 1
-            }
-          });
-        } else if (oldHouse.status === 'Occupied' && data.status === 'Occupied') {
-          // 4. Case: Addition of family members (including births)
-          const oldOccupants = oldHouse.occupants || 1;
-          const newOccupants = data.occupants || 1;
-          const oldFamilyCount = oldHouse.familyMembers?.length || 0;
-          const newFamilyCount = data.familyMembers?.length || 0;
-          
-          const oldBabyCount = oldHouse.babyCount || 0;
-          const newBabyCount = data.babyCount || 0;
-          const isBirth = newBabyCount > oldBabyCount;
-
-          if (data.generateMutationLog && (isBirth || newOccupants > oldOccupants || newFamilyCount > oldFamilyCount || data.headOfFamily !== oldHouse.headOfFamily)) {
-            const isNewHead = data.headOfFamily !== oldHouse.headOfFamily;
-            const diff = Math.max(newOccupants - oldOccupants, newFamilyCount - oldFamilyCount, isBirth ? (newBabyCount - oldBabyCount) : 0);
-
+        } else if (oldHouse) {
+          if (oldHouse.status === 'Empty' && data.status === 'Occupied') {
+            // 2. Rumah kosong diisi warga baru
             await addPopulationLogToDb({
               id: Date.now().toString(),
-              type: isNewHead ? 'Newcomer' : (isBirth ? 'Birth' : 'Newcomer'),
+              type: 'Newcomer',
               name: data.headOfFamily,
               phone: data.phone,
               houseId: data.id,
               date: logDate,
-              isGenerated: data.isInitialData, // Mark as generated if initial data
-              description: data.isInitialData 
-                ? 'Registrasi Awal (Update Data)'
-                : (isNewHead 
-                  ? 'Pergantian Kepala Keluarga / Warga Baru'
-                  : (isBirth 
-                    ? `Kelahiran ${newBabyCount - oldBabyCount} bayi baru di keluarga` 
-                    : `Penambahan ${diff} anggota keluarga baru`)),
+              description: 'Rumah kosong diisi oleh warga baru',
               details: {
-                previousAddress: isBirth ? 'Lahir di RT 02' : '-',
-                reasonForMoving: isNewHead ? 'Pindahan / Ganti KK' : (isBirth ? 'Kelahiran' : 'Penambahan Anggota Keluarga'),
-                familyCount: isNewHead ? (data.occupants || 1) : diff,
+                previousAddress: '-',
+                reasonForMoving: '-',
+                familyCount: data.occupants || 1,
                 familyMembers: data.familyMembers || [],
                 residenceType: data.residenceType || 'Tetap',
+                ownerName: data.ownerName || '-',
+                twoWheelCount: data.twoWheelCount || 0,
+                fourWheelCount: data.fourWheelCount || 0,
+                vehicleCount: (data.twoWheelCount || 0) + (data.fourWheelCount || 0) > 0 ? (data.twoWheelCount || 0) + (data.fourWheelCount || 0) : (data.vehicleCount || 0),
                 religion: data.religion || '-',
                 vulnerability: vulnerability,
                 kkNumber: data.kkNumber || '-',
                 jobCategory: data.jobCategory || '-',
-                education: data.education || '-',
-                // For Birth specific fields in details
-                gender: isBirth ? 'Laki-laki/Perempuan' : undefined,
-                motherName: isBirth ? data.headOfFamily : undefined // Placeholder or logic to find mother
+                education: data.education || '-'
               }
             });
+          } else if (oldHouse.status === 'Occupied' && data.status === 'Empty') {
+            // 3. Rumah diubah menjadi Kosong
+            await addPopulationLogToDb({
+              id: Date.now().toString(),
+              type: 'MovedOut',
+              name: oldHouse.headOfFamily,
+              phone: oldHouse.phone,
+              houseId: data.id,
+              date: new Date().toISOString().split('T')[0],
+              description: 'Warga pindah keluar (Status Rumah Menjadi Kosong)',
+              details: {
+                newAddress: '-',
+                reasonForMoving: 'Rumah Dikosongkan',
+                familyCount: oldHouse.occupants || 1
+              }
+            });
+          } else if (oldHouse.status === 'Occupied' && data.status === 'Occupied') {
+            // 4. Penambahan anggota keluarga / kelahiran
+            const oldOccupants = oldHouse.occupants || 1;
+            const newOccupants = data.occupants || 1;
+            const oldFamilyCount = oldHouse.familyMembers?.length || 0;
+            const newFamilyCount = data.familyMembers?.length || 0;
+            
+            const oldBabyCount = oldHouse.babyCount || 0;
+            const newBabyCount = data.babyCount || 0;
+            const isBirth = newBabyCount > oldBabyCount;
+
+            if (data.generateMutationLog && (isBirth || newOccupants > oldOccupants || newFamilyCount > oldFamilyCount)) {
+              const diff = Math.max(newOccupants - oldOccupants, newFamilyCount - oldFamilyCount, isBirth ? (newBabyCount - oldBabyCount) : 0);
+
+              await addPopulationLogToDb({
+                id: Date.now().toString(),
+                type: isBirth ? 'Birth' : 'Newcomer',
+                name: data.headOfFamily,
+                phone: data.phone,
+                houseId: data.id,
+                date: logDate,
+                isGenerated: data.isInitialData,
+                description: isBirth 
+                  ? `Kelahiran ${newBabyCount - oldBabyCount} bayi baru di keluarga` 
+                  : `Penambahan ${diff} anggota keluarga baru`,
+                details: {
+                  previousAddress: isBirth ? 'Lahir di RT 02' : '-',
+                  reasonForMoving: isBirth ? 'Kelahiran' : 'Penambahan Anggota Keluarga',
+                  familyCount: diff,
+                  familyMembers: data.familyMembers || [],
+                  residenceType: data.residenceType || 'Tetap',
+                  religion: data.religion || '-',
+                  vulnerability: vulnerability,
+                  kkNumber: data.kkNumber || '-',
+                  jobCategory: data.jobCategory || '-',
+                  education: data.education || '-',
+                  gender: isBirth ? 'Laki-laki/Perempuan' : undefined,
+                  motherName: isBirth ? data.headOfFamily : undefined
+                }
+              });
+            }
           }
         }
-      }
 
-      // Auto-sync to rentalContracts if residenceType is 'Sewa' or 'Rumah Keluarga'
-      if (data.residenceType === 'Sewa' || data.residenceType === 'Rumah Keluarga') {
-        const contractDocId = `rent-${houseId}`;
-        const isRumahKeluarga = data.residenceType === 'Rumah Keluarga';
-        await setDocumentInCollection('rentalContracts', contractDocId, {
-          id: contractDocId,
-          houseId: houseId,
-          block: data.block,
-          number: data.number,
-          ownerName: data.ownerName || (isRumahKeluarga ? 'Keluarga / Kerabat' : 'Perlu Konfirmasi Pemilik'),
-          ownerPhone: data.ownerPhone || data.phone,
-          tenantName: data.headOfFamily,
-          tenantPhone: data.phone,
-          rentType: isRumahKeluarga ? 'Bukan Kontrak (Keluarga)' : 'Tahunan',
-          occupancyType: isRumahKeluarga ? 'Rumah Keluarga' : ((data.occupants || 1) > 1 ? 'Keluarga' : 'Individu'),
-          occupantsCount: data.occupants || 1,
-          status: 'Aktif',
-          startDate: data.joiningDate ? data.joiningDate.split('T')[0] : new Date().toISOString().split('T')[0],
-          endDate: isRumahKeluarga ? '2099-12-31' : '',
-          updatedAt: new Date().toISOString()
-        });
+        toast.success('Data warga berhasil disimpan!');
       }
 
       setIsModalOpen(false);
       resetForm();
-      toast.success('Data warga berhasil disimpan!');
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, "houses");
       toast.error('Gagal menyimpan data warga.');
+    }
+  };
+
+  const handleSaveHouse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const houseId = formatHouseId(`${formData.block}-${formData.number}`);
+      const oldHouse = editingHouseId ? houses.find(h => h.id === editingHouseId) : houses.find(h => h.id === houseId);
+      
+      const data = {
+        ...formData,
+        id: houseId,
+        location: oldHouse?.location || { x: 0, y: 0 },
+        joiningDate: formData.joiningDate || (oldHouse?.joiningDate || new Date().toISOString()),
+        occupantHistory: oldHouse?.occupantHistory || []
+      };
+
+      // --- DETEKSI PERGANTIAN PENGHUNI OTOMATIS ---
+      const isOldOccupied = oldHouse && 
+        oldHouse.status !== 'Empty' && 
+        oldHouse.headOfFamily && 
+        oldHouse.headOfFamily.trim() !== '' && 
+        oldHouse.headOfFamily.trim() !== '-' && 
+        !oldHouse.headOfFamily.toLowerCase().startsWith('warga ');
+
+      const isNewOccupied = data.status !== 'Empty' && 
+        data.headOfFamily && 
+        data.headOfFamily.trim() !== '' && 
+        data.headOfFamily.trim() !== '-';
+
+      const isHeadChanged = isOldOccupied && isNewOccupied && 
+        (data.headOfFamily.trim().toLowerCase() !== oldHouse.headOfFamily.trim().toLowerCase());
+
+      // Jika terdeteksi nama KK baru pada rumah yang sebelumnya berpenghuni:
+      if (isHeadChanged && oldHouse) {
+        setTransitionModalData({
+          oldHouse,
+          newFormData: data
+        });
+        return;
+      }
+
+      // Jika bukan pergantian penghuni, eksekusi langsung
+      await executeSaveHouse(data, oldHouse || null);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, "houses");
+      toast.error('Gagal memproses data warga.');
     }
   };
 
@@ -2079,6 +2185,26 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         setActiveFormTab={setActiveFormTab}
         houses={houses}
       />
+
+      {/* Smart Occupant Transition Modal */}
+      {transitionModalData && (
+        <OccupantTransitionModal
+          isOpen={!!transitionModalData}
+          onClose={() => setTransitionModalData(null)}
+          oldHouse={transitionModalData.oldHouse}
+          newFormData={transitionModalData.newFormData}
+          onConfirm={(action, options) => {
+            const pendingData = transitionModalData.newFormData;
+            const oldH = transitionModalData.oldHouse;
+            setTransitionModalData(null);
+            if (action === 'move_out') {
+              executeSaveHouse(pendingData, oldH, options);
+            } else {
+              executeSaveHouse(pendingData, oldH);
+            }
+          }}
+        />
+      )}
 
       {/* Customizable Export Modal */}
       <AnimatePresence>

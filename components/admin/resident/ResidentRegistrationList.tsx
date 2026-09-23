@@ -7,7 +7,7 @@ import {
   Copy, Clock, Sparkles, CheckCheck, UserCheck, XCircle, Shield, Car, Bike,
   AlertCircle, MessageSquare, ArrowUpRight, HelpCircle, FileCheck, Hash
 } from 'lucide-react';
-import { ResidentRegistration, PaymentStatus, House } from '../../../types';
+import { ResidentRegistration, PaymentStatus, House, OccupantHistoryItem } from '../../../types';
 import { toast } from 'sonner';
 import { useConfirm } from '../../../context/ConfirmContext';
 import { formatHouseId, handleFirestoreError, OperationType, logAction, setDocumentInCollection } from '../../../services/databaseService';
@@ -149,6 +149,55 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
       const houseDbOwner = existingHouse?.ownerName && existingHouse.ownerName.trim() !== '' && existingHouse.ownerName.trim() !== '-' ? existingHouse.ownerName : null;
       const resolvedOwner = hasExplicitOwner ? reg.ownerName : (houseDbOwner || (reg.residenceType === 'Tetap' ? reg.headOfFamily : ''));
 
+      // Deteksi pergantian penghuni pada rumah yang telah berpenghuni sebelumnya
+      const isOldOccupied = !!(existingHouse && 
+        existingHouse.status !== 'Empty' && 
+        existingHouse.headOfFamily && 
+        existingHouse.headOfFamily.trim() !== '' && 
+        existingHouse.headOfFamily.trim() !== '-' && 
+        !existingHouse.headOfFamily.toLowerCase().startsWith('warga ') &&
+        existingHouse.headOfFamily.trim().toLowerCase() !== reg.headOfFamily.trim().toLowerCase());
+
+      let updatedOccupantHistory: OccupantHistoryItem[] = existingHouse?.occupantHistory || [];
+      if (isOldOccupied && existingHouse) {
+        const moveDate = new Date().toISOString().split('T')[0];
+        const oldOccupantItem: OccupantHistoryItem = {
+          id: `hist-${Date.now()}`,
+          headOfFamily: existingHouse.headOfFamily,
+          nik: existingHouse.nik,
+          kkNumber: existingHouse.kkNumber,
+          phone: existingHouse.phone,
+          occupants: existingHouse.occupants,
+          residenceType: existingHouse.residenceType,
+          startDate: existingHouse.joiningDate,
+          endDate: moveDate,
+          moveOutReason: 'Pindah Keluar (Tanpa Pamit)',
+          moveOutNotes: `Digantikan oleh penghuni baru (${reg.headOfFamily}) melalui persetujuan pendaftaran warga online.`,
+          familyMembers: existingHouse.familyMembers
+        };
+        updatedOccupantHistory = [oldOccupantItem, ...updatedOccupantHistory];
+
+        // Otomatis terbitkan Mutasi Keluar (MovedOut) untuk penghuni lama
+        if (addPopulationLogToDb) {
+          await addPopulationLogToDb({
+            id: `moveout-${Date.now()}`,
+            type: 'MovedOut',
+            name: existingHouse.headOfFamily,
+            phone: existingHouse.phone || '-',
+            houseId: houseId,
+            date: moveDate,
+            description: `Warga pindah keluar (Tanpa Pamit) - Digantikan oleh ${reg.headOfFamily}`,
+            details: {
+              previousAddress: `Blok ${existingHouse.block} No. ${existingHouse.number}`,
+              reasonForMoving: 'Pindah Keluar (Tanpa Pamit)',
+              notes: `Digantikan warga baru (${reg.headOfFamily}) via pendaftaran online RT 002`,
+              familyCount: existingHouse.occupants || (1 + (existingHouse.familyMembers?.length || 0)),
+              familyMembers: existingHouse.familyMembers || []
+            }
+          });
+        }
+      }
+
       await addHouse({
         id: houseId,
         headOfFamily: reg.headOfFamily,
@@ -198,6 +247,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
         isDisability: reg.isDisability || false,
         isOrphan: reg.isOrphan || false,
         childCount: reg.childCount || 0,
+        occupantHistory: updatedOccupantHistory
       } as any);
       
       // 2. Update registration status to approved
