@@ -491,6 +491,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 const currentNavItem = navItemsList.find(item => item.id === activeTab);
                 const CurrentIcon = currentNavItem?.icon || LayoutGrid;
                 
+                if (activeTab === 'overview') {
+                  return (
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs shrink-0">
+                        <LayoutGrid size={18} className="stroke-[2.5px]" />
+                      </div>
+                      <div>
+                        <h1 className="text-sm md:text-base font-black text-slate-900 tracking-tight leading-tight">
+                          Dashboard
+                        </h1>
+                        <p className="text-[10px] md:text-[11px] font-bold text-slate-400 leading-none mt-0.5">
+                          RT 02 • Pusat Kendali Eksekutif
+                        </p>
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <>
                     <div className="hidden sm:flex items-center gap-2.5 text-xs md:text-sm font-black text-slate-400">
@@ -650,7 +668,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </main>
 
-        {/* Mobile bottom navigation bar */}
+        {/* Mobile bottom navigation bar with active dot indicator */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 z-40 pb-[env(safe-area-inset-bottom,16px)] shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
           <div className="flex justify-around items-center h-16 px-2">
             {bottomNavItems.map((item) => {
@@ -660,12 +678,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <button 
                   key={item.id} 
                   onClick={() => setActiveTab(item.id)} 
-                  className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 transition-all ${isActive ? 'text-indigo-600 font-extrabold' : 'text-slate-400 hover:text-slate-600'}`}
+                  className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition-all relative ${isActive ? 'text-indigo-600 font-black' : 'text-slate-400 hover:text-slate-600 font-medium'}`}
                 >
-                  <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-indigo-50/70' : ''}`}>
-                    <Icon size={18} className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.8px]'} />
+                  <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-indigo-50/80 text-indigo-600' : ''}`}>
+                    <Icon size={19} className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.8px]'} />
                   </div>
-                  <span className="text-[9px] font-bold tracking-tight">{item.label}</span>
+                  <span className="text-[10px] tracking-tight mt-0.5 leading-tight">{item.label}</span>
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-0.5 shadow-2xs animate-pulse" />
+                  )}
                 </button>
               );
             })}

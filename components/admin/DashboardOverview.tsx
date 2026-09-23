@@ -4,13 +4,14 @@ import {
   Activity, Calendar, ArrowRight, Plus, Download, FileText,
   Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles, Trash2,
   Shield, Package, Bell, LayoutGrid, UserPlus, ShoppingCart, CheckSquare,
-  ShieldCheck, Sun, Wind, Droplets, Compass, Waves, Recycle, Share2, Check
+  ShieldCheck, Sun, Wind, Droplets, Compass, Waves, Recycle, Share2, Check,
+  CreditCard, ChevronDown, ChevronUp
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
 } from 'recharts';
 import { House, CashFlow, Report, Announcement, PaymentStatus, GuestReport, STBMRecord } from '../../types';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldAlert } from 'lucide-react';
 import { generateDashboardSummary } from '../../services/geminiService';
@@ -41,6 +42,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 }) => {
   const [aiSummary, setAiSummary] = useState<string>('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [showAllServices, setShowAllServices] = useState(false);
   const [stbmRecords, setStbmRecords] = useState<STBMRecord[]>([]);
   const { weather } = useWeather();
 
@@ -228,31 +230,37 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       animate="visible"
       className="space-y-8"
     >
-      {/* Executive Aurora Command Center Hero Banner */}
+      {/* Executive Pastel Modern Command Center Hero Banner */}
       <motion.div 
         variants={itemVariants} 
-        className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 rounded-[2.5rem] p-6 md:p-10 text-white shadow-2xl shadow-indigo-950/40 border border-indigo-500/25"
+        className="relative overflow-hidden bg-gradient-to-br from-[#f8f9ff] via-[#f3f5ff] to-[#edf0fe] rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 shadow-lg shadow-indigo-100/70 border border-indigo-100/80"
       >
-        {/* Ambient Specular Light Cones */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none animate-pulse-slow"></div>
-        <div className="absolute -bottom-20 left-1/4 w-80 h-80 bg-violet-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute top-1/2 left-0 -translate-y-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Soft Organic Lavender Wave SVG Background on Right Side */}
+        <div className="absolute right-0 top-0 bottom-0 w-full sm:w-1/2 md:w-5/12 pointer-events-none overflow-hidden opacity-70">
+          <svg className="absolute right-0 top-0 h-full w-full text-indigo-100/70" viewBox="0 0 400 400" preserveAspectRatio="none" fill="currentColor">
+            <path d="M140,0 C220,100 280,120 220,240 C160,360 300,380 400,400 L400,0 Z" />
+          </svg>
+          <div className="absolute -top-16 -right-16 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 right-12 w-64 h-64 bg-indigo-200/35 rounded-full blur-2xl pointer-events-none" />
+        </div>
         
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
+          <div className="space-y-3.5 max-w-2xl">
+            {/* Top Pill Badges */}
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full backdrop-blur-md shadow-2xs">
+              <span className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-sm shadow-indigo-600/30">
                 Pusat Kendali Eksekutif
               </span>
-              <span className="bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[10px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5 backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span className="bg-[#e8faf0] border border-emerald-200 text-[#059669] text-[10px] font-extrabold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Operasional 100% Aktif
               </span>
-              <span className="hidden sm:inline-flex bg-white/10 border border-white/15 text-slate-300 text-[10px] font-bold px-3 py-1 rounded-full backdrop-blur-md">
+              <span className="hidden sm:inline-flex bg-white/90 border border-indigo-100/80 text-slate-500 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-2xs">
                 Huntap Tondo 2 • RT 02 / RW 020
               </span>
             </div>
 
+            {/* Personalized Time-Aware Greeting */}
             {(() => {
               const hr = new Date().getHours();
               let greet = 'Selamat Hari';
@@ -262,42 +270,47 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               else if (hr >= 19 || hr < 5) greet = 'Selamat Malam';
               
               return (
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-white flex items-center gap-3">
-                  <span>{greet}, Pengurus {RT_NAME}!</span>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 flex items-center gap-2.5">
+                  <span>{greet},</span>
+                  <span className="text-indigo-600">Pengurus {RT_NAME}!</span>
                   <span className="inline-block animate-bounce-slow origin-bottom">👋</span>
                 </h2>
               );
             })()}
 
-            <p className="text-indigo-200/80 font-medium text-xs md:text-sm leading-relaxed max-w-xl">
+            <p className="text-slate-600 font-medium text-xs md:text-sm leading-relaxed max-w-xl">
               Pusat orkestrasi administrasi kependudukan, tata kelola kas terdesentralisasi, evaluasi sanitasi 5 pilar STBM, serta pengawasan keamanan lingkungan warga.
             </p>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <Button 
-              onClick={handleGenerateSummary} 
-              className="bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-black text-xs py-3 px-5 rounded-2xl shadow-xl shadow-indigo-600/35 border border-indigo-300/30 transition-all flex items-center gap-2"
-            >
-              <Sparkles size={16} className="text-amber-300 animate-spin-slow" /> 
-              <span>{isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}</span>
-            </Button>
-            
-            <button 
-              onClick={handleExportData} 
-              className="flex items-center gap-2 px-4 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 rounded-2xl text-xs font-bold text-white transition-all shadow-sm hover:shadow active:scale-[0.98]"
-            >
-              <Download size={15} />
-              <span>Ekspor Ringkasan</span>
-            </button>
-            
-            <button 
-              onClick={() => onTabChange('residents')} 
-              className="flex items-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl text-xs font-black transition-all shadow-lg shadow-emerald-500/30 border border-emerald-400/30 active:scale-[0.98]"
-            >
-              <Plus size={15} />
-              <span>Tambah Warga</span>
-            </button>
+            {/* Quick Action CTA Group */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-2">
+              <Button 
+                onClick={handleGenerateSummary} 
+                className="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-extrabold text-xs py-3 px-5 rounded-2xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 group w-full sm:w-auto"
+              >
+                <Sparkles size={16} className="text-amber-300 animate-spin-slow shrink-0" /> 
+                <span>{isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}</span>
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform shrink-0" />
+              </Button>
+              
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button 
+                  onClick={handleExportData} 
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-700 transition-all shadow-xs hover:shadow active:scale-[0.98]"
+                >
+                  <Download size={14} className="text-slate-500" />
+                  <span>Ekspor Ringkasan</span>
+                </button>
+                
+                <button 
+                  onClick={() => onTabChange('residents')} 
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-3 bg-[#e8faf0] hover:bg-[#d8f5e5] border border-emerald-200/70 text-[#059669] rounded-2xl text-xs font-black transition-all shadow-xs hover:shadow active:scale-[0.98]"
+                >
+                  <Plus size={15} className="text-[#059669]" />
+                  <span>Tambah Warga</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </motion.div>
@@ -334,145 +347,189 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </motion.div>
       )}
 
-      {/* Layanan Warga Terpadu Grid */}
+      {/* Layanan Warga Terpadu Modern Pastel Section */}
       <motion.div 
         variants={itemVariants}
-        className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 md:p-10 shadow-sm"
+        className="bg-white border border-slate-200/80 rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 shadow-sm"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight">
               Layanan <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
             </h3>
-            <p className="text-slate-500 font-medium text-xs md:text-sm mt-1 max-w-xl">
+            <p className="text-slate-500 font-medium text-xs md:text-sm mt-0.5">
               Pusat kendali akses langsung untuk semua modul operasional administrasi RT.
             </p>
           </div>
-          <span className="text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full uppercase tracking-wider self-start sm:self-auto">
-            ⚡ Akses Cepat Admin
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-flex text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full uppercase tracking-wider">
+              ⚡ Akses Cepat Admin
+            </span>
+            <button
+              onClick={() => setShowAllServices(!showAllServices)}
+              className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100/90 border border-indigo-200/60 px-3.5 py-1.5 rounded-full transition-all active:scale-[0.98]"
+            >
+              <span>{showAllServices ? 'Tutup Sebagian' : 'Lihat Semua'}</span>
+              <ArrowRight size={13} className={`transition-transform duration-200 ${showAllServices ? 'rotate-90' : ''}`} />
+            </button>
+          </div>
         </div>
 
-        {/* Grid layout matching Gojek/Grab/Citizen apps exactly: 4 columns */}
-        <div className="grid grid-cols-4 gap-y-8 gap-x-2 md:gap-x-8 max-w-4xl">
-          {[
-            { 
-              label: 'Profil Warga', 
-              icon: User, 
-              color: 'bg-[#5856d6]', 
-              shadow: 'shadow-[#5856d6]/30', 
-              tab: 'residents',
-              count: totalResidents
-            },
-            { 
-              label: 'Buat Surat', 
-              icon: FileText, 
-              color: 'bg-[#00a2e0]', 
-              shadow: 'shadow-[#00a2e0]/30', 
-              tab: 'services',
-              badge: letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0 ? `${letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} PENDING` : undefined,
-              badgeColor: 'bg-[#00a2e0]'
-            },
-            { 
-              label: 'Lapor Tamu', 
-              icon: Shield, 
-              color: 'bg-[#ff6200]', 
-              shadow: 'shadow-[#ff6200]/30', 
-              tab: 'guests', 
-              badge: activeGuests > 0 ? `${activeGuests} AKTIF` : undefined,
-              badgeColor: 'bg-[#ff6200]'
-            },
-            { 
-              label: 'Daftar Warga', 
-              icon: UserPlus, 
-              color: 'bg-[#af52de]', 
-              shadow: 'shadow-[#af52de]/30', 
-              tab: 'residents',
-              badge: residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 ? `${residentRegistrations.filter(r => r.approvalStatus === 'Pending').length} BARU` : undefined,
-              badgeColor: 'bg-[#af52de]'
-            },
-            { 
-              label: 'Pasar Warga', 
-              icon: ShoppingCart, 
-              color: 'bg-[#00c781]', 
-              shadow: 'shadow-[#00c781]/30', 
-              tab: 'content', 
-              subTab: 'umkm',
-              badge: 'UMKM',
-              badgeColor: 'bg-[#00c781]'
-            },
-            { 
-              label: 'Warta RT', 
-              icon: Megaphone, 
-              color: 'bg-[#00b2cc]', 
-              shadow: 'shadow-[#00b2cc]/30', 
-              tab: 'content',
-              subTab: 'announcements'
-            },
-            { 
-              label: 'LPJ & Laporan', 
-              icon: FileText, 
-              color: 'bg-[#5c72e6]', 
-              shadow: 'shadow-[#5c72e6]/30', 
-              tab: 'reports', 
-              subTab: 'monthly',
-              badge: 'RESMI',
-              badgeColor: 'bg-[#5c72e6]'
-            },
-            { 
-              label: 'Lapor RT', 
-              icon: AlertTriangle, 
-              color: 'bg-[#ff3b30]', 
-              shadow: 'shadow-[#ff3b30]/30', 
-              tab: 'services',
-              badge: newReports > 0 ? `${newReports} ADUAN` : undefined,
-              badgeColor: 'bg-[#ff3b30]'
-            },
-            { 
-              label: '5 Pilar STBM', 
-              icon: CheckSquare, 
-              color: 'bg-emerald-600', 
-              shadow: 'shadow-emerald-600/30', 
-              tab: 'stbm',
-              badge: stbmIssuesCount > 0 ? `${stbmIssuesCount} PERLU TL` : '100% ODF',
-              badgeColor: stbmIssuesCount > 0 ? 'bg-rose-600' : 'bg-emerald-600'
-            }
-          ].map((action, idx) => {
-            const Icon = action.icon;
-            return (
-              <motion.button
-                key={idx}
-                whileHover={{ y: -4, scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => onTabChange(action.tab, action.subTab)}
-                className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
-              >
-                {/* Beautiful Badges directly layered on top of squircles */}
-                {action.badge && (
-                  <span className={`absolute -top-1 md:-top-1.5 right-[5%] sm:right-[10%] z-20 text-[7px] md:text-[8px] font-black uppercase tracking-widest ${action.badgeColor || 'bg-rose-600'} text-white px-2 py-0.5 rounded-full shadow-md animate-pulse select-none scale-95 border border-white/20`}>
-                    {action.badge}
-                  </span>
-                )}
+        {/* 4 Primary Pastel Feature Cards matching the reference design */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Data Warga (Lavender) */}
+          <motion.div
+            whileHover={{ y: -3, scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onTabChange('residents')}
+            className="bg-[#f0f2fe] hover:bg-[#e8ebfd] border border-indigo-100/90 rounded-2xl md:rounded-[1.75rem] p-4 md:p-5 flex items-center justify-between cursor-pointer transition-all shadow-xs hover:shadow-md group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Users size={22} className="stroke-[2.2px]" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-black text-slate-900 text-sm md:text-base leading-tight group-hover:text-indigo-600 transition-colors truncate">
+                  Data Warga
+                </h4>
+                <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
+                  {totalResidents} Penduduk Terdata
+                </p>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/90 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-2xs shrink-0 ml-2">
+              <ArrowRight size={14} className="stroke-[2.5px]" />
+            </div>
+          </motion.div>
 
-                {/* Highly Polished Squircles with match drop-shadow */}
-                <div className={`
-                  w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] md:rounded-[1.75rem]
-                  ${action.color} text-white
-                  flex items-center justify-center
-                  shadow-lg ${action.shadow} group-hover:scale-105
-                  transition-all duration-300 relative overflow-hidden
-                `}>
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                  <Icon size={24} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.4} />
+          {/* Card 2: Kas & Iuran (Mint) */}
+          <motion.div
+            whileHover={{ y: -3, scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onTabChange('finance')}
+            className="bg-[#ecfdf5] hover:bg-[#e2fbf0] border border-emerald-100/90 rounded-2xl md:rounded-[1.75rem] p-4 md:p-5 flex items-center justify-between cursor-pointer transition-all shadow-xs hover:shadow-md group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-emerald-600 shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <CreditCard size={22} className="stroke-[2.2px]" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-black text-slate-900 text-sm md:text-base leading-tight group-hover:text-emerald-600 transition-colors truncate">
+                  Kas & Iuran
+                </h4>
+                <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
+                  Penerimaan & Saldo RT
+                </p>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/90 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-2xs shrink-0 ml-2">
+              <ArrowRight size={14} className="stroke-[2.5px]" />
+            </div>
+          </motion.div>
+
+          {/* Card 3: Surat Pengantar (Peach) */}
+          <motion.div
+            whileHover={{ y: -3, scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onTabChange('services')}
+            className="bg-[#fff7ed] hover:bg-[#ffedd5] border border-amber-100/90 rounded-2xl md:rounded-[1.75rem] p-4 md:p-5 flex items-center justify-between cursor-pointer transition-all shadow-xs hover:shadow-md group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-orange-600 shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <FileText size={22} className="stroke-[2.2px]" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h4 className="font-black text-slate-900 text-sm md:text-base leading-tight group-hover:text-orange-600 transition-colors truncate">
+                    Surat Pengantar
+                  </h4>
+                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0 && (
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0" />
+                  )}
                 </div>
+                <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
+                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0
+                    ? `${letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Permohonan Baru`
+                    : 'Pelayanan Persuratan RT'}
+                </p>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/90 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all shadow-2xs shrink-0 ml-2">
+              <ArrowRight size={14} className="stroke-[2.5px]" />
+            </div>
+          </motion.div>
 
-                <span className="font-extrabold text-slate-800 text-[11px] md:text-sm tracking-tight leading-snug mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[85px] md:max-w-none">
-                  {action.label}
-                </span>
-              </motion.button>
-            );
-          })}
+          {/* Card 4: Keamanan Lingkungan (Sky Blue) */}
+          <motion.div
+            whileHover={{ y: -3, scale: 1.01 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onTabChange('reports-warga')}
+            className="bg-[#f0f9ff] hover:bg-[#e0f2fe] border border-sky-100/90 rounded-2xl md:rounded-[1.75rem] p-4 md:p-5 flex items-center justify-between cursor-pointer transition-all shadow-xs hover:shadow-md group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-sky-600 shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                <Shield size={22} className="stroke-[2.2px]" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="font-black text-slate-900 text-sm md:text-base leading-tight group-hover:text-sky-600 transition-colors truncate">
+                  Keamanan RT
+                </h4>
+                <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
+                  {activeGuests > 0 ? `${activeGuests} Tamu Menginap` : 'Siskamling & Buku Tamu'}
+                </p>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-white/90 text-sky-600 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition-all shadow-2xs shrink-0 ml-2">
+              <ArrowRight size={14} className="stroke-[2.5px]" />
+            </div>
+          </motion.div>
         </div>
+
+        {/* Expandable Secondary Services Accordion */}
+        <AnimatePresence>
+          {showAllServices && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
+              className="overflow-hidden pt-6 mt-6 border-t border-slate-100"
+            >
+              <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-4">
+                Modul Operasional Tambahan
+              </h5>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                {[
+                  { label: '5 Pilar STBM', icon: CheckSquare, tab: 'stbm', color: 'bg-emerald-50 text-emerald-700 border-emerald-100', badge: stbmIssuesCount > 0 ? `${stbmIssuesCount} TL` : 'ODF' },
+                  { label: 'Pasar UMKM', icon: ShoppingCart, tab: 'content', subTab: 'umkm', color: 'bg-lime-50 text-lime-700 border-lime-100', badge: 'UMKM' },
+                  { label: 'Warta RT', icon: Megaphone, tab: 'content', subTab: 'announcements', color: 'bg-blue-50 text-blue-700 border-blue-100' },
+                  { label: 'Lapor RT', icon: AlertTriangle, tab: 'reports-warga', color: 'bg-rose-50 text-rose-700 border-rose-100', badge: newReports > 0 ? `${newReports} Baru` : undefined },
+                  { label: 'Agenda Warga', icon: Calendar, tab: 'activities', color: 'bg-amber-50 text-amber-700 border-amber-100' },
+                  { label: 'Aset & Logistik', icon: Package, tab: 'assets', color: 'bg-purple-50 text-purple-700 border-purple-100' },
+                ].map((item, idx) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.button
+                      key={idx}
+                      whileHover={{ y: -2, scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => onTabChange(item.tab, item.subTab)}
+                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all ${item.color} hover:shadow-xs relative`}
+                    >
+                      {item.badge && (
+                        <span className="absolute -top-1.5 -right-1 text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-slate-900 text-white shadow-2xs">
+                          {item.badge}
+                        </span>
+                      )}
+                      <Icon size={20} className="stroke-[2.2px] mb-1.5" />
+                      <span className="text-[11px] font-extrabold leading-tight">{item.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Executive Environmental & 5-Pilar STBM Health Hub */}
