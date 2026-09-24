@@ -101,28 +101,28 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               </motion.p>
             </div>
 
-            {/* 4 Smart Pulse Pills */}
+            {/* 4 Smart Pulse Pills with Pastel System */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
               className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1"
             >
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10px] md:text-[11px] font-bold text-slate-700 shadow-2xs">
-                <Building2 size={13} className="text-amber-500" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#fff4eb] border border-amber-100/80 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#ea580c] shadow-2xs">
+                <Building2 size={13} className="text-[#ea580c]" />
                 <span>120+ Hunian Aktif</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10px] md:text-[11px] font-bold text-slate-700 shadow-2xs">
-                <Shield size={13} className="text-emerald-500" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#e8faf0] border border-emerald-100/80 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#059669] shadow-2xs">
+                <Shield size={13} className="text-[#059669]" />
                 <span>Siskamling 24 Jam</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10px] md:text-[11px] font-bold text-slate-700 shadow-2xs">
-                <Droplet size={13} className="text-blue-500" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#edf7ff] border border-sky-100/80 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#0284c7] shadow-2xs">
+                <Droplet size={13} className="text-[#0284c7]" />
                 <span>Air PDAM Rp35rb/10m³</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-[10px] md:text-[11px] font-bold text-slate-700 shadow-2xs">
-                <Wallet size={13} className="text-indigo-500" />
-                <span>Kas Terbuka & Akuntabel</span>
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#f0f2fe] border border-indigo-100/80 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#4f46e5] shadow-2xs">
+                <Wallet size={13} className="text-[#4f46e5]" />
+                <span>Kas Terbuka &amp; Akuntabel</span>
               </span>
             </motion.div>
 
@@ -140,11 +140,11 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Cari nomor blok rumah, layanan, agenda, info..."
-                className="w-full pl-11 pr-24 py-3 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all shadow-xs"
+                className="w-full pl-11 pr-24 py-3 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-xs"
               />
               <button 
                 type="submit"
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-2 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer shadow-xs active:scale-95 hover:opacity-95"
               >
                 Cari
               </button>
@@ -159,7 +159,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
             >
               <button 
                 onClick={onExplore}
-                className="flex items-center gap-2 px-6 py-3 text-xs font-black uppercase tracking-wider bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-md active:scale-95 transition-all cursor-pointer hover:scale-105"
+                className="flex items-center gap-2 px-6 py-3.5 text-xs font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] hover:opacity-95 text-white rounded-2xl shadow-md shadow-indigo-500/25 active:scale-95 transition-all cursor-pointer"
               >
                 <span>Mulai Jelajahi</span>
                 <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -167,9 +167,9 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               
               <button 
                 onClick={handleSmartEnvClick}
-                className="flex items-center gap-2 px-5 py-3 text-xs font-black uppercase tracking-wider bg-slate-100 hover:bg-slate-200/70 border border-slate-200 text-slate-800 rounded-2xl transition-all cursor-pointer font-sans"
+                className="flex items-center gap-2 px-5 py-3.5 text-xs font-extrabold uppercase tracking-wider bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl shadow-2xs transition-all cursor-pointer"
               >
-                <ShieldCheck size={16} className="text-emerald-500 animate-pulse" />
+                <ShieldCheck size={16} className="text-[#059669] animate-pulse" />
                 <span>Smart Env Tondo</span>
               </button>
             </motion.div>
@@ -181,10 +181,10 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
             transition={{ delay: 0.7, duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="w-full lg:w-auto z-10"
           >
-            <div className="bg-white/90 backdrop-blur-2xl rounded-[2.8rem] p-6 md:p-8 text-slate-900 border border-slate-200/90 shadow-[0_30px_70px_-15px_rgba(0,0,0,0.08)] w-full lg:min-w-[360px] relative group/widget overflow-hidden transition-all duration-700 hover:shadow-[0_40px_90px_-15px_rgba(217,119,6,0.12)]">
+            <div className="bg-white/95 backdrop-blur-2xl rounded-3xl md:rounded-[2.8rem] p-6 md:p-8 text-slate-900 border border-slate-100 shadow-sm w-full lg:min-w-[360px] relative group/widget overflow-hidden transition-all duration-700">
               {/* Subtle ambient light glow orbs */}
-              <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-200/40 rounded-full blur-3xl pointer-events-none group-hover/widget:scale-125 transition-transform duration-1000" />
-              <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-emerald-200/35 rounded-full blur-3xl pointer-events-none group-hover/widget:scale-125 transition-transform duration-1000" />
+              <div className="absolute -top-12 -right-12 w-48 h-48 bg-amber-200/30 rounded-full blur-3xl pointer-events-none group-hover/widget:scale-125 transition-transform duration-1000" />
+              <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-emerald-200/25 rounded-full blur-3xl pointer-events-none group-hover/widget:scale-125 transition-transform duration-1000" />
 
               <div className="relative z-10 space-y-6">
                 {/* Top Bar: Time & Weather Badge */}
@@ -192,11 +192,11 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Live Station</span>
+                      <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-slate-400">Live Station</span>
                     </div>
-                    <p className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 flex items-baseline gap-2 font-sans">
+                    <p className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 flex items-baseline gap-2 font-sans">
                       <span>{date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
-                      <span className="text-[10px] font-black text-amber-800 uppercase tracking-widest bg-amber-50/90 px-2.5 py-1 rounded-xl border border-amber-200/80 shadow-2xs">WITA</span>
+                      <span className="text-[10px] font-extrabold text-[#ea580c] uppercase tracking-widest bg-[#fff4eb] px-2.5 py-1 rounded-full border border-amber-100/80 shadow-2xs">WITA</span>
                     </p>
                     <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-[0.18em] flex items-center gap-1.5 pt-0.5">
                       <Sparkles size={13} className="text-amber-500 animate-spin-slow" />
@@ -219,10 +219,10 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                       <button 
                         type="button"
                         onClick={() => setIsWeatherModalOpen(true)}
-                        className="flex items-center gap-1.5 px-3 py-1 bg-amber-50/80 hover:bg-amber-100/80 rounded-xl border border-amber-200/70 shrink-0 shadow-2xs cursor-pointer transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1 bg-[#fff4eb] hover:bg-[#ffedd5] rounded-full border border-amber-100/80 shrink-0 shadow-2xs cursor-pointer transition-colors"
                       >
-                        <Activity size={12} className="text-amber-600" />
-                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-900">ISPU {weather.aqi}</span>
+                        <Activity size={12} className="text-[#ea580c]" />
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#ea580c]">ISPU {weather.aqi}</span>
                       </button>
                     )}
                   </div>
@@ -233,13 +233,13 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                   <button
                     type="button"
                     onClick={() => setIsWeatherModalOpen(true)}
-                    className="w-full text-left p-2.5 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300/80 rounded-2xl flex items-center gap-2 hover:border-amber-400 transition-all cursor-pointer group/alert shadow-2xs"
+                    className="w-full text-left p-3 bg-[#fff4eb] border border-amber-200/80 rounded-2xl flex items-center gap-2 hover:border-amber-400 transition-all cursor-pointer group/alert shadow-2xs"
                   >
-                    <AlertTriangle size={15} className="text-amber-600 shrink-0 animate-bounce" />
+                    <AlertTriangle size={15} className="text-[#ea580c] shrink-0 animate-bounce" />
                     <span className="text-[10.5px] font-bold text-amber-950 truncate flex-1">
                       {weather.alertMessage}
                     </span>
-                    <span className="text-[9px] font-black uppercase tracking-wider text-amber-700 bg-amber-200/60 px-2 py-0.5 rounded-lg group-hover/alert:bg-amber-200 shrink-0">
+                    <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#ea580c] bg-white px-2 py-0.5 rounded-full border border-amber-200/80 shrink-0 shadow-2xs">
                       Detail
                     </span>
                   </button>
@@ -247,49 +247,49 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
 
                 <div className="h-px bg-slate-100" />
 
-                {/* 4 Weather Parameter Cards Grid */}
+                {/* 4 Weather Parameter Cards Grid with Pastel System */}
                 <div 
                   onClick={() => setIsWeatherModalOpen(true)}
                   className="grid grid-cols-2 gap-3 cursor-pointer group/grid"
                   title="Klik untuk melihat detail stasiun cuaca & kualitas udara lengkap"
                 >
-                  <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                    <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl border border-rose-100/80 shrink-0 shadow-2xs">
-                      <Thermometer size={16} />
+                  <div className="flex items-center gap-3 p-3.5 bg-[#fff1f2] border border-rose-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="w-10 h-10 bg-white text-[#e11d48] rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+                      <Thermometer size={17} className="stroke-[2.5]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Suhu Udara</p>
-                      <p className="text-sm font-black text-slate-900 mt-0.5">{weather ? `${weather.temp}°C` : '--'}</p>
+                      <p className="text-[9px] font-extrabold text-[#e11d48] uppercase tracking-widest">Suhu Udara</p>
+                      <p className="text-sm font-extrabold text-slate-900 mt-0.5">{weather ? `${weather.temp}°C` : '--'}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                    <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100/80 shrink-0 shadow-2xs">
-                      <WindIcon size={16} />
+                  <div className="flex items-center gap-3 p-3.5 bg-[#e8faf0] border border-emerald-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="w-10 h-10 bg-white text-[#059669] rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+                      <WindIcon size={17} className="stroke-[2.5]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Laju Angin</p>
-                      <p className="text-sm font-black text-slate-900 mt-0.5 truncate">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
+                      <p className="text-[9px] font-extrabold text-[#059669] uppercase tracking-widest">Laju Angin</p>
+                      <p className="text-sm font-extrabold text-slate-900 mt-0.5 truncate">{weather?.windSpeed ? `${weather.windSpeed} km/h` : '--'}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                    <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100/80 shrink-0 shadow-2xs">
-                      <Droplets size={16} />
+                  <div className="flex items-center gap-3 p-3.5 bg-[#edf7ff] border border-sky-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="w-10 h-10 bg-white text-[#0284c7] rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+                      <Droplets size={17} className="stroke-[2.5]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kelembaban</p>
-                      <p className="text-sm font-black text-slate-900 mt-0.5">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
+                      <p className="text-[9px] font-extrabold text-[#0284c7] uppercase tracking-widest">Kelembaban</p>
+                      <p className="text-sm font-extrabold text-slate-900 mt-0.5">{weather?.humidity ? `${weather.humidity}%` : '--'}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl hover:bg-white hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                    <div className="p-2.5 bg-sky-50 text-sky-600 rounded-xl border border-sky-100/80 shrink-0 shadow-2xs">
-                      <Cloud size={16} />
+                  <div className="flex items-center gap-3 p-3.5 bg-[#f0f2fe] border border-indigo-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                    <div className="w-10 h-10 bg-white text-[#4f46e5] rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
+                      <Cloud size={17} className="stroke-[2.5]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kondisi</p>
-                      <p className="text-sm font-black text-slate-900 mt-0.5 truncate">{weather ? weather.condition : 'Cerah'}</p>
+                      <p className="text-[9px] font-extrabold text-[#4f46e5] uppercase tracking-widest">Kondisi</p>
+                      <p className="text-sm font-extrabold text-slate-900 mt-0.5 truncate">{weather ? weather.condition : 'Cerah'}</p>
                     </div>
                   </div>
                 </div>
