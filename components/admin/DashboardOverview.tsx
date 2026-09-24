@@ -268,7 +268,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               return (
                 <div className="flex items-start justify-between gap-3 pt-1">
                   <div>
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
                       <span className="block text-slate-900">{greet},</span>
                       <span className="block text-[#4f46e5]">Pengurus {RT_NAME}!</span>
                     </h2>
@@ -366,7 +366,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* Layanan Warga Terpadu Modern Pastel Section matching reference */}
       <motion.div variants={itemVariants} className="space-y-3.5">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
+          <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight">
             Layanan <span className="text-[#4f46e5]">Warga Terpadu</span>
           </h3>
           
@@ -391,7 +391,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#4f46e5] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <Users size={19} className="stroke-[2.2px]" />
             </div>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">
               Data<br />Warga
             </span>
           </motion.div>
@@ -406,7 +406,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#059669] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <CreditCard size={19} className="stroke-[2.2px]" />
             </div>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">
               Kas &<br />Iuran
             </span>
           </motion.div>
@@ -424,7 +424,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <FileText size={19} className="stroke-[2.2px]" />
             </div>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">
               Surat<br />Pengantar
             </span>
           </motion.div>
@@ -439,7 +439,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#0284c7] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <Shield size={19} className="stroke-[2.2px]" />
             </div>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">
               Keamanan<br />Lingkungan
             </span>
           </motion.div>
