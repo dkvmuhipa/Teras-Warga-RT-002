@@ -317,7 +317,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             onClick={() => setActiveSubTab(tab.id as any)} 
             className={`flex items-center gap-2.5 px-6 py-3 rounded-xl transition-all whitespace-nowrap active:scale-95 ${
               activeSubTab === tab.id 
-                ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60 font-black' 
+                ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60 font-extrabold' 
                 : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 font-bold'
             }`}
           >
@@ -332,14 +332,14 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="w-full lg:w-auto">
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Keuangan & Kas</h2>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">Keuangan & Kas</h2>
           <p className="text-sm md:text-slate-500 font-medium mt-1">Kelola transparansi pemasukan dan pengeluaran RT 02.</p>
         </div>
         <div className="flex flex-wrap gap-2 w-full lg:w-auto">
           <div className="flex items-center gap-2 px-3 bg-white border border-slate-200 rounded-xl shadow-sm flex-1 sm:flex-none">
             <Calendar size={14} className="text-slate-400" />
             <select 
-              className="bg-transparent py-2.5 text-[10px] font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" 
+              className="bg-transparent py-2.5 text-[10px] font-extrabold text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" 
               value={selectedMonth} 
               onChange={e => setSelectedMonth(e.target.value)}
             >
@@ -350,56 +350,74 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           </div>
           <button 
             onClick={() => generateCashFlowReportPDF(cashFlow, selectedMonth, pdfConfig)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-xs transition-all shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl font-bold text-xs transition-all shadow-2xs"
           >
-            <Download size={16} /> <span className="hidden sm:inline">Laporan PDF</span><span className="sm:hidden">PDF</span>
+            <Download size={15} /> <span className="hidden sm:inline">Laporan PDF</span><span className="sm:hidden">PDF</span>
           </button>
           <button 
             onClick={() => generateCashFlowExcel(cashFlow, selectedMonth)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-xs transition-all shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl font-bold text-xs transition-all shadow-2xs"
           >
-            <Download size={16} /> <span className="hidden sm:inline">Laporan Excel</span><span className="sm:hidden">Excel</span>
+            <Download size={15} /> <span className="hidden sm:inline">Laporan Excel</span><span className="sm:hidden">Excel</span>
           </button>
-          <button onClick={() => { resetForm(); setIsModalOpen(true); }} className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold text-xs shadow-lg shadow-emerald-600/20 transition-all">
+          <button 
+            onClick={() => { resetForm(); setIsModalOpen(true); }} 
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-bold text-xs shadow-md shadow-indigo-500/25 hover:opacity-95 transition-all"
+          >
             <Plus size={16} /> <span className="hidden sm:inline">Catat Transaksi</span><span className="sm:hidden">Catat</span>
           </button>
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      {/* Summary Cards with Pastel Glassmorphic System */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+        {/* Total Saldo (Mint/Emerald) */}
         <motion.div 
           variants={itemVariants}
-          className="bg-gradient-to-br from-indigo-600 to-violet-700 p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-lg shadow-indigo-600/20 flex items-center gap-3 sm:gap-5 group hover:scale-[1.02] transition-transform relative overflow-hidden sm:col-span-2 lg:col-span-1"
+          className="bg-[#e8faf0] border border-emerald-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] relative overflow-hidden sm:col-span-2 lg:col-span-1"
         >
-          <div className="absolute top-0 right-0 w-24 h-24 md:w-32 md:h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-          <div className="p-2.5 sm:p-4 bg-white/20 text-white rounded-xl sm:rounded-2xl backdrop-blur-sm border border-white/20">
-            <Wallet size={18} className="sm:w-6 sm:h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#059669] shadow-2xs shrink-0">
+            <Wallet size={22} className="stroke-[2.5]" />
           </div>
-          <div className="relative z-10 text-white">
-            <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-80">Total Saldo</p>
-            <h3 className="text-lg sm:text-3xl font-black">Rp {balance.toLocaleString()}</h3>
+          <div className="relative z-10 min-w-0">
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#059669] mb-1">Total Saldo Kas</p>
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#065f46] tracking-tight truncate">
+              Rp {balance.toLocaleString()}
+            </h3>
           </div>
         </motion.div>
 
-        {[
-          { label: 'Total Pemasukan', value: totalIncome, icon: ArrowUpRight, color: 'emerald' },
-          { label: 'Total Pengeluaran', value: totalExpense, icon: ArrowDownRight, color: 'rose' }
-        ].map((stat) => (
-          <motion.div 
-            key={stat.label}
-            variants={itemVariants}
-            className="bg-white p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-3 sm:gap-5 group hover:shadow-xl hover:shadow-slate-200/50 transition-all"
-          >
-            <div className={`p-2.5 sm:p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-xl sm:rounded-2xl group-hover:scale-110 transition-transform`}>
-              <stat.icon size={18} className="sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <p className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-              <h3 className="text-base sm:text-2xl font-black text-slate-900">Rp {stat.value.toLocaleString()}</h3>
-            </div>
-          </motion.div>
-        ))}
+        {/* Total Pemasukan (Lavender/Indigo) */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-[#f0f2fe] border border-indigo-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] relative overflow-hidden"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#4f46e5] shadow-2xs shrink-0">
+            <ArrowUpRight size={22} className="stroke-[2.5]" />
+          </div>
+          <div className="relative z-10 min-w-0">
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#4f46e5] mb-1">Total Pemasukan</p>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">
+              Rp {totalIncome.toLocaleString()}
+            </h3>
+          </div>
+        </motion.div>
+
+        {/* Total Pengeluaran (Peach/Amber) */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-[#fff4eb] border border-amber-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] relative overflow-hidden"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs shrink-0">
+            <ArrowDownRight size={22} className="stroke-[2.5]" />
+          </div>
+          <div className="relative z-10 min-w-0">
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#ea580c] mb-1">Total Pengeluaran</p>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">
+              Rp {totalExpense.toLocaleString()}
+            </h3>
+          </div>
+        </motion.div>
       </div>
 
       {/* Charts Section */}

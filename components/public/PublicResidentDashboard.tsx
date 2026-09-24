@@ -1143,89 +1143,96 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       )}
       {selectedHouseId && (
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <span className="text-[11px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+          <div className="flex items-center justify-between mb-3.5 px-1">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
               <Sparkles size={13} className="text-indigo-600" /> Pintasan Aksi Cepat Warga
             </span>
             <span className="text-[11px] text-slate-400 font-medium">Layanan mandiri instan</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+            {/* Water Meter */}
             <button
               onClick={() => setActiveTab('water')}
-              className="p-3.5 rounded-2xl bg-white hover:bg-blue-50/50 border border-slate-200/80 hover:border-blue-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#edf7ff] hover:bg-[#e0f2fe] border border-sky-100/80 hover:border-sky-300 hover:shadow-md transition-all text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <Droplets size={18} />
+              <div className="w-10 h-10 rounded-xl bg-white text-[#0284c7] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
+                <Droplets size={19} className="stroke-[2.5]" />
               </div>
-              <p className="text-xs font-black text-slate-800">Catat Meter</p>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Air Mandiri m³</p>
+              <p className="text-xs font-extrabold text-slate-900 tracking-tight">Catat Meter</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Air Mandiri m³</p>
             </button>
 
+            {/* Surat Pengantar */}
             <button
               onClick={() => setActiveTab('letters')}
-              className="p-3.5 rounded-2xl bg-white hover:bg-indigo-50/50 border border-slate-200/80 hover:border-indigo-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#f0f2fe] hover:bg-[#e0e7ff] border border-indigo-100/80 hover:border-indigo-300 hover:shadow-md transition-all text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <FileText size={18} />
+              <div className="w-10 h-10 rounded-xl bg-white text-[#4f46e5] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
+                <FileText size={19} className="stroke-[2.5]" />
               </div>
-              <p className="text-xs font-black text-slate-800">Surat Pengantar</p>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Permohonan RT</p>
+              <p className="text-xs font-extrabold text-slate-900 tracking-tight">Surat Pengantar</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Permohonan RT</p>
             </button>
 
+            {/* Lapor Aduan */}
             <button
               onClick={() => setIsReportModalOpen(true)}
-              className="p-3.5 rounded-2xl bg-white hover:bg-rose-50/50 border border-slate-200/80 hover:border-rose-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#fff1f2] hover:bg-[#ffe4e6] border border-rose-100/80 hover:border-rose-300 hover:shadow-md transition-all text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <AlertTriangle size={18} />
+              <div className="w-10 h-10 rounded-xl bg-white text-[#e11d48] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
+                <AlertTriangle size={19} className="stroke-[2.5]" />
               </div>
-              <p className="text-xs font-black text-slate-800">Lapor Aduan</p>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Fasilitas/Warga</p>
+              <p className="text-xs font-extrabold text-slate-900 tracking-tight">Lapor Aduan</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Fasilitas/Warga</p>
             </button>
 
+            {/* Lapor Tamu */}
             <button
               onClick={() => setActiveTab('guests')}
-              className="p-3.5 rounded-2xl bg-white hover:bg-amber-50/50 border border-slate-200/80 hover:border-amber-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#fff4eb] hover:bg-[#ffedd5] border border-amber-100/80 hover:border-amber-300 hover:shadow-md transition-all text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <Users size={18} />
+              <div className="w-10 h-10 rounded-xl bg-white text-[#ea580c] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
+                <Users size={19} className="stroke-[2.5]" />
               </div>
-              <p className="text-xs font-black text-slate-800">Lapor Tamu</p>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Wajib 1x24 Jam</p>
+              <p className="text-xs font-extrabold text-slate-900 tracking-tight">Lapor Tamu</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Wajib 1x24 Jam</p>
             </button>
 
+            {/* Rincian Iuran */}
             <button
               onClick={() => setIsIuranModalOpen(true)}
-              className="p-3.5 rounded-2xl bg-white hover:bg-emerald-50/50 border border-slate-200/80 hover:border-emerald-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#e8faf0] hover:bg-[#dcfce7] border border-emerald-100/80 hover:border-emerald-300 hover:shadow-md transition-all text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <CreditCard size={18} />
+              <div className="w-10 h-10 rounded-xl bg-white text-[#059669] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
+                <CreditCard size={19} className="stroke-[2.5]" />
               </div>
-              <p className="text-xs font-black text-slate-800">Rincian Iuran</p>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Sampah & Air RT</p>
+              <p className="text-xs font-extrabold text-slate-900 tracking-tight">Rincian Iuran</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Sampah & Air RT</p>
             </button>
 
+            {/* Kartu E-ID */}
             <button
               onClick={() => setActiveTab('eid')}
-              className="p-3.5 rounded-2xl bg-white hover:bg-purple-50/50 border border-slate-200/80 hover:border-purple-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#f5f3ff] hover:bg-[#ede9fe] border border-purple-100/80 hover:border-purple-300 hover:shadow-md transition-all text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <QrCode size={18} />
+              <div className="w-10 h-10 rounded-xl bg-white text-[#7c3aed] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
+                <QrCode size={19} className="stroke-[2.5]" />
               </div>
-              <p className="text-xs font-black text-slate-800">Kartu E-ID</p>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Cetak & Unduh</p>
+              <p className="text-xs font-extrabold text-slate-900 tracking-tight">Kartu E-ID</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Cetak & Unduh</p>
             </button>
 
+            {/* 5 Pilar STBM */}
             <button
               onClick={() => setActiveTab('stbm')}
-              className="p-3.5 rounded-2xl bg-white hover:bg-emerald-50/50 border border-slate-200/80 hover:border-emerald-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#e8faf0] hover:bg-[#dcfce7] border border-emerald-100/80 hover:border-emerald-300 hover:shadow-md transition-all text-left group cursor-pointer"
             >
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <CheckSquare size={18} />
+              <div className="w-10 h-10 rounded-xl bg-white text-[#059669] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
+                <CheckSquare size={19} className="stroke-[2.5]" />
               </div>
-              <p className="text-xs font-black text-slate-800">5 Pilar STBM</p>
-              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Sanitasi & ODF</p>
+              <p className="text-xs font-extrabold text-slate-900 tracking-tight">5 Pilar STBM</p>
+              <p className="text-[10px] text-slate-500 font-medium mt-0.5">Sanitasi & ODF</p>
             </button>
           </div>
         </div>

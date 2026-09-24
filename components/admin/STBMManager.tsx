@@ -515,95 +515,95 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
         {/* Total KK */}
         <div className="p-3 bg-white border border-slate-200/90 rounded-2xl shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total KK</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total KK</span>
             <Users className="w-3.5 h-3.5 text-slate-400" />
           </div>
           <div className="my-1.5">
-            <span className="text-xl sm:text-2xl font-black text-slate-900">{stats.total}</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-slate-900">{stats.total}</span>
           </div>
-          <div className="text-[10px] font-bold text-slate-500 truncate">Rumah Terdata</div>
+          <div className="text-[10px] font-medium text-slate-500 truncate">Rumah Terdata</div>
         </div>
 
         {/* Pilar 1: Jamban Sehat */}
-        <div className="p-3 bg-white border border-emerald-200/90 rounded-2xl shadow-xs flex flex-col justify-between hover:border-emerald-300 transition-colors">
+        <div className="p-3 bg-[#e8faf0] border border-emerald-100/80 rounded-2xl shadow-xs flex flex-col justify-between hover:border-emerald-200 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">1. Jamban</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">1. Jamban</span>
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-xl sm:text-2xl font-black text-emerald-700">{stats.latrine}%</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-emerald-700">{stats.latrine}%</span>
           </div>
-          <div className="w-full bg-emerald-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-emerald-200/60 rounded-full h-1.5 overflow-hidden">
             <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${stats.latrine}%` }} />
           </div>
         </div>
 
         {/* Bebas BABS */}
-        <div className="p-3 bg-white border border-emerald-200/90 rounded-2xl shadow-xs flex flex-col justify-between hover:border-emerald-300 transition-colors">
+        <div className="p-3 bg-[#e8faf0] border border-emerald-100/80 rounded-2xl shadow-xs flex flex-col justify-between hover:border-emerald-200 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">Stop BABS</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Stop BABS</span>
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-xl sm:text-2xl font-black text-emerald-700">{stats.noBABS}%</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-emerald-700">{stats.noBABS}%</span>
           </div>
-          <div className="w-full bg-emerald-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-emerald-200/60 rounded-full h-1.5 overflow-hidden">
             <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${stats.noBABS}%` }} />
           </div>
         </div>
 
         {/* Pilar 2: CTPS */}
-        <div className="p-3 bg-white border border-teal-200/90 rounded-2xl shadow-xs flex flex-col justify-between hover:border-teal-300 transition-colors">
+        <div className="p-3 bg-teal-50/70 border border-teal-100/80 rounded-2xl shadow-xs flex flex-col justify-between hover:border-teal-200 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-teal-800">2. CTPS</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-teal-800">2. CTPS</span>
             <Sparkles className="w-3.5 h-3.5 text-teal-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-xl sm:text-2xl font-black text-teal-700">{stats.ctps}%</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-teal-700">{stats.ctps}%</span>
           </div>
-          <div className="w-full bg-teal-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-teal-200/60 rounded-full h-1.5 overflow-hidden">
             <div className="bg-teal-500 h-full rounded-full" style={{ width: `${stats.ctps}%` }} />
           </div>
         </div>
 
         {/* Pilar 3: Air & Makanan */}
-        <div className="p-3 bg-white border border-sky-200/90 rounded-2xl shadow-xs flex flex-col justify-between hover:border-sky-300 transition-colors">
+        <div className="p-3 bg-[#edf7ff] border border-sky-100/80 rounded-2xl shadow-xs flex flex-col justify-between hover:border-sky-200 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-sky-800">3. PAMM-RT</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-800">3. PAMM-RT</span>
             <Droplets className="w-3.5 h-3.5 text-sky-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-xl sm:text-2xl font-black text-sky-700">{stats.food}%</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-sky-700">{stats.food}%</span>
           </div>
-          <div className="w-full bg-sky-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-sky-200/60 rounded-full h-1.5 overflow-hidden">
             <div className="bg-sky-500 h-full rounded-full" style={{ width: `${stats.food}%` }} />
           </div>
         </div>
 
         {/* Pilar 4: Sampah */}
-        <div className="p-3 bg-white border border-amber-200/90 rounded-2xl shadow-xs flex flex-col justify-between hover:border-amber-300 transition-colors">
+        <div className="p-3 bg-[#fff4eb] border border-amber-100/80 rounded-2xl shadow-xs flex flex-col justify-between hover:border-amber-200 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">4. TPS3R</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-800">4. TPS3R</span>
             <Recycle className="w-3.5 h-3.5 text-amber-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-xl sm:text-2xl font-black text-amber-700">{stats.waste}%</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-amber-700">{stats.waste}%</span>
           </div>
-          <div className="w-full bg-amber-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-amber-200/60 rounded-full h-1.5 overflow-hidden">
             <div className="bg-amber-500 h-full rounded-full" style={{ width: `${stats.waste}%` }} />
           </div>
         </div>
 
         {/* Pilar 5: Limbah SPAL */}
-        <div className="p-3 bg-white border border-teal-200/90 rounded-2xl shadow-xs flex flex-col justify-between hover:border-teal-300 transition-colors">
+        <div className="p-3 bg-teal-50/70 border border-teal-100/80 rounded-2xl shadow-xs flex flex-col justify-between hover:border-teal-200 transition-colors">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-wider text-teal-800">5. SPALDT</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-teal-800">5. SPALDT</span>
             <Waves className="w-3.5 h-3.5 text-teal-600" />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className="text-xl sm:text-2xl font-black text-teal-700">{stats.liquid}%</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-teal-700">{stats.liquid}%</span>
           </div>
-          <div className="w-full bg-teal-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-teal-200/60 rounded-full h-1.5 overflow-hidden">
             <div className="bg-teal-500 h-full rounded-full" style={{ width: `${stats.liquid}%` }} />
           </div>
         </div>
@@ -611,22 +611,22 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
         {/* Tindak Lanjut */}
         <div className={`p-3 rounded-2xl shadow-xs flex flex-col justify-between transition-colors border ${
           stats.followUp > 0 
-            ? 'bg-rose-50/80 border-rose-300 hover:border-rose-400' 
+            ? 'bg-[#fff1f2] border-rose-200/80 hover:border-rose-300' 
             : 'bg-white border-slate-200 hover:border-slate-300'
         }`}>
           <div className="flex items-center justify-between">
-            <span className={`text-[10px] font-black uppercase tracking-wider ${stats.followUp > 0 ? 'text-rose-700' : 'text-slate-400'}`}>
+            <span className={`text-[10px] font-extrabold uppercase tracking-wider ${stats.followUp > 0 ? 'text-rose-700' : 'text-slate-400'}`}>
               Perlu TL
             </span>
             <AlertTriangle className={`w-3.5 h-3.5 ${stats.followUp > 0 ? 'text-rose-600' : 'text-slate-300'}`} />
           </div>
           <div className="my-1.5 flex items-baseline gap-1">
-            <span className={`text-xl sm:text-2xl font-black ${stats.followUp > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
+            <span className={`text-xl sm:text-2xl font-extrabold ${stats.followUp > 0 ? 'text-rose-600' : 'text-slate-700'}`}>
               {stats.followUp}
             </span>
             <span className="text-[10px] font-bold text-slate-400">KK</span>
           </div>
-          <div className="text-[10px] font-bold text-slate-500 truncate">
+          <div className="text-[10px] font-medium text-slate-500 truncate">
             {stats.followUp > 0 ? 'Perlu Intervensi' : 'Semua Terlayani'}
           </div>
         </div>

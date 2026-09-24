@@ -42,10 +42,10 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
 
         <div className="relative z-10">
           <div className="flex items-end gap-3.5">
-            <h3 className="text-5xl sm:text-6xl font-black tracking-tight text-slate-900 leading-none">{totalResidents}</h3>
+            <h3 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-none">{totalResidents}</h3>
             <div className="mb-0.5">
-              <span className="block text-indigo-600 font-black text-[10px] uppercase tracking-widest mb-0.5">Populasi Resmi</span>
-              <span className="block text-slate-800 font-black text-base uppercase tracking-tight leading-none">Jiwa Terdaftar</span>
+              <span className="block text-indigo-600 font-extrabold text-[10px] uppercase tracking-widest mb-0.5">Populasi Resmi</span>
+              <span className="block text-slate-800 font-extrabold text-base uppercase tracking-tight leading-none">Jiwa Terdaftar</span>
             </div>
           </div>
           
@@ -64,7 +64,7 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
 
       {/* Verified Citizens Card */}
       <motion.div 
-        variants={itemVariants}
+        variants={itemVariants} 
         whileHover={{ y: -3 }}
         className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-indigo-200 transition-all relative overflow-hidden"
       >
@@ -75,14 +75,14 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
           <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/80 px-2.5 py-1 rounded-full uppercase tracking-wider">Valid</span>
         </div>
         <div className="relative z-10">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Verifikasi Admin</p>
-          <h3 className="text-3xl font-black text-slate-900 leading-none">{verifiedCount} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
+          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Verifikasi Admin</p>
+          <h3 className="text-3xl font-extrabold text-slate-900 leading-none">{verifiedCount} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
         </div>
       </motion.div>
 
       {/* Occupied Houses Card */}
       <motion.div 
-        variants={itemVariants}
+        variants={itemVariants} 
         whileHover={{ y: -3 }}
         className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-emerald-200 transition-all relative overflow-hidden"
       >
@@ -93,14 +93,14 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
           <span className="text-[9px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100/80 px-2.5 py-1 rounded-full uppercase tracking-wider">Aktif</span>
         </div>
         <div className="relative z-10">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hunian Terisi</p>
-          <h3 className="text-3xl font-black text-slate-900 leading-none">{occupiedHouses} <span className="text-xs font-bold text-slate-400">Unit</span></h3>
+          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Hunian Terisi</p>
+          <h3 className="text-3xl font-extrabold text-slate-900 leading-none">{occupiedHouses} <span className="text-xs font-bold text-slate-400">Unit</span></h3>
         </div>
       </motion.div>
 
       {/* Empty Houses Card */}
       <motion.div 
-        variants={itemVariants}
+        variants={itemVariants} 
         whileHover={{ y: -3 }}
         className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-slate-300 transition-all relative overflow-hidden"
       >
@@ -111,8 +111,8 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
           <span className="text-[9px] font-extrabold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full uppercase tracking-wider">Kosong</span>
         </div>
         <div className="relative z-10">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Hunian Kosong</p>
-          <h3 className="text-3xl font-black text-slate-900 leading-none">{emptyHouses} <span className="text-xs font-bold text-slate-400">Unit</span></h3>
+          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Hunian Kosong</p>
+          <h3 className="text-3xl font-extrabold text-slate-900 leading-none">{emptyHouses} <span className="text-xs font-bold text-slate-400">Unit</span></h3>
         </div>
       </motion.div>
     </div>

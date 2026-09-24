@@ -751,75 +751,79 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         </div>
       </div>
 
-      {/* KPI Metric Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-5 border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+      {/* KPI Metric Cards with Pastel Glassmorphic System */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+        {/* Rumah Tercatat (Lavender/Indigo) */}
+        <div className="bg-[#f0f2fe] border border-indigo-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Rumah Tercatat</span>
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-              <Home className="w-5 h-5" />
+            <span className="text-[10px] font-extrabold text-[#4f46e5] uppercase tracking-widest">Rumah Tercatat</span>
+            <div className="w-10 h-10 rounded-2xl bg-white text-[#4f46e5] flex items-center justify-center shadow-2xs">
+              <Home className="w-5 h-5 stroke-[2.5]" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-slate-800 dark:text-white">
-              {kpi.recordedCount} <span className="text-sm font-normal text-slate-400">/ {kpi.totalHouses}</span>
+            <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              {kpi.recordedCount} <span className="text-sm font-medium text-slate-400">/ {kpi.totalHouses}</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 font-medium mt-1">
               {Math.round((kpi.recordedCount / (kpi.totalHouses || 1)) * 100)}% selesai terdata
             </p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-5 border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+        {/* Total Konsumsi (Sky/Cyan) */}
+        <div className="bg-[#edf7ff] border border-sky-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Konsumsi</span>
-            <div className="p-2 rounded-xl bg-cyan-50 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400">
-              <Droplets className="w-5 h-5" />
+            <span className="text-[10px] font-extrabold text-[#0284c7] uppercase tracking-widest">Total Konsumsi</span>
+            <div className="w-10 h-10 rounded-2xl bg-white text-[#0284c7] flex items-center justify-center shadow-2xs">
+              <Droplets className="w-5 h-5 stroke-[2.5]" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-slate-800 dark:text-white">
-              {kpi.totalUsageM3.toLocaleString('id-ID')} <span className="text-sm font-normal text-slate-400">m³</span>
+            <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              {kpi.totalUsageM3.toLocaleString('id-ID')} <span className="text-sm font-medium text-slate-400">m³</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 font-medium mt-1">
               Rata-rata: {kpi.recordedCount > 0 ? (kpi.totalUsageM3 / kpi.recordedCount).toFixed(1) : 0} m³/rumah
             </p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-5 border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+        {/* Total Tagihan Air (Mint/Emerald) */}
+        <div className="bg-[#e8faf0] border border-emerald-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Tagihan Air</span>
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-              <DollarSign className="w-5 h-5" />
+            <span className="text-[10px] font-extrabold text-[#059669] uppercase tracking-widest">Total Tagihan Air</span>
+            <div className="w-10 h-10 rounded-2xl bg-white text-[#059669] flex items-center justify-center shadow-2xs">
+              <DollarSign className="w-5 h-5 stroke-[2.5]" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+            <div className="text-2xl font-extrabold text-[#065f46] tracking-tight">
               Rp {kpi.totalBilled.toLocaleString('id-ID')}
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 font-medium mt-1">
               {waterSettings.billingMode === 'metered' ? 'Kalkulasi Kubikasi + Beban' : 'Tarif Flat Lingkungan'}
             </p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-5 border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+        {/* Butuh Verifikasi (Peach/Amber) */}
+        <div className="bg-[#fff4eb] border border-amber-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Butuh Verifikasi</span>
-            <div className="p-2 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
-              <Camera className="w-5 h-5" />
+            <span className="text-[10px] font-extrabold text-[#ea580c] uppercase tracking-widest">Butuh Verifikasi</span>
+            <div className="w-10 h-10 rounded-2xl bg-white text-[#ea580c] flex items-center justify-center shadow-2xs">
+              <Camera className="w-5 h-5 stroke-[2.5]" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-black text-amber-600 dark:text-amber-400">
+            <div className="text-2xl font-extrabold text-slate-900 tracking-tight">
               {kpi.pendingCount}
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 font-medium mt-1">
               Catatan mandiri foto warga
             </p>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Navigation Sub-Tabs */}

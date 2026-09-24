@@ -899,54 +899,54 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       </div>
 
       {/* Summary Analytics Card Widget */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* KPI: Surat Menunggu */}
-        <div className="bg-gradient-to-br from-amber-50 to-amber-100/30 p-5 rounded-3xl border border-amber-200/50 shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] hover:shadow-md">
-          <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm border border-amber-100 shrink-0">
-            <Clock size={18} className="animate-pulse" />
+        <div className="bg-[#fff4eb] border border-amber-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-all hover:translate-y-[-2px]">
+          <div className="w-11 h-11 rounded-2xl bg-white text-[#ea580c] flex items-center justify-center shadow-2xs shrink-0">
+            <Clock size={19} className="stroke-[2.5] animate-pulse" />
           </div>
           <div className="min-w-0">
-            <p className="text-[9px] sm:text-[10px] font-black text-amber-600 tracking-wider uppercase truncate">Surat Pending</p>
-            <h4 className="text-xl sm:text-2xl font-black text-slate-850 leading-none mt-1">
+            <p className="text-[10px] font-extrabold text-[#ea580c] tracking-widest uppercase truncate">Surat Pending</p>
+            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none mt-1">
               {letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length}
             </h4>
           </div>
         </div>
 
         {/* KPI: Surat Disetujui */}
-        <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/30 p-5 rounded-3xl border border-emerald-200/50 shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] hover:shadow-md">
-          <div className="p-3 bg-white text-emerald-600 rounded-2xl shadow-sm border border-emerald-100 shrink-0">
-            <CheckCircle2 size={18} />
+        <div className="bg-[#e8faf0] border border-emerald-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-all hover:translate-y-[-2px]">
+          <div className="w-11 h-11 rounded-2xl bg-white text-[#059669] flex items-center justify-center shadow-2xs shrink-0">
+            <CheckCircle2 size={19} className="stroke-[2.5]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[9px] sm:text-[10px] font-black text-emerald-600 tracking-wider uppercase truncate">Surat Disetujui</p>
-            <h4 className="text-xl sm:text-2xl font-black text-slate-850 leading-none mt-1">
+            <p className="text-[10px] font-extrabold text-[#059669] tracking-widest uppercase truncate">Surat Disetujui</p>
+            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none mt-1">
               {letters.filter(l => l.status === 'Disetujui' || l.status === 'Approved').length}
             </h4>
           </div>
         </div>
 
         {/* KPI: Aduan Baru */}
-        <div className="bg-gradient-to-br from-rose-50 to-rose-100/30 p-5 rounded-3xl border border-rose-200/50 shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] hover:shadow-md">
-          <div className="p-3 bg-white text-rose-600 rounded-2xl shadow-sm border border-rose-100 shrink-0">
-            <AlertTriangle size={18} />
+        <div className="bg-[#fff1f2] border border-rose-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-all hover:translate-y-[-2px]">
+          <div className="w-11 h-11 rounded-2xl bg-white text-[#e11d48] flex items-center justify-center shadow-2xs shrink-0">
+            <AlertTriangle size={19} className="stroke-[2.5]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[9px] sm:text-[10px] font-black text-rose-600 tracking-wider uppercase truncate">Aduan Baru</p>
-            <h4 className="text-xl sm:text-2xl font-black text-slate-850 leading-none mt-1">
+            <p className="text-[10px] font-extrabold text-[#e11d48] tracking-widest uppercase truncate">Aduan Baru</p>
+            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none mt-1">
               {reports.filter(r => r.status === 'Baru').length}
             </h4>
           </div>
         </div>
 
         {/* KPI: Aduan Diproses */}
-        <div className="bg-gradient-to-br from-sky-50 to-sky-100/30 p-5 rounded-3xl border border-sky-200/50 shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] hover:shadow-md">
-          <div className="p-3 bg-white text-sky-600 rounded-2xl shadow-sm border border-sky-100 shrink-0">
-            <RefreshCw size={18} />
+        <div className="bg-[#edf7ff] border border-sky-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-all hover:translate-y-[-2px]">
+          <div className="w-11 h-11 rounded-2xl bg-white text-[#0284c7] flex items-center justify-center shadow-2xs shrink-0">
+            <RefreshCw size={19} className="stroke-[2.5]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[9px] sm:text-[10px] font-black text-sky-600 tracking-wider uppercase truncate">Laporan Diproses</p>
-            <h4 className="text-xl sm:text-2xl font-black text-slate-850 leading-none mt-1">
+            <p className="text-[10px] font-extrabold text-[#0284c7] tracking-widest uppercase truncate">Laporan Diproses</p>
+            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none mt-1">
               {reports.filter(r => r.status === 'Diproses').length}
             </h4>
           </div>
@@ -1785,9 +1785,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="flex flex-wrap sm:flex-nowrap gap-2 relative z-10 pt-4 border-t border-slate-100 mt-auto">
                     <button 
                       onClick={() => setSelectedLetter(letter)}
-                      className="flex-1 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md flex items-center justify-center gap-1.5"
+                      className="flex-1 py-3 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-extrabold text-xs shadow-md shadow-indigo-500/25 hover:opacity-95 active:scale-95 transition-all flex items-center justify-center gap-1.5"
                     >
-                      <Eye size={13} /> Detail & Proses
+                      <Eye size={14} className="stroke-[2.5]" /> Detail &amp; Proses
                     </button>
                     
                     {isApproved && (

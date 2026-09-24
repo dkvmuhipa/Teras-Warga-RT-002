@@ -100,10 +100,10 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
 
             {/* Name & Residence details */}
             <div className="min-w-0 flex-1">
-              <h4 className="font-black text-slate-900 text-sm tracking-tight truncate leading-snug">
+              <h4 className="font-extrabold text-slate-900 text-sm tracking-tight truncate leading-snug">
                 {house.headOfFamily && house.headOfFamily !== '-' ? house.headOfFamily : (house.ownerName ? `Hunian: ${house.ownerName}` : 'Rumah Kosong')}
               </h4>
-              <p className="text-[11px] text-slate-400 font-semibold truncate mt-0.5">
+              <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
                 {house.ownerName && house.ownerName !== house.headOfFamily ? `Pemilik: ${house.ownerName}` : `Keluarga RT 02`}
               </p>
               
@@ -114,15 +114,15 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
 
               {/* Status Pill Badges */}
               <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                <span className="px-2.5 py-0.5 bg-slate-900 text-white rounded-lg text-[9px] font-black uppercase tracking-wider shadow-2xs border border-slate-800">
+                <span className="px-2.5 py-0.5 bg-slate-900 text-white rounded-full text-[9px] font-extrabold uppercase tracking-wider shadow-2xs border border-slate-800">
                   Blok {house.block}-{house.number}
                 </span>
                 
-                <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg uppercase tracking-wide border ${
-                  house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80' :
+                <span className={`text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${
+                  house.status === 'Occupied' ? 'bg-[#e8faf0] text-[#059669] border-emerald-100/80' :
                   house.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' :
                   house.status === 'Business' ? 'bg-purple-50 text-purple-700 border-purple-200/80' :
-                  'bg-sky-50 text-sky-700 border-sky-200/80'
+                  'bg-[#edf7ff] text-[#0284c7] border-sky-100/80'
                 }`}>
                   {house.status === 'Occupied' ? 'Dihuni' : 
                    house.status === 'Empty' ? 'Kosong' : 
@@ -130,10 +130,10 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                 </span>
 
                 {house.residenceType && (
-                  <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg uppercase tracking-wide border ${
-                    house.residenceType === 'Tetap' ? 'bg-blue-50 text-blue-700 border-blue-200/80' :
-                    house.residenceType === 'Sewa' ? 'bg-amber-50 text-amber-700 border-amber-200/80' :
-                    'bg-indigo-50 text-indigo-700 border-indigo-200/80'
+                  <span className={`text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${
+                    house.residenceType === 'Tetap' ? 'bg-[#f0f2fe] text-[#4f46e5] border-indigo-100/80' :
+                    house.residenceType === 'Sewa' ? 'bg-[#fff4eb] text-[#ea580c] border-amber-100/80' :
+                    'bg-[#f0f2fe] text-[#4f46e5] border-indigo-100/80'
                   }`}>
                     {house.residenceType === 'Rumah Keluarga' ? 'Keluarga' : house.residenceType}
                   </span>
@@ -184,20 +184,20 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
         <div className="grid grid-cols-2 gap-2.5 mb-3 relative z-10">
           <div className={`p-3 rounded-2xl border transition-all ${
             isDuesPaid 
-              ? 'bg-emerald-50/70 border-emerald-200/70 text-emerald-800' 
-              : 'bg-rose-50/70 border-rose-200/70 text-rose-800'
+              ? 'bg-[#e8faf0] border-emerald-100/80 text-[#059669]' 
+              : 'bg-[#fff1f2] border-rose-100/80 text-[#e11d48]'
           }`}>
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Status Iuran</p>
+            <p className="text-[9px] font-extrabold uppercase tracking-widest opacity-80 mb-1">Status Iuran</p>
             <div className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${isDuesPaid ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse' : 'bg-rose-500'}`} />
-              <p className="text-xs font-black">
+              <p className="text-xs font-extrabold">
                 {isDuesPaid ? 'Lunas' : 'Menunggak'}
               </p>
             </div>
           </div>
           <div className="p-3 bg-slate-50/80 border border-slate-200/70 rounded-2xl">
-            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Tunggakan</p>
-            <p className={`text-xs font-black font-mono ${arrears.length > 0 ? 'text-rose-600' : 'text-emerald-600 flex items-center gap-1'}`}>
+            <p className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1">Tunggakan</p>
+            <p className={`text-xs font-extrabold font-mono ${arrears.length > 0 ? 'text-[#e11d48]' : 'text-[#059669] flex items-center gap-1'}`}>
               {arrears.length > 0 ? `${arrears.length} Bulan` : <><span>Nihil</span> <CheckCircle size={11} /></>}
             </p>
           </div>
@@ -219,10 +219,10 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                 <FileText size={14} className={house.pbbStatus === 'Sudah Diambil' ? 'text-emerald-600' : 'text-amber-600'} />
                 <div className="text-left">
                   <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400">PBB {house.pbbYear || new Date().getFullYear()}</p>
-                  <p className="text-[10px] font-black uppercase leading-none mt-0.5">{house.pbbStatus || 'Belum Diambil'}</p>
+                  <p className="text-[10px] font-extrabold uppercase leading-none mt-0.5">{house.pbbStatus || 'Belum Diambil'}</p>
                 </div>
               </div>
-              <span className={`text-[9px] font-black px-2 py-0.5 rounded-md border flex items-center gap-1 ${
+              <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md border flex items-center gap-1 ${
                 house.pbbStatus === 'Sudah Diambil' 
                   ? 'bg-white/80 text-emerald-800 border-emerald-200' 
                   : 'bg-white/80 text-amber-800 border-amber-200'
@@ -256,7 +256,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
               {house.phone && (
                 <button 
                   onClick={handleWhatsAppClick} 
-                  className="px-2.5 py-1.5 rounded-xl bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white border border-[#25D366]/30 transition-all flex items-center gap-1 text-[10px] font-black shadow-2xs"
+                  className="px-2.5 py-1.5 rounded-xl bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white border border-[#25D366]/30 transition-all flex items-center gap-1 text-[10px] font-extrabold shadow-2xs"
                   title="Hubungi via WhatsApp"
                 >
                   <MessageCircle size={13} className="stroke-[2.5]" />
@@ -272,7 +272,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
       <div className="flex items-center gap-2 pt-3.5 border-t border-slate-100/90 relative z-10 mt-auto">
         <button 
           onClick={() => onOpenDetail(house)} 
-          className="flex-1 py-2.5 px-4 bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all active:scale-[0.98] shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5"
+          className="flex-1 py-2.5 px-4 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all active:scale-[0.98] shadow-md shadow-indigo-500/25 flex items-center justify-center gap-1.5"
         >
           <span>Detail Warga</span>
           <ArrowRight size={13} className="stroke-[2.5]" />
