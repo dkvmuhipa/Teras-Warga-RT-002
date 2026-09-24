@@ -230,37 +230,33 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       animate="visible"
       className="space-y-8"
     >
-      {/* Executive Pastel Modern Command Center Hero Banner */}
+      {/* Executive Modern Command Center Hero Banner matching reference design */}
       <motion.div 
         variants={itemVariants} 
-        className="relative overflow-hidden bg-gradient-to-br from-[#f8f9ff] via-[#f3f5ff] to-[#edf0fe] rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 shadow-lg shadow-indigo-100/70 border border-indigo-100/80"
+        className="relative overflow-hidden bg-white rounded-3xl md:rounded-[2.5rem] p-5 sm:p-7 md:p-8 shadow-sm border border-slate-100"
       >
-        {/* Soft Organic Lavender Wave SVG Background on Right Side */}
-        <div className="absolute right-0 top-0 bottom-0 w-full sm:w-1/2 md:w-5/12 pointer-events-none overflow-hidden opacity-70">
-          <svg className="absolute right-0 top-0 h-full w-full text-indigo-100/70" viewBox="0 0 400 400" preserveAspectRatio="none" fill="currentColor">
-            <path d="M140,0 C220,100 280,120 220,240 C160,360 300,380 400,400 L400,0 Z" />
+        {/* Soft Organic Curved Violet Wave on Right Side */}
+        <div className="absolute right-0 top-0 bottom-0 w-2/5 sm:w-1/2 pointer-events-none overflow-hidden select-none">
+          <svg className="absolute right-0 top-0 h-full w-full" viewBox="0 0 300 400" preserveAspectRatio="none" fill="none">
+            <path d="M120,0 C180,80 200,160 130,260 C80,340 160,380 300,400 L300,0 Z" fill="#6366f1" fillOpacity="0.14" />
+            <path d="M180,0 C230,70 240,150 180,240 C130,330 200,370 300,400 L300,0 Z" fill="#818cf8" fillOpacity="0.1" />
           </svg>
-          <div className="absolute -top-16 -right-16 w-72 h-72 bg-purple-200/40 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 right-12 w-64 h-64 bg-indigo-200/35 rounded-full blur-2xl pointer-events-none" />
         </div>
         
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3.5 max-w-2xl">
-            {/* Top Pill Badges */}
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-sm shadow-indigo-600/30">
+        <div className="relative z-10 flex flex-col justify-between">
+          <div className="space-y-3 max-w-2xl">
+            {/* Top Stacked Badges */}
+            <div className="flex flex-col items-start gap-1.5">
+              <span className="bg-[#4f46e5] text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-xs">
                 Pusat Kendali Eksekutif
               </span>
-              <span className="bg-[#e8faf0] border border-emerald-200 text-[#059669] text-[10px] font-extrabold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="bg-[#dcfce7] text-[#15803d] text-[10px] font-extrabold px-3 py-1 rounded-full inline-flex items-center gap-1.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 Operasional 100% Aktif
-              </span>
-              <span className="hidden sm:inline-flex bg-white/90 border border-indigo-100/80 text-slate-500 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-2xs">
-                Huntap Tondo 2 • RT 02 / RW 020
               </span>
             </div>
 
-            {/* Personalized Time-Aware Greeting */}
+            {/* Personalized Time-Aware Greeting with Waving Hand */}
             {(() => {
               const hr = new Date().getHours();
               let greet = 'Selamat Hari';
@@ -270,43 +266,63 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               else if (hr >= 19 || hr < 5) greet = 'Selamat Malam';
               
               return (
-                <h2 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight text-slate-900 flex items-center gap-2.5">
-                  <span>{greet},</span>
-                  <span className="text-indigo-600">Pengurus {RT_NAME}!</span>
-                  <span className="inline-block animate-bounce-slow origin-bottom">👋</span>
-                </h2>
+                <div className="flex items-start justify-between gap-3 pt-1">
+                  <div>
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
+                      <span className="block text-slate-900">{greet},</span>
+                      <span className="block text-[#4f46e5]">Pengurus {RT_NAME}!</span>
+                    </h2>
+                  </div>
+                  
+                  {/* Waving Hand Graphic with Vibration Waves matching reference */}
+                  <div className="relative shrink-0 select-none pointer-events-none mt-1 mr-1 sm:mr-3">
+                    <svg className="absolute -left-3 top-2 w-4 h-7 text-[#4f46e5]" viewBox="0 0 16 28" fill="none">
+                      <path d="M12 4 C6 9 6 19 12 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                      <path d="M7 8 C3 11 3 17 7 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    <span className="text-5xl sm:text-6xl inline-block transform rotate-[-6deg] filter drop-shadow-xs">
+                      👋
+                    </span>
+                    <svg className="absolute -right-2 top-0 w-4 h-7 text-[#4f46e5]" viewBox="0 0 16 28" fill="none">
+                      <path d="M4 4 C10 9 10 19 4 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                </div>
               );
             })()}
 
-            <p className="text-slate-600 font-medium text-xs md:text-sm leading-relaxed max-w-xl">
+            <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed max-w-xl">
               Pusat orkestrasi administrasi kependudukan, tata kelola kas terdesentralisasi, evaluasi sanitasi 5 pilar STBM, serta pengawasan keamanan lingkungan warga.
             </p>
 
-            {/* Quick Action CTA Group */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-2">
-              <Button 
+            {/* Action CTA Buttons */}
+            <div className="pt-2 space-y-2.5">
+              <button 
                 onClick={handleGenerateSummary} 
-                className="bg-gradient-to-r from-indigo-600 via-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-extrabold text-xs py-3 px-5 rounded-2xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 group w-full sm:w-auto"
+                disabled={isAiLoading}
+                className="w-full py-3.5 px-5 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] hover:from-[#4f46e5] hover:to-[#6d28d9] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-md shadow-indigo-500/25 relative flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
               >
-                <Sparkles size={16} className="text-amber-300 animate-spin-slow shrink-0" /> 
-                <span>{isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}</span>
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform shrink-0" />
-              </Button>
+                <Sparkles size={16} className="text-white shrink-0 animate-spin-slow" /> 
+                <span className="tracking-normal font-bold">
+                  {isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}
+                </span>
+                <ArrowRight size={15} className="absolute right-4 sm:right-5 text-white shrink-0" />
+              </button>
               
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                 <button 
                   onClick={handleExportData} 
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-700 transition-all shadow-xs hover:shadow active:scale-[0.98]"
+                  className="flex items-center justify-center gap-2 py-3 px-3 bg-white hover:bg-slate-50 border border-slate-200/90 rounded-2xl text-xs font-bold text-slate-800 transition-all shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer"
                 >
-                  <Download size={14} className="text-slate-500" />
+                  <Download size={14} className="text-slate-600" />
                   <span>Ekspor Ringkasan</span>
                 </button>
                 
                 <button 
                   onClick={() => onTabChange('residents')} 
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-3 bg-[#e8faf0] hover:bg-[#d8f5e5] border border-emerald-200/70 text-[#059669] rounded-2xl text-xs font-black transition-all shadow-xs hover:shadow active:scale-[0.98]"
+                  className="flex items-center justify-center gap-2 py-3 px-3 bg-[#dcfce7] hover:bg-[#cbfada] border border-emerald-200/80 text-[#15803d] rounded-2xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer"
                 >
-                  <Plus size={15} className="text-[#059669]" />
+                  <Plus size={15} className="text-[#15803d] stroke-[2.5px]" />
                   <span>Tambah Warga</span>
                 </button>
               </div>
@@ -347,141 +363,85 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </motion.div>
       )}
 
-      {/* Layanan Warga Terpadu Modern Pastel Section */}
-      <motion.div 
-        variants={itemVariants}
-        className="bg-white border border-slate-200/80 rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 shadow-sm"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight leading-tight">
-              Layanan <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
-            </h3>
-            <p className="text-slate-500 font-medium text-xs md:text-sm mt-0.5">
-              Pusat kendali akses langsung untuk semua modul operasional administrasi RT.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full uppercase tracking-wider">
-              ⚡ Akses Cepat Admin
-            </span>
-            <button
-              onClick={() => setShowAllServices(!showAllServices)}
-              className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50/80 hover:bg-indigo-100/90 border border-indigo-200/60 px-3.5 py-1.5 rounded-full transition-all active:scale-[0.98]"
-            >
-              <span>{showAllServices ? 'Tutup Sebagian' : 'Lihat Semua'}</span>
-              <ArrowRight size={13} className={`transition-transform duration-200 ${showAllServices ? 'rotate-90' : ''}`} />
-            </button>
-          </div>
+      {/* Layanan Warga Terpadu Modern Pastel Section matching reference */}
+      <motion.div variants={itemVariants} className="space-y-3.5">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
+            Layanan <span className="text-[#4f46e5]">Warga Terpadu</span>
+          </h3>
+          
+          <button
+            onClick={() => setShowAllServices(!showAllServices)}
+            className="flex items-center gap-1 text-xs font-bold text-[#4f46e5] hover:text-indigo-700 transition-colors cursor-pointer"
+          >
+            <span>Lihat Semua</span>
+            <ArrowRight size={13} className={`transition-transform duration-200 ${showAllServices ? 'rotate-90' : ''}`} />
+          </button>
         </div>
 
-        {/* 4 Primary Pastel Feature Cards matching the reference design */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* 4 Primary Pastel Feature Cards in a 4-Column Grid matching reference */}
+        <div className="grid grid-cols-4 gap-2 sm:gap-3.5">
           {/* Card 1: Data Warga (Lavender) */}
           <motion.div
-            whileHover={{ y: -3, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => onTabChange('residents')}
-            className="bg-[#f0f2fe] hover:bg-[#e8ebfd] border border-indigo-100/90 rounded-2xl md:rounded-[1.75rem] p-4 md:p-5 flex items-center justify-between cursor-pointer transition-all shadow-xs hover:shadow-md group"
+            className="bg-[#f0f2fe] hover:bg-[#e4e7fd] border border-indigo-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-all shadow-2xs cursor-pointer group"
           >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-indigo-600 shadow-xs group-hover:scale-105 transition-transform shrink-0">
-                <Users size={22} className="stroke-[2.2px]" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-black text-slate-900 text-sm md:text-base leading-tight group-hover:text-indigo-600 transition-colors truncate">
-                  Data Warga
-                </h4>
-                <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                  {totalResidents} Penduduk Terdata
-                </p>
-              </div>
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#4f46e5] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <Users size={19} className="stroke-[2.2px]" />
             </div>
-            <div className="w-8 h-8 rounded-full bg-white/90 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-2xs shrink-0 ml-2">
-              <ArrowRight size={14} className="stroke-[2.5px]" />
-            </div>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+              Data<br />Warga
+            </span>
           </motion.div>
 
           {/* Card 2: Kas & Iuran (Mint) */}
           <motion.div
-            whileHover={{ y: -3, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => onTabChange('finance')}
-            className="bg-[#ecfdf5] hover:bg-[#e2fbf0] border border-emerald-100/90 rounded-2xl md:rounded-[1.75rem] p-4 md:p-5 flex items-center justify-between cursor-pointer transition-all shadow-xs hover:shadow-md group"
+            className="bg-[#e8faf0] hover:bg-[#d5f6e3] border border-emerald-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-all shadow-2xs cursor-pointer group"
           >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-emerald-600 shadow-xs group-hover:scale-105 transition-transform shrink-0">
-                <CreditCard size={22} className="stroke-[2.2px]" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-black text-slate-900 text-sm md:text-base leading-tight group-hover:text-emerald-600 transition-colors truncate">
-                  Kas & Iuran
-                </h4>
-                <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                  Penerimaan & Saldo RT
-                </p>
-              </div>
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#059669] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <CreditCard size={19} className="stroke-[2.2px]" />
             </div>
-            <div className="w-8 h-8 rounded-full bg-white/90 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-2xs shrink-0 ml-2">
-              <ArrowRight size={14} className="stroke-[2.5px]" />
-            </div>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+              Kas &<br />Iuran
+            </span>
           </motion.div>
 
           {/* Card 3: Surat Pengantar (Peach) */}
           <motion.div
-            whileHover={{ y: -3, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => onTabChange('services')}
-            className="bg-[#fff7ed] hover:bg-[#ffedd5] border border-amber-100/90 rounded-2xl md:rounded-[1.75rem] p-4 md:p-5 flex items-center justify-between cursor-pointer transition-all shadow-xs hover:shadow-md group"
+            className="bg-[#fff4eb] hover:bg-[#ffe6d4] border border-amber-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-all shadow-2xs cursor-pointer group relative"
           >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-orange-600 shadow-xs group-hover:scale-105 transition-transform shrink-0">
-                <FileText size={22} className="stroke-[2.2px]" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <h4 className="font-black text-slate-900 text-sm md:text-base leading-tight group-hover:text-orange-600 transition-colors truncate">
-                    Surat Pengantar
-                  </h4>
-                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0 && (
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0" />
-                  )}
-                </div>
-                <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0
-                    ? `${letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Permohonan Baru`
-                    : 'Pelayanan Persuratan RT'}
-                </p>
-              </div>
+            {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0 && (
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            )}
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <FileText size={19} className="stroke-[2.2px]" />
             </div>
-            <div className="w-8 h-8 rounded-full bg-white/90 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all shadow-2xs shrink-0 ml-2">
-              <ArrowRight size={14} className="stroke-[2.5px]" />
-            </div>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+              Surat<br />Pengantar
+            </span>
           </motion.div>
 
           {/* Card 4: Keamanan Lingkungan (Sky Blue) */}
           <motion.div
-            whileHover={{ y: -3, scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => onTabChange('reports-warga')}
-            className="bg-[#f0f9ff] hover:bg-[#e0f2fe] border border-sky-100/90 rounded-2xl md:rounded-[1.75rem] p-4 md:p-5 flex items-center justify-between cursor-pointer transition-all shadow-xs hover:shadow-md group"
+            className="bg-[#edf7ff] hover:bg-[#dbeffe] border border-sky-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-all shadow-2xs cursor-pointer group"
           >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-sky-600 shadow-xs group-hover:scale-105 transition-transform shrink-0">
-                <Shield size={22} className="stroke-[2.2px]" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-black text-slate-900 text-sm md:text-base leading-tight group-hover:text-sky-600 transition-colors truncate">
-                  Keamanan RT
-                </h4>
-                <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                  {activeGuests > 0 ? `${activeGuests} Tamu Menginap` : 'Siskamling & Buku Tamu'}
-                </p>
-              </div>
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#0284c7] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
+              <Shield size={19} className="stroke-[2.2px]" />
             </div>
-            <div className="w-8 h-8 rounded-full bg-white/90 text-sky-600 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition-all shadow-2xs shrink-0 ml-2">
-              <ArrowRight size={14} className="stroke-[2.5px]" />
-            </div>
+            <span className="text-[11px] sm:text-xs font-bold text-slate-800 leading-tight">
+              Keamanan<br />Lingkungan
+            </span>
           </motion.div>
         </div>
 
@@ -493,12 +453,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.25 }}
-              className="overflow-hidden pt-6 mt-6 border-t border-slate-100"
+              className="overflow-hidden pt-4 mt-2 bg-white rounded-2xl p-4 border border-slate-100 shadow-xs"
             >
-              <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-4">
+              <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-3">
                 Modul Operasional Tambahan
               </h5>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
                 {[
                   { label: '5 Pilar STBM', icon: CheckSquare, tab: 'stbm', color: 'bg-emerald-50 text-emerald-700 border-emerald-100', badge: stbmIssuesCount > 0 ? `${stbmIssuesCount} TL` : 'ODF' },
                   { label: 'Pasar UMKM', icon: ShoppingCart, tab: 'content', subTab: 'umkm', color: 'bg-lime-50 text-lime-700 border-lime-100', badge: 'UMKM' },
@@ -514,14 +474,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       whileHover={{ y: -2, scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => onTabChange(item.tab, item.subTab)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all ${item.color} hover:shadow-xs relative`}
+                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all ${item.color} hover:shadow-xs relative cursor-pointer`}
                     >
                       {item.badge && (
                         <span className="absolute -top-1.5 -right-1 text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-slate-900 text-white shadow-2xs">
                           {item.badge}
                         </span>
                       )}
-                      <Icon size={20} className="stroke-[2.2px] mb-1.5" />
+                      <Icon size={19} className="stroke-[2.2px] mb-1.5" />
                       <span className="text-[11px] font-extrabold leading-tight">{item.label}</span>
                     </motion.button>
                   );

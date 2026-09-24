@@ -173,8 +173,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   });
 
   const bottomNavItems = [
-    { id: 'overview', icon: LayoutDashboard, label: 'Beranda' },
-    { id: 'residents', icon: Users, label: 'Warga' },
+    { id: 'overview', icon: LayoutGrid, label: 'Beranda' },
+    { id: 'residents', icon: User, label: 'Warga' },
     { id: 'finance', icon: DollarSign, label: 'Keuangan' },
     { id: 'services', icon: FileText, label: 'Surat' },
   ].filter(item => {
@@ -618,7 +618,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <Bell size={18} />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full animate-pulse"></span>
+                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-indigo-600 border-2 border-white rounded-full"></span>
                 )}
               </button>
               
@@ -630,7 +630,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <p className="text-[9px] font-black text-emerald-600 uppercase tracking-wider mt-0.5">{role}</p>
                 </div>
                 <div className="relative group">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">
                     <User size={17} />
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
@@ -668,9 +668,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </main>
 
-        {/* Mobile bottom navigation bar with active dot indicator */}
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/60 z-40 pb-[env(safe-area-inset-bottom,16px)] shadow-[0_-8px_30px_rgb(0,0,0,0.06)]">
-          <div className="flex justify-around items-center h-16 px-2">
+        {/* Mobile bottom navigation bar matching reference exactly */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-100 z-40 pb-[env(safe-area-inset-bottom,8px)] shadow-[0_-4px_20px_rgb(0,0,0,0.04)]">
+          <div className="flex justify-around items-center h-15 px-2">
             {bottomNavItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -678,15 +678,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <button 
                   key={item.id} 
                   onClick={() => setActiveTab(item.id)} 
-                  className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition-all relative ${isActive ? 'text-indigo-600 font-black' : 'text-slate-400 hover:text-slate-600 font-medium'}`}
+                  className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition-all ${
+                    isActive ? 'text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600 font-medium'
+                  }`}
                 >
-                  <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-indigo-50/80 text-indigo-600' : ''}`}>
-                    <Icon size={19} className={isActive ? 'stroke-[2.5px]' : 'stroke-[1.8px]'} />
-                  </div>
-                  <span className="text-[10px] tracking-tight mt-0.5 leading-tight">{item.label}</span>
-                  {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-0.5 shadow-2xs animate-pulse" />
-                  )}
+                  <Icon size={20} className={isActive ? 'stroke-[2.2px] text-indigo-600' : 'stroke-[1.8px] text-slate-400'} />
+                  <span className={`text-[10px] tracking-tight mt-1 leading-tight ${isActive ? 'text-indigo-600 font-bold' : 'text-slate-500'}`}>
+                    {item.label}
+                  </span>
                 </button>
               );
             })}
