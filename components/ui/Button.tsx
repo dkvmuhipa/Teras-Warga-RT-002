@@ -18,12 +18,12 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props 
 }) => {
-  const baseStyles = 'relative inline-flex items-center justify-center rounded-2xl font-black uppercase tracking-widest transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group';
+  const baseStyles = 'relative inline-flex items-center justify-center rounded-2xl font-extrabold uppercase tracking-wider transition-all focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden group';
   
   const variants = {
-    primary: 'bg-indigo-600 text-white shadow-[0_10px_20px_-5px_rgba(79,70,229,0.4)] hover:shadow-[0_20px_40px_-10px_rgba(79,70,229,0.5)]',
-    secondary: 'bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50',
-    danger: 'bg-rose-600 text-white shadow-[0_10px_20px_-5px_rgba(225,29,72,0.4)] hover:shadow-[0_20px_40px_-10px_rgba(225,29,72,0.5)]',
+    primary: 'bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white shadow-md shadow-indigo-500/25 hover:opacity-95',
+    secondary: 'bg-white text-slate-800 border border-slate-200/90 shadow-2xs hover:bg-slate-50',
+    danger: 'bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-md shadow-rose-500/25 hover:opacity-95',
     ghost: 'bg-transparent text-slate-600 hover:bg-slate-100',
     outline: 'bg-transparent border-2 border-slate-200 text-slate-700 hover:border-indigo-600 hover:text-indigo-600',
     glass: 'bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20'

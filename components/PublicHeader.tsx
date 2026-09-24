@@ -116,7 +116,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
               <div className="hidden lg:flex items-center space-x-1 mr-2">
                 <button 
                   onClick={() => navigate('/')} 
-                  className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${isActive('/') ? "text-indigo-600 bg-indigo-50/80 font-black" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all ${isActive('/') ? "text-indigo-600 bg-indigo-50/80" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"}`}
                 >
                   Beranda
                 </button>
@@ -131,7 +131,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                       onMouseLeave={() => setActiveDropdown(null)}
                     >
                       <button 
-                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all ${
                           active 
                           ? "text-indigo-600 bg-indigo-50/80" 
                           : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
@@ -209,14 +209,14 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
               {/* Quick Portal Warga Button on Desktop */}
               <button 
                 onClick={() => navigate('/resident')} 
-                className={`hidden xl:flex items-center gap-1.5 px-3.5 h-10 rounded-xl text-xs font-bold transition-all border ${
+                className={`hidden xl:flex items-center gap-1.5 px-4 h-10 rounded-2xl text-xs font-extrabold transition-all border ${
                   location.pathname === '/resident'
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                    : 'bg-indigo-50/70 hover:bg-indigo-100/80 text-indigo-700 border-indigo-200/70'
+                    ? 'bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white border-transparent shadow-md shadow-indigo-500/25'
+                    : 'bg-[#f0f2fe] hover:bg-[#e0e7ff] text-[#4f46e5] border-indigo-100/80 shadow-2xs'
                 }`}
                 title="Akses Portal Mandiri Warga RT 002"
               >
-                <Users size={14} />
+                <Users size={14} className="stroke-[2.5]" />
                 <span>Portal Warga</span>
               </button>
               
@@ -230,9 +230,9 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
               <div className="hidden md:block h-6 w-px bg-slate-200 mx-1"></div>
               <button 
                 onClick={() => navigate('/admin')} 
-                className="hidden md:flex items-center gap-1.5 ml-1 text-xs font-black uppercase tracking-wider h-10 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-sm active:scale-95 transition-all cursor-pointer font-sans"
+                className="hidden md:flex items-center gap-1.5 ml-1 text-xs font-extrabold uppercase tracking-wider h-10 px-5 rounded-2xl bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] hover:opacity-95 text-white shadow-md shadow-indigo-500/25 active:scale-95 transition-all cursor-pointer font-sans"
               >
-                <User size={13} />
+                <User size={13} className="stroke-[2.5]" />
                 Panel Admin
               </button>
 

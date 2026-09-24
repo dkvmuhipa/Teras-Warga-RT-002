@@ -944,7 +944,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             Pengajuan surat pengantar mandiri, pelaporan tamu 24 jam, aduan ketertiban lingkungan, hingga mutasi kependudukan terintegrasi.
           </motion.p>
 
-          {/* Clean Features Grid dengan Animated Cards */}
+          {/* Clean Features Grid dengan Pastel Glassmorphic Cards */}
           <motion.div 
             initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -952,22 +952,22 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 max-w-3xl mx-auto text-left"
           >
             {[
-              { label: 'Estimasi Selesai', icon: Clock, desc: '1x24 Jam Kerja', color: 'text-indigo-600 bg-indigo-50 border-indigo-100' },
-              { label: 'Pelacakan Berkas', icon: Eye, desc: 'Pantau Real-Time', color: 'text-amber-600 bg-amber-50 border-amber-100' },
-              { label: 'Format Resmi', icon: FileText, desc: 'Cetak PDF Digital', color: 'text-emerald-600 bg-emerald-50 border-emerald-100' },
-              { label: 'Keamanan Data', icon: ShieldCheck, desc: 'Verifikasi PIN RT', color: 'text-blue-600 bg-blue-50 border-blue-100' }
+              { label: 'Estimasi Selesai', icon: Clock, desc: '1x24 Jam Kerja', bg: 'bg-[#f0f2fe]', border: 'border-indigo-100/80', iconColor: 'text-[#4f46e5]', labelColor: 'text-[#4f46e5]' },
+              { label: 'Pelacakan Berkas', icon: Eye, desc: 'Pantau Real-Time', bg: 'bg-[#fff4eb]', border: 'border-amber-100/80', iconColor: 'text-[#ea580c]', labelColor: 'text-[#ea580c]' },
+              { label: 'Format Resmi', icon: FileText, desc: 'Cetak PDF Digital', bg: 'bg-[#e8faf0]', border: 'border-emerald-100/80', iconColor: 'text-[#059669]', labelColor: 'text-[#059669]' },
+              { label: 'Keamanan Data', icon: ShieldCheck, desc: 'Verifikasi PIN RT', bg: 'bg-[#edf7ff]', border: 'border-sky-100/80', iconColor: 'text-[#0284c7]', labelColor: 'text-[#0284c7]' }
             ].map((item, i) => (
               <motion.div 
                 key={i} 
                 whileHover={{ y: -4, scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                className="p-3.5 bg-slate-50/80 border border-slate-200/60 rounded-2xl transition-all hover:bg-white hover:shadow-lg hover:shadow-indigo-500/5 cursor-pointer group"
+                className={`p-4 ${item.bg} border ${item.border} rounded-3xl transition-all hover:shadow-md cursor-pointer group`}
               >
-                <div className={`w-8 h-8 rounded-xl ${item.color} border flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
-                  <item.icon size={16} />
+                <div className={`w-10 h-10 rounded-xl bg-white ${item.iconColor} shadow-2xs flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform`}>
+                  <item.icon size={18} className="stroke-[2.5]" />
                 </div>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{item.label}</p>
-                <p className="text-xs font-black text-slate-800 mt-0.5">{item.desc}</p>
+                <p className={`text-[10px] font-extrabold uppercase tracking-widest ${item.labelColor}`}>{item.label}</p>
+                <p className="text-xs font-extrabold text-slate-900 mt-0.5 tracking-tight">{item.desc}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -991,7 +991,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`
-                  relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black tracking-wide transition-all cursor-pointer whitespace-nowrap active:scale-95
+                  relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wide transition-all cursor-pointer whitespace-nowrap active:scale-95
                   ${isActive 
                     ? 'text-white' 
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'}
@@ -1000,11 +1000,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 {isActive && (
                   <motion.div 
                     layoutId="activeCleanTabIndicator"
-                    className="absolute inset-0 bg-slate-900 rounded-xl shadow-md"
+                    className="absolute inset-0 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] rounded-xl shadow-md shadow-indigo-500/25"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <tab.icon size={15} strokeWidth={2} className="relative z-10" />
+                <tab.icon size={15} strokeWidth={2.5} className="relative z-10" />
                 <span className="relative z-10">{tab.label}</span>
               </button>
             );
