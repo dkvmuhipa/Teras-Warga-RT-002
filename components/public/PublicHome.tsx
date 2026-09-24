@@ -162,135 +162,149 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       label: 'Profil Warga', 
       category: 'admin' as ServiceCategory,
       icon: User, 
-      color: 'bg-[#5856d6]', 
-      shadow: 'shadow-[#5856d6]/30', 
+      bg: 'bg-[#f0f2fe]', 
+      color: 'text-[#4f46e5]', 
+      border: 'border-indigo-100/80',
       link: '/resident' 
     },
     { 
       label: 'Buat Surat', 
       category: 'admin' as ServiceCategory,
       icon: FileText, 
-      color: 'bg-[#00a2e0]', 
-      shadow: 'shadow-[#00a2e0]/30', 
+      bg: 'bg-[#edf7ff]', 
+      color: 'text-[#0284c7]', 
+      border: 'border-sky-100/80',
       link: '/services' 
     },
     { 
       label: 'Lapor Tamu', 
       category: 'security' as ServiceCategory,
       icon: Shield, 
-      color: 'bg-[#ff6200]', 
-      shadow: 'shadow-[#ff6200]/30', 
+      bg: 'bg-[#fff4eb]', 
+      color: 'text-[#ea580c]', 
+      border: 'border-amber-100/80',
       link: '/services?tab=tamu',
       badge: 'PENTING',
-      badgeColor: 'bg-[#ff3b30]'
+      badgeColor: 'bg-rose-500'
     },
     { 
       label: 'Lapor Sewa', 
       category: 'security' as ServiceCategory,
       icon: Building, 
-      color: 'bg-[#0d9488]', 
-      shadow: 'shadow-[#0d9488]/30', 
+      bg: 'bg-[#e8faf0]', 
+      color: 'text-[#059669]', 
+      border: 'border-emerald-100/80',
       link: '/services?tab=sewa',
       badge: '1x24 JAM',
-      badgeColor: 'bg-[#0f766e]'
+      badgeColor: 'bg-emerald-600'
     },
     { 
       label: 'Daftar Warga', 
       category: 'admin' as ServiceCategory,
       icon: UserPlus, 
-      color: 'bg-[#af52de]', 
-      shadow: 'shadow-[#af52de]/30', 
+      bg: 'bg-[#f5f3ff]', 
+      color: 'text-[#7c3aed]', 
+      border: 'border-purple-100/80',
       link: '/register' 
     },
     { 
       label: 'UMKM Warga', 
       category: 'community' as ServiceCategory,
       icon: ShoppingCart, 
-      color: 'bg-[#00c781]', 
-      shadow: 'shadow-[#00c781]/30', 
+      bg: 'bg-[#ecfdf5]', 
+      color: 'text-[#059669]', 
+      border: 'border-emerald-100/80',
       link: '/umkm',
       badge: 'UMKM',
-      badgeColor: 'bg-[#e13f70]'
+      badgeColor: 'bg-indigo-600'
     },
     { 
       label: 'Warta RT', 
       category: 'community' as ServiceCategory,
       icon: Megaphone, 
-      color: 'bg-[#00b2cc]', 
-      shadow: 'shadow-[#00b2cc]/30', 
+      bg: 'bg-[#eff6ff]', 
+      color: 'text-[#2563eb]', 
+      border: 'border-blue-100/80',
       link: '/info' 
     },
     { 
       label: 'Peraturan RT', 
       category: 'security' as ServiceCategory,
       icon: BookOpen, 
-      color: 'bg-[#10b981]', 
-      shadow: 'shadow-[#10b981]/30', 
+      bg: 'bg-[#f0fdf4]', 
+      color: 'text-[#16a34a]', 
+      border: 'border-emerald-100/80',
       link: '/rules',
       badge: '13 BAB',
-      badgeColor: 'bg-[#059669]'
+      badgeColor: 'bg-emerald-600'
     },
     { 
-      label: 'Notula Musyawarah', 
+      label: 'Notula', 
       category: 'admin' as ServiceCategory,
       icon: Scale, 
-      color: 'bg-[#6366f1]', 
-      shadow: 'shadow-[#6366f1]/30', 
+      bg: 'bg-[#f5f3ff]', 
+      color: 'text-[#6366f1]', 
+      border: 'border-indigo-100/80',
       link: '/rules?tab=minutes',
       badge: 'MUFAKAT',
-      badgeColor: 'bg-[#4338ca]'
+      badgeColor: 'bg-indigo-600'
     },
     { 
       label: 'Jasa Warga', 
       category: 'community' as ServiceCategory,
       icon: Wrench, 
-      color: 'bg-[#f59e0b]', 
-      shadow: 'shadow-[#f59e0b]/30', 
+      bg: 'bg-[#fffbeb]', 
+      color: 'text-[#d97706]', 
+      border: 'border-amber-100/80',
       action: () => setIsSkillsModalOpen(true),
       badge: 'PRO',
-      badgeColor: 'bg-[#d97706]'
+      badgeColor: 'bg-amber-600'
     },
     { 
       label: 'Info PLN/Air', 
       category: 'security' as ServiceCategory,
       icon: Zap, 
-      color: 'bg-[#0284c7]', 
-      shadow: 'shadow-[#0284c7]/30', 
+      bg: 'bg-[#f0f9ff]', 
+      color: 'text-[#0284c7]', 
+      border: 'border-sky-100/80',
       action: () => setIsOutageModalOpen(true),
       badge: 'FASUM',
-      badgeColor: 'bg-[#0369a1]'
+      badgeColor: 'bg-sky-600'
     },
     { 
       label: 'Lapor RT', 
       category: 'admin' as ServiceCategory,
       icon: AlertTriangle, 
-      color: 'bg-[#ff3b30]', 
-      shadow: 'shadow-[#ff3b30]/30', 
+      bg: 'bg-[#fff1f2]', 
+      color: 'text-[#e11d48]', 
+      border: 'border-rose-100/80',
       action: () => setIsReportModalOpen(true) 
     },
     { 
       label: 'Kontak Darurat', 
       category: 'security' as ServiceCategory,
       icon: PhoneCall, 
-      color: 'bg-[#dc2626]', 
-      shadow: 'shadow-[#dc2626]/30', 
+      bg: 'bg-[#fef2f2]', 
+      color: 'text-[#dc2626]', 
+      border: 'border-rose-100/80',
       action: () => {
         toast.info("Kontak Darurat RT 002 / RW 020 Huntap Tondo", {
           description: "Ketua RT: +62 859-6119-4621 | Satpam Pos: +62 812-4455-8800 | Bhabinkamtibmas: 110 | Pemadam: 113 | Ambulans: 118"
         });
       },
       badge: '24 JAM',
-      badgeColor: 'bg-[#991b1b]'
+      badgeColor: 'bg-rose-600'
     },
     { 
       label: '5 Pilar STBM', 
       category: 'community' as ServiceCategory,
       icon: CheckSquare, 
-      color: 'bg-[#10b981]', 
-      shadow: 'shadow-[#10b981]/30', 
+      bg: 'bg-[#e8faf0]', 
+      color: 'text-[#059669]', 
+      border: 'border-emerald-100/80',
       link: '/health?tab=stbm',
       badge: '100% ODF',
-      badgeColor: 'bg-[#059669]'
+      badgeColor: 'bg-emerald-600'
     }
   ], []);
 
@@ -404,19 +418,19 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         <p className="text-slate-500 font-medium mt-2">Selamat datang kembali di sistem informasi digital RT 02.</p>
       </div>
 
-      {/* Quick Actions - Layanan Warga Terpadu Grid from User Image */}
+      {/* Quick Actions - Layanan Warga Terpadu Grid */}
       <motion.div 
         variants={itemVariants}
-        className="bg-white/95 backdrop-blur-md border border-slate-100/80 rounded-[2.5rem] p-6 md:p-10 shadow-xl shadow-slate-200/30 relative z-10"
+        className="bg-white border border-slate-100 rounded-3xl md:rounded-[2.5rem] p-5 sm:p-7 md:p-8 shadow-xs relative z-10"
       >
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-7">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-700">SUPER-APP RT 002 / RW 020</span>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700">SUPER-APP RT 002 / RW 020</span>
             </div>
-            <h3 className="text-xl md:text-3xl font-black text-slate-800 tracking-tight leading-tight">
-              Layanan <span className="bg-gradient-to-r from-emerald-500 to-blue-600 bg-clip-text text-transparent italic">Warga Terpadu</span>
+            <h3 className="text-xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              Layanan <span className="text-[#4f46e5]">Warga Terpadu</span>
             </h3>
             <p className="text-slate-400 font-medium text-xs md:text-sm mt-1 max-w-xl">
               Semua urusan administrasi, keamanan, gotong royong, dan usaha warga kini serba praktis dalam satu ketukan.
@@ -424,7 +438,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           </div>
 
           {/* Quick Category Filter Pills */}
-          <div className="flex items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 overflow-x-auto no-scrollbar shrink-0">
+          <div className="flex items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar shrink-0">
             {[
               { id: 'all' as ServiceCategory, label: 'Semua', count: quickActions.length },
               { id: 'admin' as ServiceCategory, label: 'Surat & Admin', count: quickActions.filter(a => a.category === 'admin').length },
@@ -434,9 +448,9 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveServiceCategory(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                   activeServiceCategory === tab.id
-                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60 font-black'
+                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60'
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -452,7 +466,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         </div>
 
         {/* Grid layout matching Gojek/Grab/Citizen apps: 4 columns on mobile, 6 to 8 columns on desktop */}
-        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-7 gap-x-3 md:gap-x-8 w-full max-w-6xl">
+        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-6 gap-x-2.5 sm:gap-x-4 md:gap-x-6 w-full max-w-6xl">
           {filteredQuickActions.map((action, idx) => (
             <motion.button
               key={action.label}
@@ -461,32 +475,31 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
-              whileHover={{ y: -4, scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ y: -3, scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
               onClick={action.action || (() => navigate(action.link!))}
               className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
             >
-              {/* Beautiful Badges directly layered on top of squircles */}
+              {/* Badges directly layered on top of squircles */}
               {action.badge && (
-                <span className={`absolute -top-1 md:-top-1.5 right-[5%] sm:right-[12%] md:right-[16%] z-20 text-[6px] md:text-[8px] font-black uppercase tracking-widest ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 md:px-2 py-[1px] md:py-0.5 rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.15)] animate-pulse select-none scale-95`}>
+                <span className={`absolute -top-1 md:-top-1.5 right-[2%] sm:right-[10%] z-20 text-[7px] md:text-[8px] font-extrabold uppercase tracking-wider ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 py-0.5 rounded-full shadow-2xs select-none`}>
                   {action.badge}
                 </span>
               )}
 
-              {/* Highly Polished Squircles with match drop-shadow */}
+              {/* Pastel Squircle Badge matching design system */}
               <div className={`
-                w-14 h-14 md:w-16 md:h-16 rounded-[1.5rem] md:rounded-[1.75rem]
-                ${action.color} text-white
+                w-13 h-13 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl md:rounded-3xl
+                ${action.bg} ${action.color} border ${action.border}
                 flex items-center justify-center
-                shadow-lg ${action.shadow} group-hover:scale-105
-                transition-all duration-300 relative overflow-hidden
+                shadow-2xs group-hover:scale-105 group-hover:shadow-xs
+                transition-all duration-200 relative overflow-hidden
               `}>
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                <action.icon size={24} className="group-hover:scale-110 transition-transform duration-300" strokeWidth={2.4} />
+                <action.icon size={22} className="group-hover:scale-110 transition-transform duration-200 stroke-[2.2]" />
               </div>
 
               {/* Service Label */}
-              <span className="font-extrabold text-slate-700 text-[11px] md:text-xs tracking-tight leading-snug mt-2.5 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[85px] md:max-w-none">
+              <span className="font-extrabold text-slate-700 text-[10px] sm:text-[11px] md:text-xs tracking-tight leading-snug mt-2 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[80px] md:max-w-none">
                 {action.label}
               </span>
             </motion.button>
@@ -500,59 +513,52 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* RT2LAW Card - Supreme Point of Interest (POI) */}
         <motion.div 
-          whileHover={{ y: -6, scale: 1.01 }}
+          whileHover={{ y: -4, scale: 1.01 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
           onClick={() => navigate('/rules')}
-          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 rounded-[3rem] p-8 md:p-12 text-white border border-amber-500/40 shadow-[0_30px_90px_-20px_rgba(217,119,6,0.25)] hover:shadow-[0_40px_110px_-15px_rgba(217,119,6,0.35)] transition-all duration-700 relative overflow-hidden group flex flex-col justify-between min-h-[360px]"
+          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 md:p-10 text-white border border-slate-800 shadow-xs relative overflow-hidden group flex flex-col justify-between min-h-[300px]"
         >
-          {/* Subtle Golden Pinstripe Luxury Grid Overlay */}
-          <div className="absolute inset-0 bg-[repeating-linear-gradient(90deg,rgba(217,119,6,0.03)_0px,rgba(217,119,6,0.03)_1px,transparent_1px,transparent_16px)] pointer-events-none" />
-          
-          {/* Radiant Ambient Gold & Emerald Light Orbs */}
-          <div className="absolute -top-20 -right-20 w-96 h-96 bg-amber-500/20 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
-          <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-emerald-500/15 rounded-full blur-[100px] pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
-          
-          <div className="relative z-10 space-y-6">
+          <div className="relative z-10 space-y-5">
             {/* Top Badge & Header */}
             <div className="flex justify-between items-start gap-4">
-              <div className="flex items-center gap-3.5">
-                <div className="p-3.5 bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 rounded-2xl shadow-lg shadow-amber-500/20 group-hover:rotate-6 transition-transform">
-                  <Scale size={26} strokeWidth={2.4} />
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-amber-500 text-slate-950 rounded-2xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+                  <Scale size={24} strokeWidth={2.4} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-400 block leading-none mb-1">Landasan Hukum RT 02</span>
-                  <span className="text-xs font-bold text-slate-300">Resmi Disahkan Wartha &amp; Pengurus</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block leading-none mb-1">Landasan Hukum RT 02</span>
+                  <span className="text-xs font-bold text-slate-300">Resmi Disahkan Warga &amp; Pengurus</span>
                 </div>
               </div>
 
-              <span className="px-3.5 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+              <span className="px-3.5 py-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-[10px] font-extrabold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
                 <Sparkles size={12} className="text-amber-400 animate-spin-slow" /> 13 BAB RESMI
               </span>
             </div>
 
             {/* Middle Landmark Title */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2 pt-1">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">POINT OF INTEREST REGULASI</span>
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">REGULASI TERTIB LINGKUNGAN</span>
               </div>
-              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">
-                RT2<span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent font-serif italic">LAW</span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                RT2<span className="text-amber-400 font-serif italic">LAW</span>
               </h2>
-              <p className="text-slate-300 text-xs md:text-sm font-medium leading-relaxed max-w-xl">
+              <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">
                 Konstitusi &amp; Tata Tertib Lingkungan Terpadu 13 BAB yang mengatur norma sosial, ketertiban ronda, hingga sanksi keberadaban demi keharmonisan bersama.
               </p>
             </div>
           </div>
 
           {/* Separator and Footer */}
-          <div className="relative z-10 pt-5 mt-6 border-t border-white/10 flex items-center justify-between">
-            <span className="text-slate-400 tracking-[0.2em] uppercase font-black text-[10px] flex items-center gap-2">
+          <div className="relative z-10 pt-4 mt-5 border-t border-white/10 flex items-center justify-between">
+            <span className="text-slate-400 tracking-wider uppercase font-extrabold text-[10px] flex items-center gap-1.5">
               <ShieldCheck size={14} className="text-amber-400" /> KELURAHAN TONDO &bull; PALU
             </span>
-            <span className="px-5 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 rounded-2xl font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-all">
-              <span>Buka Regulasi Lengkap</span>
-              <ChevronRight size={16} strokeWidth={3} />
+            <span className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-xs group-hover:scale-105 transition-all">
+              <span>Buka Regulasi</span>
+              <ChevronRight size={15} strokeWidth={2.5} />
             </span>
           </div>
         </motion.div>
@@ -560,36 +566,33 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         {/* Companion Card: Buku Saku RT 02 */}
         <div 
           onClick={() => navigate('/faq')}
-          className="lg:col-span-1 cursor-pointer bg-white rounded-[2.5rem] p-8 border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-500 relative overflow-hidden group flex flex-col justify-between min-h-[320px]"
+          className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs hover:shadow-md transition-all relative overflow-hidden group flex flex-col justify-between min-h-[300px]"
         >
-          {/* Subtle Ambient Light Glow */}
-          <div className="absolute top-0 right-0 w-60 h-60 bg-indigo-50/70 rounded-full blur-3xl pointer-events-none group-hover:scale-110 transition-transform duration-700" />
-          
-          <div className="relative z-10 space-y-5">
-            <div className="flex items-center gap-3.5">
-              <div className="p-3 bg-indigo-50 text-indigo-700 rounded-2xl border border-indigo-100/80">
-                <HelpCircle size={24} />
+          <div className="relative z-10 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-indigo-50 text-[#4f46e5] rounded-2xl flex items-center justify-center border border-indigo-100/70 shadow-2xs">
+                <HelpCircle size={22} />
               </div>
               <div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700 block">Pusat Bantuan Warga</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#4f46e5] block">Pusat Bantuan Warga</span>
                 <span className="text-xs font-bold text-slate-400">FAQ &amp; Informasi</span>
               </div>
             </div>
 
-            <div className="space-y-2 pt-2">
-              <h3 className="text-2xl font-black text-slate-900 leading-tight">Buku Saku <span className="text-indigo-600 font-serif italic">Digital</span></h3>
+            <div className="space-y-1.5 pt-1">
+              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">Buku Saku <span className="text-[#4f46e5] font-serif italic">Digital</span></h3>
               <p className="text-xs font-medium text-slate-500 leading-relaxed">
                 Panduan administratif kilat, tata cara pengajuan surat, lapor tamu 24 jam, dan penanganan darurat.
               </p>
             </div>
           </div>
 
-          <div className="relative z-10 pt-4 mt-6 border-t border-slate-100">
+          <div className="relative z-10 pt-4 mt-4 border-t border-slate-100">
             <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-slate-400 tracking-widest uppercase font-black text-[9px]">SISTEM TERAS RT</span>
-              <span className="flex items-center gap-1.5 text-slate-900 font-black group-hover:text-indigo-600 transition-colors">
+              <span className="text-slate-400 tracking-wider uppercase font-extrabold text-[9px]">SISTEM TERAS RT</span>
+              <span className="flex items-center gap-1 text-slate-900 font-extrabold group-hover:text-indigo-600 transition-colors">
                 <span>Buka FAQ</span>
-                <ChevronRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
+                <ChevronRight size={15} className="transform group-hover:translate-x-1 transition-transform" />
               </span>
             </div>
           </div>
@@ -597,104 +600,97 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </motion.div>
 
       {/* Widget Inovatif: Jadwal Sampah & Papan Kebersihan Blok */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
         {/* Widget 1: Jadwal & Count Down Pengangkutan Sampah */}
-        <div className="bg-gradient-to-br from-emerald-900 via-slate-900 to-slate-950 p-8 rounded-[3rem] text-white border border-emerald-500/20 shadow-xl relative overflow-hidden group flex flex-col justify-between">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
-            <Trash2 size={150} />
-          </div>
-
-          <div className="relative z-10 space-y-5">
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden group flex flex-col justify-between">
+          <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full border border-emerald-500/30">
+              <div className="flex items-center gap-2 px-3 py-1 bg-[#e8faf0] text-[#059669] rounded-full border border-emerald-100/80">
                 <Recycle size={14} className="animate-spin" />
-                <span className="text-[9px] font-black uppercase tracking-widest">Smart Waste RT 02</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider">Smart Waste RT 02</span>
               </div>
               <span className="text-[10px] font-bold text-slate-400">Pengangkutan Rutin</span>
             </div>
 
             <div>
-              <h3 className="text-2xl font-black tracking-tight text-white mb-1">Jadwal Sampah & Daur Ulang</h3>
-              <p className="text-xs text-slate-300 font-medium">Keluarkan tempat sampah Anda sebelum armada kebersihan tiba.</p>
+              <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 mb-1">Jadwal Sampah & Daur Ulang</h3>
+              <p className="text-xs text-slate-500 font-medium">Keluarkan tempat sampah Anda sebelum armada kebersihan tiba.</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-1">
-                <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Sampah Organik/Dapur</p>
-                <p className="text-sm font-black text-white">Senin, Rabu, Sabtu</p>
-                <p className="text-[9px] font-bold text-slate-400">Jam 07:00 WITA</p>
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-1">
+                <p className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider">Organik / Dapur</p>
+                <p className="text-sm font-extrabold text-slate-800">Senin, Rabu, Sabtu</p>
+                <p className="text-[10px] font-bold text-slate-400">Jam 07:00 WITA</p>
               </div>
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-1">
-                <p className="text-[9px] font-black text-amber-400 uppercase tracking-widest">Anorganik / Botol Plastik</p>
-                <p className="text-sm font-black text-white">Selasa & Jumat</p>
-                <p className="text-[9px] font-bold text-slate-400">Jam 15:30 WITA</p>
+              <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-1">
+                <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-wider">Anorganik / Botol</p>
+                <p className="text-sm font-extrabold text-slate-800">Selasa & Jumat</p>
+                <p className="text-[10px] font-bold text-slate-400">Jam 15:30 WITA</p>
               </div>
             </div>
           </div>
 
-          <div className="relative z-10 pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-xs font-bold text-slate-300">
-            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Armada Aktif Pagi Ini
+          <div className="relative z-10 pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
+            <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Armada Aktif Pagi Ini
             </span>
             <span className="text-[10px] text-slate-400 font-bold">Bank Sampah Huntap</span>
           </div>
         </div>
 
         {/* Widget 2: Indikator Kebersihan & Blok Terbersih */}
-        <div className="bg-gradient-to-br from-amber-500/10 via-white to-slate-50 p-8 rounded-[3rem] border border-amber-200/60 shadow-xl relative overflow-hidden group flex flex-col justify-between">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none text-amber-600">
-            <Trophy size={150} />
-          </div>
-
-          <div className="relative z-10 space-y-5">
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden group flex flex-col justify-between">
+          <div className="relative z-10 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full border border-amber-200">
+              <div className="flex items-center gap-2 px-3 py-1 bg-[#fff4eb] text-[#ea580c] rounded-full border border-amber-100/80">
                 <Award size={14} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Penghargaan Lingkungan</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider">Penghargaan Lingkungan</span>
               </div>
-              <span className="text-[10px] font-black text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 uppercase">
+              <span className="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80 uppercase">
                 {financialSettings?.cleanestMonth || 'Periode Berjalan'}
               </span>
             </div>
 
             <div>
-              <h3 className="text-2xl font-black tracking-tight text-slate-900 mb-1">Blok Terbersih Bulan Ini</h3>
+              <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 mb-1">Blok Terbersih Bulan Ini</h3>
               <p className="text-xs text-slate-500 font-medium">Berdasarkan penilaian kebersihan got, kerapihan pekarangan & keasrian tanaman.</p>
             </div>
 
             {financialSettings?.cleanestBlock ? (
-              <div className="p-4 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl text-white shadow-md flex items-center justify-between">
+              <div className="p-3.5 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl text-white shadow-xs flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-white">
-                    <Trophy size={24} />
+                  <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white">
+                    <Trophy size={22} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-amber-100">Juara 1 Kebersihan</p>
-                    <p className="text-xl font-black text-white">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-100">Juara 1 Kebersihan</p>
+                    <p className="text-lg font-extrabold text-white">
                       {financialSettings.cleanestBlock}
                     </p>
                   </div>
                 </div>
                 {financialSettings.cleanestScore ? (
-                  <span className="text-[10px] font-black bg-white text-amber-700 px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-sm">
+                  <span className="text-[10px] font-extrabold bg-white text-amber-800 px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-2xs">
                     Nilai {financialSettings.cleanestScore}/100
                   </span>
                 ) : null}
               </div>
             ) : (
-              <div className="p-5 bg-amber-500/10 border-2 border-dashed border-amber-300 rounded-2xl text-center space-y-1">
-                <div className="inline-flex p-2.5 bg-amber-500/20 text-amber-700 rounded-xl mb-1">
-                  <Award size={20} />
-                </div>
-                <p className="text-xs font-black text-amber-900 uppercase tracking-wider">Penilaian Sedang Berlangsung</p>
-                <p className="text-[11px] font-bold text-amber-700/80">Pengurus RT sedang melakukan evaluasi kebersihan lingkungan blok bulan ini.</p>
+              <div className="p-4 bg-slate-50/80 border border-slate-100 rounded-2xl text-center">
+                <p className="text-xs text-slate-500 font-medium">Penilaian kebersihan blok periode ini sedang berlangsung.</p>
               </div>
             )}
           </div>
 
-          <div className="relative z-10 pt-4 mt-4 border-t border-slate-200/60 flex items-center justify-between text-xs font-bold text-slate-500">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">Gotong Royong Berikutnya: Minggu Pagi</span>
-            <span className="text-[10px] font-black text-indigo-600 cursor-pointer hover:underline" onClick={() => setIsCleanlinessLeaderboardOpen(true)}>Lihat Peringkat Blok</span>
+          <div className="relative z-10 pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
+            <span className="text-[10px] text-slate-400 font-bold">Evaluasi Kebersihan RT 02</span>
+            <button
+              onClick={() => setIsCleanlinessLeaderboardOpen(true)}
+              className="text-[10px] font-extrabold text-indigo-600 hover:text-indigo-700 uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+            >
+              Lihat Klasemen <ArrowRight size={12} />
+            </button>
           </div>
         </div>
       </motion.div>
