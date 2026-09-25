@@ -1093,6 +1093,12 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   </span>
                 </div>
               )}
+
+              {currentHouse && (
+                <div className="pt-1">
+                  <CivicScoreBadge house={currentHouse} size="sm" />
+                </div>
+              )}
             </div>
           </div>
 

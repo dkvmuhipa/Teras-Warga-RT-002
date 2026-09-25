@@ -12,6 +12,7 @@ import { useFinancial } from '../../../context/FinancialContext';
 import { subscribeToSTBMRecords, saveSTBMRecord } from '../../../services/databaseService';
 import { toast } from 'sonner';
 import { KartuKeluargaModal } from './KartuKeluargaModal';
+import { CivicScoreBadge } from '../../community/CivicScoreBadge';
 
 interface ResidentDetailDrawerProps {
   isOpen: boolean;
@@ -227,6 +228,11 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Civic Score Honor Badge */}
+            <div className="bg-white border border-slate-100 rounded-3xl p-4.5 shadow-xs">
+              <CivicScoreBadge house={selectedResident} showDetails={true} size="md" />
             </div>
 
             {/* Quick Actions Tray */}
