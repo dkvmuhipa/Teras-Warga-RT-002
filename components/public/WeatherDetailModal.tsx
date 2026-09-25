@@ -133,41 +133,38 @@ _Pembaruan Terkini: ${weather.lastUpdated || 'Hari ini'}_
         )}
 
         {/* Big Main Card: Temperature & Status Overview */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 shadow-xl border border-slate-800">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
+        <div className="relative overflow-hidden bg-white text-slate-800 rounded-3xl p-6 shadow-xs border border-slate-100">
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                 <span>Sensor Real-Time Huntap</span>
               </div>
               <div className="flex items-baseline gap-3">
-                <span className="text-5xl sm:text-6xl font-black font-sans tracking-tight">
+                <span className="text-5xl sm:text-6xl font-black font-sans tracking-tight text-slate-800">
                   {weather ? `${weather.temp}°` : '--'}
                 </span>
                 <div className="space-y-0.5">
-                  <span className="text-base sm:text-lg font-black text-amber-400 block">
+                  <span className="text-base sm:text-lg font-black text-amber-600 block">
                     {weather?.condition || 'Cerah'}
                   </span>
-                  <span className="text-xs text-slate-300 font-medium block">
-                    Suhu terasa: <strong className="text-white font-black">{weather ? `${weather.apparentTemp}°C` : '--'}</strong>
+                  <span className="text-xs text-slate-400 font-medium block">
+                    Suhu terasa: <strong className="text-slate-700 font-black">{weather ? `${weather.apparentTemp}°C` : '--'}</strong>
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md px-5 py-3.5 rounded-2xl border border-white/10 self-start sm:self-center">
+            <div className="flex items-center gap-4 bg-[#e8faf0]/70 px-5 py-3.5 rounded-2xl border border-emerald-100 self-start sm:self-center shadow-2xs">
               <div className="p-1">
                 {getWeatherIcon(weather?.weatherCode)}
               </div>
-              <div className="text-left border-l border-white/15 pl-4 space-y-0.5">
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-300">Indeks Udara (ISPU)</p>
-                <p className="text-base font-black text-emerald-400">
-                  ISPU {weather?.aqi || '--'} <span className="text-xs font-bold text-slate-200">({weather?.aqiLabel || 'Baik'})</span>
+              <div className="text-left border-l border-emerald-200/60 pl-4 space-y-0.5">
+                <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">Indeks Udara (ISPU)</p>
+                <p className="text-base font-black text-[#059669]">
+                  ISPU {weather?.aqi || '--'} <span className="text-xs font-bold text-[#059669]/80">({weather?.aqiLabel || 'Baik'})</span>
                 </p>
-                <p className="text-[10px] text-slate-300">PM2.5: {weather?.pm2_5 || 0} µg/m³ • Standar KLHK</p>
+                <p className="text-[10px] text-slate-500 font-medium">PM2.5: {weather?.pm2_5 || 0} µg/m³ • Standar KLHK</p>
               </div>
             </div>
           </div>

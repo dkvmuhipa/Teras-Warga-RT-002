@@ -13,19 +13,23 @@ interface CardProps {
 export const Card: React.FC<CardProps> = ({ children, className = '', onClick, title, icon: Icon, action }) => {
   return (
     <div 
-      className={`bg-white rounded-3xl border border-slate-100 shadow-sm ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''} ${className}`}
+      className={`bg-white rounded-3xl border border-slate-100 shadow-xs ${onClick ? 'cursor-pointer hover:shadow-md hover:border-slate-200/80 transition-all' : ''} ${className}`}
       onClick={onClick}
     >
       {(title || Icon || action) && (
-        <div className="flex items-center justify-between p-6 border-b border-slate-50">
+        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-50">
           <div className="flex items-center gap-3">
-            {Icon && <div className="p-2 bg-slate-50 text-slate-600 rounded-xl"><Icon size={20} /></div>}
-            {title && <h3 className="font-bold text-slate-800">{title}</h3>}
+            {Icon && (
+              <div className="w-10 h-10 bg-[#f0f2fe] text-indigo-600 rounded-2xl flex items-center justify-center shrink-0 border border-indigo-100/60 shadow-xs">
+                <Icon size={18} />
+              </div>
+            )}
+            {title && <h3 className="font-extrabold text-slate-800 tracking-tight text-base">{title}</h3>}
           </div>
           {action && <div>{action}</div>}
         </div>
       )}
-      <div className="p-6">
+      <div className="p-5 sm:p-6">
         {children}
       </div>
     </div>

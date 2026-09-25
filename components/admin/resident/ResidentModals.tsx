@@ -172,7 +172,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
       title={editingHouseId ? "Edit Profil Warga" : "Pendaftaran Warga Baru"} 
       maxWidth="max-w-4xl"
       stickyHeader={
-        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/60 w-full max-w-md mx-auto items-center gap-1">
+        <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 w-full max-w-md mx-auto items-center gap-1.5 shadow-2xs">
           {[
             { id: 'basic', label: 'Identitas', icon: User },
             { id: 'demographics', label: 'Profil', icon: ShieldCheck },
@@ -189,13 +189,13 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                    if (validateTab('basic') && validateTab('demographics')) setActiveFormTab('family');
                 }
               }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-all cursor-pointer ${
                 activeFormTab === tab.id 
-                  ? 'bg-indigo-600 text-white shadow-xs font-bold' 
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+                  ? 'bg-white text-indigo-600 shadow-xs border border-slate-200/60 font-black' 
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'
               }`}
             >
-              <tab.icon size={13} className={activeFormTab === tab.id ? 'text-white' : 'text-slate-400'} />
+              <tab.icon size={13} className={activeFormTab === tab.id ? 'text-indigo-600' : 'text-slate-400'} />
               <span>{tab.label}</span>
             </button>
           ))}
@@ -2105,43 +2105,43 @@ _Salam Hormat,_
     >
       <div className="space-y-6 py-2 text-left">
         {/* Top Resident Profile Banner */}
-        <div className="bg-slate-50/90 rounded-2xl border border-slate-200/90 p-4 sm:p-5 relative overflow-hidden shadow-xs">
+        <div className="bg-white rounded-3xl border border-slate-100 p-5 sm:p-6 relative overflow-hidden shadow-xs">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
             {/* Identity */}
             <div className="flex items-center gap-3.5 sm:gap-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-900 text-white rounded-2xl flex flex-col items-center justify-center font-mono shadow-md border border-slate-800 shrink-0">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">KAVLING</span>
-                <span className="text-base sm:text-lg font-black tracking-tight leading-none mt-0.5">{payHouse.block}-{payHouse.number}</span>
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#f0f2fe] text-indigo-700 border border-indigo-100/80 rounded-2xl flex flex-col items-center justify-center font-mono shadow-xs shrink-0">
+                <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">KAVLING</span>
+                <span className="text-base sm:text-lg font-black tracking-tight leading-none mt-0.5 text-indigo-800">{payHouse.block}-{payHouse.number}</span>
               </div>
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[9px] font-black uppercase tracking-wider border border-indigo-100">
+                  <span className="px-2.5 py-0.5 bg-[#f0f2fe] text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-wider border border-indigo-100/80 shadow-2xs">
                     {payHouse.residenceType || 'Tetap'}
                   </span>
-                  <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${
-                    payHouse.status === 'Occupied' ? 'bg-emerald-50 text-emerald-700 border-emerald-150' : 'bg-slate-100 text-slate-500 border-slate-200'
+                  <span className={`px-2.5 py-0.5 rounded-xl text-[9px] font-black uppercase tracking-wider border shadow-2xs ${
+                    payHouse.status === 'Occupied' ? 'bg-[#e8faf0] text-[#059669] border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'
                   }`}>
                     {payHouse.status === 'Occupied' ? 'Dihuni' : 'Kosong'}
                   </span>
-                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 rounded-md text-[9px] font-black uppercase tracking-wider border border-emerald-200">
+                  <span className="px-2.5 py-0.5 bg-[#e8faf0] text-[#059669] rounded-xl text-[9px] font-black uppercase tracking-wider border border-emerald-100 shadow-2xs">
                     ♻️ TPS3R: {wasteTier} (Rp {currentWasteFee.toLocaleString('id-ID')})
                   </span>
-                  <span className="px-2 py-0.5 bg-sky-50 text-sky-800 rounded-md text-[9px] font-bold uppercase tracking-wider border border-sky-200">
+                  <span className="px-2.5 py-0.5 bg-[#edf7ff] text-[#0284c7] rounded-xl text-[9px] font-bold uppercase tracking-wider border border-sky-100 shadow-2xs">
                     💧 PDAM Palu
                   </span>
                   {payHouse.pbbStatus && (
-                    <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${
-                      payHouse.pbbStatus === 'Sudah Diambil' ? 'bg-blue-50 text-blue-700 border-blue-150' : 'bg-amber-50 text-amber-700 border-amber-150'
+                    <span className={`px-2.5 py-0.5 rounded-xl text-[9px] font-bold uppercase tracking-wider border shadow-2xs ${
+                      payHouse.pbbStatus === 'Sudah Diambil' ? 'bg-[#edf7ff] text-[#0284c7] border-sky-100' : 'bg-[#fff4eb] text-[#ea580c] border-amber-100'
                     }`}>
                       SPPT PBB: {payHouse.pbbStatus}
                     </span>
                   )}
                 </div>
-                <h3 className="text-base sm:text-lg font-black text-slate-900 truncate flex items-center gap-1.5">
+                <h3 className="text-base sm:text-lg font-black text-slate-800 truncate flex items-center gap-1.5 tracking-tight">
                   {payHouse.headOfFamily || (payHouse.ownerName ? `Hunian: ${payHouse.ownerName}` : 'Rumah Kosong')}
-                  {payHouse.isVerified && <ShieldCheck size={16} className="text-emerald-500 shrink-0" />}
+                  {payHouse.isVerified && <ShieldCheck size={16} className="text-[#059669] shrink-0" />}
                 </h3>
-                <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-500 font-medium">
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-medium">
                   {payHouse.ownerName && payHouse.ownerName !== payHouse.headOfFamily && (
                     <span>Pemilik: <strong className="text-slate-700">{payHouse.ownerName}</strong></span>
                   )}
@@ -2173,21 +2173,21 @@ _Salam Hormat,_
             </div>
 
             {/* Arrears Badge Card */}
-            <div className={`p-3.5 sm:p-4 rounded-xl border flex flex-col items-start md:items-end justify-center shrink-0 min-w-[200px] ${
+            <div className={`p-4 sm:p-5 rounded-2xl border flex flex-col items-start md:items-end justify-center shrink-0 min-w-[200px] shadow-2xs ${
               arrears.length === 0 
-                ? 'bg-emerald-50/90 border-emerald-200/80 text-emerald-900' 
-                : 'bg-rose-50/90 border-rose-200/80 text-rose-900'
+                ? 'bg-[#e8faf0]/70 border-emerald-100 text-emerald-950' 
+                : 'bg-[#fff1f2]/70 border-rose-100 text-rose-950'
             }`}>
               <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider mb-0.5">
                 {arrears.length === 0 ? (
                   <>
-                    <CheckCircle2 size={13} className="text-emerald-600 stroke-[2.5]" />
-                    <span className="text-emerald-700">Tervalidasi Lunas</span>
+                    <CheckCircle2 size={13} className="text-[#059669] stroke-[2.5]" />
+                    <span className="text-[#059669]">Tervalidasi Lunas</span>
                   </>
                 ) : (
                   <>
-                    <AlertTriangle size={13} className="text-rose-600 stroke-[2.5]" />
-                    <span className="text-rose-700">Tunggakan Tertagih</span>
+                    <AlertTriangle size={13} className="text-[#e11d48] stroke-[2.5]" />
+                    <span className="text-[#e11d48]">Tunggakan Tertagih</span>
                   </>
                 )}
               </div>
@@ -2943,30 +2943,30 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Koreksi & Edit Catatan Iuran" maxWidth="max-w-3xl">
       <div className="space-y-6 py-2 text-left">
         {/* Payment Headline - Modern & Clean */}
-        <div className="bg-slate-900 p-5 rounded-2xl text-white relative overflow-hidden group shadow-md border border-slate-800">
+        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center font-mono border border-white/20">
-                <span className="text-[9px] font-bold text-white/60 uppercase">Kavling</span>
-                <span className="text-base font-black text-white leading-none mt-0.5">{editingPayment.block}-{editingPayment.number}</span>
+              <div className="w-14 h-14 bg-[#f0f2fe] text-indigo-700 border border-indigo-100/80 rounded-2xl flex flex-col items-center justify-center font-mono shadow-xs shrink-0">
+                <span className="text-[9px] font-bold text-indigo-400 uppercase">Kavling</span>
+                <span className="text-base font-black text-indigo-800 leading-none mt-0.5">{editingPayment.block}-{editingPayment.number}</span>
               </div>
               <div className="space-y-0.5">
-                <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Koreksi Transaksi Kas</p>
-                <h3 className="text-lg font-black tracking-tight text-white">{editingPayment.headOfFamily}</h3>
+                <p className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest">Koreksi Transaksi Kas</p>
+                <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-800">{editingPayment.headOfFamily}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2 py-0.5 bg-indigo-600 text-white rounded-md text-[9px] font-black uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 bg-[#f0f2fe] text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-wider border border-indigo-100 shadow-2xs">
                     {editingPayment.month}
                   </span>
-                  <span className="text-[9px] text-white/40 font-mono">
+                  <span className="text-[9px] text-slate-400 font-mono">
                     ID: {editingPayment.id?.slice(-8).toUpperCase()}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/15 self-stretch sm:self-auto text-left sm:text-right">
-              <p className="text-[9px] font-bold text-white/50 uppercase tracking-wider">Nominal Awal Tercatat</p>
-              <div className="text-xl font-black tracking-tight text-emerald-400 font-mono">
+            <div className="bg-[#e8faf0]/70 px-4.5 py-3 rounded-2xl border border-emerald-100 self-stretch sm:self-auto text-left sm:text-right shadow-2xs">
+              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nominal Awal Tercatat</p>
+              <div className="text-lg sm:text-xl font-black tracking-tight text-[#059669] font-mono">
                 Rp {parseInt(editingPayment.amount || 0).toLocaleString('id-ID')}
               </div>
             </div>

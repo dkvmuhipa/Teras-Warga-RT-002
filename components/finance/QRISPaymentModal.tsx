@@ -87,59 +87,60 @@ export const QRISPaymentModal: React.FC<QRISPaymentModalProps> = ({
 
   const modalContent = (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 overflow-y-auto bg-slate-950/80 backdrop-blur-md font-sans">
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 overflow-y-auto bg-slate-900/40 backdrop-blur-xs font-sans">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          initial={{ opacity: 0, scale: 0.96, y: 12 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="relative w-full max-w-md bg-white rounded-[2.25rem] shadow-2xl border border-slate-200/80 overflow-hidden flex flex-col my-8 select-none"
+          exit={{ opacity: 0, scale: 0.96, y: 12 }}
+          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-900/10 border border-slate-100 overflow-hidden flex flex-col my-8 select-none"
         >
           {/* Header Bar */}
-          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 text-white flex items-center justify-between relative">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-white/10 rounded-xl border border-white/15">
-                <CreditCard size={18} className="text-emerald-400" />
+          <div className="p-5 sm:p-6 bg-white border-b border-slate-100 text-slate-800 flex items-center justify-between relative">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-[#e8faf0] text-[#059669] rounded-2xl flex items-center justify-center border border-emerald-100/60 shadow-xs shrink-0">
+                <CreditCard size={18} />
               </div>
               <div>
-                <h3 className="text-sm font-black tracking-tight text-white">{title || 'Pembayaran QRIS Kas RT'}</h3>
-                <p className="text-[10px] text-slate-300 font-bold tracking-wide">{RT_NAME} • Huntap Tondo 2</p>
+                <h3 className="text-base font-black tracking-tight text-slate-800">{title || 'Pembayaran QRIS Kas RT'}</h3>
+                <p className="text-xs text-slate-400 font-bold tracking-wide">{RT_NAME} • Huntap Tondo 2</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors"
+              className="w-8 h-8 rounded-full bg-slate-100/80 hover:bg-slate-200/80 text-slate-500 flex items-center justify-center transition-all cursor-pointer"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
 
           {/* Body Content */}
           <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh] custom-scrollbar">
             {/* Invoice & Resident Info Card */}
-            <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-between text-xs">
+            <div className="p-4 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between text-xs">
               <div>
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Wajib Iuran</span>
-                <span className="font-black text-slate-900 block truncate max-w-[180px]">{residentName}</span>
+                <span className="font-extrabold text-slate-800 block truncate max-w-[180px]">{residentName}</span>
                 <span className="text-[10px] text-slate-500 font-bold block">Kavling {houseId}</span>
               </div>
               <div className="text-right">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">No. Invoice</span>
                 <span className="font-mono font-bold text-[11px] text-indigo-600 block">{invoiceNo}</span>
-                <span className="text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 block mt-0.5">
+                <span className="text-[9px] font-bold uppercase text-[#059669] bg-[#e8faf0] px-2.5 py-0.5 rounded-xl border border-emerald-100 block mt-0.5 shadow-2xs">
                   {paymentType}
                 </span>
               </div>
             </div>
 
             {/* QRIS Official Card Layout */}
-            <div className="bg-gradient-to-b from-slate-50 to-white border-2 border-slate-200/90 rounded-3xl p-5 flex flex-col items-center text-center shadow-xs relative">
-              <div className="w-full flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+            <div className="bg-white border border-slate-100 rounded-3xl p-5 flex flex-col items-center text-center shadow-xs relative">
+              <div className="w-full flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-black text-red-600 text-base tracking-tighter italic">QRIS</span>
-                  <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nasional</span>
+                  <span className="font-black text-rose-600 text-base tracking-tighter italic">QRIS</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Nasional</span>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] font-bold text-slate-500">
-                  <ShieldCheck size={14} className="text-emerald-600" />
+                  <ShieldCheck size={14} className="text-[#059669]" />
                   <span>Kas Resmi RT 02</span>
                 </div>
               </div>

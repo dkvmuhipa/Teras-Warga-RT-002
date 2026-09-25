@@ -94,13 +94,13 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
     >
       <div className="space-y-6">
         {/* Action Header Bar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-full text-xs font-black uppercase tracking-wider mb-1">
-              <ShieldCheck size={14} className="text-emerald-600" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#e8faf0] border border-emerald-100 text-[#059669] rounded-full text-xs font-bold uppercase tracking-wider mb-1.5 shadow-2xs">
+              <ShieldCheck size={14} className="text-[#059669]" />
               ARSIP KARTU KELUARGA RESMI RT 002
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
               Blanko Kartu Keluarga (KK) Digital
             </h2>
             <p className="text-xs text-slate-500 font-medium">
@@ -112,14 +112,14 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
             <Button
               variant="outline"
               onClick={handleShareWhatsApp}
-              className="px-4 py-2.5 rounded-xl text-xs font-bold border-slate-200 hover:bg-slate-50 flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="px-4 py-2.5 rounded-2xl text-xs font-bold border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Share2 size={14} />
               <span>Bagikan WA</span>
             </Button>
             <Button
               onClick={handlePrint}
-              className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-slate-900/10 active:scale-95"
+              className="px-4.5 py-2.5 bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 text-white rounded-2xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95 transition-all"
             >
               <Printer size={14} />
               <span>Cetak Blanko KK</span>

@@ -29,24 +29,25 @@ export const Modal: React.FC<ModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className={`fixed inset-0 bg-black/50 backdrop-blur-sm ${zIndex}`}
+            className={`fixed inset-0 bg-slate-900/40 backdrop-blur-xs ${zIndex}`}
             onClick={onClose}
           />
-          <div className={`fixed inset-0 ${zIndex} flex items-center justify-center p-4 pointer-events-none`}>
+          <div className={`fixed inset-0 ${zIndex} flex items-center justify-center p-3 sm:p-4 pointer-events-none`}>
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className={`bg-white rounded-3xl shadow-2xl w-full ${maxWidth} max-h-[90vh] overflow-hidden pointer-events-auto flex flex-col`}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className={`bg-white rounded-3xl shadow-xl shadow-slate-900/5 border border-slate-100 w-full ${maxWidth} max-h-[92vh] overflow-hidden pointer-events-auto flex flex-col`}
             >
-              <div className="flex flex-col border-b border-slate-100/80 shrink-0">
-                <div className="flex items-center justify-between p-6">
-                  <h3 className="text-lg font-black text-slate-800">{title}</h3>
+              <div className="flex flex-col border-b border-slate-100 shrink-0">
+                <div className="flex items-center justify-between px-6 py-5">
+                  <h3 className="text-lg font-black text-slate-800 tracking-tight">{title}</h3>
                   <button 
                     onClick={onClose}
-                    className="p-2 text-slate-400 hover:bg-slate-100 rounded-full transition-colors"
+                    className="w-8 h-8 rounded-full bg-slate-100/80 hover:bg-slate-200/80 text-slate-500 flex items-center justify-center transition-all cursor-pointer"
                   >
-                    <X size={20} />
+                    <X size={16} />
                   </button>
                 </div>
                 {stickyHeader && (
@@ -55,7 +56,7 @@ export const Modal: React.FC<ModalProps> = ({
                   </div>
                 )}
               </div>
-              <div className="p-6 pb-12 overflow-y-auto custom-scrollbar">
+              <div className="p-6 pb-8 overflow-y-auto custom-scrollbar">
                 {children}
               </div>
             </motion.div>
