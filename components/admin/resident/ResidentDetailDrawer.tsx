@@ -5,7 +5,7 @@ import {
   LayoutList, Droplets, Trash2, Users, Activity, Shield, User,
   ShieldCheck, Calendar, AlertCircle, Printer, Home, Bike, Car, Key,
   CheckSquare, Waves, Recycle, Sparkles, MessageCircle, ExternalLink,
-  Check, AlertTriangle
+  Check, AlertTriangle, Store
 } from 'lucide-react';
 import { House, PaymentStatus, STBMRecord } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -322,6 +322,62 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   </div>
                 </div>
               </section>
+
+              {/* Group: Profil Usaha / UMKM Warga */}
+              {(selectedResident.hasBusiness || selectedResident.businessName) && (
+                <section className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 bg-[#fff4eb] text-[#ea580c] rounded-xl flex items-center justify-center shrink-0 border border-amber-100">
+                        <Store size={14} />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Usaha / UMKM Warga</h4>
+                        <p className="text-[10px] text-slate-400 font-medium">Potensi ekonomi lokal kavling RT 02</p>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-0.5 bg-[#fff4eb] text-[#ea580c] border border-amber-100 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-2xs">
+                      {selectedResident.businessCategory || 'UMKM Aktif'}
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-2 mb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="text-xs font-black text-slate-800">{selectedResident.businessName || 'Usaha Warga'}</p>
+                        <p className="text-[10px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
+                          <MapPin size={11} className="text-slate-400" />
+                          {selectedResident.businessLocation || 'Di Rumah / Kavling'}
+                        </p>
+                      </div>
+                      {selectedResident.isUmkmRegistered && (
+                        <span className="px-2 py-0.5 bg-[#e8faf0] text-[#059669] border border-emerald-100 rounded-lg text-[9px] font-bold">
+                          Katalog RT ✓
+                        </span>
+                      )}
+                    </div>
+                    {selectedResident.businessDescription && (
+                      <p className="text-xs text-slate-600 leading-relaxed font-medium pt-1 border-t border-slate-200/60">
+                        {selectedResident.businessDescription}
+                      </p>
+                    )}
+                  </div>
+
+                  {selectedResident.businessPhone && (
+                    <button
+                      onClick={() => {
+                        let phone = (selectedResident.businessPhone || '').replace(/[^0-9]/g, '');
+                        if (phone.startsWith('0')) phone = '62' + phone.substring(1);
+                        window.open(`https://api.whatsapp.com/send?phone=${phone}`, '_blank');
+                      }}
+                      className="w-full py-2 bg-[#e8faf0] hover:bg-emerald-100 text-[#059669] border border-emerald-100 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                    >
+                      <MessageCircle size={13} />
+                      <span>Hubungi WhatsApp Usaha ({selectedResident.businessPhone})</span>
+                    </button>
+                  )}
+                </section>
+              )}
 
               {/* Group: Smart Tags */}
               {selectedResident.tags && selectedResident.tags.length > 0 && (

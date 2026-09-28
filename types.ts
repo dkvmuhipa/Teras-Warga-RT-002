@@ -98,6 +98,15 @@ export interface House {
   twoWheelCount?: number; // Jumlah Sepeda Motor (Roda 2)
   fourWheelCount?: number; // Jumlah Mobil (Roda 4)
   
+  // Pendataan Usaha & UMKM Warga (Ekonomi Produktif)
+  hasBusiness?: boolean;
+  businessName?: string;
+  businessCategory?: string;
+  businessDescription?: string;
+  businessPhone?: string;
+  businessLocation?: string;
+  isUmkmRegistered?: boolean;
+  
   // New Identity Fields
   nik?: string; // NEW: NIK Kepala Keluarga
   birthPlace?: string; // NEW: Tempat Lahir
@@ -1107,6 +1116,15 @@ export interface UpdateRequest {
     birthDate?: string;
     job?: string;
   }[];
+  // Business / UMKM Survey
+  hasBusiness?: boolean;
+  businessName?: string;
+  businessCategory?: string;
+  businessDescription?: string;
+  businessPhone?: string;
+  businessLocation?: string;
+  isUmkmRegistered?: boolean;
+
   reason: string;
   documentUrl?: string;
   status: 'Pending' | 'Approved' | 'Rejected' | 'Menunggu' | 'Disetujui' | 'Ditolak';

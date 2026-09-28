@@ -6,7 +6,7 @@ import {
   Home, Activity, Users, User, Phone, DollarSign, CheckCircle, ChevronRight, X, UserPlus,
   CreditCard, AlertCircle, Calendar, FileText, Shield, Send, History, Edit2, Heart, ShieldCheck,
   Bike, Car, CheckCircle2, Droplets, Trash2, ArrowRight, Wallet, QrCode, Building2, Receipt,
-  Sparkles, RefreshCw, AlertTriangle, BadgeCheck, Clock, Check, Info, Calculator, MessageSquare
+  Sparkles, RefreshCw, AlertTriangle, BadgeCheck, Clock, Check, Info, Calculator, MessageSquare, Store
 } from 'lucide-react';
 import { House, PaymentStatus, Role } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -1091,6 +1091,134 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         <span>💡 Catatan Verifikasi: Jumlah kendaraan ({(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) || formData.vehicleCount}) relatif tinggi untuk status Pra-Sejahtera. Mohon periksa kembali.</span>
                       </div>
                     )}
+
+                    {/* Seksi Pendataan Usaha / UMKM Warga */}
+                    <div className="md:col-span-12 p-4 sm:p-5 bg-white border border-slate-200/90 rounded-2xl shadow-2xs space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-xl bg-[#fff4eb] text-[#ea580c] flex items-center justify-center shrink-0 border border-amber-100">
+                            <Store size={16} />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Pendataan Usaha / UMKM Warga</h4>
+                            <p className="text-[10px] text-slate-400 font-medium">Sensus potensi ekonomi mikro & usaha mandiri hunian RT 02</p>
+                          </div>
+                        </div>
+                        <label className="inline-flex items-center gap-2 cursor-pointer self-start sm:self-auto">
+                          <input 
+                            type="checkbox"
+                            className="sr-only peer"
+                            checked={!!formData.hasBusiness}
+                            onChange={e => setFormData({
+                              ...formData,
+                              hasBusiness: e.target.checked,
+                              businessCategory: formData.businessCategory || 'Kuliner & Minuman',
+                              businessLocation: formData.businessLocation || 'Di Rumah / Kavling'
+                            })}
+                          />
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 relative"></div>
+                          <span className="text-xs font-bold text-slate-700">
+                            {formData.hasBusiness ? 'Memiliki Usaha (Aktif)' : 'Tidak Ada Usaha'}
+                          </span>
+                        </label>
+                      </div>
+
+                      {formData.hasBusiness && (
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 pt-1 animate-fade-in">
+                          <div className="md:col-span-6">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Nama Usaha / Merk Dagang <span className="text-rose-500">*</span>
+                            </label>
+                            <input 
+                              type="text"
+                              placeholder="Contoh: Warung Berkah, Dapur Mama Tondo, Jasa AC..."
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                              value={formData.businessName ?? ''}
+                              onChange={e => setFormData({...formData, businessName: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="md:col-span-6">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Kategori Bidang Usaha
+                            </label>
+                            <div className="relative">
+                              <select 
+                                className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
+                                value={formData.businessCategory ?? 'Kuliner & Minuman'}
+                                onChange={e => setFormData({...formData, businessCategory: e.target.value})}
+                              >
+                                <option value="Kuliner & Minuman">🍜 Kuliner & Makanan Minuman</option>
+                                <option value="Warung Sembako & Kelontong">🛒 Warung Sembako & Kios Harian</option>
+                                <option value="Jasa & Servis / Reparasi">🔧 Jasa Keahlian / Servis / Laundry</option>
+                                <option value="Pertanian & Hasil Kebun">🌱 Hasil Kebun / Hidroponik / Ternak</option>
+                                <option value="Fashion, Kerajinan & Jahit">👗 Fashion, Jahit & Kerajinan Tangan</option>
+                                <option value="Pulsa & Pembayaran PPOB">📱 Konter Pulsa & Loket Pembayaran</option>
+                                <option value="Lainnya">📦 Bidang Usaha Lainnya</option>
+                              </select>
+                              <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
+                            </div>
+                          </div>
+
+                          <div className="md:col-span-6">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Lokasi / Tempat Beroperasi
+                            </label>
+                            <div className="relative">
+                              <select 
+                                className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
+                                value={formData.businessLocation ?? 'Di Rumah / Kavling'}
+                                onChange={e => setFormData({...formData, businessLocation: e.target.value})}
+                              >
+                                <option value="Di Rumah / Kavling">🏠 Di Dalam Rumah / Kavling Huntap</option>
+                                <option value="Kios / Lapak Depan">🏪 Kios / Teras Depan Rumah</option>
+                                <option value="Online / COD">🌐 Online / Medsos / COD</option>
+                                <option value="Keliling / Luar">🛵 Usaha Keliling / Luar Kavling</option>
+                              </select>
+                              <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
+                            </div>
+                          </div>
+
+                          <div className="md:col-span-6">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Nomor WhatsApp Khusus Usaha (Opsional)
+                            </label>
+                            <input 
+                              type="text"
+                              placeholder="08xxxxxxxxxx (jika berbeda dari kontak KK)"
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                              value={formData.businessPhone ?? ''}
+                              onChange={e => setFormData({...formData, businessPhone: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="md:col-span-12">
+                            <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                              Deskripsi Produk & Layanan yang Dijual
+                            </label>
+                            <textarea 
+                              rows={2}
+                              placeholder="Contoh: Menjual aneka gorengan, nasi kuning pagi hari, menerima pesanan snack box..."
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                              value={formData.businessDescription ?? ''}
+                              onChange={e => setFormData({...formData, businessDescription: e.target.value})}
+                            />
+                          </div>
+
+                          <div className="md:col-span-12 pt-1 flex items-center justify-between">
+                            <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                              <input 
+                                type="checkbox"
+                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                                checked={!!formData.isUmkmRegistered}
+                                onChange={e => setFormData({...formData, isUmkmRegistered: e.target.checked})}
+                              />
+                              <span>Promosikan & Daftarkan ke Katalog Publik UMKM RT 02</span>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
                     <div className="md:col-span-4">
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Perkawinan</label>

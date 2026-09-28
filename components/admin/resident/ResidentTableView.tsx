@@ -333,6 +333,12 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                   PEMILIK: <span className="text-slate-500 font-extrabold">{house.ownerName}</span>
                                 </p>
                               )}
+                              {(house.hasBusiness || house.businessName) && (
+                                <p className="text-[10px] font-bold text-amber-700 truncate mt-0.5 tracking-wide flex items-center gap-1">
+                                  <span>🏪</span>
+                                  <span>{house.businessName || 'Usaha / UMKM'}</span>
+                                </p>
+                              )}
                             </div>
                           </div>
                         </td>

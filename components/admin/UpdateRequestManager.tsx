@@ -20,7 +20,7 @@ import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { updateRequestStatus, updateHouseData, logAction, handleFirestoreError, OperationType, setDocumentInCollection } from '../../services/databaseService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
-import { FileUp, ExternalLink } from 'lucide-react';
+import { FileUp, ExternalLink, Store } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface UpdateRequestManagerProps {
@@ -87,8 +87,16 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
       if (req.childCount !== undefined) updatePayload.childCount = req.childCount;
       if (req.teenagerCount !== undefined) updatePayload.teenagerCount = req.teenagerCount;
       if (req.adultCount !== undefined) updatePayload.adultCount = req.adultCount;
-      if (req.elderlyCount !== undefined) updatePayload.elderlyCount = req.elderlyCount;
       if (req.widowCount !== undefined) updatePayload.widowCount = req.widowCount;
+
+      // Business / UMKM Survey
+      if (req.hasBusiness !== undefined) updatePayload.hasBusiness = req.hasBusiness;
+      if (req.businessName !== undefined) updatePayload.businessName = req.businessName;
+      if (req.businessCategory !== undefined) updatePayload.businessCategory = req.businessCategory;
+      if (req.businessDescription !== undefined) updatePayload.businessDescription = req.businessDescription;
+      if (req.businessPhone !== undefined) updatePayload.businessPhone = req.businessPhone;
+      if (req.businessLocation !== undefined) updatePayload.businessLocation = req.businessLocation;
+      if (req.isUmkmRegistered !== undefined) updatePayload.isUmkmRegistered = req.isUmkmRegistered;
 
       await updateHouseData(req.houseId, updatePayload);
 
@@ -369,6 +377,12 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                       {house?.ownerName && house?.ownerName !== house?.headOfFamily && (
                         <div className="flex justify-between"><span>Pemilik Rumah:</span> <span className="font-bold">{house.ownerName}</span></div>
                       )}
+                      {(house?.hasBusiness || house?.businessName) && (
+                        <div className="flex justify-between items-start pt-1 border-t border-rose-200/40">
+                          <span>Usaha Warga:</span>
+                          <span className="font-bold text-right">{house.businessName || 'Ada Usaha'} ({house.businessCategory || 'UMKM'})</span>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
@@ -397,6 +411,22 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                   )}
                   {selectedRequest.ownerName && (
                     <div className="flex justify-between"><span>Pemilik Rumah:</span> <span className="font-extrabold text-emerald-700">{selectedRequest.ownerName}</span></div>
+                  )}
+                  {(selectedRequest.hasBusiness || selectedRequest.businessName) && (
+                    <div className="flex justify-between items-start pt-1 border-t border-emerald-200/40">
+                      <span>Usaha Warga:</span>
+                      <div className="text-right">
+                        <span className="font-extrabold text-emerald-700">{selectedRequest.businessName || 'Ada Usaha'}</span>
+                        <div className="text-[10px] text-emerald-600 font-bold">
+                          {selectedRequest.businessCategory || 'UMKM'} • {selectedRequest.businessLocation || 'Di Rumah'}
+                        </div>
+                        {selectedRequest.isUmkmRegistered && (
+                          <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-800">
+                            Katalog UMKM
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

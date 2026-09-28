@@ -66,7 +66,8 @@ import {
   Receipt,
   CheckSquare,
   Waves,
-  Recycle
+  Recycle,
+  Store
 } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 import { getIndonesianMonthYear } from '../../src/utils/dateUtils';
@@ -589,6 +590,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       widowCount: 0,
       childCount: 0,
       familyMembers: [],
+      hasBusiness: false,
+      businessName: '',
+      businessCategory: 'Kuliner & Makanan',
+      businessDescription: '',
+      businessPhone: '',
+      businessLocation: 'Di Rumah',
+      isUmkmRegistered: true,
       reason: ''
     });
 
@@ -638,6 +646,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     widowCount: 0,
     childCount: 0,
     familyMembers: [] as any[],
+    hasBusiness: false,
+    businessName: '',
+    businessCategory: 'Kuliner & Makanan',
+    businessDescription: '',
+    businessPhone: '',
+    businessLocation: 'Di Rumah',
+    isUmkmRegistered: true,
     reason: ''
   });
 
@@ -721,6 +736,13 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         widowCount: currentHouse.widowCount || 0,
         childCount: currentHouse.childCount || 0,
         familyMembers: currentHouse.familyMembers || [],
+        hasBusiness: currentHouse.hasBusiness || !!currentHouse.businessName,
+        businessName: currentHouse.businessName || '',
+        businessCategory: currentHouse.businessCategory || 'Kuliner & Makanan',
+        businessDescription: currentHouse.businessDescription || '',
+        businessPhone: currentHouse.businessPhone || currentHouse.phone || '',
+        businessLocation: currentHouse.businessLocation || 'Di Rumah',
+        isUmkmRegistered: currentHouse.isUmkmRegistered ?? true,
         reason: ''
       });
     }
@@ -1852,6 +1874,86 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                     </div>
                   </div>
                 </Card>
+
+                {/* Resident Business Survey & Status Card */}
+                {(currentHouse?.hasBusiness || currentHouse?.businessName) ? (
+                  <Card className="bg-gradient-to-br from-amber-50/80 via-orange-50/40 to-white border-amber-200 shadow-xs p-5 text-left rounded-3xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-2.5 bg-amber-500/10 text-amber-600 rounded-2xl">
+                          <Store size={18} />
+                        </div>
+                        <div>
+                          <span className="text-[9px] font-black uppercase tracking-widest text-amber-700">Usaha Warga Terdata</span>
+                          <h4 className="font-black text-slate-800 text-sm leading-tight">{currentHouse.businessName || 'UMKM Warga'}</h4>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                        {currentHouse.businessCategory || 'UMKM'}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs text-slate-600 mb-4 bg-white/80 p-3 rounded-2xl border border-amber-100">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Lokasi Usaha</span>
+                        <span className="font-bold text-slate-700">{currentHouse.businessLocation || 'Di Rumah'}</span>
+                      </div>
+                      {currentHouse.businessPhone && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">WhatsApp</span>
+                          <span className="font-bold text-slate-700">{currentHouse.businessPhone}</span>
+                        </div>
+                      )}
+                      {currentHouse.businessDescription && (
+                        <p className="text-[11px] text-slate-600 font-medium italic pt-2 mt-1 border-t border-amber-50 line-clamp-2">
+                          "{currentHouse.businessDescription}"
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => {
+                          setActiveTab('update');
+                          setIsUpdateModalOpen(true);
+                        }}
+                        variant="outline"
+                        className="flex-1 h-9 text-[10px] font-black uppercase tracking-wider border-amber-300 text-amber-800 hover:bg-amber-100 rounded-xl"
+                      >
+                        Perbarui Data Usaha
+                      </Button>
+                      <a
+                        href="/#/umkm"
+                        className="px-3.5 h-9 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center transition-colors shadow-xs"
+                      >
+                        Katalog
+                      </a>
+                    </div>
+                  </Card>
+                ) : (
+                  <Card className="bg-gradient-to-br from-amber-50/50 via-white to-white border-amber-200/60 shadow-xs p-4 text-left rounded-3xl">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 bg-amber-100 text-amber-700 rounded-2xl shrink-0">
+                        <Store size={18} />
+                      </div>
+                      <div className="flex-1">
+                        <h5 className="text-xs font-black text-slate-800">Punya Usaha atau Jasa?</h5>
+                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
+                          Daftarkan usaha Anda dalam pendataan warga untuk promosi gratis di lingkungan RT 02.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        setActiveTab('update');
+                        setIsUpdateModalOpen(true);
+                      }}
+                      className="w-full mt-3 h-8.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-none"
+                    >
+                      + Daftarkan Usaha Saya
+                    </Button>
+                  </Card>
+                )}
 
                 <Card className="bg-indigo-50 border-indigo-100 shadow-sm p-5 text-left">
                   <h4 className="font-black text-indigo-900 text-sm mb-2 flex items-center gap-1.5">
@@ -3452,6 +3554,134 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                     </div>
                   </div>
 
+                  {/* Pendataan Usaha / UMKM Warga */}
+                  <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/80">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Store size={16} className="text-amber-600" />
+                        <div>
+                          <h4 className="text-xs font-black text-amber-950 uppercase tracking-widest">
+                            Pendataan Usaha / UMKM Warga
+                          </h4>
+                          <p className="text-[10px] text-amber-800/80 font-semibold">
+                            Survey pelaku usaha rumahan &amp; UMKM di lingkungan RT 02
+                          </p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={updateForm.hasBusiness}
+                          onChange={(e) => setUpdateForm({ ...updateForm, hasBusiness: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                      </label>
+                    </div>
+
+                    {updateForm.hasBusiness ? (
+                      <div className="space-y-4 pt-2 border-t border-amber-200/50">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                              Nama Usaha / Toko / Merek
+                            </label>
+                            <input
+                              type="text"
+                              required={updateForm.hasBusiness}
+                              placeholder="Contoh: Dapur Mama Tondo, Kios Barokah..."
+                              className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                              value={updateForm.businessName}
+                              onChange={(e) => setUpdateForm({ ...updateForm, businessName: e.target.value })}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                              Kategori Usaha
+                            </label>
+                            <select
+                              className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                              value={updateForm.businessCategory}
+                              onChange={(e) => setUpdateForm({ ...updateForm, businessCategory: e.target.value })}
+                            >
+                              <option value="Kuliner & Makanan">Kuliner & Makanan</option>
+                              <option value="Sembako & Kelontong">Sembako & Kelontong</option>
+                              <option value="Jasa & Servis">Jasa & Servis</option>
+                              <option value="Pakaian & Fashion">Pakaian & Fashion</option>
+                              <option value="Kerajinan & Kreatif">Kerajinan & Kreatif</option>
+                              <option value="Pertanian & Tanaman">Pertanian & Tanaman</option>
+                              <option value="Kesehatan & Kecantikan">Kesehatan & Kecantikan</option>
+                              <option value="Lainnya">Lainnya</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                              Lokasi Usaha
+                            </label>
+                            <select
+                              className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                              value={updateForm.businessLocation}
+                              onChange={(e) => setUpdateForm({ ...updateForm, businessLocation: e.target.value })}
+                            >
+                              <option value="Di Rumah (Hunian Tetap)">Di Rumah (Hunian Tetap)</option>
+                              <option value="Luar Perumahan / Pasar">Luar Perumahan / Pasar</option>
+                              <option value="Online / Keliling">Online / Keliling</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                              No. WhatsApp Bisnis
+                            </label>
+                            <input
+                              type="tel"
+                              placeholder="08xxxxxxxxxx"
+                              className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                              value={updateForm.businessPhone}
+                              onChange={(e) => setUpdateForm({ ...updateForm, businessPhone: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                            Deskripsi Produk / Jasa
+                          </label>
+                          <textarea
+                            rows={2}
+                            placeholder="Jelaskan produk atau jasa yang ditawarkan kepada tetangga dan masyarakat..."
+                            className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all resize-none"
+                            value={updateForm.businessDescription}
+                            onChange={(e) => setUpdateForm({ ...updateForm, businessDescription: e.target.value })}
+                          />
+                        </div>
+
+                        <label className="flex items-center gap-2.5 p-3 bg-white/80 border border-amber-200 rounded-xl cursor-pointer hover:bg-white transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={updateForm.isUmkmRegistered}
+                            onChange={(e) => setUpdateForm({ ...updateForm, isUmkmRegistered: e.target.checked })}
+                            className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                          />
+                          <div>
+                            <span className="text-xs font-black text-slate-800">
+                              Promosikan di Katalog UMKM RT 02 Huntap Tondo
+                            </span>
+                            <p className="text-[10px] text-slate-500 font-medium">
+                              Tampilkan toko &amp; produk Anda di direktori publik agar tetangga mudah berbelanja.
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-slate-500 font-semibold italic">
+                        Aktifkan switch jika kepala keluarga atau anggota keluarga memiliki unit usaha rumahan/UMKM.
+                      </p>
+                    )}
+                  </div>
+
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
                     <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Info size={14} /> Informasi Tambahan
@@ -3637,6 +3867,43 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                             </div>
                           ))}
                         </div>
+                      </div>
+                    )}
+
+                    {(selectedRequest.hasBusiness || selectedRequest.businessName) && (
+                      <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-200/80">
+                        <h4 className="text-[10px] font-black text-amber-900 uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <Store size={12} className="text-amber-600" /> Profil Usaha / UMKM Warga
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3 mb-2">
+                          <div className="p-2 bg-white rounded-lg border border-amber-100">
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Nama Usaha</p>
+                            <p className="text-xs font-black text-slate-800">{selectedRequest.businessName || '-'}</p>
+                          </div>
+                          <div className="p-2 bg-white rounded-lg border border-amber-100">
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Kategori</p>
+                            <p className="text-xs font-black text-slate-800">{selectedRequest.businessCategory || '-'}</p>
+                          </div>
+                          <div className="p-2 bg-white rounded-lg border border-amber-100">
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Lokasi Operasional</p>
+                            <p className="text-xs font-black text-slate-800">{selectedRequest.businessLocation || '-'}</p>
+                          </div>
+                          <div className="p-2 bg-white rounded-lg border border-amber-100">
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">No. WhatsApp</p>
+                            <p className="text-xs font-black text-slate-800">{selectedRequest.businessPhone || '-'}</p>
+                          </div>
+                        </div>
+                        {selectedRequest.businessDescription && (
+                          <div className="p-2 bg-white rounded-lg border border-amber-100 mb-2">
+                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Deskripsi Produk/Jasa</p>
+                            <p className="text-xs font-medium text-slate-700">{selectedRequest.businessDescription}</p>
+                          </div>
+                        )}
+                        <span className={`inline-block px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                          selectedRequest.isUmkmRegistered ? 'bg-amber-200 text-amber-900' : 'bg-slate-200 text-slate-700'
+                        }`}>
+                          {selectedRequest.isUmkmRegistered ? '✓ Terdaftar di Katalog UMKM' : 'Internal RT Saja'}
+                        </span>
                       </div>
                     )}
 

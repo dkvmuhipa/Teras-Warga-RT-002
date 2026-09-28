@@ -224,6 +224,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     job: '',
     education: '',
     jobCategory: '',
+    hasBusiness: false,
+    businessName: '',
+    businessCategory: 'Kuliner & Minuman',
+    businessDescription: '',
+    businessPhone: '',
+    businessLocation: 'Di Rumah / Kavling',
+    isUmkmRegistered: false,
     vehicleCount: 0,
     twoWheelCount: 0,
     fourWheelCount: 0,
@@ -835,6 +842,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       job: '',
       education: '',
       jobCategory: '',
+      hasBusiness: false,
+      businessName: '',
+      businessCategory: 'Kuliner & Minuman',
+      businessDescription: '',
+      businessPhone: '',
+      businessLocation: 'Di Rumah / Kavling',
+      isUmkmRegistered: false,
       vehicleCount: 0,
       twoWheelCount: 0,
       fourWheelCount: 0,
@@ -1062,6 +1076,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       job: house.job || '',
       education: house.education || '',
       jobCategory: house.jobCategory || '',
+      hasBusiness: house.hasBusiness || false,
+      businessName: house.businessName || '',
+      businessCategory: house.businessCategory || 'Kuliner & Minuman',
+      businessDescription: house.businessDescription || '',
+      businessPhone: house.businessPhone || '',
+      businessLocation: house.businessLocation || 'Di Rumah / Kavling',
+      isUmkmRegistered: house.isUmkmRegistered || false,
       vehicleCount: (house.twoWheelCount || 0) + (house.fourWheelCount || 0) > 0 ? (house.twoWheelCount || 0) + (house.fourWheelCount || 0) : (house.vehicleCount || 0),
       twoWheelCount: house.twoWheelCount ?? 0,
       fourWheelCount: house.fourWheelCount ?? 0,
@@ -1473,6 +1494,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         (h.block || '').toLowerCase().includes(searchLower) || 
         (h.number || '').toLowerCase().includes(searchLower) || 
         (h.ownerName && h.ownerName.toLowerCase().includes(searchLower)) || 
+        (h.businessName && h.businessName.toLowerCase().includes(searchLower)) || 
         (h.phone && h.phone.toLowerCase().includes(searchLower)) || 
         (h.familyMembers && h.familyMembers.some(m => (m?.name || '').toLowerCase().includes(searchLower)));
       
@@ -1485,7 +1507,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       else if (filterStatus === 'unpaid') matchesStatus = !isDuesPaid;
       else if (filterStatus === 'occupied') matchesStatus = h.status?.toLowerCase() === 'occupied';
       else if (filterStatus === 'empty') matchesStatus = h.status?.toLowerCase() === 'empty';
-      else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business';
+      else if (filterStatus === 'business') matchesStatus = h.status?.toLowerCase() === 'business' || !!h.hasBusiness || !!h.businessName;
       else if (filterStatus === 'visiting') matchesStatus = h.status?.toLowerCase() === 'visiting';
       else if (filterStatus === 'verified') matchesStatus = h.isVerified === true;
       else if (filterStatus === 'unverified') matchesStatus = !h.isVerified;

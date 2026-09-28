@@ -138,6 +138,16 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                     {house.residenceType === 'Rumah Keluarga' ? 'Keluarga' : house.residenceType}
                   </span>
                 )}
+
+                {(house.hasBusiness || house.businessName) && (
+                  <span 
+                    className="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border bg-[#fff4eb] text-[#ea580c] border-amber-100/80 flex items-center gap-1 shadow-2xs"
+                    title={`Usaha Warga: ${house.businessName || 'Aktif'}`}
+                  >
+                    <span>🏪</span>
+                    <span className="truncate max-w-[110px]">{house.businessName || 'UMKM'}</span>
+                  </span>
+                )}
               </div>
             </div>
           </div>
