@@ -32,31 +32,31 @@ export const Modal: React.FC<ModalProps> = ({
             className={`fixed inset-0 bg-slate-900/40 backdrop-blur-xs ${zIndex}`}
             onClick={onClose}
           />
-          <div className={`fixed inset-0 ${zIndex} flex items-center justify-center p-3 sm:p-4 pointer-events-none`}>
+          <div className={`fixed inset-0 ${zIndex} flex items-center justify-center p-2 sm:p-4 pointer-events-none`}>
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: 12 }}
               transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className={`bg-white rounded-3xl shadow-xl shadow-slate-900/5 border border-slate-100 w-full ${maxWidth} max-h-[92vh] overflow-hidden pointer-events-auto flex flex-col`}
+              className={`bg-white rounded-2xl sm:rounded-3xl shadow-xl shadow-slate-900/5 border border-slate-100 w-full ${maxWidth} max-h-[95vh] sm:max-h-[92vh] overflow-hidden pointer-events-auto flex flex-col`}
             >
               <div className="flex flex-col border-b border-slate-100 shrink-0">
-                <div className="flex items-center justify-between px-6 py-5">
-                  <h3 className="text-lg font-black text-slate-800 tracking-tight">{title}</h3>
+                <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-5">
+                  <h3 className="text-base sm:text-lg font-black text-slate-800 tracking-tight truncate pr-2">{title}</h3>
                   <button 
                     onClick={onClose}
-                    className="w-8 h-8 rounded-full bg-slate-100/80 hover:bg-slate-200/80 text-slate-500 flex items-center justify-center transition-all cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-slate-100/80 hover:bg-slate-200/80 text-slate-500 flex items-center justify-center transition-all cursor-pointer shrink-0"
                   >
                     <X size={16} />
                   </button>
                 </div>
                 {stickyHeader && (
-                  <div className="px-6 pb-4">
+                  <div className="px-4 sm:px-6 pb-3 sm:pb-4">
                     {stickyHeader}
                   </div>
                 )}
               </div>
-              <div className="p-6 pb-8 overflow-y-auto custom-scrollbar">
+              <div className="p-4 sm:p-6 pb-6 sm:pb-8 overflow-y-auto custom-scrollbar">
                 {children}
               </div>
             </motion.div>

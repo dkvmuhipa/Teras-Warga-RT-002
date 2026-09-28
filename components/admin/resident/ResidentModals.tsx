@@ -558,7 +558,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                   </button>
                                 )}
                               </div>
-                              <div className="grid grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <FormField 
                                   label="Nama Pemilik Rumah" 
                                   placeholder="Nama pemilik asli..."
@@ -623,83 +623,12 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                            <p className="text-[10px] text-slate-400 mt-1 italic leading-tight">* Acuan perhitungan masa menempati & iuran.</p>
                         </div>
                        </div>
-                    </div>
-
-                    {/* Seksi Status Meteran PDAM Kota Palu */}
-                     <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
-                        <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
-                          <div className="w-8 h-8 bg-blue-50 border border-blue-200 rounded-lg flex-shrink-0 flex items-center justify-center text-blue-600">
-                            <Droplets size={14} />
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-bold text-slate-800">Instalasi Air &amp; Meteran PDAM</h3>
-                            <p className="text-[10px] text-slate-400">Status sambungan meteran resmi PDAM Kota Palu</p>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Meteran Hunian</label>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                              {[
-                                { id: 'Terpasang', label: 'Terpasang', color: 'blue' },
-                                { id: 'Belum Terpasang', label: 'Belum Ada', color: 'rose' },
-                                { id: 'Hilang', label: '🚨 Hilang', color: 'purple' },
-                                { id: 'Dalam Proses Pengajuan', label: 'Pengajuan', color: 'amber' },
-                                { id: 'Bermasalah / Rusak', label: 'Rusak', color: 'slate' },
-                              ].map(item => (
-                                <button
-                                  key={item.id}
-                                  type="button"
-                                  onClick={() => setFormData({ ...formData, pdamStatus: item.id as any })}
-                                  className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all text-left cursor-pointer ${
-                                    (formData.pdamStatus || 'Terpasang') === item.id
-                                      ? item.id === 'Hilang'
-                                        ? 'bg-purple-50 border-purple-500 text-purple-800 ring-1 ring-purple-500/30'
-                                        : 'bg-blue-50 border-blue-500 text-blue-800 ring-1 ring-blue-500/30'
-                                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                  }`}
-                                >
-                                  {item.label}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          {formData.pdamStatus === 'Hilang' && (
-                            <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
-                              <span className="text-[11px] font-bold text-purple-800 block">
-                                ⚠️ Meteran Raib: Pastikan stop kran pipa distribusi telah ditutup/didop agar tidak bocor.
-                              </span>
-                              <FormField 
-                                label="Perkiraan Tanggal Hilang (YYYY-MM-DD)" 
-                                type="date"
-                                value={formData.pdamLostDate || ''} 
-                                onChange={(v: any) => setFormData({...formData, pdamLostDate: v})} 
-                              />
-                            </div>
-                          )}
-
-                          <FormField 
-                            label={formData.pdamStatus === 'Hilang' ? "Nomor ID / Seri Meteran Lama (Jika Sempat Tercatat)" : "Nomor ID / Seri Meteran PDAM (Opsional)"} 
-                            placeholder="Contoh: PLU-2026-XXXX"
-                            value={formData.pdamMeterNumber || ''} 
-                            onChange={(v: any) => setFormData({...formData, pdamMeterNumber: v})} 
-                          />
-
-                          <FormField 
-                            label="Catatan Teknis Pipa / Kendala Lapangan" 
-                            placeholder="Misal: Pipa cabang siap belum ada meter, kran rusak, kronologi hilang..."
-                            value={formData.pdamNotes || ''} 
-                            onChange={(v: any) => setFormData({...formData, pdamNotes: v})} 
-                          />
-                        </div>
                      </div>
 
                      {/* Contact & Access Card */}
                     <div className="lg:col-span-5 flex flex-col gap-5">
                        {/* Contact Info block */}
-                       <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs flex-1">
+                       <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
                           <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
                             <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex-shrink-0 flex items-center justify-center text-slate-700">
                               <Phone size={14} />
@@ -781,6 +710,77 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 </button>
                               ))}
                             </div>
+                          </div>
+                       </div>
+
+                       {/* Seksi Status Meteran PDAM Kota Palu */}
+                       <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
+                          <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
+                            <div className="w-8 h-8 bg-blue-50 border border-blue-200 rounded-lg flex-shrink-0 flex items-center justify-center text-blue-600">
+                              <Droplets size={14} />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-800">Instalasi Air &amp; Meteran PDAM</h3>
+                              <p className="text-[10px] text-slate-400">Status sambungan meteran resmi PDAM Kota Palu</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Meteran Hunian</label>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2">
+                                {[
+                                  { id: 'Terpasang', label: 'Terpasang', activeClass: 'bg-blue-50 border-blue-500 text-blue-800 ring-1 ring-blue-500/30 font-black' },
+                                  { id: 'Belum Terpasang', label: 'Belum Ada', activeClass: 'bg-rose-50 border-rose-500 text-rose-800 ring-1 ring-rose-500/30 font-black' },
+                                  { id: 'Hilang', label: '🚨 Hilang', activeClass: 'bg-purple-50 border-purple-500 text-purple-800 ring-1 ring-purple-500/30 font-black' },
+                                  { id: 'Dalam Proses Pengajuan', label: 'Pengajuan', activeClass: 'bg-amber-50 border-amber-500 text-amber-800 ring-1 ring-amber-500/30 font-black' },
+                                  { id: 'Bermasalah / Rusak', label: 'Rusak', activeClass: 'bg-slate-100 border-slate-500 text-slate-800 ring-1 ring-slate-500/30 font-black' },
+                                ].map((item, idx) => (
+                                  <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, pdamStatus: item.id as any })}
+                                    className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer truncate ${
+                                      idx === 4 ? 'col-span-2 sm:col-span-1 lg:col-span-2' : ''
+                                    } ${
+                                      (formData.pdamStatus || 'Terpasang') === item.id
+                                        ? item.activeClass
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                    }`}
+                                  >
+                                    {item.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {formData.pdamStatus === 'Hilang' && (
+                              <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
+                                <span className="text-[11px] font-bold text-purple-800 block">
+                                  ⚠️ Meteran Raib: Pastikan stop kran pipa distribusi telah ditutup/didop agar tidak bocor.
+                                </span>
+                                <FormField 
+                                  label="Perkiraan Tanggal Hilang (YYYY-MM-DD)" 
+                                  type="date"
+                                  value={formData.pdamLostDate || ''} 
+                                  onChange={(v: any) => setFormData({...formData, pdamLostDate: v})} 
+                                />
+                              </div>
+                            )}
+
+                            <FormField 
+                              label={formData.pdamStatus === 'Hilang' ? "Nomor ID / Seri Meteran Lama (Jika Sempat Tercatat)" : "Nomor ID / Seri Meteran PDAM (Opsional)"} 
+                              placeholder="Contoh: PLU-2026-XXXX"
+                              value={formData.pdamMeterNumber || ''} 
+                              onChange={(v: any) => setFormData({...formData, pdamMeterNumber: v})} 
+                            />
+
+                            <FormField 
+                              label="Catatan Teknis Pipa / Kendala Lapangan" 
+                              placeholder="Misal: Pipa cabang siap belum ada meter, kran rusak, kronologi hilang..."
+                              value={formData.pdamNotes || ''} 
+                              onChange={(v: any) => setFormData({...formData, pdamNotes: v})} 
+                            />
                           </div>
                        </div>
 

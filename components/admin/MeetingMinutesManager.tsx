@@ -245,20 +245,20 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
   return (
     <div className="space-y-6 text-left p-2 sm:p-4">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden shadow-xl border border-slate-800">
+      <div className="bg-gradient-to-br from-[#fff8f0] via-[#fff3e6] to-[#ffedd5] text-slate-900 rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden shadow-2xs border border-orange-200/90">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-wider text-indigo-300 border border-white/10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full text-[10px] font-black uppercase tracking-wider text-orange-700 border border-orange-200/80 shadow-2xs">
               <BookOpen size={12} />
               <span>Arsip Hukum &amp; Kesepakatan Lingkungan</span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight font-sans">
               Buku Notula &amp; Kesepakatan Musyawarah
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-2xl leading-relaxed">
               Pencatatan resmi jalannya rapat warga, berita acara keputusan mufakat, serta aturan lokal RT 002 / RW 020 Huntap Tondo 2 yang sah dan berkekuatan hukum lingkungan.
             </p>
           </div>
@@ -266,7 +266,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleOpenAdd}
-              className="flex items-center gap-2 px-5 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
             >
               <Plus size={16} />
               <span>Tulis Notula Baru</span>
@@ -275,21 +275,21 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
         </div>
 
         {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/10">
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Rapat Tercatat</span>
-            <span className="text-xl font-black text-white mt-0.5 block">{minutes.length} Sidang</span>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-orange-200/70">
+          <div className="p-3.5 bg-white/90 rounded-2xl border border-orange-100 shadow-2xs">
+            <span className="text-[10px] font-bold text-slate-500 font-black uppercase tracking-wider block">Total Rapat Tercatat</span>
+            <span className="text-xl font-black text-slate-900 mt-0.5 block">{minutes.length} Sidang</span>
           </div>
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Poin Kesepakatan Sah</span>
+          <div className="p-3.5 bg-white/90 rounded-2xl border border-orange-100 shadow-2xs">
+            <span className="text-[10px] font-bold text-slate-500 font-black uppercase tracking-wider block">Poin Kesepakatan Sah</span>
             <span className="text-xl font-black text-amber-400 mt-0.5 block">{totalDecisionsCount} Aturan</span>
           </div>
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tingkat Partisipasi</span>
+          <div className="p-3.5 bg-white/90 rounded-2xl border border-orange-100 shadow-2xs">
+            <span className="text-[10px] font-bold text-slate-500 font-black uppercase tracking-wider block">Tingkat Partisipasi</span>
             <span className="text-xl font-black text-emerald-400 mt-0.5 block">Kuorum Sah</span>
           </div>
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Arsip Berita Acara</span>
+          <div className="p-3.5 bg-white/90 rounded-2xl border border-orange-100 shadow-2xs">
+            <span className="text-[10px] font-bold text-slate-500 font-black uppercase tracking-wider block">Arsip Berita Acara</span>
             <span className="text-xl font-black text-sky-400 mt-0.5 block">100% Digital</span>
           </div>
         </div>

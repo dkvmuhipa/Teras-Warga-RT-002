@@ -601,7 +601,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
 
             {/* Weather Metrics Bar */}
-            <div className="grid grid-cols-4 gap-2 py-1">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-1">
               <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
                 <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
                   <Sun size={11} className="text-amber-500" /> Suhu

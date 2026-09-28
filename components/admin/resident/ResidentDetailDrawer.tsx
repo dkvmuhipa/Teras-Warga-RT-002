@@ -283,21 +283,26 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     value={selectedResident.pbbStatus || 'Belum Diambil'} 
                     isUrgent={selectedResident.pbbStatus !== 'Sudah Diambil'} 
                   />
-                  <DetailItem 
-                    icon={<Droplets size={13} className={selectedResident.pdamStatus === 'Hilang' ? 'text-purple-600' : 'text-blue-500'} />} 
-                    label="Meteran PDAM Palu" 
-                    value={
-                      selectedResident.pdamStatus === 'Hilang'
-                        ? `🚨 Meteran Hilang${selectedResident.pdamLostDate ? ` (Tgl: ${selectedResident.pdamLostDate})` : ''} - Stop Kran Wajib Ditutup`
-                        : `${selectedResident.pdamStatus || 'Terpasang'}${selectedResident.pdamMeterNumber ? ` (ID: ${selectedResident.pdamMeterNumber})` : ''}`
-                    } 
-                    isUrgent={selectedResident.pdamStatus === 'Belum Terpasang' || selectedResident.pdamStatus === 'Hilang'} 
-                  />
+                  <div className="col-span-2">
+                    <DetailItem 
+                      icon={<Droplets size={13} className={selectedResident.pdamStatus === 'Hilang' ? 'text-purple-600' : 'text-blue-500'} />} 
+                      label="Meteran PDAM Palu" 
+                      value={
+                        selectedResident.pdamStatus === 'Hilang'
+                          ? `🚨 Meteran Hilang${selectedResident.pdamLostDate ? ` (Tgl: ${selectedResident.pdamLostDate})` : ''} - Stop Kran Wajib Ditutup`
+                          : `${selectedResident.pdamStatus || 'Terpasang'}${selectedResident.pdamMeterNumber ? ` (ID: ${selectedResident.pdamMeterNumber})` : ''}`
+                      } 
+                      isUrgent={selectedResident.pdamStatus === 'Belum Terpasang' || selectedResident.pdamStatus === 'Hilang'} 
+                      noTruncate
+                    />
+                  </div>
                   <DetailItem icon={<FileText size={13} />} label="Nomor NIK" value={selectedResident.nik || '-'} isMain />
                   <DetailItem icon={<Users size={13} />} label="Nomor KK" value={selectedResident.kkNumber || '-'} isMain />
                   <DetailItem icon={<Calendar size={13} />} label="Bergabung Pada" value={selectedResident.joiningDate ? selectedResident.joiningDate.split('T')[0] : '-'} />
                   {selectedResident.residenceType !== 'Tetap' && (
-                    <DetailItem icon={<Key size={13} />} label="Pemilik Rumah" value={`${selectedResident.ownerName || '-'}${selectedResident.ownerPhone ? ` (${selectedResident.ownerPhone})` : ''}`} />
+                    <div className="col-span-2">
+                      <DetailItem icon={<Key size={13} />} label="Pemilik Rumah" value={`${selectedResident.ownerName || '-'}${selectedResident.ownerPhone ? ` (${selectedResident.ownerPhone})` : ''}`} noTruncate />
+                    </div>
                   )}
                 </div>
 
@@ -408,7 +413,9 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 mb-5">
-                  <DetailItem label="Tempat, Tgl Lahir" value={`${selectedResident.birthPlace || '-'}, ${selectedResident.birthDate ? new Date(selectedResident.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}`} />
+                  <div className="col-span-2">
+                    <DetailItem label="Tempat, Tgl Lahir" value={`${selectedResident.birthPlace || '-'}, ${selectedResident.birthDate ? new Date(selectedResident.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}`} noTruncate />
+                  </div>
                   <DetailItem label="Pekerjaan" value={selectedResident.jobCategory || '-'} />
                   <DetailItem label="Pendidikan Terakhir" value={selectedResident.education || '-'} />
                   <DetailItem label="Agama" value={selectedResident.religion || '-'} />
@@ -837,13 +844,13 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
 };
 
 // Sub-components
-const DetailItem = ({ icon, label, value, isUrgent = false, isMain = false }: { icon?: React.ReactNode, label: string, value: string, isUrgent?: boolean, isMain?: boolean }) => (
+const DetailItem = ({ icon, label, value, isUrgent = false, isMain = false, noTruncate = false }: { icon?: React.ReactNode, label: string, value: string, isUrgent?: boolean, isMain?: boolean, noTruncate?: boolean }) => (
   <div className="space-y-0.5">
     <div className="flex items-center gap-1.5">
        {icon && <span className="text-slate-400 shrink-0">{icon}</span>}
        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
     </div>
-    <p className={`text-sm font-extrabold truncate ${isUrgent ? 'text-indigo-600' : 'text-slate-800'} ${isMain ? 'font-mono' : ''}`}>{value || '-'}</p>
+    <p className={`text-sm font-extrabold ${noTruncate ? 'break-words leading-snug' : 'truncate'} ${isUrgent ? 'text-indigo-600' : 'text-slate-800'} ${isMain ? 'font-mono' : ''}`}>{value || '-'}</p>
   </div>
 );
 

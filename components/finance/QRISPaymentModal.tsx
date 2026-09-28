@@ -96,26 +96,26 @@ export const QRISPaymentModal: React.FC<QRISPaymentModalProps> = ({
           className="relative w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-900/10 border border-slate-100 overflow-hidden flex flex-col my-8 select-none"
         >
           {/* Header Bar */}
-          <div className="p-5 sm:p-6 bg-white border-b border-slate-100 text-slate-800 flex items-center justify-between relative">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[#e8faf0] text-[#059669] rounded-2xl flex items-center justify-center border border-emerald-100/60 shadow-xs shrink-0">
+          <div className="p-4 sm:p-6 bg-white border-b border-slate-100 text-slate-800 flex items-center justify-between relative">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#e8faf0] text-[#059669] rounded-2xl flex items-center justify-center border border-emerald-100/60 shadow-xs shrink-0">
                 <CreditCard size={18} />
               </div>
               <div>
-                <h3 className="text-base font-black tracking-tight text-slate-800">{title || 'Pembayaran QRIS Kas RT'}</h3>
-                <p className="text-xs text-slate-400 font-bold tracking-wide">{RT_NAME} • Huntap Tondo 2</p>
+                <h3 className="text-sm sm:text-base font-black tracking-tight text-slate-800">{title || 'Pembayaran QRIS Kas RT'}</h3>
+                <p className="text-[11px] sm:text-xs text-slate-400 font-bold tracking-wide">{RT_NAME} • Huntap Tondo 2</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-slate-100/80 hover:bg-slate-200/80 text-slate-500 flex items-center justify-center transition-all cursor-pointer"
+              className="w-8 h-8 rounded-full bg-slate-100/80 hover:bg-slate-200/80 text-slate-500 flex items-center justify-center transition-all cursor-pointer shrink-0"
             >
               <X size={16} />
             </button>
           </div>
 
           {/* Body Content */}
-          <div className="p-6 space-y-5 overflow-y-auto max-h-[75vh] custom-scrollbar">
+          <div className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto max-h-[75vh] custom-scrollbar">
             {/* Invoice & Resident Info Card */}
             <div className="p-4 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between text-xs">
               <div>
