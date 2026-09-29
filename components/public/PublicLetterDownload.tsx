@@ -227,20 +227,20 @@ export const PublicLetterDownload: React.FC<PublicLetterDownloadProps> = ({ pdfC
 
           {/* Letter Info Grid */}
           <div className="bg-slate-950/80 rounded-2xl p-5 border border-slate-800/80 space-y-3.5 text-xs font-medium">
-            <div className="flex justify-between items-center pb-2.5 border-b border-slate-800/60">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 pb-2.5 border-b border-slate-800/60">
               <span className="text-slate-400">Nomor Surat Resmi</span>
-              <span className="font-mono font-black text-amber-400">
+              <span className="font-mono font-black text-amber-400 text-xs sm:text-sm break-all">
                 {letter.letterNumber || 'Menunggu Penomoran'}
               </span>
             </div>
 
-            <div className="flex justify-between items-center pb-2.5 border-b border-slate-800/60">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 pb-2.5 border-b border-slate-800/60">
               <span className="text-slate-400">Nama Pemohon</span>
-              <span className="font-bold text-white uppercase">{letter.applicantName || letter.name || '-'}</span>
+              <span className="font-bold text-white uppercase text-xs sm:text-sm">{letter.applicantName || letter.name || '-'}</span>
             </div>
 
             {letter.nik && (
-              <div className="flex justify-between items-center pb-2.5 border-b border-slate-800/60">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 pb-2.5 border-b border-slate-800/60">
                 <span className="text-slate-400">NIK Pemohon</span>
                 <span className="font-mono font-bold text-slate-300">
                   {letter.nik.replace(/(\d{4})\d+(\d{4})/, '$1-******-$2')}
@@ -249,15 +249,15 @@ export const PublicLetterDownload: React.FC<PublicLetterDownloadProps> = ({ pdfC
             )}
 
             {letter.houseId && (
-              <div className="flex justify-between items-center pb-2.5 border-b border-slate-800/60">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 pb-2.5 border-b border-slate-800/60">
                 <span className="text-slate-400">Alamat Kavling</span>
                 <span className="font-bold text-slate-200">Rumah Blok {letter.houseId}</span>
               </div>
             )}
 
-            <div className="flex justify-between items-center">
-              <span className="text-slate-400">Keperluan</span>
-              <span className="font-bold text-emerald-300 text-right max-w-xs truncate">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
+              <span className="text-slate-400 shrink-0">Keperluan</span>
+              <span className="font-bold text-emerald-300 sm:text-right max-w-full sm:max-w-md break-words">
                 {letter.purposeDetail || letter.purpose || 'Administrasi Kependudukan'}
               </span>
             </div>

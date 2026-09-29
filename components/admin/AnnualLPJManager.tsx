@@ -746,7 +746,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
           </div>
 
           {/* Signatures Form */}
-          <div className="grid grid-cols-3 gap-3 pt-2 border-t border-slate-200">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200">
             <div>
               <label className="block text-[9px] font-mono font-bold text-slate-400 uppercase mb-1">Sekretaris RT</label>
               <input
