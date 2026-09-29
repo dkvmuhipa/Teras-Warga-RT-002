@@ -214,55 +214,70 @@ export const formatLetterStatusForWhatsApp = (
   letterId?: string, 
   letterNumber?: string
 ) => {
-  const isApproved = status === 'Disetujui' || status === 'Approved';
+  const isApproved = status === 'Disetujui' || status === 'Approved' || status === 'Selesai' || status === 'Completed';
   const isRejected = status === 'Ditolak' || status === 'Rejected';
   
-  const statusLabel = isApproved ? '✅ DISETUJUI & SELESAI' : isRejected ? '❌ DITOLAK / TIDAK DAPAT DIPROSES' : '⏳ SEDANG DIVERIFIKASI';
+  // Safe symbols compatible with all WhatsApp gateways (prevent \uFFFD replacement diamond)
+  const statusLabel = isApproved 
+    ? '✓ DISETUJUI & SELESAI' 
+    : isRejected 
+    ? '✕ DITOLAK / PERLU PERBAIKAN' 
+    : '⏳ SEDANG DIVERIFIKASI';
   
   // Direct tracking & download link based on current domain with HashRouter support
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://terasrt02.vercel.app';
   const downloadLink = letterId ? `${baseUrl}/#/surat/${letterId}` : `${baseUrl}/#/services?tab=history`;
 
-  let detailsBlock = `*Jenis Surat:* ${type}\n*Status Permohonan:* ${statusLabel}`;
-  if (letterNumber) {
-    detailsBlock += `\n*Nomor Surat:* ${letterNumber}`;
-  }
+  let detailsBlock = `*RINGKASAN DOKUMEN:*
+• Jenis Surat  : *${type}*
+• Nomor Surat  : *${letterNumber || 'Menunggu Penomoran'}*
+• Status       : *${statusLabel}*`;
+
   if (letterId) {
-    detailsBlock += `\n*ID Pelacakan:* \`${letterId}\``;
+    detailsBlock += `\n• ID Pelacakan : \`${letterId}\``;
   }
 
   let bodyMessage = '';
   if (isApproved) {
-    bodyMessage = `Kabar baik! Permohonan surat Anda telah selesai ditinjau dan disahkan secara resmi oleh Pengurus RT 02.
+    bodyMessage = `Kabar baik! Permohonan surat pengantar Anda telah *SELESAI DIVERIFIKASI & DISAHKAN* secara resmi oleh Pengurus RT 02.
 
-📥 *UNDUH DOKUMEN SURAT (PDF RESMI):*
-👉 ${downloadLink}
+*PANDUAN MENGUNDUH SURAT (PDF RESMI):*
+1. Buka tautan dokumen berikut:
+   ▶ ${downloadLink}
+2. Klik tombol *"Unduh Berkas Surat (PDF Resmi)"*.
+3. File PDF surat resmi langsung tersimpan di HP/perangkat Anda.
 
-_Dokumen PDF digital di atas sudah dilengkapi Tanda Tangan Digital & Stempel Sah RT 02 dan dapat langsung dicetak atau dilampirkan ke Kelurahan/Kecamatan/Instansi terkait._`;
+*Catatan Keabsahan Dokumen:*
+Dokumen digital ini merupakan surat resmi yang sah, telah dibubuhi Tanda Tangan Digital, Stempel Resmi RT 02, dan QR-Code validasi. Surat dapat langsung dicetak (print) atau dilampirkan secara online untuk keperluan di Kelurahan Tondo, Kecamatan Mantikulore, maupun instansi terkait lainnya.`;
   } else if (isRejected) {
-    bodyMessage = `Mohon maaf, permohonan surat belum dapat kami setujui saat ini. Silakan periksa detail keterangan atau hubungi pengurus RT untuk melengkapi persyaratan yang dibutuhkan.
+    bodyMessage = `Mohon maaf, permohonan surat Anda *BELUM DAPAT KAMI SETUJUI* saat ini.
 
-🔍 *Cek Status & Keterangan:*
-👉 ${downloadLink}`;
+*PANDUAN PENGECEKAN KETERANGAN:*
+1. Buka tautan berikut untuk membaca catatan/alasan dari pengurus RT:
+   ▶ ${downloadLink}
+2. Silakan lengkapi berkas persyaratan yang kurang atau hubungi Pengurus RT untuk koordinasi lebih lanjut.`;
   } else {
-    bodyMessage = `Permohonan surat Anda telah kami terima dan sedang dalam proses verifikasi oleh Ketua RT. Anda dapat memantau progresnya secara berkala melalui tautan berikut:
+    bodyMessage = `Permohonan surat Anda telah kami terima dan saat ini sedang dalam *PROSES PENINJAUAN & VERIFIKASI* oleh Pengurus RT 02.
 
-🔍 *Pantau Progres Permohonan:*
-👉 ${downloadLink}`;
+*PANTAU PROGRES PERMOHONAN:*
+Anda dapat memantau status surat secara berkala melalui tautan berikut:
+▶ ${downloadLink}
+
+Notifikasi WhatsApp lanjutan akan otomatis dikirimkan begitu surat selesai disahkan oleh Ketua RT.`;
   }
 
-  return `*KONFIRMASI LAYANAN PERSURATAN RT 02*
-------------------------------------------
+  return `*LAYANAN PERSURATAN WARGA RT 02*
+────────────────────────────
 
 Yth. Sdr/i *${name}*,
 
 ${bodyMessage}
 
-------------------------------------------
+────────────────────────────
 ${detailsBlock}
 
 Terima kasih telah menggunakan sistem pelayanan digital *TERAS WARGA RT 02*.
-_Pesan otomatis dari Pengurus RT 02_`;
+_Pesan otomatis resmi Pengurus RT 02 / RW 020 Kelurahan Tondo_`;
 };
 
 export const formatRondaScheduleForWhatsApp = (ronda: RondaSchedule[]) => {

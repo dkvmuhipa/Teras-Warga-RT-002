@@ -15,7 +15,9 @@ import {
   Share2,
   Printer,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  Eye,
+  MessageCircle
 } from 'lucide-react';
 import { getLetterById } from '../../services/databaseService';
 import { generateSuratPengantar } from '../../services/pdfService';
@@ -94,6 +96,36 @@ export const PublicLetterDownload: React.FC<PublicLetterDownloadProps> = ({ pdfC
       console.error(err);
       toast.dismiss(toastId);
       toast.error('Gagal mengunduh dokumen PDF.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handlePreviewPDF = async () => {
+    if (!letter) return;
+    setIsDownloading(true);
+    const toastId = toast.loading('Membuka pratinjau dokumen...');
+    try {
+      const { jsPDF } = await import('jspdf');
+      const originalSave = jsPDF.prototype.save;
+      let blobUrl = '';
+      jsPDF.prototype.save = function(this: any) {
+        const blob = this.output('blob');
+        blobUrl = URL.createObjectURL(blob);
+        return this;
+      };
+      await generateSuratPengantar(letter, pdfConfig, false);
+      jsPDF.prototype.save = originalSave;
+      toast.dismiss(toastId);
+      if (blobUrl) {
+        window.open(blobUrl, '_blank');
+      } else {
+        toast.info('Gunakan tombol Unduh Berkas untuk menyimpan file.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(toastId);
+      toast.error('Gagal membuka pratinjau dokumen.');
     } finally {
       setIsDownloading(false);
     }
@@ -233,26 +265,54 @@ export const PublicLetterDownload: React.FC<PublicLetterDownloadProps> = ({ pdfC
 
           {/* Download Action Primary Banner */}
           {isApproved ? (
-            <div className="space-y-3 pt-2">
-              <button 
-                onClick={handleDownloadPDF}
-                disabled={isDownloading}
-                className="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-600/20 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2.5"
-              >
-                <Download size={18} className="animate-bounce-short" /> 
-                {isDownloading ? 'Sedang Memproses...' : 'Unduh Berkas Surat (PDF Resmi)'}
-              </button>
+            <div className="space-y-3.5 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button 
+                  onClick={handleDownloadPDF}
+                  disabled={isDownloading}
+                  className="w-full py-4 px-5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-emerald-600/25 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Download size={18} className="animate-bounce" /> 
+                  <span>{isDownloading ? 'Memproses...' : 'Unduh Berkas Surat (PDF)'}</span>
+                </button>
 
-              <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
-                <p className="text-[11px] text-emerald-300 font-medium leading-relaxed">
-                  ✓ Dokumen PDF telah dilengkapi <b>Tanda Tangan Digital &amp; Stempel Sah RT 02</b>. Siap dicetak atau dilampirkan secara online.
+                <button 
+                  onClick={handlePreviewPDF}
+                  disabled={isDownloading}
+                  className="w-full py-4 px-5 bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 hover:border-emerald-500/40 font-black text-xs uppercase tracking-widest rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Eye size={18} /> 
+                  <span>Buka &amp; Cetak Dokumen</span>
+                </button>
+              </div>
+
+              {/* Status and Authenticity Notice */}
+              <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-start gap-2.5">
+                <ShieldCheck size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-emerald-200/90 leading-relaxed font-medium">
+                  Dokumen PDF ini sah dan terotentikasi resmi. Dilengkapi <b>Tanda Tangan Digital &amp; Stempel Sah RT 02</b> serta QR Code validasi instansi. Siap dicetak langsung atau dilampirkan secara online.
                 </p>
+              </div>
+
+              {/* Step-by-Step Instructions */}
+              <div className="p-4 bg-slate-950/60 border border-slate-800/80 rounded-2xl space-y-2">
+                <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs">
+                  <Sparkles size={14} />
+                  <span>Petunjuk Mudah Pengunduhan:</span>
+                </div>
+                <ol className="text-[11px] text-slate-300 space-y-1.5 list-decimal pl-4 leading-relaxed font-medium">
+                  <li>Klik tombol hijau <b>"Unduh Berkas Surat (PDF)"</b> di atas untuk menyimpan file PDF di perangkat Anda.</li>
+                  <li>Buka berkas dari notifikasi unduhan ponsel Anda atau buka folder <b>Downloads / Unduhan</b>.</li>
+                  <li>Jika ingin membaca langsung di layar browser atau mencetak dokumen, gunakan tombol <b>"Buka &amp; Cetak Dokumen"</b>.</li>
+                </ol>
               </div>
             </div>
           ) : (
-            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-center space-y-1">
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-center space-y-1.5">
               <p className="text-xs font-black text-amber-300 uppercase tracking-wider">Surat Sedang Diverifikasi Pengurus RT</p>
-              <p className="text-[11px] text-slate-400 font-medium">Tombol unduh PDF akan aktif otomatis begitu surat disetujui oleh Ketua RT.</p>
+              <p className="text-[11px] text-slate-400 font-medium">
+                Permohonan surat sedang ditinjau. Tombol unduh dokumen PDF resmi akan aktif otomatis begitu surat disahkan oleh Ketua RT 02.
+              </p>
             </div>
           )}
 
@@ -282,6 +342,18 @@ export const PublicLetterDownload: React.FC<PublicLetterDownloadProps> = ({ pdfC
               <Share2 size={14} />
             </button>
           </div>
+
+          {/* Help Contact Button */}
+          {pdfConfig.rtPhone && (
+            <a
+              href={`https://wa.me/${pdfConfig.rtPhone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Halo Pengurus RT 02, saya ${letter.applicantName || 'warga'} ingin menanyakan terkait Surat Pengantar (${letter.type || 'Surat'}) dengan nomor ${letter.letterNumber || letter.id}.`)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full py-3 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <MessageCircle size={15} /> Butuh Bantuan? Hubungi Pengurus RT via WhatsApp
+            </a>
+          )}
         </motion.div>
 
         {/* Footer info */}
