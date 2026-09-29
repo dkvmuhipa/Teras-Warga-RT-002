@@ -247,6 +247,8 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
         isDisability: reg.isDisability || false,
         isOrphan: reg.isOrphan || false,
         childCount: reg.childCount || 0,
+        addressKtp: reg.addressKtp || `Jl. Pue Lombe, Huntap Tondo 2 Blok ${reg.block}-${reg.number}`,
+        ktpStatus: reg.ktpStatus || (reg.addressKtp && (reg.addressKtp.toLowerCase().includes('tondo') || reg.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai Domisili' : (reg.addressKtp ? 'Luar Wilayah (Belum Mutasi)' : 'Sesuai Domisili')),
         occupantHistory: updatedOccupantHistory
       } as any);
       
@@ -674,6 +676,21 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                         }`}>
                           {reg.residenceType === 'Sewa' ? '🏢 Hunian Sewa / Kontrak' : reg.residenceType === 'Rumah Keluarga' ? '🏠 Rumah Keluarga' : '🏠 Rumah Milik Sendiri'}
                         </span>
+
+                        {/* Status Kesesuaian KTP Pill */}
+                        {(() => {
+                          const isLocal = reg.ktpStatus === 'Sesuai Domisili' || (!reg.ktpStatus && !!reg.addressKtp && (reg.addressKtp.toLowerCase().includes('tondo') || reg.addressKtp.toLowerCase().includes('pue lombe')));
+                          return (
+                            <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider border flex items-center gap-1 ${
+                              isLocal
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                : 'bg-amber-50 text-amber-800 border-amber-200'
+                            }`}>
+                              <span>{isLocal ? '✅' : '🪪'}</span>
+                              <span>{isLocal ? 'KTP RT 02 (Huntap)' : 'KTP Luar Wilayah'}</span>
+                            </span>
+                          );
+                        })()}
                       </div>
                       
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-semibold mt-1">
@@ -867,6 +884,33 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               }`}>
                                 BPJS: {reg.bpjsStatus || 'Tidak Ada'}
                               </span>
+                            </div>
+
+                            {/* Status KTP & Alamat Sesuai KTP */}
+                            <div className="col-span-1 sm:col-span-2 md:col-span-4 p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Status Kesesuaian KTP Dukcapil:</span>
+                                  {(() => {
+                                    const isLocal = reg.ktpStatus === 'Sesuai Domisili' || (!reg.ktpStatus && !!reg.addressKtp && (reg.addressKtp.toLowerCase().includes('tondo') || reg.addressKtp.toLowerCase().includes('pue lombe')));
+                                    return (
+                                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${
+                                        isLocal
+                                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                          : 'bg-amber-100 text-amber-800 border-amber-300'
+                                      }`}>
+                                        {isLocal ? '✅ Sesuai Domisili (RT 02)' : '🪪 Luar Wilayah (Belum Mutasi)'}
+                                      </span>
+                                    );
+                                  })()}
+                                </div>
+                                <div className="text-xs text-slate-700 font-semibold flex items-center gap-1.5 flex-wrap">
+                                  <span className="text-slate-400 font-medium">Alamat Sesuai KTP:</span>
+                                  <span className="font-bold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-200">
+                                    {reg.addressKtp || `Jl. Pue Lombe, Huntap Tondo 2 Blok ${reg.block}-${reg.number}`}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>

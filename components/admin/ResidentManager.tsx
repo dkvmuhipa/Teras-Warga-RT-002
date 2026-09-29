@@ -1562,6 +1562,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const emptyHouses = houses.filter(h => h.status === 'Empty').length;
   const verifiedCount = houses.filter(h => h.isVerified).length;
+  const ktpLocalCount = houses.filter(h => h.status === 'Occupied' && (h.ktpStatus === 'Sesuai Domisili' || (!h.ktpStatus && !!h.addressKtp && (h.addressKtp.toLowerCase().includes('tondo') || h.addressKtp.toLowerCase().includes('pue lombe'))))).length;
+  const ktpExternalCount = houses.filter(h => h.status === 'Occupied' && (h.ktpStatus === 'Luar Wilayah (Belum Mutasi)' || (!h.ktpStatus && (!h.addressKtp || (!h.addressKtp.toLowerCase().includes('tondo') && !h.addressKtp.toLowerCase().includes('pue lombe')))))).length;
 
   // Bulk Actions
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1974,6 +1976,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         occupiedHouses={occupiedHouses}
         emptyHouses={emptyHouses}
         verifiedCount={verifiedCount}
+        ktpLocalCount={ktpLocalCount}
+        ktpExternalCount={ktpExternalCount}
+        onFilterKtp={(filterType) => setFilterStatus(filterType)}
         itemVariants={itemVariants}
       />
       

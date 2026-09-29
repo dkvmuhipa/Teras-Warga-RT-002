@@ -86,6 +86,8 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     headOfFamily: '',
     nik: '',
     kkNumber: '',
+    ktpStatus: 'Sesuai Domisili' as 'Sesuai Domisili' | 'Luar Wilayah (Belum Mutasi)',
+    addressKtp: '',
     birthPlace: 'Palu',
     birthDate: '',
     gender: 'Laki-laki' as 'Laki-laki' | 'Perempuan',
@@ -423,6 +425,15 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             position: 'top-center'
           });
           return;
+        }
+
+        // Auto-fill alamat KTP dengan standar Jl. Pue Lombe jika belum diisi
+        if (!formData.addressKtp) {
+          const autoAddr = `Jl. Pue Lombe, Huntap Tondo 2 Blok ${formData.block.trim().toUpperCase()}-${formData.number.trim().padStart(2, '0')}`;
+          setFormData(prev => ({
+            ...prev,
+            addressKtp: autoAddr
+          }));
         }
       }
 
@@ -1336,6 +1347,99 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         setFormData({ ...formData, kkNumber: val });
                       }} 
                     />
+                  </div>
+
+                  {/* Status Kesesuaian KTP & Alamat Sesuai KTP (Laporan Disdukcapil) */}
+                  <div className="md:col-span-2 p-4 bg-slate-50/90 rounded-2xl border border-slate-200/80 space-y-3.5 overflow-hidden">
+                    <div className="space-y-2">
+                      <div className="flex flex-col gap-0.5">
+                        <label className="text-xs font-bold text-slate-800">
+                          Status Kesesuaian KTP Pemohon <span className="text-rose-500">*</span>
+                        </label>
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          Apakah KTP fisik Anda sudah beralamat setempat di RT 02 (Huntap Tondo 2) atau masih KTP luar wilayah?
+                        </p>
+                      </div>
+
+                      {/* Full-width responsive segmented selector */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const localAddr = `Jl. Pue Lombe, Huntap Tondo 2 Blok ${formData.block || ''}-${formData.number || ''}`.trim();
+                            setFormData({
+                              ...formData,
+                              ktpStatus: 'Sesuai Domisili',
+                              addressKtp: (!formData.addressKtp || formData.addressKtp.toLowerCase().includes('tondo') || formData.addressKtp.toLowerCase().includes('pue lombe')) ? localAddr : formData.addressKtp
+                            });
+                          }}
+                          className={`w-full py-2.5 px-3 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                            formData.ktpStatus === 'Sesuai Domisili'
+                              ? 'bg-emerald-600 text-white shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>✅</span>
+                          <span>Sesuai Domisili (RT 02)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              ktpStatus: 'Luar Wilayah (Belum Mutasi)'
+                            });
+                          }}
+                          className={`w-full py-2.5 px-3 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                            formData.ktpStatus === 'Luar Wilayah (Belum Mutasi)'
+                              ? 'bg-amber-600 text-white shadow-xs'
+                              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>🪪</span>
+                          <span>Luar Wilayah (Belum Mutasi)</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-1 border-t border-slate-200/60">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                        <label className="text-xs font-semibold text-slate-700">
+                          Alamat Sesuai KTP <span className="text-rose-500">*</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const localAddr = `Jl. Pue Lombe, Huntap Tondo 2 Blok ${formData.block || ''}-${formData.number || ''}`.trim();
+                            setFormData({
+                              ...formData,
+                              ktpStatus: 'Sesuai Domisili',
+                              addressKtp: localAddr
+                            });
+                            toast.success(`Alamat KTP diset: ${localAddr}`);
+                          }}
+                          className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center justify-center gap-1 transition-colors cursor-pointer self-start sm:self-auto active:scale-95"
+                        >
+                          📍 Set Alamat Huntap Tondo 2 (Jl. Pue Lombe)
+                        </button>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={formData.addressKtp}
+                        onChange={e => setFormData({ ...formData, addressKtp: e.target.value })}
+                        placeholder={
+                          formData.ktpStatus === 'Sesuai Domisili'
+                            ? `Contoh: Jl. Pue Lombe, Huntap Tondo 2 Blok ${formData.block || 'C10'}-${formData.number || '01'}`
+                            : 'Tuliskan alamat lengkap asal sesuai yang tertera di KTP fisik Anda...'
+                        }
+                        className="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all resize-none leading-relaxed"
+                      />
+                      {formData.ktpStatus === 'Sesuai Domisili' && (
+                        <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
+                          <Check size={11} className="stroke-[3]" /> Alamat terstandarisasi Huntap Tondo 2 Jl. Pue Lombe.
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Tempat Lahir & Tanggal Lahir */}

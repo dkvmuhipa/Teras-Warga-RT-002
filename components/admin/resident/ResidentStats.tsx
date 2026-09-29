@@ -8,6 +8,9 @@ interface ResidentStatsProps {
   emptyHouses: number;
   verifiedCount: number;
   itemVariants: any;
+  ktpLocalCount?: number;
+  ktpExternalCount?: number;
+  onFilterKtp?: (filterType: string) => void;
 }
 
 export const ResidentStats: React.FC<ResidentStatsProps> = ({ 
@@ -15,7 +18,10 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
   occupiedHouses, 
   emptyHouses,
   verifiedCount,
-  itemVariants 
+  itemVariants,
+  ktpLocalCount = 0,
+  ktpExternalCount = 0,
+  onFilterKtp
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-12 gap-5">
@@ -113,6 +119,71 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
         <div className="relative z-10">
           <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Hunian Kosong</p>
           <h3 className="text-3xl font-extrabold text-slate-900 leading-none">{emptyHouses} <span className="text-xs font-bold text-slate-400">Unit</span></h3>
+        </div>
+      </motion.div>
+
+      {/* Disdukcapil KTP Population Compliance Widget */}
+      <motion.div
+        variants={itemVariants}
+        className="col-span-1 md:col-span-4 xl:col-span-12 bg-white/90 backdrop-blur-sm p-4 sm:p-5 rounded-[2rem] border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100/80 text-indigo-600 flex items-center justify-center shrink-0 shadow-2xs">
+            <span className="text-lg">🪪</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                Status Kesesuaian KTP Warga RT 02 (Laporan Disdukcapil / Kelurahan)
+              </h4>
+              <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                {occupiedHouses} KK Dihuni
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 font-medium">
+              Monitoring ketertiban mutasi kependudukan warga Huntap Tondo 2 Jl. Pue Lombe. Klik untuk filter cepat data warga.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto shrink-0">
+          {/* KTP Setempat Button */}
+          <button
+            type="button"
+            onClick={() => onFilterKtp?.('ktp_local')}
+            className="flex-1 md:flex-none flex items-center justify-between md:justify-start gap-2.5 px-3.5 py-2 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/80 text-emerald-800 transition-all cursor-pointer active:scale-95 text-left group"
+            title="Klik untuk filter warga KTP Setempat RT 02"
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-black">KTP Setempat (RT 02)</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-black text-emerald-900">{ktpLocalCount}</span>
+              <span className="text-[10px] font-bold text-emerald-600 bg-white/80 px-1.5 py-0.5 rounded-md border border-emerald-200">
+                {Math.round((ktpLocalCount / (occupiedHouses || 1)) * 100)}%
+              </span>
+            </div>
+          </button>
+
+          {/* KTP Luar Wilayah Button */}
+          <button
+            type="button"
+            onClick={() => onFilterKtp?.('ktp_external')}
+            className="flex-1 md:flex-none flex items-center justify-between md:justify-start gap-2.5 px-3.5 py-2 rounded-xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200/80 text-amber-800 transition-all cursor-pointer active:scale-95 text-left group"
+            title="Klik untuk filter warga KTP Luar Wilayah (Belum Mutasi)"
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="text-xs font-black">Luar Wilayah (Belum Mutasi)</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-black text-amber-900">{ktpExternalCount}</span>
+              <span className="text-[10px] font-bold text-amber-600 bg-white/80 px-1.5 py-0.5 rounded-md border border-amber-200">
+                {Math.round((ktpExternalCount / (occupiedHouses || 1)) * 100)}%
+              </span>
+            </div>
+          </button>
         </div>
       </motion.div>
     </div>
