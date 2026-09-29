@@ -2042,7 +2042,12 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         { id: 'education', label: "PENDIDIKAN", baseWidth: 16 },
         { id: 'jobCategory', label: "PEKERJAAN", baseWidth: 25 },
         { id: 'economicStatus', label: "EKONOMI", baseWidth: 16 },
-        { id: 'isVerified', label: "KET", baseWidth: 12 }
+        { id: 'isVerified', label: "KET", baseWidth: 12 },
+        { id: 'joiningDate', label: "MENEMPATI", baseWidth: 18 },
+        { id: 'businessName', label: "NAMA USAHA/UMKM", baseWidth: 32 },
+        { id: 'businessCategory', label: "BIDANG USAHA", baseWidth: 22 },
+        { id: 'businessLocation', label: "LOKASI USAHA", baseWidth: 20 },
+        { id: 'businessPhone', label: "WA USAHA", baseWidth: 22 }
     ];
 
     let selectedDefs = allPdfCols;
@@ -2160,13 +2165,28 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
                 if (h.status === 'Empty') return '-';
                 return (val?.toString() || '-');
             }
+            if (header.id === 'joiningDate') {
+                return h.joiningDate ? h.joiningDate.split('T')[0] : (h.createdAt ? h.createdAt.split('T')[0] : '-');
+            }
+            if (header.id === 'businessName') {
+                return (h.businessName || (h.hasBusiness ? 'Ada Usaha' : '-')).toUpperCase();
+            }
+            if (header.id === 'businessCategory') {
+                return h.businessCategory || '-';
+            }
+            if (header.id === 'businessLocation') {
+                return h.businessLocation || '-';
+            }
+            if (header.id === 'businessPhone') {
+                return h.businessPhone || h.phone || '-';
+            }
             return (val?.toString() || '-');
         });
 
         rowData.forEach((text, idx) => {
             const hDef = headers[idx];
             const w = hDef.w;
-            const centerKeys = ['no', 'block', 'number', 'gender', 'birthDate', 'religion', 'status', 'residenceType', 'occupants', 'isVerified'];
+            const centerKeys = ['no', 'block', 'number', 'gender', 'birthDate', 'religion', 'status', 'residenceType', 'occupants', 'isVerified', 'joiningDate', 'businessLocation'];
             const align = centerKeys.includes(hDef.id) ? "center" : "left";
             const xPos = align === "center" ? currX + (w / 2) : currX + 2;
             

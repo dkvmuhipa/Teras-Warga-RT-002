@@ -97,6 +97,13 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
     { header: 'TANGGAL BAYAR TERAKHIR', key: 'paymentDate', width: 25 },
     { header: 'STATUS VERIFIKASI', key: 'isVerified', width: 20 },
     { header: 'KODE AKSES (PIN)', key: 'accessCode', width: 20 },
+    { header: 'MULAI MENEMPATI', key: 'joiningDate', width: 20 },
+    { header: 'MEMILIKI USAHA (Ya/Tidak)', key: 'hasBusiness', width: 25 },
+    { header: 'NAMA USAHA / TOKO', key: 'businessName', width: 30 },
+    { header: 'KATEGORI USAHA', key: 'businessCategory', width: 25 },
+    { header: 'LOKASI USAHA', key: 'businessLocation', width: 25 },
+    { header: 'WHATSAPP USAHA', key: 'businessPhone', width: 22 },
+    { header: 'TERDAFTAR KATALOG UMKM', key: 'isUmkmRegistered', width: 25 },
   ];
 
   let columnsToUse = allColumns;
@@ -188,6 +195,13 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
       paymentDate: house.paymentDate || '-',
       isVerified: house.isVerified ? 'Terverifikasi' : 'Belum Verifikasi',
       accessCode: house.accessCode || '-',
+      joiningDate: house.joiningDate ? house.joiningDate.split('T')[0] : (house.createdAt ? house.createdAt.split('T')[0] : '-'),
+      hasBusiness: (house.hasBusiness || !!house.businessName) ? 'Ya' : 'Tidak',
+      businessName: house.businessName || '-',
+      businessCategory: house.businessCategory || '-',
+      businessLocation: house.businessLocation || '-',
+      businessPhone: house.businessPhone || house.phone || '-',
+      isUmkmRegistered: house.isUmkmRegistered ? 'Ya' : 'Tidak',
     });
 
     // Style Data Rows
@@ -244,6 +258,14 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
         } else if (valStr === PaymentStatus.PENDING) {
           cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFD97706' }, bold: true }; // Amber-600
           cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } }; // Amber-50
+        }
+      }
+
+      // Conditional styling for Usaha & UMKM Warga
+      if (colKey === 'hasBusiness' || colKey === 'isUmkmRegistered') {
+        if (valStr === 'Ya') {
+          cell.font = { name: 'Segoe UI', size: 10, color: { argb: 'FFD97706' }, bold: true }; // Amber-600
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } }; // Amber-100
         }
       }
 

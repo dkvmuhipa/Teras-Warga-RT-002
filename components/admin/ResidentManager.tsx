@@ -516,7 +516,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     jobCategory: 'Pekerjaan',
     religion: 'Agama',
     gender: 'Jenis Kelamin',
-    birthDate: 'Tanggal Lahir'
+    birthDate: 'Tanggal Lahir',
+    joiningDate: 'Mulai Menempati',
+    hasBusiness: 'Memiliki Usaha / UMKM',
+    businessName: 'Nama Usaha / Merek',
+    businessCategory: 'Kategori Usaha',
+    businessLocation: 'Lokasi Usaha',
+    businessPhone: 'Kontak WA Usaha',
+    isUmkmRegistered: 'Masuk Katalog UMKM'
   };
 
   const handleUploadExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -2346,9 +2353,21 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <span className="text-slate-300 text-xs">|</span>
                       <button 
                         onClick={() => setSelectedExportCols([
+                          'block', 'number', 'headOfFamily', 'phone', 
+                          'businessName', 'businessCategory', 'businessLocation', 'businessPhone'
+                        ])}
+                        className="text-[10px] uppercase font-black text-amber-600 hover:text-amber-800"
+                      >
+                        Khusus UMKM
+                      </button>
+                      <span className="text-slate-300 text-xs">|</span>
+                      <button 
+                        onClick={() => setSelectedExportCols([
                           'block', 'number', 'headOfFamily', 'phone', 'ownerName', 'ownerPhone',
-                          'status', 'residenceType', 'gender', 'birthDate', 'religion',
-                          'occupants', 'education', 'jobCategory', 'economicStatus', 'isVerified', 'accessCode'
+                          'status', 'residenceType', 'joiningDate', 'gender', 'birthDate', 'religion',
+                          'occupants', 'education', 'jobCategory', 'economicStatus', 
+                          'hasBusiness', 'businessName', 'businessCategory', 'businessLocation', 'businessPhone', 'isUmkmRegistered',
+                          'isVerified', 'accessCode'
                         ])}
                         className="text-[10px] uppercase font-black text-indigo-600 hover:text-indigo-800"
                       >
@@ -2370,6 +2389,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         { id: 'block', label: 'Blok' },
                         { id: 'number', label: 'No Rumah' },
                         { id: 'headOfFamily', label: 'Kepala Keluarga' },
+                        { id: 'joiningDate', label: 'Mulai Menempati' },
                         { id: 'status', label: 'Status Hunian' },
                         { id: 'residenceType', label: 'Status Kepenghunian' }
                       ]},
@@ -2383,6 +2403,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         { id: 'birthDate', label: 'Tgl Lahir' },
                         { id: 'religion', label: 'Agama' },
                         { id: 'occupants', label: 'Jumlah Jiwa' }
+                      ]},
+                      { name: 'Usaha & UMKM Warga', items: [
+                        { id: 'hasBusiness', label: 'Memiliki Usaha' },
+                        { id: 'businessName', label: 'Nama Usaha/Toko' },
+                        { id: 'businessCategory', label: 'Kategori Usaha' },
+                        { id: 'businessLocation', label: 'Lokasi Usaha' },
+                        { id: 'businessPhone', label: 'WhatsApp Usaha' },
+                        { id: 'isUmkmRegistered', label: 'Katalog UMKM' }
                       ]},
                       { name: 'Pelengkap', items: [
                         { id: 'education', label: 'Pendidikan' },
