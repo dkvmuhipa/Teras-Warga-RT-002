@@ -299,6 +299,35 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <DetailItem icon={<FileText size={13} />} label="Nomor NIK" value={selectedResident.nik || '-'} isMain />
                   <DetailItem icon={<Users size={13} />} label="Nomor KK" value={selectedResident.kkNumber || '-'} isMain />
                   <DetailItem icon={<Calendar size={13} />} label="Mulai Menempati" value={selectedResident.joiningDate ? selectedResident.joiningDate.split('T')[0] : (selectedResident.createdAt ? `${selectedResident.createdAt.split('T')[0]} (Registrasi)` : 'Belum Dicatat')} />
+                  {/* Status Kesesuaian KTP & Alamat Sesuai KTP */}
+                  <div className="col-span-2 p-3 bg-slate-50/90 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                        <CreditCard size={15} />
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Status Kesesuaian KTP</span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-black border ${
+                            (selectedResident.ktpStatus === 'Sesuai Domisili' || (!selectedResident.ktpStatus && selectedResident.addressKtp && (selectedResident.addressKtp.toLowerCase().includes('tondo') || selectedResident.addressKtp.toLowerCase().includes('pue lombe'))))
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}>
+                            <span>{(selectedResident.ktpStatus === 'Sesuai Domisili' || (!selectedResident.ktpStatus && selectedResident.addressKtp && (selectedResident.addressKtp.toLowerCase().includes('tondo') || selectedResident.addressKtp.toLowerCase().includes('pue lombe')))) ? '✅' : '🪪'}</span>
+                            <span>
+                              {selectedResident.ktpStatus || (selectedResident.addressKtp && (selectedResident.addressKtp.toLowerCase().includes('tondo') || selectedResident.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai Domisili' : (selectedResident.addressKtp ? 'Luar Wilayah (Belum Mutasi)' : 'Sesuai Domisili'))}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {selectedResident.addressKtp && (
+                      <div className="text-left sm:text-right text-xs text-slate-700 font-semibold max-w-xs pl-10 sm:pl-0">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Alamat KTP</span>
+                        <span className="text-slate-800 font-bold leading-tight">{selectedResident.addressKtp}</span>
+                      </div>
+                    )}
+                  </div>
                   {selectedResident.residenceType !== 'Tetap' && (
                     <div className="col-span-2">
                       <DetailItem icon={<Key size={13} />} label="Pemilik Rumah" value={`${selectedResident.ownerName || '-'}${selectedResident.ownerPhone ? ` (${selectedResident.ownerPhone})` : ''}`} noTruncate />

@@ -568,6 +568,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       jobCategory: '',
       bloodType: '-',
       nationality: 'WNI',
+      ktpStatus: 'Sesuai Domisili' as any,
       addressKtp: '',
       bpjsStatus: 'Tidak Ada',
       vehicleCount: 0,
@@ -624,6 +625,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     jobCategory: '',
     bloodType: '-' as any,
     nationality: 'WNI',
+    ktpStatus: 'Sesuai Domisili' as any,
     addressKtp: '',
     bpjsStatus: 'Tidak Ada' as any,
     vehicleCount: 0,
@@ -714,6 +716,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         jobCategory: currentHouse.jobCategory || '',
         bloodType: currentHouse.bloodType || '-',
         nationality: currentHouse.nationality || 'WNI',
+        ktpStatus: currentHouse.ktpStatus || (currentHouse.addressKtp?.toLowerCase().includes('tondo') || currentHouse.addressKtp?.toLowerCase().includes('pue lombe') ? 'Sesuai Domisili' : (currentHouse.addressKtp ? 'Luar Wilayah (Belum Mutasi)' : 'Sesuai Domisili')),
         addressKtp: currentHouse.addressKtp || '',
         bpjsStatus: currentHouse.bpjsStatus || 'Tidak Ada',
         vehicleCount: (currentHouse.twoWheelCount || 0) + (currentHouse.fourWheelCount || 0) > 0 ? (currentHouse.twoWheelCount || 0) + (currentHouse.fourWheelCount || 0) : (currentHouse.vehicleCount || 0),
@@ -2235,8 +2238,16 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
                   </p>
                 </div>
 
+                <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><CreditCard size={11} className="text-slate-450"/> Kesesuaian KTP</p>
+                  <p className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                    <span className={`w-2 h-2 rounded-full ${(currentHouse?.ktpStatus === 'Sesuai Domisili' || (!currentHouse?.ktpStatus && currentHouse?.addressKtp && (currentHouse.addressKtp.toLowerCase().includes('tondo') || currentHouse.addressKtp.toLowerCase().includes('pue lombe')))) ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                    <span>{currentHouse?.ktpStatus || (currentHouse?.addressKtp && (currentHouse.addressKtp.toLowerCase().includes('tondo') || currentHouse.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai Domisili' : (currentHouse?.addressKtp ? 'Luar Wilayah (Belum Mutasi)' : 'Belum Dicatat'))}</span>
+                  </p>
+                </div>
+
                 {currentHouse?.addressKtp && (
-                  <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85 col-span-2 md:col-span-4">
+                  <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85 col-span-2 md:col-span-3">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><MapPin size={11} className="text-slate-450"/> Alamat Sesuai KTP</p>
                     <p className="text-xs font-bold text-slate-700 leading-relaxed">{currentHouse.addressKtp}</p>
                   </div>
@@ -3243,6 +3254,95 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                           <option value="Sewa">Sewa</option>
                           <option value="Rumah Keluarga">Rumah Keluarga</option>
                         </select>
+                      </div>
+
+                      {/* Status Kesesuaian KTP & Alamat Sesuai KTP */}
+                      <div className="md:col-span-2 p-3.5 bg-slate-100/70 border border-slate-200/80 rounded-2xl space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div>
+                            <label className="block text-xs font-black text-slate-700">
+                              Status Kesesuaian KTP
+                            </label>
+                            <p className="text-[10px] text-slate-400 font-medium">
+                              Apakah KTP sudah beralamat setempat di Huntap Tondo 2 atau masih luar wilayah.
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const localAddr = `Jl. Pue Lombe, Huntap Tondo 2 Blok ${currentHouse?.block || ''}-${currentHouse?.number || ''}`.trim();
+                                setUpdateForm({
+                                  ...updateForm,
+                                  ktpStatus: 'Sesuai Domisili',
+                                  addressKtp: (!updateForm.addressKtp || updateForm.addressKtp.toLowerCase().includes('tondo') || updateForm.addressKtp.toLowerCase().includes('pue lombe')) ? localAddr : updateForm.addressKtp
+                                });
+                              }}
+                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                                updateForm.ktpStatus === 'Sesuai Domisili' || (!updateForm.ktpStatus && updateForm.addressKtp?.toLowerCase().includes('tondo'))
+                                  ? 'bg-emerald-600 text-white shadow-xs'
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                              }`}
+                            >
+                              ✅ Sesuai Domisili (RT 02)
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setUpdateForm({ ...updateForm, ktpStatus: 'Luar Wilayah (Belum Mutasi)' })}
+                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                                updateForm.ktpStatus === 'Luar Wilayah (Belum Mutasi)'
+                                  ? 'bg-amber-600 text-white shadow-xs'
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                              }`}
+                            >
+                              🪪 Luar Wilayah
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                              Alamat Sesuai KTP
+                            </label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const localAddr = `Jl. Pue Lombe, Huntap Tondo 2 Blok ${currentHouse?.block || ''}-${currentHouse?.number || ''}`.trim();
+                                setUpdateForm({
+                                  ...updateForm,
+                                  ktpStatus: 'Sesuai Domisili',
+                                  addressKtp: localAddr
+                                });
+                                toast.success(`Alamat KTP diset: ${localAddr}`);
+                              }}
+                              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2 py-0.5 rounded-md border border-indigo-100 flex items-center gap-1 cursor-pointer transition-colors"
+                            >
+                              📍 Gunakan Alamat Huntap Tondo 2 (Jl. Pue Lombe)
+                            </button>
+                          </div>
+                          <textarea
+                            rows={2}
+                            value={updateForm.addressKtp}
+                            onChange={e => setUpdateForm({ ...updateForm, addressKtp: e.target.value })}
+                            placeholder={
+                              updateForm.ktpStatus === 'Sesuai Domisili'
+                                ? `Contoh: Jl. Pue Lombe, Huntap Tondo 2 Blok ${currentHouse?.block || ''}-${currentHouse?.number || ''}`
+                                : 'Tuliskan alamat lengkap asal sesuai yang tertera di KTP fisik Anda...'
+                            }
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none"
+                          />
+                          {(updateForm.ktpStatus === 'Sesuai Domisili' || (!updateForm.ktpStatus && updateForm.addressKtp?.toLowerCase().includes('tondo'))) && (
+                            <p className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                              <span>✓</span> Alamat KTP sesuai domisili RT 02 di Huntap Tondo 2 Jl. Pue Lombe.
+                            </p>
+                          )}
+                          {updateForm.ktpStatus === 'Luar Wilayah (Belum Mutasi)' && (
+                            <p className="text-[10px] text-amber-600 font-medium mt-1 flex items-center gap-1">
+                              <span>ℹ️</span> KTP Anda masih beralamat di luar wilayah dan belum melakukan mutasi kependudukan ke RT 02.
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status Perkawinan</label>

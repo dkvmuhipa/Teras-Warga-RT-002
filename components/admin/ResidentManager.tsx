@@ -219,6 +219,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     maritalStatus: 'Belum Kawin' as any,
     bloodType: '-' as any,
     nationality: 'WNI',
+    ktpStatus: 'Sesuai Domisili' as any,
     addressKtp: '',
     bpjsStatus: 'Tidak Ada' as any,
     job: '',
@@ -523,7 +524,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     businessCategory: 'Kategori Usaha',
     businessLocation: 'Lokasi Usaha',
     businessPhone: 'Kontak WA Usaha',
-    isUmkmRegistered: 'Masuk Katalog UMKM'
+    isUmkmRegistered: 'Masuk Katalog UMKM',
+    ktpStatus: 'Status Kesesuaian KTP',
+    addressKtp: 'Alamat Sesuai KTP'
   };
 
   const handleUploadExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -844,6 +847,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       maritalStatus: 'Belum Kawin' as any,
       bloodType: '-' as any,
       nationality: 'WNI',
+      ktpStatus: 'Sesuai Domisili' as any,
       addressKtp: '',
       bpjsStatus: 'Tidak Ada' as any,
       job: '',
@@ -1078,6 +1082,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       maritalStatus: house.maritalStatus || 'Belum Kawin',
       bloodType: house.bloodType || '-',
       nationality: house.nationality || 'WNI',
+      ktpStatus: house.ktpStatus || (house.addressKtp?.toLowerCase().includes('tondo') || house.addressKtp?.toLowerCase().includes('pue lombe') ? 'Sesuai Domisili' : (house.addressKtp ? 'Luar Wilayah (Belum Mutasi)' : 'Sesuai Domisili')),
       addressKtp: house.addressKtp || '',
       bpjsStatus: house.bpjsStatus || 'Tidak Ada',
       job: house.job || '',
@@ -1526,6 +1531,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       else if (filterStatus === 'pbb_not_taken') matchesStatus = h.pbbStatus !== 'Sudah Diambil' && h.pbbStatus !== undefined && (h.status === 'Occupied' || h.status === 'Visiting');
       else if (filterStatus === 'bansos') matchesStatus = !!(h.isPKH || h.isBLT || h.isBPNT || h.isBansosLain);
       else if (filterStatus === 'disability') matchesStatus = !!(h.isDisability || h.isOrphan);
+      else if (filterStatus === 'ktp_local') matchesStatus = h.ktpStatus === 'Sesuai Domisili' || (!h.ktpStatus && !!h.addressKtp && (h.addressKtp.toLowerCase().includes('tondo') || h.addressKtp.toLowerCase().includes('pue lombe')));
+      else if (filterStatus === 'ktp_external') matchesStatus = h.ktpStatus === 'Luar Wilayah (Belum Mutasi)' || (!h.ktpStatus && (!h.addressKtp || (!h.addressKtp.toLowerCase().includes('tondo') && !h.addressKtp.toLowerCase().includes('pue lombe'))));
 
       let matchesResidenceType = true;
       if (filterResidenceType !== 'all') {
@@ -2363,8 +2370,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <span className="text-slate-300 text-xs">|</span>
                       <button 
                         onClick={() => setSelectedExportCols([
+                          'block', 'number', 'headOfFamily', 'phone', 
+                          'ktpStatus', 'addressKtp'
+                        ])}
+                        className="text-[10px] uppercase font-black text-emerald-600 hover:text-emerald-800"
+                      >
+                        Khusus KTP
+                      </button>
+                      <span className="text-slate-300 text-xs">|</span>
+                      <button 
+                        onClick={() => setSelectedExportCols([
                           'block', 'number', 'headOfFamily', 'phone', 'ownerName', 'ownerPhone',
                           'status', 'residenceType', 'joiningDate', 'gender', 'birthDate', 'religion',
+                          'ktpStatus', 'addressKtp',
                           'occupants', 'education', 'jobCategory', 'economicStatus', 
                           'hasBusiness', 'businessName', 'businessCategory', 'businessLocation', 'businessPhone', 'isUmkmRegistered',
                           'isVerified', 'accessCode'
@@ -2398,7 +2416,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         { id: 'ownerName', label: 'Pemilik Rumah' },
                         { id: 'ownerPhone', label: 'Kontak Pemilik' }
                       ]},
-                      { name: 'Demografi', items: [
+                      { name: 'Kependudukan & KTP', items: [
+                        { id: 'ktpStatus', label: 'Status KTP' },
+                        { id: 'addressKtp', label: 'Alamat Sesuai KTP' },
                         { id: 'gender', label: 'Jenis Kelamin' },
                         { id: 'birthDate', label: 'Tgl Lahir' },
                         { id: 'religion', label: 'Agama' },

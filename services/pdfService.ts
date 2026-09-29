@@ -2047,7 +2047,9 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         { id: 'businessName', label: "NAMA USAHA/UMKM", baseWidth: 32 },
         { id: 'businessCategory', label: "BIDANG USAHA", baseWidth: 22 },
         { id: 'businessLocation', label: "LOKASI USAHA", baseWidth: 20 },
-        { id: 'businessPhone', label: "WA USAHA", baseWidth: 22 }
+        { id: 'businessPhone', label: "WA USAHA", baseWidth: 22 },
+        { id: 'ktpStatus', label: "STATUS KTP", baseWidth: 26 },
+        { id: 'addressKtp', label: "ALAMAT SESUAI KTP", baseWidth: 42 }
     ];
 
     let selectedDefs = allPdfCols;
@@ -2180,13 +2182,19 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
             if (header.id === 'businessPhone') {
                 return h.businessPhone || h.phone || '-';
             }
+            if (header.id === 'ktpStatus') {
+                return h.ktpStatus || (h.addressKtp && (h.addressKtp.toLowerCase().includes('tondo') || h.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai' : (h.addressKtp ? 'Luar Wilayah' : '-'));
+            }
+            if (header.id === 'addressKtp') {
+                return h.addressKtp || '-';
+            }
             return (val?.toString() || '-');
         });
 
         rowData.forEach((text, idx) => {
             const hDef = headers[idx];
             const w = hDef.w;
-            const centerKeys = ['no', 'block', 'number', 'gender', 'birthDate', 'religion', 'status', 'residenceType', 'occupants', 'isVerified', 'joiningDate', 'businessLocation'];
+            const centerKeys = ['no', 'block', 'number', 'gender', 'birthDate', 'religion', 'status', 'residenceType', 'occupants', 'isVerified', 'joiningDate', 'businessLocation', 'ktpStatus'];
             const align = centerKeys.includes(hDef.id) ? "center" : "left";
             const xPos = align === "center" ? currX + (w / 2) : currX + 2;
             

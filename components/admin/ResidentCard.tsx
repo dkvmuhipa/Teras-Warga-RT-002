@@ -148,6 +148,20 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                     <span className="truncate max-w-[110px]">{house.businessName || 'UMKM'}</span>
                   </span>
                 )}
+
+                {house.status === 'Occupied' && (
+                  <span 
+                    className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider border flex items-center gap-1 shadow-2xs ${
+                      (house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe'))))
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+                        : 'bg-amber-50 text-amber-700 border-amber-200/80'
+                    }`}
+                    title={house.addressKtp ? `Alamat KTP: ${house.addressKtp}` : `Status KTP: ${house.ktpStatus || 'Belum Terdata'}`}
+                  >
+                    <span>🪪</span>
+                    <span>{(house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')))) ? 'KTP RT 02' : 'KTP Luar'}</span>
+                  </span>
+                )}
               </div>
             </div>
           </div>

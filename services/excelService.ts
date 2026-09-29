@@ -104,6 +104,8 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
     { header: 'LOKASI USAHA', key: 'businessLocation', width: 25 },
     { header: 'WHATSAPP USAHA', key: 'businessPhone', width: 22 },
     { header: 'TERDAFTAR KATALOG UMKM', key: 'isUmkmRegistered', width: 25 },
+    { header: 'STATUS KESESUAIAN KTP', key: 'ktpStatus', width: 30 },
+    { header: 'ALAMAT SESUAI KTP', key: 'addressKtp', width: 42 },
   ];
 
   let columnsToUse = allColumns;
@@ -202,6 +204,8 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
       businessLocation: house.businessLocation || '-',
       businessPhone: house.businessPhone || house.phone || '-',
       isUmkmRegistered: house.isUmkmRegistered ? 'Ya' : 'Tidak',
+      ktpStatus: house.ktpStatus || (house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai Domisili' : (house.addressKtp ? 'Luar Wilayah (Belum Mutasi)' : '-')),
+      addressKtp: house.addressKtp || '-',
     });
 
     // Style Data Rows
@@ -725,6 +729,12 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
     else if (residenceTypeRaw?.toLowerCase() === 'kontrak' || residenceTypeRaw?.toLowerCase() === 'sewa' || residenceTypeRaw?.toLowerCase() === 'kost') residenceType = 'Sewa';
     else if (residenceTypeRaw?.toLowerCase() === 'keluarga' || residenceTypeRaw?.toLowerCase() === 'rumah keluarga') residenceType = 'Rumah Keluarga';
 
+    const ktpStatusRaw = row.getCell(getColIndex('STATUS KESESUAIAN KTP', 0)).text?.trim() || undefined;
+    const addressKtp = row.getCell(getColIndex('ALAMAT SESUAI KTP', 0)).text?.trim() || undefined;
+    let ktpStatus: 'Sesuai Domisili' | 'Luar Wilayah (Belum Mutasi)' | undefined = undefined;
+    if (ktpStatusRaw?.toLowerCase().includes('sesuai')) ktpStatus = 'Sesuai Domisili';
+    else if (ktpStatusRaw?.toLowerCase().includes('luar') || ktpStatusRaw?.toLowerCase().includes('mutasi')) ktpStatus = 'Luar Wilayah (Belum Mutasi)';
+
     data.push({
       block,
       number,
@@ -740,6 +750,8 @@ export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
       ...(residenceType !== undefined && { residenceType }),
       ...(education !== undefined && { education }),
       ...(jobCategory !== undefined && { jobCategory }),
+      ...(ktpStatus !== undefined && { ktpStatus }),
+      ...(addressKtp !== undefined && { addressKtp }),
       ...(vehicleCountRaw !== null && vehicleCountRaw !== undefined && vehicleCountRaw !== '' 
         ? { vehicleCount: Number(vehicleCountRaw) } 
         : (twoWheelCountRaw !== undefined || fourWheelCountRaw !== undefined 

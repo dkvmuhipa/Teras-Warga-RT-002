@@ -114,6 +114,7 @@ export interface House {
   bloodType?: 'A' | 'B' | 'AB' | 'O' | '-'; // NEW: Golongan Darah
   nationality?: string; // NEW: Kewarganegaraan
   addressKtp?: string; // NEW: Alamat sesuai KTP
+  ktpStatus?: 'Sesuai Domisili' | 'Luar Wilayah (Belum Mutasi)'; // Status kesesuaian KTP dengan domisili
   bpjsStatus?: 'PPU' | 'PBPU' | 'PBI' | 'Tidak Ada'; // NEW: Status BPJS
   kkNumber?: string; // NEW: Nomor Kartu Keluarga
   
@@ -248,6 +249,8 @@ export interface ResidentRegistration {
   wasteTier?: 'Umum' | 'PKH' | 'PNS';
   isDisability?: boolean;
   isOrphan?: boolean;
+  addressKtp?: string;
+  ktpStatus?: 'Sesuai Domisili' | 'Luar Wilayah (Belum Mutasi)';
   ktpUrl?: string;
   kkUrl?: string;
   useManualDemographics?: boolean;
@@ -1082,6 +1085,7 @@ export interface UpdateRequest {
   bloodType?: 'A' | 'B' | 'AB' | 'O' | '-';
   nationality?: string;
   addressKtp?: string;
+  ktpStatus?: 'Sesuai Domisili' | 'Luar Wilayah (Belum Mutasi)';
   bpjsStatus?: 'PPU' | 'PBPU' | 'PBI' | 'Tidak Ada';
   vehicleCount?: number;
   twoWheelCount?: number;

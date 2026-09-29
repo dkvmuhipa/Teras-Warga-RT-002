@@ -74,6 +74,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
       if (req.jobCategory) updatePayload.jobCategory = req.jobCategory;
       if (req.bloodType) updatePayload.bloodType = req.bloodType;
       if (req.addressKtp) updatePayload.addressKtp = req.addressKtp;
+      if (req.ktpStatus) updatePayload.ktpStatus = req.ktpStatus;
       if (req.bpjsStatus) updatePayload.bpjsStatus = req.bpjsStatus;
       if (req.familyMembers && req.familyMembers.length > 0) updatePayload.familyMembers = req.familyMembers;
       if (req.isPKH !== undefined) updatePayload.isPKH = req.isPKH;
@@ -383,6 +384,21 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                           <span className="font-bold text-right">{house.businessName || 'Ada Usaha'} ({house.businessCategory || 'UMKM'})</span>
                         </div>
                       )}
+                      {(house?.ktpStatus || house?.addressKtp) && (
+                        <div className="flex justify-between items-start pt-1 border-t border-rose-200/40">
+                          <span>Status KTP:</span>
+                          <div className="text-right">
+                            <span className="font-bold text-rose-800">
+                              {house.ktpStatus || (house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai Domisili' : (house.addressKtp ? 'Luar Wilayah' : '-'))}
+                            </span>
+                            {house.addressKtp && (
+                              <div className="text-[10px] text-rose-600 line-through max-w-[180px]">
+                                {house.addressKtp}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}
@@ -424,6 +440,21 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                           <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-800">
                             Katalog UMKM
                           </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {(selectedRequest.ktpStatus || selectedRequest.addressKtp) && (
+                    <div className="flex justify-between items-start pt-1 border-t border-emerald-200/40">
+                      <span>Status KTP:</span>
+                      <div className="text-right">
+                        <span className="font-extrabold text-emerald-700">
+                          {selectedRequest.ktpStatus || 'Sesuai Domisili'}
+                        </span>
+                        {selectedRequest.addressKtp && (
+                          <div className="text-[10px] text-emerald-600 font-bold max-w-[200px]">
+                            {selectedRequest.addressKtp}
+                          </div>
                         )}
                       </div>
                     </div>

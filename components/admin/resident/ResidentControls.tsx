@@ -214,6 +214,8 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
                     <option value="pbb_not_taken">📄 PBB Belum Diambil</option>
                     <option value="bansos">🎁 Penerima Bansos (PKH/BLT)</option>
                     <option value="disability">♿ Kelompok Rentan (Disabilitas/Yatim)</option>
+                    <option value="ktp_local">🪪 KTP Setempat (Sesuai Domisili)</option>
+                    <option value="ktp_external">🪪 KTP Luar (Belum Mutasi)</option>
                   </select>
                 </FilterGroup>
 
