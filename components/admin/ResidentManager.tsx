@@ -1113,8 +1113,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       specialNotes: house.specialNotes || '',
       housePhotoUrl: house.housePhotoUrl || '',
       ktpUrl: house.ktpUrl || '',
-      kkUrl: house.kkUrl || '',
-      joiningDate: house.joiningDate || new Date().toISOString().split('T')[0],
+      joiningDate: house.joiningDate 
+        ? house.joiningDate.split('T')[0] 
+        : (house.createdAt ? house.createdAt.split('T')[0] : ''),
       isVerified: house.isVerified !== undefined ? house.isVerified : true,
       isInitialData: false,
       pbbStatus: house.pbbStatus || 'Belum Diambil',
@@ -1448,7 +1449,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         ...formData,
         id: houseId,
         location: oldHouse?.location || { x: 0, y: 0 },
-        joiningDate: formData.joiningDate || (oldHouse?.joiningDate || new Date().toISOString()),
+        joiningDate: formData.joiningDate 
+          ? formData.joiningDate.split('T')[0] 
+          : (oldHouse?.joiningDate ? oldHouse.joiningDate.split('T')[0] : (oldHouse?.createdAt ? oldHouse.createdAt.split('T')[0] : new Date().toISOString().split('T')[0])),
         occupantHistory: oldHouse?.occupantHistory || []
       };
 
