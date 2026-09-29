@@ -577,17 +577,19 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         })()}
 
                         {/* Status Kesesuaian KTP & Alamat Sesuai KTP */}
-                        <div className="col-span-2 p-3.5 bg-slate-50/90 rounded-2xl border border-slate-200/80 space-y-3">
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                            <div>
-                              <label className="block text-xs font-bold text-slate-700">
+                        <div className="col-span-2 p-3.5 sm:p-4 bg-slate-50/90 rounded-2xl border border-slate-200/80 space-y-3.5 overflow-hidden">
+                          <div className="space-y-2">
+                            <div className="flex flex-col gap-0.5">
+                              <label className="text-xs font-bold text-slate-800">
                                 Status Kesesuaian KTP <span className="text-rose-500">*</span>
                               </label>
-                              <p className="text-[10px] text-slate-400 font-medium">
+                              <p className="text-[11px] text-slate-400 font-medium">
                                 Apakah KTP warga sudah beralamat setempat RT 02 atau masih KTP luar wilayah.
                               </p>
                             </div>
-                            <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shrink-0">
+
+                            {/* Full-width responsive segmented selector */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -598,13 +600,14 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                     addressKtp: (!formData.addressKtp || formData.addressKtp.toLowerCase().includes('tondo') || formData.addressKtp.toLowerCase().includes('pue lombe')) ? localAddr : formData.addressKtp
                                   });
                                 }}
-                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                                className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                                   formData.ktpStatus === 'Sesuai Domisili' || (!formData.ktpStatus && formData.addressKtp?.toLowerCase().includes('tondo'))
                                     ? 'bg-emerald-600 text-white shadow-xs'
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                                 }`}
                               >
-                                ✅ Sesuai Domisili (RT 02)
+                                <span>✅</span>
+                                <span>Sesuai Domisili (RT 02)</span>
                               </button>
                               <button
                                 type="button"
@@ -614,20 +617,21 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                     ktpStatus: 'Luar Wilayah (Belum Mutasi)'
                                   });
                                 }}
-                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                                className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                                   formData.ktpStatus === 'Luar Wilayah (Belum Mutasi)'
                                     ? 'bg-amber-600 text-white shadow-xs'
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                                 }`}
                               >
-                                🪪 Luar Wilayah (Belum Mutasi)
+                                <span>🪪</span>
+                                <span>Luar Wilayah (Belum Mutasi)</span>
                               </button>
                             </div>
                           </div>
 
-                          <div>
-                            <div className="flex items-center justify-between mb-1.5">
-                              <label className="block text-xs font-semibold text-slate-600">
+                          <div className="space-y-1.5 pt-1 border-t border-slate-200/60">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                              <label className="text-xs font-semibold text-slate-700">
                                 Alamat Sesuai KTP <span className="text-rose-500">*</span>
                               </label>
                               <button
@@ -641,7 +645,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                   });
                                   toast.success(`Alamat KTP diset: ${localAddr}`);
                                 }}
-                                className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center gap-1 transition-colors cursor-pointer"
+                                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center justify-center gap-1 transition-colors cursor-pointer self-start sm:self-auto active:scale-95"
                               >
                                 📍 Set Alamat Huntap Tondo 2 (Jl. Pue Lombe)
                               </button>
@@ -656,15 +660,15 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                   ? `Contoh: Jl. Pue Lombe, Huntap Tondo 2 Blok ${formData.block || 'C10'}-${formData.number || '01'}`
                                   : 'Tuliskan alamat lengkap asal sesuai yang tertera di KTP fisik warga...'
                               }
-                              className="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all resize-none"
+                              className="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all resize-none leading-relaxed"
                             />
                             {(formData.ktpStatus === 'Sesuai Domisili' || (!formData.ktpStatus && formData.addressKtp?.toLowerCase().includes('tondo'))) && (
-                              <p className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                              <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
                                 <span>✓</span> Alamat KTP sesuai domisili RT 02 di Huntap Tondo 2 Jl. Pue Lombe.
                               </p>
                             )}
                             {formData.ktpStatus === 'Luar Wilayah (Belum Mutasi)' && (
-                              <p className="text-[10px] text-amber-600 font-medium mt-1 flex items-center gap-1">
+                              <p className="text-[10px] text-amber-600 font-medium flex items-center gap-1">
                                 <span>ℹ️</span> KTP warga masih terdaftar di luar wilayah dan belum melakukan mutasi kependudukan ke RT 02.
                               </p>
                             )}

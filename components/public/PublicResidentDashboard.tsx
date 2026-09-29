@@ -3257,17 +3257,19 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                       </div>
 
                       {/* Status Kesesuaian KTP & Alamat Sesuai KTP */}
-                      <div className="md:col-span-2 p-3.5 bg-slate-100/70 border border-slate-200/80 rounded-2xl space-y-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <div>
-                            <label className="block text-xs font-black text-slate-700">
+                      <div className="md:col-span-2 p-3.5 sm:p-4 bg-slate-100/70 border border-slate-200/80 rounded-2xl space-y-3.5 overflow-hidden">
+                        <div className="space-y-2">
+                          <div className="flex flex-col gap-0.5">
+                            <label className="text-xs font-black text-slate-700">
                               Status Kesesuaian KTP
                             </label>
-                            <p className="text-[10px] text-slate-400 font-medium">
+                            <p className="text-[11px] text-slate-400 font-medium">
                               Apakah KTP sudah beralamat setempat di Huntap Tondo 2 atau masih luar wilayah.
                             </p>
                           </div>
-                          <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-slate-200 shrink-0">
+
+                          {/* Full-width responsive segmented selector */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1 bg-white rounded-xl border border-slate-200 shadow-2xs">
                             <button
                               type="button"
                               onClick={() => {
@@ -3278,31 +3280,33 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                                   addressKtp: (!updateForm.addressKtp || updateForm.addressKtp.toLowerCase().includes('tondo') || updateForm.addressKtp.toLowerCase().includes('pue lombe')) ? localAddr : updateForm.addressKtp
                                 });
                               }}
-                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                              className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center ${
                                 updateForm.ktpStatus === 'Sesuai Domisili' || (!updateForm.ktpStatus && updateForm.addressKtp?.toLowerCase().includes('tondo'))
                                   ? 'bg-emerald-600 text-white shadow-xs'
                                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                               }`}
                             >
-                              ✅ Sesuai Domisili (RT 02)
+                              <span>✅</span>
+                              <span>Sesuai Domisili (RT 02)</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => setUpdateForm({ ...updateForm, ktpStatus: 'Luar Wilayah (Belum Mutasi)' })}
-                              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                              className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center ${
                                 updateForm.ktpStatus === 'Luar Wilayah (Belum Mutasi)'
                                   ? 'bg-amber-600 text-white shadow-xs'
                                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                               }`}
                             >
-                              🪪 Luar Wilayah
+                              <span>🪪</span>
+                              <span>Luar Wilayah (Belum Mutasi)</span>
                             </button>
                           </div>
                         </div>
 
-                        <div>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        <div className="space-y-1.5 pt-1 border-t border-slate-200/60">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                            <label className="text-xs font-semibold text-slate-700">
                               Alamat Sesuai KTP
                             </label>
                             <button
@@ -3316,7 +3320,7 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                                 });
                                 toast.success(`Alamat KTP diset: ${localAddr}`);
                               }}
-                              className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2 py-0.5 rounded-md border border-indigo-100 flex items-center gap-1 cursor-pointer transition-colors"
+                              className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center justify-center gap-1 cursor-pointer transition-colors self-start sm:self-auto active:scale-95"
                             >
                               📍 Gunakan Alamat Huntap Tondo 2 (Jl. Pue Lombe)
                             </button>
@@ -3330,15 +3334,15 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                                 ? `Contoh: Jl. Pue Lombe, Huntap Tondo 2 Blok ${currentHouse?.block || ''}-${currentHouse?.number || ''}`
                                 : 'Tuliskan alamat lengkap asal sesuai yang tertera di KTP fisik Anda...'
                             }
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none"
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none leading-relaxed"
                           />
                           {(updateForm.ktpStatus === 'Sesuai Domisili' || (!updateForm.ktpStatus && updateForm.addressKtp?.toLowerCase().includes('tondo'))) && (
-                            <p className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+                            <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
                               <span>✓</span> Alamat KTP sesuai domisili RT 02 di Huntap Tondo 2 Jl. Pue Lombe.
                             </p>
                           )}
                           {updateForm.ktpStatus === 'Luar Wilayah (Belum Mutasi)' && (
-                            <p className="text-[10px] text-amber-600 font-medium mt-1 flex items-center gap-1">
+                            <p className="text-[10px] text-amber-600 font-medium flex items-center gap-1">
                               <span>ℹ️</span> KTP Anda masih beralamat di luar wilayah dan belum melakukan mutasi kependudukan ke RT 02.
                             </p>
                           )}
