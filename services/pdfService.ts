@@ -1371,6 +1371,109 @@ const getImageData = (source: string): Promise<string> => {
   });
 };
 
+/**
+ * Renders a standardized, perfectly aligned Kop Surat header.
+ * - Computes proportional dimensions via doc.getImageProperties so the logo retains its true aspect ratio
+ * - Centers the logo both vertically and horizontally in its allotted bounding box
+ * - Sets consistent typography (13pt bold for government lines, 13.5pt bold for RT name, 9pt italic for address)
+ * - Harmonizes text center (114mm with logo vs 105mm without) to perfectly balance between left logo and right margin
+ * - Ensures safe padding so the address line never collides with the logo
+ * - Draws standard double divider line with proper spacing
+ */
+export const drawStandardKopSuratSync = (
+  doc: jsPDF,
+  config: PdfConfig,
+  logoData?: string,
+  options?: {
+    dividerY?: number;
+    showPlaceholderIfNoLogo?: boolean;
+  }
+): { logoDrawn: boolean; dividerBottomY: number } => {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const centerX = pageWidth / 2;
+  const marginX = 20;
+
+  // Bounding box for Kop logo (left aligned inside margin: x=20..41, y=10..36)
+  const logoBoxX = 20;
+  const logoBoxY = 10;
+  const maxLogoW = 21;
+  const maxLogoH = 26;
+  let logoDrawn = false;
+
+  if (logoData) {
+    try {
+      const props = doc.getImageProperties(logoData);
+      const aspect = (props.width && props.height) ? (props.width / props.height) : (21 / 26);
+      let w = maxLogoW;
+      let h = w / aspect;
+      if (h > maxLogoH) {
+        h = maxLogoH;
+        w = h * aspect;
+      }
+      const posX = logoBoxX + (maxLogoW - w) / 2;
+      const posY = logoBoxY + (maxLogoH - h) / 2;
+      doc.addImage(logoData, 'PNG', posX, posY, w, h);
+      logoDrawn = true;
+    } catch (err) {
+      doc.addImage(logoData, 'PNG', logoBoxX, logoBoxY, maxLogoW, maxLogoH);
+      logoDrawn = true;
+    }
+  }
+
+  if (!logoDrawn && options?.showPlaceholderIfNoLogo) {
+    const lx = 30; const ly = 22;
+    doc.setDrawColor(0); doc.setLineWidth(0.5);
+    doc.lines([[10,0], [0,12], [-10,0], [0,-12]], lx, ly - 6, [1,1], 'S', true);
+  }
+
+  // Text center: If logo is on the left, available horizontal area is x=42 to 190.
+  // Center of that area is (42 + 190) / 2 = 116. Using 114 provides a visually balanced center.
+  // If no logo, center directly at page center (105).
+  const kopCenterX = logoDrawn ? 114 : centerX;
+
+  doc.setFont("times", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`.toUpperCase(), kopCenterX, 14, { align: "center" });
+  doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`.toUpperCase(), kopCenterX, 19.5, { align: "center" });
+  doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`.toUpperCase(), kopCenterX, 25, { align: "center" });
+  
+  doc.setFontSize(13.5);
+  doc.text(`PENGURUS ${config.rtName}`.toUpperCase(), kopCenterX, 31, { align: "center" });
+
+  doc.setFont("times", "italic");
+  doc.setFontSize(9);
+  doc.text(`Alamat : ${config.rtAddress}`, kopCenterX, 36.5, { 
+    align: "center", 
+    maxWidth: logoDrawn ? 140 : 165 
+  });
+
+  const lineY1 = options?.dividerY || 41;
+  const lineY2 = lineY1 + 1;
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.9);
+  doc.line(marginX, lineY1, pageWidth - marginX, lineY1);
+  doc.setLineWidth(0.3);
+  doc.line(marginX, lineY2, pageWidth - marginX, lineY2);
+
+  return { logoDrawn, dividerBottomY: lineY2 };
+};
+
+export const drawStandardKopSurat = async (
+  doc: jsPDF,
+  config: PdfConfig,
+  options?: {
+    dividerY?: number;
+    showPlaceholderIfNoLogo?: boolean;
+  }
+): Promise<{ logoDrawn: boolean; dividerBottomY: number }> => {
+  let logoData = '';
+  try {
+    logoData = await getImageData(config.logo);
+  } catch (e) {}
+  return drawStandardKopSuratSync(doc, config, logoData, options);
+};
+
 export const generateSuratPengantar = async (letter: LetterRequest, customConfig?: PdfConfig, isDraft: boolean = true) => {
   try {
     const config = customConfig || DEFAULT_PDF_CONFIG;
@@ -1398,35 +1501,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
       doc.setTextColor(0, 0, 0);
   }
 
-  let logoDrawn = false;
-  try {
-    const logoData = await getImageData(config.logo);
-    if (logoData) {
-      doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
-      logoDrawn = true;
-    }
-  } catch (e) { console.error(e); }
-
-  if (!logoDrawn) {
-     const lx = 30; const ly = 22;
-     doc.setDrawColor(0); doc.setLineWidth(0.5);
-     doc.lines([[10,0], [0,12], [-10,0], [0,-12]], lx, ly - 6, [1,1], 'S', true);
-  }
-
-  doc.setFont("times", "normal"); 
-  doc.setFontSize(14);
-  doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-  doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-  doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-  doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-
-  doc.setFontSize(11);
-  doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-
-  doc.setLineWidth(1.0);
-  doc.line(20, 42, 190, 42);
-  doc.setLineWidth(0.3);
-  doc.line(20, 43, 190, 43);
+  await drawStandardKopSurat(doc, config, { showPlaceholderIfNoLogo: true });
 
   const getDocumentTitle = (type: string) => {
     const t = type.toUpperCase();
@@ -1643,30 +1718,7 @@ export const generateOfficialLetterPDF = async (letter: OfficialLetter, customCo
     }
 
     // --- Professional Header (Kop Surat) ---
-    let logoDrawn = false;
-    try {
-      const logoData = await getImageData(config.logo);
-      if (logoData) {
-        doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
-        logoDrawn = true;
-      }
-    } catch (e) { console.error(e); }
-
-    doc.setFont("times", "bold"); 
-    doc.setFontSize(14);
-    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-
-    doc.setFont("times", "normal");
-    doc.setFontSize(10);
-    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-
-    doc.setLineWidth(1.0);
-    doc.line(20, 42, 190, 42);
-    doc.setLineWidth(0.3);
-    doc.line(20, 43, 190, 43);
+    await drawStandardKopSurat(doc, config);
 
     // --- Date (Top Right) ---
     let cursorY = 55;
@@ -4112,35 +4164,7 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
     let currentY = 15;
 
     // Standard Header Kop Surat & Logo (Matching generateSuratPengantar)
-    let logoDrawn = false;
-    try {
-        const logoData = await getImageData(config.logo);
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
-            logoDrawn = true;
-        }
-    } catch (e) { console.error(e); }
-
-    if (!logoDrawn) {
-        const lx = 30; const ly = 22;
-        doc.setDrawColor(0); doc.setLineWidth(0.5);
-        doc.lines([[10,0], [0,12], [-10,0], [0,-12]], lx, ly - 6, [1,1], 'S', true);
-    }
-
-    doc.setFont("times", "normal"); 
-    doc.setFontSize(14);
-    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-
-    doc.setFontSize(11);
-    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-
-    doc.setLineWidth(1.0);
-    doc.line(20, 42, 190, 42);
-    doc.setLineWidth(0.3);
-    doc.line(20, 43, 190, 43);
+    await drawStandardKopSurat(doc, config, { showPlaceholderIfNoLogo: true });
 
     currentY = 52;
 
@@ -4377,35 +4401,7 @@ export const generateSingleMutationCertificatePDF = async (log: PopulationChange
     let cursorY = 15;
 
     // Header Kop Surat
-    let logoDrawn = false;
-    try {
-        const logoData = await getImageData(config.logo);
-        if (logoData) {
-            doc.addImage(logoData, 'PNG', 20, 10, 22, 28);
-            logoDrawn = true;
-        }
-    } catch (e) { console.error(e); }
-
-    if (!logoDrawn) {
-        const lx = 30; const ly = 22;
-        doc.setDrawColor(0); doc.setLineWidth(0.5);
-        doc.lines([[10,0], [0,12], [-10,0], [0,-12]], lx, ly - 6, [1,1], 'S', true);
-    }
-
-    doc.setFont("times", "normal"); 
-    doc.setFontSize(14);
-    doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
-    doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
-    doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
-    doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
-
-    doc.setFontSize(11);
-    doc.text(`Alamat : ${config.rtAddress}`, centerX, 38, { align: "center" });
-
-    doc.setLineWidth(1.0);
-    doc.line(20, 42, 190, 42);
-    doc.setLineWidth(0.3);
-    doc.line(20, 43, 190, 43);
+    await drawStandardKopSurat(doc, config, { showPlaceholderIfNoLogo: true });
 
     cursorY = 52;
 

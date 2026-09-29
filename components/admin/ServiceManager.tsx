@@ -60,8 +60,26 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   const [showPdfPreviewModal, setShowPdfPreviewModal] = useState(false);
   const [officialLetters, setOfficialLetters] = useState<OfficialLetter[]>([]);
   const [detailModalTab, setDetailModalTab] = useState<'profil' | 'keperluan' | 'penerbitan'>('profil');
-  const [settingSubTab, setSettingSubTab] = useState<'identity' | 'assets' | 'templates' | 'whatsapp'>('identity');
+  const [settingSubTab, setSettingSubTab] = useState<'identity' | 'assets' | 'templates' | 'fields' | 'whatsapp'>('identity');
   const lastLoadedIdRef = React.useRef<string | null>(null);
+
+  const SP_FIELDS = [
+    { id: 'applicantName', defaultLabel: 'Nama Lengkap', icon: User, desc: 'Nama lengkap warga pemohon' },
+    { id: 'nik', defaultLabel: 'NIK / No KTP', icon: CreditCard, desc: '16 digit Nomor Induk Kependudukan' },
+    { id: 'familyHeadName', defaultLabel: 'Kepala Keluarga', icon: UserCheck, desc: 'Nama Kepala Keluarga di KK' },
+    { id: 'birthPlaceDate', defaultLabel: 'Tempat/Tanggal Lahir', icon: Calendar, desc: 'Tempat dan tanggal lahir' },
+    { id: 'gender', defaultLabel: 'Jenis Kelamin', icon: Users, desc: 'Jenis kelamin (Laki-laki / Perempuan)' },
+    { id: 'addressKtp', defaultLabel: 'Alamat Sesuai KTP', icon: MapPin, desc: 'Alamat resmi identitas KTP' },
+    { id: 'currentAddress', defaultLabel: 'Alamat Domisili', icon: Home, desc: 'Alamat domisili saat ini' },
+    { id: 'religion', defaultLabel: 'Agama', icon: Heart, desc: 'Agama pemohon' },
+    { id: 'maritalStatus', defaultLabel: 'Status Kawin', icon: Heart, desc: 'Status perkawinan pemohon' },
+    { id: 'job', defaultLabel: 'Pekerjaan', icon: Briefcase, desc: 'Pekerjaan / profesi' },
+    { id: 'education', defaultLabel: 'Pendidikan', icon: BookOpen, desc: 'Pendidikan terakhir' },
+    { id: 'familyStatus', defaultLabel: 'Hub. Keluarga', icon: Users, desc: 'Status hubungan dalam KK' },
+    { id: 'bloodType', defaultLabel: 'Gol. Darah', icon: Heart, desc: 'Golongan darah pemohon' },
+    { id: 'nationality', defaultLabel: 'Kewarganegaraan', icon: Flag, desc: 'Kewarganegaraan (Indonesia / WNA)' },
+    { id: 'purposeDetail', defaultLabel: 'Keperluan', icon: FileText, desc: 'Rincian keperluan pengajuan surat' }
+  ];
 
   const handleGenerateLivePreview = async (letterToPreview: LetterRequest) => {
     try {
@@ -1136,6 +1154,17 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <span>3. Template & Teks Surat</span>
                 </button>
                 <button
+                  onClick={() => setSettingSubTab('fields')}
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    settingSubTab === 'fields'
+                      ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <CheckSquare size={15} />
+                  <span>4. Poin Data Warga</span>
+                </button>
+                <button
                   onClick={() => setSettingSubTab('whatsapp')}
                   className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
                     settingSubTab === 'whatsapp'
@@ -1144,7 +1173,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   }`}
                 >
                   <MessageCircle size={15} />
-                  <span>4. Integrasi WhatsApp</span>
+                  <span>5. Integrasi WhatsApp</span>
                 </button>
               </div>
 
@@ -1512,7 +1541,168 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </motion.div>
                   )}
 
-                  {/* TAB 4: INTEGRASI WHATSAPP */}
+                  {/* TAB 4: POIN DATA WARGA PADA SURAT PENGANTAR */}
+                  {settingSubTab === 'fields' && (
+                    <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                      <div className="bg-indigo-50/60 p-4 rounded-2xl border border-indigo-100 flex items-start gap-3">
+                        <CheckSquare size={20} className="text-indigo-600 shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <h4 className="text-xs font-black text-indigo-900 uppercase tracking-widest">
+                              Poin Data Warga pada Surat Pengantar
+                            </h4>
+                            <span className="px-2.5 py-0.5 bg-indigo-100/80 text-indigo-700 text-[10px] font-black rounded-full border border-indigo-200/80">
+                              {SP_FIELDS.filter(f => pdfConfig.visibleFields ? pdfConfig.visibleFields[f.id] !== false : true).length} dari {SP_FIELDS.length} Poin Aktif
+                            </span>
+                          </div>
+                          <p className="text-xs text-indigo-800/80 mt-1 leading-relaxed">
+                            Aktifkan atau sembunyikan poin biodata yang ingin dicetak pada Surat Pengantar resmi RT. Anda juga dapat menyesuaikan judul label tiap poin sesuai kebutuhan administrasi lingkungan.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Quick Action Toolbar */}
+                      <div className="flex items-center justify-between gap-2 flex-wrap p-3 bg-slate-50/80 border border-slate-200/70 rounded-2xl">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 ml-1">Aksi Cepat:</span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const allVisible: Record<string, boolean> = {};
+                              SP_FIELDS.forEach(f => { allVisible[f.id] = true; });
+                              const newConfig = { ...pdfConfig, visibleFields: allVisible };
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                              toast.success("Semua 15 poin data diaktifkan!");
+                            }}
+                            className="px-3 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 hover:border-indigo-200 rounded-xl text-[11px] font-bold transition-all shadow-xs"
+                          >
+                            Pilih Semua
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const primaryKeys = ['applicantName', 'nik', 'birthPlaceDate', 'gender', 'addressKtp', 'religion', 'job', 'purposeDetail'];
+                              const filtered: Record<string, boolean> = {};
+                              SP_FIELDS.forEach(f => { filtered[f.id] = primaryKeys.includes(f.id); });
+                              const newConfig = { ...pdfConfig, visibleFields: filtered };
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                              toast.success("Diatur ke 8 poin data pokok.");
+                            }}
+                            className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-bold transition-all shadow-xs"
+                          >
+                            Hanya Poin Pokok
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const allVisible: Record<string, boolean> = {};
+                              const defaultLabels: Record<string, string> = {};
+                              SP_FIELDS.forEach(f => { 
+                                allVisible[f.id] = true; 
+                                defaultLabels[f.id] = f.defaultLabel;
+                              });
+                              const newConfig = { ...pdfConfig, visibleFields: allVisible, fieldLabels: defaultLabels };
+                              setPdfConfig(newConfig);
+                              localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                              toast.success("Pengaturan poin dan label di-reset ke standar bawaan.");
+                            }}
+                            className="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-slate-200 hover:border-rose-200 rounded-xl text-[11px] font-bold transition-all shadow-xs flex items-center gap-1"
+                          >
+                            <RefreshCw size={11} /> Reset Default
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* 15 Fields Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        {SP_FIELDS.map((field, idx) => {
+                          const isVisible = pdfConfig.visibleFields ? pdfConfig.visibleFields[field.id] !== false : true;
+                          const currentLabel = pdfConfig.fieldLabels?.[field.id] ?? field.defaultLabel;
+                          const FieldIcon = field.icon;
+
+                          return (
+                            <div
+                              key={field.id}
+                              className={`p-4 rounded-2xl border transition-all flex flex-col justify-between gap-3 ${
+                                isVisible 
+                                  ? 'bg-white border-slate-200/90 shadow-xs hover:border-indigo-300' 
+                                  : 'bg-slate-50/70 border-slate-200/50 opacity-60 hover:opacity-90'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${
+                                    isVisible ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
+                                  }`}>
+                                    <FieldIcon size={14} />
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="text-[10px] font-black text-slate-400">#{idx + 1}</span>
+                                      <span className="text-xs font-black text-slate-800">{field.defaultLabel}</span>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 leading-tight">{field.desc}</p>
+                                  </div>
+                                </div>
+
+                                {/* Modern Toggle Switch */}
+                                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                                  <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={isVisible}
+                                    onChange={(e) => {
+                                      const newVisibleFields = {
+                                        ...(pdfConfig.visibleFields || {}),
+                                        [field.id]: e.target.checked
+                                      };
+                                      const newConfig = { ...pdfConfig, visibleFields: newVisibleFields };
+                                      setPdfConfig(newConfig);
+                                      localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                                    }}
+                                  />
+                                  <div className="w-10 h-5.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+                                </label>
+                              </div>
+
+                              <div className="space-y-1">
+                                <label className="block text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                  Label Teks di Surat:
+                                </label>
+                                <input
+                                  type="text"
+                                  disabled={!isVisible}
+                                  value={currentLabel}
+                                  onChange={(e) => {
+                                    const newLabels = {
+                                      ...(pdfConfig.fieldLabels || {}),
+                                      [field.id]: e.target.value
+                                    };
+                                    const newConfig = { ...pdfConfig, fieldLabels: newLabels };
+                                    setPdfConfig(newConfig);
+                                    localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
+                                  }}
+                                  placeholder={field.defaultLabel}
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500 transition-all disabled:text-slate-400 disabled:bg-slate-100/50"
+                                />
+                              </div>
+
+                              <div className="flex items-center justify-between text-[10px] pt-2 border-t border-slate-100">
+                                <span className="font-mono text-[9px] text-slate-400">{field.id}</span>
+                                <span className={`font-bold ${isVisible ? 'text-emerald-600' : 'text-slate-400'}`}>
+                                  {isVisible ? '● Ditampilkan' : '○ Disembunyikan'}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* TAB 5: INTEGRASI WHATSAPP */}
                   {settingSubTab === 'whatsapp' && (
                     <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                       <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 flex items-start gap-3">
@@ -1635,10 +1825,34 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                         {/* Content Placeholder Mockup */}
                         <div className="space-y-1.5 text-[7px] font-sans text-slate-600 leading-normal">
-                          <p className="indent-4">Yang bertanda tangan di bawah ini Ketua {pdfConfig.rtName || 'RT 02'}, Kel. {pdfConfig.kelurahan || 'TONDO'} menerangkan bahwa:</p>
-                          <div className="pl-4 space-y-0.5">
-                            <p><span className="inline-block w-16">Nama</span>: BUDI SANTOSO</p>
-                            <p><span className="inline-block w-16">Keperluan</span>: Pengurusan Administrasi KTP Baru</p>
+                          <p className="indent-3 line-clamp-2">
+                            {pdfConfig.introText || `Yang bertanda tangan di bawah ini Ketua ${pdfConfig.rtName || 'RT 02'}, Kel. ${pdfConfig.kelurahan || 'TONDO'} menerangkan bahwa :`}
+                          </p>
+                          <div className="pl-2 space-y-0.5 max-h-[125px] overflow-y-auto no-scrollbar">
+                            {SP_FIELDS.filter(f => pdfConfig.visibleFields ? pdfConfig.visibleFields[f.id] !== false : true).map((f, idx) => (
+                              <div key={f.id} className="flex items-start text-[7px]">
+                                <span className="w-3 text-slate-400 shrink-0">{idx + 1}.</span>
+                                <span className="w-20 text-slate-700 font-medium shrink-0 truncate">{pdfConfig.fieldLabels?.[f.id] || f.defaultLabel}</span>
+                                <span className="mr-1 text-slate-400">:</span>
+                                <span className="text-slate-800 font-semibold truncate flex-1">
+                                  {f.id === 'applicantName' ? 'BUDI SANTOSO' :
+                                   f.id === 'nik' ? '7271012304950001' :
+                                   f.id === 'familyHeadName' ? 'BUDI SANTOSO' :
+                                   f.id === 'birthPlaceDate' ? 'PALU, 23-04-1995' :
+                                   f.id === 'gender' ? 'Laki-laki' :
+                                   f.id === 'addressKtp' ? 'Jl. Pue Lombe No. 08' :
+                                   f.id === 'currentAddress' ? 'Huntap Tondo 2 Blok C10-08' :
+                                   f.id === 'religion' ? 'Islam' :
+                                   f.id === 'maritalStatus' ? 'Kawin' :
+                                   f.id === 'job' ? 'Karyawan Swasta' :
+                                   f.id === 'education' ? 'S1 / Sarjana' :
+                                   f.id === 'familyStatus' ? 'Kepala Keluarga' :
+                                   f.id === 'bloodType' ? 'O' :
+                                   f.id === 'nationality' ? 'Indonesia' :
+                                   'Persyaratan Administrasi KTP'}
+                                </span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </div>
