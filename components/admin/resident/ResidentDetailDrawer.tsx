@@ -298,7 +298,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   </div>
                   <DetailItem icon={<FileText size={13} />} label="Nomor NIK" value={selectedResident.nik || '-'} isMain />
                   <DetailItem icon={<Users size={13} />} label="Nomor KK" value={selectedResident.kkNumber || '-'} isMain />
-                  <DetailItem icon={<Calendar size={13} />} label="Bergabung Pada" value={selectedResident.joiningDate ? selectedResident.joiningDate.split('T')[0] : '-'} />
+                  <DetailItem icon={<Calendar size={13} />} label="Mulai Menempati" value={selectedResident.joiningDate ? selectedResident.joiningDate.split('T')[0] : (selectedResident.createdAt ? `${selectedResident.createdAt.split('T')[0]} (Registrasi)` : 'Belum Dicatat')} />
                   {selectedResident.residenceType !== 'Tetap' && (
                     <div className="col-span-2">
                       <DetailItem icon={<Key size={13} />} label="Pemilik Rumah" value={`${selectedResident.ownerName || '-'}${selectedResident.ownerPhone ? ` (${selectedResident.ownerPhone})` : ''}`} noTruncate />
@@ -817,6 +817,17 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     {(selectedResident.widowCount || 0) > 0 && <VulnerabilityStat count={selectedResident.widowCount || 0} label="Janda / Duda" />}
                   </div>
                 </section>
+              )}
+            </div>
+
+            {/* System Metadata Tracking */}
+            <div className="p-3 bg-slate-50/80 rounded-2xl border border-slate-100 flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-400 font-semibold">
+              <span className="flex items-center gap-1">
+                <Clock size={11} className="text-slate-400" />
+                <span>Input Pertama: <strong className="text-slate-600">{selectedResident.createdAt ? new Date(selectedResident.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Data Awal Sistem'}</strong></span>
+              </span>
+              {selectedResident.updatedAt && (
+                <span>Terakhir Diperbarui: <strong className="text-slate-600">{new Date(selectedResident.updatedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</strong></span>
               )}
             </div>
 
