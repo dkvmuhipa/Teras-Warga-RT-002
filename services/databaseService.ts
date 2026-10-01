@@ -863,28 +863,63 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
   const isImage = file.type.startsWith("image/");
   const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
-  // 1. Attempt upload to Cloudinary endpoint (/api/upload)
+  // 1. PRIMARY: Direct Signed Upload to Cloudinary (Bypasses Vercel 4.5MB body limit, eliminates 413 error)
+  try {
+    const signResponse = await fetch("/api/sign-upload");
+    if (signResponse.ok) {
+      const signData = await signResponse.json();
+      if (signData && signData.signature && signData.apiKey && signData.cloudName) {
+        const processedFile = isImage ? await compressImageIfPossible(file) : file;
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", processedFile);
+        uploadFormData.append("api_key", signData.apiKey);
+        uploadFormData.append("timestamp", String(signData.timestamp));
+        uploadFormData.append("signature", signData.signature);
+        uploadFormData.append("folder", signData.folder || "teras-warga");
+
+        const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloudName}/auto/upload`, {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        if (cldRes.ok) {
+          const cldData = await cldRes.json();
+          if (cldData && cldData.secure_url) {
+            return cldData.secure_url;
+          }
+        } else {
+          const errText = await cldRes.text();
+          console.warn("Direct Cloudinary upload returned non-200:", errText);
+        }
+      }
+    }
+  } catch (directError) {
+    console.warn("Direct signed Cloudinary upload error, trying fallback endpoint:", directError);
+  }
+
+  // 2. SECONDARY: Serverless /api/upload endpoint (for smaller payloads under 3.5MB)
   try {
     const processedFile = isImage ? await compressImageIfPossible(file) : file;
-    const base64Data = await fileToDataUrl(processedFile);
-    
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ file: base64Data, folder: "teras-warga" }),
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.url) {
-        return data.url;
+    if (processedFile.size < 3.5 * 1024 * 1024) {
+      const base64Data = await fileToDataUrl(processedFile);
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file: base64Data, folder: "teras-warga" }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.url) {
+          return data.url;
+        }
       }
     }
   } catch (apiError) {
-    console.warn("Direct upload endpoint not reachable, persisting fallback locally:", apiError);
+    console.warn("Serverless upload endpoint not reachable:", apiError);
   }
 
-  // 2. Guaranteed Preservation Fallback:
+  // 3. Fallback:
   if (isImage) {
     try {
       const compactDataUrl = await compressImageToCompactDataUrl(file, 1024, 0.72);

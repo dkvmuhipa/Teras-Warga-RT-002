@@ -583,6 +583,28 @@ async function startServer() {
     }
   });
 
+  // Cloudinary Signed Upload Endpoint (Bypass Vercel 4.5MB Body Limit by Direct Client Upload)
+  app.get("/api/sign-upload", (req, res) => {
+    try {
+      const timestamp = Math.round(new Date().getTime() / 1000);
+      const folder = "teras-warga";
+      const apiSecret = process.env.CLOUDINARY_API_SECRET || "";
+      const signature = cloudinary.utils.api_sign_request(
+        { timestamp, folder },
+        apiSecret
+      );
+      res.json({
+        signature,
+        timestamp,
+        folder,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME || "dwybhobnw",
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // WhatsApp Gateway Endpoint (Sidobe)
   app.post("/api/whatsapp/send", async (req, res) => {
     const { target, message } = req.body;
