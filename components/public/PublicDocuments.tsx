@@ -16,7 +16,14 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
   const [filterCategory, setFilterCategory] = useState<'All' | Document['category']>('All');
 
   const filteredDocs = documents.filter(doc => {
-    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase());
+    // Only display documents intended for public view
+    if (doc.accessLevel === 'Internal') return false;
+
+    const query = searchQuery.toLowerCase();
+    const matchesSearch = 
+      doc.title.toLowerCase().includes(query) ||
+      (doc.documentNumber && doc.documentNumber.toLowerCase().includes(query)) ||
+      (doc.description && doc.description.toLowerCase().includes(query));
     const matchesCategory = filterCategory === 'All' || doc.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
@@ -187,11 +194,22 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                     </div>
 
                     <div>
+                      {doc.documentNumber && (
+                        <span className="text-[10px] font-mono font-bold text-indigo-600 block mb-1">
+                          No: {doc.documentNumber}
+                        </span>
+                      )}
                       <h3 className="text-lg font-black text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
                         {doc.title}
                       </h3>
-                      <p className="text-xs text-slate-400 font-medium mt-1">
-                        {fileMeta.label}
+                      {doc.description && (
+                        <p className="text-xs text-slate-500 font-medium mt-1.5 line-clamp-2 leading-relaxed">
+                          {doc.description}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-400 font-medium mt-2 flex items-center gap-2">
+                        <span>{fileMeta.label}</span>
+                        {doc.fileSize && <span>• {doc.fileSize}</span>}
                       </p>
                     </div>
                   </div>

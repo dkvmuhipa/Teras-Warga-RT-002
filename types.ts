@@ -708,6 +708,12 @@ export interface Document {
   url: string;
   uploadDate: string;
   uploadedBy: string;
+  documentNumber?: string;
+  description?: string;
+  fileSize?: string;
+  fileType?: string;
+  effectiveDate?: string;
+  accessLevel?: 'Publik' | 'Internal';
 }
 
 export interface BillItem {
