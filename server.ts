@@ -560,18 +560,22 @@ async function startServer() {
   // Cloudinary Upload Endpoint
   app.post("/api/upload", upload.single("file"), async (req, res) => {
     try {
-      if (!req.file) {
+      const fileToUpload = req.file?.path || req.body?.file;
+      if (!fileToUpload) {
         return res.status(400).json({ error: "No file uploaded" });
       }
 
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "teras-warga",
+      const result = await cloudinary.uploader.upload(fileToUpload, {
+        folder: req.body?.folder || "teras-warga",
+        resource_type: "auto",
         upload_preset: process.env.CLOUDINARY_UPLOAD_PRESET || undefined,
       });
 
       res.json({
         url: result.secure_url,
         public_id: result.public_id,
+        format: result.format,
+        resource_type: result.resource_type,
       });
     } catch (error: any) {
       console.error("Cloudinary upload error:", error);

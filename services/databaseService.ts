@@ -841,16 +841,37 @@ export const compressImageToCompactDataUrl = (file: File, maxDimension: number =
   });
 };
 
+export const fileToDataUrl = (file: File | Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error('Gagal membaca berkas'));
+    reader.readAsDataURL(file);
+  });
+};
+
+export const getDocumentPreviewUrl = (url: string): string => {
+  if (!url) return '';
+  // If Cloudinary PDF, convert .pdf to .jpg to avoid 401 Unauthorized restriction on direct raw delivery
+  if (url.includes('res.cloudinary.com') && url.toLowerCase().endsWith('.pdf')) {
+    return url.replace(/\.pdf$/i, '.jpg');
+  }
+  return url;
+};
+
 export const uploadImageToStorage = async (file: File, path: string): Promise<string> => {
-  // 1. Attempt upload to serverless endpoint (/api/upload) if available
+  const isImage = file.type.startsWith("image/");
+  const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+  // 1. Attempt upload to Cloudinary endpoint (/api/upload)
   try {
-    const processedFile = await compressImageIfPossible(file);
-    const formData = new FormData();
-    formData.append("file", processedFile);
+    const processedFile = isImage ? await compressImageIfPossible(file) : file;
+    const base64Data = await fileToDataUrl(processedFile);
     
     const response = await fetch("/api/upload", {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ file: base64Data, folder: "teras-warga" }),
     });
     
     if (response.ok) {
@@ -860,18 +881,29 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
       }
     }
   } catch (apiError) {
-    console.warn("Direct upload endpoint not reachable, persisting compressed data URL locally:", apiError);
+    console.warn("Direct upload endpoint not reachable, persisting fallback locally:", apiError);
   }
 
-  // 2. Guaranteed Preservation: Compress and save user's real image as Data URL
-  // NEVER replace user documents with dummy picsum placeholder images
-  try {
-    const compactDataUrl = await compressImageToCompactDataUrl(file, 1024, 0.72);
-    return compactDataUrl;
-  } catch (err: any) {
-    console.error("Failed to process image as compact data URL:", err);
-    throw new Error(err.message || "Gagal memproses berkas gambar. Pastikan format file adalah JPG, PNG, atau WEBP.");
+  // 2. Guaranteed Preservation Fallback:
+  if (isImage) {
+    try {
+      const compactDataUrl = await compressImageToCompactDataUrl(file, 1024, 0.72);
+      return compactDataUrl;
+    } catch (err: any) {
+      console.error("Failed to process image as compact data URL:", err);
+      throw new Error(err.message || "Gagal memproses berkas gambar. Pastikan format file adalah JPG, PNG, atau WEBP.");
+    }
   }
+
+  if (isPdf) {
+    try {
+      return await fileToDataUrl(file);
+    } catch (pdfErr: any) {
+      throw new Error("Gagal membaca berkas PDF.");
+    }
+  }
+
+  return await fileToDataUrl(file);
 };
 export const loginAdmin = (email: string, pass: string) => {
   return signInWithEmailAndPassword(auth, email, pass);
@@ -1120,32 +1152,7 @@ export const markNotificationAsRead = async (id: string) => {
 
 // --- FILE STORAGE ---
 export const uploadFile = async (file: File, path: string): Promise<string> => {
-  try {
-    const processedFile = await compressImageIfPossible(file);
-    const formData = new FormData();
-    formData.append("file", processedFile);
-    
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data && data.url) {
-        return data.url;
-      }
-    }
-  } catch (netErr) {
-    console.warn("Direct upload endpoint not reachable in uploadFile:", netErr);
-  }
-
-  // Fallback for image files
-  if (file.type.startsWith("image/")) {
-    return compressImageToCompactDataUrl(file, 1200, 0.75);
-  }
-
-  throw new Error("Gagal mengunggah berkas.");
+  return uploadImageToStorage(file, path);
 };
 
 // --- OFFICIAL LETTERS SERVICES ---

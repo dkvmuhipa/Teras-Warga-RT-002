@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Document } from '../../types';
+import { getDocumentPreviewUrl } from '../../services/databaseService';
 
 interface PublicDocumentsProps {
   documents: Document[];
@@ -207,7 +208,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
 
                     <div className="flex items-center gap-2">
                       <a 
-                        href={doc.url} 
+                        href={getDocumentPreviewUrl(doc.url)} 
                         target="_blank" 
                         rel="noreferrer"
                         className="p-3 bg-slate-100 text-slate-700 rounded-xl hover:bg-indigo-50 hover:text-indigo-600 transition-all"

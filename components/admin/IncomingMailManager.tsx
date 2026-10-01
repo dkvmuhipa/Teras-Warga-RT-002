@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { IncomingMail } from '../../types';
 import { 
   addIncomingMailToDb, updateIncomingMailInDb, deleteIncomingMailFromDb, 
-  uploadImageToStorage 
+  uploadImageToStorage, getDocumentPreviewUrl 
 } from '../../services/databaseService';
 import { toast } from 'sonner';
 
@@ -529,7 +529,13 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
 
               <div className="flex-1 overflow-auto bg-slate-100 rounded-xl p-4 flex items-center justify-center min-h-[350px]">
                 {selectedMail.fileUrl ? (
-                  selectedMail.fileType === 'pdf' || selectedMail.fileUrl.endsWith('.pdf') ? (
+                  selectedMail.fileUrl.includes('res.cloudinary.com') && selectedMail.fileUrl.toLowerCase().endsWith('.pdf') ? (
+                    <img 
+                      src={getDocumentPreviewUrl(selectedMail.fileUrl)} 
+                      alt="Lampiran Surat" 
+                      className="max-w-full max-h-[500px] object-contain rounded-lg shadow-md border border-slate-200" 
+                    />
+                  ) : (selectedMail.fileType === 'pdf' || selectedMail.fileUrl.endsWith('.pdf')) ? (
                     <iframe src={selectedMail.fileUrl} title="Lampiran Surat PDF" className="w-full h-[450px] rounded-lg border border-slate-200" />
                   ) : (
                     <img src={selectedMail.fileUrl} alt="Lampiran Surat" className="max-w-full max-h-[450px] object-contain rounded-lg shadow-md" />
@@ -543,7 +549,7 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
                 <span className="text-xs text-slate-500 font-semibold">Status: {selectedMail.status}</span>
                 {selectedMail.fileUrl && (
                   <a
-                    href={selectedMail.fileUrl}
+                    href={getDocumentPreviewUrl(selectedMail.fileUrl)}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-indigo-700"

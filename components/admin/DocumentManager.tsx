@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Plus, Trash2, Search, Filter, Upload, X, Clock, User, Download, FileArchive, FileCode, FileSpreadsheet, File as FileIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Document } from '../../types';
-import { subscribeToDocuments, addDocumentToDb, deleteDocumentFromDb, uploadImageToStorage, handleFirestoreError, OperationType } from '../../services/databaseService';
+import { subscribeToDocuments, addDocumentToDb, deleteDocumentFromDb, uploadImageToStorage, handleFirestoreError, OperationType, getDocumentPreviewUrl } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { useConfirm } from '../../context/ConfirmContext';
 
@@ -240,7 +240,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
 
                 <div className="flex items-center gap-2 mt-6 pt-4 border-t border-slate-100">
                   <a 
-                    href={doc.url} 
+                    href={getDocumentPreviewUrl(doc.url)} 
                     target="_blank" 
                     rel="noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xs"

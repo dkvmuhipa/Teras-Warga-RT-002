@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { FileText, Plus, Search, Filter, Edit2, Trash2, Send, Eye, X, Save, Calendar, User, Upload, Download, File as FileIcon } from 'lucide-react';
 import { OfficialLetter, PdfConfig } from '../../types';
-import { subscribeToOfficialLetters, addOfficialLetterToDb, updateOfficialLetterInDb, deleteOfficialLetterFromDb, uploadFile } from '../../services/databaseService';
+import { subscribeToOfficialLetters, addOfficialLetterToDb, updateOfficialLetterInDb, deleteOfficialLetterFromDb, uploadFile, getDocumentPreviewUrl } from '../../services/databaseService';
 import { sendWhatsAppMessage } from '../../services/whatsappService';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -247,7 +247,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
 
                 <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
                   <a 
-                    href={letter.attachmentUrl} 
+                    href={getDocumentPreviewUrl(letter.attachmentUrl)} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all text-[10px] font-black uppercase tracking-widest"
@@ -403,7 +403,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
               <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                 <FileIcon size={14} className="text-emerald-600" />
                 <span className="text-xs font-bold text-emerald-700 flex-1 truncate">File sudah terunggah</span>
-                <a href={formData.attachmentUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">Lihat</a>
+                <a href={getDocumentPreviewUrl(formData.attachmentUrl)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">Lihat</a>
               </div>
             )}
           </div>
