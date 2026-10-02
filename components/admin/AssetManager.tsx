@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Plus, Edit2, Trash2, Box, CheckCircle2, History, User, Calendar, Clock, CheckCircle, Trash, Filter, Wrench, DollarSign, ClipboardList, ShieldCheck, Tag, Sparkles, Building2, Phone, AlertTriangle } from 'lucide-react';
+import { Package, Plus, Edit2, Trash2, Box, CheckCircle2, History, User, Calendar, Clock, CheckCircle, Trash, Filter, Wrench, DollarSign, ClipboardList, ShieldCheck, Tag, Sparkles, Building2, Phone, AlertTriangle, FileText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
