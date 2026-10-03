@@ -3768,20 +3768,12 @@ export const subscribeToWaterMeterReadings = (
 ) => {
   if (!isFirebaseConfigured || !db) return () => {};
   try {
-    let q;
-    if (period) {
-      q = query(
-        collection(db, WATER_METER_READINGS_COL),
-        where("period", "==", period),
-        orderBy("houseId", "asc")
-      );
-    } else {
-      q = query(
-        collection(db, WATER_METER_READINGS_COL),
-        orderBy("period", "desc"),
-        orderBy("houseId", "asc")
-      );
-    }
+    const q = period
+      ? query(
+          collection(db, WATER_METER_READINGS_COL),
+          where("period", "==", period)
+        )
+      : collection(db, WATER_METER_READINGS_COL);
 
     return onSnapshot(
       q,
@@ -3789,6 +3781,12 @@ export const subscribeToWaterMeterReadings = (
         const readings: WaterMeterReading[] = [];
         snapshot.forEach((doc) => {
           readings.push({ id: doc.id, ...doc.data() } as WaterMeterReading);
+        });
+        readings.sort((a, b) => {
+          if (a.period !== b.period) {
+            return (b.period || '').localeCompare(a.period || '');
+          }
+          return (a.houseId || '').localeCompare(b.houseId || '', undefined, { numeric: true, sensitivity: 'base' });
         });
         callback(readings);
       },
@@ -3811,8 +3809,7 @@ export const subscribeToHouseWaterMeterReadings = (
   try {
     const q = query(
       collection(db, WATER_METER_READINGS_COL),
-      where("houseId", "==", houseId),
-      orderBy("period", "desc")
+      where("houseId", "==", houseId)
     );
 
     return onSnapshot(
@@ -3822,6 +3819,7 @@ export const subscribeToHouseWaterMeterReadings = (
         snapshot.forEach((doc) => {
           readings.push({ id: doc.id, ...doc.data() } as WaterMeterReading);
         });
+        readings.sort((a, b) => (b.period || '').localeCompare(a.period || ''));
         callback(readings);
       },
       (error) => {
@@ -3840,14 +3838,13 @@ export const getLatestWaterMeterReading = async (houseId: string): Promise<Water
   try {
     const q = query(
       collection(db, WATER_METER_READINGS_COL),
-      where("houseId", "==", houseId),
-      orderBy("period", "desc"),
-      limit(1)
+      where("houseId", "==", houseId)
     );
     const snap = await getDocs(q);
     if (snap.empty) return null;
-    const docData = snap.docs[0];
-    return { id: docData.id, ...docData.data() } as WaterMeterReading;
+    const readings = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as WaterMeterReading));
+    readings.sort((a, b) => (b.period || '').localeCompare(a.period || ''));
+    return readings[0] || null;
   } catch (error) {
     console.error("Error getting latest water meter reading:", error);
     return null;

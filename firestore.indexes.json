@@ -1,0 +1,29 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "waterMeterReadings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "period", "order": "DESCENDING" },
+        { "fieldPath": "houseId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "waterMeterReadings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "period", "order": "ASCENDING" },
+        { "fieldPath": "houseId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "waterMeterReadings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "houseId", "order": "ASCENDING" },
+        { "fieldPath": "period", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
