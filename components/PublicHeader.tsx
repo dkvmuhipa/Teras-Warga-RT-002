@@ -105,7 +105,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
   return (
     <>
       <nav className="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-xs transition-all w-full">
-        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+        <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
           <div className="flex justify-between h-18 items-center w-full">
             <div className="flex items-center cursor-pointer py-1 shrink-0" onClick={() => navigate('/')}>
               <Logo showText={true} imageSize="h-8 md:h-10" />

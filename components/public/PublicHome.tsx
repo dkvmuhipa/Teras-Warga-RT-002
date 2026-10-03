@@ -326,7 +326,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-6 sm:py-8 space-y-12 mb-24 relative"
+      className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 sm:py-8 space-y-12 mb-24 relative"
     >
       {/* Background Decorative Elements */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden pointer-events-none">

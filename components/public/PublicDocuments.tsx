@@ -239,7 +239,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 sm:py-12 mb-28 font-sans space-y-8"
+      className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8 sm:py-12 mb-28 font-sans space-y-8"
     >
       {/* 1. Executive Government Hero Banner */}
       <motion.div 
