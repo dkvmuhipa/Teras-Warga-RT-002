@@ -928,20 +928,31 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
     ? await compressFileIfPossible(file, { minSizeMBToCompress: 3, maxSizeMB: 4.5, showToast: false }) 
     : file;
 
-  // 1. PRIMARY: Direct Signed Upload to Cloudinary (Bypasses Vercel 4.5MB body limit, eliminates 413 error)
+  // 1. PRIMARY: Direct Signed or Unsigned Upload to Cloudinary (Bypasses Vercel 4.5MB body limit, eliminates 413 error)
   try {
     const signResponse = await fetch("/api/sign-upload");
     if (signResponse.ok) {
       const signData = await signResponse.json();
-      if (signData && signData.signature && signData.apiKey && signData.cloudName) {
-        const uploadFormData = new FormData();
-        uploadFormData.append("file", processedFile);
+      const cloudName = signData?.cloudName || "dwybhobnw";
+
+      let canUpload = false;
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", processedFile);
+
+      if (signData?.uploadPreset) {
+        uploadFormData.append("upload_preset", signData.uploadPreset);
+        if (signData?.folder) uploadFormData.append("folder", signData.folder);
+        canUpload = true;
+      } else if (signData?.signature && signData?.apiKey) {
         uploadFormData.append("api_key", signData.apiKey);
         uploadFormData.append("timestamp", String(signData.timestamp));
         uploadFormData.append("signature", signData.signature);
         uploadFormData.append("folder", signData.folder || "teras-warga");
+        canUpload = true;
+      }
 
-        const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${signData.cloudName}/auto/upload`, {
+      if (canUpload) {
+        const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
           method: "POST",
           body: uploadFormData,
         });
@@ -991,6 +1002,15 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
       console.error("Failed to process image as compact data URL:", err);
       throw new Error(err.message || "Gagal memproses berkas gambar. Pastikan format file adalah JPG, PNG, atau WEBP.");
     }
+  }
+
+  // Non-image files (PDF, DOCX, XLSX, ZIP)
+  // Firestore has a strict 1 MiB document limit. Converting files > 500 KB to Base64
+  // will cause the fatal error: "Request payload size exceeds the limit: 11534336 bytes".
+  if (file.size > 500 * 1024) {
+    throw new Error(
+      `Penyimpanan Cloud (Cloudinary) belum terhubung di Vercel atau kuota terlampaui. Berkas dokumen berukuran ${(file.size / (1024 * 1024)).toFixed(1)} MB tidak dapat disimpan langsung di database. Silakan gunakan tab "Link Dokumen / Cloud" (Google Drive) atau lengkapi CLOUDINARY_API_KEY & SECRET di Vercel.`
+    );
   }
 
   if (isPdf) {

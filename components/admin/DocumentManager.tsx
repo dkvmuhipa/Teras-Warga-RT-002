@@ -188,9 +188,23 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
       setIsAdding(false);
       setNewDoc(initialDocState);
       setSelectedFile(null);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, "documents");
-      toast.error('Gagal mengunggah dokumen');
+    } catch (error: any) {
+      const errMsg = error?.message || 'Gagal mengunggah dokumen';
+      if (errMsg.includes('Penyimpanan Cloud') || errMsg.includes('Link Dokumen') || errMsg.includes('payload size') || errMsg.includes('exceeds the limit')) {
+        toast.error(
+          `Penyimpanan Cloud belum terhubung di Vercel. Untuk berkas ${selectedFile?.name || 'dokumen ini'}, silakan gunakan tab "Link Dokumen / Cloud" (Google Drive).`,
+          {
+            duration: 10000,
+            action: {
+              label: 'Beralih ke Link',
+              onClick: () => setUploadType('url'),
+            },
+          }
+        );
+      } else {
+        handleFirestoreError(error, OperationType.CREATE, "documents");
+        toast.error(errMsg);
+      }
     } finally {
       setIsUploading(false);
     }

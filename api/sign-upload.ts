@@ -36,6 +36,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       folder,
       apiKey: process.env.CLOUDINARY_API_KEY,
       cloudName: process.env.CLOUDINARY_CLOUD_NAME || 'dwybhobnw',
+      uploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET || '',
     });
   } catch (error: any) {
     console.error('Cloudinary Sign Error:', error);

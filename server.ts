@@ -599,6 +599,7 @@ async function startServer() {
         folder,
         apiKey: process.env.CLOUDINARY_API_KEY,
         cloudName: process.env.CLOUDINARY_CLOUD_NAME || "dwybhobnw",
+        uploadPreset: process.env.CLOUDINARY_UPLOAD_PRESET || "",
       });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
