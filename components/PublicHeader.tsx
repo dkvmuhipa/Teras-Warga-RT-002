@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   User, ChevronDown, LayoutGrid, Wallet, Users, Info, Download, X, Smartphone, Sparkles, HelpCircle,
-  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, Package, ShieldAlert, UserPlus, Menu, Wrench, Zap, MapPin, Building, History, Heart
+  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, Package, ShieldAlert, UserPlus, Menu, Wrench, Zap, MapPin, Building, History, Heart, ShieldCheck, Building2
 } from 'lucide-react';
 import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
@@ -73,25 +73,24 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
     },
     {
       id: 'info',
-      label: 'Informasi',
+      label: 'Informasi & Arsip',
       icon: Info,
       columns: 2,
       width: 'w-[540px] sm:w-[620px]',
       footer: {
         text: 'Pusat transparansi data & regulasi resmi lingkungan',
-        icon: Info,
-        color: 'text-sky-600',
-        note: 'Kel. Tondo, Mantikulore'
+        icon: ShieldCheck,
+        color: 'text-indigo-600',
+        note: 'RT 002 / RW 020'
       },
       items: [
-        { path: '/info', label: 'Info RT & Kas', desc: 'Transparansi saldo kas, agenda & utilitas umum', icon: LineChart, color: 'text-sky-600 bg-sky-50/80 border-sky-150' },
-        { path: '/about', label: 'Tentang Kami', desc: 'Sejarah, struktur kepengurusan RT & visi misi', icon: Info, color: 'text-indigo-600 bg-indigo-50/80 border-indigo-150' },
+        { path: '/dokumen', label: 'Pusat Arsip & Dokumen', desc: 'SK resmi kepengurusan, edaran publik & blangko formulir', icon: FileText, color: 'text-indigo-600 bg-indigo-50/80 border-indigo-150' },
+        { path: '/info', label: 'Info Kas & Transparansi', desc: 'Transparansi saldo kas, agenda & utilitas umum', icon: LineChart, color: 'text-sky-600 bg-sky-50/80 border-sky-150' },
         { path: '/rules', label: 'Peraturan RT 02', desc: 'Tata tertib resmi bermukim di Huntap Tondo 2', icon: Scale, color: 'text-slate-700 bg-slate-50/80 border-slate-150' },
         { path: '/peta', label: 'Peta Wilayah & Mitigasi', desc: 'Denah kavling hunian, jalur evakuasi & live BMKG', icon: MapPin, color: 'text-rose-600 bg-rose-50/80 border-rose-150' },
-        { path: '/faq', label: 'E-FAQ RT', desc: 'Panduan mandiri penyelesaian kendala harian', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/80 border-violet-150' },
         { path: '/kegiatan', label: 'Jadwal Agenda', desc: 'Kalender kerja bakti, siskamling & pertemuan', icon: Calendar, color: 'text-emerald-600 bg-emerald-50/80 border-emerald-150' },
-        { path: '/dokumen', label: 'Arsip Dokumen', desc: 'Download berita acara, regulasi & draf formulir', icon: Download, color: 'text-blue-600 bg-blue-50/80 border-blue-150' },
-        { path: '/resident', label: 'Portal Warga Mandiri', desc: 'Akses kartu identitas digital & riwayat iuran kavling', icon: Users, color: 'text-amber-600 bg-amber-50/80 border-amber-150' },
+        { path: '/about', label: 'Tentang Kami', desc: 'Sejarah, struktur kepengurusan RT & visi misi', icon: Building2, color: 'text-amber-600 bg-amber-50/80 border-amber-150' },
+        { path: '/faq', label: 'E-FAQ & Panduan', desc: 'Panduan mandiri penyelesaian kendala harian', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/80 border-violet-150' },
       ]
     }
   ];
