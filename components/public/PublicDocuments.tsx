@@ -239,18 +239,18 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 mb-28 font-sans space-y-8"
+      className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-8 sm:py-12 mb-28 font-sans space-y-8"
     >
       {/* 1. Executive Government Hero Banner */}
       <motion.div 
         variants={itemVariants}
-        className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2.5rem] p-6 sm:p-10 md:p-12 shadow-xl shadow-slate-950/20 border border-slate-800/80"
+        className="relative w-full overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2.5rem] p-6 sm:p-10 md:p-12 shadow-xl shadow-slate-950/20 border border-slate-800/80"
       >
         {/* Ambient Glows */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-br from-indigo-500/20 to-purple-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-indigo-500/20 to-purple-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-4xl space-y-6">
+        <div className="relative z-10 max-w-5xl space-y-6">
           {/* Official Badge & RT Indicator */}
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-500/20 backdrop-blur-md rounded-full border border-indigo-400/30 text-indigo-300 text-[11px] font-black uppercase tracking-widest shadow-xs">

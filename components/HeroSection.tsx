@@ -56,14 +56,14 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative bg-white rounded-3xl md:rounded-[2.8rem] overflow-hidden mb-6 md:mb-12 shadow-xl shadow-slate-200/40 border border-slate-200/80 group min-h-0 md:min-h-[380px] flex items-center"
+        className="relative w-full bg-white rounded-3xl md:rounded-[2.8rem] overflow-hidden mb-6 md:mb-12 shadow-xl shadow-slate-200/40 border border-slate-200/80 group min-h-0 md:min-h-[400px] flex items-center"
       >
         {/* Ambient Subtle Glow */}
-        <div className="absolute top-0 right-0 w-[420px] h-[420px] bg-gradient-to-br from-amber-100/60 via-orange-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[420px] h-[420px] bg-gradient-to-tr from-emerald-100/50 via-teal-100/25 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-amber-100/60 via-orange-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[550px] h-[550px] bg-gradient-to-tr from-emerald-100/50 via-teal-100/25 to-transparent rounded-full blur-3xl pointer-events-none" />
         
-        <div className="relative w-full px-6 py-8 md:px-14 md:py-12 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-10 z-10">
-          <div className="text-center lg:text-left max-w-2xl z-10 w-full space-y-4 md:space-y-5">
+        <div className="relative w-full px-6 py-8 sm:px-10 md:px-12 lg:px-14 xl:px-16 md:py-12 lg:py-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12 z-10">
+          <div className="text-center lg:text-left max-w-3xl xl:max-w-4xl z-10 w-full space-y-4 md:space-y-6">
             {/* Wilayah Badge */}
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
