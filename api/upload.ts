@@ -40,10 +40,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const folder = req.body?.folder || 'teras-warga';
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET || undefined;
+    const isImage = typeof file === 'string' && (file.startsWith('data:image/') || !file.startsWith('data:application/pdf'));
+    const resourceType = req.body?.resource_type || (isImage ? 'image' : 'raw');
 
     const result = await cloudinary.uploader.upload(file, {
       folder,
-      resource_type: 'auto',
+      resource_type: resourceType,
       upload_preset: uploadPreset,
     });
 

@@ -912,8 +912,9 @@ export const fileToDataUrl = (file: File | Blob): Promise<string> => {
 
 export const getDocumentPreviewUrl = (url: string): string => {
   if (!url) return '';
-  // If Cloudinary PDF, convert .pdf to .jpg to avoid 401 Unauthorized restriction on direct raw delivery
-  if (url.includes('res.cloudinary.com') && url.toLowerCase().endsWith('.pdf')) {
+  // Only convert .pdf to .jpg if it was uploaded under the /image/ endpoint
+  // For raw resources (/raw/upload/), Cloudinary serves .pdf natively with HTTP 200
+  if (url.includes('res.cloudinary.com') && url.includes('/image/upload/') && url.toLowerCase().endsWith('.pdf')) {
     return url.replace(/\.pdf$/i, '.jpg');
   }
   return url;
@@ -952,7 +953,8 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
       }
 
       if (canUpload) {
-        const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+        const resourceType = isImage ? "image" : "raw";
+        const cldRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
           method: "POST",
           body: uploadFormData,
         });
