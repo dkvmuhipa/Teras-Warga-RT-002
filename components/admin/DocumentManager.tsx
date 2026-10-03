@@ -53,39 +53,62 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
 
   const handleFileSelection = async (file: File | null) => {
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) {
-      toast.error('Ukuran berkas melebihi batas maksimum 15MB');
-      return;
-    }
 
     const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name);
 
-    // Hanya kompres jika berkas gambar melebihi 3 MB agar pas dalam rentang 3 - 5 MB
-    if (isImage && file.size > 3 * 1024 * 1024) {
-      setIsCompressing(true);
-      try {
-        const compressed = await compressFileIfPossible(file, { 
-          minSizeMBToCompress: 3, 
-          maxSizeMB: 4.5, 
-          showToast: true 
-        });
-        setSelectedFile(compressed);
-        if (compressed.size < file.size) {
-          setCompressionInfo({ originalSize: file.size, compressedSize: compressed.size });
-        } else {
+    if (isImage) {
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error('Ukuran berkas foto melebihi 50 MB. Silakan gunakan berkas di bawah 50 MB.');
+        return;
+      }
+
+      // Berkas gambar di atas 3 MB (termasuk yang melebihi 15 MB) otomatis dikompresi agar pas di rentang 3 - 5 MB
+      if (file.size > 3 * 1024 * 1024) {
+        setIsCompressing(true);
+        try {
+          const compressed = await compressFileIfPossible(file, { 
+            minSizeMBToCompress: 3, 
+            maxSizeMB: 4.5, 
+            showToast: true 
+          });
+          setSelectedFile(compressed);
+          if (compressed.size < file.size) {
+            setCompressionInfo({ originalSize: file.size, compressedSize: compressed.size });
+          } else {
+            setCompressionInfo(null);
+          }
+        } catch (err) {
+          setSelectedFile(file);
           setCompressionInfo(null);
+        } finally {
+          setIsCompressing(false);
         }
-      } catch (err) {
+      } else {
         setSelectedFile(file);
         setCompressionInfo(null);
-      } finally {
-        setIsCompressing(false);
       }
     } else {
+      // Berkas non-gambar (PDF, DOCX, XLSX, ZIP)
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error(
+          `Berkas dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 50 MB. Untuk dokumen sangat besar, silakan gunakan tab "Link Dokumen / Cloud" (Google Drive).`,
+          {
+            action: {
+              label: 'Beralih ke Link',
+              onClick: () => setUploadType('url'),
+            },
+            duration: 8000,
+          }
+        );
+        return;
+      }
+
       setSelectedFile(file);
       setCompressionInfo(null);
-      if (file.size > 5 * 1024 * 1024) {
-        toast.warning(`Ukuran dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 5 MB. Disarankan dokumen maksimal 3-5 MB agar warga dapat mengunduh cepat.`);
+      if (file.size > 15 * 1024 * 1024) {
+        toast.info(`Berkas dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) siap diunggah. Untuk dokumen besar, Anda juga dapat menautkannya lewat Google Drive di tab "Link Dokumen" agar hemat kuota warga.`);
+      } else if (file.size > 5 * 1024 * 1024) {
+        toast.warning(`Ukuran dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) di atas 5 MB. Disarankan dokumen di kisaran 3-5 MB agar warga dapat mengunduh cepat.`);
       }
     }
 
@@ -792,7 +815,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.XLSX</span>
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.ZIP</span>
                             <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[9px] font-black rounded-md flex items-center gap-1">
-                              ⚡ Auto-Kompres Maks 3-5MB
+                              ⚡ Maks 50MB • Auto-Kompres 3-5MB
                             </span>
                           </div>
                         </div>
