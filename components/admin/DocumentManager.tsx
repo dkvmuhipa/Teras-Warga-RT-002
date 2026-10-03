@@ -89,26 +89,27 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
       }
     } else {
       // Berkas non-gambar (PDF, DOCX, XLSX, ZIP)
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error(
-          `Berkas dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 50 MB. Untuk dokumen sangat besar, silakan gunakan tab "Link Dokumen / Cloud" (Google Drive).`,
+      // Paket Cloudinary Free memiliki limit 10 MB per berkas raw.
+      if (file.size > 10 * 1024 * 1024) {
+        toast.warning(
+          `Berkas dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 10 MB paket Cloudinary Free. Silakan gunakan tab "Link Dokumen / Cloud" (Google Drive) untuk menautkan dokumen ini.`,
           {
             action: {
               label: 'Beralih ke Link',
               onClick: () => setUploadType('url'),
             },
-            duration: 8000,
+            duration: 10000,
           }
         );
+        setSelectedFile(null);
+        setCompressionInfo(null);
         return;
       }
 
       setSelectedFile(file);
       setCompressionInfo(null);
-      if (file.size > 15 * 1024 * 1024) {
-        toast.info(`Berkas dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) siap diunggah. Untuk dokumen besar, Anda juga dapat menautkannya lewat Google Drive di tab "Link Dokumen" agar hemat kuota warga.`);
-      } else if (file.size > 5 * 1024 * 1024) {
-        toast.warning(`Ukuran dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) di atas 5 MB. Disarankan dokumen di kisaran 3-5 MB agar warga dapat mengunduh cepat.`);
+      if (file.size > 5 * 1024 * 1024) {
+        toast.info(`Berkas dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) siap diunggah.`);
       }
     }
 
@@ -190,9 +191,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
       setSelectedFile(null);
     } catch (error: any) {
       const errMsg = error?.message || 'Gagal mengunggah dokumen';
-      if (errMsg.includes('Penyimpanan Cloud') || errMsg.includes('Link Dokumen') || errMsg.includes('payload size') || errMsg.includes('exceeds the limit')) {
+      if (errMsg.includes('10 MB') || errMsg.includes('Link Dokumen') || errMsg.includes('Penyimpanan Cloud') || errMsg.includes('payload size') || errMsg.includes('exceeds the limit')) {
         toast.error(
-          `Penyimpanan Cloud belum terhubung di Vercel. Untuk berkas ${selectedFile?.name || 'dokumen ini'}, silakan gunakan tab "Link Dokumen / Cloud" (Google Drive).`,
+          errMsg,
           {
             duration: 10000,
             action: {
@@ -829,7 +830,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.XLSX</span>
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.ZIP</span>
                             <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[9px] font-black rounded-md flex items-center gap-1">
-                              ⚡ Maks 50MB • Auto-Kompres 3-5MB
+                              ⚡ Foto: Auto-Kompres 3-5MB • Dokumen: Maks 10MB
                             </span>
                           </div>
                         </div>

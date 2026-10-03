@@ -967,6 +967,9 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
         } else {
           const errText = await cldRes.text();
           console.warn("Direct Cloudinary upload returned non-200:", errText);
+          if (errText.includes("File size too large") || errText.includes("exceeds the Free plan upload limit")) {
+            throw new Error(`Ukuran berkas (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 10 MB paket Cloudinary Free. Silakan gunakan tab "Link Dokumen / Cloud" (Google Drive).`);
+          }
         }
       }
     }
