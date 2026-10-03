@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Document } from '../../types';
-import { addDocumentToDb, deleteDocumentFromDb, uploadImageToStorage, handleFirestoreError, OperationType, getDocumentPreviewUrl } from '../../services/databaseService';
+import { addDocumentToDb, deleteDocumentFromDb, uploadImageToStorage, compressFileIfPossible, handleFirestoreError, OperationType, getDocumentPreviewUrl } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { useConfirm } from '../../context/ConfirmContext';
 
@@ -40,6 +40,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
 
   const [newDoc, setNewDoc] = useState<Partial<Document>>(initialDocState);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
+  const [compressionInfo, setCompressionInfo] = useState<{ originalSize: number; compressedSize: number } | null>(null);
 
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -49,13 +51,44 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
   };
 
-  const handleFileSelection = (file: File | null) => {
+  const handleFileSelection = async (file: File | null) => {
     if (!file) return;
     if (file.size > 15 * 1024 * 1024) {
       toast.error('Ukuran berkas melebihi batas maksimum 15MB');
       return;
     }
-    setSelectedFile(file);
+
+    const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name);
+
+    // Hanya kompres jika berkas gambar melebihi 3 MB agar pas dalam rentang 3 - 5 MB
+    if (isImage && file.size > 3 * 1024 * 1024) {
+      setIsCompressing(true);
+      try {
+        const compressed = await compressFileIfPossible(file, { 
+          minSizeMBToCompress: 3, 
+          maxSizeMB: 4.5, 
+          showToast: true 
+        });
+        setSelectedFile(compressed);
+        if (compressed.size < file.size) {
+          setCompressionInfo({ originalSize: file.size, compressedSize: compressed.size });
+        } else {
+          setCompressionInfo(null);
+        }
+      } catch (err) {
+        setSelectedFile(file);
+        setCompressionInfo(null);
+      } finally {
+        setIsCompressing(false);
+      }
+    } else {
+      setSelectedFile(file);
+      setCompressionInfo(null);
+      if (file.size > 5 * 1024 * 1024) {
+        toast.warning(`Ukuran dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 5 MB. Disarankan dokumen maksimal 3-5 MB agar warga dapat mengunduh cepat.`);
+      }
+    }
+
     if (!newDoc.title) {
       const rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
       const formattedName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
@@ -669,23 +702,45 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                         className="hidden"
                       />
 
-                      {selectedFile ? (
+                      {isCompressing ? (
+                        <div className="p-6 bg-indigo-50/60 border-2 border-dashed border-indigo-300 rounded-2xl flex flex-col items-center justify-center text-center gap-2">
+                          <RefreshCw size={26} className="text-indigo-600 animate-spin" />
+                          <p className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                            Menyesuaikan Berkas ke Batas 3 - 5 MB...
+                          </p>
+                          <p className="text-[10px] text-slate-500 font-medium">
+                            Berkas gambar di atas 3 MB sedang dioptimasi agar pas di batas maksimal 3 - 5 MB.
+                          </p>
+                        </div>
+                      ) : selectedFile ? (
                         <div className="p-4 bg-indigo-50/40 border-2 border-indigo-200 rounded-2xl flex items-center justify-between gap-3 transition-all">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="p-3 bg-white rounded-xl shadow-xs text-indigo-600 shrink-0 border border-indigo-100">
                               <FileCheck size={24} />
                             </div>
                             <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-black text-slate-900 truncate max-w-[220px] sm:max-w-xs block">
+                              <div className="flex items-center flex-wrap gap-2">
+                                <span className="text-xs font-black text-slate-900 truncate max-w-[200px] sm:max-w-xs block">
                                   {selectedFile.name}
                                 </span>
-                                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase rounded-full shrink-0">
-                                  Siap Unggah
-                                </span>
+                                {compressionInfo ? (
+                                  <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-[9px] font-black uppercase rounded-full shrink-0 flex items-center gap-1">
+                                    <Sparkles size={10} /> Hemat {Math.round(((compressionInfo.originalSize - compressionInfo.compressedSize) / compressionInfo.originalSize) * 100)}%
+                                  </span>
+                                ) : (
+                                  <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase rounded-full shrink-0">
+                                    Siap Unggah
+                                  </span>
+                                )}
                               </div>
                               <p className="text-[10px] text-slate-500 font-semibold mt-0.5">
-                                Ukuran: <span className="font-bold text-slate-700">{formatBytes(selectedFile.size)}</span> • Format: <span className="uppercase">{selectedFile.name.split('.').pop()}</span>
+                                Ukuran: <span className="font-bold text-slate-800">{formatBytes(selectedFile.size)}</span>
+                                {compressionInfo && (
+                                  <span className="text-slate-400 line-through ml-1.5 font-normal">
+                                    {formatBytes(compressionInfo.originalSize)}
+                                  </span>
+                                )}
+                                {' '}• Format: <span className="uppercase">{selectedFile.name.split('.').pop()}</span>
                               </p>
                             </div>
                           </div>
@@ -700,7 +755,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                             </button>
                             <button
                               type="button"
-                              onClick={() => setSelectedFile(null)}
+                              onClick={() => { setSelectedFile(null); setCompressionInfo(null); }}
                               className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
                               title="Hapus berkas terpilih"
                             >
@@ -736,7 +791,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.DOCX</span>
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.XLSX</span>
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.ZIP</span>
-                            <span className="text-[9px] text-slate-400 font-semibold">• Maks 15MB</span>
+                            <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[9px] font-black rounded-md flex items-center gap-1">
+                              ⚡ Auto-Kompres Maks 3-5MB
+                            </span>
                           </div>
                         </div>
                       )}

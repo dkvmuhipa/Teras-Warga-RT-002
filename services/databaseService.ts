@@ -677,55 +677,83 @@ export const getPlaceholderImage = (keyword: string = 'community', width: number
 };
 
 /**
- * Automatically compresses an image file before upload if it exceeds a certain size (e.g., 200KB).
- * Resizes the image to a maximum dimension of 1200px while maintaining the aspect ratio,
- * and recompresses it with 0.8 quality as JPEG or keeps PNG formatting depending on needs.
+/**
+ * Options for file compression
  */
-export const compressImageIfPossible = async (file: File, maxDimension: number = 1200, quality: number = 0.8): Promise<File> => {
+export interface CompressOptions {
+  minSizeMBToCompress?: number; // Ambang batas: hanya berkas di atas ukuran ini yang dikompres (default: 3 MB)
+  maxSizeMB?: number; // Batas maksimal ukuran hasil kompresi (default: 4.5 MB, agar pas di bawah 5 MB)
+  maxDimension?: number; // Resolusi maksimal piksel (default: 2400px untuk kejernihan tinggi)
+  quality?: number; // Kualitas kompresi awal (default: 0.88)
+  showToast?: boolean; // Tampilkan notifikasi penghematan kapasitas
+}
+
+/**
+ * Intelligent adaptive file compressor for web apps.
+ * - Berkas gambar di bawah 3 MB dipertahankan 100% tanpa kompresi tambahan.
+ * - Berkas gambar di atas 3 MB (misal 5-20 MB) otomatis dikompresi agar pas di batas 3 - 5 MB.
+ * - Mempertahankan ketajaman dokumen, KTP, KK, serta detail gambar.
+ */
+export const compressFileIfPossible = async (
+  file: File,
+  options: CompressOptions = {}
+): Promise<File> => {
+  const {
+    minSizeMBToCompress = 3,
+    maxSizeMB = 4.5,
+    maxDimension = 2400,
+    quality = 0.88,
+    showToast = true,
+  } = options;
+
   // Check if browser environment
   if (typeof window === 'undefined' || typeof FileReader === 'undefined') {
     return file;
   }
 
-  // Only compress images
-  if (!file.type.startsWith('image/')) {
+  const isImage = file.type.startsWith('image/') || 
+    /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name);
+
+  // If not an image (e.g. PDF, Word, Excel, ZIP), return as is
+  if (!isImage) {
     return file;
   }
 
-  // Only compress files larger than 200KB (200 * 1024 bytes)
-  const MIN_SIZE_TO_COMPRESS = 200 * 1024;
-  if (file.size <= MIN_SIZE_TO_COMPRESS) {
+  // Ambang batas: jika ukuran file sudah <= 3 MB, tidak perlu dikompres
+  const minBytes = minSizeMBToCompress * 1024 * 1024;
+  if (file.size <= minBytes) {
     return file;
   }
 
-  // Skip formats that shouldn't be compressed or don't support simple canvas manipulation (e.g., svg, gif)
+  // Skip SVG or GIF animations
   if (file.type.includes('svg') || file.type.includes('gif')) {
     return file;
   }
 
   try {
-    return new Promise<File>((resolve) => {
+    const targetMaxBytes = maxSizeMB * 1024 * 1024;
+    const originalSize = file.size;
+
+    return await new Promise<File>((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-          let width = img.width;
-          let height = img.height;
+          let initialWidth = img.width;
+          let initialHeight = img.height;
 
-          // Only scale down if one of the dimensions exceeds maxDimension
-          if (width > maxDimension || height > maxDimension) {
-            if (width > height) {
-              height = Math.round((height * maxDimension) / width);
-              width = maxDimension;
+          // Scale down if exceeding maxDimension
+          if (initialWidth > maxDimension || initialHeight > maxDimension) {
+            if (initialWidth > initialHeight) {
+              initialHeight = Math.round((initialHeight * maxDimension) / initialWidth);
+              initialWidth = maxDimension;
             } else {
-              width = Math.round((width * maxDimension) / height);
-              height = maxDimension;
+              initialWidth = Math.round((initialWidth * maxDimension) / initialHeight);
+              initialHeight = maxDimension;
             }
           }
 
           const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
           const ctx = canvas.getContext('2d');
 
           if (!ctx) {
@@ -733,59 +761,91 @@ export const compressImageIfPossible = async (file: File, maxDimension: number =
             return;
           }
 
-          // If converting PNG to JPEG, draw a white background first to handle transparency nicely
-          const targetType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-          if (targetType === 'image/jpeg') {
+          const targetType = 'image/jpeg';
+
+          // Multi-stage compression function
+          const tryCompress = (currentQuality: number, currentWidth: number, currentHeight: number, iteration: number) => {
+            canvas.width = currentWidth;
+            canvas.height = currentHeight;
             ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, width, height);
-          }
+            ctx.fillRect(0, 0, currentWidth, currentHeight);
+            ctx.drawImage(img, 0, 0, currentWidth, currentHeight);
 
-          ctx.drawImage(img, 0, 0, width, height);
-
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                // If the compressed blob is actually larger than the original, use original file
-                if (blob.size >= file.size) {
+            canvas.toBlob(
+              (blob) => {
+                if (!blob) {
                   resolve(file);
-                } else {
-                  // Keep original filename or append proper extension if converted
-                  let name = file.name;
-                  if (targetType === 'image/jpeg' && !name.toLowerCase().endsWith('.jpg') && !name.toLowerCase().endsWith('.jpeg')) {
-                    name = name.replace(/\.[^/.]+$/, "") + ".jpg";
-                  }
-                  
-                  const compressedFile = new File([blob], name, {
-                    type: targetType,
-                    lastModified: Date.now(),
-                  });
-                  
-                  const savedPercent = (((file.size - compressedFile.size) / file.size) * 100).toFixed(0);
-                  toast.success(`Gambar Dioptimasi! Menghemat ${savedPercent}% kapasitas penyimpanan.`, {
-                    description: `Ukuran berkas berkurang dari ${(file.size / 1024).toFixed(0)}KB menjadi ${(compressedFile.size / 1024).toFixed(0)}KB.`,
+                  return;
+                }
+
+                // If blob exceeds targetMaxBytes (3-5 MB) and we can still adjust (up to 3 iterations)
+                if (blob.size > targetMaxBytes && iteration < 3) {
+                  const nextQuality = Math.max(0.70, currentQuality - 0.08);
+                  const nextWidth = Math.round(currentWidth * 0.85);
+                  const nextHeight = Math.round(currentHeight * 0.85);
+                  tryCompress(nextQuality, nextWidth, nextHeight, iteration + 1);
+                  return;
+                }
+
+                // If compressed blob is somehow larger than original, keep original
+                if (blob.size >= originalSize) {
+                  resolve(file);
+                  return;
+                }
+
+                let newName = file.name;
+                if (!newName.toLowerCase().endsWith('.jpg') && !newName.toLowerCase().endsWith('.jpeg')) {
+                  newName = newName.replace(/\.[^/.]+$/, '') + '.jpg';
+                }
+
+                const compressedFile = new File([blob], newName, {
+                  type: targetType,
+                  lastModified: Date.now(),
+                });
+
+                const savedPercent = Math.round(((originalSize - compressedFile.size) / originalSize) * 100);
+                const beforeMB = (originalSize / (1024 * 1024)).toFixed(1);
+                const afterMB = (compressedFile.size / (1024 * 1024)).toFixed(1);
+
+                if (showToast) {
+                  toast.success(`✨ Berkas Disesuaikan ke Batas 3-5 MB!`, {
+                    description: `Ukuran berkas dari ${beforeMB} MB disesuaikan menjadi ${afterMB} MB (Hemat ${savedPercent}% kapasitas).`,
                     duration: 4000
                   });
-                  
-                  resolve(compressedFile);
                 }
-              } else {
-                resolve(file);
-              }
-            },
-            targetType,
-            quality
-          );
+
+                resolve(compressedFile);
+              },
+              targetType,
+              currentQuality
+            );
+          };
+
+          tryCompress(quality, initialWidth, initialHeight, 1);
         };
+
         img.onerror = () => resolve(file);
         img.src = e.target?.result as string;
       };
+
       reader.onerror = () => resolve(file);
       reader.readAsDataURL(file);
     });
   } catch (error) {
-    console.warn("Image compression failed, uploading original file:", error);
+    console.warn('Compress failed, using original file:', error);
     return file;
   }
+};
+
+/**
+ * Backward compatible wrapper for compressImageIfPossible
+ */
+export const compressImageIfPossible = async (
+  file: File, 
+  maxDimension: number = 2400, 
+  quality: number = 0.88
+): Promise<File> => {
+  return compressFileIfPossible(file, { maxDimension, quality, minSizeMBToCompress: 3, maxSizeMB: 4.5, showToast: true });
 };
 
 /**
@@ -860,8 +920,13 @@ export const getDocumentPreviewUrl = (url: string): string => {
 };
 
 export const uploadImageToStorage = async (file: File, path: string): Promise<string> => {
-  const isImage = file.type.startsWith("image/");
+  const isImage = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name);
   const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+  // Hanya kompres berkas gambar yang melebihi 3 MB agar pas di batas 3 - 5 MB
+  const processedFile = (isImage && file.size > 3 * 1024 * 1024) 
+    ? await compressFileIfPossible(file, { minSizeMBToCompress: 3, maxSizeMB: 4.5, showToast: false }) 
+    : file;
 
   // 1. PRIMARY: Direct Signed Upload to Cloudinary (Bypasses Vercel 4.5MB body limit, eliminates 413 error)
   try {
@@ -869,7 +934,6 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
     if (signResponse.ok) {
       const signData = await signResponse.json();
       if (signData && signData.signature && signData.apiKey && signData.cloudName) {
-        const processedFile = isImage ? await compressImageIfPossible(file) : file;
         const uploadFormData = new FormData();
         uploadFormData.append("file", processedFile);
         uploadFormData.append("api_key", signData.apiKey);
@@ -899,7 +963,6 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
 
   // 2. SECONDARY: Serverless /api/upload endpoint (for smaller payloads under 3.5MB)
   try {
-    const processedFile = isImage ? await compressImageIfPossible(file) : file;
     if (processedFile.size < 3.5 * 1024 * 1024) {
       const base64Data = await fileToDataUrl(processedFile);
       const response = await fetch("/api/upload", {
