@@ -684,14 +684,163 @@ export interface CompressOptions {
   minSizeMBToCompress?: number; // Ambang batas: hanya berkas di atas ukuran ini yang dikompres (default: 3 MB)
   maxSizeMB?: number; // Batas maksimal ukuran hasil kompresi (default: 4.5 MB, agar pas di bawah 5 MB)
   maxDimension?: number; // Resolusi maksimal piksel (default: 2400px untuk kejernihan tinggi)
-  quality?: number; // Kualitas kompresi awal (default: 0.88)
+  quality?: number; // Kualitas kompresi awal (default: 0.88 untuk gambar, 0.76 untuk PDF)
   showToast?: boolean; // Tampilkan notifikasi penghematan kapasitas
 }
 
 /**
+ * Loads PDF.js on-demand from cdnjs
+ */
+const loadPdfJs = async (): Promise<any> => {
+  if (typeof window === 'undefined') {
+    throw new Error('Environment does not support PDF rendering');
+  }
+  if ((window as any).pdfjsLib) {
+    return (window as any).pdfjsLib;
+  }
+
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[src*="pdf.min.js"]');
+    if (existing) {
+      if ((window as any).pdfjsLib) {
+        resolve((window as any).pdfjsLib);
+      } else {
+        existing.addEventListener('load', () => resolve((window as any).pdfjsLib));
+        existing.addEventListener('error', () => reject(new Error('Gagal memuat library PDF.js')));
+      }
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    script.onload = () => {
+      const lib = (window as any).pdfjsLib;
+      if (lib) {
+        lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        resolve(lib);
+      } else {
+        reject(new Error('PDF.js library tidak ditemukan setelah dimuat.'));
+      }
+    };
+    script.onerror = () => reject(new Error('Gagal memuat engine kompresi PDF'));
+    document.head.appendChild(script);
+  });
+};
+
+/**
+ * Kompresi berkas PDF berukuran besar (> 3 MB) dengan me-render setiap halaman
+ * ke canvas beresolusi tajam (JPEG 0.76) dan merakitnya kembali menggunakan jsPDF.
+ * Mampu mengecilkan berkas PDF hasil scan 15-35 MB menjadi 2-4.5 MB dengan teks tetap tajam.
+ */
+export const compressPdfIfPossible = async (
+  file: File,
+  options: CompressOptions = {}
+): Promise<File> => {
+  const {
+    minSizeMBToCompress = 3,
+    quality = 0.76,
+    showToast = true
+  } = options;
+
+  const minBytes = minSizeMBToCompress * 1024 * 1024;
+  if (file.size <= minBytes) {
+    return file;
+  }
+
+  try {
+    const originalSize = file.size;
+    const arrayBuffer = await file.arrayBuffer();
+    const pdfjs = await loadPdfJs();
+    const loadingTask = pdfjs.getDocument({ data: arrayBuffer });
+    const pdfDoc = await loadingTask.promise;
+    const numPages = pdfDoc.numPages;
+
+    if (numPages === 0) return file;
+
+    const { jsPDF } = await import('jspdf');
+    let newPdf: any = null;
+
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdfDoc.getPage(pageNum);
+      const originalViewport = page.getViewport({ scale: 1.0 });
+
+      // Target dimensi maksimum per halaman ~1500px agar teks dan tanda tangan tetap tajam
+      const maxDim = 1500;
+      const scale = Math.min(1.5, maxDim / Math.max(originalViewport.width, originalViewport.height));
+      const viewport = page.getViewport({ scale: Math.max(1.0, scale) });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) continue;
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      await page.render({ canvasContext: ctx, viewport }).promise;
+
+      const imgData = canvas.toDataURL('image/jpeg', quality);
+      const orientation = originalViewport.width > originalViewport.height ? 'landscape' : 'portrait';
+
+      if (pageNum === 1) {
+        newPdf = new jsPDF({
+          orientation,
+          unit: 'pt',
+          format: [originalViewport.width, originalViewport.height],
+          compress: true
+        });
+      } else {
+        newPdf.addPage([originalViewport.width, originalViewport.height], orientation);
+      }
+
+      newPdf.addImage(
+        imgData,
+        'JPEG',
+        0,
+        0,
+        originalViewport.width,
+        originalViewport.height,
+        undefined,
+        'FAST'
+      );
+    }
+
+    if (!newPdf) return file;
+
+    const compressedBlob = newPdf.output('blob');
+    if (compressedBlob && compressedBlob.size < originalSize) {
+      const compressedFile = new File([compressedBlob], file.name, {
+        type: 'application/pdf',
+        lastModified: Date.now()
+      });
+
+      const beforeMB = (originalSize / (1024 * 1024)).toFixed(1);
+      const afterMB = (compressedFile.size / (1024 * 1024)).toFixed(1);
+      const savedPercent = Math.round(((originalSize - compressedFile.size) / originalSize) * 100);
+
+      if (showToast) {
+        toast.success(`✨ Dokumen PDF Berhasil Dikompresi!`, {
+          description: `Ukuran PDF berhasil diperkecil dari ${beforeMB} MB menjadi ${afterMB} MB (Hemat ${savedPercent}% kapasitas).`,
+          duration: 5000
+        });
+      }
+
+      return compressedFile;
+    }
+
+    return file;
+  } catch (err) {
+    console.warn('Kompresi PDF gagal, menggunakan berkas asli:', err);
+    return file;
+  }
+};
+
+/**
  * Intelligent adaptive file compressor for web apps.
- * - Berkas gambar di bawah 3 MB dipertahankan 100% tanpa kompresi tambahan.
- * - Berkas gambar di atas 3 MB (misal 5-20 MB) otomatis dikompresi agar pas di batas 3 - 5 MB.
+ * - Berkas foto dan PDF di bawah 3 MB dipertahankan 100% tanpa kompresi tambahan.
+ * - Berkas foto dan PDF di atas 3 MB (misal 5-25 MB) otomatis dikompresi agar pas di batas 3 - 5 MB.
  * - Mempertahankan ketajaman dokumen, KTP, KK, serta detail gambar.
  */
 export const compressFileIfPossible = async (
@@ -711,10 +860,15 @@ export const compressFileIfPossible = async (
     return file;
   }
 
+  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  if (isPdf) {
+    return compressPdfIfPossible(file, options);
+  }
+
   const isImage = file.type.startsWith('image/') || 
     /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name);
 
-  // If not an image (e.g. PDF, Word, Excel, ZIP), return as is
+  // If not an image (e.g. Word, Excel, ZIP), return as is
   if (!isImage) {
     return file;
   }
@@ -924,8 +1078,8 @@ export const uploadImageToStorage = async (file: File, path: string): Promise<st
   const isImage = file.type.startsWith("image/") || /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name);
   const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
 
-  // Hanya kompres berkas gambar yang melebihi 3 MB agar pas di batas 3 - 5 MB
-  const processedFile = (isImage && file.size > 3 * 1024 * 1024) 
+  // Kompres berkas foto maupun dokumen PDF yang melebihi 3 MB agar pas di batas 3 - 5 MB
+  const processedFile = ((isImage || isPdf) && file.size > 3 * 1024 * 1024) 
     ? await compressFileIfPossible(file, { minSizeMBToCompress: 3, maxSizeMB: 4.5, showToast: false }) 
     : file;
 

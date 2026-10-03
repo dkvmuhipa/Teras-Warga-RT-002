@@ -54,64 +54,59 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
   const handleFileSelection = async (file: File | null) => {
     if (!file) return;
 
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Ukuran berkas melebihi 50 MB. Silakan gunakan berkas di bawah 50 MB atau gunakan tab Google Drive.');
+      return;
+    }
+
     const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|webp|heic|heif)$/i.test(file.name);
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
-    if (isImage) {
-      if (file.size > 50 * 1024 * 1024) {
-        toast.error('Ukuran berkas foto melebihi 50 MB. Silakan gunakan berkas di bawah 50 MB.');
-        return;
-      }
+    let processedFile: File = file;
 
-      // Berkas gambar di atas 3 MB (termasuk yang melebihi 15 MB) otomatis dikompresi agar pas di rentang 3 - 5 MB
-      if (file.size > 3 * 1024 * 1024) {
-        setIsCompressing(true);
-        try {
-          const compressed = await compressFileIfPossible(file, { 
-            minSizeMBToCompress: 3, 
-            maxSizeMB: 4.5, 
-            showToast: true 
-          });
-          setSelectedFile(compressed);
-          if (compressed.size < file.size) {
-            setCompressionInfo({ originalSize: file.size, compressedSize: compressed.size });
-          } else {
-            setCompressionInfo(null);
-          }
-        } catch (err) {
-          setSelectedFile(file);
+    // Kompresi otomatis untuk Foto maupun Dokumen PDF jika ukuran > 3 MB
+    if ((isImage || isPdf) && file.size > 3 * 1024 * 1024) {
+      setIsCompressing(true);
+      try {
+        const compressed = await compressFileIfPossible(file, { 
+          minSizeMBToCompress: 3, 
+          maxSizeMB: 4.5, 
+          showToast: true 
+        });
+        processedFile = compressed;
+        if (compressed.size < file.size) {
+          setCompressionInfo({ originalSize: file.size, compressedSize: compressed.size });
+        } else {
           setCompressionInfo(null);
-        } finally {
-          setIsCompressing(false);
         }
-      } else {
-        setSelectedFile(file);
+      } catch (err) {
+        console.warn("Kompresi berkas gagal, menggunakan berkas asli:", err);
+        processedFile = file;
         setCompressionInfo(null);
+      } finally {
+        setIsCompressing(false);
       }
     } else {
-      // Berkas non-gambar (PDF, DOCX, XLSX, ZIP)
-      // Paket Cloudinary Free memiliki limit 10 MB per berkas raw.
-      if (file.size > 10 * 1024 * 1024) {
-        toast.warning(
-          `Berkas dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 10 MB paket Cloudinary Free. Silakan gunakan tab "Link Dokumen / Cloud" (Google Drive) untuk menautkan dokumen ini.`,
-          {
-            action: {
-              label: 'Beralih ke Link',
-              onClick: () => setUploadType('url'),
-            },
-            duration: 10000,
-          }
-        );
-        setSelectedFile(null);
-        setCompressionInfo(null);
-        return;
-      }
-
-      setSelectedFile(file);
       setCompressionInfo(null);
-      if (file.size > 5 * 1024 * 1024) {
-        toast.info(`Berkas dokumen (${(file.size / (1024 * 1024)).toFixed(1)} MB) siap diunggah.`);
-      }
     }
+
+    // Jika berkas non-gambar setelah dikompresi masih > 10 MB (misal file arsip ZIP atau file biner lain)
+    if (!isImage && processedFile.size > 10 * 1024 * 1024) {
+      toast.warning(
+        `Berkas dokumen (${(processedFile.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 10 MB Cloudinary. Silakan gunakan tab "Link Dokumen / Cloud" (Google Drive).`,
+        {
+          action: {
+            label: 'Beralih ke Link',
+            onClick: () => setUploadType('url'),
+          },
+          duration: 10000,
+        }
+      );
+      setSelectedFile(null);
+      return;
+    }
+
+    setSelectedFile(processedFile);
 
     if (!newDoc.title) {
       const rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ');
@@ -747,7 +742,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                             Menyesuaikan Berkas ke Batas 3 - 5 MB...
                           </p>
                           <p className="text-[10px] text-slate-500 font-medium">
-                            Berkas gambar di atas 3 MB sedang dioptimasi agar pas di batas maksimal 3 - 5 MB.
+                            Berkas (foto atau dokumen PDF) di atas 3 MB sedang dioptimasi agar pas di batas maksimal 3 - 5 MB.
                           </p>
                         </div>
                       ) : selectedFile ? (
