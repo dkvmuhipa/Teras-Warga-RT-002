@@ -73,6 +73,7 @@ import PublicDonations from './components/public/PublicDonations';
 import { PublicFAQ } from './components/public/PublicFAQ';
 import { PublicRules } from './components/public/PublicRules';
 import { PublicAbout } from './components/public/PublicAbout';
+import { PublicWelcomeKit } from './components/public/PublicWelcomeKit';
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -571,6 +572,8 @@ export const App = () => {
                                 <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
                                 <Route path="/faq" element={<PublicFAQ faqItems={faqItems} />} />
                                 <Route path="/rules" element={<PublicRules pdfConfig={pdfConfig} />} />
+                                <Route path="/welcome" element={<PublicWelcomeKit />} />
+                                <Route path="/panduan-warga" element={<PublicWelcomeKit />} />
                                 <Route path="/about" element={
                                     <PublicAbout 
                                         officials={officials} 

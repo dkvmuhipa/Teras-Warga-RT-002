@@ -91,6 +91,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
         { path: '/kegiatan', label: 'Jadwal Agenda', desc: 'Kalender kerja bakti, siskamling & pertemuan', icon: Calendar, color: 'text-emerald-600 bg-emerald-50/80 border-emerald-150' },
         { path: '/about', label: 'Tentang Kami', desc: 'Sejarah, struktur kepengurusan RT & visi misi', icon: Building2, color: 'text-amber-600 bg-amber-50/80 border-amber-150' },
         { path: '/faq', label: 'E-FAQ & Panduan', desc: 'Panduan mandiri penyelesaian kendala harian', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/80 border-violet-150' },
+        { path: '/welcome', label: 'Buku Saku Warga Baru', desc: 'Panduan adaptasi, kontak penting & aturan lingkungan', icon: BookOpen, color: 'text-indigo-600 bg-indigo-50/80 border-indigo-150' },
       ]
     }
   ];

@@ -563,26 +563,26 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           </div>
         </motion.div>
 
-        {/* Companion Card: Buku Saku RT 02 */}
+        {/* Companion Card: Buku Saku Warga Baru RT 02 */}
         <div 
-          onClick={() => navigate('/faq')}
+          onClick={() => navigate('/welcome')}
           className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs hover:shadow-md transition-all relative overflow-hidden group flex flex-col justify-between min-h-[300px]"
         >
           <div className="relative z-10 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-indigo-50 text-[#4f46e5] rounded-2xl flex items-center justify-center border border-indigo-100/70 shadow-2xs">
-                <HelpCircle size={22} />
+              <div className="w-12 h-12 bg-indigo-50 text-[#4f46e5] rounded-2xl flex items-center justify-center border border-indigo-100/70 shadow-2xs group-hover:scale-105 transition-transform">
+                <BookOpen size={22} />
               </div>
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#4f46e5] block">Pusat Bantuan Warga</span>
-                <span className="text-xs font-bold text-slate-400">FAQ &amp; Informasi</span>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#4f46e5] block">Selamat Datang</span>
+                <span className="text-xs font-bold text-slate-400">Panduan &amp; Adaptasi</span>
               </div>
             </div>
 
             <div className="space-y-1.5 pt-1">
-              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">Buku Saku <span className="text-[#4f46e5] font-serif italic">Digital</span></h3>
+              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">Buku Saku <span className="text-[#4f46e5] font-serif italic">Warga Baru</span></h3>
               <p className="text-xs font-medium text-slate-500 leading-relaxed">
-                Panduan administratif kilat, tata cara pengajuan surat, lapor tamu 24 jam, dan penanganan darurat.
+                Panduan praktis warga baru &amp; penghuni kontrak: 4 langkah adaptasi awal, jadwal sampah, tata tertib, dan direktori kontak darurat.
               </p>
             </div>
           </div>
@@ -591,7 +591,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             <div className="flex items-center justify-between text-xs font-bold">
               <span className="text-slate-400 tracking-wider uppercase font-extrabold text-[9px]">SISTEM TERAS RT</span>
               <span className="flex items-center gap-1 text-slate-900 font-extrabold group-hover:text-indigo-600 transition-colors">
-                <span>Buka FAQ</span>
+                <span>Buka Buku Saku</span>
                 <ChevronRight size={15} className="transform group-hover:translate-x-1 transition-transform" />
               </span>
             </div>

@@ -5,7 +5,7 @@ import {
   GraduationCap, Briefcase, Car, Bike, Baby, Heart, Accessibility, Smile, 
   FileText, Camera, ShieldCheck, MapPin, Calendar, Check, AlertCircle, Info,
   ShieldAlert, Search, Sparkles, Building, Lock, CheckSquare, Eye, ExternalLink,
-  Shield, CheckCheck, HelpCircle, X, Clock
+  Shield, CheckCheck, HelpCircle, X, Clock, BookOpen, ArrowRight
 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { 
@@ -595,9 +595,23 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             </span>
           </div>
         </div>
-        <Button onClick={onClose} variant="primary" className="w-full py-4 text-xs font-black tracking-widest uppercase shadow-md">
-          Selesai &amp; Kembali
-        </Button>
+        <div className="space-y-3">
+          <button 
+            type="button"
+            onClick={() => {
+              if (onClose) onClose();
+              window.location.href = '/welcome';
+            }} 
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all active:scale-95 cursor-pointer"
+          >
+            <BookOpen size={16} />
+            <span>Buka Buku Saku &amp; Panduan Warga Baru</span>
+            <ArrowRight size={15} />
+          </button>
+          <Button onClick={onClose} variant="secondary" className="w-full py-3 text-xs font-bold tracking-wider uppercase">
+            Selesai &amp; Kembali
+          </Button>
+        </div>
       </div>
     );
   }
