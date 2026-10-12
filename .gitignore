@@ -35,12 +35,16 @@ bower_components
 # node-modules
 node_modules/
 
-# Environment variables
+# Environment variables and secrets
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+firebase-service-account.json
+*-service-account*.json
+*.pem
+*.key
 
 # Build output
 dist/

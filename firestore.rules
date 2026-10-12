@@ -301,14 +301,14 @@ service cloud.firestore {
 
     // Monthly Activity Reports (Laporan Bulanan Kegiatan RT)
     match /monthlyActivityReports/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Annual / Semester LPJ Reports (Laporan Pertanggungjawaban Tahunan RT)
     match /annualLPJReports/{id} {
-      allow read, create, update: if true;
-      allow delete: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Utility Outages (Info Pemadaman PLN, PDAM, Internet)
@@ -337,12 +337,14 @@ service cloud.firestore {
 
     // Rental Contracts (Buku Kontrak & Rumah Sewa RT)
     match /rentalContracts/{id} {
-      allow read, create, update, delete: if true;
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Meeting Minutes (Buku Notula & Kesepakatan Musyawarah RT 02)
     match /meetingMinutes/{id} {
-      allow read, create, update, delete: if true;
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // STBM Records (5 Pilar Sanitasi Total Berbasis Masyarakat)

@@ -13,6 +13,7 @@ import 'react-quill-new/dist/quill.snow.css';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
 import { useConfirm } from '../../context/ConfirmContext';
+import DOMPurify from 'dompurify';
 
 interface OfficialLetterManagerProps {
   pdfConfig: PdfConfig;
@@ -829,7 +830,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                 <div className="flex-1 py-2 font-serif text-[10px] leading-relaxed border-t border-dashed border-slate-200">
                   <div 
                     dangerouslySetInnerHTML={{ 
-                      __html: formData.content || '<p class="italic text-slate-400 font-sans">Ketikkan isi surat resmi pada formulir sebelah kiri...</p>' 
+                      __html: DOMPurify.sanitize(formData.content || '<p class="italic text-slate-400 font-sans">Ketikkan isi surat resmi pada formulir sebelah kiri...</p>') 
                     }} 
                   />
                 </div>
