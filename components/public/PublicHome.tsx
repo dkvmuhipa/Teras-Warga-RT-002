@@ -208,6 +208,17 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       link: '/register' 
     },
     { 
+      label: 'Buku Saku', 
+      category: 'admin' as ServiceCategory,
+      icon: BookOpen, 
+      bg: 'bg-[#f0f2fe]', 
+      color: 'text-[#4f46e5]', 
+      border: 'border-indigo-100/80',
+      link: '/welcome',
+      badge: 'BARU',
+      badgeColor: 'bg-emerald-600'
+    },
+    { 
       label: 'UMKM Warga', 
       category: 'community' as ServiceCategory,
       icon: ShoppingCart, 
@@ -411,11 +422,22 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </motion.div>
 
       {/* Personalized Greeting */}
-      <div ref={contentRef} className="text-center md:text-left">
-        <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter">
-          {getGreeting()}, Warga! 👋
-        </h2>
-        <p className="text-slate-500 font-medium mt-2">Selamat datang kembali di sistem informasi digital RT 02.</p>
+      <div ref={contentRef} className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-center sm:text-left border-b border-slate-200/60 pb-5">
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600 mb-1 block">
+            Portal Warga RT 002 / RW 020
+          </span>
+          <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">
+            {getGreeting()}, <span className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-600 bg-clip-text text-transparent">Warga!</span> 👋
+          </h2>
+          <p className="text-slate-500 font-medium text-xs sm:text-sm mt-1">
+            Selamat datang di pusat layanan mandiri dan transparansi digital lingkungan Huntap Tondo 2.
+          </p>
+        </div>
+        <div className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] font-bold text-slate-600 shrink-0 shadow-2xs">
+          <Calendar size={13} className="text-indigo-600" />
+          <span>{today}, {fullDate}</span>
+        </div>
       </div>
 
       {/* Quick Actions - Layanan Warga Terpadu Grid */}
@@ -786,13 +808,13 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               </p>
               
               <div className="flex items-center gap-1.5 flex-wrap mb-4">
-                <span className="text-[10px] font-bold text-slate-400">Pilih Cepat:</span>
-                {['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(blockPrefix => (
+                <span className="text-[10px] font-bold text-slate-400">Pilih Cepat Blok:</span>
+                {['C5', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12'].map(blockPrefix => (
                   <button
                     key={blockPrefix}
                     type="button"
                     onClick={() => setStatusSearchId(`${blockPrefix}-`)}
-                    className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer border border-slate-200/60"
+                    className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer border border-slate-200/60 active:scale-95 shadow-2xs"
                   >
                     Blok {blockPrefix}
                   </button>
@@ -802,12 +824,12 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               <form onSubmit={handleCheckStatus} className="flex gap-3">
                 <input 
                   type="text" 
-                  placeholder="No. Rumah (Contoh: A1-01)" 
-                  className="flex-1 px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+                  placeholder="No. Rumah (Contoh: C10-08)" 
+                  className="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-xs"
                   value={statusSearchId}
                   onChange={e => setStatusSearchId(e.target.value)}
                 />
-                <Button type="submit" className="px-8 rounded-2xl cursor-pointer shadow-md">
+                <Button type="submit" className="px-7 rounded-2xl cursor-pointer shadow-md">
                   Cek
                 </Button>
               </form>

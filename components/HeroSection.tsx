@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles, Building2, Lock, Shield, Search, Wallet, Droplet, AlertTriangle } from 'lucide-react';
+import { Sun, Cloud, CloudRain, CloudLightning, CloudFog, ShieldCheck, Users, Droplets, Thermometer, Wind as WindIcon, Activity, ArrowRight, Sparkles, Building2, Lock, Shield, Search, Wallet, Droplet, AlertTriangle, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 import { RT_NAME } from '../constants';
 import { toast } from 'sonner';
@@ -64,18 +64,24 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
         
         <div className="relative w-full px-6 py-8 sm:px-10 md:px-12 lg:px-14 xl:px-16 md:py-12 lg:py-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12 z-10">
           <div className="text-center lg:text-left max-w-3xl xl:max-w-4xl z-10 w-full space-y-4 md:space-y-6">
-            {/* Wilayah Badge */}
+            {/* Wilayah Badge with Dual Chips */}
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.22em] border border-emerald-200/80 text-emerald-800 shadow-2xs"
+              className="inline-flex flex-wrap items-center justify-center lg:justify-start gap-2"
             >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-200/90 text-emerald-800 shadow-xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>RT 002 / RW 020 • Kelurahan Tondo</span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50/90 border border-amber-200/80 rounded-full text-[10px] font-extrabold text-amber-800 tracking-wider shadow-2xs">
+                <MapPin size={11} className="text-amber-600" />
+                <span>Huntap Tondo 2, Palu</span>
               </span>
-              <span>RT 002 / RW 020 • Kelurahan Tondo</span>
             </motion.div>
             
             <div className="space-y-2 md:space-y-3">
@@ -106,21 +112,21 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.45 }}
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1"
+              className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1"
             >
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#fff4eb] border border-amber-100/80 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#ea580c] shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#fff4eb] border border-amber-200/70 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#ea580c] shadow-2xs hover:scale-105 hover:shadow-xs transition-all duration-200 cursor-default">
                 <Building2 size={13} className="text-[#ea580c]" />
                 <span>120+ Hunian Aktif</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#e8faf0] border border-emerald-100/80 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#059669] shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#e8faf0] border border-emerald-200/70 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#059669] shadow-2xs hover:scale-105 hover:shadow-xs transition-all duration-200 cursor-default">
                 <Shield size={13} className="text-[#059669]" />
                 <span>Siskamling 24 Jam</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#edf7ff] border border-sky-100/80 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#0284c7] shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#edf7ff] border border-sky-200/70 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#0284c7] shadow-2xs hover:scale-105 hover:shadow-xs transition-all duration-200 cursor-default">
                 <Droplet size={13} className="text-[#0284c7]" />
                 <span>Air PDAM Rp35rb/10m³</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#f0f2fe] border border-indigo-100/80 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#4f46e5] shadow-2xs">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#f0f2fe] border border-indigo-200/70 rounded-full text-[10px] md:text-[11px] font-extrabold text-[#4f46e5] shadow-2xs hover:scale-105 hover:shadow-xs transition-all duration-200 cursor-default">
                 <Wallet size={13} className="text-[#4f46e5]" />
                 <span>Kas Terbuka &amp; Akuntabel</span>
               </span>
@@ -139,7 +145,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 type="text"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Cari nomor blok rumah, layanan, agenda, info..."
+                placeholder="Cari nomor blok rumah (C10), layanan, agenda, info..."
                 className="w-full pl-11 pr-24 py-3 bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-xs"
               />
               <button 
@@ -167,7 +173,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               
               <button 
                 onClick={handleSmartEnvClick}
-                className="flex items-center gap-2 px-5 py-3.5 text-xs font-extrabold uppercase tracking-wider bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl shadow-2xs transition-all cursor-pointer"
+                className="flex items-center gap-2 px-5 py-3.5 text-xs font-extrabold uppercase tracking-wider bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl shadow-2xs hover:shadow-xs transition-all cursor-pointer active:scale-95"
               >
                 <ShieldCheck size={16} className="text-[#059669] animate-pulse" />
                 <span>Smart Env Tondo</span>
