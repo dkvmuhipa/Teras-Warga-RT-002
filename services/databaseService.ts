@@ -805,6 +805,10 @@ export const compressPdfIfPossible = async (
         undefined,
         'FAST'
       );
+
+      // Clean up canvas memory buffer immediately to prevent RAM bloat on multi-page PDFs
+      canvas.width = 0;
+      canvas.height = 0;
     }
 
     if (!newPdf) return file;

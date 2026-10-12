@@ -128,7 +128,7 @@ service cloud.firestore {
 
     // Documents
     match /documents/{id} {
-      allow read: if true;
+      allow read: if !('accessLevel' in resource.data) || resource.data.accessLevel != 'Internal' || isAdmin();
       allow write: if isAdmin();
     }
 

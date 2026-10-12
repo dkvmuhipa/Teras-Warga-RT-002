@@ -758,12 +758,14 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                 <iframe
                   src={getDocumentPreviewUrl(selectedPreviewDoc.url)}
                   title={selectedPreviewDoc.title}
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                   className="w-full h-full border-0 bg-white"
                 />
               ) : selectedPreviewDoc.url.includes('drive.google.com') ? (
                 <iframe
                   src={selectedPreviewDoc.url.replace('/view', '/preview')}
                   title={selectedPreviewDoc.title}
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                   className="w-full h-full border-0 bg-white"
                 />
               ) : (
