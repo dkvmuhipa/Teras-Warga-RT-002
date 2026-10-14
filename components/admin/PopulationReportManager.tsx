@@ -263,7 +263,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       houses.forEach(house => {
         if (house.status === 'Occupied') {
           const occupantsCount = Math.max(house.occupants || 1, 1 + (house.familyMembers?.length || 0));
-          const isSeasonal = house.residenceType === 'Sewa';
+          const isSeasonal = house.residenceType === 'Sewa' || house.residenceType === 'Rumah Keluarga' || (house.status as any) === 'Visiting';
           if (isSeasonal) currentSeasonal += occupantsCount;
 
           currentTotal += occupantsCount;
@@ -278,11 +278,14 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
           currentDisability += house.disabilityCount || 0;
           currentOrphan += house.orphanCount || 0;
 
+          const isHoFFemale = house.gender === 'Perempuan' || (house.gender as string) === 'Wanita';
+          const isHoFMale = !isHoFFemale;
+
           if (house.familyMembers && house.familyMembers.length > 0) {
-            currentMale += (house.gender === 'Laki-laki' || !house.gender) ? 1 : 0;
-            if (isSeasonal && (house.gender === 'Laki-laki' || !house.gender)) currentSeasonalMale++;
-            currentFemale += house.gender === 'Perempuan' ? 1 : 0;
-            if (isSeasonal && house.gender === 'Perempuan') currentSeasonalFemale++;
+            currentMale += isHoFMale ? 1 : 0;
+            if (isSeasonal && isHoFMale) currentSeasonalMale++;
+            currentFemale += isHoFFemale ? 1 : 0;
+            if (isSeasonal && isHoFFemale) currentSeasonalFemale++;
 
             house.familyMembers.forEach(mem => {
               const mGender = mem.gender || 'Laki-laki';
@@ -383,7 +386,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
               const jDate = house.joiningDate ? house.joiningDate.split('T')[0] : '2000-01-01';
               if (jDate <= endOfMonthDateStr) {
                 const occupantsCount = Math.max(house.occupants || 1, 1 + (house.familyMembers?.length || 0));
-                const isSeasonal = house.residenceType === 'Sewa';
+                const isSeasonal = house.residenceType === 'Sewa' || house.residenceType === 'Rumah Keluarga' || (house.status as any) === 'Visiting';
                 if (isSeasonal) monthSeasonal += occupantsCount;
 
                 monthPregnant += house.pregnantCount || 0;
@@ -397,11 +400,14 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                 monthDisability += house.disabilityCount || 0;
                 monthOrphan += house.orphanCount || 0;
 
+                const isHoFFemale = house.gender === 'Perempuan' || (house.gender as string) === 'Wanita';
+                const isHoFMale = !isHoFFemale;
+
                 if (house.familyMembers && house.familyMembers.length > 0) {
-                  monthMale += (house.gender === 'Laki-laki' || !house.gender) ? 1 : 0;
-                  if (isSeasonal && (house.gender === 'Laki-laki' || !house.gender)) monthSeasonalMale++;
-                  monthFemale += house.gender === 'Perempuan' ? 1 : 0;
-                  if (isSeasonal && house.gender === 'Perempuan') monthSeasonalFemale++;
+                  monthMale += isHoFMale ? 1 : 0;
+                  if (isSeasonal && isHoFMale) monthSeasonalMale++;
+                  monthFemale += isHoFFemale ? 1 : 0;
+                  if (isSeasonal && isHoFFemale) monthSeasonalFemale++;
 
                   house.familyMembers.forEach(mem => {
                     const mGender = mem.gender || 'Laki-laki';
@@ -693,7 +699,7 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     houses.forEach(house => {
       if (house.status === 'Occupied') {
         const occupantsCount = Math.max(house.occupants || 1, 1 + (house.familyMembers?.length || 0));
-        const isSeasonal = house.residenceType === 'Sewa';
+        const isSeasonal = house.residenceType === 'Sewa' || house.residenceType === 'Rumah Keluarga' || (house.status as any) === 'Visiting';
         if (isSeasonal) {
           currentSeasonal += occupantsCount;
         }
@@ -710,14 +716,17 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         currentDisability += house.disabilityCount || 0;
         currentOrphan += house.orphanCount || 0;
         
+        const isHoFFemale = house.gender === 'Perempuan' || (house.gender as string) === 'Wanita';
+        const isHoFMale = !isHoFFemale;
+
         // Count gender from family members if available, otherwise estimate
         if (house.familyMembers && house.familyMembers.length > 0) {
           // We must count at least the Head of Family
-          currentMale += (house.gender === 'Laki-laki' || !house.gender) ? 1 : 0;
-          if (isSeasonal && (house.gender === 'Laki-laki' || !house.gender)) currentSeasonalMale++;
+          currentMale += isHoFMale ? 1 : 0;
+          if (isSeasonal && isHoFMale) currentSeasonalMale++;
           
-          currentFemale += house.gender === 'Perempuan' ? 1 : 0;
-          if (isSeasonal && house.gender === 'Perempuan') currentSeasonalFemale++;
+          currentFemale += isHoFFemale ? 1 : 0;
+          if (isSeasonal && isHoFFemale) currentSeasonalFemale++;
 
           house.familyMembers.forEach(m => {
             const mGender = m.gender || 'Laki-laki';
@@ -1550,11 +1559,11 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-slate-600">
-                  <span className="px-3 py-1.5 bg-slate-100 rounded-xl">
+                  <span className="px-3 py-1.5 bg-slate-100 rounded-xl" title="Total seluruh kepala keluarga berpenghuni aktif">
                     Total KK: <b>{liveStats.housesTetap + liveStats.housesMusiman} Rumah</b>
                   </span>
-                  <span className="px-3 py-1.5 bg-pink-50 text-pink-700 border border-pink-200 rounded-xl">
-                    KK Perempuan: <b>{liveStats.housesFemaleHoF} KK</b>
+                  <span className="px-3 py-1.5 bg-pink-50 text-pink-700 border border-pink-200 rounded-xl" title="Jumlah KK dengan Kepala Keluarga Perempuan (PEKKA)">
+                    KK Perempuan (PEKKA): <b>{liveStats.housesFemaleHoF} KK</b>
                   </span>
                 </div>
               </div>
@@ -1613,13 +1622,13 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     <div className="flex items-start justify-between">
                       <div>
                         <span className="px-2.5 py-1 bg-amber-500 text-slate-950 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
-                          WARGA MUSIMAN / KONTRAK / KOST
+                          PENDUDUK PENDATANG / TIDAK TETAP (SEWA / KOST)
                         </span>
                         <h4 className="text-3xl font-black text-amber-950 mt-3">
                           {liveStats.totalMusiman} <span className="text-sm font-bold text-amber-600">Jiwa</span>
                         </h4>
                         <p className="text-xs text-amber-800/80 font-medium mt-1">
-                          Tersebar di <b>{liveStats.housesMusiman} Rumah / Unit</b> (Sewa / Kost)
+                          Tersebar di <b>{liveStats.housesMusiman} Rumah / KK</b> (Kontrakan / Kost / Kerabat)
                         </p>
                       </div>
                       <div className="p-3 bg-white text-amber-600 rounded-2xl shadow-sm">

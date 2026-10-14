@@ -439,13 +439,12 @@ Wilayah: Hunian Tetap (Huntap) 2 Tondo, Kel. Tondo, Kec. Mantikulore, Kota Palu
 Tanggal Pembaruan: ${dateStr}
 Filter Wilayah: ${selectedBlock === 'ALL' ? 'Semua Blok (A - F)' : `Blok ${selectedBlock}`}
 
-1. STATISTIK KEPALA KELUARGA & HUNIAN:
-   • Total KK Aktif: ${totalOccupied} KK
-   • Jumlah KK Dengan Kepala Keluarga Perempuan (PEKKA): ${totalFemaleHoF} KK (${totalOccupied > 0 ? ((totalFemaleHoF / totalOccupied) * 100).toFixed(1) : 0}%)
+1. DATA KEPENDUDUKAN PRIORITAS KELURAHAN TONDO:
+   • Jumlah KK Dengan Kepala Keluarga Perempuan: ${totalFemaleHoF} KK (${totalOccupied > 0 ? ((totalFemaleHoF / totalOccupied) * 100).toFixed(1) : 0}% dari total KK)
+   • Jumlah Penduduk Pendatang/ tidak tetap: ${totalNonPermanentSouls} Jiwa (${totalNonPermanentHouses} KK Sewa / Kontrak / Non-Tetap)
+   • Total Kepala Keluarga (KK Aktif): ${totalOccupied} KK
+   • Total Seluruh Jiwa Penduduk: ${totalSoul} Jiwa (Warga Tetap: ${Math.max(0, totalSoul - totalNonPermanentSouls)} Jiwa, Pendatang/Tidak Tetap: ${totalNonPermanentSouls} Jiwa)
    • KK Kepala Keluarga Laki-laki: ${totalMaleHoF} KK (${totalOccupied > 0 ? ((totalMaleHoF / totalOccupied) * 100).toFixed(1) : 0}%)
-   • Total Jiwa Penduduk: ${totalSoul} Jiwa
-   • Penduduk Tetap: ${Math.max(0, totalSoul - totalNonPermanentSouls)} Jiwa (${Math.max(0, totalOccupied - totalNonPermanentHouses)} KK)
-   • Jumlah Penduduk Pendatang / Tidak Tetap: ${totalNonPermanentSouls} Jiwa (${totalNonPermanentHouses} KK Sewa/Kontrak)
    • Rata-rata Jiwa per KK: ${averageSoulPerKK} Jiwa/KK
    • Total Kendaraan Warga: ${totalVehicles} Unit (${totalMotor} Motor, ${totalMobil} Mobil)
 
@@ -724,22 +723,22 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   </div>
                   <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/10 border border-pink-400/30 p-4 rounded-2xl backdrop-blur-sm relative overflow-hidden">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-black text-pink-300 uppercase tracking-widest">KK Kepala Keluarga P</p>
-                      <span className="px-1.5 py-0.5 bg-pink-500/30 text-pink-200 text-[8px] font-black rounded uppercase">Kelurahan</span>
+                      <p className="text-[10px] font-black text-pink-300 uppercase tracking-widest">KK Kepala Keluarga Perempuan</p>
+                      <span className="px-1.5 py-0.5 bg-pink-500/30 text-pink-200 text-[8px] font-black rounded uppercase">PEKKA</span>
                     </div>
                     <p className="text-2xl font-black text-pink-200 mt-1">{totalFemaleHoF} <span className="text-xs font-bold text-pink-300">KK</span></p>
                     <p className="text-[10px] text-pink-200/80 font-medium mt-1">
-                      {totalOccupied > 0 ? ((totalFemaleHoF / totalOccupied) * 100).toFixed(1) : 0}% dari {totalOccupied} KK
+                      {totalOccupied > 0 ? ((totalFemaleHoF / totalOccupied) * 100).toFixed(1) : 0}% dari {totalOccupied} KK aktif
                     </p>
                   </div>
                   <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-400/30 p-4 rounded-2xl backdrop-blur-sm relative overflow-hidden">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Penduduk Tidak Tetap</p>
+                      <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Penduduk Pendatang / Tdk Tetap</p>
                       <span className="px-1.5 py-0.5 bg-amber-500/30 text-amber-200 text-[8px] font-black rounded uppercase">Kelurahan</span>
                     </div>
                     <p className="text-2xl font-black text-amber-200 mt-1">{totalNonPermanentSouls} <span className="text-xs font-bold text-amber-300">Jiwa</span></p>
                     <p className="text-[10px] text-amber-200/80 font-medium mt-1">
-                      {totalNonPermanentHouses} KK Sewa / Kontrak
+                      {totalNonPermanentHouses} KK Sewa / Kontrak / Non-Tetap
                     </p>
                   </div>
                 </div>
