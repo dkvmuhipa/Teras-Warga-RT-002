@@ -94,6 +94,10 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
     let totalBLT = 0;
     let totalBansosLain = 0;
     let totalOccupied = 0;
+    let totalFemaleHoF = 0;
+    let totalMaleHoF = 0;
+    let totalNonPermanentHouses = 0;
+    let totalNonPermanentSouls = 0;
 
     houses.forEach(h => {
       if (h && h.status === 'Occupied') {
@@ -135,6 +139,19 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
           vaccinationStatus: h.vaccinationStatus || 'Belum'
         };
         allResidents.push(hoF);
+
+        const isFemaleHoF = hoF.gender === 'Perempuan' || (h.gender as string) === 'Wanita';
+        if (isFemaleHoF) {
+          totalFemaleHoF++;
+        } else {
+          totalMaleHoF++;
+        }
+
+        const isNonPermanent = (h.residenceType === 'Sewa' || h.residenceType === 'Rumah Keluarga' || (h.status as any) === 'Visiting');
+        if (isNonPermanent) {
+          totalNonPermanentHouses++;
+          totalNonPermanentSouls += occupantsCount;
+        }
 
         religions[hoF.religion] = (religions[hoF.religion] || 0) + 1;
         educations[hoF.education] = (educations[hoF.education] || 0) + 1;
@@ -235,7 +252,11 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
       totalPKH,
       totalBLT,
       totalBansosLain,
-      totalOccupied
+      totalOccupied,
+      totalFemaleHoF,
+      totalMaleHoF,
+      totalNonPermanentHouses,
+      totalNonPermanentSouls
     };
   }, [filteredHouses]);
 
@@ -244,7 +265,8 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
     economicStatuses, bpjsStatuses, vaccinationStatuses, residenceTypes,
     totalVehicles, totalMotor, totalMobil, totalSoul, totalPregnant, totalBabies, 
     totalToddlers, totalChildren, totalTeenagers, totalAdults,
-    totalElderly, totalWidows, totalDisability, totalOrphans, totalPKH, totalBLT, totalBansosLain, totalOccupied 
+    totalElderly, totalWidows, totalDisability, totalOrphans, totalPKH, totalBLT, totalBansosLain, totalOccupied,
+    totalFemaleHoF, totalMaleHoF, totalNonPermanentHouses, totalNonPermanentSouls
   } = stats;
 
   const [isPrinting, setIsPrinting] = useState(false);
@@ -419,7 +441,11 @@ Filter Wilayah: ${selectedBlock === 'ALL' ? 'Semua Blok (A - F)' : `Blok ${selec
 
 1. STATISTIK KEPALA KELUARGA & HUNIAN:
    • Total KK Aktif: ${totalOccupied} KK
+   • Jumlah KK Dengan Kepala Keluarga Perempuan (PEKKA): ${totalFemaleHoF} KK (${totalOccupied > 0 ? ((totalFemaleHoF / totalOccupied) * 100).toFixed(1) : 0}%)
+   • KK Kepala Keluarga Laki-laki: ${totalMaleHoF} KK (${totalOccupied > 0 ? ((totalMaleHoF / totalOccupied) * 100).toFixed(1) : 0}%)
    • Total Jiwa Penduduk: ${totalSoul} Jiwa
+   • Penduduk Tetap: ${Math.max(0, totalSoul - totalNonPermanentSouls)} Jiwa (${Math.max(0, totalOccupied - totalNonPermanentHouses)} KK)
+   • Jumlah Penduduk Pendatang / Tidak Tetap: ${totalNonPermanentSouls} Jiwa (${totalNonPermanentHouses} KK Sewa/Kontrak)
    • Rata-rata Jiwa per KK: ${averageSoulPerKK} Jiwa/KK
    • Total Kendaraan Warga: ${totalVehicles} Unit (${totalMotor} Motor, ${totalMobil} Mobil)
 
@@ -444,10 +470,15 @@ Filter Wilayah: ${selectedBlock === 'ALL' ? 'Semua Blok (A - F)' : `Blok ${selec
 Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text);
-      toast.success("Format Laporan Kelurahan Disalin!", {
-        description: "Teks berhasil disalin ke clipboard, siap dikirim via WhatsApp atau dilampirkan ke surat pengantar."
-      });
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          toast.success("Format Laporan Kelurahan Disalin!", {
+            description: "Teks berhasil disalin ke clipboard, siap dikirim via WhatsApp atau dilampirkan ke surat pengantar."
+          });
+        })
+        .catch(() => {
+          toast.info("Ringkasan Data Siap", { description: text.slice(0, 100) + '...' });
+        });
     } else {
       toast.info("Ringkasan Data Siap", { description: text.slice(0, 100) + '...' });
     }
@@ -662,33 +693,53 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
                     <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Rasio Jenis Kelamin</p>
-                    <p className="text-2xl md:text-3xl font-black text-white mt-1">{sexRatio}</p>
+                    <p className="text-2xl font-black text-white mt-1">{sexRatio}</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
-                      {totalMale} L : {totalFemale} P (per 100 wanita)
+                      {totalMale} L : {totalFemale} P
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
-                    <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Rasio Ketergantungan</p>
-                    <p className="text-2xl md:text-3xl font-black text-white mt-1">{dependencyRatio}%</p>
+                    <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Rasio Tanggungan</p>
+                    <p className="text-2xl font-black text-white mt-1">{dependencyRatio}%</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
-                      Tanggungan per 100 usia produktif
+                      Beban per 100 produktif
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
                     <p className="text-[10px] font-black text-teal-300 uppercase tracking-widest">Indeks Penuaan</p>
-                    <p className="text-2xl md:text-3xl font-black text-white mt-1">{ageingIndex}%</p>
+                    <p className="text-2xl font-black text-white mt-1">{ageingIndex}%</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
                       {elderlyDependents} Lansia vs {youngDependents} Anak
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
-                    <p className="text-[10px] font-black text-rose-300 uppercase tracking-widest">Rata-rata Jiwa / KK</p>
-                    <p className="text-2xl md:text-3xl font-black text-white mt-1">{averageSoulPerKK}</p>
+                    <p className="text-[10px] font-black text-rose-300 uppercase tracking-widest">Rata Jiwa / KK</p>
+                    <p className="text-2xl font-black text-white mt-1">{averageSoulPerKK}</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
                       Kepadatan hunian aktif
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/10 border border-pink-400/30 p-4 rounded-2xl backdrop-blur-sm relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-black text-pink-300 uppercase tracking-widest">KK Kepala Keluarga P</p>
+                      <span className="px-1.5 py-0.5 bg-pink-500/30 text-pink-200 text-[8px] font-black rounded uppercase">Kelurahan</span>
+                    </div>
+                    <p className="text-2xl font-black text-pink-200 mt-1">{totalFemaleHoF} <span className="text-xs font-bold text-pink-300">KK</span></p>
+                    <p className="text-[10px] text-pink-200/80 font-medium mt-1">
+                      {totalOccupied > 0 ? ((totalFemaleHoF / totalOccupied) * 100).toFixed(1) : 0}% dari {totalOccupied} KK
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-400/30 p-4 rounded-2xl backdrop-blur-sm relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Penduduk Tidak Tetap</p>
+                      <span className="px-1.5 py-0.5 bg-amber-500/30 text-amber-200 text-[8px] font-black rounded uppercase">Kelurahan</span>
+                    </div>
+                    <p className="text-2xl font-black text-amber-200 mt-1">{totalNonPermanentSouls} <span className="text-xs font-bold text-amber-300">Jiwa</span></p>
+                    <p className="text-[10px] text-amber-200/80 font-medium mt-1">
+                      {totalNonPermanentHouses} KK Sewa / Kontrak
                     </p>
                   </div>
                 </div>

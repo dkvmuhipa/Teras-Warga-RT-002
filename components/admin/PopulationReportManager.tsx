@@ -1173,6 +1173,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
     let musimanFemale = 0;
     let housesTetap = 0;
     let housesMusiman = 0;
+    let housesFemaleHoF = 0;
+    let housesMaleHoF = 0;
     let totalPregnant = 0;
     let totalBaby = 0;
     let totalToddler = 0;
@@ -1194,16 +1196,18 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
         let houseFemale = 0;
 
         // Head of family gender
-        if (h.gender === 'Perempuan') {
+        if (h.gender === 'Perempuan' || (h.gender as string) === 'Wanita') {
           houseFemale += 1;
+          housesFemaleHoF += 1;
         } else {
           houseMale += 1; // Default to male if not specified
+          housesMaleHoF += 1;
         }
 
         // Family members gender
         if (h.familyMembers && h.familyMembers.length > 0) {
           h.familyMembers.forEach(m => {
-            if (m.gender === 'Perempuan') {
+            if (m.gender === 'Perempuan' || (m.gender as string) === 'Wanita') {
               houseFemale += 1;
             } else {
               houseMale += 1;
@@ -1260,6 +1264,8 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
       musimanFemale,
       housesTetap,
       housesMusiman,
+      housesFemaleHoF,
+      housesMaleHoF,
       vulnerableTotal: totalPregnant + totalBaby + totalToddler + totalDisability + totalOrphan + totalWidow,
       totalPregnant, totalBaby, totalToddler, totalChild, totalTeenager, totalAdult, totalElderly, totalWidow, totalDisability, totalOrphan
     };
@@ -1543,9 +1549,12 @@ export const PopulationReportManager: React.FC<PopulationReportManagerProps> = (
                     Rasio kependudukan berdasarkan status kepemilikan dan hak tinggal di lingkungan RT 02
                   </p>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-600">
+                <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-slate-600">
                   <span className="px-3 py-1.5 bg-slate-100 rounded-xl">
                     Total KK: <b>{liveStats.housesTetap + liveStats.housesMusiman} Rumah</b>
+                  </span>
+                  <span className="px-3 py-1.5 bg-pink-50 text-pink-700 border border-pink-200 rounded-xl">
+                    KK Perempuan: <b>{liveStats.housesFemaleHoF} KK</b>
                   </span>
                 </div>
               </div>
