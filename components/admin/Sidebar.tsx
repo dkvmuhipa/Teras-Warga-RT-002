@@ -104,14 +104,15 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     { 
       title: "Pusat Kendali", 
       items: [
-        { id: 'overview', icon: LayoutDashboard, label: 'Dashboard UTAMA' },
-        { id: 'analytics', icon: BarChart3, label: 'Pusat Analitik' },
+        { id: 'overview', icon: LayoutDashboard, label: 'Dashboard Utama' },
+        { id: 'analytics', icon: BarChart3, label: 'Analitik & Demografi' },
       ] 
     },
     { 
       title: "Kependudukan", 
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
+        { id: 'mutations', icon: FileClock, label: 'Mutasi & Laporan Penduduk' },
         { id: 'rentals', icon: Building, label: 'Rumah Sewa & Kontrakan' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
         { id: 'stbm', icon: CheckSquare, label: '5 Pilar STBM' },
@@ -121,10 +122,10 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     { 
       title: "Layanan & Pelaporan", 
       items: [
-        { id: 'services', icon: FileText, label: 'Pusat Persuratan' },
+        { id: 'services', icon: FileText, label: 'Persuratan & Pengantar' },
         { id: 'meeting-minutes', icon: BookOpen, label: 'Notula Musyawarah' },
-        { id: 'reports-lpj', icon: Award, label: 'Laporan & LPJ RT' },
-        { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu' },
+        { id: 'reports-lpj', icon: Award, label: 'LPJ Keuangan & Tahunan' },
+        { id: 'reports-warga', icon: AlertTriangle, label: 'Aduan Warga & Tamu' },
         { id: 'documents', icon: FileText, label: 'Arsip Dokumen' },
       ] 
     },
@@ -133,10 +134,10 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan' },
         { id: 'water-meter', icon: Droplets, label: 'Meter Air & Utilitas' },
-        { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda' },
+        { id: 'facilities', icon: Shield, label: 'Ronda & Keamanan' },
         { id: 'kerja-bakti', icon: Users, label: 'Kerja Bakti & Gotong Royong' },
         { id: 'panic-logs', icon: ShieldAlert, label: 'Log Panic Button SOS' },
-        { id: 'content', icon: Megaphone, label: 'Pusat Informasi' },
+        { id: 'content', icon: Megaphone, label: 'Pengumuman & Berita' },
         { id: 'activities', icon: Calendar, label: 'Agenda & Presensi' },
         { id: 'assets', icon: Box, label: 'Aset & Inventaris' },
       ] 
@@ -162,7 +163,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         isAllowed = ['overview', 'analytics', 'finance', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
       } else if (role === Role.SECRETARY) {
         isAllowed = [
-          'overview', 'analytics', 'residents', 'rentals',
+          'overview', 'analytics', 'residents', 'mutations', 'rentals',
           'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
         ].includes(item.id);

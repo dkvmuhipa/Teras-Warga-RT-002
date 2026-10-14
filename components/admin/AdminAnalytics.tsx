@@ -252,7 +252,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
             <div className="w-2.5 h-6 bg-indigo-600 rounded-full"></div>
             <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Dashboard Analitik Terpadu</span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-1">Pusat Analitik RT 02</h2>
+          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-1">Analitik & Demografi RT 02</h2>
           <p className="text-slate-500 font-medium text-xs md:text-sm">Visualisasi data demografi, keuangan, dan efisiensi operasional pengurus.</p>
         </div>
         

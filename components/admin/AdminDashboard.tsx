@@ -46,7 +46,8 @@ const STBMManager = React.lazy(() => import('./STBMManager').then(m => ({ defaul
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle,
-  LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid, BookOpen, Building, CheckSquare, Clock, Sparkles, Command, Sun, CloudRain, Wind, ArrowRight, CornerDownLeft
+  LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid, BookOpen, Building, CheckSquare, Clock, Sparkles, Command, Sun, CloudRain, Wind, ArrowRight, CornerDownLeft,
+  FileClock, Award, Droplets
 } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 import { toast } from 'sonner';
@@ -131,19 +132,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   }, []);
 
   const navItemsList = [
-    { id: 'overview', icon: LayoutDashboard, label: 'Dashboard', desc: 'Ringkasan & status RT terbaru', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
-    { id: 'analytics', icon: BarChart3, label: 'Pusat Analitik', desc: 'Statistik & demografi kependudukan', color: 'bg-blue-50 text-blue-600 border-blue-100/60 hover:bg-blue-100/50' },
-    { id: 'residents', icon: Users, label: 'Data Warga', desc: 'Database KK & data penduduk', color: 'bg-emerald-50 text-emerald-600 border-emerald-100/60 hover:bg-emerald-100/50' },
+    { id: 'overview', icon: LayoutDashboard, label: 'Dashboard Utama', desc: 'Ringkasan & status RT terbaru', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
+    { id: 'analytics', icon: BarChart3, label: 'Analitik & Demografi', desc: 'Statistik, demografi BPS & rasio kependudukan', color: 'bg-blue-50 text-blue-600 border-blue-100/60 hover:bg-blue-100/50' },
+    { id: 'residents', icon: Users, label: 'Data Warga', desc: 'Database KK & sensus data penduduk', color: 'bg-emerald-50 text-emerald-600 border-emerald-100/60 hover:bg-emerald-100/50' },
+    { id: 'mutations', icon: FileClock, label: 'Mutasi & Laporan Penduduk', desc: 'Arsip laporan bulanan, mutasi warga, & format kelurahan', color: 'bg-indigo-50 text-indigo-700 border-indigo-100/60 hover:bg-indigo-100/50' },
     { id: 'rentals', icon: Building, label: 'Rumah Sewa & Kontrakan', desc: 'Buku registrasi & monitoring hunian sewa RT', color: 'bg-teal-50 text-teal-700 border-teal-100/60 hover:bg-teal-100/50' },
     { id: 'health', icon: Activity, label: 'Posyandu Digital', desc: 'Pemantauan kesehatan & lansia', color: 'bg-teal-50 text-teal-600 border-teal-100/60 hover:bg-teal-100/50' },
     { id: 'stbm', icon: CheckSquare, label: '5 Pilar STBM', desc: 'Pendataan sanitasi total berbasis masyarakat RT', color: 'bg-emerald-50 text-emerald-700 border-emerald-100/60 hover:bg-emerald-100/50' },
     { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan', desc: 'Pengelolaan keuangan & iuran warga', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
-    { id: 'services', icon: FileText, label: 'Pusat Persuratan', desc: 'Surat pengantar warga, surat resmi RT, & surat masuk', color: 'bg-violet-50 text-violet-600 border-violet-100/60 hover:bg-violet-100/50' },
+    { id: 'water-meter', icon: Droplets, label: 'Meter Air & Utilitas', desc: 'Pencatatan meter air PAM & tagihan utilitas', color: 'bg-sky-50 text-sky-600 border-sky-100/60 hover:bg-sky-100/50' },
+    { id: 'services', icon: FileText, label: 'Persuratan & Pengantar', desc: 'Surat pengantar warga, surat resmi RT, & surat masuk', color: 'bg-violet-50 text-violet-600 border-violet-100/60 hover:bg-violet-100/50' },
     { id: 'meeting-minutes', icon: BookOpen, label: 'Notula Musyawarah', desc: 'Buku notula & kesepakatan rapat warga', color: 'bg-amber-50 text-amber-700 border-amber-100/60 hover:bg-amber-100/50' },
-    { id: 'reports-warga', icon: AlertTriangle, label: 'Pusat Pelaporan & Tamu', desc: 'Aspirasi, pengaduan warga, & log wajib lapor tamu', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
+    { id: 'reports-lpj', icon: Award, label: 'LPJ Keuangan & Tahunan', desc: 'Laporan pertanggungjawaban kas & musyawarah tahunan', color: 'bg-amber-50 text-amber-700 border-amber-100/60 hover:bg-amber-100/50' },
+    { id: 'reports-warga', icon: AlertTriangle, label: 'Aduan Warga & Tamu', desc: 'Aspirasi, pengaduan warga, & log wajib lapor tamu', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
     { id: 'documents', icon: FileText, label: 'Arsip Dokumen', desc: 'Penyimpanan regulasi & AD/ART', color: 'bg-purple-50 text-purple-600 border-purple-100/60 hover:bg-purple-100/50' },
-    { id: 'facilities', icon: Shield, label: 'Keamanan & Ronda', desc: 'Jadwal ronda & alarm darurat', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
-    { id: 'content', icon: Megaphone, label: 'Pusat Informasi', desc: 'Pengumuman, berita, & info UMKM', color: 'bg-sky-50 text-sky-600 border-sky-100/60 hover:bg-sky-100/50' },
+    { id: 'facilities', icon: Shield, label: 'Ronda & Keamanan', desc: 'Jadwal ronda & alarm darurat', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
+    { id: 'kerja-bakti', icon: Users, label: 'Kerja Bakti & Gotong Royong', desc: 'Agenda kerja bakti & log gotong royong warga', color: 'bg-emerald-50 text-emerald-600 border-emerald-100/60 hover:bg-emerald-100/50' },
+    { id: 'panic-logs', icon: ShieldAlert, label: 'Log Panic Button SOS', desc: 'Riwayat panggilan darurat warga lingkungan', color: 'bg-rose-50 text-rose-600 border-rose-100/60 hover:bg-rose-100/50' },
+    { id: 'content', icon: Megaphone, label: 'Pengumuman & Berita', desc: 'Pengumuman, berita, & info UMKM', color: 'bg-sky-50 text-sky-600 border-sky-100/60 hover:bg-sky-100/50' },
     { id: 'activities', icon: Calendar, label: 'Agenda & Presensi', desc: 'Kegiatan gotong royong & rapat', color: 'bg-orange-50 text-orange-600 border-orange-100/60 hover:bg-orange-100/50' },
     { id: 'assets', icon: Box, label: 'Aset & Inventaris', desc: 'Peminjaman alat & status inventaris', color: 'bg-cyan-50 text-cyan-600 border-cyan-100/60 hover:bg-cyan-100/50' },
     { id: 'officials', icon: Briefcase, label: 'Pengurus RT', desc: 'Struktur kepengurusan aktif', color: 'bg-pink-50 text-pink-600 border-pink-100/60 hover:bg-pink-100/50' },
@@ -156,15 +162,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     if (role === Role.ADMIN) return true;
     
     if (role === Role.TREASURER) {
-      const allowed = ['overview', 'analytics', 'finance', 'settings', 'notifications'];
+      const allowed = ['overview', 'analytics', 'finance', 'water-meter', 'reports-lpj', 'settings', 'notifications'];
       return allowed.includes(item.id);
     }
     
     if (role === Role.SECRETARY) {
       const allowed = [
-        'overview', 'analytics', 'residents', 'rentals',
-        'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-warga', 'documents', 'activities', 
-        'assets', 'content', 'audit', 'notifications', 'settings'
+        'overview', 'analytics', 'residents', 'mutations', 'rentals',
+        'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'reports-warga', 'documents', 'activities', 
+        'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
       ];
       return allowed.includes(item.id);
     }
@@ -232,6 +238,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           />
         );
       case 'residents':
+      case 'mutations':
       case 'health':
       case 'guests':
       case 'officials':
@@ -499,7 +506,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </div>
                       <div>
                         <h1 className="text-sm md:text-base font-black text-slate-900 tracking-tight leading-tight">
-                          Dashboard
+                          Dashboard Utama
                         </h1>
                         <p className="text-[10px] md:text-[11px] font-bold text-slate-400 leading-none mt-0.5">
                           RT 02 • Pusat Kendali Eksekutif
