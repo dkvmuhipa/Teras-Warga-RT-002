@@ -83,7 +83,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
             <Logo showText={true} imageSize="h-12" />
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">Portal Administrasi</h1>
-          <p className="text-slate-500 text-sm font-medium">Khusus Pengurus {FULL_RT_NAME}</p>
+          <p className="text-slate-500 text-sm font-medium">Pengurus RT & Super Admin Platform</p>
           
           <div className="mt-4 flex items-center justify-center gap-2">
             <span className={`w-2 h-2 rounded-full ${isFirebaseConfigured ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`}></span>

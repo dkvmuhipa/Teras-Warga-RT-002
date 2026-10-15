@@ -18,18 +18,10 @@ import { toast } from 'sonner';
 
 interface SuperAdminPortalProps {
   role?: Role | null;
-  houses?: House[];
-  cashFlow?: CashFlow[];
-  announcements?: Announcement[];
-  reports?: Report[];
 }
 
 export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
-  role,
-  houses = [],
-  cashFlow = [],
-  announcements = [],
-  reports = []
+  role
 }) => {
   const navigate = useNavigate();
   const { currentTenant, availableTenants, switchTenant, isSuperAdmin } = useTenant();
@@ -111,17 +103,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           </p>
           <div className="flex gap-3 justify-center">
             <button
-              onClick={() => navigate('/admin')}
+              onClick={() => navigate('/')}
               className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer flex items-center gap-1.5"
             >
               <ArrowLeft size={14} />
-              <span>Dasbor RT</span>
-            </button>
-            <button
-              onClick={() => navigate('/')}
-              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
-            >
-              Beranda Publik
+              <span>Kembali ke Beranda</span>
             </button>
           </div>
         </motion.div>
@@ -163,23 +149,14 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <span>Daftarkan RT Baru</span>
           </button>
 
-          {/* Navigate to RT Admin Dashboard */}
-          <button
-            onClick={() => navigate('/admin')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
-            title="Buka Dasbor RT Aktif"
-          >
-            <span>Dasbor RT</span>
-            <ExternalLink size={13} />
-          </button>
-
           {/* Navigate to Public Home */}
           <button
             onClick={() => navigate('/')}
             className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
             title="Buka Beranda Publik"
           >
-            <span>Publik</span>
+            <span>Web Publik</span>
+            <ExternalLink size={13} />
           </button>
 
           {/* Logout */}
@@ -363,13 +340,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                       <td className="py-3.5 px-4 text-right">
                         <button
                           onClick={() => {
-                            switchTenant(t.id);
-                            navigate('/admin');
-                            toast.success(`Beralih inspeksi ke ${t.name}`);
+                            window.open(`#/?rt=${t.slug || t.id}`, '_blank');
                           }}
-                          className="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                          title={`Buka Portal Publik ${t.name}`}
                         >
-                          <span>Inspeksi RT</span>
+                          <span>Web Publik RT</span>
                           <ExternalLink size={12} />
                         </button>
                       </td>

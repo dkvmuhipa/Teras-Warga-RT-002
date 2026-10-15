@@ -281,22 +281,10 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
             )}
           </div>
 
-          {/* Tenant Switcher (Multi-RT) */}
+          {/* Tenant Identity (Active RT) */}
           {!isCollapsed && (
-            <div className="px-4 pt-3 pb-1 space-y-1.5">
+            <div className="px-4 pt-3 pb-1">
               <TenantSwitcher variant="sidebar" />
-              {role === Role.SUPER_ADMIN && (
-                <a
-                  href="#/superadmin"
-                  className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200/80 text-purple-700 text-xs font-black transition-all shadow-2xs"
-                >
-                  <div className="flex items-center gap-2">
-                    <ShieldAlert size={14} className="text-purple-600" />
-                    <span>Super Admin Tower</span>
-                  </div>
-                  <ChevronRight size={13} className="text-purple-400" />
-                </a>
-              )}
             </div>
           )}
 
