@@ -86,6 +86,8 @@ export interface TenantContextType {
   availableTenants: Tenant[];
   switchTenant: (idOrSlug: string) => void;
   registerTenant: (newTenantData: Omit<Tenant, 'id' | 'createdAt'>) => Promise<Tenant>;
+  updateTenant: (tenantId: string, updates: Partial<Tenant>) => Promise<void>;
+  deleteTenant: (tenantId: string) => Promise<void>;
   isDefaultTenant: boolean;
   isSuperAdmin: boolean;
   pdfConfig: PdfConfig;

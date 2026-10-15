@@ -4487,3 +4487,26 @@ export const addTenantToDb = async (tenantData: Tenant): Promise<string> => {
   }
 };
 
+export const updateTenantInDb = async (tenantId: string, updates: Partial<Tenant>): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const clean = deepSanitize(updates);
+    const docRef = doc(db, TENANTS_COL, tenantId);
+    await setDoc(docRef, clean, { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${TENANTS_COL}/${tenantId}`);
+    throw error;
+  }
+};
+
+export const deleteTenantFromDb = async (tenantId: string): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const docRef = doc(db, TENANTS_COL, tenantId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${TENANTS_COL}/${tenantId}`);
+    throw error;
+  }
+};
+

@@ -89,6 +89,32 @@ export const registerTenantInMemory = (newTenant: Tenant): void => {
   }
 };
 
+export const updateTenantInMemory = (tenantId: string, updates: Partial<Tenant>): void => {
+  const existingIdx = inMemoryTenants.findIndex(t => t.id === tenantId);
+  if (existingIdx >= 0) {
+    inMemoryTenants[existingIdx] = { ...inMemoryTenants[existingIdx], ...updates };
+  } else {
+    const fromInitial = INITIAL_TENANTS.find(t => t.id === tenantId);
+    if (fromInitial) {
+      inMemoryTenants.push({ ...fromInitial, ...updates });
+    }
+  }
+  try {
+    localStorage.setItem(REGISTERED_TENANTS_KEY, JSON.stringify(inMemoryTenants));
+  } catch (e) {
+    console.warn('Failed to persist updated tenant:', e);
+  }
+};
+
+export const deleteTenantInMemory = (tenantId: string): void => {
+  inMemoryTenants = inMemoryTenants.filter(t => t.id !== tenantId);
+  try {
+    localStorage.setItem(REGISTERED_TENANTS_KEY, JSON.stringify(inMemoryTenants));
+  } catch (e) {
+    console.warn('Failed to persist deleted tenant:', e);
+  }
+};
+
 export const syncTenantsFromRemote = (remoteTenants: Tenant[]): void => {
   if (!remoteTenants || remoteTenants.length === 0) return;
   const mergedMap = new Map<string, Tenant>();

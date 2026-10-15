@@ -9,9 +9,11 @@ import {
   setActiveTenant, 
   getPdfConfigForTenant,
   registerTenantInMemory,
+  updateTenantInMemory,
+  deleteTenantInMemory,
   syncTenantsFromRemote
 } from '../services/tenantService';
-import { setActiveTenantScope, addTenantToDb, subscribeToTenants } from '../services/databaseService';
+import { setActiveTenantScope, addTenantToDb, updateTenantInDb, deleteTenantFromDb, subscribeToTenants } from '../services/databaseService';
 import { auth } from '../services/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { isSuperAdminEmail } from '../constants';
@@ -187,12 +189,48 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     return newTenant;
   };
 
+  const updateTenant = async (id: string, updates: Partial<Tenant>): Promise<void> => {
+    if (!isSuperAdmin) {
+      toast.error('Hanya Super Admin yang berwenang mengubah profil RT');
+      return;
+    }
+    updateTenantInMemory(id, updates);
+    setAllLoadedTenants(getAllTenants());
+    try {
+      await updateTenantInDb(id, updates);
+      toast.success('Profil RT berhasil diperbarui');
+    } catch (e) {
+      console.warn('Failed to update tenant remotely:', e);
+    }
+  };
+
+  const deleteTenant = async (id: string): Promise<void> => {
+    if (!isSuperAdmin) {
+      toast.error('Hanya Super Admin yang berwenang menghapus tenant');
+      return;
+    }
+    if (id === DEFAULT_TENANT_ID) {
+      toast.error('Wilayah Utama RT 002 tidak dapat dihapus');
+      return;
+    }
+    deleteTenantInMemory(id);
+    setAllLoadedTenants(getAllTenants());
+    try {
+      await deleteTenantFromDb(id);
+      toast.success('Tenant RT berhasil dihapus dari sistem');
+    } catch (e) {
+      console.warn('Failed to delete tenant remotely:', e);
+    }
+  };
+
   const value: TenantContextType = {
     currentTenant,
     tenantId: currentTenant.id,
     availableTenants,
     switchTenant,
     registerTenant,
+    updateTenant,
+    deleteTenant,
     isDefaultTenant: currentTenant.id === DEFAULT_TENANT_ID,
     isSuperAdmin,
     pdfConfig: getPdfConfigForTenant(currentTenant)
@@ -216,6 +254,8 @@ export const useTenant = (): TenantContextType => {
       availableTenants: [fallbackTenant],
       switchTenant: () => {},
       registerTenant: async () => fallbackTenant,
+      updateTenant: async () => {},
+      deleteTenant: async () => {},
       isDefaultTenant: true,
       isSuperAdmin: false,
       pdfConfig: getPdfConfigForTenant(fallbackTenant)
