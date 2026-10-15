@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import { useTenant } from '../../context/TenantContext';
 import { Tenant, House, CashFlow, Announcement, Report } from '../../types';
-import { TenantRegistrationModal } from '../TenantRegistrationModal';
 import { Logo } from '../../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -45,7 +44,6 @@ export const MasterDashboard: React.FC<MasterDashboardProps> = ({
 
   // Tab State
   const [activeTab, setActiveTab] = useState<'overview' | 'tenants' | 'finance' | 'broadcast' | 'settings'>('overview');
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [selectedRwFilter, setSelectedRwFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -277,10 +275,10 @@ export const MasterDashboard: React.FC<MasterDashboardProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
-                Pusat Kendali Master RW 020
+                Pusat Kendali Pengurus RW 020
               </h1>
               <span className="text-[10px] font-black uppercase text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
-                Super Admin
+                Pengurus RW
               </span>
             </div>
             <p className="text-[11px] font-medium text-slate-400">
@@ -421,17 +419,17 @@ export const MasterDashboard: React.FC<MasterDashboardProps> = ({
                 </p>
                 <div className="flex flex-wrap items-center gap-3 mt-6">
                   <button
-                    onClick={() => setShowRegisterModal(true)}
-                    className="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-indigo-500/30 transition-all flex items-center gap-2 cursor-pointer"
-                  >
-                    <Plus size={15} /> Daftarkan RT Binaan Baru
-                  </button>
-                  <button
                     onClick={handleBroadcastAll}
-                    className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-extrabold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-2 cursor-pointer"
+                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <MessageSquare size={15} /> Broadcast Pesan se-RW
                   </button>
+                  <a
+                    href="#/superadmin"
+                    className="px-4 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-extrabold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <Server size={15} /> Akses Super Admin (Provisioning)
+                  </a>
                 </div>
               </div>
             </div>
@@ -465,13 +463,9 @@ export const MasterDashboard: React.FC<MasterDashboardProps> = ({
                   ))}
                 </select>
 
-                <button
-                  onClick={() => setShowRegisterModal(true)}
-                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
-                >
-                  <Plus size={14} />
-                  <span>Tambah RT</span>
-                </button>
+                <span className="text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1.5 rounded-xl shrink-0 hidden sm:inline-block">
+                  Registrasi RT Terpusat di Super Admin
+                </span>
               </div>
             </div>
 
@@ -705,15 +699,6 @@ export const MasterDashboard: React.FC<MasterDashboardProps> = ({
           </div>
         )}
       </main>
-
-      {/* Registration Modal */}
-      <TenantRegistrationModal
-        isOpen={showRegisterModal}
-        onClose={() => setShowRegisterModal(false)}
-        onSuccess={(created) => {
-          toast.success(`RT Baru Berhasil Terdaftar: ${created.name}`);
-        }}
-      />
     </div>
   );
 };

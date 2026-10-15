@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Building2, ChevronDown, Check, Sparkles, MapPin, 
-  ExternalLink, PlusCircle, ShieldCheck, ArrowRight, X 
+  ExternalLink, ShieldCheck, ArrowRight, X 
 } from 'lucide-react';
 import { useTenant } from '../context/TenantContext';
 import { motion, AnimatePresence } from 'motion/react';
-import { TenantRegistrationModal } from './TenantRegistrationModal';
 
 interface TenantSwitcherProps {
   variant?: 'public' | 'sidebar' | 'compact';
@@ -18,7 +17,6 @@ export const TenantSwitcher: React.FC<TenantSwitcherProps> = ({
 }) => {
   const { currentTenant, availableTenants, switchTenant } = useTenant();
   const [isOpen, setIsOpen] = useState(false);
-  const [showRegisterModal, setShowRegisterModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -169,33 +167,10 @@ export const TenantSwitcher: React.FC<TenantSwitcherProps> = ({
                   );
                 })}
               </div>
-
-              {/* Master RW Link */}
-              <div className="mt-2 pt-2 border-t border-slate-100">
-                <a
-                  href="#/master"
-                  onClick={() => setIsOpen(false)}
-                  className="w-full flex items-center justify-between p-2 rounded-xl text-left bg-indigo-50/60 hover:bg-indigo-50 text-indigo-700 transition-colors group cursor-pointer"
-                >
-                  <span className="flex items-center gap-2 text-xs font-black">
-                    <Building2 size={14} className="text-indigo-600 group-hover:scale-110 transition-transform" />
-                    <span>Portal Master RW (Super Admin)</span>
-                  </span>
-                  <span className="text-[9px] font-black bg-indigo-200/80 text-indigo-900 px-1.5 py-0.5 rounded">
-                    PIN
-                  </span>
-                </a>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-
-      {/* Onboarding Dialog Modal */}
-      <TenantRegistrationModal 
-        isOpen={showRegisterModal} 
-        onClose={() => setShowRegisterModal(false)} 
-      />
     </>
   );
 };

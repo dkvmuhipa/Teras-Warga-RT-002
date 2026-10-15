@@ -21,11 +21,10 @@ service cloud.firestore {
     // Rules for Collections
     // ===============================================================
 
-    // Tenants (Profiles & Configurations for Multi-RT)
+    // Tenants (Profiles & Configurations for Multi-RT) - Centralized Super Admin Provisioning
     match /tenants/{tenantId} {
       allow read: if true;
-      allow create: if true;
-      allow update, delete: if isAdmin();
+      allow write: if isAdmin();
     }
 
     // Houses

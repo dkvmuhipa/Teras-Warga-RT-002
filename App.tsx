@@ -49,6 +49,7 @@ import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from './services/w
 import { AdminRouteWrapper } from './components/AdminComponents';
 const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const MasterDashboard = React.lazy(() => import('./components/master/MasterDashboard').then(m => ({ default: m.MasterDashboard })));
+const SuperAdminPortal = React.lazy(() => import('./components/superadmin/SuperAdminPortal').then(m => ({ default: m.SuperAdminPortal })));
 import { FinancialProvider } from './context/FinancialContext';
 import { useConfirm } from './context/ConfirmContext';
 import { useTenant } from './context/TenantContext';
@@ -551,6 +552,28 @@ export const App = () => {
                             </div>
                         }>
                             <MasterDashboard 
+                                houses={houses} 
+                                cashFlow={cashFlow} 
+                                announcements={announcements} 
+                                reports={reports} 
+                            />
+                        </React.Suspense>
+                    </ErrorBoundary>
+                }/>
+                <Route path="/rw-admin" element={<Navigate to="/master" replace />} />
+                <Route path="/superadmin" element={
+                    <ErrorBoundary>
+                        <React.Suspense fallback={
+                            <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center p-8 font-sans">
+                                <div className="relative flex items-center justify-center mb-4">
+                                    <div className="w-16 h-16 border-4 border-indigo-950 border-t-indigo-500 rounded-full animate-spin"></div>
+                                    <Loader2 className="absolute text-indigo-400 animate-pulse" size={24} />
+                                </div>
+                                <h3 className="text-white font-black text-sm tracking-wide uppercase">Memuat Super Admin Portal</h3>
+                                <p className="text-slate-400 text-xs mt-1">Mengautentikasi otorisasi root platform...</p>
+                            </div>
+                        }>
+                            <SuperAdminPortal 
                                 houses={houses} 
                                 cashFlow={cashFlow} 
                                 announcements={announcements} 
