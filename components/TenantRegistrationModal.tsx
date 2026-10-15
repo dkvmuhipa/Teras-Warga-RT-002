@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 interface TenantRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: (tenant: Tenant) => void;
 }
 
 const THEME_COLORS = [
@@ -25,7 +26,8 @@ const THEME_COLORS = [
 
 export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = ({
   isOpen,
-  onClose
+  onClose,
+  onSuccess
 }) => {
   const { registerTenant } = useTenant();
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -171,6 +173,9 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
 
       setCreatedTenant(newTenant);
       setIsSuccess(true);
+      if (onSuccess) {
+        onSuccess(newTenant);
+      }
       toast.success("RT Baru Berhasil Didaftarkan!", {
         description: `Portal ${newTenant.name} kini telah aktif dan siap digunakan.`,
         duration: 4500

@@ -8,6 +8,12 @@ export const FULL_RT_NAME = `${RT_NAME} ${RW_NAME}`;
 export const ADMIN_ROLE = "Admin Utama";
 export const ADMIN_TITLE = "Ketua RT 02";
 export const ADMIN_EMAIL = "admin@teras.id";
+export const SUPER_ADMIN_EMAILS = ["admin@teras.id", "dkvsmkmuhipa@gmail.com"];
+
+export const isSuperAdminEmail = (email?: string | null): boolean => {
+  if (!email) return false;
+  return SUPER_ADMIN_EMAILS.some(e => e.toLowerCase() === email.trim().toLowerCase());
+};
 export const DEFAULT_DUES_AMOUNT = 20000;
 export const CURRENCY_SYMBOL = "Rp";
 

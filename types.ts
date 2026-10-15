@@ -27,6 +27,7 @@ export interface FirestoreErrorInfo {
 }
 
 export enum Role {
+  SUPER_ADMIN = 'Super Admin',
   ADMIN = 'Admin',
   TREASURER = 'Bendahara',
   SECRETARY = 'Sekretaris',
@@ -86,6 +87,7 @@ export interface TenantContextType {
   switchTenant: (idOrSlug: string) => void;
   registerTenant: (newTenantData: Omit<Tenant, 'id' | 'createdAt'>) => Promise<Tenant>;
   isDefaultTenant: boolean;
+  isSuperAdmin: boolean;
   pdfConfig: PdfConfig;
 }
 

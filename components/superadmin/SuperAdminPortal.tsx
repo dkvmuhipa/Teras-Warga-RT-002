@@ -4,16 +4,20 @@ import {
   ShieldAlert, ShieldCheck, Key, Lock, Unlock, Users, Home, TrendingUp, 
   Filter, Search, Plus, ExternalLink, ArrowRight, ArrowLeft, RefreshCw, 
   LogOut, CheckCircle2, AlertCircle, Phone, MessageSquare, Sparkles, 
-  Layers, Wallet, BarChart3, Settings, Shield, ChevronRight, Eye, EyeOff,
-  Edit2, Trash2, Server, Globe, Database, Activity, Check, HelpCircle
+  Layers, Wallet, BarChart3, Settings, Shield, ChevronRight,
+  Server, Globe, Database, Activity, Check, HelpCircle
 } from 'lucide-react';
 import { useTenant } from '../../context/TenantContext';
-import { Tenant, House, CashFlow, Announcement, Report } from '../../types';
+import { Tenant, House, CashFlow, Announcement, Report, Role } from '../../types';
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
+import { SUPER_ADMIN_EMAILS } from '../../constants';
+import { auth } from '../../services/firebaseConfig';
+import { signOut } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
 interface SuperAdminPortalProps {
+  role?: Role | null;
   houses?: House[];
   cashFlow?: CashFlow[];
   announcements?: Announcement[];
@@ -21,44 +25,19 @@ interface SuperAdminPortalProps {
 }
 
 export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
+  role,
   houses = [],
   cashFlow = [],
   announcements = [],
   reports = []
 }) => {
   const navigate = useNavigate();
-  const { currentTenant, availableTenants, switchTenant } = useTenant();
+  const { currentTenant, availableTenants, switchTenant, isSuperAdmin } = useTenant();
 
-  // Root Super Admin Master Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    try {
-      return sessionStorage.getItem('is_superadmin_authenticated') === 'true';
-    } catch {
-      return false;
-    }
-  });
-
-  const [authKeyInput, setAuthKeyInput] = useState('');
-  const [showKey, setShowKey] = useState(false);
-  const [authError, setAuthError] = useState(false);
-
-  // Tab State
-  const [activeTab, setActiveTab] = useState<'tenants' | 'provisioning' | 'telemetry' | 'security'>('tenants');
+  // Modal & Search States
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'demo' | 'suspended'>('all');
-
-  // Super Admin Root Key configuration (Stored securely in localStorage or default)
-  const [superAdminKey, setSuperAdminKey] = useState<string>(() => {
-    try {
-      return localStorage.getItem('platform_superadmin_key') || 'superadmin2026';
-    } catch {
-      return 'superadmin2026';
-    }
-  });
-
-  const [newKey, setNewKey] = useState('');
-  const [confirmNewKey, setConfirmNewKey] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active'>('all');
 
   // Filtered tenants list
   const filteredTenants = useMemo(() => {
@@ -69,13 +48,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         (t.chairmanName && t.chairmanName.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (t.rw && t.rw.includes(searchQuery));
 
-      let matchStatus = true;
-      if (statusFilter === 'demo') matchStatus = !!t.isDemo || !!t.isPilotDemo;
-      if (statusFilter === 'active') matchStatus = !t.isDemo && !t.isPilotDemo;
-
-      return matchSearch && matchStatus;
+      return matchSearch;
     });
-  }, [availableTenants, searchQuery, statusFilter]);
+  }, [availableTenants, searchQuery]);
 
   // Global Telemetry Stats
   const platformStats = useMemo(() => {
@@ -102,143 +77,51 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     };
   }, [availableTenants, currentTenant]);
 
-  // Handle Super Admin Key Verification
-  const handleVerifyKey = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (authKeyInput.trim() === superAdminKey) {
-      try {
-        sessionStorage.setItem('is_superadmin_authenticated', 'true');
-      } catch (err) {}
-      setIsAuthenticated(true);
-      setAuthError(false);
-      setAuthKeyInput('');
-      toast.success('Super Admin Terverifikasi', {
-        description: 'Selamat datang di Pusat Kendali Root Platform Teras Warga.'
-      });
-    } else {
-      setAuthError(true);
-      toast.error('Kunci Akses Ditolak', {
-        description: 'Kunci Super Admin tidak valid. Periksa kembali kunci master Anda.'
-      });
-    }
-  };
-
-  // Lock Session
-  const handleLockSession = () => {
+  const handleLogout = async () => {
     try {
-      sessionStorage.removeItem('is_superadmin_authenticated');
-    } catch (err) {}
-    setIsAuthenticated(false);
-    toast.info('Sesi Super Admin Ditutup');
-  };
-
-  // Update Master Key
-  const handleChangeKey = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newKey.length < 6) {
-      toast.error('Kunci Super Admin minimal 6 karakter');
-      return;
-    }
-    if (newKey !== confirmNewKey) {
-      toast.error('Konfirmasi Kunci Baru tidak cocok');
-      return;
-    }
-    try {
-      localStorage.setItem('platform_superadmin_key', newKey);
-      setSuperAdminKey(newKey);
-      setNewKey('');
-      setConfirmNewKey('');
-      toast.success('Kunci Super Admin Berhasil Diperbarui!');
-    } catch (err) {
-      toast.error('Gagal memperbarui kunci akses');
+      await signOut(auth);
+      toast.success('Berhasil keluar dari sesi Super Admin');
+      navigate('/');
+    } catch (e) {
+      toast.error('Gagal keluar sesi');
     }
   };
 
-  // 1. ROOT AUTHENTICATION SCREEN (If not authenticated)
-  if (!isAuthenticated) {
+  // 1. NON-SUPERADMIN RESTRICTION SCREEN
+  if (!isSuperAdmin) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 font-mono select-none">
+      <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col items-center justify-center p-6 text-center font-sans">
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="w-full max-w-md bg-slate-900/90 border border-indigo-500/30 rounded-3xl p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(79,70,229,0.3)] backdrop-blur-2xl"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl"
         >
-          {/* Header Terminal Icon & Badge */}
-          <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 mb-3 shadow-inner">
-              <ShieldAlert size={32} />
-            </div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-              <span className="text-[10px] font-black tracking-widest text-indigo-300 uppercase bg-indigo-950/80 border border-indigo-500/30 px-3 py-0.5 rounded-full">
-                PLATFORM SUPER ADMIN
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Central Control Tower
-            </h1>
-            <p className="text-xs text-slate-400 mt-1 max-w-xs font-sans">
-              Gerbang khusus pengelolaan dan pendaftaran terpusat seluruh penyewa (RT/RW) platform.
-            </p>
+          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4">
+            <ShieldAlert size={32} />
           </div>
-
-          {/* Form Auth */}
-          <form onSubmit={handleVerifyKey} className="space-y-4 font-sans">
-            <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
-                <span>Super Admin Secret Key</span>
-                <span className="text-[10px] font-mono text-slate-400">Default: superadmin2026</span>
-              </label>
-              <div className="relative">
-                <input
-                  type={showKey ? "text" : "password"}
-                  value={authKeyInput}
-                  onChange={(e) => {
-                    setAuthKeyInput(e.target.value);
-                    if (authError) setAuthError(false);
-                  }}
-                  placeholder="Masukkan kunci root super admin..."
-                  className={`w-full px-4 py-3 pr-11 bg-slate-950 border ${authError ? 'border-rose-500 bg-rose-950/20' : 'border-slate-700 focus:border-indigo-500'} rounded-2xl text-white text-center tracking-widest text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all`}
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
-                >
-                  {showKey ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {authError && (
-                <p className="text-[11px] font-semibold text-rose-400 mt-1.5 flex items-center gap-1 justify-center">
-                  <AlertCircle size={13} /> Kunci tidak valid. Default: superadmin2026
-                </p>
-              )}
-            </div>
-
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/60 border border-rose-500/30 text-rose-300 text-[10px] font-mono uppercase font-black mb-3">
+            Otorisasi Terbatas
+          </div>
+          <h2 className="text-xl font-black text-white mb-2 tracking-tight">
+            Khusus Super Admin Platform
+          </h2>
+          <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+            Portal kendali fleet dan pendaftaran terpusat ini hanya dapat diakses oleh akun Super Admin platform ({SUPER_ADMIN_EMAILS.join(', ')}). 
+            Akun pengurus RT reguler hanya memiliki akses ke wilayah RT masing-masing.
+          </p>
+          <div className="flex gap-3 justify-center">
             <button
-              type="submit"
-              className="w-full py-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 active:scale-[0.99] text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <Lock size={16} /> Otorisasi Akses Root
-            </button>
-          </form>
-
-          {/* Quick Exit Links */}
-          <div className="mt-6 pt-5 border-t border-slate-800 flex items-center justify-between text-xs font-sans">
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="text-slate-400 hover:text-indigo-400 font-bold transition-colors flex items-center gap-1 cursor-pointer"
-            >
-              <ArrowLeft size={14} /> Beranda Publik
-            </button>
-            <button
-              type="button"
               onClick={() => navigate('/admin')}
-              className="text-slate-400 hover:text-indigo-400 font-bold transition-colors flex items-center gap-1 cursor-pointer"
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer flex items-center gap-1.5"
             >
-              Dashboard RT <ArrowRight size={14} />
+              <ArrowLeft size={14} />
+              <span>Dasbor RT</span>
+            </button>
+            <button
+              onClick={() => navigate('/')}
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            >
+              Beranda Publik
             </button>
           </div>
         </motion.div>
@@ -246,13 +129,13 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     );
   }
 
-  // 2. ROOT SUPER ADMIN DASHBOARD
+  // 2. SUPER ADMIN FLEET CONTROL DASHBOARD
   return (
     <div className="min-h-screen bg-[#0F172A] text-slate-100 flex flex-col font-sans">
       {/* Top Root Bar */}
-      <header className="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
             <Server size={20} />
           </div>
           <div>
@@ -261,7 +144,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 Super Admin Fleet Control
               </h1>
               <span className="text-[9px] font-mono font-black uppercase text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md">
-                ROOT ACCESS
+                ROOT SUPER ADMIN
               </span>
             </div>
             <p className="text-[11px] font-medium text-slate-400">
@@ -270,23 +153,42 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Quick Action: Add New Tenant */}
           <button
             onClick={() => setShowOnboardModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-600/30 cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-600/30 cursor-pointer"
           >
             <Plus size={14} />
             <span>Daftarkan RT Baru</span>
           </button>
 
-          {/* Lock Root Session */}
+          {/* Navigate to RT Admin Dashboard */}
           <button
-            onClick={handleLockSession}
-            className="p-2 bg-slate-800 hover:bg-rose-950/40 border border-slate-700 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors cursor-pointer"
-            title="Kunci Sesi Root"
+            onClick={() => navigate('/admin')}
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            title="Buka Dasbor RT Aktif"
           >
-            <Lock size={16} />
+            <span>Dasbor RT</span>
+            <ExternalLink size={13} />
+          </button>
+
+          {/* Navigate to Public Home */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            title="Buka Beranda Publik"
+          >
+            <span>Publik</span>
+          </button>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="p-2 bg-slate-800 hover:bg-rose-950/40 border border-slate-700 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors cursor-pointer"
+            title="Keluar dari Akun"
+          >
+            <LogOut size={16} />
           </button>
         </div>
       </header>
@@ -343,15 +245,15 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-sm">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-mono">Status DB Security</span>
-              <div className="w-8 h-8 rounded-xl bg-sky-950/60 text-sky-400 flex items-center justify-center border border-sky-500/20">
+              <div className="w-8 h-8 rounded-xl bg-emerald-950/60 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
                 <Database size={16} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-sky-400 tracking-tight">
-              LOCKED
+            <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+              TERISOLASI
             </div>
             <p className="text-[11px] text-slate-400 font-medium mt-1">
-              Hanya Super Admin yang dapat menulis
+              Isolasi ketat antar-RT aktif
             </p>
           </div>
         </div>
@@ -384,15 +286,13 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 />
               </div>
 
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="px-3 py-1.5 bg-slate-950 border border-slate-700 rounded-xl text-xs font-bold text-slate-300 focus:outline-none focus:border-indigo-500"
+              <button
+                onClick={() => setShowOnboardModal(true)}
+                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold flex items-center gap-1 cursor-pointer transition-all"
               >
-                <option value="all">Semua Status</option>
-                <option value="active">RT Aktif</option>
-                <option value="demo">Pilot Demo</option>
-              </select>
+                <Plus size={14} />
+                <span>Tambah RT</span>
+              </button>
             </div>
           </div>
 
@@ -435,7 +335,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                       <td className="py-3.5 px-4">
                         <p className="text-slate-200 font-bold leading-tight">{t.chairmanName || 'Belum ditunjuk'}</p>
-                        <p className="text-[11px] text-emerald-400 font-mono mt-0.5">{t.phone || '-'}</p>
+                        <p className="text-[11px] text-emerald-400 font-mono mt-0.5">{t.chairmanPhone || '-'}</p>
                       </td>
 
                       <td className="py-3.5 px-4">
@@ -453,13 +353,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-indigo-950 border border-indigo-500/40 text-indigo-300 rounded">
                             Utama
                           </span>
-                        ) : t.isDemo || t.isPilotDemo ? (
-                          <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-amber-950 border border-amber-500/40 text-amber-300 rounded">
-                            Demo
-                          </span>
                         ) : (
                           <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-emerald-950 border border-emerald-500/40 text-emerald-300 rounded">
-                            Active
+                            Aktif
                           </span>
                         )}
                       </td>
@@ -485,50 +381,59 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           </div>
         </div>
 
-        {/* Security Settings Section */}
-        <div className="bg-slate-900/80 rounded-3xl p-6 border border-slate-800 max-w-xl">
-          <h3 className="text-sm font-black text-white mb-1 flex items-center gap-2">
-            <Key size={16} className="text-indigo-400" />
-            <span>Pengaturan Kunci Akses Super Admin</span>
-          </h3>
-          <p className="text-xs text-slate-400 mb-4">
-            Kunci ini digunakan secara eksklusif oleh pengembang / super admin untuk membuka portal ini.
-          </p>
-
-          <form onSubmit={handleChangeKey} className="space-y-3">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                Kunci Baru (Minimal 6 karakter)
-              </label>
-              <input
-                type="password"
-                value={newKey}
-                onChange={(e) => setNewKey(e.target.value)}
-                placeholder="Masukkan kunci baru..."
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
-              />
+        {/* Security & Multi-Tenant Isolation Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-slate-900/80 rounded-3xl p-6 border border-slate-800">
+            <h3 className="text-sm font-black text-white mb-1 flex items-center gap-2">
+              <ShieldCheck size={16} className="text-emerald-400" />
+              <span>Otorisasi Super Admin Platform</span>
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Akun berikut terdaftar sebagai Super Admin dengan hak akses penuh ke registrasi tenant dan fleet switching.
+            </p>
+            <div className="space-y-2">
+              {SUPER_ADMIN_EMAILS.map((email) => {
+                const isCurrent = auth.currentUser?.email?.toLowerCase() === email.toLowerCase();
+                return (
+                  <div key={email} className="flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                      <span className="text-xs font-mono text-slate-200">{email}</span>
+                    </div>
+                    {isCurrent && (
+                      <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/30 text-emerald-400">
+                        Sesi Aktif
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-slate-300 mb-1">
-                Konfirmasi Kunci Baru
-              </label>
-              <input
-                type="password"
-                value={confirmNewKey}
-                onChange={(e) => setConfirmNewKey(e.target.value)}
-                placeholder="Ulangi kunci baru..."
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer"
-            >
-              Simpan Kunci Akses
-            </button>
-          </form>
+          <div className="bg-slate-900/80 rounded-3xl p-6 border border-slate-800">
+            <h3 className="text-sm font-black text-white mb-1 flex items-center gap-2">
+              <Database size={16} className="text-indigo-400" />
+              <span>Prinsip Isolasi Tenant Platform</span>
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Standar perlindungan data multi-penyewa (multi-tenant) Teras Warga:
+            </p>
+            <ul className="space-y-2 text-xs text-slate-300">
+              <li className="flex items-start gap-2">
+                <Check size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong>Isolasi Tampilan:</strong> Pengurus & warga RT hanya dapat melihat data lingkungannya sendiri.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong>Pendaftaran Terpusat:</strong> Hanya Super Admin yang berwenang mendaftarkan RT baru.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check size={14} className="text-emerald-400 shrink-0 mt-0.5" />
+                <span><strong>Inspeksi Supervisi:</strong> Super Admin dapat beralih lingkungan RT untuk keperluan supervisi tanpa membocorkan data antar-warga.</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </main>
 

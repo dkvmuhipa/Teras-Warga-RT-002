@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
 import { Tenant, TenantContextType } from '../types';
 import { 
   DEFAULT_TENANT_ID, 
@@ -12,6 +12,9 @@ import {
   syncTenantsFromRemote
 } from '../services/tenantService';
 import { setActiveTenantScope, addTenantToDb, subscribeToTenants } from '../services/databaseService';
+import { auth } from '../services/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
+import { isSuperAdminEmail } from '../constants';
 import { toast } from 'sonner';
 
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
@@ -64,18 +67,37 @@ const resolveInitialTenant = (): Tenant => {
 
 export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentTenant, setCurrentTenant] = useState<Tenant>(() => resolveInitialTenant());
-  const [availableTenants, setAvailableTenants] = useState<Tenant[]>(() => getAllTenants());
+  const [allLoadedTenants, setAllLoadedTenants] = useState<Tenant[]>(() => getAllTenants());
+  const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(() => isSuperAdminEmail(auth.currentUser?.email));
+
+  // Sync auth state with Super Admin privileges
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      setIsSuperAdmin(isSuperAdminEmail(user?.email));
+    });
+    return () => unsubAuth();
+  }, []);
 
   // Subscribe to remote tenants in Firestore
   useEffect(() => {
     const unsub = subscribeToTenants((remoteList) => {
       if (remoteList && remoteList.length > 0) {
         syncTenantsFromRemote(remoteList);
-        setAvailableTenants(getAllTenants());
+        setAllLoadedTenants(getAllTenants());
       }
     });
     return () => unsub();
   }, []);
+
+  // Strict Tenant Isolation:
+  // Non-Super Admin (residents and regular RT admins) can ONLY see their active [currentTenant].
+  // Only Super Admin can see all registered tenants across the platform.
+  const availableTenants = useMemo(() => {
+    if (isSuperAdmin) {
+      return allLoadedTenants;
+    }
+    return [currentTenant];
+  }, [isSuperAdmin, allLoadedTenants, currentTenant]);
 
   useEffect(() => {
     // Sync scope with database service & tenant service on init & change
@@ -95,6 +117,12 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
 
     if (!target || target.id === currentTenant.id) {
+      return;
+    }
+
+    // Strict Isolation: Only Super Admin can switch active tenant
+    if (!isSuperAdmin) {
+      console.warn(`[TenantContext] Pengalihan tenant diblokir untuk pengguna non-superadmin.`);
       return;
     }
 
@@ -133,7 +161,7 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
     // 1. Save to in-memory & local cache
     registerTenantInMemory(newTenant);
-    setAvailableTenants(getAllTenants());
+    setAllLoadedTenants(getAllTenants());
 
     // 2. Save to Firestore tenants collection
     try {
@@ -142,8 +170,19 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       console.warn("Could not save tenant to remote firestore:", e);
     }
 
-    // 3. Immediately switch active tenant to the newly registered RT
-    switchTenant(newTenant.id);
+    // 3. Immediately switch active tenant to the newly registered RT (if super admin)
+    if (isSuperAdmin) {
+      setCurrentTenant(newTenant);
+      setActiveTenantScope(newTenant.id);
+      try {
+        localStorage.setItem('active_tenant_id', newTenant.id);
+        const url = new URL(window.location.href);
+        url.searchParams.set('rt', newTenant.slug);
+        window.history.replaceState({}, '', url.toString());
+      } catch (e) {
+        console.warn('Error saving tenant state:', e);
+      }
+    }
 
     return newTenant;
   };
@@ -155,6 +194,7 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     switchTenant,
     registerTenant,
     isDefaultTenant: currentTenant.id === DEFAULT_TENANT_ID,
+    isSuperAdmin,
     pdfConfig: getPdfConfigForTenant(currentTenant)
   };
 
@@ -173,10 +213,11 @@ export const useTenant = (): TenantContextType => {
     return {
       currentTenant: fallbackTenant,
       tenantId: fallbackTenant.id,
-      availableTenants: INITIAL_TENANTS,
+      availableTenants: [fallbackTenant],
       switchTenant: () => {},
       registerTenant: async () => fallbackTenant,
       isDefaultTenant: true,
+      isSuperAdmin: false,
       pdfConfig: getPdfConfigForTenant(fallbackTenant)
     };
   }

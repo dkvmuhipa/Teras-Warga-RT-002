@@ -162,7 +162,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   ];
 
   const allowedItems = navItemsList.filter(item => {
-    if (role === Role.ADMIN) return true;
+    if (role === Role.ADMIN || role === Role.SUPER_ADMIN) return true;
     
     if (role === Role.TREASURER) {
       const allowed = ['overview', 'analytics', 'finance', 'water-meter', 'reports-lpj', 'settings', 'notifications'];
@@ -189,7 +189,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   ].filter(item => {
     if (item.id === 'overview') return true;
     
-    if (role === Role.ADMIN) return true;
+    if (role === Role.ADMIN || role === Role.SUPER_ADMIN) return true;
     
     if (role === Role.TREASURER) {
       return ['finance'].includes(item.id);
@@ -654,9 +654,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
               
               <div className="flex items-center gap-2.5 pl-1">
+                {role === Role.SUPER_ADMIN && (
+                  <button
+                    onClick={() => navigate('/superadmin')}
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-xl text-xs font-black shadow-sm transition-all cursor-pointer"
+                    title="Buka Pusat Kendali Super Admin (Multi-Tenant)"
+                  >
+                    <ShieldAlert size={14} />
+                    <span>Super Admin Tower</span>
+                  </button>
+                )}
                 <div className="hidden md:block text-right">
                   <p className="text-xs font-black text-slate-900 leading-tight">Admin {currentTenant ? currentTenant.name : RT_NAME}</p>
-                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-wider mt-0.5">{role}</p>
+                  <p className="text-[9px] font-black text-purple-600 uppercase tracking-wider mt-0.5">{role}</p>
                 </div>
                 <div className="relative group">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">

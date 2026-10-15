@@ -37,9 +37,8 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Components & Services
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS } from '@/constants';
+import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS, isSuperAdminEmail } from '@/constants';
 import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, RondaCheckLog, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
 import { HouseMap } from './components/HouseMap';
 import { SmartImage } from './components/SmartImage';
@@ -449,6 +448,12 @@ export const App = () => {
       setIsAdmin(!!user);
       if (user && user.email) {
         try {
+          // Check if Super Admin first
+          if (isSuperAdminEmail(user.email)) {
+            setAdminRole(Role.SUPER_ADMIN);
+            return;
+          }
+
           // Fetch role from officials
           const q = query(collection(db, "officials"), where("email", "==", user.email));
           const snapshot = await getDocs(q);
@@ -562,25 +567,28 @@ export const App = () => {
                 }/>
                 <Route path="/rw-admin" element={<Navigate to="/master" replace />} />
                 <Route path="/superadmin" element={
-                    <ErrorBoundary>
-                        <React.Suspense fallback={
-                            <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center p-8 font-sans">
-                                <div className="relative flex items-center justify-center mb-4">
-                                    <div className="w-16 h-16 border-4 border-indigo-950 border-t-indigo-500 rounded-full animate-spin"></div>
-                                    <Loader2 className="absolute text-indigo-400 animate-pulse" size={24} />
+                    <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
+                        <ErrorBoundary>
+                            <React.Suspense fallback={
+                                <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center p-8 font-sans">
+                                    <div className="relative flex items-center justify-center mb-4">
+                                        <div className="w-16 h-16 border-4 border-indigo-950 border-t-indigo-500 rounded-full animate-spin"></div>
+                                        <Loader2 className="absolute text-indigo-400 animate-pulse" size={24} />
+                                    </div>
+                                    <h3 className="text-white font-black text-sm tracking-wide uppercase">Memuat Super Admin Portal</h3>
+                                    <p className="text-slate-400 text-xs mt-1">Mengautentikasi otorisasi root platform...</p>
                                 </div>
-                                <h3 className="text-white font-black text-sm tracking-wide uppercase">Memuat Super Admin Portal</h3>
-                                <p className="text-slate-400 text-xs mt-1">Mengautentikasi otorisasi root platform...</p>
-                            </div>
-                        }>
-                            <SuperAdminPortal 
-                                houses={houses} 
-                                cashFlow={cashFlow} 
-                                announcements={announcements} 
-                                reports={reports} 
-                            />
-                        </React.Suspense>
-                    </ErrorBoundary>
+                            }>
+                                <SuperAdminPortal 
+                                    role={adminRole}
+                                    houses={houses} 
+                                    cashFlow={cashFlow} 
+                                    announcements={announcements} 
+                                    reports={reports} 
+                                />
+                            </React.Suspense>
+                        </ErrorBoundary>
+                    </AdminRouteWrapper>
                 }/>
                 <Route path="*" element={
                     <>

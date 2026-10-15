@@ -158,7 +158,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     const matchedItems = group.items.filter(item => {
       // Role validation
       let isAllowed = false;
-      if (role === Role.ADMIN) {
+      if (role === Role.ADMIN || role === Role.SUPER_ADMIN) {
         isAllowed = true;
       } else if (role === Role.TREASURER) {
         isAllowed = ['overview', 'analytics', 'rw-recap', 'finance', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
@@ -185,7 +185,9 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
   const getRoleBadge = () => {
     const roleLower = String(role).toLowerCase();
-    if (roleLower.includes('admin')) {
+    if (roleLower.includes('super admin')) {
+      return { short: 'SA', full: 'Super Admin', bg: 'bg-purple-50 border-purple-200 text-purple-700' };
+    } else if (roleLower.includes('admin')) {
       return { short: 'AD', full: 'Administrator', bg: 'bg-indigo-50 border-indigo-100 text-indigo-700' };
     } else if (roleLower.includes('treasurer') || roleLower.includes('bendahara')) {
       return { short: 'BK', full: 'Bendahara Kas', bg: 'bg-emerald-50 border-emerald-100 text-emerald-700' };
@@ -281,8 +283,20 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
           {/* Tenant Switcher (Multi-RT) */}
           {!isCollapsed && (
-            <div className="px-4 pt-3 pb-1">
+            <div className="px-4 pt-3 pb-1 space-y-1.5">
               <TenantSwitcher variant="sidebar" />
+              {role === Role.SUPER_ADMIN && (
+                <a
+                  href="#/superadmin"
+                  className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 border border-purple-200/80 text-purple-700 text-xs font-black transition-all shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <ShieldAlert size={14} className="text-purple-600" />
+                    <span>Super Admin Tower</span>
+                  </div>
+                  <ChevronRight size={13} className="text-purple-400" />
+                </a>
+              )}
             </div>
           )}
 

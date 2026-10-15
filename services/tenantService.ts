@@ -40,41 +40,6 @@ export const INITIAL_TENANTS: Tenant[] = [
     themeColor: '#2563EB',
     isPilotDemo: false,
     createdAt: '2026-01-01T00:00:00.000Z'
-  },
-  {
-    id: 'tondo-rw20-rt01',
-    slug: 'rt01-tondo',
-    name: 'RT 001 / RW 020 Huntap Tondo 2',
-    rt: '001',
-    rw: '020',
-    kelurahan: 'Tondo',
-    kecamatan: 'Mantikulore',
-    city: 'Kota Palu',
-    province: 'Sulawesi Tengah',
-    postalCode: '94119',
-    address: 'Jl. Merpati Blok A1-01 Huntap Tondo 2, Kel. Tondo, Kec. Mantikulore, Kota Palu',
-    chairmanName: 'Bpk. Supriadi',
-    chairmanPhone: '+62 812-3456-7890',
-    secretaryName: 'Sekretaris RT 001',
-    treasurerName: 'Bendahara RT 001',
-    blocks: ['A1', 'A2', 'B1', 'B2'],
-    blockConfig: [
-      { code: 'A1', start: 1, end: 20 },
-      { code: 'A2', start: 1, end: 20 },
-      { code: 'B1', start: 1, end: 20 },
-      { code: 'B2', start: 1, end: 20 },
-    ],
-    fees: {
-      sampahUmum: 20000,
-      sampahPkh: 10000,
-      sampahPns: 35000,
-      airFee: 10000,
-      kasFee: 25000,
-    },
-    logoUrl: '/logo-rt.svg',
-    themeColor: '#059669',
-    isPilotDemo: true,
-    createdAt: '2026-03-01T00:00:00.000Z'
   }
 ];
 
@@ -83,8 +48,18 @@ const REGISTERED_TENANTS_KEY = 'registered_tenants';
 const loadStoredTenants = (): Tenant[] => {
   if (typeof window === 'undefined') return [];
   try {
+    // Purge demo tenant from active selection if stuck
+    if (localStorage.getItem('active_tenant_id') === 'tondo-rw20-rt01') {
+      localStorage.setItem('active_tenant_id', DEFAULT_TENANT_ID);
+    }
     const raw = localStorage.getItem(REGISTERED_TENANTS_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    const list: Tenant[] = JSON.parse(raw);
+    const cleaned = list.filter(t => t.id !== 'tondo-rw20-rt01' && !t.isPilotDemo);
+    if (cleaned.length !== list.length) {
+      localStorage.setItem(REGISTERED_TENANTS_KEY, JSON.stringify(cleaned));
+    }
+    return cleaned;
   } catch (e) {
     console.warn('Failed to load stored tenants:', e);
     return [];
@@ -118,7 +93,11 @@ export const syncTenantsFromRemote = (remoteTenants: Tenant[]): void => {
   if (!remoteTenants || remoteTenants.length === 0) return;
   const mergedMap = new Map<string, Tenant>();
   inMemoryTenants.forEach(t => mergedMap.set(t.id, t));
-  remoteTenants.forEach(t => mergedMap.set(t.id, t));
+  remoteTenants.forEach(t => {
+    if (t.id !== 'tondo-rw20-rt01' && !t.isPilotDemo) {
+      mergedMap.set(t.id, t);
+    }
+  });
   inMemoryTenants = Array.from(mergedMap.values());
   try {
     localStorage.setItem(REGISTERED_TENANTS_KEY, JSON.stringify(inMemoryTenants));
