@@ -59,12 +59,12 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   if (!isOpen || !tenant) return null;
 
   const publicUrl = `${window.location.origin}${window.location.pathname}#/?rt=${tenant.slug || tenant.id}`;
-  const registerUrl = `${window.location.origin}${window.location.pathname}#/register?rt=${tenant.slug || tenant.id}`;
+  const registerUrl = `${window.location.origin}${window.location.pathname}#/?rt=${tenant.slug || tenant.id}#register`;
 
   const handleCopy = (text: string, type: 'public' | 'register') => {
     navigator.clipboard.writeText(text);
     setCopiedLink(type);
-    toast.success('Tautan disalin ke clipboard');
+    toast.success('Tautan berhasil disalin ke clipboard');
     setTimeout(() => setCopiedLink(null), 2500);
   };
 
@@ -108,32 +108,32 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className="w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-100"
+        className="w-full max-w-3xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-800"
       >
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-800 bg-slate-950/50 flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <div 
-              className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white shadow-lg shrink-0"
+              className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white shadow-xs shrink-0"
               style={{ backgroundColor: formData.themeColor || tenant.themeColor || '#4f46e5' }}
             >
               {tenant.rt}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black text-white truncate tracking-tight">
+                <h2 className="text-base sm:text-lg font-black text-slate-900 truncate tracking-tight">
                   {tenant.name}
                 </h2>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-indigo-950 border border-indigo-500/30 text-indigo-300">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold">
                   {tenant.id}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 truncate">
+              <p className="text-xs text-slate-500 truncate">
                 RW {tenant.rw} • Kel. {tenant.kelurahan}, Kec. {tenant.kecamatan}, {tenant.city}
               </p>
             </div>
@@ -143,7 +143,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
               >
                 <Edit3 size={13} />
                 <span>Edit</span>
@@ -151,14 +151,14 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             ) : (
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
                 Batal
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors cursor-pointer"
+              className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -166,13 +166,13 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-6 pt-3 border-b border-slate-800 bg-slate-900/40 flex gap-2 overflow-x-auto text-xs font-bold">
+        <div className="px-6 pt-3 border-b border-slate-200 bg-white flex gap-2 overflow-x-auto text-xs font-bold">
           <button
             onClick={() => setActiveTab('info')}
             className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'info'
-                ? 'border-indigo-500 text-white'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Building2 size={14} />
@@ -182,8 +182,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             onClick={() => setActiveTab('officials')}
             className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'officials'
-                ? 'border-indigo-500 text-white'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <User size={14} />
@@ -193,8 +193,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             onClick={() => setActiveTab('fees')}
             className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'fees'
-                ? 'border-indigo-500 text-white'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <DollarSign size={14} />
@@ -204,8 +204,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             onClick={() => setActiveTab('links')}
             className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'links'
-                ? 'border-indigo-500 text-white'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <ExternalLink size={14} />
@@ -219,58 +219,58 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Nama Wilayah Resmi</label>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Nama Wilayah Resmi</label>
                   {isEditing ? (
                     <input
                       type="text"
                       value={formData.name || ''}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                     />
                   ) : (
-                    <p className="text-sm font-bold text-white bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
+                    <p className="text-sm font-bold text-slate-900 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                       {tenant.name}
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Warna Tema Brand RT</label>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Warna Tema Brand RT</label>
                   {isEditing ? (
                     <div className="flex items-center gap-2">
                       <input
                         type="color"
                         value={formData.themeColor || '#4f46e5'}
                         onChange={(e) => setFormData(prev => ({ ...prev, themeColor: e.target.value }))}
-                        className="w-10 h-9 p-1 rounded-xl bg-slate-950 border border-slate-700 cursor-pointer"
+                        className="w-10 h-9 p-1 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer"
                       />
                       <input
                         type="text"
                         value={formData.themeColor || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, themeColor: e.target.value }))}
-                        className="flex-1 px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
+                        className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                       />
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-                      <span className="w-4 h-4 rounded-full" style={{ backgroundColor: tenant.themeColor || '#4f46e5' }} />
-                      <span className="text-xs font-mono text-slate-300">{tenant.themeColor || '#4f46e5'}</span>
+                    <div className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                      <span className="w-4 h-4 rounded-full shadow-2xs" style={{ backgroundColor: tenant.themeColor || '#4f46e5' }} />
+                      <span className="text-xs font-mono text-slate-700 font-bold">{tenant.themeColor || '#4f46e5'}</span>
                     </div>
                   )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 mb-1">Alamat Domisili / Sekretariat</label>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Alamat Domisili / Sekretariat</label>
                 {isEditing ? (
                   <textarea
                     rows={2}
                     value={formData.address || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
                 ) : (
-                  <p className="text-xs text-slate-300 bg-slate-950/60 p-2.5 rounded-xl border border-slate-800 leading-relaxed">
+                  <p className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-200 leading-relaxed">
                     {tenant.address}
                   </p>
                 )}
@@ -278,15 +278,15 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
               {/* Block Coverage Overview */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 mb-2 flex items-center justify-between">
+                <label className="block text-[11px] font-bold text-slate-600 mb-2 flex items-center justify-between">
                   <span>Blok Kavling Warga ({tenant.blocks?.length || 0} Blok)</span>
                   <span className="text-[10px] text-slate-500">Estimasi ~{(tenant.blocks?.length || 0) * 20} Kavling</span>
                 </label>
-                <div className="flex flex-wrap gap-2 p-3 bg-slate-950/60 rounded-xl border border-slate-800">
+                <div className="flex flex-wrap gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200">
                   {tenant.blocks?.map(block => (
                     <span 
                       key={block}
-                      className="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-xs font-mono font-bold text-slate-200"
+                      className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-mono font-bold text-slate-700 shadow-2xs"
                     >
                       Blok {block}
                     </span>
@@ -298,8 +298,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
           {activeTab === 'officials' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-black text-indigo-400 uppercase tracking-wider">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-black text-indigo-700 uppercase tracking-wider">
                   <User size={14} />
                   <span>Ketua RT</span>
                 </div>
@@ -311,10 +311,10 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                         type="text"
                         value={formData.chairmanName || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, chairmanName: e.target.value }))}
-                        className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                       />
                     ) : (
-                      <p className="text-xs font-bold text-white">{tenant.chairmanName || '-'}</p>
+                      <p className="text-xs font-bold text-slate-900">{tenant.chairmanName || '-'}</p>
                     )}
                   </div>
                   <div>
@@ -324,17 +324,17 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                         type="text"
                         value={formData.chairmanPhone || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, chairmanPhone: e.target.value }))}
-                        className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-mono focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                       />
                     ) : (
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-mono text-emerald-400">{tenant.chairmanPhone || '-'}</p>
+                        <p className="text-xs font-mono text-emerald-600 font-bold">{tenant.chairmanPhone || '-'}</p>
                         {tenant.chairmanPhone && (
                           <a
                             href={`https://wa.me/${tenant.chairmanPhone.replace(/[^0-9]/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[10px] text-emerald-400 hover:underline flex items-center gap-0.5"
+                            className="text-[10px] text-emerald-600 hover:underline flex items-center gap-0.5 font-bold"
                           >
                             <span>Chat WA</span>
                             <ExternalLink size={10} />
@@ -347,31 +347,31 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Sekretaris RT</span>
                   {isEditing ? (
                     <input
                       type="text"
                       value={formData.secretaryName || ''}
                       onChange={(e) => setFormData(prev => ({ ...prev, secretaryName: e.target.value }))}
-                      className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                     />
                   ) : (
-                    <p className="text-xs font-bold text-slate-200">{tenant.secretaryName || '-'}</p>
+                    <p className="text-xs font-bold text-slate-800">{tenant.secretaryName || '-'}</p>
                   )}
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Bendahara RT</span>
                   {isEditing ? (
                     <input
                       type="text"
                       value={formData.treasurerName || ''}
                       onChange={(e) => setFormData(prev => ({ ...prev, treasurerName: e.target.value }))}
-                      className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                     />
                   ) : (
-                    <p className="text-xs font-bold text-slate-200">{tenant.treasurerName || '-'}</p>
+                    <p className="text-xs font-bold text-slate-800">{tenant.treasurerName || '-'}</p>
                   )}
                 </div>
               </div>
@@ -380,54 +380,54 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
           {activeTab === 'fees' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
-                <h4 className="text-xs font-black text-amber-400 uppercase tracking-wider mb-3">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <h4 className="text-xs font-black text-amber-700 uppercase tracking-wider mb-3">
                   Tarif Retribusi Sampah TPS3R (Perda Kota Palu)
                 </h4>
                 <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                    <span className="block text-[10px] text-slate-400 font-bold mb-1">Umum</span>
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
+                    <span className="block text-[10px] text-slate-500 font-bold mb-1">Umum</span>
                     {isEditing ? (
                       <input
                         type="number"
                         value={formData.fees?.sampahUmum || 20000}
                         onChange={(e) => setFormData(prev => ({ ...prev, fees: { ...prev.fees, sampahUmum: Number(e.target.value) } }))}
-                        className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white font-mono text-center"
+                        className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 font-mono text-center"
                       />
                     ) : (
-                      <span className="text-xs font-mono font-bold text-white">
+                      <span className="text-xs font-mono font-bold text-slate-900">
                         Rp {(tenant.fees?.sampahUmum || 20000).toLocaleString('id-ID')}
                       </span>
                     )}
                   </div>
 
-                  <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                    <span className="block text-[10px] text-slate-400 font-bold mb-1">Penerima PKH</span>
+                  <div className="bg-white p-2.5 rounded-xl border border-emerald-200 shadow-2xs">
+                    <span className="block text-[10px] text-emerald-700 font-bold mb-1">Penerima PKH</span>
                     {isEditing ? (
                       <input
                         type="number"
                         value={formData.fees?.sampahPkh || 10000}
                         onChange={(e) => setFormData(prev => ({ ...prev, fees: { ...prev.fees, sampahPkh: Number(e.target.value) } }))}
-                        className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white font-mono text-center"
+                        className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 font-mono text-center"
                       />
                     ) : (
-                      <span className="text-xs font-mono font-bold text-emerald-400">
+                      <span className="text-xs font-mono font-bold text-emerald-600">
                         Rp {(tenant.fees?.sampahPkh || 10000).toLocaleString('id-ID')}
                       </span>
                     )}
                   </div>
 
-                  <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                    <span className="block text-[10px] text-slate-400 font-bold mb-1">ASN / PNS</span>
+                  <div className="bg-white p-2.5 rounded-xl border border-purple-200 shadow-2xs">
+                    <span className="block text-[10px] text-purple-700 font-bold mb-1">ASN / PNS</span>
                     {isEditing ? (
                       <input
                         type="number"
                         value={formData.fees?.sampahPns || 35000}
                         onChange={(e) => setFormData(prev => ({ ...prev, fees: { ...prev.fees, sampahPns: Number(e.target.value) } }))}
-                        className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white font-mono text-center"
+                        className="w-full px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-900 font-mono text-center"
                       />
                     ) : (
-                      <span className="text-xs font-mono font-bold text-sky-400">
+                      <span className="text-xs font-mono font-bold text-purple-600">
                         Rp {(tenant.fees?.sampahPns || 35000).toLocaleString('id-ID')}
                       </span>
                     )}
@@ -436,33 +436,33 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Iuran Kas RT</span>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Iuran Kas RT</span>
                   {isEditing ? (
                     <input
                       type="number"
                       value={formData.fees?.kasFee || 20000}
                       onChange={(e) => setFormData(prev => ({ ...prev, fees: { ...prev.fees, kasFee: Number(e.target.value) } }))}
-                      className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-mono"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-mono"
                     />
                   ) : (
-                    <p className="text-sm font-mono font-bold text-white">
+                    <p className="text-sm font-mono font-bold text-slate-900">
                       Rp {(tenant.fees?.kasFee || 20000).toLocaleString('id-ID')}
                     </p>
                   )}
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
-                  <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Tarif Dasar Air PDAM</span>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tarif Dasar Air PDAM</span>
                   {isEditing ? (
                     <input
                       type="number"
                       value={formData.fees?.airFee || 10000}
                       onChange={(e) => setFormData(prev => ({ ...prev, fees: { ...prev.fees, airFee: Number(e.target.value) } }))}
-                      className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white font-mono"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-mono"
                     />
                   ) : (
-                    <p className="text-sm font-mono font-bold text-white">
+                    <p className="text-sm font-mono font-bold text-slate-900">
                       Rp {(tenant.fees?.airFee || 10000).toLocaleString('id-ID')}
                     </p>
                   )}
@@ -473,18 +473,18 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
           {activeTab === 'links' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-                <span className="text-xs font-bold text-slate-300 block">Tautan Portal Publik Warga</span>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span className="text-xs font-bold text-slate-700 block">Tautan Portal Publik Warga</span>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     readOnly
                     value={publicUrl}
-                    className="flex-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300 font-mono"
+                    className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 font-mono shadow-2xs"
                   />
                   <button
                     onClick={() => handleCopy(publicUrl, 'public')}
-                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
                   >
                     {copiedLink === 'public' ? <Check size={14} /> : <Copy size={14} />}
                     <span>{copiedLink === 'public' ? 'Tersalin' : 'Salin'}</span>
@@ -493,7 +493,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                     href={publicUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition-colors cursor-pointer"
+                    className="p-2 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-colors cursor-pointer shadow-2xs"
                     title="Buka Halaman"
                   >
                     <ExternalLink size={16} />
@@ -501,18 +501,18 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-2">
-                <span className="text-xs font-bold text-slate-300 block">Tautan Langsung Pendaftaran Warga Baru</span>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <span className="text-xs font-bold text-slate-700 block">Tautan Langsung Pendaftaran Warga Baru</span>
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
                     readOnly
                     value={registerUrl}
-                    className="flex-1 px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300 font-mono"
+                    className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 font-mono shadow-2xs"
                   />
                   <button
                     onClick={() => handleCopy(registerUrl, 'register')}
-                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
                   >
                     {copiedLink === 'register' ? <Check size={14} /> : <Copy size={14} />}
                     <span>{copiedLink === 'register' ? 'Tersalin' : 'Salin'}</span>
@@ -522,14 +522,14 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
               {/* Danger Zone: Delete Tenant */}
               {tenant.id !== 'tondo-rw20-rt02' && (
-                <div className="mt-6 pt-5 border-t border-rose-950/50 p-4 rounded-2xl bg-rose-950/20 border border-rose-500/20 flex items-center justify-between">
+                <div className="mt-6 pt-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h5 className="text-xs font-black text-rose-300">Zona Hapus Tenant</h5>
-                    <p className="text-[11px] text-rose-400/80">Hapus wilayah ini dari direktori platform secara permanen.</p>
+                    <h5 className="text-xs font-black text-rose-800">Zona Hapus Tenant</h5>
+                    <p className="text-[11px] text-rose-600">Hapus wilayah ini dari direktori platform secara permanen.</p>
                   </div>
                   <button
                     onClick={handleDelete}
-                    className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
                   >
                     <Trash2 size={14} />
                     <span>Hapus Tenant</span>
@@ -541,9 +541,9 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-slate-800 bg-slate-950/50 flex items-center justify-between">
-          <div className="text-[11px] text-slate-500">
-            Didaftarkan: {tenant.createdAt ? new Date(tenant.createdAt).toLocaleDateString('id-ID') : 'Default'}
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between">
+          <div className="text-[11px] text-slate-500 font-mono">
+            Didaftarkan: {tenant.createdAt ? new Date(tenant.createdAt).toLocaleDateString('id-ID') : 'Default Platform'}
           </div>
 
           <div className="flex items-center gap-2">
@@ -551,7 +551,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Save size={14} />
                 <span>{isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}</span>
@@ -559,7 +559,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             ) : (
               <button
                 onClick={onClose}
-                className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                className="px-5 py-2 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 transition-colors cursor-pointer shadow-2xs"
               >
                 Tutup
               </button>

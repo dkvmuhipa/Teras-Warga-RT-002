@@ -248,32 +248,32 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     toast.success('Siaran telah dihapus');
   };
 
-  // 1. NON-SUPERADMIN RESTRICTION SCREEN
+  // 1. NON-SUPERADMIN RESTRICTION SCREEN (CLEAN LIGHT)
   if (!isSuperAdmin) {
     return (
-      <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col items-center justify-center p-6 text-center font-sans">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-6 text-center font-sans">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl"
+          className="max-w-md bg-white border border-slate-200/90 rounded-3xl p-8 shadow-xl"
         >
-          <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert size={32} />
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-950/60 border border-rose-500/30 text-rose-300 text-[10px] font-mono uppercase font-black mb-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-mono uppercase font-black mb-3">
             Otorisasi Terbatas
           </div>
-          <h2 className="text-xl font-black text-white mb-2 tracking-tight">
+          <h2 className="text-xl font-black text-slate-900 mb-2 tracking-tight">
             Khusus Super Admin Platform
           </h2>
-          <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+          <p className="text-xs text-slate-600 mb-6 leading-relaxed">
             Portal kendali fleet dan pendaftaran terpusat ini hanya dapat diakses oleh akun Super Admin platform ({SUPER_ADMIN_EMAILS.join(', ')}). 
             Akun pengurus RT reguler hanya memiliki akses ke wilayah RT masing-masing.
           </p>
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => navigate('/')}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
             >
               <ArrowLeft size={14} />
               <span>Kembali ke Beranda</span>
@@ -284,26 +284,26 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     );
   }
 
-  // 2. SUPER ADMIN FLEET CONTROL DASHBOARD
+  // 2. SUPER ADMIN FLEET CONTROL DASHBOARD (CLEAN LIGHT THEME)
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
       {/* Top Root Bar */}
-      <header className="sticky top-0 z-30 bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 ring-1 ring-white/10">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
             <Server size={20} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-sm sm:text-base font-black text-white tracking-tight flex items-center gap-2">
-                <span>Teras Warga Control Tower</span>
+              <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+                Teras Warga Control Tower
               </h1>
-              <span className="text-[9px] font-mono font-black uppercase text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="text-[10px] font-mono font-bold uppercase text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 SUPER ADMIN ROOT
               </span>
             </div>
-            <p className="text-[11px] font-medium text-slate-400">
+            <p className="text-[11px] font-medium text-slate-500">
               Pusat Tata Kelola, Pendaftaran Terpusat & Fleet Multi-Tenant Seluruh RT/RW
             </p>
           </div>
@@ -313,7 +313,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Quick Action: Add New Tenant */}
           <button
             onClick={() => setShowOnboardModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-600/30 cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/30 cursor-pointer"
           >
             <Plus size={14} />
             <span>Daftarkan RT Baru</span>
@@ -322,7 +322,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Export CSV */}
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
             title="Ekspor Direktori Tenant ke CSV"
           >
             <Download size={13} />
@@ -332,7 +332,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Navigate to Public Home */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
             title="Buka Beranda Publik"
           >
             <span className="hidden sm:inline">Web Publik</span>
@@ -342,7 +342,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="p-2 bg-slate-900 hover:bg-rose-950/40 border border-slate-700 hover:border-rose-500/40 text-slate-400 hover:text-rose-400 rounded-xl transition-colors cursor-pointer"
+            className="p-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-500 hover:text-rose-600 rounded-xl transition-colors cursor-pointer shadow-2xs"
             title="Keluar dari Akun Super Admin"
           >
             <LogOut size={16} />
@@ -354,86 +354,86 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         {/* Telemetry Metric Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-sm relative overflow-hidden group hover:border-indigo-500/40 transition-all">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-60"></div>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-mono">Total Tenant RT</span>
-              <div className="w-8 h-8 rounded-xl bg-indigo-950/60 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">Total Tenant RT</span>
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
                 <Globe size={16} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              {platformStats.totalTenants} <span className="text-xs font-bold text-slate-400">Tenant</span>
+            <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
+              {platformStats.totalTenants} <span className="text-xs font-bold text-slate-500 font-sans">Tenant</span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium mt-1">
-              Terdaftar aktif di platform
+            <p className="text-[11px] text-slate-500 font-medium mt-1">
+              Terdaftar aktif di sistem platform
             </p>
           </div>
 
-          <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-sm relative overflow-hidden group hover:border-amber-500/40 transition-all">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500 opacity-60"></div>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-mono">Total Blok Kavling</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-950/60 text-amber-400 flex items-center justify-center border border-amber-500/20">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">Total Blok Kavling</span>
+              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
                 <Layers size={16} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-amber-400 tracking-tight">
-              {platformStats.totalBlocks} <span className="text-xs font-bold text-slate-400">Blok</span>
+            <div className="text-2xl sm:text-3xl font-black text-amber-600 tracking-tight font-mono">
+              {platformStats.totalBlocks} <span className="text-xs font-bold text-slate-500 font-sans">Blok</span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium mt-1">
+            <p className="text-[11px] text-slate-500 font-medium mt-1">
               Tersebar di seluruh rukun tetangga
             </p>
           </div>
 
-          <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition-all">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-60"></div>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-mono">Estimasi Kapasitas</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-950/60 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">Estimasi Kapasitas</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
                 <Home size={16} />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
-              ~{platformStats.totalEstimatedDoors} <span className="text-xs font-bold text-slate-400">Kavling</span>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight font-mono">
+              ~{platformStats.totalEstimatedDoors} <span className="text-xs font-bold text-slate-500 font-sans">Kavling</span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium mt-1">
-              Kapasitas total platform
+            <p className="text-[11px] text-slate-500 font-medium mt-1">
+              Kapasitas total naungan warga
             </p>
           </div>
 
-          <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 shadow-sm relative overflow-hidden group hover:border-cyan-500/40 transition-all">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 to-blue-500 opacity-60"></div>
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-500"></div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-mono">Status DB Security</span>
-              <div className="w-8 h-8 rounded-xl bg-cyan-950/60 text-cyan-400 flex items-center justify-center border border-cyan-500/20">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">Status DB Security</span>
+              <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
                 <Database size={16} />
               </div>
             </div>
-            <div className="text-xl sm:text-2xl font-black text-cyan-400 tracking-tight uppercase flex items-center gap-1.5">
+            <div className="text-xl sm:text-2xl font-black text-sky-700 tracking-tight uppercase flex items-center gap-1.5">
               <span>TERISOLASI</span>
-              <ShieldCheck size={18} className="text-cyan-400" />
+              <ShieldCheck size={18} className="text-sky-600" />
             </div>
-            <p className="text-[11px] text-slate-400 font-medium mt-1">
+            <p className="text-[11px] text-slate-500 font-medium mt-1">
               Isolasi ketat antar-RT aktif
             </p>
           </div>
         </div>
 
         {/* Tab Navigation Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-2">
-          <div className="flex items-center gap-1.5 p-1 bg-slate-900/90 rounded-2xl border border-slate-800">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-2">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-200/70 rounded-2xl border border-slate-200">
             <button
               onClick={() => setActiveTab('tenants')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'tenants'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              <Globe size={14} />
+              <Globe size={14} className={activeTab === 'tenants' ? 'text-indigo-600' : ''} />
               <span>Direktori Tenant</span>
-              <span className="px-1.5 py-0.2 rounded-md bg-white/20 text-[10px] font-mono">
+              <span className="px-1.5 py-0.2 rounded-md bg-slate-100 text-[10px] font-mono text-slate-600">
                 {availableTenants.length}
               </span>
             </button>
@@ -442,11 +442,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               onClick={() => setActiveTab('tariffs')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'tariffs'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              <BarChart3 size={14} />
+              <BarChart3 size={14} className={activeTab === 'tariffs' ? 'text-indigo-600' : ''} />
               <span>Matriks Tarif & Kepatuhan</span>
             </button>
 
@@ -454,14 +454,14 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               onClick={() => setActiveTab('broadcast')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'broadcast'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              <Megaphone size={14} />
+              <Megaphone size={14} className={activeTab === 'broadcast' ? 'text-indigo-600' : ''} />
               <span>Siaran Platform</span>
               {broadcasts.filter(b => b.isActive).length > 0 && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               )}
             </button>
 
@@ -469,11 +469,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               onClick={() => setActiveTab('security')}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'security'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              <ShieldCheck size={14} />
+              <ShieldCheck size={14} className={activeTab === 'security' ? 'text-indigo-600' : ''} />
               <span>Keamanan & Root</span>
             </button>
           </div>
@@ -487,22 +487,22 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         {activeTab === 'tenants' && (
           <div className="space-y-4">
             {/* Search, Filter & View Controls */}
-            <div className="bg-slate-900/80 rounded-2xl p-4 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-md">
+            <div className="bg-white rounded-2xl p-4 border border-slate-200/90 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
               <div className="flex flex-wrap items-center gap-2 flex-1">
                 {/* Search Input */}
                 <div className="relative flex-1 min-w-[220px]">
-                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Cari nama RT, kelurahan, ketua RT, slug..."
-                    className="w-full pl-9 pr-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
                     >
                       ×
                     </button>
@@ -510,17 +510,17 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 </div>
 
                 {/* Filter Kelurahan */}
-                <div className="flex items-center gap-1.5 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-700/80 text-xs">
-                  <Filter size={13} className="text-slate-500" />
-                  <span className="text-slate-400 text-[11px] font-bold">Kelurahan:</span>
+                <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                  <Filter size={13} className="text-slate-400" />
+                  <span className="text-slate-500 text-[11px] font-bold">Kelurahan:</span>
                   <select
                     value={kelurahanFilter}
                     onChange={(e) => setKelurahanFilter(e.target.value)}
-                    className="bg-transparent text-white focus:outline-none text-xs cursor-pointer"
+                    className="bg-transparent text-slate-800 focus:outline-none text-xs cursor-pointer font-medium"
                   >
-                    <option value="all" className="bg-slate-900 text-white">Semua Kelurahan</option>
+                    <option value="all">Semua Kelurahan</option>
                     {kelurahanOptions.map(k => (
-                      <option key={k} value={k} className="bg-slate-900 text-white">{k}</option>
+                      <option key={k} value={k}>{k}</option>
                     ))}
                   </select>
                 </div>
@@ -528,15 +528,15 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
               {/* View Switcher & Counter */}
               <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400 font-mono">
-                  Menampilkan <strong className="text-white">{filteredTenants.length}</strong> RT
+                <span className="text-xs text-slate-500 font-mono">
+                  Menampilkan <strong className="text-slate-800">{filteredTenants.length}</strong> RT
                 </span>
 
-                <div className="flex items-center p-0.5 bg-slate-950 rounded-xl border border-slate-700/80">
+                <div className="flex items-center p-0.5 bg-slate-100 rounded-xl border border-slate-200">
                   <button
                     onClick={() => setViewMode('table')}
                     className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                      viewMode === 'table' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                      viewMode === 'table' ? 'bg-white text-indigo-600 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-800'
                     }`}
                     title="Tampilan Tabel"
                   >
@@ -545,7 +545,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
-                      viewMode === 'grid' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                      viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-2xs font-bold' : 'text-slate-500 hover:text-slate-800'
                     }`}
                     title="Tampilan Kartu Grid"
                   >
@@ -557,17 +557,17 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
             {/* Empty State */}
             {filteredTenants.length === 0 && (
-              <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-12 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+              <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center shadow-xs">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-3">
                   <Search size={20} />
                 </div>
-                <h3 className="text-sm font-bold text-white mb-1">Tidak ada RT yang cocok</h3>
-                <p className="text-xs text-slate-400 mb-4 max-w-sm mx-auto">
+                <h3 className="text-sm font-bold text-slate-800 mb-1">Tidak ada RT yang cocok</h3>
+                <p className="text-xs text-slate-500 mb-4 max-w-sm mx-auto">
                   Coba ubah kata kunci pencarian atau reset filter kelurahan untuk melihat daftar seluruh RT.
                 </p>
                 <button
                   onClick={() => { setSearchQuery(''); setKelurahanFilter('all'); }}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition-colors"
                 >
                   Reset Filter
                 </button>
@@ -576,10 +576,10 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
             {/* VIEW MODE: TABLE */}
             {viewMode === 'table' && filteredTenants.length > 0 && (
-              <div className="bg-slate-900/80 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
+              <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px] font-mono font-black border-b border-slate-800">
+                    <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-black border-b border-slate-200">
                       <tr>
                         <th className="py-3.5 px-4">Nama Wilayah / Tenant</th>
                         <th className="py-3.5 px-4">RW / Kelurahan</th>
@@ -590,68 +590,68 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                         <th className="py-3.5 px-4 text-right">Aksi Super Admin</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60 font-medium">
+                    <tbody className="divide-y divide-slate-100 font-medium">
                       {filteredTenants.map((t) => {
                         const isMain = t.id === 'tondo-rw20-rt02';
                         return (
-                          <tr key={t.id} className="hover:bg-slate-800/30 transition-colors">
-                            <td className="py-3.5 px-4 font-bold text-white">
+                          <tr key={t.id} className="hover:bg-indigo-50/20 transition-colors">
+                            <td className="py-3.5 px-4 font-bold text-slate-900">
                               <div className="flex items-center gap-2.5">
                                 <div 
-                                  className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs text-white shrink-0 shadow-sm"
+                                  className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs text-white shrink-0 shadow-xs"
                                   style={{ backgroundColor: t.themeColor || '#4f46e5' }}
                                 >
                                   {t.rt}
                                 </div>
                                 <div>
-                                  <p className="text-white font-bold leading-tight">{t.name}</p>
-                                  <p className="text-[10px] text-slate-500 font-mono mt-0.5">{t.id}</p>
+                                  <p className="text-slate-900 font-bold leading-tight">{t.name}</p>
+                                  <p className="text-[10px] text-slate-400 font-mono mt-0.5">{t.id}</p>
                                 </div>
                               </div>
                             </td>
 
-                            <td className="py-3.5 px-4 text-slate-300">
+                            <td className="py-3.5 px-4 text-slate-600">
                               RW {t.rw} • Kel. {t.kelurahan}
                             </td>
 
                             <td className="py-3.5 px-4">
-                              <p className="text-slate-200 font-bold leading-tight">{t.chairmanName || 'Belum ditunjuk'}</p>
+                              <p className="text-slate-800 font-bold leading-tight">{t.chairmanName || 'Belum ditunjuk'}</p>
                               {t.chairmanPhone ? (
                                 <a 
                                   href={`https://wa.me/${t.chairmanPhone.replace(/\D/g, '')}`} 
                                   target="_blank" 
                                   rel="noreferrer" 
-                                  className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 font-mono mt-0.5"
+                                  className="inline-flex items-center gap-1 text-[11px] text-emerald-600 hover:text-emerald-700 font-mono mt-0.5 font-bold"
                                 >
                                   <Phone size={10} />
                                   <span>{t.chairmanPhone}</span>
                                 </a>
                               ) : (
-                                <span className="text-[11px] text-slate-500 font-mono">-</span>
+                                <span className="text-[11px] text-slate-400 font-mono">-</span>
                               )}
                             </td>
 
                             <td className="py-3.5 px-4">
                               <div className="flex flex-wrap gap-1 max-w-xs">
                                 {(t.blocks || []).map(b => (
-                                  <span key={b} className="text-[10px] font-mono px-1.5 py-0.2 bg-slate-800 border border-slate-700 text-slate-300 rounded">
+                                  <span key={b} className="text-[10px] font-mono px-1.5 py-0.2 bg-slate-100 border border-slate-200 text-slate-700 rounded-md">
                                     {b}
                                   </span>
                                 ))}
                               </div>
                             </td>
 
-                            <td className="py-3.5 px-4 font-mono text-slate-300">
+                            <td className="py-3.5 px-4 font-mono text-slate-700">
                               Rp {(t.fees?.kasFee || 20000).toLocaleString('id-ID')}
                             </td>
 
                             <td className="py-3.5 px-4">
                               {isMain ? (
-                                <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-indigo-950 border border-indigo-500/40 text-indigo-300 rounded">
+                                <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-md">
                                   Default
                                 </span>
                               ) : (
-                                <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-emerald-950 border border-emerald-500/40 text-emerald-300 rounded">
+                                <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md">
                                   Aktif
                                 </span>
                               )}
@@ -661,7 +661,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                               <div className="inline-flex items-center gap-1.5">
                                 <button
                                   onClick={() => setSelectedTenantForDetail(t)}
-                                  className="px-2.5 py-1.5 bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                                  className="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 hover:border-indigo-600 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1"
                                   title="Kelola Identitas, Pengurus, & Tarif RT"
                                 >
                                   <Edit3 size={12} />
@@ -670,7 +670,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                                 <button
                                   onClick={() => copyRegisterLink(t.slug || t.id)}
-                                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-xl transition-all cursor-pointer"
+                                  className="p-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
                                   title="Salin Link Registrasi Warga Baru"
                                 >
                                   <Copy size={13} />
@@ -678,7 +678,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                                 <button
                                   onClick={() => window.open(`#/?rt=${t.slug || t.id}`, '_blank')}
-                                  className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-xl transition-all cursor-pointer"
+                                  className="p-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
                                   title="Buka Portal Publik RT"
                                 >
                                   <ExternalLink size={13} />
@@ -702,44 +702,44 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   return (
                     <div 
                       key={t.id} 
-                      className="bg-slate-900/80 rounded-2xl border border-slate-800 p-5 shadow-sm hover:border-slate-700 transition-all flex flex-col justify-between"
+                      className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
                     >
                       <div>
                         {/* Card Top */}
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex items-center gap-3">
                             <div 
-                              className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white shrink-0 shadow-md ring-1 ring-white/10"
+                              className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white shrink-0 shadow-xs"
                               style={{ backgroundColor: t.themeColor || '#4f46e5' }}
                             >
                               {t.rt}
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-white leading-tight">{t.name}</h3>
-                              <p className="text-[10px] text-slate-400 font-mono mt-0.5">RW {t.rw} • Kel. {t.kelurahan}</p>
+                              <h3 className="text-sm font-black text-slate-900 leading-tight">{t.name}</h3>
+                              <p className="text-[10px] text-slate-500 font-mono mt-0.5">RW {t.rw} • Kel. {t.kelurahan}</p>
                             </div>
                           </div>
                           {isMain ? (
-                            <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-indigo-950 border border-indigo-500/40 text-indigo-300 rounded shrink-0">
+                            <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-md shrink-0">
                               Default
                             </span>
                           ) : (
-                            <span className="text-[9px] font-mono font-black uppercase px-2 py-0.5 bg-emerald-950 border border-emerald-500/40 text-emerald-300 rounded shrink-0">
+                            <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md shrink-0">
                               Aktif
                             </span>
                           )}
                         </div>
 
                         {/* Ketua RT & Contact */}
-                        <div className="p-3 bg-slate-950/60 rounded-xl border border-slate-800/80 mb-3 space-y-1">
-                          <div className="text-[10px] font-mono font-black uppercase text-slate-500">Ketua RT</div>
-                          <div className="text-xs font-bold text-slate-200">{t.chairmanName || 'Belum ditunjuk'}</div>
+                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 mb-3 space-y-1">
+                          <div className="text-[10px] font-mono font-black uppercase text-slate-400">Ketua RT</div>
+                          <div className="text-xs font-bold text-slate-800">{t.chairmanName || 'Belum ditunjuk'}</div>
                           {t.chairmanPhone ? (
                             <a 
                               href={`https://wa.me/${t.chairmanPhone.replace(/\D/g, '')}`} 
                               target="_blank" 
                               rel="noreferrer"
-                              className="text-[11px] font-mono text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                              className="text-[11px] font-mono text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1"
                             >
                               <Phone size={10} />
                               <span>{t.chairmanPhone}</span>
@@ -749,12 +749,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                         {/* Blocks */}
                         <div className="mb-4">
-                          <div className="text-[10px] font-mono font-black uppercase text-slate-500 mb-1.5">
+                          <div className="text-[10px] font-mono font-black uppercase text-slate-400 mb-1.5">
                             Blok Terdaftar ({t.blocks?.length || 0})
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {(t.blocks || []).map(b => (
-                              <span key={b} className="text-[10px] font-mono px-2 py-0.5 bg-slate-800 border border-slate-700 text-slate-300 rounded-md">
+                              <span key={b} className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md">
                                 {b}
                               </span>
                             ))}
@@ -763,10 +763,10 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                       </div>
 
                       {/* Card Footer Actions */}
-                      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                         <button
                           onClick={() => setSelectedTenantForDetail(t)}
-                          className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
+                          className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shadow-indigo-600/20"
                         >
                           <Edit3 size={13} />
                           <span>Detail & Kelola</span>
@@ -774,7 +774,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                         <button
                           onClick={() => copyRegisterLink(t.slug || t.id)}
-                          className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-xl transition-all cursor-pointer"
+                          className="p-2 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
                           title="Salin Link Pendaftaran Warga"
                         >
                           <Copy size={13} />
@@ -782,7 +782,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                         <button
                           onClick={() => window.open(`#/?rt=${t.slug || t.id}`, '_blank')}
-                          className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 rounded-xl transition-all cursor-pointer"
+                          className="p-2 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
                           title="Buka Web Publik RT"
                         >
                           <ExternalLink size={13} />
@@ -801,52 +801,52 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <div className="space-y-6">
             {/* Tariff Benchmarks Bar */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                <div className="flex items-center justify-between text-slate-400 text-xs mb-1 font-mono">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+                <div className="flex items-center justify-between text-slate-500 text-xs mb-1 font-mono">
                   <span>RATA-RATA IURAN SAMPAH</span>
-                  <Wallet size={14} className="text-indigo-400" />
+                  <Wallet size={14} className="text-indigo-600" />
                 </div>
-                <div className="text-2xl font-black text-white font-mono">
+                <div className="text-2xl font-black text-slate-900 font-mono">
                   Rp {platformStats.avgSampah.toLocaleString('id-ID')}
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Tarif kategori Umum antar seluruh RT</p>
+                <p className="text-[11px] text-slate-500 mt-1">Tarif kategori Umum antar seluruh RT</p>
               </div>
 
-              <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                <div className="flex items-center justify-between text-slate-400 text-xs mb-1 font-mono">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+                <div className="flex items-center justify-between text-slate-500 text-xs mb-1 font-mono">
                   <span>RATA-RATA KAS RT</span>
-                  <BarChart3 size={14} className="text-amber-400" />
+                  <BarChart3 size={14} className="text-amber-600" />
                 </div>
-                <div className="text-2xl font-black text-amber-400 font-mono">
+                <div className="text-2xl font-black text-amber-600 font-mono">
                   Rp {platformStats.avgKas.toLocaleString('id-ID')}
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Alokasi operasional kas lingkungan</p>
+                <p className="text-[11px] text-slate-500 mt-1">Alokasi operasional kas lingkungan</p>
               </div>
 
-              <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                <div className="flex items-center justify-between text-slate-400 text-xs mb-1 font-mono">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+                <div className="flex items-center justify-between text-slate-500 text-xs mb-1 font-mono">
                   <span>RATA-RATA AIR / PDAM</span>
-                  <Activity size={14} className="text-cyan-400" />
+                  <Activity size={14} className="text-sky-600" />
                 </div>
-                <div className="text-2xl font-black text-cyan-400 font-mono">
+                <div className="text-2xl font-black text-sky-600 font-mono">
                   Rp {platformStats.avgAir.toLocaleString('id-ID')}
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Standar retribusi air bersih swadaya</p>
+                <p className="text-[11px] text-slate-500 mt-1">Standar retribusi air bersih swadaya</p>
               </div>
             </div>
 
             {/* Matrix Table */}
-            <div className="bg-slate-900/80 rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
-              <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+            <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
+              <div className="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-black text-white">Matriks Perbandingan Struktur Tarif Seluruh RT</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <h3 className="text-sm font-black text-slate-900">Matriks Perbandingan Struktur Tarif Seluruh RT</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Data transparan untuk pengawasan disparitas iuran dan sinkronisasi kebijakan wilayah.
                   </p>
                 </div>
                 <button
                   onClick={handleExportCSV}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-300 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs self-start sm:self-auto"
                 >
                   <Download size={13} />
                   <span>Unduh Matriks CSV</span>
@@ -855,7 +855,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px] font-mono font-black border-b border-slate-800">
+                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-black border-b border-slate-200">
                     <tr>
                       <th className="py-3 px-4">Wilayah RT</th>
                       <th className="py-3 px-4">Sampah Umum</th>
@@ -867,7 +867,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                       <th className="py-3 px-4 text-right">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60 font-mono">
+                  <tbody className="divide-y divide-slate-100 font-mono">
                     {availableTenants.map((t) => {
                       const sampah = t.fees?.sampahUmum || 20000;
                       const pkh = t.fees?.sampahPkh || 10000;
@@ -877,8 +877,8 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                       const totalStandard = sampah + kas;
 
                       return (
-                        <tr key={t.id} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="py-3.5 px-4 font-sans font-bold text-white">
+                        <tr key={t.id} className="hover:bg-slate-50/70 transition-colors">
+                          <td className="py-3.5 px-4 font-sans font-bold text-slate-900">
                             <div className="flex items-center gap-2">
                               <span 
                                 className="w-2.5 h-2.5 rounded-full shrink-0"
@@ -886,30 +886,30 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                               ></span>
                               <span>{t.name}</span>
                             </div>
-                            <span className="text-[10px] text-slate-500 font-mono">Kel. {t.kelurahan}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">Kel. {t.kelurahan}</span>
                           </td>
-                          <td className="py-3.5 px-4 text-slate-200">
+                          <td className="py-3.5 px-4 text-slate-700">
                             Rp {sampah.toLocaleString('id-ID')}
                           </td>
-                          <td className="py-3.5 px-4 text-emerald-400">
+                          <td className="py-3.5 px-4 text-emerald-600 font-bold">
                             Rp {pkh.toLocaleString('id-ID')}
                           </td>
-                          <td className="py-3.5 px-4 text-purple-400">
+                          <td className="py-3.5 px-4 text-purple-600 font-bold">
                             Rp {pns.toLocaleString('id-ID')}
                           </td>
-                          <td className="py-3.5 px-4 text-amber-400">
+                          <td className="py-3.5 px-4 text-amber-600 font-bold">
                             Rp {kas.toLocaleString('id-ID')}
                           </td>
-                          <td className="py-3.5 px-4 text-cyan-400">
+                          <td className="py-3.5 px-4 text-sky-600 font-bold">
                             Rp {air.toLocaleString('id-ID')}
                           </td>
-                          <td className="py-3.5 px-4 font-bold text-indigo-300">
+                          <td className="py-3.5 px-4 font-bold text-indigo-700">
                             Rp {totalStandard.toLocaleString('id-ID')}
                           </td>
                           <td className="py-3.5 px-4 text-right font-sans">
                             <button
                               onClick={() => setSelectedTenantForDetail(t)}
-                              className="px-2.5 py-1 bg-slate-800 hover:bg-indigo-600 text-slate-300 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                              className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-600 text-slate-700 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
                             >
                               Edit Tarif
                             </button>
@@ -928,36 +928,36 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         {activeTab === 'broadcast' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Create Broadcast Form */}
-            <div className="lg:col-span-1 bg-slate-900/80 rounded-3xl p-6 border border-slate-800 shadow-md">
+            <div className="lg:col-span-1 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-xl bg-purple-950/60 border border-purple-500/30 text-purple-400 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 border border-purple-200 text-purple-600 flex items-center justify-center">
                   <Megaphone size={16} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-white">Buat Siaran Platform</h3>
-                  <p className="text-[11px] text-slate-400">Pemberitahuan resmi ke seluruh dashboard RT</p>
+                  <h3 className="text-sm font-black text-slate-900">Buat Siaran Platform</h3>
+                  <p className="text-[11px] text-slate-500">Pemberitahuan resmi ke seluruh dashboard RT</p>
                 </div>
               </div>
 
               <form onSubmit={handleCreateBroadcast} className="space-y-4 text-xs">
                 <div>
-                  <label className="block text-slate-400 font-bold mb-1">Judul Siaran</label>
+                  <label className="block text-slate-600 font-bold mb-1">Judul Siaran</label>
                   <input
                     type="text"
                     value={newBroadcastTitle}
                     onChange={(e) => setNewBroadcastTitle(e.target.value)}
                     placeholder="Contoh: Jadwal Maintenance Server..."
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-slate-400 font-bold mb-1">Tingkat Prioritas</label>
+                    <label className="block text-slate-600 font-bold mb-1">Tingkat Prioritas</label>
                     <select
                       value={newBroadcastPriority}
                       onChange={(e) => setNewBroadcastPriority(e.target.value as any)}
-                      className="w-full px-2.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                      className="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 cursor-pointer font-medium"
                     >
                       <option value="info">Informasi (Biru)</option>
                       <option value="warning">Penting (Kuning)</option>
@@ -967,11 +967,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-slate-400 font-bold mb-1">Target Tenant</label>
+                    <label className="block text-slate-600 font-bold mb-1">Target Tenant</label>
                     <select
                       value={newBroadcastTarget}
                       onChange={(e) => setNewBroadcastTarget(e.target.value)}
-                      className="w-full px-2.5 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                      className="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 cursor-pointer font-medium"
                     >
                       <option value="all">Semua RT (Global)</option>
                       {availableTenants.map(t => (
@@ -982,19 +982,19 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-slate-400 font-bold mb-1">Isi Pesan Siaran</label>
+                  <label className="block text-slate-600 font-bold mb-1">Isi Pesan Siaran</label>
                   <textarea
                     rows={4}
                     value={newBroadcastMessage}
                     onChange={(e) => setNewBroadcastMessage(e.target.value)}
                     placeholder="Tuliskan pesan instruksi atau pengumuman platform..."
-                    className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white focus:outline-none focus:border-indigo-500 resize-none"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none transition-all"
                   ></textarea>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition-all shadow-md shadow-indigo-600/30 cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-sm shadow-indigo-600/30 cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Radio size={14} />
                   <span>Terbitkan Siaran Sekarang</span>
@@ -1005,16 +1005,16 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             {/* Broadcast List & Live Preview */}
             <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-black text-white flex items-center gap-2">
+                <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
                   <span>Daftar Siaran Aktif & Riwayat</span>
-                  <span className="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-mono text-slate-300">
+                  <span className="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-mono text-slate-600 font-bold">
                     {broadcasts.length}
                   </span>
                 </h3>
               </div>
 
               {broadcasts.length === 0 ? (
-                <div className="bg-slate-900/60 rounded-3xl border border-slate-800 p-8 text-center text-xs text-slate-400">
+                <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500 shadow-xs">
                   Belum ada siaran yang diterbitkan.
                 </div>
               ) : (
@@ -1025,32 +1025,32 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     const isMaint = bc.priority === 'maintenance';
 
                     const borderClass = isUrgent 
-                      ? 'border-rose-500/40 bg-rose-950/20' 
+                      ? 'border-rose-200 bg-rose-50/50' 
                       : isWarning 
-                        ? 'border-amber-500/40 bg-amber-950/20'
+                        ? 'border-amber-200 bg-amber-50/50'
                         : isMaint
-                          ? 'border-purple-500/40 bg-purple-950/20'
-                          : 'border-indigo-500/40 bg-indigo-950/20';
+                          ? 'border-purple-200 bg-purple-50/50'
+                          : 'border-indigo-200 bg-indigo-50/50';
 
                     const badgeClass = isUrgent
-                      ? 'bg-rose-950 text-rose-300 border-rose-500/40'
+                      ? 'bg-rose-100 text-rose-800 border-rose-300'
                       : isWarning
-                        ? 'bg-amber-950 text-amber-300 border-amber-500/40'
+                        ? 'bg-amber-100 text-amber-800 border-amber-300'
                         : isMaint
-                          ? 'bg-purple-950 text-purple-300 border-purple-500/40'
-                          : 'bg-indigo-950 text-indigo-300 border-indigo-500/40';
+                          ? 'bg-purple-100 text-purple-800 border-purple-300'
+                          : 'bg-indigo-100 text-indigo-800 border-indigo-300';
 
                     return (
                       <div 
                         key={bc.id}
-                        className={`rounded-2xl border p-4 transition-all shadow-sm ${borderClass} ${!bc.isActive ? 'opacity-50 grayscale-[40%]' : ''}`}
+                        className={`rounded-2xl border p-4.5 transition-all shadow-2xs ${borderClass} ${!bc.isActive ? 'opacity-60 grayscale-[30%]' : ''}`}
                       >
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div className="flex items-center gap-2">
-                            <span className={`text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded border ${badgeClass}`}>
+                            <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${badgeClass}`}>
                               {bc.priority.toUpperCase()}
                             </span>
-                            <h4 className="text-xs sm:text-sm font-bold text-white">{bc.title}</h4>
+                            <h4 className="text-xs sm:text-sm font-bold text-slate-900">{bc.title}</h4>
                           </div>
 
                           <div className="flex items-center gap-1.5 shrink-0">
@@ -1058,8 +1058,8 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                               onClick={() => handleToggleBroadcast(bc.id)}
                               className={`px-2 py-0.5 rounded-lg text-[10px] font-bold font-mono transition-colors cursor-pointer border ${
                                 bc.isActive 
-                                  ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300' 
-                                  : 'bg-slate-800 border-slate-700 text-slate-400'
+                                  ? 'bg-emerald-100 border-emerald-300 text-emerald-800' 
+                                  : 'bg-slate-100 border-slate-200 text-slate-500'
                               }`}
                             >
                               {bc.isActive ? 'Aktif' : 'Non-Aktif'}
@@ -1067,7 +1067,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                             <button
                               onClick={() => handleDeleteBroadcast(bc.id)}
-                              className="p-1 text-slate-500 hover:text-rose-400 transition-colors cursor-pointer"
+                              className="p-1 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
                               title="Hapus Siaran"
                             >
                               <Trash2 size={13} />
@@ -1075,11 +1075,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           </div>
                         </div>
 
-                        <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                        <p className="text-xs text-slate-700 leading-relaxed mb-3">
                           {bc.message}
                         </p>
 
-                        <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-2 border-t border-slate-800/60">
+                        <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-2 border-t border-slate-200/60">
                           <span>Target: {bc.targetTenantId === 'all' ? 'Semua RT (Platform)' : availableTenants.find(t => t.id === bc.targetTenantId)?.name || bc.targetTenantId}</span>
                           <span>Diterbitkan: {bc.createdAt}</span>
                         </div>
@@ -1095,32 +1095,32 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         {/* TAB 4: KEAMANAN & ROOT ENGINE */}
         {activeTab === 'security' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-900/80 rounded-3xl p-6 border border-slate-800">
-              <h3 className="text-sm font-black text-white mb-1 flex items-center gap-2">
-                <ShieldCheck size={16} className="text-emerald-400" />
+            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs">
+              <h3 className="text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
+                <ShieldCheck size={16} className="text-emerald-600" />
                 <span>Daftar Akun Otorisasi Super Admin</span>
               </h3>
-              <p className="text-xs text-slate-400 mb-4">
+              <p className="text-xs text-slate-500 mb-4">
                 Daftar email yang telah disahkan memiliki kekebalan akses dan hak mutlak dalam fleet multi-tenant:
               </p>
               <div className="space-y-2">
                 {SUPER_ADMIN_EMAILS.map((email) => {
                   const isCurrent = auth.currentUser?.email?.toLowerCase() === email.toLowerCase();
                   return (
-                    <div key={email} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950 border border-slate-800">
+                    <div key={email} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
                         <div>
-                          <span className="text-xs font-mono font-bold text-slate-200">{email}</span>
+                          <span className="text-xs font-mono font-bold text-slate-800">{email}</span>
                           <p className="text-[10px] text-slate-500 font-sans mt-0.5">Level Akses: PLATFORM_ROOT_OPERATOR</p>
                         </div>
                       </div>
                       {isCurrent ? (
-                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-950 border border-emerald-500/30 text-emerald-400 font-mono">
+                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono">
                           Sesi Anda
                         </span>
                       ) : (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">
+                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-200 text-slate-600 font-mono">
                           Terverifikasi
                         </span>
                       )}
@@ -1129,62 +1129,62 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 })}
               </div>
 
-              <div className="mt-5 p-3.5 bg-indigo-950/30 border border-indigo-500/20 rounded-2xl">
+              <div className="mt-5 p-3.5 bg-indigo-50/70 border border-indigo-100 rounded-2xl">
                 <div className="flex items-start gap-2">
-                  <Info size={15} className="text-indigo-400 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Untuk menambahkan akun Super Admin baru, tambahkan email pada konstanta <code className="text-indigo-300 font-mono">SUPER_ADMIN_EMAILS</code> di konfigurasi sistem platform.
+                  <Info size={15} className="text-indigo-600 shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-indigo-900 leading-relaxed">
+                    Untuk menambahkan akun Super Admin baru, tambahkan email pada konstanta <code className="text-indigo-700 font-mono font-bold">SUPER_ADMIN_EMAILS</code> di konfigurasi sistem platform.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-900/80 rounded-3xl p-6 border border-slate-800 flex flex-col justify-between">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs flex flex-col justify-between">
               <div>
-                <h3 className="text-sm font-black text-white mb-1 flex items-center gap-2">
-                  <Database size={16} className="text-indigo-400" />
+                <h3 className="text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
+                  <Database size={16} className="text-indigo-600" />
                   <span>Audit Isolasi & Integritas Multi-Tenant</span>
                 </h3>
-                <p className="text-xs text-slate-400 mb-4">
+                <p className="text-xs text-slate-500 mb-4">
                   Pemeriksaan berkala standar pengamanan arsitektur data Teras Warga:
                 </p>
 
                 <div className="space-y-3 text-xs">
-                  <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800/80 flex items-start gap-3">
-                    <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                    <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white block font-sans">Isolasi Prefix Database</strong>
-                      <span className="text-slate-400 text-[11px]">
+                      <strong className="text-slate-900 block font-sans">Isolasi Prefix Database</strong>
+                      <span className="text-slate-600 text-[11px]">
                         Semua koleksi warga, transaksi kas, dan aduan disimpan dengan prefix tenant unik terisolasi.
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800/80 flex items-start gap-3">
-                    <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                    <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white block font-sans">Pemisahan Dashboard Admin RT</strong>
-                      <span className="text-slate-400 text-[11px]">
+                      <strong className="text-slate-900 block font-sans">Pemisahan Dashboard Admin RT</strong>
+                      <span className="text-slate-600 text-[11px]">
                         Admin RT 02 atau RT lainnya tidak memiliki navigasi maupun hak pendaftaran RT baru.
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-slate-950/70 rounded-xl border border-slate-800/80 flex items-start gap-3">
-                    <CheckCircle2 size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 flex items-start gap-3">
+                    <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-white block font-sans">Perlindungan Tenant Utama</strong>
-                      <span className="text-slate-400 text-[11px]">
-                        Tenant acuan (<code className="text-indigo-300 font-mono">tondo-rw20-rt02</code>) dilindungi dari operasi penghapusan atau mutasi ilegal.
+                      <strong className="text-slate-900 block font-sans">Perlindungan Tenant Utama</strong>
+                      <span className="text-slate-600 text-[11px]">
+                        Tenant acuan (<code className="text-indigo-700 font-mono font-bold">tondo-rw20-rt02</code>) dilindungi dari operasi penghapusan atau mutasi ilegal.
                       </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] font-mono text-slate-500">
                 <span>Security Engine Status:</span>
-                <span className="text-emerald-400 font-bold">100% HEALTHY</span>
+                <span className="text-emerald-600 font-bold">100% HEALTHY</span>
               </div>
             </div>
           </div>
