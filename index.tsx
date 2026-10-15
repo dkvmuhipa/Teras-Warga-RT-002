@@ -2,6 +2,7 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { ConfirmProvider } from "./context/ConfirmContext";
+import { TenantProvider } from "./context/TenantContext";
 import "./index.css";
 
 // Register PWA Service Worker (Only in Production mode to prevent Vite HMR dev conflicts)
@@ -34,7 +35,9 @@ const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <ConfirmProvider>
-      <App />
+      <TenantProvider>
+        <App />
+      </TenantProvider>
     </ConfirmProvider>
   </React.StrictMode>
 );

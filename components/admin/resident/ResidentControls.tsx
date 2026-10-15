@@ -4,6 +4,7 @@ import { generateMonthOptions } from '../../../src/utils/dateUtils';
 import { ResidentRegistration } from '../../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useTenant } from '../../../context/TenantContext';
 
 interface ResidentControlsProps {
   searchTerm: string;
@@ -40,6 +41,8 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
   setViewMode,
   residentRegistrations
 }) => {
+  const { currentTenant } = useTenant();
+  const availableBlocks = currentTenant?.blocks || ['C5', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12'];
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
   // Calculate active filter count (excluding defaults)
@@ -241,13 +244,9 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
                     onChange={e => setFilterBlock(e.target.value)}
                   >
                     <option value="all">Semua Blok</option>
-                    <option value="C5">Blok C5</option>
-                    <option value="C7">Blok C7</option>
-                    <option value="C8">Blok C8</option>
-                    <option value="C9">Blok C9</option>
-                    <option value="C10">Blok C10</option>
-                    <option value="C11">Blok C11</option>
-                    <option value="C12">Blok C12</option>
+                    {availableBlocks.map(block => (
+                      <option key={block} value={block}>Blok {block}</option>
+                    ))}
                   </select>
                 </FilterGroup>
 

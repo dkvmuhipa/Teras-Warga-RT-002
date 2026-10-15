@@ -4,10 +4,11 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert, AlertTriangle,
-  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen, Building, CheckSquare
+  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen, Building, CheckSquare, Building2
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
+import { TenantSwitcher } from '../TenantSwitcher';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface SidebarProps {
@@ -160,10 +161,10 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       if (role === Role.ADMIN) {
         isAllowed = true;
       } else if (role === Role.TREASURER) {
-        isAllowed = ['overview', 'analytics', 'finance', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
+        isAllowed = ['overview', 'analytics', 'rw-recap', 'finance', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
       } else if (role === Role.SECRETARY) {
         isAllowed = [
-          'overview', 'analytics', 'residents', 'mutations', 'rentals',
+          'overview', 'analytics', 'rw-recap', 'residents', 'mutations', 'rentals',
           'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
         ].includes(item.id);
@@ -278,9 +279,16 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
             )}
           </div>
 
+          {/* Tenant Switcher (Multi-RT) */}
+          {!isCollapsed && (
+            <div className="px-4 pt-3 pb-1">
+              <TenantSwitcher variant="sidebar" />
+            </div>
+          )}
+
           {/* Quick Search (Only when not collapsed) */}
           {!isCollapsed && (
-            <div className="px-4 mt-5 mb-2">
+            <div className="px-4 mt-3 mb-2">
               <div className="relative group/search">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/search:text-indigo-600 transition-colors" size={15} />
                 <input 
@@ -435,6 +443,22 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                   </div>
                 </div>
               )}
+              <a 
+                href="#/master"
+                className={`
+                  flex items-center gap-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-200 group
+                  ${isCollapsed ? 'p-2.5 justify-center bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-100' : 'w-full px-3.5 py-2.5 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100/90 border border-indigo-200/80 shadow-2xs'}
+                `}
+                title={isCollapsed ? 'Portal Master RW' : ''}
+              >
+                <Building2 size={15} className="shrink-0 text-indigo-600 group-hover:scale-110 transition-transform" />
+                {!isCollapsed && (
+                  <div className="flex items-center justify-between w-full">
+                    <span>Portal Master RW</span>
+                    <span className="text-[9px] font-black bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded">PIN</span>
+                  </div>
+                )}
+              </a>
               <button 
                 onClick={onLogout}
                 className={`

@@ -39,6 +39,56 @@ export enum PaymentStatus {
   UNPAID = 'Menunggak'
 }
 
+export interface BlockRangeConfig {
+  code: string;
+  start: number;
+  end: number;
+}
+
+export interface TenantFeeConfig {
+  sampahUmum: number;
+  sampahPkh: number;
+  sampahPns: number;
+  airFee: number;
+  kasFee: number;
+}
+
+export interface Tenant {
+  id: string; // e.g. 'tondo-rw20-rt02'
+  slug: string; // e.g. 'rt02-tondo'
+  name: string; // 'RT 002 / RW 020 Huntap Tondo 2'
+  rt: string; // '002'
+  rw: string; // '020'
+  kelurahan: string; // 'Tondo'
+  kecamatan: string; // 'Mantikulore'
+  city: string; // 'Kota Palu'
+  province: string; // 'Sulawesi Tengah'
+  postalCode?: string;
+  address: string;
+  chairmanName: string;
+  chairmanPhone?: string;
+  secretaryName?: string;
+  treasurerName?: string;
+  blocks: string[]; // ['C5', 'C7', ...]
+  blockConfig: BlockRangeConfig[];
+  fees?: Partial<TenantFeeConfig>;
+  logoUrl?: string;
+  themeColor?: string;
+  isPilotDemo?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TenantContextType {
+  currentTenant: Tenant;
+  tenantId: string;
+  availableTenants: Tenant[];
+  switchTenant: (idOrSlug: string) => void;
+  registerTenant: (newTenantData: Omit<Tenant, 'id' | 'createdAt'>) => Promise<Tenant>;
+  isDefaultTenant: boolean;
+  pdfConfig: PdfConfig;
+}
+
 export interface OccupancyHistoryRecord {
   id: string;
   startDate: string;
@@ -52,6 +102,7 @@ export interface OccupancyHistoryRecord {
 
 export interface House {
   id: string;
+  tenantId?: string; // Logical Partitioning for Multi-RT
   block: string;
   number: string;
   headOfFamily: string; // Nama Kepala Keluarga
@@ -217,6 +268,7 @@ export interface OccupantHistoryItem {
 
 export interface ResidentRegistration {
   id: string;
+  tenantId?: string;
   headOfFamily: string;
   gender: 'Laki-laki' | 'Perempuan';
   birthDate: string;
@@ -271,6 +323,7 @@ export interface ResidentRegistration {
 
 export interface GuestReport {
   id: string;
+  tenantId?: string;
   residentName: string;
   residentHouseId: string;
   hostHouseNumber?: string;
@@ -294,6 +347,7 @@ export interface GuestReport {
 
 export interface AuditLog {
   id: string;
+  tenantId?: string;
   action: string;
   timestamp: string;
   user: string;
@@ -303,6 +357,7 @@ export interface AuditLog {
 // Feature 1: Event Management
 export interface AppEvent {
   id: string;
+  tenantId?: string;
   title: string;
   description: string;
   date: string;
@@ -338,6 +393,7 @@ export interface Message {
 
 export interface Announcement {
   id: string;
+  tenantId?: string;
   title: string;
   content: string;
   date: string;
@@ -354,6 +410,7 @@ export interface Announcement {
 
 export interface News {
   id: string;
+  tenantId?: string;
   title: string;
   content: string;
   date: string;
@@ -368,6 +425,7 @@ export interface News {
 // Feature: Direktori Keahlian & Jasa Warga (Community Skill Exchange)
 export interface CommunitySkill {
   id: string;
+  tenantId?: string;
   providerName: string;
   houseId: string;
   category: 'Pertukangan & Bangunan' | 'Elektronik & Kelistrikan' | 'Pendidikan & Les' | 'Katering & Kuliner' | 'Kecantikan & Jahit' | 'Otomotif & Transportasi' | 'Lainnya' | string;
@@ -419,6 +477,7 @@ export interface AppNotification {
 
 export interface Report {
   id: string;
+  tenantId?: string;
   type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Sosial' | 'Aspirasi/Saran' | 'Temuan Lapangan' | 'Lainnya';
   description: string;
   reporterName: string;
@@ -452,6 +511,7 @@ export interface UMKMReview {
 
 export interface UMKM {
   id: string;
+  tenantId?: string;
   name: string;
   owner: string;
   category: string;
@@ -484,6 +544,7 @@ export interface UMKM {
 
 export interface LetterRequest {
   id: string;
+  tenantId?: string;
   type: string;
   applicantName: string;
   houseId: string; // Alamat Domisili di RT (Blok)
@@ -521,6 +582,7 @@ export interface LetterRequest {
 // New Types
 export interface RondaSchedule {
   id?: string; // Optional for seeding, required for edit
+  tenantId?: string;
   day: string;
   members: string[]; // Nama warga (Legacy/Simple)
   shifts?: {
@@ -614,6 +676,7 @@ export interface PanicAlert {
 
 export interface CashFlow {
   id: string;
+  tenantId?: string;
   date: string;
   description: string;
   amount: number;
@@ -627,6 +690,7 @@ export interface CashFlow {
 
 export interface Official {
   id: string;
+  tenantId?: string;
   role: string;
   name: string;
   houseId: string;
@@ -656,6 +720,10 @@ export interface PdfConfig {
   lastLetterNumber: number;
   whatsappGroupId?: string; // NEW: Group ID for WhatsApp Broadcast
   whatsappGroupName?: string; // NEW: Group Name for display
+  kopLine1?: string;
+  kopLine2?: string;
+  kopLine3?: string;
+  rtLeader?: string;
   letterTemplates?: {
     type: string;
     suggestion: string;
@@ -676,6 +744,7 @@ export interface MaintenanceLog {
 
 export interface InventoryItem {
   id: string;
+  tenantId?: string;
   name: string;
   total: number;
   available: number;
@@ -703,6 +772,7 @@ export interface FAQItem {
 
 export interface Document {
   id: string;
+  tenantId?: string;
   title: string;
   category: 'SK RT' | 'Aturan' | 'Formulir' | 'Notulensi' | 'Lainnya';
   url: string;
@@ -727,6 +797,7 @@ export interface BillItem {
 
 export interface Bill {
   id: string;
+  tenantId?: string;
   houseId: string;
   month: string; // e.g., "2026-03"
   items: BillItem[];
@@ -1034,6 +1105,7 @@ export interface UMKMOrder {
 // Donasi Sosial & Kas Kematian
 export interface DonationCampaign {
   id: string;
+  tenantId?: string;
   title: string;
   description: string;
   targetAmount?: number;
@@ -1058,6 +1130,7 @@ export interface DonationRecord {
 
 export interface OfficialLetter {
   id: string;
+  tenantId?: string;
   letterNumber: string;
   subject: string;
   date: string;
@@ -1073,6 +1146,7 @@ export interface OfficialLetter {
 
 export interface UpdateRequest {
   id: string;
+  tenantId?: string;
   houseId: string;
   headOfFamily: string;
   gender?: 'Laki-laki' | 'Perempuan';
@@ -1173,6 +1247,7 @@ export interface AssetBorrowRequest {
 
 export interface IncomingMail {
   id: string;
+  tenantId?: string;
   mailNumber: string;         // Nomor Surat Asli Pihak Luar
   agendaNumber: string;       // Nomor Agenda Internal RT
   sender: string;             // Pengirim (misal: Kelurahan Tondo, PLN, Polsek)
@@ -1208,6 +1283,7 @@ export interface CommunityWorkAttendance {
 
 export interface CommunityWork {
   id: string;
+  tenantId?: string;
   title: string;          // Misal: Kerja Bakti Akbar Menyambut Bulan Ramadan
   description: string;
   date: string;           // YYYY-MM-DD

@@ -42,16 +42,18 @@ const WaterMeterManager = React.lazy(() => import('./WaterMeterManager').then(m 
 const MeetingMinutesManager = React.lazy(() => import('./MeetingMinutesManager').then(m => ({ default: m.MeetingMinutesManager })));
 const RentalManager = React.lazy(() => import('./RentalManager').then(m => ({ default: m.RentalManager })));
 const STBMManager = React.lazy(() => import('./STBMManager').then(m => ({ default: m.STBMManager })));
+const RWAggregationDashboard = React.lazy(() => import('./RWAggregationDashboard').then(m => ({ default: m.RWAggregationDashboard })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle,
   LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid, BookOpen, Building, CheckSquare, Clock, Sparkles, Command, Sun, CloudRain, Wind, ArrowRight, CornerDownLeft,
-  FileClock, Award, Droplets
+  FileClock, Award, Droplets, Building2
 } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 import { toast } from 'sonner';
 import { useWeather } from '../../hooks/useWeather';
+import { useTenant } from '../../context/TenantContext';
 
 interface AdminDashboardProps {
   role: Role;
@@ -99,6 +101,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   ronda, rondaAttendance, inventory, umkm, bills, rondaLogs, rondaSwapRequests, gallery, pdfConfig, setPdfConfig, notifications, documents, populationReports, setPopulationReports, populationLogs, setPopulationLogs, events, mapPoints, activePatrol, iuranPayments, residentRegistrations, guestReports, inventoryLogs, auditLogs, faqItems, updateRequests, incomingMails = [], settings, onUpdateSettings
 }) => {
   const confirm = useConfirm();
+  const { currentTenant, switchTenant } = useTenant();
   const [activeTab, setActiveTab] = useState('overview');
   const [contentSubTab, setContentSubTab] = useState<'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>('announcements');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -236,6 +239,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               }
             }} 
           />
+        );
+      case 'rw-recap':
+        return (
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 text-center max-w-lg mx-auto space-y-4 my-8 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+              <Building2 size={28} />
+            </div>
+            <h3 className="text-lg font-black text-slate-900">Portal Master RW Mandiri</h3>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Pusat kendali dan rekapitulasi seluruh RT di lingkungan RW telah dipisahkan ke portal mandiri dengan proteksi PIN khusus Super Admin / RW.
+            </p>
+            <a 
+              href="#/master"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+            >
+              <span>Buka Portal Master RW</span>
+              <ArrowRight size={14} />
+            </a>
+          </div>
         );
       case 'residents':
       case 'mutations':
@@ -509,7 +531,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           Dashboard Utama
                         </h1>
                         <p className="text-[10px] md:text-[11px] font-bold text-slate-400 leading-none mt-0.5">
-                          RT 02 • Pusat Kendali Eksekutif
+                          {currentTenant ? `RT ${currentTenant.rt}` : 'RT 02'} • Pusat Kendali Eksekutif
                         </p>
                       </div>
                     </div>
@@ -633,7 +655,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               
               <div className="flex items-center gap-2.5 pl-1">
                 <div className="hidden md:block text-right">
-                  <p className="text-xs font-black text-slate-900 leading-tight">Admin {RT_NAME}</p>
+                  <p className="text-xs font-black text-slate-900 leading-tight">Admin {currentTenant ? currentTenant.name : RT_NAME}</p>
                   <p className="text-[9px] font-black text-emerald-600 uppercase tracking-wider mt-0.5">{role}</p>
                 </div>
                 <div className="relative group">

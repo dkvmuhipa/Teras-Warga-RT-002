@@ -6,12 +6,14 @@ import { RT_NAME } from '../constants';
 import { toast } from 'sonner';
 import { useWeather } from '../hooks/useWeather';
 import { WeatherDetailModal } from './public/WeatherDetailModal';
+import { useTenant } from '../context/TenantContext';
 
 interface HeroSectionProps {
     onExplore?: () => void;
 }
 
 export const HeroSection = ({ onExplore }: HeroSectionProps) => {
+    const { currentTenant } = useTenant();
     const navigate = useNavigate();
     const [date, setDate] = useState(new Date());
     const [searchTerm, setSearchTerm] = useState('');
@@ -76,11 +78,11 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span>RT 002 / RW 020 • Kelurahan Tondo</span>
+                <span>{currentTenant.name} • Kel. {currentTenant.kelurahan}</span>
               </div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50/90 border border-amber-200/80 rounded-full text-[10px] font-extrabold text-amber-800 tracking-wider shadow-2xs">
                 <MapPin size={11} className="text-amber-600" />
-                <span>Huntap Tondo 2, Palu</span>
+                <span>{currentTenant.city}</span>
               </span>
             </motion.div>
             
@@ -93,7 +95,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               >
                 TERAS WARGA <br className="hidden md:block"/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 font-serif italic font-bold">
-                  RT 002 / RW 020
+                  {currentTenant.name}
                 </span>
               </motion.h1>
               
@@ -103,7 +105,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 transition={{ delay: 0.4 }}
                 className="text-slate-500 text-xs md:text-sm font-medium leading-relaxed max-w-lg"
               >
-                Harmoni warga dalam satu genggaman. Portal digital resmi Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu untuk mewujudkan lingkungan yang sinergis, aman, dan transparan.
+                Harmoni warga dalam satu genggaman. Portal digital resmi Kelurahan {currentTenant.kelurahan}, Kecamatan {currentTenant.kecamatan}, {currentTenant.city} untuk mewujudkan lingkungan yang sinergis, aman, dan transparan.
               </motion.p>
             </div>
 

@@ -35,10 +35,28 @@ import {
   signOut, 
   updatePassword
 } from "firebase/auth";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, WaterMeterReading, WaterUtilitySettings, STBMRecord } from "../types";
+import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, WaterMeterReading, WaterUtilitySettings, STBMRecord, Tenant } from "../types";
 import { toast } from "sonner";
+import { DEFAULT_TENANT_ID, matchesTenant } from "./tenantService";
 
 export { OperationType, isFirebaseConfigured };
+
+// Multi-Tenant Active Scope & Filter
+let activeTenantScope: string = DEFAULT_TENANT_ID;
+
+export const setActiveTenantScope = (tenantId: string) => {
+  if (tenantId) {
+    activeTenantScope = tenantId;
+  }
+};
+
+export const getActiveTenantScope = (): string => {
+  return activeTenantScope;
+};
+
+export const filterByActiveTenant = <T extends { tenantId?: string }>(items: T[]): T[] => {
+  return items.filter(item => matchesTenant(item.tenantId, activeTenantScope));
+};
 
 export const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {
   const errInfo: FirestoreErrorInfo = {
@@ -259,7 +277,7 @@ export const subscribeToDonationCampaigns = (callback: (data: any[]) => void) =>
     const q = query(collection(db, DONATION_CAMPAIGNS_COL), orderBy("startDate", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, DONATION_CAMPAIGNS_COL);
     });
@@ -270,7 +288,7 @@ export const subscribeToIncomingMails = (callback: (data: any[]) => void) => {
     const q = query(collection(db, INCOMING_MAILS_COL), orderBy("receivedDate", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, INCOMING_MAILS_COL);
     });
@@ -279,6 +297,7 @@ export const subscribeToIncomingMails = (callback: (data: any[]) => void) => {
 export const addIncomingMailToDb = async (data: any) => {
     try {
         return await addDoc(collection(db, INCOMING_MAILS_COL), {
+            tenantId: data.tenantId || activeTenantScope,
             ...data,
             createdAt: new Date().toISOString()
         });
@@ -438,7 +457,7 @@ export const subscribeToGuestReports = (callback: (data: any[]) => void) => {
     const q = query(collection(db, GUEST_REPORTS_COL), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, GUEST_REPORTS_COL);
     });
@@ -446,7 +465,9 @@ export const subscribeToGuestReports = (callback: (data: any[]) => void) => {
 
 export const addGuestReportToDb = async (data: any) => {
     try {
-        await addDoc(collection(db, GUEST_REPORTS_COL), deepSanitize(data));
+        const clean = deepSanitize(data);
+        if (!clean.tenantId) clean.tenantId = activeTenantScope;
+        await addDoc(collection(db, GUEST_REPORTS_COL), clean);
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, GUEST_REPORTS_COL);
     }
@@ -482,7 +503,7 @@ export const subscribeToDocuments = (callback: (data: any[]) => void) => {
     const q = query(collection(db, DOCUMENTS_COL), orderBy("uploadDate", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, DOCUMENTS_COL);
     });
@@ -491,7 +512,9 @@ export const subscribeToDocuments = (callback: (data: any[]) => void) => {
 export const addDocumentToDb = async (docData: any) => {
     try {
         const { id, ...data } = docData;
-        await addDoc(collection(db, DOCUMENTS_COL), deepSanitize(data));
+        const clean = deepSanitize(data);
+        if (!clean.tenantId) clean.tenantId = activeTenantScope;
+        await addDoc(collection(db, DOCUMENTS_COL), clean);
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, DOCUMENTS_COL);
     }
@@ -611,7 +634,9 @@ export const deleteMapPointFromDb = async (id: string) => {
 export const addBillToDb = async (bill: any) => {
     try {
         const { id, ...data } = bill;
-        await addDoc(collection(db, BILLS_COL), deepSanitize(data));
+        const clean = deepSanitize(data);
+        if (!clean.tenantId) clean.tenantId = activeTenantScope;
+        await addDoc(collection(db, BILLS_COL), clean);
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, BILLS_COL);
     }
@@ -1351,7 +1376,7 @@ export const subscribeToCollection = (
       ...doc.data(), 
       id: doc.id 
     }));
-    callback(data);
+    callback(filterByActiveTenant(data));
   }, (error) => {
     if (onError) {
       onError(error);
@@ -1548,7 +1573,7 @@ export const subscribeToActivePanicAlerts = (callback: (data: any[]) => void) =>
     const q = query(collection(db, PANIC_ALERTS_COL), where("status", "in", ["Active", "Responding"]));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, PANIC_ALERTS_COL);
     });
@@ -1570,7 +1595,7 @@ export const subscribeToUpdateRequests = (callback: (data: any[]) => void) => {
     const q = query(collection(db, UPDATE_REQUESTS_COL), orderBy("createdAt", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, UPDATE_REQUESTS_COL);
     });
@@ -1653,6 +1678,7 @@ export const addHouse = async (houseData: any) => {
   try {
     const cleanData = deepSanitize(houseData);
     if (!cleanData) return;
+    if (!cleanData.tenantId) cleanData.tenantId = activeTenantScope;
 
     const now = new Date().toISOString();
     if (!cleanData.createdAt) cleanData.createdAt = now;
@@ -2066,7 +2092,9 @@ export const resetHouseData = async (newHouses: any[]) => {
 export const addAnnouncementToDb = async (announcement: any) => {
   try {
     const { id, ...data } = announcement; 
-    await addDoc(collection(db, ANNOUNCEMENTS_COL), deepSanitize(data));
+    const clean = deepSanitize(data);
+    if (!clean.tenantId) clean.tenantId = activeTenantScope;
+    await addDoc(collection(db, ANNOUNCEMENTS_COL), clean);
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, ANNOUNCEMENTS_COL);
   }
@@ -2090,7 +2118,9 @@ export const updateAnnouncementInDb = async (id: string, updates: any) => {
 
 export const addIuranPaymentToDb = async (payment: any) => {
     try {
-        await addDoc(collection(db, IURAN_PAYMENTS_COL), deepSanitize(payment));
+        const clean = deepSanitize(payment);
+        if (!clean.tenantId) clean.tenantId = activeTenantScope;
+        await addDoc(collection(db, IURAN_PAYMENTS_COL), clean);
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, IURAN_PAYMENTS_COL);
     }
@@ -2101,7 +2131,7 @@ export const subscribeToIuranPayments = (callback: (data: any[]) => void) => {
     const q = query(collection(db, IURAN_PAYMENTS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, IURAN_PAYMENTS_COL);
     });
@@ -2161,7 +2191,9 @@ export const updateIuranPaymentInDb = async (id: string, updates: any) => {
 // --- RESIDENT REGISTRATIONS ---
 export const addResidentRegistrationToDb = async (registration: any) => {
     try {
-        await addDoc(collection(db, RESIDENT_REGISTRATIONS_COL), deepSanitize(registration));
+        const clean = deepSanitize(registration);
+        if (!clean.tenantId) clean.tenantId = activeTenantScope;
+        await addDoc(collection(db, RESIDENT_REGISTRATIONS_COL), clean);
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, RESIDENT_REGISTRATIONS_COL);
     }
@@ -2172,7 +2204,7 @@ export const subscribeToResidentRegistrations = (callback: (data: ResidentRegist
     const q = query(collection(db, RESIDENT_REGISTRATIONS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })) as ResidentRegistration[];
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, RESIDENT_REGISTRATIONS_COL);
     });
@@ -2345,7 +2377,7 @@ export const subscribeToEvents = (callback: (data: any[]) => void) => {
     const q = query(collection(db, EVENTS_COL), orderBy("date", "asc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, EVENTS_COL);
     });
@@ -2354,7 +2386,9 @@ export const subscribeToEvents = (callback: (data: any[]) => void) => {
 export const addEventToDb = async (event: any) => {
     try {
         const { id, ...data } = event;
-        await addDoc(collection(db, EVENTS_COL), deepSanitize(data));
+        const clean = deepSanitize(data);
+        if (!clean.tenantId) clean.tenantId = activeTenantScope;
+        await addDoc(collection(db, EVENTS_COL), clean);
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, EVENTS_COL);
     }
@@ -2380,7 +2414,9 @@ export const deleteEventFromDb = async (id: string) => {
 export const addTransactionToDb = async (transaction: any) => {
   try {
     const { id, ...data } = transaction;
-    await addDoc(collection(db, CASHFLOW_COL), deepSanitize(data));
+    const clean = deepSanitize(data);
+    if (!clean.tenantId) clean.tenantId = activeTenantScope;
+    await addDoc(collection(db, CASHFLOW_COL), clean);
     await logAction('Catat Keuangan', `${data.type}: ${data.description} - Rp ${data.amount.toLocaleString()}`);
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, CASHFLOW_COL);
@@ -2409,7 +2445,9 @@ export const deleteTransactionFromDb = async (id: string) => {
 export const addOfficialToDb = async (official: any) => {
   try {
     const { id, ...data } = official;
-    await addDoc(collection(db, OFFICIALS_COL), deepSanitize(data));
+    const clean = deepSanitize(data);
+    if (!clean.tenantId) clean.tenantId = activeTenantScope;
+    await addDoc(collection(db, OFFICIALS_COL), clean);
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, OFFICIALS_COL);
   }
@@ -2455,7 +2493,9 @@ export const subscribeToHouseReports = (houseId: string, callback: (data: any[])
 export const addReportToDb = async (report: any) => {
   try {
     const { id, ...data } = report;
-    await addDoc(collection(db, REPORTS_COL), deepSanitize(data));
+    const clean = deepSanitize(data);
+    if (!clean.tenantId) clean.tenantId = activeTenantScope;
+    await addDoc(collection(db, REPORTS_COL), clean);
     
     // Add notification for admin
     await addNotificationToDb({
@@ -2521,7 +2561,9 @@ export const deleteReportFromDb = async (id: string) => {
 export const addLetterToDb = async (letter: any) => {
   try {
     const { id, ...data } = letter;
-    await addDoc(collection(db, LETTERS_COL), deepSanitize(data));
+    const clean = deepSanitize(data);
+    if (!clean.tenantId) clean.tenantId = activeTenantScope;
+    await addDoc(collection(db, LETTERS_COL), clean);
 
     // Add notification for admin
     await addNotificationToDb({
@@ -2961,7 +3003,9 @@ export const subscribeToPopulationLogs = (callback: (data: any[]) => void) => {
 export const addInventoryToDb = async (item: any) => {
     try {
         const { id, ...data } = item;
-        await addDoc(collection(db, INVENTORY_COL), deepSanitize(data));
+        const clean = deepSanitize(data);
+        if (!clean.tenantId) clean.tenantId = activeTenantScope;
+        await addDoc(collection(db, INVENTORY_COL), clean);
         await logAction('Tambah Inventaris', `Menambahkan barang: ${data.name}`);
     } catch (error) {
         handleFirestoreError(error, OperationType.CREATE, INVENTORY_COL);
@@ -3071,7 +3115,9 @@ export const subscribeToRondaSwapRequests = (callback: (data: any[]) => void) =>
 export const addUMKMToDb = async (umkm: any) => {
   try {
     const { id, ...data } = umkm;
-    await addDoc(collection(db, UMKM_COL), deepSanitize(data));
+    const clean = deepSanitize(data);
+    if (!clean.tenantId) clean.tenantId = activeTenantScope;
+    await addDoc(collection(db, UMKM_COL), clean);
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, UMKM_COL);
   }
@@ -3275,7 +3321,7 @@ export const subscribeToNews = (callback: (data: any[]) => void) => {
       ...doc.data(), 
       id: doc.id 
     }));
-    callback(data);
+    callback(filterByActiveTenant(data));
   }, (error) => {
     handleFirestoreError(error, OperationType.LIST, NEWS_COL);
   });
@@ -3288,7 +3334,7 @@ export const subscribeToUMKM = (callback: (data: UMKM[]) => void) => {
     if (!isFirebaseConfigured || !db) return () => {};
     return onSnapshot(collection(db, UMKM_COL), (snapshot) => {
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UMKM));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, UMKM_COL);
     });
@@ -3299,7 +3345,7 @@ export const subscribeToWasteDeposits = (callback: (data: any[]) => void) => {
     const q = query(collection(db, WASTE_DEPOSITS_COL), orderBy("date", "desc"));
     return onSnapshot(q, (snapshot) => {
         const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
+        callback(filterByActiveTenant(data));
     }, (error) => {
         handleFirestoreError(error, OperationType.LIST, WASTE_DEPOSITS_COL);
     });
@@ -3794,7 +3840,7 @@ export const subscribeToCommunityWorks = (callback: (data: any[]) => void) => {
         }));
         // Sort in memory by date descending
         works.sort((a: any, b: any) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
-        callback(works);
+        callback(filterByActiveTenant(works));
     }, (error) => {
         console.warn("Firestore subscription error for communityWorks:", error);
         callback([]);
@@ -3805,6 +3851,7 @@ export const addCommunityWorkToDb = async (workData: any) => {
     if (!isFirebaseConfigured || !db) return;
     try {
         await addDoc(collection(db, COMMUNITY_WORKS_COL), {
+            tenantId: workData.tenantId || activeTenantScope,
             ...workData,
             createdAt: new Date().toISOString()
         });
@@ -4407,3 +4454,36 @@ export const batchSaveSTBMRecords = async (records: STBMRecord[]) => {
     console.error("Error batch saving STBM records:", error);
   }
 };
+
+// --- TENANTS SERVICES (MULTI-TENANT REGISTRATION) ---
+export const TENANTS_COL = "tenants";
+
+export const subscribeToTenants = (callback: (tenants: Tenant[]) => void) => {
+  if (!isFirebaseConfigured || !db) {
+    callback([]);
+    return () => {};
+  }
+  const q = query(collection(db, TENANTS_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({ ...docSnap.data(), id: docSnap.id } as Tenant));
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore Tenants subscription fallback:", error);
+    callback([]);
+  });
+};
+
+export const addTenantToDb = async (tenantData: Tenant): Promise<string> => {
+  if (!isFirebaseConfigured || !db) return tenantData.id;
+  try {
+    const { id, ...data } = tenantData;
+    const clean = deepSanitize(data);
+    const docRef = doc(db, TENANTS_COL, id);
+    await setDoc(docRef, clean, { merge: true });
+    return id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, TENANTS_COL);
+    throw error;
+  }
+};
+

@@ -7,6 +7,8 @@ import {
 import { RT_NAME, Logo } from '../constants';
 import { Button } from './ui/Button';
 import { NotificationCenter } from './NotificationCenter';
+import { TenantSwitcher } from './TenantSwitcher';
+import { useTenant } from '../context/TenantContext';
 import { AppNotification } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -18,6 +20,7 @@ interface PublicHeaderProps {
 }
 
 export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMarkRead, onDeleteNotification, onDeleteAllNotifications }) => {
+  const { currentTenant } = useTenant();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -108,8 +111,11 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
       <nav className="bg-white/95 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-xs transition-all w-full">
         <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
           <div className="flex justify-between h-18 items-center w-full">
-            <div className="flex items-center cursor-pointer py-1 shrink-0" onClick={() => navigate('/')}>
-              <Logo showText={true} imageSize="h-8 md:h-10" />
+            <div className="flex items-center gap-2 sm:gap-3 py-1 shrink-0">
+              <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+                <Logo showText={true} imageSize="h-8 md:h-10" />
+              </div>
+              <TenantSwitcher variant="public" />
             </div>
             
             <div className="flex items-center gap-2">
@@ -276,6 +282,15 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                 transition={{ duration: 0.18, ease: "easeOut" }}
                 className="lg:hidden absolute left-0 right-0 top-full bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-2xl z-[100] max-h-[calc(100vh-5rem)] overflow-y-auto p-4 sm:p-6"
               >
+                {/* Mobile Tenant Switcher banner */}
+                <div className="mb-4 p-3 bg-slate-50 border border-slate-200/90 rounded-2xl flex items-center justify-between">
+                  <div className="min-w-0 pr-2">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">Wilayah RT Aktif</p>
+                    <p className="text-xs font-black text-slate-800 truncate">{currentTenant.name}</p>
+                  </div>
+                  <TenantSwitcher variant="compact" />
+                </div>
+
                 {/* Quick Home, Resident Portal & Admin Shortcuts */}
                 <div className="grid grid-cols-3 gap-2 mb-6">
                   <button

@@ -15,6 +15,7 @@ import {
 } from '../services/databaseService';
 import { House } from '../types';
 import { toast } from 'sonner';
+import { useTenant } from '../context/TenantContext';
 
 interface ResidentRegistrationFormProps {
   onClose: () => void;
@@ -39,10 +40,17 @@ const DEFAULT_BLOCKS = [
 ];
 
 export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> = ({ onClose, houses = [] }) => {
+  const { currentTenant: tenant } = useTenant();
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadedHouses, setLoadedHouses] = useState<House[]>(houses);
+
+  const activeBlockConfig = useMemo(() => {
+    return (tenant?.blockConfig && tenant.blockConfig.length > 0) ? tenant.blockConfig : DEFAULT_BLOCKS;
+  }, [tenant]);
+
+  const defaultInitialBlock = (tenant?.blocks && tenant.blocks.length > 0) ? tenant.blocks[0] : 'C10';
 
   // Subscribe to houses if prop is empty
   useEffect(() => {
@@ -55,10 +63,20 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
   }, [houses]);
 
   // Block & Unit Availability Selector States
-  const [selectedBlock, setSelectedBlock] = useState<string>('C10');
+  const [selectedBlock, setSelectedBlock] = useState<string>(defaultInitialBlock);
   const [inputMode, setInputMode] = useState<'picker' | 'manual'>('picker');
   const [unitFilter, setUnitFilter] = useState<'available' | 'occupied' | 'all'>('available');
   const [unitSearch, setUnitSearch] = useState<string>('');
+
+  // Keep selectedBlock and form block in sync if tenant changes
+  useEffect(() => {
+    if (tenant?.blocks && tenant.blocks.length > 0) {
+      if (!tenant.blocks.includes(selectedBlock)) {
+        setSelectedBlock(tenant.blocks[0]);
+        setFormData(prev => ({ ...prev, block: tenant.blocks[0] }));
+      }
+    }
+  }, [tenant]);
 
   // Upload and preview states
   const [ktpFile, setKtpFile] = useState<File | null>(null);
@@ -72,7 +90,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
   // Comprehensive Resident Registration Form Data
   const [formData, setFormData] = useState({
     // Step 0: Domisili & Hunian
-    block: 'C10',
+    block: defaultInitialBlock,
     number: '',
     phone: '',
     status: 'Occupied' as 'Occupied' | 'Business' | 'Visiting',
@@ -157,17 +175,19 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
     const fromHouses = Array.from(
       new Set(loadedHouses.map(h => (h.block || '').trim().toUpperCase()).filter(Boolean))
     );
-    const defaultCodes = DEFAULT_BLOCKS.map(b => b.code);
-    const merged = Array.from(new Set([...defaultCodes, ...fromHouses])).sort((a, b) =>
+    const tenantCodes = (tenant?.blocks && tenant.blocks.length > 0)
+      ? tenant.blocks
+      : activeBlockConfig.map(b => b.code);
+    const merged = Array.from(new Set([...tenantCodes, ...fromHouses])).sort((a, b) =>
       a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
     );
     return merged;
-  }, [loadedHouses]);
+  }, [loadedHouses, tenant, activeBlockConfig]);
 
   // Calculate units and their live status for currently selected block
   const blockUnits = useMemo(() => {
     if (!selectedBlock) return [];
-    const cfg = DEFAULT_BLOCKS.find(b => b.code.toUpperCase() === selectedBlock.toUpperCase());
+    const cfg = activeBlockConfig.find(b => b.code.toUpperCase() === selectedBlock.toUpperCase());
     const startNum = cfg ? cfg.start : 1;
     const endNum = cfg ? cfg.end : 20;
 
@@ -204,11 +224,11 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         status: existing?.status || 'Empty'
       };
     });
-  }, [selectedBlock, loadedHouses]);
+  }, [selectedBlock, loadedHouses, activeBlockConfig]);
 
   // Calculate availability stats for a block
   const getBlockStats = (blockCode: string) => {
-    const cfg = DEFAULT_BLOCKS.find(b => b.code.toUpperCase() === blockCode.toUpperCase());
+    const cfg = activeBlockConfig.find(b => b.code.toUpperCase() === blockCode.toUpperCase());
     const startNum = cfg ? cfg.start : 1;
     const endNum = cfg ? cfg.end : 20;
     const housesInBlock = loadedHouses.filter(
@@ -505,7 +525,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         kkUrl,
         date: new Date().toISOString(),
         approvalStatus: 'Pending',
-        officialTerritory: 'RT 002 / RW 020 Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu'
+        officialTerritory: `RT ${tenant.rt} / RW ${tenant.rw} Kelurahan ${tenant.kelurahan}, Kecamatan ${tenant.kecamatan}, ${tenant.city}`
       });
 
       setIsSubmitted(true);
@@ -561,7 +581,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         </span>
         <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-3">Pendaftaran Dikirim!</h2>
         <p className="text-slate-500 text-xs md:text-sm leading-relaxed mt-3 mb-6">
-          Terima kasih. Berkas pendaftaran warga baru untuk <strong>Blok {formData.block} No. {formData.number}</strong> telah sukses tersimpan di sistem pengurus <strong>RT 002 / RW 020 Kelurahan Tondo</strong>. Pengurus RT akan memverifikasi berkas dan menghubungi nomor WhatsApp Anda (<strong>{formData.phone}</strong>).
+          Terima kasih. Berkas pendaftaran warga baru untuk <strong>Blok {formData.block} No. {formData.number}</strong> telah sukses tersimpan di sistem pengurus <strong>{tenant.name || 'RT 002 / RW 020'} Kelurahan {tenant.kelurahan}</strong>. Pengurus RT akan memverifikasi berkas dan menghubungi nomor WhatsApp Anda (<strong>{formData.phone}</strong>).
         </p>
         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 mb-8 text-left text-xs space-y-2">
           <div className="flex justify-between">
@@ -635,7 +655,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             </div>
             <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pendaftaran Warga Baru</h2>
             <p className="text-[10px] md:text-[11px] font-bold text-slate-500 mt-0.5">
-              RT 002 / RW 020 &bull; Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu
+              {tenant.name || 'RT 002 / RW 020'} &bull; Kelurahan {tenant.kelurahan}, Kecamatan {tenant.kecamatan}, {tenant.city}
             </p>
           </div>
         </div>
@@ -712,7 +732,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     </div>
                     <div>
                       <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Pilih Lokasi Hunian Rumah</h3>
-                      <p className="text-[11px] text-slate-500 font-medium">Pilih blok dan nomor rumah yang masih kosong/tersedia di RT 002 / RW 020</p>
+                      <p className="text-[11px] text-slate-500 font-medium">Pilih blok dan nomor rumah yang masih kosong/tersedia di {tenant.name || 'RT 002 / RW 020'}</p>
                     </div>
                   </div>
 
@@ -923,7 +943,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                               </span>
                             </div>
                             <p className="text-[11px] text-emerald-700 font-medium mt-0.5">
-                              Huntap Tondo 2 &bull; RT 002 / RW 020 Kelurahan Tondo, Palu
+                              {tenant.name || 'RT 002 / RW 020'} &bull; Kelurahan {tenant.kelurahan}, {tenant.city}
                             </p>
                           </div>
                         </div>
@@ -1124,7 +1144,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       </div>
                       {matchedHouse?.ownerName && matchedHouse.ownerName !== '-' ? (
                         <p className="text-[10px] text-emerald-700 font-medium ml-1">
-                          ✓ Nama pemilik asli terdeteksi otomatis dari database kavling RT 002. Anda dapat mengubahnya jika rumah sudah berpindah kepemilikan.
+                          ✓ Nama pemilik asli terdeteksi otomatis dari database kavling {tenant.name || 'RT 002'}. Anda dapat mengubahnya jika rumah sudah berpindah kepemilikan.
                         </p>
                       ) : (
                         <p className="text-[10px] text-slate-500 font-medium ml-1">
@@ -1174,7 +1194,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           Inventaris Kendaraan Penghuni
                         </h4>
                         <p className="text-[10px] text-slate-500 font-medium">
-                          Klasifikasi jenis kendaraan untuk ketertiban lahan parkir RT 002
+                          Klasifikasi jenis kendaraan untuk ketertiban lahan parkir {tenant.name || 'RT 002'}
                         </p>
                       </div>
                     </div>
@@ -2123,7 +2143,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     className="mt-0.5 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500/20 w-4 h-4 cursor-pointer"
                   />
                   <span className="text-xs text-slate-700 leading-relaxed font-medium">
-                    Saya menyatakan bahwa seluruh informasi dan berkas yang saya unggah adalah <strong>benar, sah, dan dapat dipertanggungjawabkan</strong>. Saya bersedia mematuhi norma lingkungan dan tata tertib resmi <strong>RT 002 / RW 020 Kelurahan Tondo</strong>.
+                    Saya menyatakan bahwa seluruh informasi dan berkas yang saya unggah adalah <strong>benar, sah, dan dapat dipertanggungjawabkan</strong>. Saya bersedia mematuhi norma lingkungan dan tata tertib resmi <strong>{tenant.name || 'RT 002 / RW 020'} Kelurahan {tenant.kelurahan}</strong>.
                   </span>
                 </label>
                 {validationErrors.agreement && (

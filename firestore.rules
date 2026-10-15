@@ -21,6 +21,13 @@ service cloud.firestore {
     // Rules for Collections
     // ===============================================================
 
+    // Tenants (Profiles & Configurations for Multi-RT)
+    match /tenants/{tenantId} {
+      allow read: if true;
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
     // Houses
     match /houses/{id} {
       allow read: if true;

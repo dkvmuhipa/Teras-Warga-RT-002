@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { toast } from "sonner";
 import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official, MonthlyActivityReport, AnnualLPJReport } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
+import { getActivePdfConfig } from "./tenantService";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
 import { naturalSortBlockAndNumber } from "./excelService";
 
@@ -18,7 +19,7 @@ jsPDF.prototype.setFont = function (this: any, fontName: string, fontStyle?: str
 // ... (existing helper functions) ...
 
 export const generatePopulationReportPDF = async (report: PopulationReport, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "portrait", 
         unit: "mm", 
@@ -266,7 +267,7 @@ export const generateDedicatedMonthlyActivityReportPDF = async (
     includeSignature: boolean = true,
     includeStamp: boolean = true
 ) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: orientation, 
         unit: "mm", 
@@ -529,7 +530,7 @@ export const generateAnnualLPJReportPDF = async (
         includeSignature?: boolean;
     }
 ) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const includeStamp = options?.includeStamp !== undefined ? options.includeStamp : true;
     const includeSignature = options?.includeSignature !== undefined ? options.includeSignature : true;
 
@@ -1476,7 +1477,7 @@ export const drawStandardKopSurat = async (
 
 export const generateSuratPengantar = async (letter: LetterRequest, customConfig?: PdfConfig, isDraft: boolean = true) => {
   try {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     
     const doc = new jsPDF({
       orientation: "portrait",
@@ -1530,7 +1531,8 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   doc.setFontSize(11);
   const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
   const currentYear = new Date().getFullYear();
-  const nomorSurat = letter.letterNumber || `.../RT. 02/RW. 020/${currentMonthRoman}/${currentYear}`;
+  const cleanRtTag = config.rtName ? config.rtName.replace(/\s+/g, '') : 'RT.02/RW.020';
+  const nomorSurat = letter.letterNumber || `.../${cleanRtTag}/${currentMonthRoman}/${currentYear}`;
   doc.text(`Nomor : ${nomorSurat}`, centerX, 57, { align: "center" });
 
   let cursorY = 66;
@@ -1691,7 +1693,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
 export const generateOfficialLetterPDF = async (letter: OfficialLetter, customConfig?: PdfConfig) => {
   try {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     
     const doc = new jsPDF({
       orientation: "portrait",
@@ -1919,7 +1921,7 @@ export const generateOfficialLetterPDF = async (letter: OfficialLetter, customCo
 };
 
 export const generateReportReceiptPDF = async (report: Report, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "portrait", 
         unit: "mm", 
@@ -2014,7 +2016,7 @@ export const generateReportReceiptPDF = async (report: Report, customConfig?: Pd
 };
 
 export const generateResidentReportPDF = async (houses: House[], customConfig?: PdfConfig, selectedCols?: string[]) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     
     const doc = new jsPDF({ 
         orientation: "landscape", 
@@ -2424,7 +2426,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
 };
 
 export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "portrait", 
         unit: "mm", 
@@ -2527,7 +2529,7 @@ export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfCo
 };
 
 export const generateCashFlowReportPDF = async (cashFlow: any[], month: string, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "portrait", 
         unit: "mm", 
@@ -2702,7 +2704,7 @@ export const generateCashFlowReportPDF = async (cashFlow: any[], month: string, 
 };
 
 export const generateGuestReportPDF = async (guestReports: any[], customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "landscape", 
         unit: "mm", 
@@ -2845,7 +2847,7 @@ export const generateGuestReportPDF = async (guestReports: any[], customConfig?:
 };
 
 export const generatePBBReportPDF = async (houses: House[], year: string, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     
     const doc = new jsPDF({ 
         orientation: "portrait", 
@@ -3138,7 +3140,7 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
 };
 
 export const generateResidentStatsReportPDF = async (houses: House[], customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     
     const doc = new jsPDF({ 
         orientation: "portrait", 
@@ -3315,7 +3317,7 @@ export const generateResidentStatsReportPDF = async (houses: House[], customConf
 };
 
 export const generateIncidentReportPDF = async (reports: Report[], houses: House[], customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     
     const doc = new jsPDF({ 
         orientation: "portrait", 
@@ -3497,7 +3499,7 @@ export const generateIncidentReportPDF = async (reports: Report[], houses: House
 };
 
 export const generateBillReportPDF = async (houses: House[], iuranPayments: any[], billType: 'Air' | 'Sampah', month?: string, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     
     const doc = new jsPDF({ 
         orientation: "portrait", 
@@ -3746,7 +3748,7 @@ export const generateDemographicAnalyticsReportPDF = async (
   reports: Report[],
   customConfig?: PdfConfig
 ) => {
-  const config = customConfig || DEFAULT_PDF_CONFIG;
+  const config = customConfig || getActivePdfConfig();
   const doc = new jsPDF({ 
     orientation: "portrait", 
     unit: "mm", 
@@ -4071,7 +4073,7 @@ export const generateDemographicAnalyticsReportPDF = async (
 };
 
 export const generateResidentCardPDF = async (house: House, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "landscape", 
         unit: "mm", 
@@ -4154,7 +4156,7 @@ export const generateResidentCardPDF = async (house: House, customConfig?: PdfCo
 };
 
 export const generateMutationReportPDF = async (report: PopulationReport, logs: PopulationChangeLog[], customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
     
     const marginX = 20;
@@ -4391,7 +4393,7 @@ export const generateMutationReportPDF = async (report: PopulationReport, logs: 
 };
 
 export const generateSingleMutationCertificatePDF = async (log: PopulationChangeLog, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
     
     const marginX = 20;
@@ -4539,7 +4541,7 @@ export const generateSingleMutationCertificatePDF = async (log: PopulationChange
 };
 
 export const generateOfficialStructurePDF = async (officials: Official[], customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4", compress: true });
     
     const marginX = 20;
@@ -4685,7 +4687,7 @@ export const generateRondaSchedulePDF = async (schedules: any[], config: PdfConf
 };
 
 export const generateEventAttendanceReportPDF = async (activity: any, attendanceRecords: any[], houses: House[], customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "portrait", 
         unit: "mm", 
@@ -4764,7 +4766,7 @@ export const generateEventAttendanceReportPDF = async (activity: any, attendance
 };
 
 export const generateRulesPDF = async (rule: { title: string; nomorBerkas: string; nomorSurat: string; tentang: string; menimbang: string; items: string[] }, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "portrait", 
         unit: "mm", 
@@ -4930,7 +4932,7 @@ export const generateRulesPDF = async (rule: { title: string; nomorBerkas: strin
 };
 
 export const generateAllRulesPDF = async (allRules: Array<{ title: string; nomorBerkas: string; nomorSurat: string; tentang: string; menimbang: string; items: string[] }>, customConfig?: PdfConfig) => {
-    const config = customConfig || DEFAULT_PDF_CONFIG;
+    const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
         orientation: "portrait", 
         unit: "mm", 
@@ -5241,7 +5243,7 @@ export const generatePDAMInstallationReportPDF = async (
   filterType: 'Semua' | 'Belum Terpasang' | 'Dalam Proses Pengajuan' | 'Hilang' | 'Belum Terpasang & Hilang' = 'Belum Terpasang',
   customConfig?: PdfConfig
 ) => {
-  const config = customConfig || DEFAULT_PDF_CONFIG;
+  const config = customConfig || getActivePdfConfig();
   const isLostOnly = filterType === 'Hilang';
   const isCombined = filterType === 'Belum Terpasang & Hilang';
 
@@ -5475,12 +5477,12 @@ export const generatePDAMInstallationReportPDF = async (
 
   doc.setFontSize(8.5);
   doc.text("Pengelola Utilitas & Air Bersih,", sigLeftX, y);
-  doc.text("Ketua RT 002 / RW 020,", sigRightX, y);
+  doc.text(`Ketua ${config.rtName || 'RT 002 / RW 020'},`, sigRightX, y);
 
   y += 20;
   doc.setFont("helvetica", "bold");
-  doc.text("SEKSI UTILITAS AIR RT 02", sigLeftX, y);
-  doc.text(config.rtLeader || "KETUA RT 002", sigRightX, y);
+  doc.text(`SEKSI UTILITAS AIR ${config.rtName?.split('/')[0]?.trim() || 'RT 02'}`, sigLeftX, y);
+  doc.text(config.rtLeader || config.rtChairman || "KETUA RT", sigRightX, y);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);

@@ -17,6 +17,7 @@ import { House, WaterMeterReading } from '../../../../types';
 import { Modal } from '../../../ui/Modal';
 import { Button } from '../../../ui/Button';
 import { WATER_PROVIDER_NAME } from '../../../../constants';
+import { useTenant } from '../../../../context/TenantContext';
 
 interface ResidentIuranModalProps {
   isOpen: boolean;
@@ -51,6 +52,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
   currentWaterReading,
   handleDownloadReceipt,
 }) => {
+  const { currentTenant: tenant } = useTenant();
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Rincian & Status Tagihan Iuran Warga" maxWidth="max-w-xl">
       <div className="p-6 space-y-5">
@@ -204,10 +206,10 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
             </div>
             <div className="space-y-1">
               <h5 className="text-xs font-black text-emerald-950 uppercase tracking-wide flex items-center gap-2">
-                <span>Pembayaran Tunai ke Bendahara RT 002</span>
+                <span>Pembayaran Tunai ke Bendahara {tenant.name || 'RT 002'}</span>
               </h5>
               <p className="text-xs text-emerald-900/90 leading-relaxed font-medium">
-                Iuran bulanan diserahkan langsung secara tunai kepada <strong>Bendahara RT 002</strong> atau <strong>Ketua RT</strong> di Sekretariat / Pos Ronda RT 002 Huntap Tondo 2.
+                Iuran bulanan diserahkan langsung secara tunai kepada <strong>Bendahara {tenant.name || 'RT 002'}</strong> atau <strong>Ketua RT</strong> di Sekretariat / Pos Ronda {tenant.name || 'RT 002'}.
               </p>
             </div>
           </div>
@@ -220,7 +222,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
             <div className="space-y-0.5 text-xs text-slate-600">
               <p className="font-bold text-slate-800">Informasi Rekening Bank Kas RT</p>
               <p className="text-[11.5px] leading-relaxed">
-                Saat ini rekening kas resmi RT 002 belum tersedia / belum dibuka. Seluruh transaksi iuran lingkungan dikelola secara tunai dan dibukukan langsung ke sistem pencatatan kas RT 002.
+                Saat ini rekening kas resmi {tenant.name || 'RT 002'} belum tersedia / belum dibuka. Seluruh transaksi iuran lingkungan dikelola secara tunai dan dibukukan langsung ke sistem pencatatan kas {tenant.name || 'RT 002'}.
               </p>
             </div>
           </div>
@@ -232,7 +234,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
               <span>Koordinasi Penyerahan &amp; Konfirmasi Pembayaran</span>
             </div>
             <p className="text-[11.5px] text-amber-900/90 space-y-1 font-medium leading-relaxed">
-              Untuk janjian penyerahan iuran atau konfirmasi setelah pembayaran tunai dilakukan, silakan hubungi <strong>Bendahara RT 002</strong> via WhatsApp agar status di dashboard segera diperbarui menjadi Lunas.
+              Untuk janjian penyerahan iuran atau konfirmasi setelah pembayaran tunai dilakukan, silakan hubungi <strong>Bendahara / Ketua {tenant.name || 'RT 002'}</strong> via WhatsApp agar status di dashboard segera diperbarui menjadi Lunas.
             </p>
           </div>
         </div>
@@ -263,7 +265,8 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
           </Button>
           <Button 
             onClick={() => {
-              const message = `Halo Pengurus / Bendahara RT 002 Huntap Tondo 2,
+              const waTarget = (tenant.chairmanPhone || '6285961194621').replace(/[^0-9]/g, '');
+              const message = `Halo Pengurus / Bendahara ${tenant.name || 'RT 002'},
 
 Saya ingin konfirmasi / koordinasi pembayaran iuran lingkungan:
 • Periode: ${currentMonth}
@@ -275,7 +278,7 @@ ${airFee > 0 ? `• Iuran Air: Rp ${airFee.toLocaleString('id-ID')}\n` : ''}• 
 • Status: ${isAllPaid ? 'Sudah Lunas Terbayar' : 'Ingin Menyerahkan Iuran / Konfirmasi'}
 
 Mohon informasi waktu penyerahan atau bantuan verifikasi pencatatan status iuran. Terima kasih!`;
-              window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(message)}`, '_blank');
+              window.open(`https://wa.me/${waTarget}?text=${encodeURIComponent(message)}`, '_blank');
             }}
             className={`flex-1 py-3.5 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95 ${
               isAllPaid 

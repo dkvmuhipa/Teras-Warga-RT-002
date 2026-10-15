@@ -48,8 +48,11 @@ import { generateSuratPengantar, generateResidentReportPDF } from './services/pd
 import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from './services/whatsappService';
 import { AdminRouteWrapper } from './components/AdminComponents';
 const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const MasterDashboard = React.lazy(() => import('./components/master/MasterDashboard').then(m => ({ default: m.MasterDashboard })));
 import { FinancialProvider } from './context/FinancialContext';
 import { useConfirm } from './context/ConfirmContext';
+import { useTenant } from './context/TenantContext';
+import { getPdfConfigForTenant } from './services/tenantService';
 import { ResidentRegistrationForm } from './components/ResidentRegistrationForm';
 import { GuestReportForm } from './components/GuestReportForm';
 import { ChatBot } from './components/ChatBot';
@@ -204,6 +207,7 @@ import { subscribeToMapPoints, subscribeToCollection,
 
 export const App = () => {
   const confirm = useConfirm();
+  const { currentTenant, tenantId } = useTenant();
   const [houses, setHouses] = useState<House[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [news, setNews] = useState<News[]>([]);
@@ -283,13 +287,42 @@ export const App = () => {
     }
   };
 
-  const [pdfConfig, setPdfConfigState] = useState<PdfConfig>(() => { try { const saved = localStorage.getItem('pdf_config'); return saved ? JSON.parse(saved) : DEFAULT_PDF_CONFIG; } catch { return DEFAULT_PDF_CONFIG; } });
+  const [pdfConfig, setPdfConfigState] = useState<PdfConfig>(() => {
+    try {
+      const saved = localStorage.getItem(`pdf_config_${tenantId}`);
+      if (saved) return JSON.parse(saved);
+      const legacy = localStorage.getItem('pdf_config');
+      if (tenantId === 'tondo-rw20-rt02' && legacy) return JSON.parse(legacy);
+      return getPdfConfigForTenant(currentTenant);
+    } catch {
+      return getPdfConfigForTenant(currentTenant);
+    }
+  });
+
+  // Sync pdfConfig dynamically whenever active tenant changes
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`pdf_config_${tenantId}`);
+      if (saved) {
+        setPdfConfigState(JSON.parse(saved));
+      } else {
+        const legacy = localStorage.getItem('pdf_config');
+        if (tenantId === 'tondo-rw20-rt02' && legacy) {
+          setPdfConfigState(JSON.parse(legacy));
+        } else {
+          setPdfConfigState(getPdfConfigForTenant(currentTenant));
+        }
+      }
+    } catch {
+      setPdfConfigState(getPdfConfigForTenant(currentTenant));
+    }
+  }, [tenantId, currentTenant]);
 
   const setPdfConfig = (newConfig: PdfConfig | ((prev: PdfConfig) => PdfConfig)) => {
     setPdfConfigState(prev => {
       const next = typeof newConfig === 'function' ? newConfig(prev) : newConfig;
       try {
-        localStorage.setItem('pdf_config', safeJsonStringify(next));
+        localStorage.setItem(`pdf_config_${tenantId}`, safeJsonStringify(next));
       } catch (e) {
         console.warn("Failed to save PDF config to localStorage:", e);
       }
@@ -376,7 +409,7 @@ export const App = () => {
       unsubUmkm(); unsubPopulationReports(); unsubIuranPayments(); unsubGuestReports(); unsubInventoryLogs(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubPdfConfig(); unsubWasteDeposits();
     };
-  }, []);
+  }, [tenantId]);
 
   // Admin-Only/Restricted Subscriptions
   useEffect(() => {
@@ -408,7 +441,7 @@ export const App = () => {
       unsubUpdateRequests();
       unsubIncomingMails();
     };
-  }, [isAdmin]);
+  }, [isAdmin, tenantId]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -504,6 +537,27 @@ export const App = () => {
                             </React.Suspense>
                         </ErrorBoundary>
                     </AdminRouteWrapper>
+                }/>
+                <Route path="/master" element={
+                    <ErrorBoundary>
+                        <React.Suspense fallback={
+                            <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-8 font-sans">
+                                <div className="relative flex items-center justify-center mb-4">
+                                    <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                                    <Loader2 className="absolute text-indigo-600 animate-pulse" size={24} />
+                                </div>
+                                <h3 className="text-slate-800 font-black text-sm tracking-wide uppercase">Memuat Portal Master RW</h3>
+                                <p className="text-slate-400 text-xs mt-1">Mengoptimalkan akses super admin...</p>
+                            </div>
+                        }>
+                            <MasterDashboard 
+                                houses={houses} 
+                                cashFlow={cashFlow} 
+                                announcements={announcements} 
+                                reports={reports} 
+                            />
+                        </React.Suspense>
+                    </ErrorBoundary>
                 }/>
                 <Route path="*" element={
                     <>
