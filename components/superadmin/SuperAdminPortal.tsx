@@ -174,6 +174,17 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [newAdminName, setNewAdminName] = useState('');
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
 
+  // Close AddAdminModal on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showAddAdminModal) {
+        setShowAddAdminModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAddAdminModal]);
+
   const handleAddPlatformAdmin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAdminEmail.trim()) return;
@@ -2644,8 +2655,16 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
       {/* ADD PLATFORM ADMIN MODAL */}
       {showAddAdminModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAddAdminModal(false); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
+        >
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-label="Tambah Admin Wilayah"
+            className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden focus:outline-none"
+          >
             <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
@@ -2658,7 +2677,8 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               </div>
               <button 
                 onClick={() => setShowAddAdminModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Tutup form tambah admin"
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <X size={16} />
               </button>

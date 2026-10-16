@@ -66,6 +66,18 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [copiedLink, setCopiedLink] = useState<'public' | 'register' | null>(null);
 
+  // Keyboard Accessibility: Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   // Live officials computation
   const tenantOfficials = useMemo(() => {
     if (!tenant || !officials) return [];

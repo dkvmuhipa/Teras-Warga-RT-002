@@ -272,6 +272,18 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
     };
   }, [isMuted]);
 
+  // Accessibility: Close SOS Control Center modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isOpenControlCenter) setIsOpenControlCenter(false);
+        if (showIdentifyPrompt) setShowIdentifyPrompt(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpenControlCenter, showIdentifyPrompt]);
+
   const myActiveAlert = activeAlerts.find(a => a.houseId === residentHouseId);
 
   // Sound triggering helper

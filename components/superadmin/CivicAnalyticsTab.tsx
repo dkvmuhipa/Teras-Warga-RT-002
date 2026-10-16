@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { 
   BarChart3, TrendingUp, Users, Award, ShieldCheck, 
   CheckCircle2, AlertCircle, Home, PieChart, Sparkles,
@@ -102,6 +102,17 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
   const [aiReport, setAiReport] = useState<string | null>(null);
   const [showAiModal, setShowAiModal] = useState(false);
   const [copiedAi, setCopiedAi] = useState(false);
+
+  // Close AI modal on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showAiModal) {
+        setShowAiModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAiModal]);
 
   const handleGenerateFleetAi = async () => {
     setIsGeneratingAi(true);
@@ -390,8 +401,16 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
 
       {/* AI Executive Report Modal */}
       {showAiModal && aiReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+        <div 
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAiModal(false); }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200"
+        >
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-label="Laporan Eksekutif Civic Copilot"
+            className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden focus:outline-none"
+          >
             <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
@@ -404,7 +423,8 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
               </div>
               <button 
                 onClick={() => setShowAiModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+                aria-label="Tutup laporan AI"
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <X size={16} />
               </button>
