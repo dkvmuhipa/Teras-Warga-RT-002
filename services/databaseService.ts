@@ -4531,7 +4531,11 @@ export const subscribeToTenants = (callback: (tenants: Tenant[]) => void) => {
     const data = snapshot.docs.map(docSnap => ({ ...docSnap.data(), id: docSnap.id } as Tenant));
     callback(data);
   }, (error) => {
-    console.warn("Firestore Tenants subscription fallback:", error);
+    if (error?.code === 'permission-denied') {
+      console.info("Firestore Tenants: Menggunakan konfigurasi tenant lokal (Cloud rules belum dideploy).");
+    } else {
+      console.warn("Firestore Tenants subscription fallback:", error);
+    }
     callback([]);
   });
 };
@@ -4901,7 +4905,11 @@ export const subscribeToSystemBroadcasts = (callback: (broadcasts: SystemBroadca
     data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
     callback(data);
   }, (error) => {
-    console.warn("Firestore system broadcasts subscription error:", error);
+    if (error?.code === 'permission-denied') {
+      console.info("Firestore Broadcasts: Sistem siaran cloud belum aktif (Cloud rules belum dideploy).");
+    } else {
+      console.warn("Firestore system broadcasts subscription error:", error);
+    }
     callback([]);
   });
 };

@@ -27,6 +27,54 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Platform Super Admins & Platform Admins
+    match /platform_admins/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    match /platformAdmins/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // System Broadcasts (System-wide alerts & banners)
+    match /system_broadcasts/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /systemBroadcasts/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // System Audit Events & Platform Audit Logs
+    match /system_audit_events/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /systemAuditLogs/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // Letter Templates & Global Letter Templates
+    match /letter_templates/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /letterTemplates/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /globalLetterTemplates/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Central Admin List
+    match /admins/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
     // Houses
     match /houses/{id} {
       allow read: if true;
@@ -221,6 +269,12 @@ service cloud.firestore {
 
     // Waste Deposits
     match /wasteDeposits/{id} {
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    // Pending Deposits (Bank Sampah)
+    match /pendingDeposits/{id} {
       allow create, read: if true;
       allow update, delete: if isAdmin();
     }

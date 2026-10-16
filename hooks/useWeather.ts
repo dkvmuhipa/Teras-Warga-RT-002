@@ -46,9 +46,14 @@ export const useWeather = () => {
                         aqiData = await aqiRes.json();
                     }
                 }
-            } catch (proxyErr) {
+            } catch (proxyErr: any) {
+                if (proxyErr?.name === 'AbortError' || signal?.aborted) {
+                    return;
+                }
                 console.warn("Proxy fetch failed, trying direct fetch:", proxyErr);
             }
+
+            if (signal?.aborted) return;
 
             // Fallback to direct fetch if proxy failed or returned non-JSON
             if (!weatherData || !aqiData) {
@@ -125,11 +130,10 @@ export const useWeather = () => {
                 lastUpdated: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
             });
         } catch (err: any) {
-            if (err.name === 'AbortError' || err === 'timeout') {
-                console.log("Weather fetch aborted:", err);
-            } else {
-                console.error("Error fetching weather/AQI:", err);
+            if (err?.name === 'AbortError' || signal?.aborted || err === 'timeout') {
+                return;
             }
+            console.error("Error fetching weather/AQI:", err);
 
             if (!weather) {
                 setWeather({
