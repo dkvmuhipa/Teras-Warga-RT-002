@@ -54,6 +54,17 @@ export interface TenantFeeConfig {
   kasFee: number;
 }
 
+export type TenantStatus = 'active' | 'suspended' | 'maintenance' | 'archived';
+
+export interface TenantModules {
+  waterMeter?: boolean;      // Pencatatan meteran air PDAM / swadaya
+  assetRental?: boolean;     // Peminjaman / sewa aset lingkungan
+  letters?: boolean;         // Pelayanan surat pengantar digital
+  panicButton?: boolean;     // Tombol darurat / panic alert
+  stbmSanitation?: boolean;  // Modul sanitasi STBM
+  cctv?: boolean;            // Pantauan CCTV lingkungan
+}
+
 export interface Tenant {
   id: string; // e.g. 'tondo-rw20-rt02'
   slug: string; // e.g. 'rt02-tondo'
@@ -73,6 +84,8 @@ export interface Tenant {
   blocks: string[]; // ['C5', 'C7', ...]
   blockConfig: BlockRangeConfig[];
   fees?: Partial<TenantFeeConfig>;
+  status?: TenantStatus;
+  modules?: TenantModules;
   logoUrl?: string;
   themeColor?: string;
   isPilotDemo?: boolean;
@@ -88,6 +101,10 @@ export interface TenantContextType {
   registerTenant: (newTenantData: Omit<Tenant, 'id' | 'createdAt'>) => Promise<Tenant>;
   updateTenant: (tenantId: string, updates: Partial<Tenant>) => Promise<void>;
   deleteTenant: (tenantId: string) => Promise<void>;
+  supervisingTenant: Tenant | null;
+  isSupervising: boolean;
+  startSupervision: (tenant: Tenant) => void;
+  stopSupervision: () => void;
   isDefaultTenant: boolean;
   isSuperAdmin: boolean;
   pdfConfig: PdfConfig;

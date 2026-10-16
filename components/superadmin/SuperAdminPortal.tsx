@@ -7,10 +7,11 @@ import {
   Layers, Wallet, BarChart3, Settings, Shield, ChevronRight,
   Server, Globe, Database, Activity, Check, HelpCircle, Download,
   Radio, Megaphone, FileText, Bell, LayoutGrid, List, Copy,
-  Edit3, Trash2, Sliders, CheckSquare, Eye, Share2, Info
+  Edit3, Trash2, Sliders, CheckSquare, Eye, Share2, Info,
+  AlertTriangle, Droplets, Package, Camera, AlertOctagon
 } from 'lucide-react';
 import { useTenant } from '../../context/TenantContext';
-import { Tenant, Role } from '../../types';
+import { Tenant, Role, TenantStatus } from '../../types';
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
 import { TenantDetailModal } from './TenantDetailModal';
 import { SUPER_ADMIN_EMAILS } from '../../constants';
@@ -39,7 +40,16 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   role
 }) => {
   const navigate = useNavigate();
-  const { currentTenant, availableTenants, switchTenant, isSuperAdmin, deleteTenant } = useTenant();
+  const { 
+    currentTenant, 
+    availableTenants, 
+    switchTenant, 
+    isSuperAdmin, 
+    deleteTenant,
+    startSupervision,
+    isSupervising,
+    stopSupervision
+  } = useTenant();
 
   // Tab State
   const [activeTab, setActiveTab] = useState<'tenants' | 'tariffs' | 'broadcast' | 'security'>('tenants');
@@ -51,6 +61,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [kelurahanFilter, setKelurahanFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'maintenance'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
   // Broadcast Manager State
@@ -111,15 +122,20 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       const matchKelurahan = kelurahanFilter === 'all' || 
         t.kelurahan.toLowerCase() === kelurahanFilter.toLowerCase();
 
-      return matchSearch && matchKelurahan;
+      const currentStatus = t.status || 'active';
+      const matchStatus = statusFilter === 'all' || currentStatus === statusFilter;
+
+      return matchSearch && matchKelurahan && matchStatus;
     });
-  }, [availableTenants, searchQuery, kelurahanFilter]);
+  }, [availableTenants, searchQuery, kelurahanFilter, statusFilter]);
 
   // Global Telemetry Stats
   const platformStats = useMemo(() => {
     const totalTenants = availableTenants.length;
     let totalBlocks = 0;
     let totalEstimatedDoors = 0;
+    let activeTenantsCount = 0;
+    let suspendedCount = 0;
 
     let totalSampahUmum = 0;
     let totalKasFee = 0;
@@ -135,6 +151,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         totalEstimatedDoors += (t.blocks ? t.blocks.length * 20 : 0);
       }
 
+      if (t.status === 'suspended') {
+        suspendedCount++;
+      } else {
+        activeTenantsCount++;
+      }
+
       totalSampahUmum += (t.fees?.sampahUmum || 20000);
       totalKasFee += (t.fees?.kasFee || 20000);
       totalAirFee += (t.fees?.airFee || 10000);
@@ -146,6 +168,8 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
     return {
       totalTenants,
+      activeTenantsCount,
+      suspendedCount,
       totalBlocks,
       totalEstimatedDoors,
       avgSampah,
@@ -165,24 +189,42 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     }
   };
 
+  // Helper to extract active modules
+  const getActiveModulesList = (t: Tenant) => {
+    const m = t.modules;
+    const list: { key: string; label: string; icon: any }[] = [];
+    if (!m || m.waterMeter !== false) list.push({ key: 'water', label: 'Air', icon: Droplets });
+    if (!m || m.assetRental !== false) list.push({ key: 'rental', label: 'Aset', icon: Package });
+    if (!m || m.letters !== false) list.push({ key: 'letters', label: 'Surat', icon: FileText });
+    if (!m || m.panicButton !== false) list.push({ key: 'panic', label: 'Panik', icon: AlertOctagon });
+    if (!m || m.stbmSanitation !== false) list.push({ key: 'stbm', label: 'STBM', icon: Activity });
+    if (!m || m.cctv !== false) list.push({ key: 'cctv', label: 'CCTV', icon: Camera });
+    return list;
+  };
+
   // Export tenants directory as CSV
   const handleExportCSV = () => {
     try {
-      const headers = ['ID Tenant', 'Nama RT', 'RT', 'RW', 'Kelurahan', 'Alamat', 'Ketua RT', 'No Telp', 'Blok Terdaftar', 'Tarif Sampah', 'Kas RT', 'Air PDAM'];
-      const rows = availableTenants.map(t => [
-        `"${t.id}"`,
-        `"${t.name}"`,
-        `"${t.rt}"`,
-        `"${t.rw}"`,
-        `"${t.kelurahan}"`,
-        `"${(t.address || '').replace(/"/g, '""')}"`,
-        `"${t.chairmanName || '-'}"`,
-        `"${t.chairmanPhone || '-'}"`,
-        `"${(t.blocks || []).join('; ')}"`,
-        t.fees?.sampahUmum || 20000,
-        t.fees?.kasFee || 20000,
-        t.fees?.airFee || 10000
-      ]);
+      const headers = ['ID Tenant', 'Nama RT', 'RT', 'RW', 'Kelurahan', 'Status', 'Alamat', 'Ketua RT', 'No Telp', 'Blok Terdaftar', 'Modul Aktif', 'Tarif Sampah', 'Kas RT', 'Air PDAM'];
+      const rows = availableTenants.map(t => {
+        const modules = getActiveModulesList(t).map(m => m.label).join('; ');
+        return [
+          `"${t.id}"`,
+          `"${t.name}"`,
+          `"${t.rt}"`,
+          `"${t.rw}"`,
+          `"${t.kelurahan}"`,
+          `"${t.status || 'active'}"`,
+          `"${(t.address || '').replace(/"/g, '""')}"`,
+          `"${t.chairmanName || '-'}"`,
+          `"${t.chairmanPhone || '-'}"`,
+          `"${(t.blocks || []).join('; ')}"`,
+          `"${modules}"`,
+          t.fees?.sampahUmum || 20000,
+          t.fees?.kasFee || 20000,
+          t.fees?.airFee || 10000
+        ];
+      });
 
       const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
       const encodedUri = encodeURI(csvContent);
@@ -213,6 +255,13 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     const url = `${origin}#/?rt=${slugOrId}#register`;
     navigator.clipboard.writeText(url);
     toast.success('Link Pendaftaran Warga Baru berhasil disalin ke clipboard');
+  };
+
+  // Trigger Supervision Mode
+  const handleStartSupervision = (t: Tenant) => {
+    startSupervision(t);
+    toast.success(`Memulai mode supervisi untuk ${t.name}`);
+    navigate('/admin');
   };
 
   // Add Broadcast
@@ -365,9 +414,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
               {platformStats.totalTenants} <span className="text-xs font-bold text-slate-500 font-sans">Tenant</span>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1">
-              Terdaftar aktif di sistem platform
-            </p>
+            <div className="flex items-center gap-2 mt-1 text-[11px] font-medium text-slate-500">
+              <span className="text-emerald-600 font-bold">{platformStats.activeTenantsCount} Aktif</span>
+              {platformStats.suspendedCount > 0 && (
+                <span className="text-rose-600 font-bold">• {platformStats.suspendedCount} Suspended</span>
+              )}
+            </div>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
@@ -490,7 +542,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <div className="bg-white rounded-2xl p-4 border border-slate-200/90 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
               <div className="flex flex-wrap items-center gap-2 flex-1">
                 {/* Search Input */}
-                <div className="relative flex-1 min-w-[220px]">
+                <div className="relative flex-1 min-w-[200px]">
                   <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
@@ -522,6 +574,21 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     {kelurahanOptions.map(k => (
                       <option key={k} value={k}>{k}</option>
                     ))}
+                  </select>
+                </div>
+
+                {/* Filter Status (Lifecycle) */}
+                <div className="flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs">
+                  <span className="text-slate-500 text-[11px] font-bold">Status:</span>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    className="bg-transparent text-slate-800 focus:outline-none text-xs cursor-pointer font-medium"
+                  >
+                    <option value="all">Semua Status</option>
+                    <option value="active">✓ Aktif</option>
+                    <option value="maintenance">⚠️ Pemeliharaan</option>
+                    <option value="suspended">⛔ Ditangguhkan</option>
                   </select>
                 </div>
               </div>
@@ -563,10 +630,10 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 </div>
                 <h3 className="text-sm font-bold text-slate-800 mb-1">Tidak ada RT yang cocok</h3>
                 <p className="text-xs text-slate-500 mb-4 max-w-sm mx-auto">
-                  Coba ubah kata kunci pencarian atau reset filter kelurahan untuk melihat daftar seluruh RT.
+                  Coba ubah kata kunci pencarian atau reset filter kelurahan dan status untuk melihat daftar seluruh RT.
                 </p>
                 <button
-                  onClick={() => { setSearchQuery(''); setKelurahanFilter('all'); }}
+                  onClick={() => { setSearchQuery(''); setKelurahanFilter('all'); setStatusFilter('all'); }}
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold cursor-pointer transition-colors"
                 >
                   Reset Filter
@@ -584,8 +651,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                         <th className="py-3.5 px-4">Nama Wilayah / Tenant</th>
                         <th className="py-3.5 px-4">RW / Kelurahan</th>
                         <th className="py-3.5 px-4">Ketua RT / Kontak</th>
-                        <th className="py-3.5 px-4">Blok Terdaftar</th>
-                        <th className="py-3.5 px-4">Tarif Kas</th>
+                        <th className="py-3.5 px-4">Modul Layanan</th>
                         <th className="py-3.5 px-4">Status</th>
                         <th className="py-3.5 px-4 text-right">Aksi Super Admin</th>
                       </tr>
@@ -593,6 +659,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     <tbody className="divide-y divide-slate-100 font-medium">
                       {filteredTenants.map((t) => {
                         const isMain = t.id === 'tondo-rw20-rt02';
+                        const activeModules = getActiveModulesList(t);
+                        const status = t.status || 'active';
+
                         return (
                           <tr key={t.id} className="hover:bg-indigo-50/20 transition-colors">
                             <td className="py-3.5 px-4 font-bold text-slate-900">
@@ -631,38 +700,60 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                               )}
                             </td>
 
+                            {/* Active Modules Chips */}
                             <td className="py-3.5 px-4">
-                              <div className="flex flex-wrap gap-1 max-w-xs">
-                                {(t.blocks || []).map(b => (
-                                  <span key={b} className="text-[10px] font-mono px-1.5 py-0.2 bg-slate-100 border border-slate-200 text-slate-700 rounded-md">
-                                    {b}
+                              <div className="flex flex-wrap items-center gap-1 max-w-xs">
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded font-bold">
+                                  {activeModules.length}/6 Modul
+                                </span>
+                                {activeModules.slice(0, 3).map(m => (
+                                  <span key={m.key} className="text-[10px] font-mono px-1.5 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded">
+                                    {m.label}
                                   </span>
                                 ))}
+                                {activeModules.length > 3 && (
+                                  <span className="text-[10px] font-mono text-slate-400">
+                                    +{activeModules.length - 3}
+                                  </span>
+                                )}
                               </div>
                             </td>
 
-                            <td className="py-3.5 px-4 font-mono text-slate-700">
-                              Rp {(t.fees?.kasFee || 20000).toLocaleString('id-ID')}
-                            </td>
-
+                            {/* Lifecycle Status Pill */}
                             <td className="py-3.5 px-4">
-                              {isMain ? (
-                                <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-md">
-                                  Default
+                              {status === 'suspended' ? (
+                                <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-md">
+                                  Suspended
+                                </span>
+                              ) : status === 'maintenance' ? (
+                                <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-md">
+                                  Maintenance
                                 </span>
                               ) : (
                                 <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md">
-                                  Aktif
+                                  {isMain ? 'Default' : 'Aktif'}
                                 </span>
                               )}
                             </td>
 
+                            {/* Actions: Supervisi, Kelola, Links */}
                             <td className="py-3.5 px-4 text-right">
                               <div className="inline-flex items-center gap-1.5">
+                                {/* Button Supervisi */}
+                                <button
+                                  onClick={() => handleStartSupervision(t)}
+                                  className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 hover:border-amber-600 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs"
+                                  title="Inspeksi Dashboard RT ini dalam Mode Supervisi (Read-Only)"
+                                >
+                                  <Eye size={12} />
+                                  <span>Supervisi</span>
+                                </button>
+
+                                {/* Button Kelola */}
                                 <button
                                   onClick={() => setSelectedTenantForDetail(t)}
                                   className="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 hover:border-indigo-600 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1"
-                                  title="Kelola Identitas, Pengurus, & Tarif RT"
+                                  title="Kelola Identitas, Pengurus, Tarif, & Modul RT"
                                 >
                                   <Edit3 size={12} />
                                   <span>Kelola</span>
@@ -699,6 +790,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredTenants.map((t) => {
                   const isMain = t.id === 'tondo-rw20-rt02';
+                  const activeModules = getActiveModulesList(t);
+                  const status = t.status || 'active';
+
                   return (
                     <div 
                       key={t.id} 
@@ -719,13 +813,17 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                               <p className="text-[10px] text-slate-500 font-mono mt-0.5">RW {t.rw} • Kel. {t.kelurahan}</p>
                             </div>
                           </div>
-                          {isMain ? (
-                            <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-md shrink-0">
-                              Default
+                          {status === 'suspended' ? (
+                            <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-md shrink-0">
+                              Suspended
+                            </span>
+                          ) : status === 'maintenance' ? (
+                            <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-md shrink-0">
+                              Maintenance
                             </span>
                           ) : (
                             <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md shrink-0">
-                              Aktif
+                              {isMain ? 'Default' : 'Aktif'}
                             </span>
                           )}
                         </div>
@@ -747,15 +845,16 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           ) : null}
                         </div>
 
-                        {/* Blocks */}
+                        {/* Modules Active Chips */}
                         <div className="mb-4">
-                          <div className="text-[10px] font-mono font-black uppercase text-slate-400 mb-1.5">
-                            Blok Terdaftar ({t.blocks?.length || 0})
+                          <div className="text-[10px] font-mono font-black uppercase text-slate-400 mb-1.5 flex items-center justify-between">
+                            <span>Modul Fitur Aktif</span>
+                            <span className="text-indigo-600 font-bold">{activeModules.length}/6</span>
                           </div>
                           <div className="flex flex-wrap gap-1">
-                            {(t.blocks || []).map(b => (
-                              <span key={b} className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md">
-                                {b}
+                            {activeModules.map(m => (
+                              <span key={m.key} className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-700 rounded-md">
+                                {m.label}
                               </span>
                             ))}
                           </div>
@@ -764,6 +863,15 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                       {/* Card Footer Actions */}
                       <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <button
+                          onClick={() => handleStartSupervision(t)}
+                          className="px-3 py-2 bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 hover:border-amber-600 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                          title="Mode Supervisi Read-Only"
+                        >
+                          <Eye size={13} />
+                          <span>Supervisi</span>
+                        </button>
+
                         <button
                           onClick={() => setSelectedTenantForDetail(t)}
                           className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shadow-indigo-600/20"

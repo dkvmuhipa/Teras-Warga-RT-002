@@ -3,10 +3,12 @@ import {
   X, Building2, MapPin, User, Phone, Shield, Trash2, 
   Edit3, Save, ExternalLink, Copy, Check, Layers, 
   DollarSign, Palette, AlertTriangle, ArrowRight, ShieldCheck,
-  Calendar, CheckCircle2
+  Calendar, CheckCircle2, Sliders, Eye, ToggleLeft, ToggleRight,
+  Droplets, Package, FileText, AlertOctagon, Activity, Camera,
+  CheckSquare, Square
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Tenant } from '../../types';
+import { Tenant, TenantStatus, TenantModules } from '../../types';
 import { useTenant } from '../../context/TenantContext';
 import { toast } from 'sonner';
 
@@ -25,8 +27,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   onUpdate,
   onDelete
 }) => {
-  const { updateTenant, deleteTenant } = useTenant();
-  const [activeTab, setActiveTab] = useState<'info' | 'officials' | 'fees' | 'links'>('info');
+  const { updateTenant, deleteTenant, startSupervision } = useTenant();
+  const [activeTab, setActiveTab] = useState<'info' | 'officials' | 'fees' | 'modules' | 'links'>('info');
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [copiedLink, setCopiedLink] = useState<'public' | 'register' | null>(null);
@@ -44,6 +46,15 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         treasurerName: tenant.treasurerName,
         address: tenant.address,
         themeColor: tenant.themeColor || '#4F46E5',
+        status: tenant.status || 'active',
+        modules: {
+          waterMeter: tenant.modules?.waterMeter ?? true,
+          assetRental: tenant.modules?.assetRental ?? true,
+          letters: tenant.modules?.letters ?? true,
+          panicButton: tenant.modules?.panicButton ?? true,
+          stbmSanitation: tenant.modules?.stbmSanitation ?? true,
+          cctv: tenant.modules?.cctv ?? true,
+        },
         fees: {
           sampahUmum: tenant.fees?.sampahUmum || 20000,
           sampahPkh: tenant.fees?.sampahPkh || 10000,
@@ -84,6 +95,24 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleModuleToggle = (key: keyof TenantModules) => {
+    if (!isEditing) return;
+    setFormData(prev => ({
+      ...prev,
+      modules: {
+        ...prev.modules,
+        [key]: !prev.modules?.[key]
+      }
+    }));
+  };
+
+  const handleStartSupervision = () => {
+    startSupervision(tenant);
+    onClose();
+    // Navigate to admin dashboard in supervision mode
+    window.location.hash = '#/admin';
   };
 
   const handleDelete = async () => {
@@ -132,6 +161,19 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold">
                   {tenant.id}
                 </span>
+                {formData.status === 'suspended' ? (
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-300 font-bold uppercase">
+                    Suspended
+                  </span>
+                ) : formData.status === 'maintenance' ? (
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 font-bold uppercase">
+                    Maintenance
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold uppercase">
+                    Active
+                  </span>
+                )}
               </div>
               <p className="text-xs text-slate-500 truncate">
                 RW {tenant.rw} • Kel. {tenant.kelurahan}, Kec. {tenant.kecamatan}, {tenant.city}
@@ -198,7 +240,18 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             }`}
           >
             <DollarSign size={14} />
-            <span>Struktur Tarif Iuran</span>
+            <span>Struktur Tarif</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('modules')}
+            className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              activeTab === 'modules'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Sliders size={14} />
+            <span>Status & Modul</span>
           </button>
           <button
             onClick={() => setActiveTab('links')}
@@ -215,6 +268,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
         {/* Modal Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* TAB 1: IDENTITAS & BLOK */}
           {activeTab === 'info' && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -276,7 +330,6 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                 )}
               </div>
 
-              {/* Block Coverage Overview */}
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 mb-2 flex items-center justify-between">
                   <span>Blok Kavling Warga ({tenant.blocks?.length || 0} Blok)</span>
@@ -296,6 +349,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             </div>
           )}
 
+          {/* TAB 2: PENGURUS INTI */}
           {activeTab === 'officials' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
@@ -378,6 +432,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             </div>
           )}
 
+          {/* TAB 3: STRUKTUR TARIF */}
           {activeTab === 'fees' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
@@ -471,6 +526,283 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             </div>
           )}
 
+          {/* TAB 4: STATUS & MODUL LAYANAN (NEW) */}
+          {activeTab === 'modules' && (
+            <div className="space-y-6">
+              {/* Status Operasional Selector */}
+              <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200">
+                <label className="block text-xs font-black text-slate-900 uppercase tracking-wider mb-2">
+                  Status Operasional Tenant
+                </label>
+                <p className="text-xs text-slate-500 mb-3">
+                  Mengatur izin akses platform secara keseluruhan untuk warga dan pengurus RT ini:
+                </p>
+
+                {isEditing ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, status: 'active' }))}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        formData.status === 'active'
+                          ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="block text-xs font-bold text-emerald-800">✓ Aktif Normal</span>
+                      <span className="text-[10px] text-slate-500">Layanan penuh aktif untuk warga & admin.</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, status: 'maintenance' }))}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        formData.status === 'maintenance'
+                          ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="block text-xs font-bold text-amber-800">⚠️ Pemeliharaan</span>
+                      <span className="text-[10px] text-slate-500">Layar info maintenance ditampilkan ke publik.</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, status: 'suspended' }))}
+                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                        formData.status === 'suspended'
+                          ? 'bg-rose-50 border-rose-300 ring-2 ring-rose-200'
+                          : 'bg-white border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      <span className="block text-xs font-bold text-rose-800">⛔ Ditangguhkan</span>
+                      <span className="text-[10px] text-slate-500">Akses dibekukan sementara oleh platform.</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    {tenant.status === 'suspended' ? (
+                      <span className="px-3 py-1 bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold font-mono">
+                        ⛔ LAYANAN DITANGGUHKAN (SUSPENDED)
+                      </span>
+                    ) : tenant.status === 'maintenance' ? (
+                      <span className="px-3 py-1 bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold font-mono">
+                        ⚠️ DALAM PEMELIHARAAN (MAINTENANCE)
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold font-mono">
+                        ✓ AKTIF BEROPERASI NORMAL
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Modular Feature Flags */}
+              <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-black text-slate-900 uppercase tracking-wider block">
+                    Sakelar Modul Layanan (Feature Flags)
+                  </label>
+                  {isEditing && (
+                    <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">
+                      Klik untuk aktif/nonaktif
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-500 mb-3">
+                  Sesuaikan fitur yang aktif sesuai kebutuhan fasilitas fisik masing-masing RT:
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Water Meter */}
+                  <div 
+                    onClick={() => handleModuleToggle('waterMeter')}
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                      isEditing ? 'cursor-pointer hover:border-slate-300' : ''
+                    } ${
+                      formData.modules?.waterMeter 
+                        ? 'bg-white border-slate-200' 
+                        : 'bg-slate-100/70 border-slate-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
+                        <Droplets size={16} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 block">Meteran Air PDAM/Swadaya</span>
+                        <span className="text-[10px] text-slate-500">Pencatatan kubikasi & tagihan air</span>
+                      </div>
+                    </div>
+                    {formData.modules?.waterMeter ? (
+                      <span className="text-emerald-600 text-xs font-bold">Aktif</span>
+                    ) : (
+                      <span className="text-slate-400 text-xs font-bold">Nonaktif</span>
+                    )}
+                  </div>
+
+                  {/* Asset Rental */}
+                  <div 
+                    onClick={() => handleModuleToggle('assetRental')}
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                      isEditing ? 'cursor-pointer hover:border-slate-300' : ''
+                    } ${
+                      formData.modules?.assetRental 
+                        ? 'bg-white border-slate-200' 
+                        : 'bg-slate-100/70 border-slate-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <Package size={16} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 block">Sewa & Peminjaman Aset</span>
+                        <span className="text-[10px] text-slate-500">Tenda, kursi, aula & inventaris</span>
+                      </div>
+                    </div>
+                    {formData.modules?.assetRental ? (
+                      <span className="text-emerald-600 text-xs font-bold">Aktif</span>
+                    ) : (
+                      <span className="text-slate-400 text-xs font-bold">Nonaktif</span>
+                    )}
+                  </div>
+
+                  {/* Letters */}
+                  <div 
+                    onClick={() => handleModuleToggle('letters')}
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                      isEditing ? 'cursor-pointer hover:border-slate-300' : ''
+                    } ${
+                      formData.modules?.letters 
+                        ? 'bg-white border-slate-200' 
+                        : 'bg-slate-100/70 border-slate-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <FileText size={16} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 block">Surat Pengantar Digital</span>
+                        <span className="text-[10px] text-slate-500">Permohonan & unduh PDF instan</span>
+                      </div>
+                    </div>
+                    {formData.modules?.letters ? (
+                      <span className="text-emerald-600 text-xs font-bold">Aktif</span>
+                    ) : (
+                      <span className="text-slate-400 text-xs font-bold">Nonaktif</span>
+                    )}
+                  </div>
+
+                  {/* Panic Button */}
+                  <div 
+                    onClick={() => handleModuleToggle('panicButton')}
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                      isEditing ? 'cursor-pointer hover:border-slate-300' : ''
+                    } ${
+                      formData.modules?.panicButton 
+                        ? 'bg-white border-slate-200' 
+                        : 'bg-slate-100/70 border-slate-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                        <AlertOctagon size={16} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 block">Tombol Panik Warga</span>
+                        <span className="text-[10px] text-slate-500">Sirine darurat & notifikasi cepat</span>
+                      </div>
+                    </div>
+                    {formData.modules?.panicButton ? (
+                      <span className="text-emerald-600 text-xs font-bold">Aktif</span>
+                    ) : (
+                      <span className="text-slate-400 text-xs font-bold">Nonaktif</span>
+                    )}
+                  </div>
+
+                  {/* STBM */}
+                  <div 
+                    onClick={() => handleModuleToggle('stbmSanitation')}
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                      isEditing ? 'cursor-pointer hover:border-slate-300' : ''
+                    } ${
+                      formData.modules?.stbmSanitation 
+                        ? 'bg-white border-slate-200' 
+                        : 'bg-slate-100/70 border-slate-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <Activity size={16} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 block">Sanitasi STBM</span>
+                        <span className="text-[10px] text-slate-500">Pemantauan 5 pilar kesehatan</span>
+                      </div>
+                    </div>
+                    {formData.modules?.stbmSanitation ? (
+                      <span className="text-emerald-600 text-xs font-bold">Aktif</span>
+                    ) : (
+                      <span className="text-slate-400 text-xs font-bold">Nonaktif</span>
+                    )}
+                  </div>
+
+                  {/* CCTV */}
+                  <div 
+                    onClick={() => handleModuleToggle('cctv')}
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                      isEditing ? 'cursor-pointer hover:border-slate-300' : ''
+                    } ${
+                      formData.modules?.cctv 
+                        ? 'bg-white border-slate-200' 
+                        : 'bg-slate-100/70 border-slate-200 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                        <Camera size={16} />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 block">Pantauan CCTV</span>
+                        <span className="text-[10px] text-slate-500">Streaming kamera keamanan</span>
+                      </div>
+                    </div>
+                    {formData.modules?.cctv ? (
+                      <span className="text-emerald-600 text-xs font-bold">Aktif</span>
+                    ) : (
+                      <span className="text-slate-400 text-xs font-bold">Nonaktif</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Mode Supervisi CTA Card */}
+              <div className="p-4.5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-1.5 text-amber-900 font-black text-xs">
+                    <Eye size={15} />
+                    <span>Mode Supervisi Read-Only</span>
+                  </div>
+                  <p className="text-[11px] text-amber-800 mt-0.5">
+                    Inspeksi langsung dashboard pengurus RT ini tanpa risiko mengubah atau merusak data warga.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleStartSupervision}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  <Eye size={14} />
+                  <span>Mulai Supervisi</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: TAUTAN & AKSES */}
           {activeTab === 'links' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">

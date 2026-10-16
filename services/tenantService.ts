@@ -36,12 +36,30 @@ export const INITIAL_TENANTS: Tenant[] = [
       airFee: 10000,
       kasFee: 20000,
     },
+    status: 'active',
+    modules: {
+      waterMeter: true,
+      assetRental: true,
+      letters: true,
+      panicButton: true,
+      stbmSanitation: true,
+      cctv: true
+    },
     logoUrl: '/logo-rt.svg',
     themeColor: '#2563EB',
     isPilotDemo: false,
     createdAt: '2026-01-01T00:00:00.000Z'
   }
 ];
+
+export const DEFAULT_TENANT_MODULES = {
+  waterMeter: true,
+  assetRental: true,
+  letters: true,
+  panicButton: true,
+  stbmSanitation: true,
+  cctv: true
+};
 
 const REGISTERED_TENANTS_KEY = 'registered_tenants';
 

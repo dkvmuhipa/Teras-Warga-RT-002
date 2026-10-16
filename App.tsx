@@ -207,7 +207,7 @@ import { subscribeToMapPoints, subscribeToCollection,
 
 export const App = () => {
   const confirm = useConfirm();
-  const { currentTenant, tenantId } = useTenant();
+  const { currentTenant, tenantId, isSupervising, supervisingTenant, stopSupervision, isSuperAdmin } = useTenant();
   const [houses, setHouses] = useState<House[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [news, setNews] = useState<News[]>([]);
@@ -479,6 +479,58 @@ export const App = () => {
     <HashRouter>
         <ScrollToTop />
         <Toaster position="top-right" richColors />
+        
+        {/* Persistent Sticky Supervision Mode Banner for Super Admin */}
+        {isSupervising && (
+          <div className="sticky top-0 z-[100] bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 px-4 py-2.5 text-xs font-bold flex flex-wrap items-center justify-between gap-2 shadow-md border-b border-amber-500">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded bg-slate-950 text-amber-300 font-mono text-[10px] uppercase font-black tracking-wider">
+                MODE SUPERVISI READ-ONLY
+              </span>
+              <span>
+                Anda sedang menginspeksi data wilayah <strong>{currentTenant.name}</strong> sebagai Super Admin
+              </span>
+            </div>
+            <button
+              onClick={() => {
+                stopSupervision();
+                window.location.hash = '#/superadmin';
+              }}
+              className="px-3 py-1 bg-slate-950 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-xs"
+            >
+              <span>Kembali ke Control Tower Super Admin</span>
+            </button>
+          </div>
+        )}
+
+        {/* Suspended Tenant Guard Screen for Non-Superadmin Visitors */}
+        {!isSuperAdmin && currentTenant.status === 'suspended' && (
+          <div className="fixed inset-0 z-[99] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-6 text-center text-slate-900 font-sans">
+            <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-2xl border border-slate-200">
+              <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4 border border-rose-200">
+                <AlertTriangle size={32} />
+              </div>
+              <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-mono font-bold uppercase">
+                Layanan Ditangguhkan
+              </span>
+              <h2 className="text-xl font-black mt-3 mb-2 text-slate-900">
+                {currentTenant.name}
+              </h2>
+              <p className="text-xs text-slate-600 mb-6 leading-relaxed">
+                Akses portal untuk wilayah RT ini sedang ditangguhkan sementara oleh pengelola platform. Untuk keperluan mendesak, silakan hubungi pengurus RT Anda secara langsung.
+              </p>
+              <button
+                onClick={() => {
+                  window.location.href = window.location.origin + window.location.pathname;
+                }}
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+              >
+                Kembali ke Beranda Utama
+              </button>
+            </div>
+          </div>
+        )}
+
         {activeNotification && <NotificationToast notification={activeNotification} onClose={() => setActiveNotification(null)} />}
         <FinancialProvider 
             houses={houses}
@@ -490,7 +542,7 @@ export const App = () => {
             <Routes>
                 <Route path="/admin" element={
                     <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                        {adminRole === Role.SUPER_ADMIN ? (
+                        {adminRole === Role.SUPER_ADMIN && !isSupervising ? (
                             <Navigate to="/superadmin" replace />
                         ) : (
                             <ErrorBoundary>

@@ -223,6 +223,56 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     }
   };
 
+  // Supervision Mode (Super Admin Read-Only Impersonation)
+  const [supervisingTenant, setSupervisingTenant] = useState<Tenant | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const supId = sessionStorage.getItem('supervising_tenant_id');
+      if (supId) {
+        return getTenantById(supId) || null;
+      }
+    } catch (e) {
+      console.warn('Supervision restore error:', e);
+    }
+    return null;
+  });
+
+  const isSupervising = useMemo(() => isSuperAdmin && !!supervisingTenant, [isSuperAdmin, supervisingTenant]);
+
+  const startSupervision = (tenant: Tenant) => {
+    if (!isSuperAdmin) {
+      toast.error('Mode Supervisi hanya dapat diakses oleh Super Admin');
+      return;
+    }
+    setSupervisingTenant(tenant);
+    setCurrentTenant(tenant);
+    setActiveTenantScope(tenant.id);
+    try {
+      sessionStorage.setItem('supervising_tenant_id', tenant.id);
+      localStorage.setItem('active_tenant_id', tenant.id);
+    } catch (e) {
+      console.warn('Error saving supervision state:', e);
+    }
+    toast.warning(`Mode Supervisi Diaktifkan: ${tenant.name}`, {
+      description: 'Anda sedang memeriksa data RT ini dalam mode aman (Read-Only).',
+      duration: 5000
+    });
+  };
+
+  const stopSupervision = () => {
+    const defaultTenant = getTenantById(DEFAULT_TENANT_ID);
+    setSupervisingTenant(null);
+    setCurrentTenant(defaultTenant);
+    setActiveTenantScope(defaultTenant.id);
+    try {
+      sessionStorage.removeItem('supervising_tenant_id');
+      localStorage.setItem('active_tenant_id', defaultTenant.id);
+    } catch (e) {
+      console.warn('Error clearing supervision state:', e);
+    }
+    toast.info('Keluar dari Mode Supervisi.');
+  };
+
   const value: TenantContextType = {
     currentTenant,
     tenantId: currentTenant.id,
@@ -231,6 +281,10 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     registerTenant,
     updateTenant,
     deleteTenant,
+    supervisingTenant,
+    isSupervising,
+    startSupervision,
+    stopSupervision,
     isDefaultTenant: currentTenant.id === DEFAULT_TENANT_ID,
     isSuperAdmin,
     pdfConfig: getPdfConfigForTenant(currentTenant)
@@ -256,6 +310,10 @@ export const useTenant = (): TenantContextType => {
       registerTenant: async () => fallbackTenant,
       updateTenant: async () => {},
       deleteTenant: async () => {},
+      supervisingTenant: null,
+      isSupervising: false,
+      startSupervision: () => {},
+      stopSupervision: () => {},
       isDefaultTenant: true,
       isSuperAdmin: false,
       pdfConfig: getPdfConfigForTenant(fallbackTenant)
