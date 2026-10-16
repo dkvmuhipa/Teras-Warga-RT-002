@@ -46,77 +46,46 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
   // Flatten officials list from all tenants + live Firestore officials collection
   const officialsList = useMemo(() => {
     const list: OfficialEntry[] = [];
-    const seenKeys = new Set<string>();
+    const seenNames = new Set<string>();
+
+    const normalizeName = (name: string) => {
+      return name
+        .toLowerCase()
+        .replace(/^(bpk\.|bapak|ibu|sdr\.|sdri\.)\s*/i, '')
+        .trim();
+    };
+
+    const isPlaceholder = (name: string) => {
+      const lower = name.toLowerCase().trim();
+      return (
+        lower === 'sekretaris rt 002' ||
+        lower === 'bendahara rt 002' ||
+        lower === 'sekretaris rt' ||
+        lower === 'bendahara rt' ||
+        lower === 'ketua rt' ||
+        lower === 'pengurus rt' ||
+        lower.startsWith('sekretaris rt') ||
+        lower.startsWith('bendahara rt') ||
+        lower === 'belum ada' ||
+        lower === 'belum ditentukan' ||
+        lower === '-'
+      );
+    };
 
     tenants.forEach(t => {
-      // 1. Core Leadership: Chairman
-      if (t.chairmanName) {
-        const key = `${t.id}-${t.chairmanName.toLowerCase().trim()}`;
-        seenKeys.add(key);
-        list.push({
-          id: `${t.id}-chairman`,
-          tenantId: t.id,
-          tenantName: t.name,
-          tenantRt: t.rt,
-          tenantRw: t.rw,
-          kelurahan: t.kelurahan,
-          roleTitle: 'Ketua RT',
-          name: t.chairmanName,
-          phone: t.chairmanPhone || '',
-          themeColor: t.themeColor,
-          isVerified: Boolean(t.chairmanPhone && t.chairmanPhone.length >= 10),
-          isCoreLeadership: true
-        });
-      }
-
-      // 2. Core Leadership: Secretary
-      if (t.secretaryName) {
-        const key = `${t.id}-${t.secretaryName.toLowerCase().trim()}`;
-        seenKeys.add(key);
-        list.push({
-          id: `${t.id}-secretary`,
-          tenantId: t.id,
-          tenantName: t.name,
-          tenantRt: t.rt,
-          tenantRw: t.rw,
-          kelurahan: t.kelurahan,
-          roleTitle: 'Sekretaris',
-          name: t.secretaryName,
-          phone: t.chairmanPhone || '',
-          themeColor: t.themeColor,
-          isVerified: Boolean(t.secretaryName),
-          isCoreLeadership: true
-        });
-      }
-
-      // 3. Core Leadership: Treasurer
-      if (t.treasurerName) {
-        const key = `${t.id}-${t.treasurerName.toLowerCase().trim()}`;
-        seenKeys.add(key);
-        list.push({
-          id: `${t.id}-treasurer`,
-          tenantId: t.id,
-          tenantName: t.name,
-          tenantRt: t.rt,
-          tenantRw: t.rw,
-          kelurahan: t.kelurahan,
-          roleTitle: 'Bendahara',
-          name: t.treasurerName,
-          phone: t.chairmanPhone || '',
-          themeColor: t.themeColor,
-          isVerified: Boolean(t.treasurerName),
-          isCoreLeadership: true
-        });
-      }
-
-      // 4. Live Officials from Firestore collection 'officials'
       const matchedOfficials = officials.filter(o => matchesTenant(o.tenantId, t.id));
+
+      // 1. Process all LIVE officials from Firestore first (this is the single source of truth!)
       matchedOfficials.forEach(o => {
-        const key = `${t.id}-${o.name.toLowerCase().trim()}`;
-        if (!seenKeys.has(key)) {
-          seenKeys.add(key);
+        if (!o.name || isPlaceholder(o.name)) return;
+        const norm = normalizeName(o.name);
+        const key = `${t.id}-${norm}`;
+        if (!seenNames.has(key)) {
+          seenNames.add(key);
+          const roleLower = (o.role || '').toLowerCase();
+          const isCore = roleLower.includes('ketua') || roleLower.includes('sekretaris') || roleLower.includes('bendahara');
           list.push({
-            id: o.id || `${t.id}-off-${Math.random()}`,
+            id: o.id || `${t.id}-off-${norm}`,
             tenantId: t.id,
             tenantName: t.name,
             tenantRt: t.rt,
@@ -128,18 +97,112 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
             houseId: o.houseId,
             photo: o.photo,
             themeColor: t.themeColor,
-            isVerified: Boolean(o.phone && o.phone.length >= 10),
+            isVerified: Boolean(o.phone && o.phone.replace(/[^0-9]/g, '').length >= 10),
             termStart: o.termStart,
             termEnd: o.termEnd,
             duties: o.duties,
-            isCoreLeadership: false
+            isCoreLeadership: isCore
           });
         }
       });
+
+      // 2. Fallback for Chairman only if not already present in live officials
+      const hasChairmanInLive = list.some(
+        item => matchesTenant(item.tenantId, t.id) && item.roleTitle.toLowerCase().includes('ketua')
+      );
+      if (!hasChairmanInLive && t.chairmanName && !isPlaceholder(t.chairmanName)) {
+        const norm = normalizeName(t.chairmanName);
+        const key = `${t.id}-${norm}`;
+        if (!seenNames.has(key)) {
+          seenNames.add(key);
+          list.push({
+            id: `${t.id}-chairman`,
+            tenantId: t.id,
+            tenantName: t.name,
+            tenantRt: t.rt,
+            tenantRw: t.rw,
+            kelurahan: t.kelurahan,
+            roleTitle: 'Ketua RT',
+            name: t.chairmanName,
+            phone: t.chairmanPhone || '',
+            themeColor: t.themeColor,
+            isVerified: Boolean(t.chairmanPhone && t.chairmanPhone.replace(/[^0-9]/g, '').length >= 10),
+            isCoreLeadership: true
+          });
+        }
+      }
+
+      // 3. Fallback for Secretary only if not already present in live officials AND is not a placeholder
+      const hasSecretaryInLive = list.some(
+        item => matchesTenant(item.tenantId, t.id) && item.roleTitle.toLowerCase().includes('sekretaris')
+      );
+      if (!hasSecretaryInLive && t.secretaryName && !isPlaceholder(t.secretaryName)) {
+        const norm = normalizeName(t.secretaryName);
+        const key = `${t.id}-${norm}`;
+        if (!seenNames.has(key)) {
+          seenNames.add(key);
+          list.push({
+            id: `${t.id}-secretary`,
+            tenantId: t.id,
+            tenantName: t.name,
+            tenantRt: t.rt,
+            tenantRw: t.rw,
+            kelurahan: t.kelurahan,
+            roleTitle: 'Sekretaris',
+            name: t.secretaryName,
+            phone: '',
+            themeColor: t.themeColor,
+            isVerified: false,
+            isCoreLeadership: true
+          });
+        }
+      }
+
+      // 4. Fallback for Treasurer only if not already present in live officials AND is not a placeholder
+      const hasTreasurerInLive = list.some(
+        item => matchesTenant(item.tenantId, t.id) && item.roleTitle.toLowerCase().includes('bendahara')
+      );
+      if (!hasTreasurerInLive && t.treasurerName && !isPlaceholder(t.treasurerName)) {
+        const norm = normalizeName(t.treasurerName);
+        const key = `${t.id}-${norm}`;
+        if (!seenNames.has(key)) {
+          seenNames.add(key);
+          list.push({
+            id: `${t.id}-treasurer`,
+            tenantId: t.id,
+            tenantName: t.name,
+            tenantRt: t.rt,
+            tenantRw: t.rw,
+            kelurahan: t.kelurahan,
+            roleTitle: 'Bendahara',
+            name: t.treasurerName,
+            phone: '',
+            themeColor: t.themeColor,
+            isVerified: false,
+            isCoreLeadership: true
+          });
+        }
+      }
     });
 
-    return list;
+    // Sort order: Ketua RT first, then Sekretaris, Bendahara, then other roles
+    const rolePriority = (role: string) => {
+      const r = role.toLowerCase();
+      if (r.includes('ketua') && !r.includes('wakil')) return 1;
+      if (r.includes('wakil')) return 2;
+      if (r.includes('sekretaris')) return 3;
+      if (r.includes('bendahara')) return 4;
+      return 5;
+    };
+
+    return list.sort((a, b) => {
+      const pA = rolePriority(a.roleTitle);
+      const pB = rolePriority(b.roleTitle);
+      if (pA !== pB) return pA - pB;
+      return a.name.localeCompare(b.name);
+    });
   }, [tenants, officials]);
+
 
   // Filtered officials
   const filteredOfficials = useMemo(() => {

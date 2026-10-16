@@ -4767,7 +4767,19 @@ export const calculateFleetAggregates = (
       .reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
 
     const liveBalance = totalIncome - totalExpense;
-    const officialsCount = tOfficials.length + 3;
+    
+    // Accurate official count (prefer real Firestore collection, avoid placeholder counting)
+    let officialsCount = tOfficials.length;
+    if (officialsCount === 0) {
+      const isPlaceholder = (name?: string) => {
+        const lower = (name || '').toLowerCase().trim();
+        return !lower || lower.includes('sekretaris rt') || lower.includes('bendahara rt') || lower === 'belum ada' || lower === '-';
+      };
+      if (tenant.chairmanName && !isPlaceholder(tenant.chairmanName)) officialsCount++;
+      if (tenant.secretaryName && !isPlaceholder(tenant.secretaryName)) officialsCount++;
+      if (tenant.treasurerName && !isPlaceholder(tenant.treasurerName)) officialsCount++;
+    }
+
     const openTicketsCount = tTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
     const reportsCount = tReports.length;
     const pendingReportsCount = tReports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;

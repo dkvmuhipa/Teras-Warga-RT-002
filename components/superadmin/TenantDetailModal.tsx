@@ -10,11 +10,26 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Tenant, TenantStatus, TenantModules, 
-  House, CashFlow, Report, LetterRequest, HelpdeskTicket 
+  House, CashFlow, Report, LetterRequest, HelpdeskTicket,
+  Official
 } from '../../types';
 import { useTenant } from '../../context/TenantContext';
 import { matchesTenant } from '../../services/tenantService';
 import { toast } from 'sonner';
+
+const isPlaceholderName = (name?: string) => {
+  if (!name) return true;
+  const lower = name.toLowerCase().trim();
+  return (
+    lower.includes('sekretaris rt') ||
+    lower.includes('bendahara rt') ||
+    lower.includes('ketua rt') ||
+    lower.includes('belum ada') ||
+    lower.includes('placeholder') ||
+    lower.includes('dummy') ||
+    lower === '-'
+  );
+};
 
 interface TenantDetailModalProps {
   tenant: Tenant | null;
@@ -25,6 +40,7 @@ interface TenantDetailModalProps {
   reports?: Report[];
   letters?: LetterRequest[];
   tickets?: HelpdeskTicket[];
+  officials?: Official[];
   onUpdate?: (updated: Tenant) => void;
   onDelete?: (tenantId: string) => void;
 }
@@ -38,6 +54,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   reports = [],
   letters = [],
   tickets = [],
+  officials = [],
   onUpdate,
   onDelete
 }) => {
@@ -48,39 +65,23 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [copiedLink, setCopiedLink] = useState<'public' | 'register' | null>(null);
 
-  // Editable Form State
-  const [formData, setFormData] = useState<Partial<Tenant>>({});
+  // Live officials computation
+  const tenantOfficials = useMemo(() => {
+    if (!tenant || !officials) return [];
+    return officials.filter(o => matchesTenant(o.tenantId, tenant.id));
+  }, [officials, tenant]);
 
-  useEffect(() => {
-    if (tenant) {
-      setFormData({
-        name: tenant.name,
-        chairmanName: tenant.chairmanName,
-        chairmanPhone: tenant.chairmanPhone,
-        secretaryName: tenant.secretaryName,
-        treasurerName: tenant.treasurerName,
-        address: tenant.address,
-        themeColor: tenant.themeColor || '#4F46E5',
-        status: tenant.status || 'active',
-        modules: {
-          waterMeter: tenant.modules?.waterMeter ?? true,
-          assetRental: tenant.modules?.assetRental ?? true,
-          letters: tenant.modules?.letters ?? true,
-          panicButton: tenant.modules?.panicButton ?? true,
-          stbmSanitation: tenant.modules?.stbmSanitation ?? true,
-          cctv: tenant.modules?.cctv ?? true,
-        },
-        fees: {
-          sampahUmum: tenant.fees?.sampahUmum || 20000,
-          sampahPkh: tenant.fees?.sampahPkh || 10000,
-          sampahPns: tenant.fees?.sampahPns || 35000,
-          kasFee: tenant.fees?.kasFee || 20000,
-          airFee: tenant.fees?.airFee || 10000,
-        }
-      });
-      setIsEditing(false);
-    }
-  }, [tenant]);
+  const liveChairman = useMemo(() => {
+    return tenantOfficials.find(o => (o.role || '').toLowerCase().includes('ketua'));
+  }, [tenantOfficials]);
+
+  const liveSecretary = useMemo(() => {
+    return tenantOfficials.find(o => (o.role || '').toLowerCase().includes('sekretaris'));
+  }, [tenantOfficials]);
+
+  const liveTreasurer = useMemo(() => {
+    return tenantOfficials.find(o => (o.role || '').toLowerCase().includes('bendahara'));
+  }, [tenantOfficials]);
 
   const tenantHouses = useMemo(() => {
     if (!tenant || !houses) return [];
@@ -106,6 +107,45 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
     if (!tenant || !tickets) return [];
     return tickets.filter(t => matchesTenant(t.tenantId, tenant.id));
   }, [tickets, tenant]);
+
+  // Editable Form State
+  const [formData, setFormData] = useState<Partial<Tenant>>({});
+
+  useEffect(() => {
+    if (tenant) {
+      const effChairman = (!isPlaceholderName(tenant.chairmanName) ? tenant.chairmanName : liveChairman?.name) || tenant.chairmanName || '';
+      const effPhone = tenant.chairmanPhone || liveChairman?.phone || '';
+      const effSecretary = (!isPlaceholderName(tenant.secretaryName) ? tenant.secretaryName : liveSecretary?.name) || tenant.secretaryName || '';
+      const effTreasurer = (!isPlaceholderName(tenant.treasurerName) ? tenant.treasurerName : liveTreasurer?.name) || tenant.treasurerName || '';
+
+      setFormData({
+        name: tenant.name,
+        chairmanName: effChairman,
+        chairmanPhone: effPhone,
+        secretaryName: effSecretary,
+        treasurerName: effTreasurer,
+        address: tenant.address,
+        themeColor: tenant.themeColor || '#4F46E5',
+        status: tenant.status || 'active',
+        modules: {
+          waterMeter: tenant.modules?.waterMeter ?? true,
+          assetRental: tenant.modules?.assetRental ?? true,
+          letters: tenant.modules?.letters ?? true,
+          panicButton: tenant.modules?.panicButton ?? true,
+          stbmSanitation: tenant.modules?.stbmSanitation ?? true,
+          cctv: tenant.modules?.cctv ?? true,
+        },
+        fees: {
+          sampahUmum: tenant.fees?.sampahUmum || 20000,
+          sampahPkh: tenant.fees?.sampahPkh || 10000,
+          sampahPns: tenant.fees?.sampahPns || 35000,
+          kasFee: tenant.fees?.kasFee || 20000,
+          airFee: tenant.fees?.airFee || 10000,
+        }
+      });
+      setIsEditing(false);
+    }
+  }, [tenant, liveChairman, liveSecretary, liveTreasurer]);
 
   const liveStats = useMemo(() => {
     const totalDoors = tenantHouses.length;
@@ -603,9 +643,16 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           {activeTab === 'officials' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-black text-indigo-700 uppercase tracking-wider">
-                  <User size={14} />
-                  <span>Ketua RT</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-black text-indigo-700 uppercase tracking-wider">
+                    <User size={14} />
+                    <span>Ketua RT</span>
+                  </div>
+                  {liveChairman && (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Live Database RT
+                    </span>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
@@ -618,7 +665,9 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                         className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                       />
                     ) : (
-                      <p className="text-xs font-bold text-slate-900">{tenant.chairmanName || '-'}</p>
+                      <p className="text-xs font-bold text-slate-900">
+                        {(!isPlaceholderName(tenant.chairmanName) ? tenant.chairmanName : liveChairman?.name) || tenant.chairmanName || '-'}
+                      </p>
                     )}
                   </div>
                   <div>
@@ -632,10 +681,12 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                       />
                     ) : (
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-mono text-emerald-600 font-bold">{tenant.chairmanPhone || '-'}</p>
-                        {tenant.chairmanPhone && (
+                        <p className="text-xs font-mono text-emerald-600 font-bold">
+                          {tenant.chairmanPhone || liveChairman?.phone || '-'}
+                        </p>
+                        {(tenant.chairmanPhone || liveChairman?.phone) && (
                           <a
-                            href={`https://wa.me/${tenant.chairmanPhone.replace(/[^0-9]/g, '')}`}
+                            href={`https://wa.me/${(tenant.chairmanPhone || liveChairman?.phone || '').replace(/[^0-9]/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-[10px] text-emerald-600 hover:underline flex items-center gap-0.5 font-bold"
@@ -652,7 +703,14 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Sekretaris RT</span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Sekretaris RT</span>
+                    {liveSecretary && (
+                      <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Live DB
+                      </span>
+                    )}
+                  </div>
                   {isEditing ? (
                     <input
                       type="text"
@@ -661,12 +719,26 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                       className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                     />
                   ) : (
-                    <p className="text-xs font-bold text-slate-800">{tenant.secretaryName || '-'}</p>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">
+                        {(!isPlaceholderName(tenant.secretaryName) ? tenant.secretaryName : liveSecretary?.name) || tenant.secretaryName || '-'}
+                      </p>
+                      {liveSecretary?.phone && (
+                        <p className="text-[11px] font-mono text-slate-500 mt-0.5">WA: {liveSecretary.phone}</p>
+                      )}
+                    </div>
                   )}
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Bendahara RT</span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Bendahara RT</span>
+                    {liveTreasurer && (
+                      <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Live DB
+                      </span>
+                    )}
+                  </div>
                   {isEditing ? (
                     <input
                       type="text"
@@ -675,10 +747,62 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                       className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
                     />
                   ) : (
-                    <p className="text-xs font-bold text-slate-800">{tenant.treasurerName || '-'}</p>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">
+                        {(!isPlaceholderName(tenant.treasurerName) ? tenant.treasurerName : liveTreasurer?.name) || tenant.treasurerName || '-'}
+                      </p>
+                      {liveTreasurer?.phone && (
+                        <p className="text-[11px] font-mono text-slate-500 mt-0.5">WA: {liveTreasurer.phone}</p>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
+
+              {/* Live Officials Roster from Firestore */}
+              {tenantOfficials.length > 0 && (
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-[11px] font-black text-slate-800 uppercase tracking-wider">
+                      Struktur Aparatur Terdaftar di RT ({tenantOfficials.length} Pengurus)
+                    </h5>
+                    <span className="text-[10px] font-mono text-indigo-600 font-bold">Sinkron Realtime</span>
+                  </div>
+                  <div className="divide-y divide-slate-200 border border-slate-200 rounded-xl bg-white overflow-hidden">
+                    {tenantOfficials.map(off => (
+                      <div key={off.id} className="p-2.5 flex items-center justify-between gap-3 text-xs">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {off.photo ? (
+                            <img src={off.photo} alt={off.name} className="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0" />
+                          ) : (
+                            <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0">
+                              {off.name.charAt(0)}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="font-bold text-slate-900 truncate">{off.name}</div>
+                            <div className="text-[10px] text-slate-500 flex items-center gap-1.5">
+                              <span className="font-semibold text-indigo-600">{off.role}</span>
+                              {off.houseId && <span>• Blok {off.houseId}</span>}
+                            </div>
+                          </div>
+                        </div>
+                        {off.phone && (
+                          <a
+                            href={`https://wa.me/${off.phone.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold border border-emerald-200 flex items-center gap-1 shrink-0"
+                          >
+                            <span>{off.phone}</span>
+                            <ExternalLink size={9} />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -2176,6 +2176,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         reports={allReports}
         letters={allLetters}
         tickets={allTickets}
+        officials={allOfficials}
         onUpdate={(updated) => {
           setSelectedTenantForDetail(updated);
           logAuditEvent('Pembaruan Profil & Konfigurasi Tenant', 'lifecycle', updated.id, `Profil dan pengaturan wilayah ${updated.name} diperbarui`);
