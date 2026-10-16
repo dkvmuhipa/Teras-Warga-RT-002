@@ -40,12 +40,12 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
       return {
         tenantId: t.id,
         tenantName: t.name,
-        bankName: gw?.bankName || (isPilot ? 'Bank BPD Sulteng' : isSecond ? 'Bank BRI' : 'Bank Mandiri'),
-        accountNumber: gw?.accountNumber || (isPilot ? '01-02-004589-1' : isSecond ? '4512-01-008921-50-4' : '158-00-0987654-2'),
+        bankName: gw?.bankName || (isPilot ? 'Bank BPD Sulteng' : 'Belum Dikonfigurasi'),
+        accountNumber: gw?.accountNumber || (isPilot ? '01-02-004589-1' : '-'),
         accountHolder: gw?.accountHolder || `KAS ${t.name.toUpperCase()}`,
-        qrisStatus: gw?.qrisStatus || (isPilot ? 'active' : isSecond ? 'pending' : 'active'),
-        merchantNmid: gw?.merchantNmid || (isPilot ? 'ID1020260981244' : isSecond ? undefined : 'ID1020261189432'),
-        digitalRate: gw?.digitalRate ?? (isPilot ? 88 : isSecond ? 45 : 72)
+        qrisStatus: gw?.qrisStatus || (isPilot ? 'active' : 'manual_cash'),
+        merchantNmid: gw?.merchantNmid || (isPilot ? 'ID1020260981244' : undefined),
+        digitalRate: gw?.digitalRate ?? (isPilot ? 88 : 0)
       };
     });
   }, [tenants]);

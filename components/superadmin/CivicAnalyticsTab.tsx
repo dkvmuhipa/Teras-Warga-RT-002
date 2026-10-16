@@ -47,9 +47,9 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
       const emptyDoors = metric?.emptyDoors ?? Math.max(0, doors - occupiedDoors);
       const residents = metric && metric.realResidents > 0 ? metric.realResidents : Math.round(doors * 3.8);
 
-      // Real or calculated compliance
-      const compliance = metric ? metric.complianceRate : Math.min(98, 85 + ((t.id.length * 7 + idx * 3) % 13));
-      const digitalAdoption = t.paymentGateway?.digitalRate ?? (t.id === 'tondo-rw20-rt02' ? 88 : 65);
+      // Real compliance directly from Firestore live metrics
+      const compliance = metric?.complianceRate ?? 0;
+      const digitalAdoption = t.paymentGateway?.digitalRate ?? (t.id === 'tondo-rw20-rt02' ? 88 : 0);
       
       // Civic score derived from live data: compliance (70%) + healthy balance (20%) + aparatur aktif (10%)
       const liveBalance = metric?.liveBalance ?? 0;

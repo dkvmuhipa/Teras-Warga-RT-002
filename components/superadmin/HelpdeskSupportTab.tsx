@@ -28,47 +28,29 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
   const [tickets, setTickets] = useState<HelpdeskTicket[]>(() => {
     try {
       const stored = localStorage.getItem(TICKET_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          // Filter out any legacy dummy tickets
+          const clean = parsed.filter(t => 
+            t.id !== 'TCK-2026-001' && 
+            t.id !== 'TCK-2026-002' && 
+            t.senderPhone !== '081234567890' && 
+            t.senderPhone !== '081298765432'
+          );
+          return clean;
+        }
+      }
     } catch (e) {
       console.error('Failed to parse tickets:', e);
     }
-    return [
-      {
-        id: 'TCK-2026-001',
-        tenantId: 'tondo-rw20-rt02',
-        tenantName: 'RT 002 / RW 020 Huntap Tondo 2',
-        senderName: 'Bpk. M. Irfan (Ketua RT)',
-        senderPhone: '081234567890',
-        title: 'Pengajuan Penambahan Blok Baru (Blok D1 - D3)',
-        category: 'account',
-        priority: 'medium',
-        status: 'open',
-        createdAt: '15 Okt 2026, 14:20',
-        description: 'Terdapat 30 unit hunian baru yang mulai dihuni di sektor timur. Mohon bantuan pembukaan nomor rumah blok D1 no 01-10, D2 no 01-10, dan D3 no 01-10 pada portal kami.'
-      },
-      {
-        id: 'TCK-2026-002',
-        tenantId: 'tondo-rw20-rt02',
-        tenantName: 'RT 002 / RW 020 Huntap Tondo 2',
-        senderName: 'Ibu Siti Rahma (Bendahara)',
-        senderPhone: '081298765432',
-        title: 'Verifikasi Template Bukti Iuran QRIS',
-        category: 'billing',
-        priority: 'low',
-        status: 'in_progress',
-        createdAt: '14 Okt 2026, 09:15',
-        description: 'Format struk PDF iuran sampah dan kas warga perlu disesuaikan dengan logo RT beresolusi tinggi yang baru diperbarui.',
-        adminResponse: 'Logo beresolusi tinggi sedang kami proses rendering pada engine PDF v2.4.'
-      }
-    ];
+    return [];
   });
 
   // Subscribe to real-time Cloud Firestore Support Tickets
   useEffect(() => {
     const unsub = subscribeToSupportTickets((fireTickets) => {
-      if (fireTickets && fireTickets.length > 0) {
-        setTickets(fireTickets);
-      }
+      setTickets(fireTickets || []);
     });
     return () => unsub();
   }, []);

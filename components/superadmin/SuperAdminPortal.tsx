@@ -945,11 +945,6 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   >
                     <GroupIcon size={14} className={isClusterActive ? 'text-indigo-400' : 'text-slate-400'} />
                     <span>{group.category}</span>
-                    <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
-                      isClusterActive ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-600'
-                    }`}>
-                      {group.tabs.length}
-                    </span>
                   </button>
                 );
               })}
