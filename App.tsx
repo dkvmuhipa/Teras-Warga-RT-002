@@ -58,6 +58,7 @@ import { GuestReportForm } from './components/GuestReportForm';
 import { ChatBot } from './components/ChatBot';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { PWAStatusHandler } from './components/PWAStatusHandler';
+import { SystemBroadcastBanner } from './components/common/SystemBroadcastBanner';
 import { PublicHeader } from './components/PublicHeader';
 import { HeroSection } from './components/HeroSection';
 import { PublicHome } from './components/public/PublicHome';
@@ -479,6 +480,9 @@ export const App = () => {
     <HashRouter>
         <ScrollToTop />
         <Toaster position="top-right" richColors />
+
+        {/* Real-time System Broadcast Banner from Super Admin Fleet Command */}
+        <SystemBroadcastBanner currentTenantId={currentTenant?.id} />
         
         {/* Persistent Sticky Supervision Mode Banner for Super Admin */}
         {isSupervising && (

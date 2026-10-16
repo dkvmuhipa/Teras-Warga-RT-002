@@ -15,13 +15,23 @@ import {
 import { useTenant } from '../../context/TenantContext';
 import { 
   Tenant, Role, TenantStatus, TenantModules, 
-  House, CashFlow, Official, HelpdeskTicket, FleetAggregates 
+  House, CashFlow, Official, HelpdeskTicket, FleetAggregates,
+  Report, LetterRequest, SystemBroadcast, PlatformAuditEvent 
 } from '../../types';
 import { 
   subscribeToAllHouses, 
   subscribeToAllCashFlow, 
   subscribeToAllOfficials, 
-  subscribeToSupportTickets, 
+  subscribeToSupportTickets,
+  subscribeToAllReports,
+  subscribeToAllLetters,
+  subscribeToSystemBroadcasts,
+  createSystemBroadcast,
+  updateSystemBroadcast,
+  deleteSystemBroadcast,
+  subscribeToSystemAuditLogs,
+  logPlatformAuditEvent,
+  clearSystemAuditLogs,
   calculateFleetAggregates 
 } from '../../services/databaseService';
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
@@ -42,30 +52,6 @@ import { toast } from 'sonner';
 interface SuperAdminPortalProps {
   role?: Role | null;
 }
-
-export interface SystemBroadcast {
-  id: string;
-  title: string;
-  message: string;
-  priority: 'info' | 'warning' | 'urgent' | 'maintenance';
-  targetTenantId: 'all' | string;
-  createdAt: string;
-  isActive: boolean;
-}
-
-export interface PlatformAuditEvent {
-  id: string;
-  timestamp: string;
-  action: string;
-  actor: string;
-  targetTenantId?: string;
-  targetTenantName?: string;
-  details: string;
-  category: 'lifecycle' | 'module' | 'tariff' | 'broadcast' | 'security' | 'export';
-}
-
-const BROADCAST_STORAGE_KEY = 'teras_system_broadcasts';
-const AUDIT_STORAGE_KEY = 'teras_system_audit_trail';
 
 export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   role
@@ -110,24 +96,45 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [allCashFlow, setAllCashFlow] = useState<CashFlow[]>([]);
   const [allOfficials, setAllOfficials] = useState<Official[]>([]);
   const [allTickets, setAllTickets] = useState<HelpdeskTicket[]>([]);
+  const [allReports, setAllReports] = useState<Report[]>([]);
+  const [allLetters, setAllLetters] = useState<LetterRequest[]>([]);
+  const [broadcasts, setBroadcasts] = useState<SystemBroadcast[]>([]);
+  const [auditLogs, setAuditLogs] = useState<PlatformAuditEvent[]>([]);
 
   useEffect(() => {
     const unsubHouses = subscribeToAllHouses(setAllHouses);
     const unsubCash = subscribeToAllCashFlow(setAllCashFlow);
     const unsubOfficials = subscribeToAllOfficials(setAllOfficials);
     const unsubTickets = subscribeToSupportTickets(setAllTickets);
+    const unsubReports = subscribeToAllReports(setAllReports);
+    const unsubLetters = subscribeToAllLetters(setAllLetters);
+    const unsubBroadcasts = subscribeToSystemBroadcasts(setBroadcasts);
+    const unsubAudit = subscribeToSystemAuditLogs(setAuditLogs);
+
     return () => {
       unsubHouses();
       unsubCash();
       unsubOfficials();
       unsubTickets();
+      unsubReports();
+      unsubLetters();
+      unsubBroadcasts();
+      unsubAudit();
     };
   }, []);
 
   // Compute Live Fleet Aggregates
   const fleetAggregates: FleetAggregates = useMemo(() => {
-    return calculateFleetAggregates(availableTenants, allHouses, allCashFlow, allTickets, allOfficials);
-  }, [availableTenants, allHouses, allCashFlow, allTickets, allOfficials]);
+    return calculateFleetAggregates(
+      availableTenants, 
+      allHouses, 
+      allCashFlow, 
+      allTickets, 
+      allOfficials,
+      allReports,
+      allLetters
+    );
+  }, [availableTenants, allHouses, allCashFlow, allTickets, allOfficials, allReports, allLetters]);
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -139,83 +146,13 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [auditCategoryFilter, setAuditCategoryFilter] = useState<string>('all');
   const [auditSearchQuery, setAuditSearchQuery] = useState<string>('');
 
-  // Broadcast State
-  const [broadcasts, setBroadcasts] = useState<SystemBroadcast[]>(() => {
-    try {
-      const stored = localStorage.getItem(BROADCAST_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
-    } catch (e) {
-      console.error('Failed to parse broadcasts:', e);
-    }
-    return [
-      {
-        id: 'bc-sample-1',
-        title: 'Pembaruan Sistem Multi-Tenant v2.4 Selesai',
-        message: 'Seluruh tenant RT/RW kini berjalan di bawah arsitektur basis data terisolasi dengan performa kilat dan pencadangan otomatis.',
-        priority: 'info',
-        targetTenantId: 'all',
-        createdAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-        isActive: true
-      }
-    ];
-  });
-
+  // Broadcast Form State
   const [newBroadcastTitle, setNewBroadcastTitle] = useState('');
   const [newBroadcastMessage, setNewBroadcastMessage] = useState('');
   const [newBroadcastPriority, setNewBroadcastPriority] = useState<'info' | 'warning' | 'urgent' | 'maintenance'>('info');
   const [newBroadcastTarget, setNewBroadcastTarget] = useState<string>('all');
 
-  // Audit Logs State
-  const [auditLogs, setAuditLogs] = useState<PlatformAuditEvent[]>(() => {
-    try {
-      const stored = localStorage.getItem(AUDIT_STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
-    } catch (e) {
-      console.error('Failed to parse audit logs:', e);
-    }
-    return [
-      {
-        id: 'audit-init-1',
-        timestamp: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
-        action: 'Inisialisasi Control Tower',
-        actor: 'system@teraswarga.id',
-        targetTenantId: 'all',
-        targetTenantName: 'Platform Global',
-        details: 'Sistem tata kelola multi-tenant dan engine isolasi diaktifkan',
-        category: 'security'
-      },
-      {
-        id: 'audit-init-2',
-        timestamp: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
-        action: 'Verifikasi Wilayah Acuan',
-        actor: 'root@teraswarga.id',
-        targetTenantId: 'tondo-rw20-rt02',
-        targetTenantName: 'RT 002 / RW 020 Huntap Tondo 2',
-        details: 'Konfigurasi RT percontohan terverifikasi aman dan terlindungi',
-        category: 'lifecycle'
-      }
-    ];
-  });
-
-  // Save broadcasts to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(BROADCAST_STORAGE_KEY, JSON.stringify(broadcasts));
-    } catch (e) {
-      console.error('Failed to store broadcasts:', e);
-    }
-  }, [broadcasts]);
-
-  // Save audit logs to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(AUDIT_STORAGE_KEY, JSON.stringify(auditLogs));
-    } catch (e) {
-      console.error('Failed to store audit logs:', e);
-    }
-  }, [auditLogs]);
-
-  // Helper to log audit events
+  // Helper to log audit events into Firestore Realtime Database
   const logAuditEvent = (
     action: string, 
     category: PlatformAuditEvent['category'], 
@@ -233,8 +170,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       details: details || '',
       category
     };
-    setAuditLogs(prev => [newEvent, ...prev.slice(0, 99)]);
+    logPlatformAuditEvent(newEvent);
   };
+
 
   // Unique Kelurahan options for filtering
   const kelurahanOptions = useMemo(() => {
@@ -522,16 +460,15 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     }
   };
 
-  // Add Broadcast
-  const handleCreateBroadcast = (e: React.FormEvent) => {
+  // Add Broadcast directly to Firestore Realtime Collection
+  const handleCreateBroadcast = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newBroadcastTitle.trim() || !newBroadcastMessage.trim()) {
       toast.error('Mohon isi judul dan pesan siaran');
       return;
     }
 
-    const newBc: SystemBroadcast = {
-      id: `bc-${Date.now()}`,
+    const newBc: Omit<SystemBroadcast, 'id'> = {
       title: newBroadcastTitle.trim(),
       message: newBroadcastMessage.trim(),
       priority: newBroadcastPriority,
@@ -540,36 +477,49 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       isActive: true
     };
 
-    setBroadcasts([newBc, ...broadcasts]);
-    setNewBroadcastTitle('');
-    setNewBroadcastMessage('');
-    logAuditEvent(
-      'Menerbitkan Siaran Platform',
-      'broadcast',
-      newBroadcastTarget,
-      `Judul: "${newBc.title}" (Prioritas: ${newBc.priority.toUpperCase()})`
-    );
-    toast.success('Siaran sistem platform berhasil diterbitkan!');
+    try {
+      await createSystemBroadcast(newBc);
+      setNewBroadcastTitle('');
+      setNewBroadcastMessage('');
+      logAuditEvent(
+        'Menerbitkan Siaran Platform',
+        'broadcast',
+        newBroadcastTarget,
+        `Judul: "${newBc.title}" (Prioritas: ${newBc.priority.toUpperCase()})`
+      );
+      toast.success('Siaran sistem platform berhasil diterbitkan ke Firestore!');
+    } catch (error) {
+      toast.error('Gagal menerbitkan siaran platform');
+    }
   };
 
-  const handleToggleBroadcast = (id: string) => {
+  const handleToggleBroadcast = async (id: string) => {
     const target = broadcasts.find(b => b.id === id);
     if (!target) return;
     const nextActive = !target.isActive;
-    setBroadcasts(prev => prev.map(b => b.id === id ? { ...b, isActive: nextActive } : b));
-    logAuditEvent(
-      `${nextActive ? 'Mengaktifkan' : 'Menonaktifkan'} Siaran`,
-      'broadcast',
-      target.targetTenantId,
-      `Siaran "${target.title}" disetel ${nextActive ? 'Aktif' : 'Non-Aktif'}`
-    );
+    try {
+      await updateSystemBroadcast(id, { isActive: nextActive });
+      logAuditEvent(
+        `${nextActive ? 'Mengaktifkan' : 'Menonaktifkan'} Siaran`,
+        'broadcast',
+        target.targetTenantId,
+        `Siaran "${target.title}" disetel ${nextActive ? 'Aktif' : 'Non-Aktif'}`
+      );
+      toast.success(`Siaran berhasil ${nextActive ? 'diaktifkan' : 'dinonaktifkan'}`);
+    } catch (e) {
+      toast.error('Gagal mengubah status siaran');
+    }
   };
 
-  const handleDeleteBroadcast = (id: string) => {
+  const handleDeleteBroadcast = async (id: string) => {
     const target = broadcasts.find(b => b.id === id);
-    setBroadcasts(prev => prev.filter(b => b.id !== id));
-    logAuditEvent('Menghapus Siaran', 'broadcast', target?.targetTenantId, `Siaran "${target?.title}" dihapus`);
-    toast.success('Siaran telah dihapus');
+    try {
+      await deleteSystemBroadcast(id);
+      logAuditEvent('Menghapus Siaran', 'broadcast', target?.targetTenantId, `Siaran "${target?.title}" dihapus`);
+      toast.success('Siaran telah dihapus dari basis data Firestore');
+    } catch (e) {
+      toast.error('Gagal menghapus siaran');
+    }
   };
 
   // 1. NON-SUPERADMIN RESTRICTION SCREEN (CLEAN LIGHT)
@@ -1957,11 +1907,10 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 </span>
 
                 <button
-                  onClick={() => {
-                    if (window.confirm('Bersihkan jejak audit lokal?')) {
-                      setAuditLogs([]);
-                      localStorage.removeItem(AUDIT_STORAGE_KEY);
-                      toast.success('Log audit telah dibersihkan');
+                  onClick={async () => {
+                    if (window.confirm('Bersihkan jejak audit platform di Cloud Firestore?')) {
+                      await clearSystemAuditLogs();
+                      toast.success('Log audit platform telah dibersihkan dari Firestore');
                     }
                   }}
                   className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors cursor-pointer"
@@ -2222,6 +2171,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         tenant={selectedTenantForDetail}
         isOpen={!!selectedTenantForDetail}
         onClose={() => setSelectedTenantForDetail(null)}
+        houses={allHouses}
+        cashFlows={allCashFlow}
+        reports={allReports}
+        letters={allLetters}
+        tickets={allTickets}
         onUpdate={(updated) => {
           setSelectedTenantForDetail(updated);
           logAuditEvent('Pembaruan Profil & Konfigurasi Tenant', 'lifecycle', updated.id, `Profil dan pengaturan wilayah ${updated.name} diperbarui`);
@@ -2361,6 +2315,72 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     {allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length === 0 && (
                       <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 text-[11px] text-slate-400 italic">
                         Tidak ada tiket bantuan yang menunggu respon.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Realtime Citizen Reports (Aduan Warga Seluruh RT) */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                        <AlertOctagon size={13} className="text-rose-600" />
+                        <span>Aduan Warga Realtime ({fleetAggregates.totalPendingReports} Butuh Respon)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono text-slate-400">
+                        Total {fleetAggregates.totalReports}
+                      </span>
+                    </div>
+                    {allReports.filter(r => r.status === 'Baru' || r.status === 'Diproses').slice(0, 2).map(rep => (
+                      <div key={rep.id} className="p-3 bg-rose-50/60 border border-rose-200/70 rounded-xl text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-900 truncate max-w-[170px]">{rep.reporterName || 'Warga'}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-rose-200 text-rose-900 font-bold uppercase">
+                            {rep.status}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 line-clamp-1">{rep.description}</p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                          <span>Wilayah: {rep.tenantId || 'Umum'}</span>
+                          <span>{rep.date || 'Hari ini'}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {allReports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length === 0 && (
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 text-[11px] text-slate-400 italic">
+                        Seluruh aduan warga di semua RT telah tertangani.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Realtime Letter Requests (Surat Pengantar Warga Seluruh RT) */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                        <FileText size={13} className="text-indigo-600" />
+                        <span>Pengajuan Surat Warga ({fleetAggregates.totalPendingLetters} Verifikasi)</span>
+                      </h4>
+                      <span className="text-[10px] font-mono text-slate-400">
+                        Total {fleetAggregates.totalLetters}
+                      </span>
+                    </div>
+                    {allLetters.filter(l => l.status === 'Menunggu' || (l.status as any) === 'Diproses').slice(0, 2).map(letReq => (
+                      <div key={letReq.id} className="p-3 bg-indigo-50/60 border border-indigo-200/70 rounded-xl text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-900 truncate max-w-[170px]">{letReq.applicantName}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold uppercase">
+                            {letReq.status}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 line-clamp-1">{letReq.type}</p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
+                          <span>Wilayah: {letReq.tenantId || 'Umum'}</span>
+                          <span>Rumah: {letReq.houseId}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {allLetters.filter(l => l.status === 'Menunggu' || (l.status as any) === 'Diproses').length === 0 && (
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 text-[11px] text-slate-400 italic">
+                        Tidak ada surat pengantar yang menunggu verifikasi RT.
                       </div>
                     )}
                   </div>

@@ -41,7 +41,8 @@ import {
   OperationType, FirestoreErrorInfo, OfficialLetter, 
   WaterMeterReading, WaterUtilitySettings, STBMRecord, 
   Tenant, House, CashFlow, Official, HelpdeskTicket, 
-  FleetTenantMetrics, FleetAggregates, TenantFeeConfig 
+  FleetTenantMetrics, FleetAggregates, TenantFeeConfig,
+  Report, SystemBroadcast, PlatformAuditEvent, LetterTemplate 
 } from "../types";
 import { toast } from "sonner";
 import { DEFAULT_TENANT_ID, matchesTenant, updateTenantInMemory } from "./tenantService";
@@ -131,6 +132,9 @@ const OFFICIAL_LETTERS_COL = "officialLetters";
 const FCM_TOKENS_COL = "fcmTokens";
 const CONFIGS_COL = "configs";
 export const WATER_METER_READINGS_COL = "waterMeterReadings";
+export const SYSTEM_BROADCASTS_COL = "systemBroadcasts";
+export const SYSTEM_AUDIT_LOGS_COL = "systemAuditLogs";
+export const GLOBAL_LETTER_TEMPLATES_COL = "globalLetterTemplates";
 
 // --- FCM TOKEN SERVICES ---
 export const saveFCMToken = async (userId: string, token: string) => {
@@ -4715,7 +4719,9 @@ export const calculateFleetAggregates = (
   houses: House[],
   cashFlows: CashFlow[],
   tickets: HelpdeskTicket[] = [],
-  officials: Official[] = []
+  officials: Official[] = [],
+  reports: Report[] = [],
+  letters: LetterRequest[] = []
 ): FleetAggregates => {
   const tenantMetrics: Record<string, FleetTenantMetrics> = {};
 
@@ -4727,12 +4733,18 @@ export const calculateFleetAggregates = (
   let totalFleetIncome = 0;
   let totalFleetExpense = 0;
   let totalPaidDoors = 0;
+  const totalReports = reports.length;
+  const totalPendingReports = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
+  const totalLetters = letters.length;
+  const totalPendingLetters = letters.filter(l => l.status === 'Menunggu' || (l.status as any) === 'Diproses').length;
 
   tenants.forEach(tenant => {
     const tHouses = houses.filter(h => matchesTenant(h.tenantId, tenant.id));
     const tCash = cashFlows.filter(c => matchesTenant(c.tenantId, tenant.id));
     const tOfficials = officials.filter(o => matchesTenant(o.tenantId, tenant.id));
     const tTickets = tickets.filter(t => matchesTenant(t.tenantId, tenant.id));
+    const tReports = reports.filter(r => matchesTenant(r.tenantId, tenant.id));
+    const tLetters = letters.filter(l => matchesTenant(l.tenantId, tenant.id));
 
     const realDoors = tHouses.length;
     const occupiedDoors = tHouses.filter(h => h.status === 'Occupied' || h.status === 'Business').length;
@@ -4757,6 +4769,10 @@ export const calculateFleetAggregates = (
     const liveBalance = totalIncome - totalExpense;
     const officialsCount = tOfficials.length + 3;
     const openTicketsCount = tTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+    const reportsCount = tReports.length;
+    const pendingReportsCount = tReports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
+    const lettersCount = tLetters.length;
+    const pendingLettersCount = tLetters.filter(l => l.status === 'Menunggu' || (l.status as any) === 'Diproses').length;
 
     tenantMetrics[tenant.id] = {
       tenantId: tenant.id,
@@ -4770,7 +4786,11 @@ export const calculateFleetAggregates = (
       totalIncome,
       totalExpense,
       officialsCount,
-      openTicketsCount
+      openTicketsCount,
+      reportsCount,
+      pendingReportsCount,
+      lettersCount,
+      pendingLettersCount
     };
 
     totalRegisteredDoors += realDoors;
@@ -4797,7 +4817,184 @@ export const calculateFleetAggregates = (
     totalFleetIncome,
     totalFleetExpense,
     averageCompliance,
+    totalReports,
+    totalPendingReports,
+    totalLetters,
+    totalPendingLetters,
     tenantMetrics
   };
 };
+
+// --- REALTIME ALL-FLEET CIVIC SERVICES (REPORTS & LETTERS) ---
+export const subscribeToAllReports = (callback: (reports: Report[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
+  const q = query(collection(db, REPORTS_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as Report));
+    data.sort((a, b) => new Date(b.date || (b as any).createdAt || 0).getTime() - new Date(a.date || (a as any).createdAt || 0).getTime());
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore all reports subscription error:", error);
+    callback([]);
+  });
+};
+
+export const subscribeToAllLetters = (callback: (letters: LetterRequest[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
+  const q = query(collection(db, LETTERS_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as LetterRequest));
+    data.sort((a, b) => new Date(b.date || (b as any).createdAt || 0).getTime() - new Date(a.date || (a as any).createdAt || 0).getTime());
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore all letters subscription error:", error);
+    callback([]);
+  });
+};
+
+// --- REALTIME SYSTEM BROADCASTS ---
+export const subscribeToSystemBroadcasts = (callback: (broadcasts: SystemBroadcast[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
+  const q = query(collection(db, SYSTEM_BROADCASTS_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as SystemBroadcast));
+    data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore system broadcasts subscription error:", error);
+    callback([]);
+  });
+};
+
+export const createSystemBroadcast = async (broadcast: Omit<SystemBroadcast, 'id'> & { id?: string }): Promise<string> => {
+  if (!isFirebaseConfigured || !db) return broadcast.id || `bc-${Date.now()}`;
+  try {
+    const clean = deepSanitize({
+      ...broadcast,
+      createdAt: broadcast.createdAt || new Date().toISOString(),
+      isActive: broadcast.isActive ?? true
+    });
+    if (broadcast.id) {
+      await setDoc(doc(db, SYSTEM_BROADCASTS_COL, broadcast.id), clean, { merge: true });
+      return broadcast.id;
+    } else {
+      const docRef = await addDoc(collection(db, SYSTEM_BROADCASTS_COL), clean);
+      return docRef.id;
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, SYSTEM_BROADCASTS_COL);
+    throw error;
+  }
+};
+
+export const updateSystemBroadcast = async (id: string, updates: Partial<SystemBroadcast>): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const clean = deepSanitize(updates);
+    await updateDoc(doc(db, SYSTEM_BROADCASTS_COL, id), clean);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${SYSTEM_BROADCASTS_COL}/${id}`);
+    throw error;
+  }
+};
+
+export const deleteSystemBroadcast = async (id: string): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    await deleteDoc(doc(db, SYSTEM_BROADCASTS_COL, id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${SYSTEM_BROADCASTS_COL}/${id}`);
+    throw error;
+  }
+};
+
+// --- REALTIME SYSTEM AUDIT LOGS ---
+export const subscribeToSystemAuditLogs = (callback: (logs: PlatformAuditEvent[]) => void, limitCount: number = 100) => {
+  if (!isFirebaseConfigured || !db) return () => {};
+  const q = query(collection(db, SYSTEM_AUDIT_LOGS_COL), limit(limitCount));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as PlatformAuditEvent));
+    data.sort((a, b) => new Date(b.timestamp || (b as any).createdAt || 0).getTime() - new Date(a.timestamp || (a as any).createdAt || 0).getTime());
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore system audit logs subscription error:", error);
+    callback([]);
+  });
+};
+
+export const logPlatformAuditEvent = async (event: Omit<PlatformAuditEvent, 'id'> & { id?: string }): Promise<string> => {
+  if (!isFirebaseConfigured || !db) return event.id || `audit-${Date.now()}`;
+  try {
+    const clean = deepSanitize({
+      ...event,
+      timestamp: event.timestamp || new Date().toISOString()
+    });
+    if (event.id) {
+      await setDoc(doc(db, SYSTEM_AUDIT_LOGS_COL, event.id), clean, { merge: true });
+      return event.id;
+    } else {
+      const docRef = await addDoc(collection(db, SYSTEM_AUDIT_LOGS_COL), clean);
+      return docRef.id;
+    }
+  } catch (error) {
+    console.warn("Failed to write platform audit event to Firestore:", error);
+    return event.id || '';
+  }
+};
+
+export const clearSystemAuditLogs = async (): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const snap = await getDocs(query(collection(db, SYSTEM_AUDIT_LOGS_COL), limit(100)));
+    const batch = writeBatch(db);
+    snap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+  } catch (error) {
+    console.warn("Failed to clear audit logs:", error);
+  }
+};
+
+// --- REALTIME GLOBAL LETTER TEMPLATES ---
+export const subscribeToGlobalLetterTemplates = (callback: (templates: LetterTemplate[]) => void) => {
+  if (!isFirebaseConfigured || !db) return () => {};
+  const q = query(collection(db, GLOBAL_LETTER_TEMPLATES_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as LetterTemplate));
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore global letter templates subscription error:", error);
+    callback([]);
+  });
+};
+
+export const deployGlobalLetterTemplates = async (templates: LetterTemplate[]): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const batch = writeBatch(db);
+    templates.forEach(tpl => {
+      const docRef = doc(db, GLOBAL_LETTER_TEMPLATES_COL, tpl.id);
+      batch.set(docRef, deepSanitize(tpl), { merge: true });
+    });
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, GLOBAL_LETTER_TEMPLATES_COL);
+    throw error;
+  }
+};
+
 

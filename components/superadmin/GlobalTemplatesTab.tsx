@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FileText, Copy, ExternalLink, Check, Download, 
   Plus, Sparkles, Send, Eye, ShieldCheck, X, CheckCircle2,
@@ -6,17 +6,13 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { LetterTemplate } from '../../types';
+import { 
+  subscribeToGlobalLetterTemplates, 
+  deployGlobalLetterTemplates 
+} from '../../services/databaseService';
 
-export interface LetterTemplate {
-  id: string;
-  code: string;
-  title: string;
-  category: 'kependudukan' | 'keamanan' | 'usaha' | 'sosial';
-  description: string;
-  variables: string[];
-  contentPreview: string;
-  isOfficialKemendagri: boolean;
-}
+export type { LetterTemplate };
 
 interface GlobalTemplatesTabProps {
   onLogAudit: (action: string, category: any, targetTenantId?: string, details?: string) => void;
@@ -92,6 +88,15 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isDeploying, setIsDeploying] = useState(false);
 
+  useEffect(() => {
+    const unsub = subscribeToGlobalLetterTemplates((cloudTemplates) => {
+      if (cloudTemplates && cloudTemplates.length > 0) {
+        setTemplates(cloudTemplates);
+      }
+    });
+    return () => unsub();
+  }, []);
+
   const handleCopyCode = (tpl: LetterTemplate) => {
     navigator.clipboard.writeText(JSON.stringify(tpl, null, 2));
     setCopiedId(tpl.id);
@@ -102,20 +107,21 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
   const handleDeployAll = async () => {
     setIsDeploying(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await deployGlobalLetterTemplates(templates);
       onLogAudit(
         'Deploy Template Persuratan',
         'module',
         'all',
-        `Katalog ${templates.length} template surat standar disinkronkan ke seluruh armada RT`
+        `Katalog ${templates.length} template surat standar disinkronkan ke seluruh armada RT di Firestore`
       );
-      toast.success('Seluruh template berhasil disinkronisasi ke semua armada RT!');
+      toast.success('Seluruh template berhasil disimpan dan disinkronkan secara realtime ke semua armada RT!');
     } catch (err) {
-      toast.error('Gagal menyinkronkan template');
+      toast.error('Gagal menyinkronkan template ke basis data Firestore');
     } finally {
       setIsDeploying(false);
     }
   };
+
 
   return (
     <div className="space-y-6">

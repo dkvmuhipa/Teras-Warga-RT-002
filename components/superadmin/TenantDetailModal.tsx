@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   X, Building2, MapPin, User, Phone, Shield, Trash2, 
   Edit3, Save, ExternalLink, Copy, Check, Layers, 
@@ -8,14 +8,23 @@ import {
   CheckSquare, Square
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Tenant, TenantStatus, TenantModules } from '../../types';
+import { 
+  Tenant, TenantStatus, TenantModules, 
+  House, CashFlow, Report, LetterRequest, HelpdeskTicket 
+} from '../../types';
 import { useTenant } from '../../context/TenantContext';
+import { matchesTenant } from '../../services/tenantService';
 import { toast } from 'sonner';
 
 interface TenantDetailModalProps {
   tenant: Tenant | null;
   isOpen: boolean;
   onClose: () => void;
+  houses?: House[];
+  cashFlows?: CashFlow[];
+  reports?: Report[];
+  letters?: LetterRequest[];
+  tickets?: HelpdeskTicket[];
   onUpdate?: (updated: Tenant) => void;
   onDelete?: (tenantId: string) => void;
 }
@@ -24,11 +33,17 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   tenant,
   isOpen,
   onClose,
+  houses = [],
+  cashFlows = [],
+  reports = [],
+  letters = [],
+  tickets = [],
   onUpdate,
   onDelete
 }) => {
   const { updateTenant, deleteTenant, startSupervision } = useTenant();
-  const [activeTab, setActiveTab] = useState<'info' | 'officials' | 'fees' | 'modules' | 'links'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'officials' | 'fees' | 'modules' | 'links' | 'operations'>('operations');
+
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [copiedLink, setCopiedLink] = useState<'public' | 'register' | null>(null);
@@ -66,6 +81,63 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
       setIsEditing(false);
     }
   }, [tenant]);
+
+  const tenantHouses = useMemo(() => {
+    if (!tenant || !houses) return [];
+    return houses.filter(h => matchesTenant(h.tenantId, tenant.id));
+  }, [houses, tenant]);
+
+  const tenantCash = useMemo(() => {
+    if (!tenant || !cashFlows) return [];
+    return cashFlows.filter(c => matchesTenant(c.tenantId, tenant.id));
+  }, [cashFlows, tenant]);
+
+  const tenantReports = useMemo(() => {
+    if (!tenant || !reports) return [];
+    return reports.filter(r => matchesTenant(r.tenantId, tenant.id));
+  }, [reports, tenant]);
+
+  const tenantLetters = useMemo(() => {
+    if (!tenant || !letters) return [];
+    return letters.filter(l => matchesTenant(l.tenantId, tenant.id));
+  }, [letters, tenant]);
+
+  const tenantTickets = useMemo(() => {
+    if (!tenant || !tickets) return [];
+    return tickets.filter(t => matchesTenant(t.tenantId, tenant.id));
+  }, [tickets, tenant]);
+
+  const liveStats = useMemo(() => {
+    const totalDoors = tenantHouses.length;
+    const occupiedDoors = tenantHouses.filter(h => h.status === 'Occupied' || h.status === 'Business').length;
+    const emptyDoors = tenantHouses.filter(h => h.status === 'Empty').length;
+    const paidDoors = tenantHouses.filter(h => h.paymentStatus === 'Lunas').length;
+    const complianceRate = totalDoors > 0 ? Math.round((paidDoors / totalDoors) * 100) : 0;
+    const population = tenantHouses.reduce((sum, h) => {
+      const occ = Number(h.occupants);
+      return sum + (occ > 0 ? occ : (h.headOfFamily ? 1 : 0));
+    }, 0);
+
+    const income = tenantCash
+      .filter(c => c.type === 'Income' || (c.type as any) === 'income')
+      .reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+    const expense = tenantCash
+      .filter(c => c.type === 'Expense' || (c.type as any) === 'expense')
+      .reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+    const balance = income - expense;
+
+    return {
+      totalDoors,
+      occupiedDoors,
+      emptyDoors,
+      paidDoors,
+      complianceRate,
+      population,
+      income,
+      expense,
+      balance
+    };
+  }, [tenantHouses, tenantCash]);
 
   if (!isOpen || !tenant) return null;
 
@@ -210,6 +282,20 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         {/* Navigation Tabs */}
         <div className="px-6 pt-3 border-b border-slate-200 bg-white flex gap-2 overflow-x-auto text-xs font-bold">
           <button
+            onClick={() => setActiveTab('operations')}
+            className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              activeTab === 'operations'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Activity size={14} />
+            <span>Operasional Realtime</span>
+            {tenantReports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length > 0 && (
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            )}
+          </button>
+          <button
             onClick={() => setActiveTab('info')}
             className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'info'
@@ -268,6 +354,170 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
         {/* Modal Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* TAB 0: DATA OPERASIONAL REALTIME */}
+          {activeTab === 'operations' && (
+            <div className="space-y-6">
+              {/* 4 Precision Metric Dials */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Pintu Terdaftar</span>
+                  <div className="text-lg font-black font-mono text-slate-900 mt-0.5">
+                    {liveStats.totalDoors} <span className="text-xs font-sans font-normal text-slate-500">Pintu</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-emerald-700 font-bold">
+                    {liveStats.occupiedDoors} Berpenghuni • {liveStats.emptyDoors} Kosong
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Populasi Warga</span>
+                  <div className="text-lg font-black font-mono text-indigo-600 mt-0.5">
+                    {liveStats.population} <span className="text-xs font-sans font-normal text-slate-500">Jiwa</span>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    Sensus Kepala & Anggota Keluarga
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Kas Bersih Riil</span>
+                  <div className="text-lg font-black font-mono text-emerald-600 mt-0.5">
+                    Rp {liveStats.balance.toLocaleString('id-ID')}
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    +Rp {liveStats.income.toLocaleString('id-ID')} / -Rp {liveStats.expense.toLocaleString('id-ID')}
+                  </span>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Kepatuhan Iuran</span>
+                  <div className="text-lg font-black font-mono text-sky-600 mt-0.5">
+                    {liveStats.complianceRate}%
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    {liveStats.paidDoors} dari {liveStats.totalDoors} Pintu Lunas
+                  </span>
+                </div>
+              </div>
+
+              {/* 2-Column Split: Aduan Warga & Pengajuan Surat */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Citizen Reports (Aduan Warga) */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <AlertOctagon size={15} className="text-rose-600" />
+                      <h4 className="text-xs font-black text-slate-900">Aduan Warga Realtime</h4>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-bold">
+                      {tenantReports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length} Aktif
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {tenantReports.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic py-4 text-center">Belum ada aduan warga masuk di wilayah ini</p>
+                    ) : (
+                      tenantReports.slice(0, 5).map(rep => (
+                        <div key={rep.id} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-800 truncate max-w-[150px]">{rep.reporterName || 'Warga'}</span>
+                            <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded border ${
+                              rep.status === 'Baru' ? 'bg-rose-100 text-rose-800 border-rose-200' :
+                              rep.status === 'Diproses' ? 'bg-amber-100 text-amber-800 border-amber-200' :
+                              'bg-emerald-100 text-emerald-800 border-emerald-200'
+                            }`}>
+                              {rep.status}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">{rep.description}</p>
+                          <div className="text-[9px] text-slate-400 font-mono flex items-center justify-between pt-0.5">
+                            <span>Kategori: {rep.type}</span>
+                            <span>{rep.date || 'Hari ini'}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Letter Requests (Surat Pengantar Warga) */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <FileText size={15} className="text-indigo-600" />
+                      <h4 className="text-xs font-black text-slate-900">Permohonan Surat Pengantar</h4>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold">
+                      {tenantLetters.filter(l => l.status === 'Menunggu' || (l.status as any) === 'Diproses').length} Menunggu
+                    </span>
+                  </div>
+
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                    {tenantLetters.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic py-4 text-center">Belum ada pengajuan surat di wilayah ini</p>
+                    ) : (
+                      tenantLetters.slice(0, 5).map(letReq => (
+                        <div key={letReq.id} className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 text-xs space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-800 truncate max-w-[150px]">{letReq.applicantName}</span>
+                            <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded border ${
+                              letReq.status === 'Menunggu' ? 'bg-amber-100 text-amber-800 border-amber-200' :
+                              letReq.status === 'Disetujui' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
+                              'bg-rose-100 text-rose-800 border-rose-200'
+                            }`}>
+                              {letReq.status}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-600 line-clamp-1 font-medium">{letReq.type}</p>
+                          <div className="text-[9px] text-slate-400 font-mono flex items-center justify-between pt-0.5">
+                            <span>Blok / Rumah: {letReq.houseId}</span>
+                            <span>NIK: {letReq.nik ? `${letReq.nik.slice(0, 6)}...` : '-'}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Helpdesk Tickets for this RT */}
+              <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={15} className="text-slate-700" />
+                    <h4 className="text-xs font-black text-slate-900">Tiket Dukungan Teknis Wilayah</h4>
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    Total {tenantTickets.length} Tiket
+                  </span>
+                </div>
+
+                {tenantTickets.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic py-2">Tidak ada kendala sistem atau tiket bantuan terbuka untuk wilayah ini</p>
+                ) : (
+                  <div className="space-y-2">
+                    {tenantTickets.slice(0, 3).map(tk => (
+                      <div key={tk.id} className="p-3 bg-white rounded-xl border border-slate-200 text-xs flex items-center justify-between gap-3">
+                        <div>
+                          <div className="font-bold text-slate-900">{tk.title}</div>
+                          <p className="text-[11px] text-slate-500 line-clamp-1">{tk.description}</p>
+                        </div>
+                        <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded border shrink-0 ${
+                          tk.status === 'open' ? 'bg-amber-100 text-amber-800 border-amber-300' :
+                          tk.status === 'in_progress' ? 'bg-indigo-100 text-indigo-800 border-indigo-300' :
+                          'bg-emerald-100 text-emerald-800 border-emerald-300'
+                        }`}>
+                          {tk.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* TAB 1: IDENTITAS & BLOK */}
           {activeTab === 'info' && (
             <div className="space-y-4">

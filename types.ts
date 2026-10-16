@@ -106,6 +106,10 @@ export interface FleetTenantMetrics {
   totalExpense: number;
   officialsCount: number;
   openTicketsCount: number;
+  reportsCount: number;
+  pendingReportsCount: number;
+  lettersCount: number;
+  pendingLettersCount: number;
 }
 
 export interface FleetAggregates {
@@ -118,7 +122,43 @@ export interface FleetAggregates {
   totalFleetIncome: number;
   totalFleetExpense: number;
   averageCompliance: number;
+  totalReports: number;
+  totalPendingReports: number;
+  totalLetters: number;
+  totalPendingLetters: number;
   tenantMetrics: Record<string, FleetTenantMetrics>;
+}
+
+export interface SystemBroadcast {
+  id: string;
+  title: string;
+  message: string;
+  priority: 'info' | 'warning' | 'urgent' | 'maintenance';
+  targetTenantId: 'all' | string;
+  createdAt: string;
+  isActive: boolean;
+}
+
+export interface PlatformAuditEvent {
+  id: string;
+  timestamp: string;
+  action: string;
+  actor: string;
+  targetTenantId?: string;
+  targetTenantName?: string;
+  details: string;
+  category: 'lifecycle' | 'module' | 'tariff' | 'broadcast' | 'security' | 'export';
+}
+
+export interface LetterTemplate {
+  id: string;
+  code: string;
+  title: string;
+  category: 'kependudukan' | 'keamanan' | 'usaha' | 'sosial';
+  description: string;
+  variables: string[];
+  contentPreview: string;
+  isOfficialKemendagri: boolean;
 }
 
 export interface Tenant {
