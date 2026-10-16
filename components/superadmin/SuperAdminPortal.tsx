@@ -9,12 +9,20 @@ import {
   Radio, Megaphone, FileText, Bell, LayoutGrid, List, Copy,
   Edit3, Trash2, Sliders, CheckSquare, Eye, Share2, Info,
   AlertTriangle, Droplets, Package, Camera, AlertOctagon,
-  History, UserPlus, HardDrive, Terminal, CheckCheck, ToggleLeft, ToggleRight, X
+  History, UserPlus, HardDrive, Terminal, CheckCheck, ToggleLeft, ToggleRight, X,
+  UploadCloud
 } from 'lucide-react';
 import { useTenant } from '../../context/TenantContext';
 import { Tenant, Role, TenantStatus, TenantModules } from '../../types';
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
 import { TenantDetailModal } from './TenantDetailModal';
+import { RestoreSnapshotModal } from './RestoreSnapshotModal';
+import { OfficialsDirectoryTab } from './OfficialsDirectoryTab';
+import { HelpdeskSupportTab } from './HelpdeskSupportTab';
+import { CivicAnalyticsTab } from './CivicAnalyticsTab';
+import { GlobalTemplatesTab } from './GlobalTemplatesTab';
+import { PaymentGatewayTab } from './PaymentGatewayTab';
+import { SystemTelemetryTab } from './SystemTelemetryTab';
 import { SUPER_ADMIN_EMAILS } from '../../constants';
 import { auth } from '../../services/firebaseConfig';
 import { signOut } from 'firebase/auth';
@@ -65,11 +73,16 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     stopSupervision
   } = useTenant();
 
-  // Primary Tab State
-  const [activeTab, setActiveTab] = useState<'tenants' | 'modules' | 'tariffs' | 'broadcast' | 'audit' | 'security'>('tenants');
+  // Primary Tab State (12 Tools across 4 Civic Operation Groups)
+  const [activeTab, setActiveTab] = useState<
+    'tenants' | 'officials' | 'modules' | 'support' | 'templates' | 
+    'tariffs' | 'gateway' | 'analytics' | 'broadcast' | 'telemetry' | 
+    'audit' | 'security'
+  >('tenants');
 
   // Modal States
   const [showOnboardModal, setShowOnboardModal] = useState(false);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [selectedTenantForDetail, setSelectedTenantForDetail] = useState<Tenant | null>(null);
 
   // Search & Filter States
@@ -541,23 +554,91 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     );
   }
 
-  // Navigation Tabs Configuration
+  // Navigation Tabs Configuration (12 Tools across 4 Civic Operation Groups)
+  type SuperAdminTabId = 
+    | 'tenants' | 'officials' | 'modules' | 'support' | 'templates' 
+    | 'tariffs' | 'gateway' | 'analytics' | 'broadcast' | 'telemetry' 
+    | 'audit' | 'security';
+
   interface NavTabItem {
-    id: 'tenants' | 'modules' | 'tariffs' | 'broadcast' | 'audit' | 'security';
+    id: SuperAdminTabId;
     label: string;
     icon: React.ElementType;
     count?: number;
     badge?: string;
   }
 
-  const tabs: NavTabItem[] = [
-    { id: 'tenants', label: 'Direktori Armada RT', icon: Globe, count: availableTenants.length },
-    { id: 'modules', label: 'Matriks Modul & Sakelar', icon: Sliders, badge: 'Matrix' },
-    { id: 'tariffs', label: 'Matriks Tarif & Finansial', icon: BarChart3 },
-    { id: 'broadcast', label: 'Siaran Platform', icon: Megaphone, count: broadcasts.filter(b => b.isActive).length },
-    { id: 'audit', label: 'Jejak Audit Platform', icon: History, count: auditLogs.length },
-    { id: 'security', label: 'Keamanan & Snapshot', icon: ShieldCheck }
+  interface NavTabGroup {
+    category: string;
+    description: string;
+    tabs: NavTabItem[];
+  }
+
+  const tabGroups: NavTabGroup[] = [
+    {
+      category: 'Armada & Pengurus',
+      description: 'Tata kelola wilayah dan kontak aparatur RT',
+      tabs: [
+        { id: 'tenants', label: 'Direktori Armada RT', icon: Globe, count: availableTenants.length },
+        { id: 'officials', label: 'Pengurus & Kontak WA', icon: Users },
+        { id: 'modules', label: 'Matriks Modul & Sakelar', icon: Sliders, badge: 'Matrix' },
+      ]
+    },
+    {
+      category: 'Layanan & Birokrasi',
+      description: 'Dukungan teknis dan standardisasi persuratan',
+      tabs: [
+        { id: 'support', label: 'Tiket Bantuan RT', icon: HelpCircle, badge: 'Helpdesk' },
+        { id: 'templates', label: 'Template Surat Standar', icon: FileText },
+        { id: 'broadcast', label: 'Siaran Platform', icon: Megaphone, count: broadcasts.filter(b => b.isActive).length },
+      ]
+    },
+    {
+      category: 'Finansial & Wawasan',
+      description: 'Tolok ukur fiskal dan agregasi analitik',
+      tabs: [
+        { id: 'tariffs', label: 'Matriks Tarif & Kas', icon: BarChart3 },
+        { id: 'gateway', label: 'Monitoring QRIS', icon: Wallet },
+        { id: 'analytics', label: 'Civic Analytics', icon: TrendingUp },
+      ]
+    },
+    {
+      category: 'Sistem & Keandalan',
+      description: 'Telemetri cloud, audit, dan snapshot pemulihan',
+      tabs: [
+        { id: 'telemetry', label: 'Telemetri & Cloud', icon: Activity },
+        { id: 'audit', label: 'Jejak Audit Platform', icon: History, count: auditLogs.length },
+        { id: 'security', label: 'Keamanan & Snapshot', icon: ShieldCheck }
+      ]
+    }
   ];
+
+  const allTabs: NavTabItem[] = tabGroups.flatMap(g => g.tabs);
+
+  const handleRestoreSuccess = (snapshot: any) => {
+    try {
+      if (Array.isArray(snapshot.tenants) && snapshot.tenants.length > 0) {
+        snapshot.tenants.forEach((t: Tenant) => {
+          if (updateTenant) updateTenant(t.id, t);
+        });
+      }
+      if (Array.isArray(snapshot.broadcasts) && snapshot.broadcasts.length > 0) {
+        setBroadcasts(snapshot.broadcasts);
+      }
+      if (Array.isArray(snapshot.auditTrail) && snapshot.auditTrail.length > 0) {
+        setAuditLogs(snapshot.auditTrail);
+      }
+      logAuditEvent(
+        'Pemulihan Disaster Recovery (Snapshot)',
+        'export',
+        'all',
+        `Memulihkan konfigurasi armada dari berkas cadangan (${snapshot.totalTenants || snapshot.tenants?.length || 0} RT)`
+      );
+      toast.success('Snapshot armada sukses dipulihkan ke platform!');
+    } catch (e: any) {
+      toast.error('Gagal menerapkan snapshot: ' + e.message);
+    }
+  };
 
   // 2. SUPER ADMIN FLEET CONTROL DASHBOARD (CLEAN LIGHT THEME)
   return (
@@ -602,6 +683,16 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           >
             <HardDrive size={13} className="text-indigo-600" />
             <span className="hidden sm:inline">Snapshot JSON</span>
+          </button>
+
+          {/* Restore JSON Backup */}
+          <button
+            onClick={() => setShowRestoreModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            title="Pulihkan Snapshot Armada (Restore JSON)"
+          >
+            <UploadCloud size={13} className="text-rose-600" />
+            <span className="hidden sm:inline">Pulihkan JSON</span>
           </button>
 
           {/* Export CSV */}
@@ -732,41 +823,74 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           </div>
         </div>
 
-        {/* Tab Navigation Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-2">
-          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-200/70 rounded-2xl border border-slate-200">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
-                  }`}
-                >
-                  <Icon size={14} className={isActive ? 'text-indigo-600' : ''} />
-                  <span>{tab.label}</span>
-                  {tab.count !== undefined && (
-                    <span className="px-1.5 py-0.2 rounded-md bg-slate-100 text-[10px] font-mono text-slate-600">
-                      {tab.count}
-                    </span>
-                  )}
-                  {tab.badge && (
-                    <span className="px-1.5 py-0.2 rounded-md bg-indigo-100 text-[9px] font-mono text-indigo-700 font-bold uppercase">
-                      {tab.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+        {/* Civic Command Sub-Navigation: 4 Operation Clusters (12 Tools) */}
+        <div className="space-y-3 border-b border-slate-200 pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 font-mono">
+                Konsol Operasional Root Super Admin
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold">
+                12 Modul Kendali
+              </span>
+            </div>
+            <div className="text-xs text-slate-500 font-mono hidden sm:block">
+              Platform Engine: v2.4 Multi-Tenant Fleet Standard
+            </div>
           </div>
 
-          <div className="text-xs text-slate-500 font-mono hidden md:block">
-            Platform Engine: v2.4 Multi-Tenant Fleet Standard
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {tabGroups.map((group) => (
+              <div 
+                key={group.category}
+                className="bg-white p-2.5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1.5"
+              >
+                <div className="px-2 py-0.5 flex items-center justify-between border-b border-slate-100 pb-1">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-mono">
+                    {group.category}
+                  </span>
+                  <span className="text-[9px] text-slate-400 font-mono">
+                    {group.tabs.length} tools
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  {group.tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as any)}
+                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-left ${
+                          isActive
+                            ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/20'
+                            : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Icon size={14} className={isActive ? 'text-white' : 'text-slate-400'} />
+                          <span className="truncate">{tab.label}</span>
+                        </div>
+                        {tab.count !== undefined && (
+                          <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono ${
+                            isActive ? 'bg-indigo-700/80 text-white' : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {tab.count}
+                          </span>
+                        )}
+                        {tab.badge && (
+                          <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-mono font-bold uppercase ${
+                            isActive ? 'bg-white text-indigo-700' : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                          }`}>
+                            {tab.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -1785,6 +1909,13 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <Download size={14} />
                   <span>Unduh Fleet Snapshot Lengkap (.JSON)</span>
                 </button>
+                <button
+                  onClick={() => setShowRestoreModal(true)}
+                  className="w-full mt-2 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <UploadCloud size={14} className="text-rose-600" />
+                  <span>Pulihkan dari Berkas JSON (Restore)</span>
+                </button>
               </div>
             </div>
 
@@ -1848,6 +1979,49 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             </div>
           </div>
         )}
+
+        {/* TAB 7: DIREKTORI PENGURUS & KONTAK WA */}
+        {activeTab === 'officials' && (
+          <OfficialsDirectoryTab 
+            tenants={availableTenants} 
+            onEditTenant={(tenant) => setSelectedTenantForDetail(tenant)} 
+          />
+        )}
+
+        {/* TAB 8: TIKET BANTUAN & DUKUNGAN TEKNIS RT */}
+        {activeTab === 'support' && (
+          <HelpdeskSupportTab 
+            tenants={availableTenants} 
+            onLogAudit={logAuditEvent} 
+          />
+        )}
+
+        {/* TAB 9: TEMPLATE PERSURATAN STANDAR */}
+        {activeTab === 'templates' && (
+          <GlobalTemplatesTab 
+            onLogAudit={logAuditEvent} 
+          />
+        )}
+
+        {/* TAB 10: MONITORING GATEWAY PEMBAYARAN & QRIS */}
+        {activeTab === 'gateway' && (
+          <PaymentGatewayTab 
+            tenants={availableTenants} 
+            onLogAudit={logAuditEvent} 
+          />
+        )}
+
+        {/* TAB 11: AGREGASI DEMOGRAFI & CIVIC ANALYTICS */}
+        {activeTab === 'analytics' && (
+          <CivicAnalyticsTab 
+            tenants={availableTenants} 
+          />
+        )}
+
+        {/* TAB 12: TELEMETRI & KESEHATAN SISTEM CLOUD */}
+        {activeTab === 'telemetry' && (
+          <SystemTelemetryTab />
+        )}
       </main>
 
       {/* Centralized Onboarding Registration Modal */}
@@ -1873,6 +2047,13 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           logAuditEvent('Penghapusan Tenant', 'lifecycle', tenantId, `Wilayah ID ${tenantId} telah dihapus dari fleet platform`);
           setSelectedTenantForDetail(null);
         }}
+      />
+
+      {/* Two-Way Disaster Recovery Restore Modal */}
+      <RestoreSnapshotModal
+        isOpen={showRestoreModal}
+        onClose={() => setShowRestoreModal(false)}
+        onRestoreSuccess={handleRestoreSuccess}
       />
     </div>
   );
