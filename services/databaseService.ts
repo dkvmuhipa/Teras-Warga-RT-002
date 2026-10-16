@@ -1934,14 +1934,21 @@ export const validateResidentAccess = async (houseId: string, code: string): Pro
             // If not found by ID, try finding by block and number (handles case and padding differences)
             const parts = formattedHouseId.split('-');
             if (parts.length >= 2) {
-                const block = parts[0];
+                const block = parts[0].toUpperCase();
                 const number = parts[1];
                 
-                const q = query(collection(db, HOUSES_COL));
+                // Targeted query by block rather than scanning the entire collection
+                const q = query(collection(db, HOUSES_COL), where('block', '==', block));
                 const querySnapshot = await getDocs(q);
-                const allHouses = querySnapshot.docs.map(doc => doc.data());
+                let candidates = querySnapshot.docs.map(doc => doc.data());
+
+                if (candidates.length === 0) {
+                    const fallbackQ = query(collection(db, HOUSES_COL), where('number', '==', number));
+                    const fallbackSnap = await getDocs(fallbackQ);
+                    candidates = fallbackSnap.docs.map(doc => doc.data());
+                }
                 
-                data = allHouses.find(h => {
+                data = candidates.find(h => {
                     const hBlock = String(h.block || '').toUpperCase().trim();
                     const hNum = String(h.number || '').toUpperCase().trim();
                     const hNumPadded = hNum.length === 1 ? `0${hNum}` : hNum;

@@ -1,26 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { 
-  FileText, ShoppingCart, Vote, AlertTriangle, Megaphone, 
-  Clock, Moon, Calendar, ChevronRight, ArrowRight, ShieldCheck, UserPlus, ShieldAlert, CheckCircle2, User,
-  Camera, Send, Home, Phone, Info, Lock, Eye, EyeOff, Droplets, Shield, CheckSquare, Scale, HelpCircle,
-  BookOpen, PhoneCall, Sparkles, TrendingUp, DollarSign, Trash2, Recycle, Trophy, Award, Zap, Wrench, Hammer,
-  Share2, MapPin, ExternalLink, Building
+  Sparkles, Calendar, ChevronRight, ArrowRight, ShieldCheck, 
+  BookOpen, Scale, Zap
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { House, Announcement, Report, Official, RondaSchedule, GalleryItem, PatrolSession, LetterRequest, MapPoint, CommunitySkill, UtilityOutage } from '../../types';
+import { 
+  House, Announcement, Report, Official, RondaSchedule, 
+  GalleryItem, PatrolSession, LetterRequest, MapPoint, 
+  CommunitySkill, UtilityOutage 
+} from '../../types';
 import { HeroSection } from '../HeroSection';
 import { DigitalSummary } from './DigitalSummary';
 import { ServiceStats } from '../ServiceStats';
 import { HouseMap } from '../HouseMap';
-import { Card } from '../ui/Card';
-import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
-import { useFinancial } from '../../context/FinancialContext';
-import { addReportToDb, validateResidentAccess, formatHouseId, subscribeToCollection } from '../../services/databaseService';
 import { SmartImage } from '../SmartImage';
+import { useFinancial } from '../../context/FinancialContext';
+import { useTenant } from '../../context/TenantContext';
+import { subscribeToCollection } from '../../services/databaseService';
 import { UtilityOutageTrackerModal } from './UtilityOutageTrackerModal';
+
+// Modular Home Subcomponents
+import { QuickActionsGrid } from './home/QuickActionsGrid';
+import { HouseBillChecker } from './home/HouseBillChecker';
+import { WasteCleanlinessWidget } from './home/WasteCleanlinessWidget';
+import { SpotlightAgenda } from './home/SpotlightAgenda';
+import { AnnouncementsFeed } from './home/AnnouncementsFeed';
+import { NightPatrolWidget } from './home/NightPatrolWidget';
+import { QuickReportModal } from './home/QuickReportModal';
+import { CleanlinessLeaderboardModal } from './home/CleanlinessLeaderboardModal';
+import { CommunitySkillsModal } from './home/CommunitySkillsModal';
 
 interface PublicHomeProps {
   houses: House[];
@@ -38,16 +47,19 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   houses, announcements, ronda, reports, letters, officials, gallery, activePatrol, mapPoints
 }) => {
   const navigate = useNavigate();
-  const contentRef = React.useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const { currentTenant } = useTenant();
   const { summaries, settings: financialSettings } = useFinancial();
-  const [statusSearchId, setStatusSearchId] = React.useState('');
   
-  const [communitySkills, setCommunitySkills] = React.useState<CommunitySkill[]>([]);
-  const [utilityOutages, setUtilityOutages] = React.useState<UtilityOutage[]>([]);
-  const [isSkillsModalOpen, setIsSkillsModalOpen] = React.useState(false);
-  const [isOutageModalOpen, setIsOutageModalOpen] = React.useState(false);
+  // Realtime Subscriptions for Community & Facilities
+  const [communitySkills, setCommunitySkills] = useState<CommunitySkill[]>([]);
+  const [utilityOutages, setUtilityOutages] = useState<UtilityOutage[]>([]);
+  const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
+  const [isOutageModalOpen, setIsOutageModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isCleanlinessLeaderboardOpen, setIsCleanlinessLeaderboardOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const unsubSkills = subscribeToCollection('communitySkills', (data) => setCommunitySkills(data as CommunitySkill[]));
     const unsubOutages = subscribeToCollection('utilityOutages', (data) => setUtilityOutages(data as UtilityOutage[]));
     return () => {
@@ -55,78 +67,6 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       unsubOutages();
     };
   }, []);
-  
-  const [isReportModalOpen, setIsReportModalOpen] = React.useState(false);
-  const [isCleanlinessLeaderboardOpen, setIsCleanlinessLeaderboardOpen] = React.useState(false);
-  const [reportForm, setReportForm] = React.useState({
-    type: 'Keamanan' as Report['type'],
-    description: '',
-    reporterName: '',
-    reporterHouseId: '',
-    reporterPhone: '',
-    pin: ''
-  });
-  const [showPin, setShowPin] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-
-  const handleSubmitReport = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reportForm.description || !reportForm.reporterName || !reportForm.reporterHouseId || !reportForm.pin) {
-      toast.error("Mohon lengkapi data laporan dan verifikasi");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      // Validate PIN
-      const isValid = await validateResidentAccess(reportForm.reporterHouseId, reportForm.pin);
-      if (!isValid) {
-        toast.error("Verifikasi Gagal!", {
-          description: "Kode Akses Rumah (PIN) tidak valid."
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      const formattedHouseId = formatHouseId(reportForm.reporterHouseId);
-      const { pin, ...reportData } = reportForm;
-
-      await addReportToDb({
-        ...reportData,
-        reporterHouseId: formattedHouseId,
-        date: new Date().toISOString(),
-        status: 'Baru'
-      });
-      toast.success("Laporan berhasil dikirim!", {
-        description: "Terima kasih atas laporannya. Pengurus RT akan segera menindaklanjuti."
-      });
-      setIsReportModalOpen(false);
-      setReportForm({
-        type: 'Keamanan',
-        description: '',
-        reporterName: '',
-        reporterHouseId: '',
-        reporterPhone: '',
-        pin: ''
-      });
-    } catch (error) {
-      toast.error("Gagal mengirim laporan");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-  const handleCheckStatus = (e: React.FormEvent) => {
-    e.preventDefault();
-    const house = houses.find(h => h.id.toLowerCase() === statusSearchId.toLowerCase());
-    if (house) {
-      navigate(`/info?search=${statusSearchId}`);
-    } else {
-      toast.error("No. Rumah tidak ditemukan", {
-        description: "Pastikan format benar (Contoh: A1-01)"
-      });
-    }
-  };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -145,188 +85,14 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
+      transition: { staggerChildren: 0.08 }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 15 },
     visible: { opacity: 1, y: 0 }
   };
-
-  type ServiceCategory = 'all' | 'admin' | 'security' | 'community';
-  const [activeServiceCategory, setActiveServiceCategory] = React.useState<ServiceCategory>('all');
-
-  const quickActions = React.useMemo(() => [
-    { 
-      label: 'Profil Warga', 
-      category: 'admin' as ServiceCategory,
-      icon: User, 
-      bg: 'bg-[#f0f2fe]', 
-      color: 'text-[#4f46e5]', 
-      border: 'border-indigo-100/80',
-      link: '/resident' 
-    },
-    { 
-      label: 'Buat Surat', 
-      category: 'admin' as ServiceCategory,
-      icon: FileText, 
-      bg: 'bg-[#edf7ff]', 
-      color: 'text-[#0284c7]', 
-      border: 'border-sky-100/80',
-      link: '/services' 
-    },
-    { 
-      label: 'Lapor Tamu', 
-      category: 'security' as ServiceCategory,
-      icon: Shield, 
-      bg: 'bg-[#fff4eb]', 
-      color: 'text-[#ea580c]', 
-      border: 'border-amber-100/80',
-      link: '/services?tab=tamu',
-      badge: 'PENTING',
-      badgeColor: 'bg-rose-500'
-    },
-    { 
-      label: 'Lapor Sewa', 
-      category: 'security' as ServiceCategory,
-      icon: Building, 
-      bg: 'bg-[#e8faf0]', 
-      color: 'text-[#059669]', 
-      border: 'border-emerald-100/80',
-      link: '/services?tab=sewa',
-      badge: '1x24 JAM',
-      badgeColor: 'bg-emerald-600'
-    },
-    { 
-      label: 'Daftar Warga', 
-      category: 'admin' as ServiceCategory,
-      icon: UserPlus, 
-      bg: 'bg-[#f5f3ff]', 
-      color: 'text-[#7c3aed]', 
-      border: 'border-purple-100/80',
-      link: '/register' 
-    },
-    { 
-      label: 'Buku Saku', 
-      category: 'admin' as ServiceCategory,
-      icon: BookOpen, 
-      bg: 'bg-[#f0f2fe]', 
-      color: 'text-[#4f46e5]', 
-      border: 'border-indigo-100/80',
-      link: '/welcome',
-      badge: 'BARU',
-      badgeColor: 'bg-emerald-600'
-    },
-    { 
-      label: 'UMKM Warga', 
-      category: 'community' as ServiceCategory,
-      icon: ShoppingCart, 
-      bg: 'bg-[#ecfdf5]', 
-      color: 'text-[#059669]', 
-      border: 'border-emerald-100/80',
-      link: '/umkm',
-      badge: 'UMKM',
-      badgeColor: 'bg-indigo-600'
-    },
-    { 
-      label: 'Warta RT', 
-      category: 'community' as ServiceCategory,
-      icon: Megaphone, 
-      bg: 'bg-[#eff6ff]', 
-      color: 'text-[#2563eb]', 
-      border: 'border-blue-100/80',
-      link: '/info' 
-    },
-    { 
-      label: 'Peraturan RT', 
-      category: 'security' as ServiceCategory,
-      icon: BookOpen, 
-      bg: 'bg-[#f0fdf4]', 
-      color: 'text-[#16a34a]', 
-      border: 'border-emerald-100/80',
-      link: '/rules',
-      badge: '13 BAB',
-      badgeColor: 'bg-emerald-600'
-    },
-    { 
-      label: 'Notula', 
-      category: 'admin' as ServiceCategory,
-      icon: Scale, 
-      bg: 'bg-[#f5f3ff]', 
-      color: 'text-[#6366f1]', 
-      border: 'border-indigo-100/80',
-      link: '/rules?tab=minutes',
-      badge: 'MUFAKAT',
-      badgeColor: 'bg-indigo-600'
-    },
-    { 
-      label: 'Jasa Warga', 
-      category: 'community' as ServiceCategory,
-      icon: Wrench, 
-      bg: 'bg-[#fffbeb]', 
-      color: 'text-[#d97706]', 
-      border: 'border-amber-100/80',
-      action: () => setIsSkillsModalOpen(true),
-      badge: 'PRO',
-      badgeColor: 'bg-amber-600'
-    },
-    { 
-      label: 'Info PLN/Air', 
-      category: 'security' as ServiceCategory,
-      icon: Zap, 
-      bg: 'bg-[#f0f9ff]', 
-      color: 'text-[#0284c7]', 
-      border: 'border-sky-100/80',
-      action: () => setIsOutageModalOpen(true),
-      badge: 'FASUM',
-      badgeColor: 'bg-sky-600'
-    },
-    { 
-      label: 'Lapor RT', 
-      category: 'admin' as ServiceCategory,
-      icon: AlertTriangle, 
-      bg: 'bg-[#fff1f2]', 
-      color: 'text-[#e11d48]', 
-      border: 'border-rose-100/80',
-      action: () => setIsReportModalOpen(true) 
-    },
-    { 
-      label: 'Kontak Darurat', 
-      category: 'security' as ServiceCategory,
-      icon: PhoneCall, 
-      bg: 'bg-[#fef2f2]', 
-      color: 'text-[#dc2626]', 
-      border: 'border-rose-100/80',
-      action: () => {
-        toast.info("Kontak Darurat RT 002 / RW 020 Huntap Tondo", {
-          description: "Ketua RT: +62 859-6119-4621 | Satpam Pos: +62 812-4455-8800 | Bhabinkamtibmas: 110 | Pemadam: 113 | Ambulans: 118"
-        });
-      },
-      badge: '24 JAM',
-      badgeColor: 'bg-rose-600'
-    },
-    { 
-      label: '5 Pilar STBM', 
-      category: 'community' as ServiceCategory,
-      icon: CheckSquare, 
-      bg: 'bg-[#e8faf0]', 
-      color: 'text-[#059669]', 
-      border: 'border-emerald-100/80',
-      link: '/health?tab=stbm',
-      badge: '100% ODF',
-      badgeColor: 'bg-emerald-600'
-    }
-  ], []);
-
-  const filteredQuickActions = React.useMemo(() => {
-    if (activeServiceCategory === 'all') return quickActions;
-    return quickActions.filter(action => action.category === activeServiceCategory);
-  }, [quickActions, activeServiceCategory]);
-
-  const [filterType, setFilterType] = React.useState<'All' | 'General' | 'Urgent' | 'Event' | 'Lelayu'>('All');
-
-  const filteredAnnouncements = announcements.filter(a => filterType === 'All' || a.type === filterType);
 
   const handleExplore = () => {
     contentRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -339,13 +105,14 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       animate="visible"
       className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 sm:py-8 space-y-12 mb-24 relative"
     >
-      {/* Background Decorative Elements */}
+      {/* Background Ambient Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-[5%] right-[5%] w-[30%] h-[30%] bg-indigo-200/20 blur-[120px] rounded-full animate-pulse" />
         <div className="absolute top-[40%] left-[-10%] w-[40%] h-[40%] bg-emerald-200/10 blur-[100px] rounded-full" />
         <div className="absolute bottom-[10%] right-[-5%] w-[25%] h-[25%] bg-amber-200/10 blur-[80px] rounded-full" />
       </div>
 
+      {/* Hero Section */}
       <HeroSection onExplore={handleExplore} />
 
       {/* Live Active Utility Outage Alert Banner */}
@@ -372,7 +139,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                 {utilityOutages.find(o => o.status === 'Ongoing')?.title}
               </h4>
               <p className="text-xs text-amber-100/90 font-medium line-clamp-1">
-                Wilayah Terdampak: {utilityOutages.find(o => o.status === 'Ongoing')?.affectedBlocks?.join(', ') || 'Semua Blok Huntap'}
+                Wilayah Terdampak: {utilityOutages.find(o => o.status === 'Ongoing')?.affectedBlocks?.join(', ') || `Semua Blok ${currentTenant.name}`}
               </p>
             </div>
           </div>
@@ -400,7 +167,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
           </span>
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full flex items-center gap-1">
-            <Sparkles size={11} className="text-emerald-600" /> LIVE UPDATE RT 02
+            <Sparkles size={11} className="text-emerald-600" /> LIVE UPDATE {currentTenant.rt ? `RT ${currentTenant.rt}` : 'WARGA'}
           </span>
         </div>
 
@@ -425,13 +192,13 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       <div ref={contentRef} className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-center sm:text-left border-b border-slate-200/60 pb-5">
         <div>
           <span className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600 mb-1 block">
-            Portal Warga RT 002 / RW 020
+            {currentTenant.name}
           </span>
           <h2 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight">
             {getGreeting()}, <span className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-600 bg-clip-text text-transparent">Warga!</span> 👋
           </h2>
           <p className="text-slate-500 font-medium text-xs sm:text-sm mt-1">
-            Selamat datang di pusat layanan mandiri dan transparansi digital lingkungan Huntap Tondo 2.
+            Selamat datang di pusat layanan mandiri dan transparansi digital lingkungan {currentTenant.name}.
           </p>
         </div>
         <div className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-[11px] font-bold text-slate-600 shrink-0 shadow-2xs">
@@ -440,100 +207,21 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         </div>
       </div>
 
-      {/* Quick Actions - Layanan Warga Terpadu Grid */}
-      <motion.div 
-        variants={itemVariants}
-        className="bg-white border border-slate-100 rounded-3xl md:rounded-[2.5rem] p-5 sm:p-7 md:p-8 shadow-xs relative z-10"
-      >
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-7">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700">SUPER-APP RT 002 / RW 020</span>
-            </div>
-            <h3 className="text-xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              Layanan <span className="text-[#4f46e5]">Warga Terpadu</span>
-            </h3>
-            <p className="text-slate-400 font-medium text-xs md:text-sm mt-1 max-w-xl">
-              Semua urusan administrasi, keamanan, gotong royong, dan usaha warga kini serba praktis dalam satu ketukan.
-            </p>
-          </div>
-
-          {/* Quick Category Filter Pills */}
-          <div className="flex items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/60 overflow-x-auto no-scrollbar shrink-0">
-            {[
-              { id: 'all' as ServiceCategory, label: 'Semua', count: quickActions.length },
-              { id: 'admin' as ServiceCategory, label: 'Surat & Admin', count: quickActions.filter(a => a.category === 'admin').length },
-              { id: 'security' as ServiceCategory, label: 'Keamanan & Fasum', count: quickActions.filter(a => a.category === 'security').length },
-              { id: 'community' as ServiceCategory, label: 'Komunitas & UMKM', count: quickActions.filter(a => a.category === 'community').length },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveServiceCategory(tab.id)}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                  activeServiceCategory === tab.id
-                    ? 'bg-white text-slate-900 shadow-xs border border-slate-200/60'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <span>{tab.label}</span>
-                <span className={`text-[8px] px-1.5 py-0.2 rounded-full font-black ${
-                  activeServiceCategory === tab.id ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
-                }`}>
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Grid layout matching Gojek/Grab/Citizen apps: 4 columns on mobile, 6 to 8 columns on desktop */}
-        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-6 gap-x-2.5 sm:gap-x-4 md:gap-x-6 w-full max-w-6xl">
-          {filteredQuickActions.map((action, idx) => (
-            <motion.button
-              key={action.label}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-              whileHover={{ y: -3, scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={action.action || (() => navigate(action.link!))}
-              className="flex flex-col items-center justify-start text-center group cursor-pointer focus:outline-none relative self-start"
-            >
-              {/* Badges directly layered on top of squircles */}
-              {action.badge && (
-                <span className={`absolute -top-1 md:-top-1.5 right-[2%] sm:right-[10%] z-20 text-[7px] md:text-[8px] font-extrabold uppercase tracking-wider ${action.badgeColor || 'bg-rose-600'} text-white px-1.5 py-0.5 rounded-full shadow-2xs select-none`}>
-                  {action.badge}
-                </span>
-              )}
-
-              {/* Pastel Squircle Badge matching design system */}
-              <div className={`
-                w-13 h-13 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl md:rounded-3xl
-                ${action.bg} ${action.color} border ${action.border}
-                flex items-center justify-center
-                shadow-2xs group-hover:scale-105 group-hover:shadow-xs
-                transition-all duration-200 relative overflow-hidden
-              `}>
-                <action.icon size={22} className="group-hover:scale-110 transition-transform duration-200 stroke-[2.2]" />
-              </div>
-
-              {/* Service Label */}
-              <span className="font-extrabold text-slate-700 text-[10px] sm:text-[11px] md:text-xs tracking-tight leading-snug mt-2 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[80px] md:max-w-none">
-                {action.label}
-              </span>
-            </motion.button>
-          ))}
-        </div>
+      {/* 1. Quick Actions - Layanan Warga Terpadu Grid */}
+      <motion.div variants={itemVariants}>
+        <QuickActionsGrid 
+          onOpenReport={() => setIsReportModalOpen(true)}
+          onOpenSkills={() => setIsSkillsModalOpen(true)}
+          onOpenOutage={() => setIsOutageModalOpen(true)}
+        />
       </motion.div>
 
+      {/* 2. Digital Summary (Kegiatan & Posyandu) */}
       <DigitalSummary />
 
-      {/* Peraturan RT 02 - RT2LAW & Buku Saku Section */}
+      {/* 3. Peraturan RT - RT2LAW & Buku Saku Section */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* RT2LAW Card - Supreme Point of Interest (POI) */}
+        {/* RT2LAW Card */}
         <motion.div 
           whileHover={{ y: -4, scale: 1.01 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -541,14 +229,15 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 md:p-10 text-white border border-slate-800 shadow-xs relative overflow-hidden group flex flex-col justify-between min-h-[300px]"
         >
           <div className="relative z-10 space-y-5">
-            {/* Top Badge & Header */}
             <div className="flex justify-between items-start gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-amber-500 text-slate-950 rounded-2xl flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                   <Scale size={24} strokeWidth={2.4} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block leading-none mb-1">Landasan Hukum RT 02</span>
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block leading-none mb-1">
+                    Landasan Hukum {currentTenant.rt ? `RT ${currentTenant.rt}` : 'Warga'}
+                  </span>
                   <span className="text-xs font-bold text-slate-300">Resmi Disahkan Warga &amp; Pengurus</span>
                 </div>
               </div>
@@ -558,7 +247,6 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
               </span>
             </div>
 
-            {/* Middle Landmark Title */}
             <div className="space-y-2 pt-1">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
@@ -573,10 +261,9 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             </div>
           </div>
 
-          {/* Separator and Footer */}
           <div className="relative z-10 pt-4 mt-5 border-t border-white/10 flex items-center justify-between">
             <span className="text-slate-400 tracking-wider uppercase font-extrabold text-[10px] flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-amber-400" /> KELURAHAN TONDO &bull; PALU
+              <ShieldCheck size={14} className="text-amber-400" /> KELURAHAN {currentTenant.kelurahan?.toUpperCase()} &bull; {currentTenant.city?.toUpperCase()}
             </span>
             <span className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-xs group-hover:scale-105 transition-all">
               <span>Buka Regulasi</span>
@@ -585,7 +272,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           </div>
         </motion.div>
 
-        {/* Companion Card: Buku Saku Warga Baru RT 02 */}
+        {/* Companion Card: Buku Saku Warga Baru */}
         <div 
           onClick={() => navigate('/welcome')}
           className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs hover:shadow-md transition-all relative overflow-hidden group flex flex-col justify-between min-h-[300px]"
@@ -602,9 +289,11 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             </div>
 
             <div className="space-y-1.5 pt-1">
-              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">Buku Saku <span className="text-[#4f46e5] font-serif italic">Warga Baru</span></h3>
+              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
+                Buku Saku <span className="text-[#4f46e5] font-serif italic">Warga Baru</span>
+              </h3>
               <p className="text-xs font-medium text-slate-500 leading-relaxed">
-                Panduan praktis warga baru &amp; penghuni kontrak: 4 langkah adaptasi awal, jadwal sampah, tata tertib, dan direktori kontak darurat.
+                Panduan praktis warga baru &amp; penghuni kontrak: 4 langkah adaptasi awal, jadwal sampah, tata tertib, dan direktori kontak darurat lingkungan.
               </p>
             </div>
           </div>
@@ -621,393 +310,27 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         </div>
       </motion.div>
 
-      {/* Widget Inovatif: Jadwal Sampah & Papan Kebersihan Blok */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-        {/* Widget 1: Jadwal & Count Down Pengangkutan Sampah */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden group flex flex-col justify-between">
-          <div className="relative z-10 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 px-3 py-1 bg-[#e8faf0] text-[#059669] rounded-full border border-emerald-100/80">
-                <Recycle size={14} className="animate-spin" />
-                <span className="text-[10px] font-extrabold uppercase tracking-wider">Smart Waste RT 02</span>
-              </div>
-              <span className="text-[10px] font-bold text-slate-400">Pengangkutan Rutin</span>
-            </div>
-
-            <div>
-              <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 mb-1">Jadwal Sampah & Daur Ulang</h3>
-              <p className="text-xs text-slate-500 font-medium">Keluarkan tempat sampah Anda sebelum armada kebersihan tiba.</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-1">
-              <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-1">
-                <p className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider">Organik / Dapur</p>
-                <p className="text-sm font-extrabold text-slate-800">Senin, Rabu, Sabtu</p>
-                <p className="text-[10px] font-bold text-slate-400">Jam 07:00 WITA</p>
-              </div>
-              <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-1">
-                <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-wider">Anorganik / Botol</p>
-                <p className="text-sm font-extrabold text-slate-800">Selasa & Jumat</p>
-                <p className="text-[10px] font-bold text-slate-400">Jam 15:30 WITA</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10 pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
-            <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Armada Aktif Pagi Ini
-            </span>
-            <span className="text-[10px] text-slate-400 font-bold">Bank Sampah Huntap</span>
-          </div>
-        </div>
-
-        {/* Widget 2: Indikator Kebersihan & Blok Terbersih */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden group flex flex-col justify-between">
-          <div className="relative z-10 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 px-3 py-1 bg-[#fff4eb] text-[#ea580c] rounded-full border border-amber-100/80">
-                <Award size={14} />
-                <span className="text-[10px] font-extrabold uppercase tracking-wider">Penghargaan Lingkungan</span>
-              </div>
-              <span className="text-[10px] font-extrabold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/80 uppercase">
-                {financialSettings?.cleanestMonth || 'Periode Berjalan'}
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 mb-1">Blok Terbersih Bulan Ini</h3>
-              <p className="text-xs text-slate-500 font-medium">Berdasarkan penilaian kebersihan got, kerapihan pekarangan & keasrian tanaman.</p>
-            </div>
-
-            {financialSettings?.cleanestBlock ? (
-              <div className="p-3.5 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl text-white shadow-xs flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-white">
-                    <Trophy size={22} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-amber-100">Juara 1 Kebersihan</p>
-                    <p className="text-lg font-extrabold text-white">
-                      {financialSettings.cleanestBlock}
-                    </p>
-                  </div>
-                </div>
-                {financialSettings.cleanestScore ? (
-                  <span className="text-[10px] font-extrabold bg-white text-amber-800 px-3 py-1.5 rounded-xl uppercase tracking-wider shadow-2xs">
-                    Nilai {financialSettings.cleanestScore}/100
-                  </span>
-                ) : null}
-              </div>
-            ) : (
-              <div className="p-4 bg-slate-50/80 border border-slate-100 rounded-2xl text-center">
-                <p className="text-xs text-slate-500 font-medium">Penilaian kebersihan blok periode ini sedang berlangsung.</p>
-              </div>
-            )}
-          </div>
-
-          <div className="relative z-10 pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
-            <span className="text-[10px] text-slate-400 font-bold">Evaluasi Kebersihan RT 02</span>
-            <button
-              onClick={() => setIsCleanlinessLeaderboardOpen(true)}
-              className="text-[10px] font-extrabold text-indigo-600 hover:text-indigo-700 uppercase tracking-wider flex items-center gap-1 cursor-pointer"
-            >
-              Lihat Klasemen <ArrowRight size={12} />
-            </button>
-          </div>
-        </div>
+      {/* 4. Jadwal Sampah & Papan Kebersihan Blok */}
+      <motion.div variants={itemVariants}>
+        <WasteCleanlinessWidget 
+          financialSettings={financialSettings}
+          onOpenLeaderboard={() => setIsCleanlinessLeaderboardOpen(true)}
+        />
       </motion.div>
 
+      {/* 5. Transparansi Layanan & Kinerja Pengurus */}
       <ServiceStats houses={houses} reports={reports} letters={letters} />
 
-      {/* Resident Dues Widget - NEW Bento Card */}
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 p-8 rounded-[3rem] text-white shadow-2xl shadow-slate-200 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
-            <Droplets size={140} />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Keuangan Warga</p>
-              <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-[9px] font-black uppercase tracking-wider">Transparan</span>
-            </div>
-            <h3 className="text-2xl font-black mb-4 tracking-tight">Iuran & Kas RT</h3>
-
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-2xl border border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-xl text-blue-400">
-                    <Droplets size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-200">Fasilitas Air Bersih</span>
-                    <p className="text-[10px] text-slate-400">Sistem Meter Mandiri</p>
-                  </div>
-                </div>
-                <span className="text-xs font-black text-white">
-                  {financialSettings.airFee > 0 ? `Rp ${financialSettings.airFee.toLocaleString('id-ID')}` : 'PDAM (Mandiri)'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between p-3.5 bg-white/5 rounded-2xl border border-white/10">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-500/20 rounded-xl text-emerald-400">
-                    <ShoppingCart size={16} />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-200">Retribusi Sampah TPS3R</span>
-                    <p className="text-[10px] text-slate-400">Berjenjang Sesuai Kategori</p>
-                  </div>
-                </div>
-                <span className="text-xs font-black text-white">
-                  {financialSettings.sampahFee ? `Rp ${financialSettings.sampahFee.toLocaleString('id-ID')}` : 'Rp 20.000'}
-                </span>
-              </div>
-              
-              {/* Info Transparansi Tambahan */}
-              <div className="pt-3 mt-3 border-t border-white/10 space-y-2.5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dana Air Terkumpul</span>
-                  <span className="font-black text-blue-400">Rp {summaries.air.totalCollected.toLocaleString('id-ID')}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dana Sampah Terkumpul</span>
-                  <span className="font-black text-emerald-400">Rp {summaries.sampah.totalCollected.toLocaleString('id-ID')}</span>
-                </div>
-                <div className="pt-2 border-t border-white/10 flex justify-between items-center">
-                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Total Iuran Terkumpul</span>
-                  <span className="text-base font-black text-emerald-300">Rp {summaries.totalCollected.toLocaleString('id-ID')}</span>
-                </div>
-              </div>
-            </div>
-
-            <Button 
-              onClick={() => navigate('/services?tab=iuran')}
-              variant="secondary" 
-              className="w-full py-4 rounded-2xl text-[10px] font-black tracking-widest uppercase shadow-lg cursor-pointer hover:bg-white transition-all"
-            >
-              Bayar Iuran Sekarang
-            </Button>
-          </div>
-        </div>
-
-        <div className="md:col-span-2 bg-white/80 backdrop-blur-md p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-indigo-500/5 flex flex-col justify-between group">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-1">Status Pembayaran</p>
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight">Cek Tagihan Rumah</h3>
-            </div>
-            <div className="p-4 bg-indigo-50 rounded-2xl text-indigo-600">
-              <CheckCircle2 size={24} />
-            </div>
-          </div>
-          
-          <div className="flex flex-col md:flex-row gap-6 items-center">
-            <div className="flex-1 w-full">
-              <p className="text-sm text-slate-500 font-medium mb-4 leading-relaxed">
-                Masukkan nomor rumah Anda untuk melihat rincian tagihan iuran air dan sampah yang belum terbayar.
-              </p>
-              
-              <div className="flex items-center gap-1.5 flex-wrap mb-4">
-                <span className="text-[10px] font-bold text-slate-400">Pilih Cepat Blok:</span>
-                {['C5', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12'].map(blockPrefix => (
-                  <button
-                    key={blockPrefix}
-                    type="button"
-                    onClick={() => setStatusSearchId(`${blockPrefix}-`)}
-                    className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 rounded-lg text-[10px] font-black uppercase transition-all cursor-pointer border border-slate-200/60 active:scale-95 shadow-2xs"
-                  >
-                    Blok {blockPrefix}
-                  </button>
-                ))}
-              </div>
-
-              <form onSubmit={handleCheckStatus} className="flex gap-3">
-                <input 
-                  type="text" 
-                  placeholder="No. Rumah (Contoh: C10-08)" 
-                  className="flex-1 px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-bold outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all shadow-xs"
-                  value={statusSearchId}
-                  onChange={e => setStatusSearchId(e.target.value)}
-                />
-                <Button type="submit" className="px-7 rounded-2xl cursor-pointer shadow-md">
-                  Cek
-                </Button>
-              </form>
-            </div>
-            <div className="hidden md:block w-px h-32 bg-slate-100 mx-4" />
-            <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-              <div className="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100 group-hover:bg-indigo-50 transition-colors flex flex-col justify-center">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Rumah</p>
-                <p className="text-2xl font-black text-slate-800">{houses.length}</p>
-                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter mt-1">
-                  {houses.filter(h => h.status === 'Occupied').length} Rumah Terisi
-                </p>
-              </div>
-              <div className="p-6 bg-slate-50 rounded-[2rem] text-center border border-slate-100 group-hover:bg-emerald-50 transition-colors">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Lunas Iuran</p>
-                <div className="flex flex-col items-center">
-                  <p className="text-2xl font-black text-emerald-600">
-                    {summaries.fullyPaidHousesCount}
-                  </p>
-                  <p className="text-[7px] font-black text-slate-400 uppercase tracking-tighter mt-0.5">Lunas Keduanya</p>
-                </div>
-                
-                <div className="mt-3 pt-3 border-t border-slate-200/50 grid grid-cols-2 gap-1">
-                  <div className="text-center">
-                    <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Air</p>
-                    <p className="text-[10px] font-black text-blue-600">
-                      {houses.filter(h => h.status === 'Occupied').length - summaries.air.unpaidCount}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-[6px] font-black text-slate-400 uppercase tracking-widest">Sampah</p>
-                    <p className="text-[10px] font-black text-emerald-600">
-                      {houses.filter(h => h.status === 'Occupied').length - summaries.sampah.unpaidCount}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* 6. Tagihan & Kas Warga */}
+      <motion.div variants={itemVariants}>
+        <HouseBillChecker 
+          houses={houses} 
+          summaries={summaries} 
+          financialSettings={financialSettings} 
+        />
       </motion.div>
 
-      {/* Quick Report Modal */}
-      <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="Aspirasi & Pengaduan Warga" maxWidth="max-w-xl">
-        <div className="p-6">
-          <div className="bg-rose-50 border border-rose-100 rounded-2xl p-4 mb-6 flex gap-3">
-            <div className="p-2 bg-rose-100 text-rose-600 rounded-xl h-fit">
-              <AlertTriangle size={20} />
-            </div>
-            <div>
-              <h4 className="text-sm font-black text-rose-900 uppercase tracking-tight">Layanan Aspirasi & Pengaduan</h4>
-              <p className="text-xs text-rose-700 font-medium leading-relaxed">
-                Gunakan formulir ini untuk melaporkan masalah keamanan, kebersihan, fasilitas, atau memberikan saran/aspirasi untuk lingkungan RT 02.
-              </p>
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmitReport} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kategori Laporan/Aspirasi</label>
-                <select 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                  value={reportForm.type}
-                  onChange={e => setReportForm({...reportForm, type: e.target.value as any})}
-                >
-                  <option value="Keamanan">Keamanan</option>
-                  <option value="Kebersihan">Kebersihan</option>
-                  <option value="Fasilitas">Fasilitas</option>
-                  <option value="Sosial">Sosial</option>
-                  <option value="Aspirasi/Saran">Aspirasi/Saran</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Pelapor</label>
-                <div className="relative">
-                  <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Nama Lengkap"
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                    value={reportForm.reporterName}
-                    onChange={e => setReportForm({...reportForm, reporterName: e.target.value})}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. Rumah Pelapor <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Contoh: A1-05"
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                    value={reportForm.reporterHouseId}
-                    onChange={e => setReportForm({...reportForm, reporterHouseId: e.target.value})}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PIN Akses Rumah <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input 
-                    type={showPin ? "text" : "password"} 
-                    placeholder="••••••"
-                    className="w-full pl-11 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                    value={reportForm.pin}
-                    onChange={e => setReportForm({...reportForm, pin: e.target.value})}
-                    required
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setShowPin(!showPin)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors"
-                  >
-                    {showPin ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">No. WhatsApp</label>
-              <div className="relative">
-                <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="0812..."
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
-                  value={reportForm.reporterPhone}
-                  onChange={e => setReportForm({...reportForm, reporterPhone: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Deskripsi Laporan / Aspirasi</label>
-              <textarea 
-                rows={4}
-                placeholder="Jelaskan secara detail masalah atau saran Anda..."
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none"
-                value={reportForm.description}
-                onChange={e => setReportForm({...reportForm, description: e.target.value})}
-              />
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="flex-1 py-4 rounded-2xl text-xs font-black uppercase tracking-widest"
-                onClick={() => setIsReportModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="flex-[2] py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-100"
-              >
-                {isSubmitting ? 'Mengirim...' : (
-                  <span className="flex items-center gap-2">
-                    <Send size={16} /> Kirim Laporan/Aspirasi
-                  </span>
-                )}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
-
-      {/* Map Section - Immersive */}
+      {/* 7. Interactive Map Section */}
       <motion.div 
         variants={itemVariants} 
         className="w-full bg-white/60 backdrop-blur-md p-3 rounded-[3rem] shadow-2xl shadow-indigo-500/5 border border-white/50 relative group"
@@ -1022,344 +345,23 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         />
       </motion.div>
 
-      {/* Spotlight Agenda Terdekat Warga RT 002 */}
-      {(() => {
-        const upcomingEvent = announcements.find(a => a.type === 'Event') || {
-          id: 'agenda-gotong-royong',
-          title: 'Gotong Royong & Pembersihan Saluran Drainase Blok RT 002',
-          content: 'Kegiatan kerja bakti berkala warga RT 002 / RW 020 untuk menjaga kelancaran saluran drainase, pembersihan rumput liar, dan penataan pekarangan menjelang musim hujan.',
-          date: new Date(Date.now() + 86400000 * 3).toISOString(),
-          type: 'Event' as const
-        };
-        const eventDate = new Date(upcomingEvent.date);
-        const eventDateFormatted = eventDate.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        const diffDays = Math.ceil((eventDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-        const countdownLabel = diffDays > 1 ? `${diffDays} Hari Lagi` : diffDays === 1 ? 'Besok Pagi' : diffDays === 0 ? 'Hari Ini' : 'Terlaksana';
+      {/* 8. Spotlight Agenda Terdekat */}
+      <motion.div variants={itemVariants}>
+        <SpotlightAgenda announcements={announcements} />
+      </motion.div>
 
-        const handleShareAgendaWA = () => {
-          const text = `📅 *AGENDA KEGIATAN RT 002 / RW 020*\n\n*${upcomingEvent.title}*\n🗓️ Tanggal: ${eventDateFormatted}\n📍 Lokasi: Lingkungan RT 002 Huntap Tondo 2\n\n${upcomingEvent.content}\n\n_Mari berpartisipasi dan menjaga kerukunan warga bersama!_\n🌐 Info Lengkap: ${window.location.origin}`;
-          window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-        };
-
-        return (
-          <motion.div 
-            variants={itemVariants} 
-            className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 rounded-[2.8rem] p-7 md:p-10 text-white border border-indigo-500/30 shadow-2xl relative overflow-hidden group"
-          >
-            <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
-            
-            <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="space-y-3 max-w-2xl">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                    <Sparkles size={11} className="text-amber-400 animate-spin-slow" /> AGENDA TERDEKAT WARGA
-                  </span>
-                  <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                    <Clock size={11} /> {countdownLabel}
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                    <Calendar size={12} className="text-indigo-400" /> {eventDateFormatted}
-                  </span>
-                </div>
-
-                <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-                  {upcomingEvent.title}
-                </h3>
-
-                <p className="text-xs md:text-sm text-slate-300 font-medium leading-relaxed">
-                  {upcomingEvent.content}
-                </p>
-
-                <div className="flex items-center gap-2 pt-1 text-[11px] font-bold text-slate-400">
-                  <MapPin size={13} className="text-rose-400 shrink-0" />
-                  <span>Titik Kumpul: Wilayah RT 002 / RW 020 Kelurahan Tondo, Palu</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full sm:w-auto">
-                <button
-                  onClick={handleShareAgendaWA}
-                  className="px-5 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer active:scale-95"
-                >
-                  <Share2 size={15} />
-                  <span>Bagikan ke WhatsApp RT</span>
-                </button>
-                <button
-                  onClick={() => navigate('/info')}
-                  className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all border border-white/10 cursor-pointer"
-                >
-                  <span>Lihat Semua Agenda</span>
-                  <ChevronRight size={14} />
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        );
-      })()}
-
+      {/* 9. Warta Warga & Night Patrol Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* Announcements - Editorial Style (Left Column - 2 Cols Wide) */}
-        <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 backdrop-blur-md p-6 rounded-[2.5rem] border border-slate-100/90 shadow-sm">
-            <div>
-              <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-1">Update Terkini</p>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
-                Warta <span className="italic font-serif text-indigo-600">Warga</span>
-              </h2>
-            </div>
-            
-            {/* Filter Tabs - Modern */}
-            <div className="flex bg-slate-100/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/80 shrink-0 overflow-x-auto no-scrollbar">
-              {[
-                { id: 'All', label: 'Semua' },
-                { id: 'Lelayu', label: 'Lelayu / Duka' },
-                { id: 'Urgent', label: 'Penting' },
-                { id: 'Event', label: 'Acara' },
-                { id: 'General', label: 'Info' }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setFilterType(tab.id as any)}
-                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap ${
-                    filterType === tab.id 
-                      ? 'bg-white text-indigo-600 shadow-sm font-black' 
-                      : 'text-slate-400 hover:text-slate-600'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {filteredAnnouncements.map((ann, idx) => {
-              const isLelayu = ann.type === 'Lelayu';
-              return (
-                <motion.div 
-                  key={ann.id} 
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  whileHover={{ y: -3 }}
-                  className={`backdrop-blur-md p-7 rounded-[2.5rem] border shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden ${
-                    isLelayu 
-                      ? 'bg-slate-900 text-white border-slate-800 shadow-slate-900/20' 
-                      : 'bg-white/95 border-slate-100/90 shadow-indigo-500/5'
-                  }`}
-                >
-                  <div className={`absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700 pointer-events-none ${
-                    isLelayu ? 'bg-rose-500/10' : 'bg-indigo-50/50'
-                  }`} />
-                  
-                  <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
-                    <div className="flex-1 space-y-3">
-                      <div className="flex items-center gap-3">
-                        <span className={`
-                          px-3.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] border
-                          ${isLelayu ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' :
-                            ann.type === 'Urgent' ? 'bg-rose-50 text-rose-600 border-rose-100' : 
-                            ann.type === 'Event' ? 'bg-purple-50 text-purple-600 border-purple-100' : 
-                            'bg-indigo-50 text-indigo-600 border-indigo-100'}
-                        `}>
-                          {isLelayu ? '🖤 Berita Lelayu' : ann.type}
-                        </span>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                          isLelayu ? 'text-slate-400' : 'text-slate-400'
-                        }`}>
-                          <Clock size={12} strokeWidth={2.5} className="text-slate-400" /> 
-                          {new Date(ann.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                        </span>
-                      </div>
-
-                      <h3 className={`text-xl md:text-2xl font-black leading-snug transition-colors ${
-                        isLelayu ? 'text-white group-hover:text-rose-300' : 'text-slate-900 group-hover:text-indigo-600'
-                      }`}>
-                        {ann.title}
-                      </h3>
-
-                      {isLelayu && (
-                        <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-2 text-xs">
-                          {ann.deceasedName && (
-                            <p className="font-bold text-slate-200">
-                              Almarhum/Almarhumah: <span className="text-white font-extrabold">{ann.deceasedName}</span> {ann.deceasedAge ? `(${ann.deceasedAge} Thn)` : ''}
-                            </p>
-                          )}
-                          {ann.deceasedHouseId && (
-                            <p className="text-slate-300">
-                              Rumah Duka: <span className="text-white font-bold">{ann.deceasedHouseId}</span>
-                            </p>
-                          )}
-                          {ann.funeralTime && (
-                            <p className="text-slate-300">
-                              Waktu Pemakaman: <span className="text-white font-bold">{ann.funeralTime}</span> {ann.funeralLocation ? `di ${ann.funeralLocation}` : ''}
-                            </p>
-                          )}
-                          {ann.tazkiahSchedule && (
-                            <p className="text-slate-300">
-                              Jadwal Takziah: <span className="text-white font-bold">{ann.tazkiahSchedule}</span>
-                            </p>
-                          )}
-                          {ann.bankAccount && (
-                            <div className="mt-3 pt-2 border-t border-white/10 flex items-center justify-between">
-                              <span className="text-[10px] uppercase font-black tracking-wider text-rose-300">Rekening Belasungkawa:</span>
-                              <span className="text-xs font-mono font-bold text-white bg-black/40 px-2 py-0.5 rounded">{ann.bankAccount}</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      <p className={`text-xs md:text-sm leading-relaxed whitespace-pre-line line-clamp-3 group-hover:line-clamp-none transition-all duration-500 font-medium ${
-                        isLelayu ? 'text-slate-300' : 'text-slate-500'
-                      }`}>
-                        {ann.content}
-                      </p>
-
-                      {/* Announcement Quick Action Footer */}
-                      <div className="pt-2 flex items-center gap-2 flex-wrap">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const text = `📢 *WARTA RESMI RT 002 / RW 020*\n\n*${ann.title}*\n📅 Tanggal: ${new Date(ann.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}\n\n${ann.content}\n\n_Diterbitkan oleh Pengurus RT 002 / RW 020 Kelurahan Tondo_\n🌐 Buka Portal Warga: ${window.location.origin}`;
-                            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
-                          }}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer shadow-xs ${
-                            isLelayu 
-                              ? 'bg-rose-500/20 text-rose-200 hover:bg-rose-500/30 border border-rose-500/30' 
-                              : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80'
-                          }`}
-                        >
-                          <Share2 size={12} />
-                          <span>Bagikan ke WhatsApp RT</span>
-                        </button>
-                      </div>
-                    </div>
-                    <div className="shrink-0 self-end md:self-start">
-                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-sm border ${
-                        isLelayu 
-                          ? 'bg-white/10 text-white border-white/10 group-hover:bg-rose-500 group-hover:text-white' 
-                          : 'bg-slate-50 text-slate-400 border-slate-100 group-hover:bg-indigo-600 group-hover:text-white'
-                      }`}>
-                        <ArrowRight size={18} />
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-            {filteredAnnouncements.length === 0 && (
-              <div className="text-center p-16 bg-white/60 backdrop-blur-sm rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                <Megaphone size={40} className="mx-auto text-slate-300 mb-3" />
-                <p className="text-slate-400 font-black uppercase tracking-wider text-xs">Belum ada warta terbaru</p>
-              </div>
-            )}
-          </div>
+        <motion.div variants={itemVariants} className="lg:col-span-2">
+          <AnnouncementsFeed announcements={announcements} />
         </motion.div>
 
-        {/* Right Sidebar Widgets - Stacked (Right Column - 1 Col Wide) */}
         <motion.div variants={itemVariants} className="space-y-6">
-
-          {/* Ronda Widget - Refined Compact Height */}
-          <div className="bg-slate-950 text-white p-7 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-950/20 relative overflow-hidden group border border-white/10">
-            <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity duration-700 rotate-12 pointer-events-none">
-              <Moon size={140} />
-            </div>
-            
-            <div className="relative z-10 space-y-6">
-              {activePatrol && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-md"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                      </span>
-                      <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Live Patrol</span>
-                    </div>
-                    <span className="text-[9px] font-black text-emerald-300 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                      {new Date(activePatrol.startTime).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
-                      <ShieldCheck size={20} />
-                    </div>
-                    <div>
-                      <p className="font-black text-white text-sm leading-tight">{activePatrol.officerName}</p>
-                      <p className="text-[9px] text-emerald-400/60 font-black uppercase tracking-widest mt-0.5">Petugas Aktif</p>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-
-              <div className="pb-5 border-b border-white/10 flex justify-between items-end">
-                <div>
-                  <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.25em] mb-1">Jadwal Siskamling</p>
-                  <p className="text-3xl font-black text-white leading-none tracking-tight">{today}</p>
-                  <p className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5 mt-1.5">
-                    <Calendar size={13} className="text-indigo-400" /> {fullDate}
-                  </p>
-                </div>
-                <div className="bg-indigo-600/20 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-indigo-500/30">
-                  <span className="text-[9px] font-black uppercase tracking-wider text-indigo-300">Shift Malam</span>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                {todayRonda && (todayRonda.shifts || todayRonda.members.length > 0) ? (
-                  todayRonda.shifts ? (
-                    todayRonda.shifts.map((shift, i) => (
-                      <div key={shift.id} className="space-y-2 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <p className="text-[9px] font-black text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
-                            <Clock size={11} strokeWidth={2.5} /> {shift.time}
-                          </p>
-                          <span className="text-[8px] font-black bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 uppercase">Shift {i+1}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {shift.members.map((member, j) => (
-                            <span key={j} className="text-[10px] font-bold text-white/80 bg-white/5 px-2.5 py-1 rounded-lg border border-white/10">
-                              {member}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    todayRonda.members.map((member, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                        <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-black text-xs border border-indigo-500/30">
-                          {i + 1}
-                        </div>
-                        <span className="font-bold text-sm tracking-tight text-white/90">{member}</span>
-                      </div>
-                    ))
-                  )
-                ) : (
-                  <div className="text-center py-6 border-2 border-dashed border-slate-800 rounded-2xl text-slate-500 text-xs font-bold uppercase tracking-wider">
-                    Jadwal belum diatur
-                  </div>
-                )}
-              </div>
-
-              <Button 
-                onClick={() => navigate('/info')} 
-                variant="secondary"
-                className="w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest gap-2"
-              >
-                Selengkapnya <ChevronRight size={14} strokeWidth={3}/>
-              </Button>
-            </div>
-          </div>
+          <NightPatrolWidget ronda={ronda} activePatrol={activePatrol} />
         </motion.div>
       </div>
 
-      {/* Gallery Widget - Creative Style */}
+      {/* 10. Gallery Warga */}
       <motion.div variants={itemVariants} className="bg-white/80 backdrop-blur-md p-8 rounded-[3rem] border border-white/50 shadow-2xl shadow-indigo-500/5 group">
         <div className="flex items-center justify-between mb-8 px-2">
           <h3 className="text-xl font-black text-slate-800 tracking-tight">Galeri <span className="text-indigo-600 italic font-serif">Warga</span></h3>
@@ -1396,165 +398,24 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         )}
       </motion.div>
 
-      {/* Modal Papan Peringkat Kebersihan Seluruh Blok */}
-      <Modal
+      {/* Modals */}
+      <QuickReportModal 
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+      />
+
+      <CleanlinessLeaderboardModal 
         isOpen={isCleanlinessLeaderboardOpen}
         onClose={() => setIsCleanlinessLeaderboardOpen(false)}
-        title="Papan Peringkat Kebersihan Lingkungan Blok RT 02"
-        maxWidth="max-w-2xl"
-      >
-        <div className="space-y-6 p-2">
-          <div className="p-4 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-200/80 rounded-2xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-amber-500 text-white rounded-xl shadow-md">
-                <Trophy size={24} />
-              </div>
-              <div>
-                <h4 className="font-black text-slate-900 text-sm">Evaluasi Kebersihan Kawasan</h4>
-                <p className="text-xs text-slate-500 font-medium">Periode Evaluasi: <span className="font-black text-amber-700">{financialSettings?.cleanestMonth || 'Agustus 2026'}</span></p>
-              </div>
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 px-3 py-1 rounded-full border border-amber-200">Official Board</span>
-          </div>
+        financialSettings={financialSettings}
+      />
 
-          {financialSettings?.cleanestBlock && financialSettings?.cleanestRankings ? (
-            <div className="space-y-3">
-              {financialSettings.cleanestRankings.map((item: any, idx: number) => {
-                const rankNum = item.rank || idx + 1;
-                const badge = rankNum === 1 ? '🥇 Juara 1 (Emas)' : rankNum === 2 ? '🥈 Juara 2 (Perak)' : rankNum === 3 ? '🥉 Juara 3 (Perunggu)' : `Peringkat ${rankNum}`;
-                const badgeBg = rankNum === 1 ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20' : rankNum === 2 ? 'bg-slate-300 text-slate-800' : rankNum === 3 ? 'bg-amber-700 text-white' : 'bg-slate-200 text-slate-700';
-                const border = rankNum === 1 ? 'border-amber-400/80 bg-amber-50/40 shadow-xs' : rankNum === 2 ? 'border-slate-200 bg-slate-50/60' : rankNum === 3 ? 'border-amber-900/10 bg-amber-900/5' : 'border-slate-200 bg-white';
-
-                return (
-                  <div key={rankNum} className={`p-4 rounded-2xl border ${border} flex items-center justify-between transition-all hover:scale-[1.01]`}>
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-xl ${badgeBg} flex items-center justify-center font-black text-sm shrink-0`}>
-                        {rankNum}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h5 className="font-black text-slate-900 text-sm">{item.block}</h5>
-                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600">{badge}</span>
-                        </div>
-                        <p className="text-[11px] font-bold text-slate-500 mt-0.5">{item.status || 'Evaluasi Lingkungan Baik'}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-black text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl block">
-                        {item.score}/100
-                      </span>
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Score Nilai</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="p-8 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-slate-50 border-2 border-dashed border-amber-300 rounded-3xl text-center space-y-3">
-              <div className="inline-flex p-4 bg-amber-500/20 text-amber-700 rounded-2xl">
-                <Award size={36} />
-              </div>
-              <h4 className="text-base font-black text-slate-800 uppercase tracking-wider">Penilaian Kebersihan Sedang Berlangsung</h4>
-              <p className="text-xs text-slate-600 leading-relaxed max-w-md mx-auto">
-                Pengurus RT 02 dan Tim Penilai Gotong Royong sedang melakukan evaluasi berkala kebersihan drainase, kerapian pekarangan, serta keasrian tanaman di setiap blok.
-              </p>
-              <div className="inline-block px-4 py-1.5 bg-amber-100 border border-amber-200 rounded-full text-[10px] font-black text-amber-800 uppercase tracking-widest">
-                Pengumuman Peringkat Segera Dipublikasikan
-              </div>
-            </div>
-          )}
-
-          <div className="p-4 bg-indigo-50/70 rounded-2xl border border-indigo-100 text-xs font-medium text-slate-600 leading-relaxed">
-            💡 <strong className="text-indigo-900">Kriteria Penilaian Kebersihan RT 02:</strong> Kebersihan got/drainase (35%), kerapian pekarangan & sampah (35%), keasrian tanaman (30%). Evaluasi dilakukan pengurus setiap akhir bulan.
-          </div>
-        </div>
-      </Modal>
-
-      {/* Public Modal: Direktori Jasa & Keahlian Warga */}
-      <Modal
+      <CommunitySkillsModal 
         isOpen={isSkillsModalOpen}
         onClose={() => setIsSkillsModalOpen(false)}
-        title="Direktori Jasa &amp; Keahlian Warga RT 02"
-        maxWidth="max-w-4xl"
-      >
-        <div className="space-y-6 p-2 text-left">
-          <div className="p-4 bg-amber-500/10 border border-amber-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-amber-500 text-white rounded-xl">
-                <Wrench size={22} />
-              </div>
-              <div>
-                <h4 className="font-black text-slate-900 text-sm">Gotong Royong Ekonomi &amp; Jasa Antar-Warga</h4>
-                <p className="text-xs text-slate-600 font-medium">Temukan teknisi, tukang, guru les, atau katering dari tetangga sendiri di lingkungan RT 02.</p>
-              </div>
-            </div>
-            <Button 
-              onClick={() => {
-                setIsSkillsModalOpen(false);
-                navigate('/resident');
-              }}
-              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-black uppercase tracking-wider py-2 px-4 rounded-xl shadow-md shrink-0"
-            >
-              + Pasang Jasa Saya
-            </Button>
-          </div>
+        skills={communitySkills}
+      />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-1">
-            {communitySkills.length > 0 ? (
-              communitySkills.map((item) => (
-                <Card key={item.id} className="p-5 bg-white border border-slate-200/80 shadow-xs hover:border-amber-300 transition-all flex flex-col justify-between">
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between">
-                      <span className="px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-lg text-[9px] font-black uppercase tracking-wider">
-                        {item.category}
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-400">
-                        Rumah: Blok {item.houseId}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h4 className="font-black text-slate-900 text-base">{item.title}</h4>
-                      <p className="text-xs text-slate-600 font-medium mt-1 line-clamp-3 leading-relaxed">{item.description}</p>
-                    </div>
-
-                    <div className="p-3 bg-slate-50 rounded-xl flex items-center justify-between">
-                      <div>
-                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Penyedia Jasa</p>
-                        <p className="text-xs font-bold text-slate-800">{item.providerName}</p>
-                      </div>
-                      {item.rateInfo && (
-                        <span className="text-[11px] font-black text-emerald-600">💰 {item.rateInfo}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="pt-3 mt-3 border-t border-slate-100">
-                    <button
-                      onClick={() => {
-                        const waPhone = (item.phone || '6285961194621').replace(/\D/g, '').replace(/^0/, '62');
-                        const msg = `Halo Bpk/Ibu ${item.providerName} (Blok ${item.houseId}), saya tetangga di RT 02 ingin menanyakan tentang jasa "${item.title}". Apakah sedang tersedia?`;
-                        window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-                      }}
-                      className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
-                    >
-                      <Phone size={14} /> Hubungi via WhatsApp
-                    </button>
-                  </div>
-                </Card>
-              ))
-            ) : (
-              <div className="col-span-full py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                <Wrench size={32} className="text-slate-300 mx-auto mb-2" />
-                <p className="text-xs font-bold text-slate-500">Belum ada daftar jasa tetangga yang dipublikasikan.</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">Warga dapat mempromosikan keahlian mereka melalui Portal Mandiri Warga.</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </Modal>
-
-      {/* Public Modal: Papan Informasi & Pantau Utilitas Huntap (PLN, Air, & Lapor Warga) */}
       <UtilityOutageTrackerModal
         isOpen={isOutageModalOpen}
         onClose={() => setIsOutageModalOpen(false)}

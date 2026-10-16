@@ -12,18 +12,38 @@ interface HeroSectionProps {
     onExplore?: () => void;
 }
 
+const LiveStationClock = React.memo(() => {
+    const [now, setNow] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-slate-400">Live Station</span>
+            </div>
+            <p className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 flex items-baseline gap-2 font-sans">
+                <span>{now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className="text-[10px] font-extrabold text-[#ea580c] uppercase tracking-widest bg-[#fff4eb] px-2.5 py-1 rounded-full border border-amber-100/80 shadow-2xs">WITA</span>
+            </p>
+            <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-[0.18em] flex items-center gap-1.5 pt-0.5">
+                <Sparkles size={13} className="text-amber-500 animate-spin-slow" />
+                {now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
+            </p>
+        </div>
+    );
+});
+
 export const HeroSection = ({ onExplore }: HeroSectionProps) => {
     const { currentTenant } = useTenant();
     const navigate = useNavigate();
-    const [date, setDate] = useState(new Date());
     const [searchTerm, setSearchTerm] = useState('');
     const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
     const { weather, loading, refresh } = useWeather();
-
-    useEffect(() => { 
-        const timer = setInterval(() => setDate(new Date()), 1000); 
-        return () => clearInterval(timer);
-    }, []);
 
     const getWeatherIcon = (code: number | undefined) => {
         if (code === undefined) return <Sun size={28} className="text-amber-400 animate-spin-slow" />;
@@ -197,20 +217,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               <div className="relative z-10 space-y-6">
                 {/* Top Bar: Time & Weather Badge */}
                 <div className="flex justify-between items-start gap-4">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                      <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-slate-400">Live Station</span>
-                    </div>
-                    <p className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 flex items-baseline gap-2 font-sans">
-                      <span>{date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</span>
-                      <span className="text-[10px] font-extrabold text-[#ea580c] uppercase tracking-widest bg-[#fff4eb] px-2.5 py-1 rounded-full border border-amber-100/80 shadow-2xs">WITA</span>
-                    </p>
-                    <p className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-[0.18em] flex items-center gap-1.5 pt-0.5">
-                      <Sparkles size={13} className="text-amber-500 animate-spin-slow" />
-                      {date.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short' })}
-                    </p>
-                  </div>
+                  <LiveStationClock />
 
                   <div className="flex flex-col items-end gap-2.5 shrink-0">
                     <motion.button 

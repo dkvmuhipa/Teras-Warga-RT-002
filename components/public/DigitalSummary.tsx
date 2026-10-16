@@ -91,7 +91,7 @@ export const DigitalSummary = () => {
                             <Heart size={24} />
                         </div>
                         <h4 className="text-xl font-black tracking-tight mb-3">Posyandu Digital</h4>
-                        <p className="text-sm font-medium text-emerald-50 text-emerald-100 leading-relaxed">
+                        <p className="text-sm font-medium text-emerald-100 leading-relaxed">
                             Pantau kesehatan keluarga Anda secara mandiri. Cek riwayat pemeriksaan bayi, balita, remaja, dewasa, ibu hamil, dan lansia langsung dari ponsel Anda.
                         </p>
                     </div>
