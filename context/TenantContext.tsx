@@ -86,6 +86,10 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       if (remoteList && remoteList.length > 0) {
         syncTenantsFromRemote(remoteList);
         setAllLoadedTenants(getAllTenants());
+        setCurrentTenant(prev => {
+          const matched = remoteList.find(t => t.id === prev.id);
+          return matched ? { ...prev, ...matched } : prev;
+        });
       }
     });
     return () => unsub();

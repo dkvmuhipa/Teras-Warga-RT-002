@@ -68,6 +68,59 @@ export interface TenantModules {
   cctv?: boolean;            // Pantauan CCTV lingkungan
 }
 
+export interface TenantPaymentGatewayConfig {
+  bankName: string;
+  accountNumber: string;
+  accountHolder: string;
+  qrisStatus: 'active' | 'pending' | 'manual_cash';
+  merchantNmid?: string;
+  digitalRate?: number;
+}
+
+export interface HelpdeskTicket {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  senderName: string;
+  senderPhone?: string;
+  title: string;
+  category: 'water_meter' | 'billing' | 'account' | 'feature_request' | 'system_bug' | 'other';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'in_progress' | 'resolved';
+  createdAt: string;
+  description: string;
+  adminResponse?: string;
+  resolvedAt?: string;
+}
+
+export interface FleetTenantMetrics {
+  tenantId: string;
+  realDoors: number;
+  occupiedDoors: number;
+  emptyDoors: number;
+  realResidents: number;
+  paidDoors: number;
+  complianceRate: number;
+  liveBalance: number;
+  totalIncome: number;
+  totalExpense: number;
+  officialsCount: number;
+  openTicketsCount: number;
+}
+
+export interface FleetAggregates {
+  totalTenants: number;
+  totalRegisteredDoors: number;
+  totalOccupiedDoors: number;
+  totalEmptyDoors: number;
+  totalPopulation: number;
+  totalFleetBalance: number;
+  totalFleetIncome: number;
+  totalFleetExpense: number;
+  averageCompliance: number;
+  tenantMetrics: Record<string, FleetTenantMetrics>;
+}
+
 export interface Tenant {
   id: string; // e.g. 'tondo-rw20-rt02'
   slug?: string; // e.g. 'rt02-tondo'
@@ -89,6 +142,7 @@ export interface Tenant {
   blockConfig: BlockRangeConfig[];
   fees?: Partial<TenantFeeConfig>;
   feeConfig?: Partial<TenantFeeConfig>;
+  paymentGateway?: TenantPaymentGatewayConfig;
   status?: TenantStatus;
   modules?: TenantModules;
   pdfConfig?: Partial<PdfConfig>;

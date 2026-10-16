@@ -48,12 +48,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle,
   LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid, BookOpen, Building, CheckSquare, Clock, Sparkles, Command, Sun, CloudRain, Wind, ArrowRight, CornerDownLeft,
-  FileClock, Award, Droplets, Building2
+  FileClock, Award, Droplets, Building2, HelpCircle
 } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 import { toast } from 'sonner';
 import { useWeather } from '../../hooks/useWeather';
 import { useTenant } from '../../context/TenantContext';
+import { SupportTicketModal } from './SupportTicketModal';
 
 interface AdminDashboardProps {
   role: Role;
@@ -109,6 +110,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
   const [spotlightQuery, setSpotlightQuery] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showSupportTicketModal, setShowSupportTicketModal] = useState(false);
   const { weather } = useWeather();
   const navigate = useNavigate();
 
@@ -637,8 +639,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <Search size={18} />
             </button>
             
-            {/* Notification & User Profile */}
+            {/* Notification, Support & User Profile */}
             <div className="flex items-center gap-1.5 md:gap-2">
+              <button
+                type="button"
+                onClick={() => setShowSupportTicketModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                title="Buka Pusat Bantuan & Tiket Super Admin"
+              >
+                <HelpCircle size={15} className="text-indigo-600" />
+                <span className="hidden sm:inline">Bantuan Super Admin</span>
+              </button>
+
               <button 
                 onClick={() => setActiveTab('notifications')}
                 className={`p-2 md:p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-all relative ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
@@ -876,6 +888,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           )}
         </AnimatePresence>
+
+        {/* Modal Pusat Bantuan & Tiket Super Admin */}
+        <SupportTicketModal
+          isOpen={showSupportTicketModal}
+          onClose={() => setShowSupportTicketModal(false)}
+        />
       </div>
     </div>
   );

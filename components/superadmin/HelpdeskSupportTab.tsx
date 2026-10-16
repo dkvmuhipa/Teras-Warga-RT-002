@@ -5,24 +5,14 @@ import {
   X, AlertTriangle, ShieldCheck, Tag, Send, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Tenant } from '../../types';
+import { Tenant, HelpdeskTicket } from '../../types';
+import { 
+  subscribeToSupportTickets, 
+  createSupportTicket, 
+  updateSupportTicket, 
+  deleteSupportTicket 
+} from '../../services/databaseService';
 import { toast } from 'sonner';
-
-export interface HelpdeskTicket {
-  id: string;
-  tenantId: string;
-  tenantName: string;
-  senderName: string;
-  senderPhone?: string;
-  title: string;
-  category: 'water_meter' | 'billing' | 'account' | 'feature_request' | 'system_bug' | 'other';
-  priority: 'low' | 'medium' | 'high' | 'critical';
-  status: 'open' | 'in_progress' | 'resolved';
-  createdAt: string;
-  description: string;
-  adminResponse?: string;
-  resolvedAt?: string;
-}
 
 interface HelpdeskSupportTabProps {
   tenants: Tenant[];
@@ -69,22 +59,19 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
         createdAt: '14 Okt 2026, 09:15',
         description: 'Format struk PDF iuran sampah dan kas warga perlu disesuaikan dengan logo RT beresolusi tinggi yang baru diperbarui.',
         adminResponse: 'Logo beresolusi tinggi sedang kami proses rendering pada engine PDF v2.4.'
-      },
-      {
-        id: 'TCK-2026-003',
-        tenantId: 'talise-rw05-rt01',
-        tenantName: 'RT 001 / RW 005 Talise Valangguni',
-        senderName: 'Bpk. Ahmad (Ketua RT)',
-        senderPhone: '085211223344',
-        title: 'Kendala Sinkronisasi Sensor Meteran Air Blok C',
-        category: 'water_meter',
-        priority: 'critical',
-        status: 'open',
-        createdAt: '16 Okt 2026, 08:30',
-        description: 'Tekanan air di pipa induk blok C sempat drop dan ada 5 meteran digital warga yang angkanya belum terbarui otomatis di dashboard.'
       }
     ];
   });
+
+  // Subscribe to real-time Cloud Firestore Support Tickets
+  useEffect(() => {
+    const unsub = subscribeToSupportTickets((fireTickets) => {
+      if (fireTickets && fireTickets.length > 0) {
+        setTickets(fireTickets);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'in_progress' | 'resolved'>('all');
@@ -102,7 +89,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
   const [newPriority, setNewPriority] = useState<HelpdeskTicket['priority']>('medium');
   const [newDescription, setNewDescription] = useState('');
 
-  // Save tickets to localStorage
+  // Persist backup to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(TICKET_STORAGE_KEY, JSON.stringify(tickets));
@@ -128,60 +115,61 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
   }, [tickets, searchQuery, statusFilter, priorityFilter]);
 
   // Update Ticket Status
-  const handleUpdateStatus = (ticketId: string, newStatus: 'open' | 'in_progress' | 'resolved') => {
-    setTickets(prev => prev.map(t => {
-      if (t.id === ticketId) {
-        return {
-          ...t,
-          status: newStatus,
-          resolvedAt: newStatus === 'resolved' ? new Date().toLocaleDateString('id-ID') : t.resolvedAt
-        };
-      }
-      return t;
-    }));
+  const handleUpdateStatus = async (ticketId: string, newStatus: 'open' | 'in_progress' | 'resolved') => {
+    const updates: Partial<HelpdeskTicket> = {
+      status: newStatus,
+      resolvedAt: newStatus === 'resolved' ? new Date().toISOString() : undefined
+    };
 
+    setTickets(prev => prev.map(t => (t.id === ticketId ? { ...t, ...updates } : t)));
     if (selectedTicket && selectedTicket.id === ticketId) {
-      setSelectedTicket(prev => prev ? { ...prev, status: newStatus } : null);
+      setSelectedTicket(prev => (prev ? { ...prev, ...updates } : null));
     }
 
-    const target = tickets.find(t => t.id === ticketId);
-    onLogAudit(
-      'Ubah Status Tiket',
-      'support',
-      target?.tenantId,
-      `Status tiket ${ticketId} (${target?.title}) diubah menjadi ${newStatus}`
-    );
-    toast.success(`Status tiket diubah menjadi ${newStatus.toUpperCase()}`);
+    try {
+      await updateSupportTicket(ticketId, updates);
+      const target = tickets.find(t => t.id === ticketId);
+      onLogAudit(
+        'Ubah Status Tiket',
+        'support',
+        target?.tenantId,
+        `Status tiket ${ticketId} (${target?.title}) diubah menjadi ${newStatus}`
+      );
+      toast.success(`Status tiket diubah menjadi ${newStatus.toUpperCase()}`);
+    } catch (err) {
+      toast.error('Gagal memperbarui status di cloud');
+    }
   };
 
   // Submit Admin Response
-  const handleSubmitResponse = () => {
+  const handleSubmitResponse = async () => {
     if (!selectedTicket || !responseInput.trim()) return;
 
-    setTickets(prev => prev.map(t => {
-      if (t.id === selectedTicket.id) {
-        return {
-          ...t,
-          adminResponse: responseInput.trim(),
-          status: t.status === 'open' ? 'in_progress' : t.status
-        };
-      }
-      return t;
-    }));
+    const updates: Partial<HelpdeskTicket> = {
+      adminResponse: responseInput.trim(),
+      status: selectedTicket.status === 'open' ? 'in_progress' : selectedTicket.status
+    };
 
-    setSelectedTicket(prev => prev ? { ...prev, adminResponse: responseInput.trim() } : null);
-    onLogAudit(
-      'Balas Tiket Dukungan',
-      'support',
-      selectedTicket.tenantId,
-      `Tanggapan resmi dikirimkan untuk tiket ${selectedTicket.id}`
-    );
-    toast.success('Tanggapan berhasil disimpan dan dikirimkan');
-    setResponseInput('');
+    setTickets(prev => prev.map(t => (t.id === selectedTicket.id ? { ...t, ...updates } : t)));
+    setSelectedTicket(prev => (prev ? { ...prev, ...updates } : null));
+
+    try {
+      await updateSupportTicket(selectedTicket.id, updates);
+      onLogAudit(
+        'Balas Tiket Dukungan',
+        'support',
+        selectedTicket.tenantId,
+        `Tanggapan resmi dikirimkan untuk tiket ${selectedTicket.id}`
+      );
+      toast.success('Tanggapan berhasil disimpan dan disinkronkan ke RT');
+      setResponseInput('');
+    } catch (err) {
+      toast.error('Gagal mengirim tanggapan');
+    }
   };
 
   // Create New Ticket
-  const handleCreateTicket = (e: React.FormEvent) => {
+  const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newDescription.trim() || !newSenderName.trim()) {
       toast.error('Mohon lengkapi judul, pengirim, dan rincian masalah');
@@ -189,7 +177,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
     }
 
     const tenantObj = tenants.find(t => t.id === newTenantId) || tenants[0];
-    const newId = `TCK-${new Date().getFullYear()}-${String(tickets.length + 1).padStart(3, '0')}`;
+    const newId = `TCK-${new Date().getFullYear()}-${String(Date.now()).slice(-4)}`;
 
     const created: HelpdeskTicket = {
       id: newId,
@@ -201,20 +189,25 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
       category: newCategory,
       priority: newPriority,
       status: 'open',
-      createdAt: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
+      createdAt: new Date().toISOString(),
       description: newDescription.trim()
     };
 
-    setTickets(prev => [created, ...prev]);
-    onLogAudit('Catat Tiket Dukungan Baru', 'support', created.tenantId, `Tiket ${created.id}: ${created.title}`);
-    toast.success(`Tiket ${created.id} berhasil dicatat`);
+    try {
+      await createSupportTicket(created);
+      setTickets(prev => [created, ...prev]);
+      onLogAudit('Catat Tiket Dukungan Baru', 'support', created.tenantId, `Tiket ${created.id}: ${created.title}`);
+      toast.success(`Tiket ${created.id} berhasil dicatat di Cloud Firestore`);
 
-    // Reset & close
-    setShowNewModal(false);
-    setNewTitle('');
-    setNewDescription('');
-    setNewSenderName('');
-    setNewSenderPhone('');
+      // Reset & close
+      setShowNewModal(false);
+      setNewTitle('');
+      setNewDescription('');
+      setNewSenderName('');
+      setNewSenderPhone('');
+    } catch (err) {
+      toast.error('Gagal mencatat tiket di cloud');
+    }
   };
 
   const openWhatsAppSender = (phone?: string, ticketId?: string) => {
@@ -595,7 +588,26 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/60 flex justify-end">
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/60 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (window.confirm('Hapus tiket ini dari sistem?')) {
+                    try {
+                      await deleteSupportTicket(selectedTicket.id);
+                      setTickets(prev => prev.filter(t => t.id !== selectedTicket.id));
+                      setSelectedTicket(null);
+                      toast.success('Tiket berhasil dihapus dari Cloud');
+                    } catch (e) {
+                      toast.error('Gagal menghapus tiket');
+                    }
+                  }
+                }}
+                className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 size={13} />
+                <span>Hapus Tiket</span>
+              </button>
               <button
                 onClick={() => setSelectedTicket(null)}
                 className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"

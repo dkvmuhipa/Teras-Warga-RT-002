@@ -2,13 +2,15 @@ import React, { useState, useMemo } from 'react';
 import { 
   Users, Search, Filter, Phone, MessageSquare, ShieldCheck, 
   ExternalLink, Edit3, CheckCircle2, UserCheck, Building2, 
-  ArrowRight, Mail, ChevronRight, Copy
+  ArrowRight, Mail, ChevronRight, Copy, Home, Shield, Award
 } from 'lucide-react';
-import { Tenant } from '../../types';
+import { Tenant, Official } from '../../types';
+import { matchesTenant } from '../../services/tenantService';
 import { toast } from 'sonner';
 
 interface OfficialsDirectoryTabProps {
   tenants: Tenant[];
+  officials?: Official[];
   onEditTenant: (tenant: Tenant) => void;
 }
 
@@ -19,27 +21,38 @@ interface OfficialEntry {
   tenantRt: string;
   tenantRw: string;
   kelurahan: string;
-  roleTitle: 'Ketua RT' | 'Sekretaris' | 'Bendahara';
+  roleTitle: string;
   name: string;
   phone: string;
+  houseId?: string;
+  photo?: string;
   themeColor?: string;
   isVerified: boolean;
+  termStart?: string;
+  termEnd?: string;
+  duties?: string[];
+  isCoreLeadership?: boolean;
 }
 
 export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
   tenants,
+  officials = [],
   onEditTenant
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'all' | 'Ketua RT' | 'Sekretaris' | 'Bendahara'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'Ketua RT' | 'Sekretaris' | 'Bendahara' | 'seksi'>('all');
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
 
-  // Flatten officials list from all tenants
+  // Flatten officials list from all tenants + live Firestore officials collection
   const officialsList = useMemo(() => {
     const list: OfficialEntry[] = [];
+    const seenKeys = new Set<string>();
+
     tenants.forEach(t => {
-      // Chairman
+      // 1. Core Leadership: Chairman
       if (t.chairmanName) {
+        const key = `${t.id}-${t.chairmanName.toLowerCase().trim()}`;
+        seenKeys.add(key);
         list.push({
           id: `${t.id}-chairman`,
           tenantId: t.id,
@@ -51,11 +64,15 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
           name: t.chairmanName,
           phone: t.chairmanPhone || '',
           themeColor: t.themeColor,
-          isVerified: Boolean(t.chairmanPhone && t.chairmanPhone.length >= 10)
+          isVerified: Boolean(t.chairmanPhone && t.chairmanPhone.length >= 10),
+          isCoreLeadership: true
         });
       }
-      // Secretary
+
+      // 2. Core Leadership: Secretary
       if (t.secretaryName) {
+        const key = `${t.id}-${t.secretaryName.toLowerCase().trim()}`;
+        seenKeys.add(key);
         list.push({
           id: `${t.id}-secretary`,
           tenantId: t.id,
@@ -65,13 +82,17 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
           kelurahan: t.kelurahan,
           roleTitle: 'Sekretaris',
           name: t.secretaryName,
-          phone: t.chairmanPhone || '', // Fallback or RT desk
+          phone: t.chairmanPhone || '',
           themeColor: t.themeColor,
-          isVerified: Boolean(t.secretaryName)
+          isVerified: Boolean(t.secretaryName),
+          isCoreLeadership: true
         });
       }
-      // Treasurer
+
+      // 3. Core Leadership: Treasurer
       if (t.treasurerName) {
+        const key = `${t.id}-${t.treasurerName.toLowerCase().trim()}`;
+        seenKeys.add(key);
         list.push({
           id: `${t.id}-treasurer`,
           tenantId: t.id,
@@ -83,12 +104,42 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
           name: t.treasurerName,
           phone: t.chairmanPhone || '',
           themeColor: t.themeColor,
-          isVerified: Boolean(t.treasurerName)
+          isVerified: Boolean(t.treasurerName),
+          isCoreLeadership: true
         });
       }
+
+      // 4. Live Officials from Firestore collection 'officials'
+      const matchedOfficials = officials.filter(o => matchesTenant(o.tenantId, t.id));
+      matchedOfficials.forEach(o => {
+        const key = `${t.id}-${o.name.toLowerCase().trim()}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          list.push({
+            id: o.id || `${t.id}-off-${Math.random()}`,
+            tenantId: t.id,
+            tenantName: t.name,
+            tenantRt: t.rt,
+            tenantRw: t.rw,
+            kelurahan: t.kelurahan,
+            roleTitle: o.role || 'Seksi RT',
+            name: o.name,
+            phone: o.phone || '',
+            houseId: o.houseId,
+            photo: o.photo,
+            themeColor: t.themeColor,
+            isVerified: Boolean(o.phone && o.phone.length >= 10),
+            termStart: o.termStart,
+            termEnd: o.termEnd,
+            duties: o.duties,
+            isCoreLeadership: false
+          });
+        }
+      });
     });
+
     return list;
-  }, [tenants]);
+  }, [tenants, officials]);
 
   // Filtered officials
   const filteredOfficials = useMemo(() => {
@@ -97,9 +148,16 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.tenantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.phone.includes(searchQuery) ||
+        item.roleTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.kelurahan.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesRole = roleFilter === 'all' || item.roleTitle === roleFilter;
+
+      let matchesRole = true;
+      if (roleFilter === 'Ketua RT') matchesRole = item.roleTitle.toLowerCase().includes('ketua');
+      else if (roleFilter === 'Sekretaris') matchesRole = item.roleTitle.toLowerCase().includes('sekretaris');
+      else if (roleFilter === 'Bendahara') matchesRole = item.roleTitle.toLowerCase().includes('bendahara');
+      else if (roleFilter === 'seksi') {
+        matchesRole = !item.isCoreLeadership;
+      }
 
       return matchesSearch && matchesRole;
     });
@@ -108,95 +166,105 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
   const handleCopyPhone = (phone: string) => {
     navigator.clipboard.writeText(phone);
     setCopiedPhone(phone);
-    toast.success(`Nomor ${phone} disalin`);
+    toast.success('Nomor telepon berhasil disalin');
     setTimeout(() => setCopiedPhone(null), 2000);
-  };
-
-  const getCleanPhoneForWhatsApp = (rawPhone: string) => {
-    let clean = rawPhone.replace(/\D/g, '');
-    if (clean.startsWith('0')) {
-      clean = '62' + clean.slice(1);
-    }
-    return clean;
   };
 
   const openWhatsApp = (official: OfficialEntry) => {
     if (!official.phone) {
-      toast.error('Nomor telepon belum diatur untuk pengurus ini');
+      toast.error('Nomor telepon tidak tersedia');
       return;
     }
-    const cleanPhone = getCleanPhoneForWhatsApp(official.phone);
+    let clean = official.phone.replace(/\D/g, '');
+    if (clean.startsWith('0')) clean = '62' + clean.slice(1);
     const text = encodeURIComponent(
-      `Halo ${official.name} (${official.roleTitle} ${official.tenantName}), salam dari Tim Super Admin Platform Teras Warga. Mengenai koordinasi tata kelola platform di lingkungan Anda...`
+      `Halo Bpk/Ibu ${official.name} (${official.roleTitle} ${official.tenantName}), salam koordinasi dari Super Admin Teras Warga...`
     );
-    window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
+    window.open(`https://wa.me/${clean}?text=${text}`, '_blank');
   };
 
-  // Metrics
-  const totalOfficials = officialsList.length;
-  const verifiedPhones = officialsList.filter(o => o.isVerified).length;
-  const completeTenants = tenants.filter(t => t.chairmanName && t.secretaryName && t.treasurerName).length;
+  const totalKetua = officialsList.filter(o => o.roleTitle.toLowerCase().includes('ketua')).length;
+  const totalSekr = officialsList.filter(o => o.roleTitle.toLowerCase().includes('sekretaris')).length;
+  const totalBend = officialsList.filter(o => o.roleTitle.toLowerCase().includes('bendahara')).length;
+  const totalSeksi = officialsList.filter(o => !o.isCoreLeadership).length;
 
   return (
     <div className="space-y-6">
-      {/* Top Banner & Telemetry Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
-              Total Pengurus Terdata
+              Ketua RT Terdaftar
             </span>
             <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
               <Users size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
-            {totalOfficials} <span className="text-xs font-bold text-slate-500 font-sans">Aparatur RT</span>
+          <div className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tight font-mono">
+            {totalKetua} <span className="text-xs font-bold text-slate-500 font-sans">Pimpinan</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
-            Tersebar di {tenants.length} wilayah armada Teras Warga
+            Penanggung jawab otoritas wilayah
           </p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
-              Kontak WhatsApp Siap
+              Sekretaris Wilayah
+            </span>
+            <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
+              <Building2 size={16} />
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-black text-sky-600 tracking-tight font-mono">
+            {totalSekr} <span className="text-xs font-bold text-slate-500 font-sans">Aparatur</span>
+          </div>
+          <p className="text-[11px] text-slate-500 font-medium mt-1">
+            Pusat administrasi dan persuratan
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+              Bendahara Kas
             </span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-              <MessageSquare size={16} />
+              <CheckCircle2 size={16} />
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight font-mono">
-            {verifiedPhones} <span className="text-xs font-bold text-slate-500 font-sans">Nomor Aktif</span>
+            {totalBend} <span className="text-xs font-bold text-slate-500 font-sans">Pengelola</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
-            Dapat dihubungi langsung via API WhatsApp 1-Klik
+            Pengelola rekening kas dan iuran
           </p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
-              Struktur RT Lengkap
+              Seksi Lapangan & Ronda
             </span>
-            <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
-              <ShieldCheck size={16} />
+            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
+              <Shield size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-sky-700 tracking-tight font-mono">
-            {completeTenants} <span className="text-xs font-bold text-slate-500 font-sans">/ {tenants.length} RT</span>
+          <div className="text-2xl sm:text-3xl font-black text-purple-600 tracking-tight font-mono">
+            {totalSeksi} <span className="text-xs font-bold text-slate-500 font-sans">Petugas</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
-            Memiliki Ketua, Sekretaris, dan Bendahara lengkap
+            Keamanan, kebersihan, & sarpras live
           </p>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200/90 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
-        <div className="flex flex-wrap items-center gap-2 flex-1">
-          <div className="relative min-w-[240px] flex-1">
+      <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="flex flex-1 items-center gap-3">
+          <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
             <input
               type="text"
@@ -207,18 +275,24 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
             />
           </div>
 
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs">
-            {(['all', 'Ketua RT', 'Sekretaris', 'Bendahara'] as const).map((r) => (
+          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs overflow-x-auto">
+            {[
+              { id: 'all', label: 'Semua' },
+              { id: 'Ketua RT', label: 'Ketua RT' },
+              { id: 'Sekretaris', label: 'Sekretaris' },
+              { id: 'Bendahara', label: 'Bendahara' },
+              { id: 'seksi', label: 'Seksi / Lapangan' },
+            ].map((r) => (
               <button
-                key={r}
-                onClick={() => setRoleFilter(r)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                  roleFilter === r
+                key={r.id}
+                onClick={() => setRoleFilter(r.id as any)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  roleFilter === r.id
                     ? 'bg-white text-indigo-700 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {r === 'all' ? 'Semua Jabatan' : r}
+                {r.label}
               </button>
             ))}
           </div>
@@ -236,7 +310,7 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-black uppercase tracking-wider text-[10px]">
                 <th className="py-3.5 px-4">Nama Pengurus</th>
-                <th className="py-3.5 px-4">Jabatan</th>
+                <th className="py-3.5 px-4">Jabatan & Tugas</th>
                 <th className="py-3.5 px-4">Wilayah RT / Lingkungan</th>
                 <th className="py-3.5 px-4">Kontak WhatsApp</th>
                 <th className="py-3.5 px-4 text-right">Aksi Koordinasi</th>
@@ -250,34 +324,56 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
                     {/* Official Name */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2.5">
-                        <div 
-                          className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs text-white shadow-2xs shrink-0"
-                          style={{ backgroundColor: item.themeColor || '#4F46E5' }}
-                        >
-                          {item.name.charAt(0)}
-                        </div>
+                        {item.photo ? (
+                          <img
+                            src={item.photo}
+                            alt={item.name}
+                            className="w-8 h-8 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                          />
+                        ) : (
+                          <div 
+                            className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs text-white shadow-2xs shrink-0"
+                            style={{ backgroundColor: item.themeColor || '#4F46E5' }}
+                          >
+                            {item.name.charAt(0)}
+                          </div>
+                        )}
                         <div>
                           <div className="font-black text-slate-900 text-xs">
                             {item.name}
                           </div>
-                          <span className="text-[10px] text-slate-500 font-mono">
-                            ID: {item.tenantId}
-                          </span>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono">
+                            <span>ID: {item.tenantId}</span>
+                            {item.houseId && (
+                              <span className="text-indigo-600 font-bold bg-indigo-50 px-1 rounded">
+                                Blok {item.houseId}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
 
                     {/* Role Title */}
                     <td className="py-3 px-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md font-mono text-[10px] font-bold ${
-                        item.roleTitle === 'Ketua RT'
-                          ? 'bg-indigo-50 border border-indigo-200 text-indigo-700'
-                          : item.roleTitle === 'Sekretaris'
-                          ? 'bg-sky-50 border border-sky-200 text-sky-700'
-                          : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-                      }`}>
-                        {item.roleTitle}
-                      </span>
+                      <div className="space-y-1">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md font-mono text-[10px] font-bold ${
+                          item.roleTitle.toLowerCase().includes('ketua')
+                            ? 'bg-indigo-50 border border-indigo-200 text-indigo-700'
+                            : item.roleTitle.toLowerCase().includes('sekretaris')
+                            ? 'bg-sky-50 border border-sky-200 text-sky-700'
+                            : item.roleTitle.toLowerCase().includes('bendahara')
+                            ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                            : 'bg-purple-50 border border-purple-200 text-purple-700'
+                        }`}>
+                          {item.roleTitle}
+                        </span>
+                        {item.duties && item.duties.length > 0 && (
+                          <p className="text-[10px] text-slate-500 max-w-xs truncate">
+                            {item.duties.join(', ')}
+                          </p>
+                        )}
+                      </div>
                     </td>
 
                     {/* Tenant Info */}
@@ -329,7 +425,7 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
                           <button
                             onClick={() => onEditTenant(parentTenant)}
                             className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-slate-900 rounded-xl transition-colors cursor-pointer border border-slate-200"
-                            title="Edit Data Pengurus RT"
+                            title="Edit Data Wilayah RT"
                           >
                             <Edit3 size={13} />
                           </button>

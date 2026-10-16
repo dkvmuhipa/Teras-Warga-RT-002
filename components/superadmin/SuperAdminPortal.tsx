@@ -13,7 +13,17 @@ import {
   UploadCloud, Clock, Zap, Wifi
 } from 'lucide-react';
 import { useTenant } from '../../context/TenantContext';
-import { Tenant, Role, TenantStatus, TenantModules } from '../../types';
+import { 
+  Tenant, Role, TenantStatus, TenantModules, 
+  House, CashFlow, Official, HelpdeskTicket, FleetAggregates 
+} from '../../types';
+import { 
+  subscribeToAllHouses, 
+  subscribeToAllCashFlow, 
+  subscribeToAllOfficials, 
+  subscribeToSupportTickets, 
+  calculateFleetAggregates 
+} from '../../services/databaseService';
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
 import { TenantDetailModal } from './TenantDetailModal';
 import { RestoreSnapshotModal } from './RestoreSnapshotModal';
@@ -94,6 +104,30 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // --- Real-time Fleet Data Subscriptions across Cloud Firestore Collections ---
+  const [allHouses, setAllHouses] = useState<House[]>([]);
+  const [allCashFlow, setAllCashFlow] = useState<CashFlow[]>([]);
+  const [allOfficials, setAllOfficials] = useState<Official[]>([]);
+  const [allTickets, setAllTickets] = useState<HelpdeskTicket[]>([]);
+
+  useEffect(() => {
+    const unsubHouses = subscribeToAllHouses(setAllHouses);
+    const unsubCash = subscribeToAllCashFlow(setAllCashFlow);
+    const unsubOfficials = subscribeToAllOfficials(setAllOfficials);
+    const unsubTickets = subscribeToSupportTickets(setAllTickets);
+    return () => {
+      unsubHouses();
+      unsubCash();
+      unsubOfficials();
+      unsubTickets();
+    };
+  }, []);
+
+  // Compute Live Fleet Aggregates
+  const fleetAggregates: FleetAggregates = useMemo(() => {
+    return calculateFleetAggregates(availableTenants, allHouses, allCashFlow, allTickets, allOfficials);
+  }, [availableTenants, allHouses, allCashFlow, allTickets, allOfficials]);
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -249,7 +283,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const platformStats = useMemo(() => {
     const totalTenants = availableTenants.length;
     let totalBlocks = 0;
-    let totalEstimatedDoors = 0;
+    let fallbackEstimatedDoors = 0;
     let activeTenantsCount = 0;
     let suspendedCount = 0;
     let maintenanceCount = 0;
@@ -262,10 +296,10 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       totalBlocks += (t.blocks ? t.blocks.length : 0);
       if (t.blockConfig && t.blockConfig.length > 0) {
         t.blockConfig.forEach(bc => {
-          totalEstimatedDoors += Math.max(1, (bc.end - bc.start + 1));
+          fallbackEstimatedDoors += Math.max(1, (bc.end - bc.start + 1));
         });
       } else {
-        totalEstimatedDoors += (t.blocks ? t.blocks.length * 20 : 0);
+        fallbackEstimatedDoors += (t.blocks ? t.blocks.length * 20 : 0);
       }
 
       if (t.status === 'suspended') {
@@ -284,7 +318,10 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     const avgSampah = totalTenants > 0 ? Math.round(totalSampahUmum / totalTenants) : 0;
     const avgKas = totalTenants > 0 ? Math.round(totalKasFee / totalTenants) : 0;
     const avgAir = totalTenants > 0 ? Math.round(totalAirFee / totalTenants) : 0;
-    const totalEstimatedMonthlyCashflow = totalEstimatedDoors * (avgSampah + avgKas);
+
+    const realDoors = fleetAggregates.totalRegisteredDoors > 0 
+      ? fleetAggregates.totalRegisteredDoors 
+      : fallbackEstimatedDoors;
 
     return {
       totalTenants,
@@ -292,14 +329,19 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       suspendedCount,
       maintenanceCount,
       totalBlocks,
-      totalEstimatedDoors,
+      totalEstimatedDoors: realDoors,
+      totalOccupiedDoors: fleetAggregates.totalOccupiedDoors,
+      totalEmptyDoors: fleetAggregates.totalEmptyDoors,
+      totalPopulation: fleetAggregates.totalPopulation,
+      totalFleetTreasury: fleetAggregates.totalFleetBalance,
+      averageCompliance: fleetAggregates.averageCompliance,
       avgSampah,
       avgKas,
       avgAir,
-      totalEstimatedMonthlyCashflow,
+      totalEstimatedMonthlyCashflow: fleetAggregates.totalFleetIncome > 0 ? fleetAggregates.totalFleetIncome : realDoors * (avgSampah + avgKas),
       activeScope: currentTenant.name
     };
-  }, [availableTenants, currentTenant]);
+  }, [availableTenants, currentTenant, fleetAggregates]);
 
   const handleLogout = async () => {
     try {
@@ -826,6 +868,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
             {availableTenants.map((t) => {
               const isSupervised = currentTenant?.id === t.id;
+              const metric = fleetAggregates.tenantMetrics[t.id];
+              const doorCount = metric?.realDoors || (t.blockConfig?.reduce((acc, b) => acc + (b.end - b.start + 1), 0) || 40);
+              const compliance = metric?.complianceRate ?? 0;
               return (
                 <div
                   key={t.id}
@@ -844,9 +889,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <div className="text-left">
                     <div className="font-black text-xs truncate max-w-[170px]">{t.name}</div>
                     <div className="text-[10px] text-slate-500 font-mono flex items-center gap-1.5">
-                      <span>RT {t.rt}/RW {t.rw}</span>
+                      <span>{doorCount} Pintu</span>
                       <span>•</span>
-                      <span className="text-emerald-700 font-bold">~38ms</span>
+                      <span className="text-emerald-700 font-bold">{metric ? `${compliance}% Lunas` : '~38ms'}</span>
                     </div>
                   </div>
                   {isSupervised && (
@@ -885,40 +930,40 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
               <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
-                <span>Kapasitas Pintu</span>
+                <span>Pintu & Hunian Riil</span>
                 <Home size={13} className="text-emerald-600" />
               </div>
               <div className="text-xl font-black font-mono text-emerald-600">
-                ~{platformStats.totalEstimatedDoors} <span className="text-xs font-sans font-bold text-slate-500">Kavling</span>
+                {platformStats.totalEstimatedDoors} <span className="text-xs font-sans font-bold text-slate-500">Pintu</span>
               </div>
               <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                {platformStats.totalBlocks} Blok Pemukiman
+                {platformStats.totalOccupiedDoors} Terisi • {platformStats.totalEmptyDoors} Kosong
               </div>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
               <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
-                <span>Estimasi Kas / Bulan</span>
+                <span>Total Saldo Kas Armada</span>
                 <Wallet size={13} className="text-amber-600" />
               </div>
               <div className="text-xl font-black font-mono text-amber-600">
-                Rp {(platformStats.totalEstimatedMonthlyCashflow / 1000000).toFixed(1)} <span className="text-xs font-sans font-bold text-slate-500">Juta</span>
+                Rp {Math.max(0, platformStats.totalFleetTreasury).toLocaleString('id-ID')}
               </div>
               <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                Akumulasi Iuran Se-Platform
+                Live Net Kas Semua RT
               </div>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
               <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
-                <span>Status Basis Data</span>
+                <span>Rata Kepatuhan Iuran</span>
                 <ShieldCheck size={13} className="text-sky-600" />
               </div>
               <div className="text-xl font-black font-mono text-sky-700 flex items-center gap-1.5">
-                <span>TERISOLASI</span>
+                <span>{platformStats.averageCompliance}%</span>
               </div>
               <div className="text-[10px] text-emerald-700 font-mono font-bold mt-0.5">
-                100% Zero Cross-Tenant Leak
+                Sinkron Live Kartu Warga
               </div>
             </div>
           </div>
@@ -974,6 +1019,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               >
                 <Zap size={13} className="text-amber-500" />
                 <span>Quick Triage</span>
+                {allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white font-mono text-[9px] font-bold animate-pulse">
+                    {allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -2114,6 +2164,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         {activeTab === 'officials' && (
           <OfficialsDirectoryTab 
             tenants={availableTenants} 
+            officials={allOfficials}
             onEditTenant={(tenant) => setSelectedTenantForDetail(tenant)} 
           />
         )}
@@ -2138,6 +2189,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <PaymentGatewayTab 
             tenants={availableTenants} 
             onLogAudit={logAuditEvent} 
+            onUpdateTenant={updateTenant}
           />
         )}
 
@@ -2145,6 +2197,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         {activeTab === 'analytics' && (
           <CivicAnalyticsTab 
             tenants={availableTenants} 
+            fleetAggregates={fleetAggregates}
           />
         )}
 
@@ -2264,6 +2317,52 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     <p className="text-[11px] text-slate-500 leading-relaxed">
                       Koneksi terenkripsi SSL aktif ke region Jakarta (<code className="font-mono text-slate-700">asia-southeast2</code>).
                     </p>
+                  </div>
+
+                  {/* Live Support Tickets Requiring Attention */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                        <MessageSquare size={13} className="text-indigo-600" />
+                        <span>Tiket Butuh Respon ({allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length})</span>
+                      </h4>
+                      <button
+                        onClick={() => {
+                          setActiveTab('support');
+                          setShowTriageDrawer(false);
+                        }}
+                        className="text-[11px] text-indigo-600 font-bold hover:underline"
+                      >
+                        Buka Semua Tiket →
+                      </button>
+                    </div>
+                    {allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').slice(0, 3).map(ticket => (
+                      <div 
+                        key={ticket.id} 
+                        onClick={() => {
+                          setActiveTab('support');
+                          setShowTriageDrawer(false);
+                        }}
+                        className="p-3 bg-amber-50/70 hover:bg-amber-100/60 border border-amber-200/80 rounded-xl text-xs space-y-1 cursor-pointer transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-900 truncate max-w-[180px]">{ticket.title}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 font-bold uppercase">
+                            {ticket.status === 'open' ? 'Baru' : 'Diproses'}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 line-clamp-1">{ticket.description}</p>
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5">
+                          <span className="font-bold text-slate-700">{ticket.tenantName}</span>
+                          <span className="font-mono text-slate-400">{ticket.senderName}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length === 0 && (
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 text-[11px] text-slate-400 italic">
+                        Tidak ada tiket bantuan yang menunggu respon.
+                      </div>
+                    )}
                   </div>
 
                   {/* Recent Platform Broadcasts */}

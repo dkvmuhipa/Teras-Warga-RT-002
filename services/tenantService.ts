@@ -36,6 +36,14 @@ export const INITIAL_TENANTS: Tenant[] = [
       airFee: 10000,
       kasFee: 20000,
     },
+    paymentGateway: {
+      bankName: 'Bank BPD Sulteng',
+      accountNumber: '01-02-004589-1',
+      accountHolder: 'KAS RT 002 HUNTAP TONDO 2',
+      qrisStatus: 'active',
+      merchantNmid: 'ID1020260981244',
+      digitalRate: 88
+    },
     status: 'active',
     modules: {
       waterMeter: true,

@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Wallet, QrCode, CreditCard, CheckCircle2, AlertCircle, 
   Building2, ArrowRight, ShieldCheck, DollarSign, RefreshCw, 
-  ExternalLink, Eye, Check, X
+  ExternalLink, Eye, Check, X, Edit3, Save
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Tenant } from '../../types';
+import { Tenant, TenantPaymentGatewayConfig } from '../../types';
 import { toast } from 'sonner';
 
 interface PaymentGatewayTabProps {
   tenants: Tenant[];
   onLogAudit: (action: string, category: any, targetTenantId?: string, details?: string) => void;
+  onUpdateTenant?: (tenantId: string, updates: Partial<Tenant>) => Promise<void>;
 }
 
 interface TenantGatewayRecord {
@@ -26,48 +27,110 @@ interface TenantGatewayRecord {
 
 export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
   tenants,
-  onLogAudit
+  onLogAudit,
+  onUpdateTenant
 }) => {
-  // Generate realistic gateway statuses per tenant
-  const [records, setRecords] = useState<TenantGatewayRecord[]>(() => {
+  // Derive records directly from live tenants in Firestore
+  const records: TenantGatewayRecord[] = useMemo(() => {
     return tenants.map((t, idx) => {
+      const gw = t.paymentGateway;
       const isPilot = t.id === 'tondo-rw20-rt02';
       const isSecond = idx === 1;
 
       return {
         tenantId: t.id,
         tenantName: t.name,
-        bankName: isPilot ? 'Bank BPD Sulteng' : isSecond ? 'Bank BRI' : 'Bank Mandiri',
-        accountNumber: isPilot ? '01-02-004589-1' : isSecond ? '4512-01-008921-50-4' : '158-00-0987654-2',
-        accountHolder: `KAS ${t.name.toUpperCase()}`,
-        qrisStatus: isPilot ? 'active' : isSecond ? 'pending' : 'active',
-        merchantNmid: isPilot ? 'ID1020260981244' : isSecond ? undefined : 'ID1020261189432',
-        digitalRate: isPilot ? 88 : isSecond ? 45 : 72
+        bankName: gw?.bankName || (isPilot ? 'Bank BPD Sulteng' : isSecond ? 'Bank BRI' : 'Bank Mandiri'),
+        accountNumber: gw?.accountNumber || (isPilot ? '01-02-004589-1' : isSecond ? '4512-01-008921-50-4' : '158-00-0987654-2'),
+        accountHolder: gw?.accountHolder || `KAS ${t.name.toUpperCase()}`,
+        qrisStatus: gw?.qrisStatus || (isPilot ? 'active' : isSecond ? 'pending' : 'active'),
+        merchantNmid: gw?.merchantNmid || (isPilot ? 'ID1020260981244' : isSecond ? undefined : 'ID1020261189432'),
+        digitalRate: gw?.digitalRate ?? (isPilot ? 88 : isSecond ? 45 : 72)
       };
     });
+  }, [tenants]);
+
+  // Modal edit state
+  const [editingRecord, setEditingRecord] = useState<TenantGatewayRecord | null>(null);
+  const [bankForm, setBankForm] = useState({
+    bankName: '',
+    accountNumber: '',
+    accountHolder: '',
+    merchantNmid: '',
+    qrisStatus: 'active' as 'active' | 'pending' | 'manual_cash'
   });
 
-  const [selectedRecord, setSelectedRecord] = useState<TenantGatewayRecord | null>(null);
+  const handleOpenEdit = (rec: TenantGatewayRecord) => {
+    setEditingRecord(rec);
+    setBankForm({
+      bankName: rec.bankName,
+      accountNumber: rec.accountNumber,
+      accountHolder: rec.accountHolder,
+      merchantNmid: rec.merchantNmid || '',
+      qrisStatus: rec.qrisStatus
+    });
+  };
 
-  const handleToggleStatus = (tenantId: string) => {
-    setRecords(prev => prev.map(r => {
-      if (r.tenantId === tenantId) {
-        const nextStatus = r.qrisStatus === 'active' ? 'manual_cash' : 'active';
-        onLogAudit(
-          'Ubah Status Gateway QRIS',
-          'tariff',
-          tenantId,
-          `Status QRIS diubah menjadi ${nextStatus.toUpperCase()}`
-        );
-        return {
-          ...r,
-          qrisStatus: nextStatus,
-          merchantNmid: nextStatus === 'active' ? (r.merchantNmid || 'ID102026' + Math.floor(1000000 + Math.random() * 9000000)) : undefined
-        };
+  const handleSaveBankForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingRecord) return;
+
+    const updatedGw: TenantPaymentGatewayConfig = {
+      bankName: bankForm.bankName.trim() || 'Bank Kas RT',
+      accountNumber: bankForm.accountNumber.trim() || '-',
+      accountHolder: bankForm.accountHolder.trim() || `KAS ${editingRecord.tenantName}`,
+      qrisStatus: bankForm.qrisStatus,
+      merchantNmid: bankForm.merchantNmid.trim() || undefined,
+      digitalRate: editingRecord.digitalRate
+    };
+
+    if (onUpdateTenant) {
+      try {
+        await onUpdateTenant(editingRecord.tenantId, { paymentGateway: updatedGw });
+        toast.success(`Konfigurasi rekening kas ${editingRecord.tenantName} berhasil disimpan ke Cloud!`);
+      } catch (err) {
+        toast.error('Gagal memperbarui rekening kas di Cloud');
       }
-      return r;
-    }));
-    toast.success('Status integrasi pembayaran berhasil diperbarui');
+    }
+
+    onLogAudit(
+      'Perbarui Rekening Kas & QRIS',
+      'tariff',
+      editingRecord.tenantId,
+      `Rekening ${bankForm.bankName} (${bankForm.accountNumber}) diperbarui`
+    );
+
+    setEditingRecord(null);
+  };
+
+  const handleToggleStatus = async (tenantId: string) => {
+    const current = records.find(r => r.tenantId === tenantId);
+    if (!current) return;
+    const nextStatus = current.qrisStatus === 'active' ? 'manual_cash' : 'active';
+    const updatedGw: TenantPaymentGatewayConfig = {
+      bankName: current.bankName,
+      accountNumber: current.accountNumber,
+      accountHolder: current.accountHolder,
+      qrisStatus: nextStatus,
+      merchantNmid: nextStatus === 'active' ? (current.merchantNmid || 'ID102026' + Math.floor(1000000 + Math.random() * 9000000)) : undefined,
+      digitalRate: current.digitalRate
+    };
+
+    if (onUpdateTenant) {
+      try {
+        await onUpdateTenant(tenantId, { paymentGateway: updatedGw });
+        toast.success(`Integrasi QRIS ${nextStatus === 'active' ? 'diaktifkan' : 'dinonaktifkan'} di Firestore`);
+      } catch (e) {
+        toast.error('Gagal memperbarui status gateway');
+      }
+    }
+
+    onLogAudit(
+      'Ubah Status Gateway QRIS',
+      'tariff',
+      tenantId,
+      `Status QRIS diubah menjadi ${nextStatus.toUpperCase()}`
+    );
   };
 
   // Metrics
@@ -141,7 +204,7 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
               Matriks Pengaturan QRIS & Rekening Kas RT
             </h3>
             <p className="text-[11px] text-slate-500">
-              Pantauan rekening penampung kas resmi dan status sertifikasi QRIS swakelola
+              Pantauan rekening penampung kas resmi dan status sertifikasi QRIS swakelola langsung terhubung ke Firestore
             </p>
           </div>
         </div>
@@ -201,12 +264,22 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
                   </td>
 
                   <td className="py-3.5 px-4 text-right">
-                    <button
-                      onClick={() => handleToggleStatus(r.tenantId)}
-                      className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-2xs"
-                    >
-                      {r.qrisStatus === 'active' ? 'Nonaktifkan' : 'Aktifkan QRIS'}
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleOpenEdit(r)}
+                        className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                        title="Edit Rekening Kas"
+                      >
+                        <Edit3 size={13} />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => handleToggleStatus(r.tenantId)}
+                        className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-2xs"
+                      >
+                        {r.qrisStatus === 'active' ? 'Nonaktifkan' : 'Aktifkan QRIS'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -214,6 +287,111 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Edit Bank Modal */}
+      {editingRecord && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+          >
+            <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-black text-slate-900">
+                  Konfigurasi Kas & QRIS: {editingRecord.tenantName}
+                </h3>
+                <p className="text-[11px] text-slate-500 font-mono">ID: {editingRecord.tenantId}</p>
+              </div>
+              <button
+                onClick={() => setEditingRecord(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveBankForm} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nama Bank / Lembaga</label>
+                <input
+                  type="text"
+                  value={bankForm.bankName}
+                  onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })}
+                  placeholder="e.g. Bank BPD Sulteng / BRI / Mandiri"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nomor Rekening</label>
+                <input
+                  type="text"
+                  value={bankForm.accountNumber}
+                  onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value })}
+                  placeholder="e.g. 01-02-004589-1"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Atas Nama Rekening</label>
+                <input
+                  type="text"
+                  value={bankForm.accountHolder}
+                  onChange={(e) => setBankForm({ ...bankForm, accountHolder: e.target.value })}
+                  placeholder="e.g. KAS RT 002 HUNTAP TONDO 2"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">NMID Merchant QRIS (Opsional)</label>
+                <input
+                  type="text"
+                  value={bankForm.merchantNmid}
+                  onChange={(e) => setBankForm({ ...bankForm, merchantNmid: e.target.value })}
+                  placeholder="e.g. ID1020260981244"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Status Integrasi</label>
+                <select
+                  value={bankForm.qrisStatus}
+                  onChange={(e) => setBankForm({ ...bankForm, qrisStatus: e.target.value as any })}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="active">QRIS Aktif (Digital Cashless)</option>
+                  <option value="pending">Menunggu Verifikasi Bank</option>
+                  <option value="manual_cash">Kas Tunai Manual</option>
+                </select>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingRecord(null)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                >
+                  <Save size={13} />
+                  <span>Simpan Perubahan</span>
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

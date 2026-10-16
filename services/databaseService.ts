@@ -35,9 +35,16 @@ import {
   signOut, 
   updatePassword
 } from "firebase/auth";
-import { MapPoint, Checkpoint, LetterRequest, ResidentRegistration, RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, OperationType, FirestoreErrorInfo, OfficialLetter, WaterMeterReading, WaterUtilitySettings, STBMRecord, Tenant } from "../types";
+import { 
+  MapPoint, Checkpoint, LetterRequest, ResidentRegistration, 
+  RondaSchedule, RondaAttendance, RondaCheckLog, UMKM, 
+  OperationType, FirestoreErrorInfo, OfficialLetter, 
+  WaterMeterReading, WaterUtilitySettings, STBMRecord, 
+  Tenant, House, CashFlow, Official, HelpdeskTicket, 
+  FleetTenantMetrics, FleetAggregates, TenantFeeConfig 
+} from "../types";
 import { toast } from "sonner";
-import { DEFAULT_TENANT_ID, matchesTenant } from "./tenantService";
+import { DEFAULT_TENANT_ID, matchesTenant, updateTenantInMemory } from "./tenantService";
 
 export { OperationType, isFirebaseConfigured };
 
@@ -169,6 +176,39 @@ export const updateSettings = async (settings: any) => {
             data: settings,
             updatedAt: new Date().toISOString()
         });
+
+        // Two-way fee sync: Keep active tenant document & in-memory cache synchronized with system settings
+        if (activeTenantScope) {
+            const feeUpdates: Partial<TenantFeeConfig> = {};
+            if (settings.sampahTiers?.umum !== undefined || settings.sampahFee !== undefined) {
+                feeUpdates.sampahUmum = Number(settings.sampahTiers?.umum ?? settings.sampahFee);
+            }
+            if (settings.sampahTiers?.pkh !== undefined) {
+                feeUpdates.sampahPkh = Number(settings.sampahTiers.pkh);
+            }
+            if (settings.sampahTiers?.pns !== undefined) {
+                feeUpdates.sampahPns = Number(settings.sampahTiers.pns);
+            }
+            if (settings.airFee !== undefined) {
+                feeUpdates.airFee = Number(settings.airFee);
+            }
+            if (settings.kasFee !== undefined) {
+                feeUpdates.kasFee = Number(settings.kasFee);
+            }
+
+            if (Object.keys(feeUpdates).length > 0) {
+                try {
+                    const tenantDocRef = doc(db, TENANTS_COL, activeTenantScope);
+                    await setDoc(tenantDocRef, {
+                        fees: feeUpdates,
+                        updatedAt: new Date().toISOString()
+                    }, { merge: true });
+                    updateTenantInMemory(activeTenantScope, { fees: feeUpdates });
+                } catch (tErr) {
+                    console.warn("Non-fatal: Failed to sync fee updates to tenant doc:", tErr);
+                }
+            }
+        }
     } catch (error) {
         handleFirestoreError(error, OperationType.WRITE, `${CONFIGS_COL}/system`);
     }
@@ -4493,6 +4533,33 @@ export const updateTenantInDb = async (tenantId: string, updates: Partial<Tenant
     const clean = deepSanitize(updates);
     const docRef = doc(db, TENANTS_COL, tenantId);
     await setDoc(docRef, clean, { merge: true });
+
+    // Bidirectional sync: if this updated tenant is the active RT scope and has fee updates, sync to configs/system
+    if (tenantId === activeTenantScope && updates.fees) {
+      try {
+        const configDocRef = doc(db, CONFIGS_COL, "system");
+        const currentConfigSnap = await getDoc(configDocRef);
+        const existingData = currentConfigSnap.exists() ? currentConfigSnap.data().data || {} : {};
+
+        await setDoc(configDocRef, {
+          type: "system",
+          data: {
+            ...existingData,
+            sampahFee: updates.fees.sampahUmum ?? existingData.sampahFee,
+            airFee: updates.fees.airFee ?? existingData.airFee,
+            kasFee: updates.fees.kasFee ?? existingData.kasFee,
+            sampahTiers: {
+              umum: updates.fees.sampahUmum ?? existingData.sampahTiers?.umum ?? 20000,
+              pkh: updates.fees.sampahPkh ?? existingData.sampahTiers?.pkh ?? 10000,
+              pns: updates.fees.sampahPns ?? existingData.sampahTiers?.pns ?? 35000,
+            }
+          },
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (cErr) {
+        console.warn("Non-fatal: Failed to sync fee updates to configs/system:", cErr);
+      }
+    }
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${TENANTS_COL}/${tenantId}`);
     throw error;
@@ -4508,5 +4575,229 @@ export const deleteTenantFromDb = async (tenantId: string): Promise<void> => {
     handleFirestoreError(error, OperationType.DELETE, `${TENANTS_COL}/${tenantId}`);
     throw error;
   }
+};
+
+// --- FLEET LEVEL SUBSCRIPTIONS (SUPER ADMIN REALTIME RADAR) ---
+
+export const subscribeToAllHouses = (callback: (houses: House[]) => void) => {
+  if (!isFirebaseConfigured || !db) {
+    callback([]);
+    return () => {};
+  }
+  const q = query(collection(db, HOUSES_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as House));
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore all houses subscription error:", error);
+    callback([]);
+  });
+};
+
+export const subscribeToAllCashFlow = (callback: (cashFlow: CashFlow[]) => void) => {
+  if (!isFirebaseConfigured || !db) {
+    callback([]);
+    return () => {};
+  }
+  const q = query(collection(db, CASHFLOW_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as CashFlow));
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore all cashflow subscription error:", error);
+    callback([]);
+  });
+};
+
+export const subscribeToAllOfficials = (callback: (officials: Official[]) => void) => {
+  if (!isFirebaseConfigured || !db) {
+    callback([]);
+    return () => {};
+  }
+  const q = query(collection(db, OFFICIALS_COL));
+  return onSnapshot(q, (snapshot) => {
+    const data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as Official));
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore all officials subscription error:", error);
+    callback([]);
+  });
+};
+
+// --- SUPPORT TICKETS SERVICES (RT HELPDESK & SUPER ADMIN TRIAGE) ---
+export const SUPPORT_TICKETS_COL = "supportTickets";
+
+export const subscribeToSupportTickets = (
+  callback: (tickets: HelpdeskTicket[]) => void,
+  tenantIdFilter?: string
+) => {
+  if (!isFirebaseConfigured || !db) {
+    callback([]);
+    return () => {};
+  }
+  const q = query(collection(db, SUPPORT_TICKETS_COL));
+  return onSnapshot(q, (snapshot) => {
+    let data = snapshot.docs.map(docSnap => ({
+      ...docSnap.data(),
+      id: docSnap.id
+    } as HelpdeskTicket));
+    
+    // Sort descending by createdAt
+    data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
+    if (tenantIdFilter) {
+      data = data.filter(t => matchesTenant(t.tenantId, tenantIdFilter));
+    }
+    callback(data);
+  }, (error) => {
+    console.warn("Firestore support tickets subscription error:", error);
+    callback([]);
+  });
+};
+
+export const createSupportTicket = async (ticketData: Omit<HelpdeskTicket, 'id'> & { id?: string }): Promise<string> => {
+  if (!isFirebaseConfigured || !db) return ticketData.id || `TCK-${Date.now()}`;
+  try {
+    const clean = deepSanitize({
+      ...ticketData,
+      status: ticketData.status || 'open',
+      createdAt: ticketData.createdAt || new Date().toISOString()
+    });
+    if (ticketData.id) {
+      const docRef = doc(db, SUPPORT_TICKETS_COL, ticketData.id);
+      await setDoc(docRef, clean, { merge: true });
+      return ticketData.id;
+    } else {
+      const docRef = await addDoc(collection(db, SUPPORT_TICKETS_COL), clean);
+      return docRef.id;
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, SUPPORT_TICKETS_COL);
+    throw error;
+  }
+};
+
+export const updateSupportTicket = async (ticketId: string, updates: Partial<HelpdeskTicket>): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const clean = deepSanitize(updates);
+    const docRef = doc(db, SUPPORT_TICKETS_COL, ticketId);
+    await updateDoc(docRef, clean);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${SUPPORT_TICKETS_COL}/${ticketId}`);
+    throw error;
+  }
+};
+
+export const deleteSupportTicket = async (ticketId: string): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const docRef = doc(db, SUPPORT_TICKETS_COL, ticketId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${SUPPORT_TICKETS_COL}/${ticketId}`);
+    throw error;
+  }
+};
+
+// --- REALTIME FLEET AGGREGATES COMPUTATION ---
+export const calculateFleetAggregates = (
+  tenants: Tenant[],
+  houses: House[],
+  cashFlows: CashFlow[],
+  tickets: HelpdeskTicket[] = [],
+  officials: Official[] = []
+): FleetAggregates => {
+  const tenantMetrics: Record<string, FleetTenantMetrics> = {};
+
+  let totalRegisteredDoors = 0;
+  let totalOccupiedDoors = 0;
+  let totalEmptyDoors = 0;
+  let totalPopulation = 0;
+  let totalFleetBalance = 0;
+  let totalFleetIncome = 0;
+  let totalFleetExpense = 0;
+  let totalPaidDoors = 0;
+
+  tenants.forEach(tenant => {
+    const tHouses = houses.filter(h => matchesTenant(h.tenantId, tenant.id));
+    const tCash = cashFlows.filter(c => matchesTenant(c.tenantId, tenant.id));
+    const tOfficials = officials.filter(o => matchesTenant(o.tenantId, tenant.id));
+    const tTickets = tickets.filter(t => matchesTenant(t.tenantId, tenant.id));
+
+    const realDoors = tHouses.length;
+    const occupiedDoors = tHouses.filter(h => h.status === 'Occupied' || h.status === 'Business').length;
+    const emptyDoors = tHouses.filter(h => h.status === 'Empty').length;
+
+    const realResidents = tHouses.reduce((sum, h) => {
+      const occ = Number(h.occupants);
+      return sum + (occ > 0 ? occ : (h.headOfFamily ? 1 : 0));
+    }, 0);
+
+    const paidDoors = tHouses.filter(h => h.paymentStatus === 'Lunas').length;
+    const complianceRate = realDoors > 0 ? Math.round((paidDoors / realDoors) * 100) : 0;
+
+    const totalIncome = tCash
+      .filter(c => c.type === 'Income' || (c.type as any) === 'income')
+      .reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+
+    const totalExpense = tCash
+      .filter(c => c.type === 'Expense' || (c.type as any) === 'expense')
+      .reduce((sum, c) => sum + (Number(c.amount) || 0), 0);
+
+    const liveBalance = totalIncome - totalExpense;
+    const officialsCount = tOfficials.length + 3;
+    const openTicketsCount = tTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+
+    tenantMetrics[tenant.id] = {
+      tenantId: tenant.id,
+      realDoors,
+      occupiedDoors,
+      emptyDoors,
+      realResidents,
+      paidDoors,
+      complianceRate,
+      liveBalance,
+      totalIncome,
+      totalExpense,
+      officialsCount,
+      openTicketsCount
+    };
+
+    totalRegisteredDoors += realDoors;
+    totalOccupiedDoors += occupiedDoors;
+    totalEmptyDoors += emptyDoors;
+    totalPopulation += realResidents;
+    totalFleetIncome += totalIncome;
+    totalFleetExpense += totalExpense;
+    totalFleetBalance += liveBalance;
+    totalPaidDoors += paidDoors;
+  });
+
+  const averageCompliance = totalRegisteredDoors > 0
+    ? Math.round((totalPaidDoors / totalRegisteredDoors) * 100)
+    : 0;
+
+  return {
+    totalTenants: tenants.length,
+    totalRegisteredDoors,
+    totalOccupiedDoors,
+    totalEmptyDoors,
+    totalPopulation,
+    totalFleetBalance,
+    totalFleetIncome,
+    totalFleetExpense,
+    averageCompliance,
+    tenantMetrics
+  };
 };
 
