@@ -1,15 +1,19 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
   BarChart3, TrendingUp, Users, Award, ShieldCheck, 
   CheckCircle2, AlertCircle, Home, PieChart, Sparkles,
-  ArrowUpRight, ArrowDownRight, Layers, Wallet, CheckSquare
+  ArrowUpRight, ArrowDownRight, Layers, Wallet, CheckSquare,
+  Bot, Copy, Check, Download, RefreshCw, X, ShieldAlert,
+  Radio, AlertTriangle
 } from 'lucide-react';
 import { Tenant, FleetAggregates } from '../../types';
+import { toast } from 'sonner';
 
 interface CivicAnalyticsTabProps {
   tenants: Tenant[];
   fleetAggregates?: FleetAggregates;
 }
+
 
 export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
   tenants,
@@ -93,10 +97,111 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
 
   const totalFleetTreasury = fleetAggregates?.totalFleetBalance ?? 0;
 
+  // AI Fleet Copilot States
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [aiReport, setAiReport] = useState<string | null>(null);
+  const [showAiModal, setShowAiModal] = useState(false);
+  const [copiedAi, setCopiedAi] = useState(false);
+
+  const handleGenerateFleetAi = async () => {
+    setIsGeneratingAi(true);
+    try {
+      const payload = {
+        data: {
+          totalTenants: tenants.length,
+          totalDoors,
+          totalPopulation,
+          totalFleetBalance: totalFleetTreasury,
+          averageCompliance: avgCompliance,
+          activeReportsCount: fleetAggregates?.totalPendingReports ?? fleetAggregates?.totalReports ?? 0,
+          tenantSummaries: tenantPerformance
+            .map(t => `${t.name} (Kel. ${t.kelurahan}): Skor ${t.civicScore}, Kas Rp ${t.liveBalance.toLocaleString('id-ID')}, Kepatuhan ${t.compliance}%`)
+            .join('\n')
+        }
+      };
+
+      const res = await fetch('/api/gemini/fleet-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json();
+      if (json && json.text) {
+        setAiReport(json.text);
+        setShowAiModal(true);
+        toast.success("Laporan Eksekutif AI Fleet berhasil dihasilkan!");
+      } else {
+        throw new Error("Gagal menerima respons AI");
+      }
+    } catch (err: any) {
+      toast.error(`Gagal menghasilkan analisis AI: ${err.message || 'Koneksi terputus'}`);
+    } finally {
+      setIsGeneratingAi(false);
+    }
+  };
+
+  const handleCopyAi = () => {
+    if (!aiReport) return;
+    navigator.clipboard.writeText(aiReport);
+    setCopiedAi(true);
+    toast.success("Ringkasan eksekutif disalin ke clipboard!");
+    setTimeout(() => setCopiedAi(false), 2000);
+  };
+
+  const handleDownloadTxt = () => {
+    if (!aiReport) return;
+    const blob = new Blob([aiReport], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Laporan_Eksekutif_Armada_RT_${new Date().toISOString().slice(0, 10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
+      {/* Executive Fleet Copilot Banner */}
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-5 rounded-3xl text-white shadow-lg border border-indigo-900/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-400/30">
+              <Bot size={18} />
+            </div>
+            <span className="text-xs font-mono font-bold tracking-widest text-indigo-300 uppercase">
+              FastAPI AI Intelligence Engine
+            </span>
+          </div>
+          <h2 className="text-lg font-black tracking-tight text-white">
+            Civic Command Executive Copilot
+          </h2>
+          <p className="text-xs text-slate-300 max-w-xl font-medium">
+            Analisis terpadu performa seluruh armada RT secara otomatis menggunakan kecerdasan buatan Gemini untuk rekomendasi kebijakan pimpinan wilayah.
+          </p>
+        </div>
+
+        <button
+          onClick={handleGenerateFleetAi}
+          disabled={isGeneratingAi}
+          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all shrink-0 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          {isGeneratingAi ? (
+            <>
+              <RefreshCw size={15} className="animate-spin" />
+              <span>Memproses Data Armada...</span>
+            </>
+          ) : (
+            <>
+              <Sparkles size={15} className="text-amber-300" />
+              <span>Hasilkan Laporan Eksekutif AI</span>
+            </>
+          )}
+        </button>
+      </div>
+
       {/* Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
         {/* Total Population */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
@@ -282,6 +387,60 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
           </div>
         </div>
       </div>
+
+      {/* AI Executive Report Modal */}
+      {showAiModal && aiReport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                  <Bot size={20} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black tracking-tight">Laporan Eksekutif Civic Copilot</h3>
+                  <p className="text-[11px] text-slate-400 font-mono">Dianalisis dari seluruh RT aktif di wilayah</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowAiModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-xs font-sans text-slate-700 whitespace-pre-line leading-relaxed bg-slate-50/50">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs font-sans text-[13px] leading-relaxed">
+                {aiReport}
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-100 bg-white flex flex-wrap items-center justify-between gap-3">
+              <span className="text-[11px] text-slate-500 font-mono">
+                Model: Google Gemini 2.5 Flash via FastAPI
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCopyAi}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all"
+                >
+                  {copiedAi ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                  <span>{copiedAi ? 'Tersalin' : 'Salin Teks'}</span>
+                </button>
+                <button
+                  onClick={handleDownloadTxt}
+                  className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-all"
+                >
+                  <Download size={14} />
+                  <span>Unduh Dokumen (.txt)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

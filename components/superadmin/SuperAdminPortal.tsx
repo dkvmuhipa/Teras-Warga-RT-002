@@ -16,7 +16,7 @@ import { useTenant } from '../../context/TenantContext';
 import { 
   Tenant, Role, TenantStatus, TenantModules, 
   House, CashFlow, Official, HelpdeskTicket, FleetAggregates,
-  Report, LetterRequest, SystemBroadcast, PlatformAuditEvent 
+  Report, LetterRequest, SystemBroadcast, PlatformAuditEvent, PanicAlert 
 } from '../../types';
 import { 
   subscribeToAllHouses, 
@@ -32,8 +32,10 @@ import {
   subscribeToSystemAuditLogs,
   logPlatformAuditEvent,
   clearSystemAuditLogs,
-  calculateFleetAggregates 
+  calculateFleetAggregates,
+  subscribeToFleetPanicAlerts
 } from '../../services/databaseService';
+
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
 import { TenantDetailModal } from './TenantDetailModal';
 import { RestoreSnapshotModal } from './RestoreSnapshotModal';
@@ -100,6 +102,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [allLetters, setAllLetters] = useState<LetterRequest[]>([]);
   const [broadcasts, setBroadcasts] = useState<SystemBroadcast[]>([]);
   const [auditLogs, setAuditLogs] = useState<PlatformAuditEvent[]>([]);
+  const [fleetPanicAlerts, setFleetPanicAlerts] = useState<PanicAlert[]>([]);
 
   useEffect(() => {
     const unsubHouses = subscribeToAllHouses(setAllHouses);
@@ -110,6 +113,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     const unsubLetters = subscribeToAllLetters(setAllLetters);
     const unsubBroadcasts = subscribeToSystemBroadcasts(setBroadcasts);
     const unsubAudit = subscribeToSystemAuditLogs(setAuditLogs);
+    const unsubPanic = subscribeToFleetPanicAlerts(setFleetPanicAlerts);
 
     return () => {
       unsubHouses();
@@ -120,8 +124,10 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       unsubLetters();
       unsubBroadcasts();
       unsubAudit();
+      unsubPanic();
     };
   }, []);
+
 
   // Compute Live Fleet Aggregates
   const fleetAggregates: FleetAggregates = useMemo(() => {
@@ -151,6 +157,51 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [newBroadcastMessage, setNewBroadcastMessage] = useState('');
   const [newBroadcastPriority, setNewBroadcastPriority] = useState<'info' | 'warning' | 'urgent' | 'maintenance'>('info');
   const [newBroadcastTarget, setNewBroadcastTarget] = useState<string>('all');
+
+  // Dynamic Platform Admins State
+  const [platformAdmins, setPlatformAdmins] = useState<Array<{
+    email: string;
+    role: 'super_admin' | 'kelurahan_officer' | 'support_agent';
+    name: string;
+    addedAt: string;
+  }>>([
+    { email: 'lurah.tondo@palukota.go.id', role: 'kelurahan_officer', name: 'Bpk. Lurah Tondo', addedAt: '12 Okt 2026' },
+    { email: 'sekretaris.kelurahan@palukota.go.id', role: 'kelurahan_officer', name: 'Sekretariat Kelurahan Tondo', addedAt: '14 Okt 2026' },
+    { email: 'helpdesk.huntap@palukota.go.id', role: 'support_agent', name: 'Tim Helpdesk Huntap', addedAt: '15 Okt 2026' }
+  ]);
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [newAdminRole, setNewAdminRole] = useState<'super_admin' | 'kelurahan_officer' | 'support_agent'>('kelurahan_officer');
+  const [newAdminName, setNewAdminName] = useState('');
+  const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+
+  const handleAddPlatformAdmin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAdminEmail.trim()) return;
+    const cleanEmail = newAdminEmail.trim().toLowerCase();
+    if (platformAdmins.some(a => a.email.toLowerCase() === cleanEmail)) {
+      toast.error('Email ini sudah terdaftar sebagai pengurus platform!');
+      return;
+    }
+    const newEntry = {
+      email: cleanEmail,
+      role: newAdminRole,
+      name: newAdminName.trim() || 'Aparatur Wilayah',
+      addedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+    };
+    setPlatformAdmins(prev => [...prev, newEntry]);
+    logAuditEvent('Tambah Administrator Wilayah', 'security', 'all', `Menambahkan ${cleanEmail} sebagai ${newAdminRole}`);
+    setNewAdminEmail('');
+    setNewAdminName('');
+    setShowAddAdminModal(false);
+    toast.success(`Akun ${cleanEmail} berhasil ditambahkan dengan hak akses ${newAdminRole}!`);
+  };
+
+  const handleRemovePlatformAdmin = (email: string) => {
+    setPlatformAdmins(prev => prev.filter(a => a.email !== email));
+    logAuditEvent('Cabut Akses Administrator', 'security', 'all', `Mencabut akses ${email}`);
+    toast.info(`Akses untuk ${email} telah dicabut.`);
+  };
+
 
   // Helper to log audit events into Firestore Realtime Database
   const logAuditEvent = (
@@ -1019,7 +1070,62 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           </div>
         </div>
 
+        {/* CROSS-RT EMERGENCY CRISIS ALERT BANNER */}
+        {fleetPanicAlerts.length > 0 && (
+          <div className="bg-rose-600 border-2 border-rose-400 rounded-3xl p-5 text-white shadow-xl animate-pulse space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-white text-rose-600 flex items-center justify-center font-black shadow-md">
+                  <ShieldAlert size={24} />
+                </div>
+                <div>
+                  <h2 className="text-sm sm:text-base font-black tracking-tight flex items-center gap-2">
+                    <span>PERINGATAN DARURAT KRISIS ({fleetPanicAlerts.length} ALARM AKTIF)</span>
+                    <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-mono uppercase">
+                      Live Fleet SOS
+                    </span>
+                  </h2>
+                  <p className="text-xs text-rose-100 font-medium">
+                    Warga telah menekan tombol darurat (Panic Button). Pengurus RT & Tim Keamanan sedang merespons di lokasi.
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-mono bg-rose-700/80 px-3 py-1.5 rounded-xl border border-rose-500 hidden sm:inline-block">
+                WITA {liveTime}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
+              {fleetPanicAlerts.map(alert => (
+                <div key={alert.id} className="bg-rose-950/60 backdrop-blur-xs p-3.5 rounded-2xl border border-rose-400/40 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-black text-xs text-white truncate flex items-center gap-1.5">
+                      <span>{alert.residentName}</span>
+                      <span className="text-[10px] text-rose-200 font-mono">({alert.location})</span>
+                    </div>
+                    <div className="text-[10px] text-rose-300 font-mono">
+                      Status: {alert.status} • {new Date(alert.timestamp).toLocaleTimeString('id-ID')}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      if (alert.tenantId) {
+                        switchTenant(alert.tenantId);
+                        toast.info(`Beralih ke RT ${alert.tenantId} untuk memantau situasi`);
+                      }
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-700 font-bold text-[11px] shrink-0 transition-all shadow-xs cursor-pointer"
+                  >
+                    Supervisi RT
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* TAB 1: DIREKTORI TENANT */}
+
         {activeTab === 'tenants' && (
           <div className="space-y-4">
             {/* Search, Filter & View Controls */}
@@ -1974,48 +2080,107 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         {/* TAB 6: KEAMANAN & ROOT ENGINE */}
         {activeTab === 'security' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs">
-              <h3 className="text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
-                <ShieldCheck size={16} className="text-emerald-600" />
-                <span>Daftar Akun Otorisasi Super Admin</span>
-              </h3>
-              <p className="text-xs text-slate-500 mb-4">
-                Daftar email yang telah disahkan memiliki kekebalan akses dan hak mutlak dalam fleet multi-tenant:
-              </p>
-              <div className="space-y-2">
-                {SUPER_ADMIN_EMAILS.map((email) => {
-                  const isCurrent = auth.currentUser?.email?.toLowerCase() === email.toLowerCase();
-                  return (
-                    <div key={email} className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-                        <div>
-                          <span className="text-xs font-mono font-bold text-slate-800">{email}</span>
-                          <p className="text-[10px] text-slate-500 font-sans mt-0.5">Level Akses: PLATFORM_ROOT_OPERATOR</p>
+            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-6">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                    <ShieldCheck size={16} className="text-emerald-600" />
+                    <span>Akun Otorisasi Root Super Admin</span>
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-bold">
+                    Hardcoded Guard
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mb-3">
+                  Akun pemilik platform dengan kekebalan akses mutlak:
+                </p>
+                <div className="space-y-2">
+                  {SUPER_ADMIN_EMAILS.map((email) => {
+                    const isCurrent = auth.currentUser?.email?.toLowerCase() === email.toLowerCase();
+                    return (
+                      <div key={email} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                          <div>
+                            <span className="text-xs font-mono font-bold text-slate-800">{email}</span>
+                            <p className="text-[10px] text-slate-500 font-sans">Level Akses: PLATFORM_ROOT_OPERATOR</p>
+                          </div>
                         </div>
+                        {isCurrent ? (
+                          <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono">
+                            Sesi Anda
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-200 text-slate-600 font-mono">
+                            Terverifikasi
+                          </span>
+                        )}
                       </div>
-                      {isCurrent ? (
-                        <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono">
-                          Sesi Anda
-                        </span>
-                      ) : (
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-200 text-slate-600 font-mono">
-                          Terverifikasi
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-5 p-3.5 bg-indigo-50/70 border border-indigo-100 rounded-2xl">
-                <div className="flex items-start gap-2">
-                  <Info size={15} className="text-indigo-600 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-indigo-900 leading-relaxed">
-                    Untuk menambahkan akun Super Admin baru, tambahkan email pada konstanta <code className="text-indigo-700 font-mono font-bold">SUPER_ADMIN_EMAILS</code> di konfigurasi sistem platform.
-                  </p>
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* DYNAMIC PLATFORM ADMINS & KELURAHAN STAFF */}
+              <div className="pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                      <UserPlus size={16} className="text-indigo-600" />
+                      <span>Administrator Wilayah & Staf Kelurahan (Dynamic RBAC)</span>
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Kelola hak akses berjenjang untuk Lurah, Staf Kelurahan, atau Tim Helpdesk tanpa ubah kode program:
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddAdminModal(true)}
+                    className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs shrink-0 cursor-pointer"
+                  >
+                    <Plus size={13} />
+                    <span>Tambah Admin</span>
+                  </button>
+                </div>
+
+                <div className="space-y-2 mt-3">
+                  {platformAdmins.map((adm) => {
+                    const roleBadges = {
+                      super_admin: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                      kelurahan_officer: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                      support_agent: 'bg-sky-100 text-sky-800 border-sky-300',
+                    };
+                    const roleLabels = {
+                      super_admin: 'Super Admin',
+                      kelurahan_officer: 'Staf Kelurahan (Auditor)',
+                      support_agent: 'Agen Helpdesk',
+                    };
+
+                    return (
+                      <div key={adm.email} className="p-3 rounded-xl bg-slate-50 border border-slate-200/90 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-xs text-slate-900 truncate">{adm.name}</span>
+                            <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.2 rounded border ${roleBadges[adm.role]}`}>
+                              {roleLabels[adm.role]}
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-mono text-slate-500 truncate mt-0.5">
+                            {adm.email} • Ditambahkan {adm.addedAt}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleRemovePlatformAdmin(adm.email)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          title="Cabut Akses Admin"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
 
               {/* Disaster Recovery Snapshot Box */}
               <div className="mt-6 pt-5 border-t border-slate-100">
@@ -2476,6 +2641,92 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           </div>
         )}
       </AnimatePresence>
+
+      {/* ADD PLATFORM ADMIN MODAL */}
+      {showAddAdminModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center border border-indigo-500/30">
+                  <UserPlus size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black tracking-tight">Tambah Admin Wilayah</h3>
+                  <p className="text-[11px] text-slate-400 font-mono">Otorisasi aparatur & staf kelurahan</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowAddAdminModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddPlatformAdmin} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Nama Aparatur / Petugas</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Misal: Bpk. Lurah Tondo"
+                  value={newAdminName}
+                  onChange={(e) => setNewAdminName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Email Google / Akun Resmi</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="aparatur@palukota.go.id"
+                  value={newAdminEmail}
+                  onChange={(e) => setNewAdminEmail(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Level Akses & Peran</label>
+                <select
+                  value={newAdminRole}
+                  onChange={(e: any) => setNewAdminRole(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer"
+                >
+                  <option value="kelurahan_officer">Staf Kelurahan (Auditor & Monitoring)</option>
+                  <option value="super_admin">Super Admin (Akses Penuh Seluruh Fleet)</option>
+                  <option value="support_agent">Agen Helpdesk (Tiket & Layanan Surat)</option>
+                </select>
+                <p className="text-[10px] text-slate-400 mt-1 font-mono">
+                  {newAdminRole === 'kelurahan_officer' && 'Dapat melihat analitik seluruh RT, supervisi wilayah, dan log audit.'}
+                  {newAdminRole === 'super_admin' && 'Memiliki hak mutlak mengedit tenant, tarif, modul, dan sistem.'}
+                  {newAdminRole === 'support_agent' && 'Hanya dapat menangani keluhan helpdesk dan format surat warga.'}
+                </p>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddAdminModal(false)}
+                  className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+                >
+                  Simpan Hak Akses
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

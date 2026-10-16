@@ -1623,6 +1623,18 @@ export const subscribeToActivePanicAlerts = (callback: (data: any[]) => void) =>
     });
 };
 
+export const subscribeToFleetPanicAlerts = (callback: (data: any[]) => void) => {
+    if (!db) return () => {};
+    const q = query(collection(db, PANIC_ALERTS_COL), where("status", "in", ["Active", "Responding"]));
+    return onSnapshot(q, (snapshot) => {
+        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+        callback(data);
+    }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, PANIC_ALERTS_COL);
+    });
+};
+
+
 export const updatePanicAlertStatus = async (id: string, status: string, responderName?: string) => {
     try {
         const updateData: any = { status };

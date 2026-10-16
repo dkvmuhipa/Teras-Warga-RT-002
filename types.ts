@@ -813,7 +813,9 @@ export interface PanicAlert {
   status: 'Active' | 'Responding' | 'Resolved' | 'Cancelled';
   responderName?: string;
   resolvedAt?: string;
+  tenantId?: string;
 }
+
 
 export interface CashFlow {
   id: string;

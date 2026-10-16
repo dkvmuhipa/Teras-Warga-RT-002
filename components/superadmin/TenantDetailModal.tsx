@@ -5,8 +5,9 @@ import {
   DollarSign, Palette, AlertTriangle, ArrowRight, ShieldCheck,
   Calendar, CheckCircle2, Sliders, Eye, ToggleLeft, ToggleRight,
   Droplets, Package, FileText, AlertOctagon, Activity, Camera,
-  CheckSquare, Square
+  CheckSquare, Square, Download
 } from 'lucide-react';
+
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Tenant, TenantStatus, TenantModules, 
@@ -555,8 +556,55 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   </div>
                 )}
               </div>
+
+              {/* Tenant Data Backup & Archival */}
+
+              <div className="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                    <Download size={14} className="text-indigo-600" />
+                    <span>Arsip Cadangan Data RT Mandiri (.JSON)</span>
+                  </h4>
+                  <p className="text-[11px] text-indigo-700/80 font-medium mt-0.5">
+                    Unduh snapshot lengkap ({tenantHouses.length} rumah, {tenantCash.length} kas, {tenantOfficials.length} pengurus, {tenantReports.length} laporan) untuk arsip lokal.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const backupData = {
+                      manifest: {
+                        tenantId: tenant.id,
+                        tenantName: tenant.name,
+                        exportedAt: new Date().toISOString(),
+                        version: '2.4.0'
+                      },
+                      tenant,
+                      houses: tenantHouses,
+                      cashFlows: tenantCash,
+                      officials: tenantOfficials,
+                      reports: tenantReports,
+                      letters: tenantLetters,
+                      tickets: tenantTickets
+                    };
+                    const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Backup_${tenant.id}_${new Date().toISOString().slice(0, 10)}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success(`Arsip cadangan untuk ${tenant.name} berhasil diunduh!`);
+                  }}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                >
+                  <Download size={14} />
+                  <span>Unduh Arsip JSON</span>
+                </button>
+              </div>
             </div>
           )}
+
 
           {/* TAB 1: IDENTITAS & BLOK */}
           {activeTab === 'info' && (

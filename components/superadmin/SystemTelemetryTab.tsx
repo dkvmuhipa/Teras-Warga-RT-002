@@ -11,36 +11,76 @@ import { toast } from 'sonner';
 export const SystemTelemetryTab: React.FC = () => {
   const [isPinging, setIsPinging] = useState(false);
   const [latencyMs, setLatencyMs] = useState<number>(42);
+  const [backendLatencyMs, setBackendLatencyMs] = useState<number>(12);
+  const [backendStatus, setBackendStatus] = useState<'ONLINE' | 'OFFLINE'>('ONLINE');
   const [lastPingTime, setLastPingTime] = useState<string>('Baru saja');
 
   const handlePingDatabase = async () => {
     setIsPinging(true);
-    const start = performance.now();
+    const startDb = performance.now();
     try {
       if (db) {
         await getDoc(doc(db, '_health_check', 'ping'));
       } else {
         await fetch(window.location.origin, { method: 'HEAD', cache: 'no-store' });
       }
-      const elapsed = Math.round(performance.now() - start);
-      setLatencyMs(elapsed);
-      setLastPingTime(new Date().toLocaleTimeString('id-ID'));
-      toast.success(`Latensi Database: ${elapsed}ms (Optimal)`);
+      const elapsedDb = Math.round(performance.now() - startDb);
+      setLatencyMs(elapsedDb);
     } catch (e) {
-      const elapsed = Math.round(performance.now() - start);
-      setLatencyMs(elapsed);
-      setLastPingTime(new Date().toLocaleTimeString('id-ID'));
-      toast.success(`Latensi Cloud: ${elapsed}ms`);
+      const elapsedDb = Math.round(performance.now() - startDb);
+      setLatencyMs(elapsedDb);
+    }
+
+    // Ping Python FastAPI Backend via Proxy
+    const startPy = performance.now();
+    try {
+      const pyRes = await fetch('/health', { cache: 'no-store' });
+      const elapsedPy = Math.round(performance.now() - startPy);
+      setBackendLatencyMs(elapsedPy);
+      if (pyRes.ok) {
+        setBackendStatus('ONLINE');
+        toast.success(`Telemetri: DB ${latencyMs}ms • Python API ${elapsedPy}ms (Optimal)`);
+      } else {
+        setBackendStatus('OFFLINE');
+      }
+    } catch (err) {
+      setBackendStatus('OFFLINE');
     } finally {
+      setLastPingTime(new Date().toLocaleTimeString('id-ID'));
       setIsPinging(false);
     }
   };
 
+
   return (
     <div className="space-y-6">
       {/* Services Health Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {/* Python FastAPI Backend Engine */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+              FastAPI Python API
+            </span>
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${
+              backendStatus === 'ONLINE' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-rose-50 text-rose-600 border-rose-100'
+            }`}>
+              <Server size={16} />
+            </div>
+          </div>
+          <div className={`text-xl sm:text-2xl font-black tracking-tight font-mono flex items-center gap-2 ${
+            backendStatus === 'ONLINE' ? 'text-indigo-600' : 'text-rose-600'
+          }`}>
+            <span>{backendStatus}</span>
+            <div className={`w-2.5 h-2.5 rounded-full ${backendStatus === 'ONLINE' ? 'bg-indigo-500 animate-pulse' : 'bg-rose-500'}`}></div>
+          </div>
+          <p className="text-[11px] text-slate-500 font-medium mt-1">
+            Latensi: <strong className="text-slate-800 font-mono">{backendLatencyMs} ms</strong> (v1.0.0 ASGI)
+          </p>
+        </div>
+
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
+
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
               Cloud Database

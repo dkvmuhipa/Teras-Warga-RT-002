@@ -49,3 +49,16 @@ firebase-service-account.json
 # Build output
 dist/
 build/
+
+# Python virtual environment and bytecode
+.venv/
+backend/.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.pytest_cache/
+.coverage
+htmlcov/
