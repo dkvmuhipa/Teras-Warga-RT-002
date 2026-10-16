@@ -615,7 +615,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                                                         </div>
                                                         <div className="min-w-0">
                                                             <p className="text-xs font-black text-slate-800 truncate">{member.name}</p>
-                                                            <p className="text-[10px] text-slate-400 font-bold">{member.relationship || 'Keluarga'}</p>
+                                                            <p className="text-[10px] text-slate-400 font-bold">{member.relation || member.relationship || 'Keluarga'}</p>
                                                         </div>
                                                     </div>
                                                     {member.gender && (

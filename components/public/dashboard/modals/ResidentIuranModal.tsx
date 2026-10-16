@@ -271,7 +271,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
 Saya ingin konfirmasi / koordinasi pembayaran iuran lingkungan:
 • Periode: ${currentMonth}
 • Hunian: Blok ${currentHouse?.block}-${currentHouse?.number}
-• Nama Warga: ${currentHouse?.residentName || 'Warga'}
+• Nama Warga: ${currentHouse?.headOfFamily || currentHouse?.residentName || 'Warga'}
 • Retribusi Sampah TPS3R (${currentHouseWasteTier}): Rp ${sampahFee.toLocaleString('id-ID')}
 ${airFee > 0 ? `• Iuran Air: Rp ${airFee.toLocaleString('id-ID')}\n` : ''}• Metode Pembayaran: Tunai (Cash)
 • Nominal: Rp ${(totalRemainingFee > 0 ? totalRemainingFee : totalFee).toLocaleString('id-ID')}

@@ -247,7 +247,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
 
                 <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
                   <a 
-                    href={getDocumentPreviewUrl(letter.attachmentUrl)} 
+                    href={getDocumentPreviewUrl(letter.attachmentUrl || '')} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all text-[10px] font-black uppercase tracking-widest"

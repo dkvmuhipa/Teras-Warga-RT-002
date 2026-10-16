@@ -5,7 +5,7 @@ import {
   Filter, Search, Plus, ExternalLink, ArrowRight, ArrowLeft, RefreshCw, 
   LogOut, CheckCircle2, AlertCircle, Phone, MessageSquare, Sparkles, 
   Layers, Wallet, BarChart3, Settings, Shield, ChevronRight, Eye, EyeOff,
-  Edit2, Share2, Printer, MapPin, Send, HelpCircle
+  Edit2, Share2, Printer, MapPin, Send, HelpCircle, Server
 } from 'lucide-react';
 import { useTenant } from '../../context/TenantContext';
 import { Tenant, House, CashFlow, Announcement, Report } from '../../types';

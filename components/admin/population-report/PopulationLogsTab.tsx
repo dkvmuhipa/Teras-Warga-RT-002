@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { 
   User, ArrowRight, Baby, Activity, AlertCircle, FileText, 
   Search, Calendar, CheckCircle, RefreshCw, Trash2, Printer, 
-  ChevronLeft, ChevronRight 
+  ChevronLeft, ChevronRight, Clock 
 } from 'lucide-react';
 import { PopulationChangeLog, House, PdfConfig } from '../../../types';
 import { generateSingleMutationCertificatePDF } from '../../../services/pdfService';

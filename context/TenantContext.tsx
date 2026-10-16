@@ -135,7 +135,7 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       
       // Update URL query parameter seamlessly
       const url = new URL(window.location.href);
-      url.searchParams.set('rt', target.slug);
+      url.searchParams.set('rt', target.slug || target.id);
       window.history.replaceState({}, '', url.toString());
     } catch (e) {
       console.warn('Error saving tenant state:', e);
@@ -179,7 +179,7 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       try {
         localStorage.setItem('active_tenant_id', newTenant.id);
         const url = new URL(window.location.href);
-        url.searchParams.set('rt', newTenant.slug);
+        url.searchParams.set('rt', newTenant.slug || newTenant.id);
         window.history.replaceState({}, '', url.toString());
       } catch (e) {
         console.warn('Error saving tenant state:', e);

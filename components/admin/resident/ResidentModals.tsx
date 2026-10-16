@@ -2369,7 +2369,7 @@ _Salam Hormat,_
                       <button
                         type="button"
                         onClick={() => {
-                          let p = payHouse.phone.replace(/[^0-9]/g, '');
+                          let p = (payHouse.phone || '').replace(/[^0-9]/g, '');
                           if (p.startsWith('0')) p = '62' + p.substring(1);
                           window.open(`https://api.whatsapp.com/send?phone=${p}`, '_blank');
                         }}
@@ -3009,7 +3009,7 @@ _Salam Hormat,_
                       {payHouse.ownerName && payHouse.ownerName !== payHouse.headOfFamily && (
                         <button
                           type="button"
-                          onClick={() => setPayerName(payHouse.ownerName)}
+                          onClick={() => setPayerName(payHouse.ownerName || '')}
                           className="text-[9px] text-emerald-400 hover:text-emerald-300 underline cursor-pointer ml-1"
                         >
                           Pemilik

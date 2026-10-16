@@ -38,9 +38,10 @@ export interface SkillFormData {
 }
 
 export interface ReportFormData {
-  title: string;
-  category: Report['category'];
+  type?: string;
+  title?: string;
+  category?: Report['category'];
   description: string;
-  photoUrl: string;
-  isUrgent: boolean;
+  photoUrl?: string;
+  isUrgent?: boolean;
 }

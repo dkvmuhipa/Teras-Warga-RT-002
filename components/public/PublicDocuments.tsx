@@ -6,7 +6,7 @@ import {
   Share2, Copy, Check, ExternalLink, Calendar, 
   X, Info, Globe, Building2, ChevronRight
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, type Variants } from 'motion/react';
 import { toast } from 'sonner';
 import { Document } from '../../types';
 import { getDocumentPreviewUrl } from '../../services/databaseService';
@@ -224,14 +224,14 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
 
   const categories = ['All', 'SK RT', 'Aturan', 'Formulir', 'Notulensi', 'Lainnya'] as const;
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.06 } }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const } }
   };
 
   return (

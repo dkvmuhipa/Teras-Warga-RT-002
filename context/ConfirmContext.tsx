@@ -6,8 +6,11 @@ interface ConfirmOptions {
   title: string;
   message: string;
   confirmLabel?: string;
+  confirmText?: string;
   cancelLabel?: string;
+  cancelText?: string;
   isDanger?: boolean;
+  type?: 'danger' | 'warning' | 'info' | string;
   confirmIcon?: React.ReactNode;
 }
 
@@ -89,9 +92,9 @@ export const ConfirmProvider: React.FC<{ children: ReactNode }> = ({ children })
         onConfirm={handleConfirmAction}
         title={confirmOptions.title}
         message={confirmOptions.message}
-        confirmLabel={confirmOptions.confirmLabel}
-        cancelLabel={confirmOptions.cancelLabel}
-        isDanger={confirmOptions.isDanger}
+        confirmLabel={confirmOptions.confirmLabel || confirmOptions.confirmText}
+        cancelLabel={confirmOptions.cancelLabel || confirmOptions.cancelText}
+        isDanger={confirmOptions.isDanger || confirmOptions.type === 'danger' || confirmOptions.type === 'warning'}
         icon={confirmOptions.confirmIcon}
       />
       <PromptDialog

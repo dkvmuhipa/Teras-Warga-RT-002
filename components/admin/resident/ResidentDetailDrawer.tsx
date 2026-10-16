@@ -5,7 +5,7 @@ import {
   LayoutList, Droplets, Trash2, Users, Activity, Shield, User,
   ShieldCheck, Calendar, AlertCircle, Printer, Home, Bike, Car, Key,
   CheckSquare, Waves, Recycle, Sparkles, MessageCircle, ExternalLink,
-  Check, AlertTriangle, Store
+  Check, AlertTriangle, Store, Clock
 } from 'lucide-react';
 import { House, PaymentStatus, STBMRecord } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
@@ -66,7 +66,8 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
           hasSTBMTriggering: true,
           needsFollowUp: false,
           problemType: '',
-          notes: ''
+          notes: '',
+          updatedAt: new Date().toISOString()
         });
       }
     });

@@ -54,8 +54,8 @@ export const getActiveTenantScope = (): string => {
   return activeTenantScope;
 };
 
-export const filterByActiveTenant = <T extends { tenantId?: string }>(items: T[]): T[] => {
-  return items.filter(item => matchesTenant(item.tenantId, activeTenantScope));
+export const filterByActiveTenant = <T = any>(items: T[]): T[] => {
+  return items.filter(item => matchesTenant((item as any)?.tenantId, activeTenantScope));
 };
 
 export const handleFirestoreError = (error: unknown, operationType: OperationType, path: string | null) => {

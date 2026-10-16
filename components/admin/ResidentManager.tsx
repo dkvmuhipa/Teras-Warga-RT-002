@@ -1125,6 +1125,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       specialNotes: house.specialNotes || '',
       housePhotoUrl: house.housePhotoUrl || '',
       ktpUrl: house.ktpUrl || '',
+      kkUrl: house.kkUrl || '',
       joiningDate: house.joiningDate 
         ? house.joiningDate.split('T')[0] 
         : (house.createdAt ? house.createdAt.split('T')[0] : ''),

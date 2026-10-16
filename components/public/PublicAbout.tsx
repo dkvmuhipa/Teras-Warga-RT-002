@@ -87,7 +87,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
     houses.forEach(h => {
       if (h.status === 'Occupied') {
         // HoF
-        if (h.gender === 'Perempuan' || h.gender === 'Wanita') females++;
+        if (h.gender === 'Perempuan') females++;
         else males++;
 
         const birth = h.birthDate ? new Date(h.birthDate) : null;
@@ -100,7 +100,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         if (h.familyMembers && Array.isArray(h.familyMembers)) {
           h.familyMembers.forEach(m => {
             if (!m) return;
-            if (m.gender === 'Perempuan' || m.gender === 'Wanita') females++;
+            if (m.gender === 'Perempuan') females++;
             else males++;
 
             const mBirth = m.birthDate ? new Date(m.birthDate) : null;

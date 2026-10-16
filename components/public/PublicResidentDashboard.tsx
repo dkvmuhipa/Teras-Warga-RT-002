@@ -207,7 +207,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
     const paymentData = existingPayment || {
       id: `KAS-${currentHouse.block}${currentHouse.number}-${Date.now().toString().slice(-6)}`,
-      headOfFamily: currentHouse.headOfFamily || currentHouse.residentName || 'Warga RT 002',
+      headOfFamily: currentHouse.headOfFamily || 'Warga RT 002',
       block: currentHouse.block,
       number: currentHouse.number,
       type: airFee > 0 ? 'Both' : 'Sampah',
@@ -317,7 +317,8 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           hasSTBMTriggering: true,
           needsFollowUp: false,
           problemType: '',
-          notes: ''
+          notes: '',
+          updatedAt: new Date().toISOString()
         });
       }
     });
@@ -780,13 +781,10 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
             showFullNiks={showFullNiks}
             toggleNikVisibility={toggleNikVisibility}
             formatSensitiveNik={formatSensitiveNik}
-            onOpenIuranModal={() => setIsIuranModalOpen(true)}
-            onOpenWaterModal={() => {
-              setWaterInputReading(currentWaterReading ? String(currentWaterReading.currentReading) : '');
-              setWaterPhoto(currentWaterReading?.photoUrl || '');
-              setIsWaterModalOpen(true);
-            }}
-            onNavigateTab={(tab) => setActiveTab(tab)}
+            setIsIuranModalOpen={setIsIuranModalOpen}
+            setIsWaterModalOpen={setIsWaterModalOpen}
+            setIsUpdateModalOpen={setIsUpdateModalOpen}
+            setActiveTab={setActiveTab}
           />
         )}
 

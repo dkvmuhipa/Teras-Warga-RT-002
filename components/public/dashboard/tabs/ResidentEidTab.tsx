@@ -30,7 +30,8 @@ import {
   User, 
   History, 
   Printer, 
-  FileText 
+  FileText,
+  QrCode
 } from 'lucide-react';
 import { House, LetterRequest, Report, GuestReport, UpdateRequest, WaterMeterReading, WaterUtilitySettings } from '../../../../types';
 import { Card } from '../../../ui/Card';
@@ -62,12 +63,12 @@ interface ResidentEidTabProps {
   femaleCount: number;
   currentPoints: number;
   citizenTier: CitizenTier;
-  showPin: boolean;
-  setShowPin: React.Dispatch<React.SetStateAction<boolean>>;
+  showPin?: boolean;
+  setShowPin?: React.Dispatch<React.SetStateAction<boolean>>;
   showFullNiks: Record<string, boolean>;
   toggleNikVisibility: (id: string) => void;
   formatSensitiveNik: (nik: string, isVisible: boolean) => string;
-  handleCopyToClipboard: (text: string, type: 'pin' | 'houseId') => void;
+  handleCopyToClipboard?: (text: string, type: 'pin' | 'houseId') => void;
   setIsWaterModalOpen: (open: boolean) => void;
   setIsIuranModalOpen: (open: boolean) => void;
   setIsUpdateModalOpen: (open: boolean) => void;
@@ -108,6 +109,25 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
   setIsUpdateModalOpen,
   setActiveTab
 }) => {
+  const [internalShowPin, setInternalShowPin] = React.useState(false);
+  const activeShowPin = showPin !== undefined ? showPin : internalShowPin;
+  const toggleShowPin = () => {
+    if (setShowPin) {
+      setShowPin(!activeShowPin);
+    } else {
+      setInternalShowPin(!activeShowPin);
+    }
+  };
+
+  const copyToClipboard = (text: string, type: 'pin' | 'houseId') => {
+    if (handleCopyToClipboard) {
+      handleCopyToClipboard(text, type);
+    } else {
+      navigator.clipboard.writeText(text);
+      toast.success(type === 'pin' ? 'PIN Akses disalin ke clipboard' : 'ID Rumah disalin');
+    }
+  };
+
   return (
     <motion.div 
       key="eid"
@@ -413,7 +433,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                     <div>
                       <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-1">ID Hunian</p>
                       <span 
-                        onClick={() => currentHouse?.id && handleCopyToClipboard(currentHouse.id, 'houseId')}
+                        onClick={() => currentHouse?.id && copyToClipboard(currentHouse.id, 'houseId')}
                         className="text-lg md:text-xl font-black hover:text-indigo-200 hover:underline cursor-pointer flex items-center gap-1.5 text-amber-300"
                         title="Klik untuk salin ID Rumah"
                       >
@@ -609,17 +629,17 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">PIN Akses Rumah</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-xs font-black text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 select-all relative group">
-                    {showPin ? currentHouse?.accessCode : '••••••'}
+                    {activeShowPin ? currentHouse?.accessCode : '••••••'}
                   </span>
                   <button 
-                    onClick={() => setShowPin(!showPin)} 
+                    onClick={toggleShowPin} 
                     className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
                     title="Tampilkan PIN"
                   >
-                    {showPin ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {activeShowPin ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                   <button 
-                    onClick={() => currentHouse?.accessCode && handleCopyToClipboard(currentHouse.accessCode, 'pin')} 
+                    onClick={() => currentHouse?.accessCode && copyToClipboard(currentHouse.accessCode, 'pin')} 
                     className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
                     title="Salin PIN"
                   >

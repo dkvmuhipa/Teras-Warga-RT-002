@@ -52,6 +52,9 @@ export interface TenantFeeConfig {
   sampahPns: number;
   airFee: number;
   kasFee: number;
+  trashFee?: number;
+  securityFee?: number;
+  waterPerM3?: number;
 }
 
 export type TenantStatus = 'active' | 'suspended' | 'maintenance' | 'archived';
@@ -67,7 +70,7 @@ export interface TenantModules {
 
 export interface Tenant {
   id: string; // e.g. 'tondo-rw20-rt02'
-  slug: string; // e.g. 'rt02-tondo'
+  slug?: string; // e.g. 'rt02-tondo'
   name: string; // 'RT 002 / RW 020 Huntap Tondo 2'
   rt: string; // '002'
   rw: string; // '020'
@@ -79,16 +82,20 @@ export interface Tenant {
   address: string;
   chairmanName: string;
   chairmanPhone?: string;
+  phone?: string;
   secretaryName?: string;
   treasurerName?: string;
   blocks: string[]; // ['C5', 'C7', ...]
   blockConfig: BlockRangeConfig[];
   fees?: Partial<TenantFeeConfig>;
+  feeConfig?: Partial<TenantFeeConfig>;
   status?: TenantStatus;
   modules?: TenantModules;
+  pdfConfig?: Partial<PdfConfig>;
   logoUrl?: string;
   themeColor?: string;
   isPilotDemo?: boolean;
+  isDemo?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -134,6 +141,8 @@ export interface House {
   residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga'; // NEW: Status Kepenghunian (Tetap, Sewa, Rumah Keluarga)
   ownerName?: string; // NEW: Nama Pemilik Rumah (jika berbeda dengan penghuni)
   ownerPhone?: string; // NEW: Kontak Pemilik Rumah
+  ownerAddress?: string; // NEW: Alamat Pemilik Rumah
+  residentName?: string; // NEW: Alias nama penghuni/warga
   paymentStatus?: PaymentStatus; // Status Iuran Umum
   paymentDate?: string; // Tanggal Pembayaran Iuran
   paymentStatusAir?: PaymentStatus; // Iuran Air
@@ -258,8 +267,12 @@ export interface House {
     nik?: string;
     gender?: 'Laki-laki' | 'Perempuan';
     relation: 'Suami' | 'Istri' | 'Anak' | 'Menantu' | 'Cucu' | 'Orang Tua' | 'Mertua' | 'Saudara' | 'Keponakan' | 'Kakek/Nenek' | 'Pembantu' | 'Famili Lain';
+    relationship?: string;
     education?: string;
     birthDate?: string;
+    birthPlace?: string;
+    bloodType?: string;
+    maritalStatus?: string;
     job?: string;
   }[];
 
@@ -291,9 +304,17 @@ export interface ResidentRegistration {
   id: string;
   tenantId?: string;
   headOfFamily: string;
+  nik?: string;
+  religion?: string;
+  birthPlace?: string;
+  maritalStatus?: string;
+  bloodType?: string;
+  bpjsStatus?: string;
   gender: 'Laki-laki' | 'Perempuan';
   birthDate: string;
   ownerName?: string;
+  ownerPhone?: string;
+  ownerAddress?: string;
   block: string;
   number: string;
   phone: string;
@@ -333,8 +354,12 @@ export interface ResidentRegistration {
     nik?: string;
     gender: 'Laki-laki' | 'Perempuan';
     relation: 'Suami' | 'Istri' | 'Anak' | 'Menantu' | 'Cucu' | 'Orang Tua' | 'Mertua' | 'Saudara' | 'Keponakan' | 'Kakek/Nenek' | 'Pembantu' | 'Famili Lain';
+    relationship?: string;
     education?: string;
     birthDate?: string;
+    birthPlace?: string;
+    bloodType?: string;
+    maritalStatus?: string;
     job?: string;
   }[];
   date: string;
@@ -500,6 +525,7 @@ export interface Report {
   id: string;
   tenantId?: string;
   type: 'Keamanan' | 'Kebersihan' | 'Fasilitas' | 'Sosial' | 'Aspirasi/Saran' | 'Temuan Lapangan' | 'Lainnya';
+  category?: string;
   description: string;
   reporterName: string;
   date: string;
@@ -734,6 +760,7 @@ export interface PdfConfig {
   rtName: string;
   rtAddress: string;
   rtChairman: string;
+  rtTreasurer?: string;
   rtPhone?: string;
   kelurahan?: string;
   kecamatan?: string;
@@ -745,6 +772,7 @@ export interface PdfConfig {
   kopLine2?: string;
   kopLine3?: string;
   rtLeader?: string;
+  signatoryName?: string;
   letterTemplates?: {
     type: string;
     suggestion: string;
@@ -1337,6 +1365,7 @@ export interface WaterMeterReading {
   photoUrl?: string;            // Foto angka meter fisik
   recordedBy: 'Warga' | 'Petugas RT';
   recordedByName?: string;
+  residentName?: string;
   recordedAt: string;           // ISO timestamp
   status: 'Menunggu Verifikasi' | 'Terverifikasi' | 'Ditolak';
   adminNotes?: string;

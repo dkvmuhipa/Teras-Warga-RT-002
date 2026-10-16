@@ -334,7 +334,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
           id: Math.random().toString(36).substr(2, 9),
           name: '',
           nik: '',
-          gender: 'Laki-laki',
+          gender: 'Laki-laki' as const,
           relation: 'Istri',
           birthDate: '',
           job: 'Ibu Rumah Tangga',

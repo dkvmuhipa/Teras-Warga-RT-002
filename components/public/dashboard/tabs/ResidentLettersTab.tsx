@@ -222,7 +222,7 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                         onClick={() => {
                           const msg = `Halo Ketua RT 002, saya ingin menanyakan status permohonan surat pengantar:
 • Jenis Surat: ${letter.type}
-• Pemohon: ${letter.applicantName || currentHouse?.residentName || 'Warga'} (Blok ${currentHouse?.block}-${currentHouse?.number})
+• Pemohon: ${letter.applicantName || currentHouse?.headOfFamily || 'Warga'} (Blok ${currentHouse?.block}-${currentHouse?.number})
 • Tanggal Pengajuan: ${formattedDate}
 Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                           window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(msg)}`, '_blank');
@@ -256,7 +256,7 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                         <button
                           type="button"
                           onClick={() => {
-                            navigator.clipboard.writeText(letter.letterNumber);
+                            navigator.clipboard.writeText(letter.letterNumber || '');
                             toast.success('Nomor surat berhasil disalin!');
                           }}
                           className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all"

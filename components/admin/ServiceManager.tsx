@@ -3495,7 +3495,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             hasSTBMTriggering: true,
                             needsFollowUp: true,
                             problemType: selectedReport.description.slice(0, 80),
-                            notes: `Diperbarui otomatis dari Pengaduan Warga (ID: ${selectedReport.id})`
+                            notes: `Diperbarui otomatis dari Pengaduan Warga (ID: ${selectedReport.id})`,
+                            updatedAt: new Date().toISOString()
                           });
                           toast.success(`Kavling Blok ${reporterHouse.block}-${reporterHouse.number} ditandai butuh tindak lanjut pada Buku 5 Pilar STBM!`);
                         } catch (e) {
