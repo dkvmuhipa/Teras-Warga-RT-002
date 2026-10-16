@@ -47,7 +47,7 @@ export const useWeather = () => {
                     }
                 }
             } catch (proxyErr: any) {
-                if (proxyErr?.name === 'AbortError' || signal?.aborted) {
+                if (proxyErr?.name === 'AbortError' || signal?.aborted || String(proxyErr).includes('AbortError') || String(proxyErr).includes('aborted')) {
                     return;
                 }
                 console.warn("Proxy fetch failed, trying direct fetch:", proxyErr);

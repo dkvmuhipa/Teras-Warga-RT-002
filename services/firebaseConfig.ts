@@ -2,8 +2,7 @@ import { initializeApp } from "firebase/app";
 import { 
   getFirestore, 
   initializeFirestore, 
-  persistentLocalCache, 
-  persistentMultipleTabManager 
+  persistentLocalCache 
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getMessaging, isSupported } from "firebase/messaging";
@@ -30,13 +29,12 @@ try {
   // Using modular imports directly via namespace to avoid export errors
   app = initializeApp(firebaseConfig);
   
-  // Enable modern multi-tab offline persistence using FirestoreSettings.localCache
+  // Enable modern stable offline persistence using FirestoreSettings.localCache
+  // Avoiding persistentMultipleTabManager() which suffers from internal assertion failures in v10.14.x
   if (typeof window !== 'undefined') {
     try {
       db = initializeFirestore(app, {
-        localCache: persistentLocalCache({
-          tabManager: persistentMultipleTabManager()
-        })
+        localCache: persistentLocalCache({})
       });
     } catch {
       db = getFirestore(app);

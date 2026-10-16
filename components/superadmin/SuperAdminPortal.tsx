@@ -116,15 +116,15 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     const unsubPanic = subscribeToFleetPanicAlerts(setFleetPanicAlerts);
 
     return () => {
-      unsubHouses();
-      unsubCash();
-      unsubOfficials();
-      unsubTickets();
-      unsubReports();
-      unsubLetters();
-      unsubBroadcasts();
-      unsubAudit();
-      unsubPanic();
+      try { unsubHouses?.(); } catch (e) { /* ignore cleanup error */ }
+      try { unsubCash?.(); } catch (e) { /* ignore cleanup error */ }
+      try { unsubOfficials?.(); } catch (e) { /* ignore cleanup error */ }
+      try { unsubTickets?.(); } catch (e) { /* ignore cleanup error */ }
+      try { unsubReports?.(); } catch (e) { /* ignore cleanup error */ }
+      try { unsubLetters?.(); } catch (e) { /* ignore cleanup error */ }
+      try { unsubBroadcasts?.(); } catch (e) { /* ignore cleanup error */ }
+      try { unsubAudit?.(); } catch (e) { /* ignore cleanup error */ }
+      try { unsubPanic?.(); } catch (e) { /* ignore cleanup error */ }
     };
   }, []);
 

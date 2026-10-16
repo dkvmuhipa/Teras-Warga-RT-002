@@ -1414,21 +1414,29 @@ export const subscribeToCollection = (
     console.warn(`Firebase not configured, skipping subscription to ${colName}`);
     return () => {};
   }
-  const q = query(collection(db, colName));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(doc => ({
-      ...doc.data(), 
-      id: doc.id 
-    }));
-    callback(filterByActiveTenant(data));
-  }, (error) => {
-    if (onError) {
-      onError(error);
-    } else {
-      console.warn(`Firestore subscription warning on ${colName}:`, error?.message || error);
-      callback([]);
-    }
-  });
+  try {
+    const q = query(collection(db, colName));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        ...doc.data(), 
+        id: doc.id 
+      }));
+      callback(filterByActiveTenant(data));
+    }, (error) => {
+      if (onError) {
+        onError(error);
+      } else {
+        console.warn(`Firestore subscription warning on ${colName}:`, error?.message || error);
+        callback([]);
+      }
+    });
+    return () => {
+      try { unsubscribe(); } catch (err) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn(`Firestore subscription setup error on ${colName}:`, err);
+    return () => {};
+  }
 };
 
 // --- OPTIMIZED REPORT SUBSCRIBE ---
@@ -1577,30 +1585,26 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
             status: 'Baru'
         });
 
-        // Trigger Push Notifications
+        // Trigger Push Notifications (Broadcast to all devices server-side)
         try {
-            const tokens = await getFCMTokens();
-            if (tokens && tokens.length > 0) {
-                fetch('/api/push/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tokens,
-                        notification: {
-                            title: "🚨 DARURAT (PANIC BUTTON)",
-                            body: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`
-                        },
-                        data: {
-                            type: 'PanicAlert',
-                            houseId,
-                            location
-                        }
-                    })
-                }).catch(err => {
-                    // Non-critical error, just log
-                    console.warn("Push API fetch error:", err);
-                });
-            }
+            fetch('/api/push/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    notification: {
+                        title: "🚨 DARURAT (PANIC BUTTON)",
+                        body: `Warga ${residentName} (Blok ${location}) menekan tombol darurat! Segera cek lokasi!`
+                    },
+                    data: {
+                        type: 'PanicAlert',
+                        houseId: String(houseId || ''),
+                        location: String(location || '')
+                    }
+                })
+            }).catch(err => {
+                // Non-critical error, just log
+                console.warn("Push API broadcast error:", err);
+            });
         } catch (error) {
             // Non-critical error, just log
             console.warn("Error triggering push notifications:", error);
@@ -1614,24 +1618,40 @@ export const sendPanicAlert = async (houseId: string, residentName: string, loca
 };
 
 export const subscribeToActivePanicAlerts = (callback: (data: any[]) => void) => {
-    const q = query(collection(db, PANIC_ALERTS_COL), where("status", "in", ["Active", "Responding"]));
-    return onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(filterByActiveTenant(data));
-    }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, PANIC_ALERTS_COL);
-    });
+    if (!db) return () => {};
+    try {
+        const q = query(collection(db, PANIC_ALERTS_COL), where("status", "in", ["Active", "Responding"]));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            callback(filterByActiveTenant(data));
+        }, (error) => {
+            handleFirestoreError(error, OperationType.LIST, PANIC_ALERTS_COL);
+        });
+        return () => {
+            try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+        };
+    } catch (e) {
+        return () => {};
+    }
 };
 
 export const subscribeToFleetPanicAlerts = (callback: (data: any[]) => void) => {
     if (!db) return () => {};
-    const q = query(collection(db, PANIC_ALERTS_COL), where("status", "in", ["Active", "Responding"]));
-    return onSnapshot(q, (snapshot) => {
-        const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-        callback(data);
-    }, (error) => {
-        handleFirestoreError(error, OperationType.LIST, PANIC_ALERTS_COL);
-    });
+    try {
+        const q = query(collection(db, PANIC_ALERTS_COL), where("status", "in", ["Active", "Responding"]));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const data = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+            callback(data);
+        }, (error) => {
+            handleFirestoreError(error, OperationType.LIST, PANIC_ALERTS_COL);
+            callback([]);
+        });
+        return () => {
+            try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+        };
+    } catch (e) {
+        return () => {};
+    }
 };
 
 
@@ -4611,17 +4631,26 @@ export const subscribeToAllHouses = (callback: (houses: House[]) => void) => {
     callback([]);
     return () => {};
   }
-  const q = query(collection(db, HOUSES_COL));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as House));
-    callback(data);
-  }, (error) => {
-    console.warn("Firestore all houses subscription error:", error);
+  try {
+    const q = query(collection(db, HOUSES_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as House));
+      callback(data);
+    }, (error) => {
+      console.warn("Firestore all houses subscription error:", error);
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore all houses setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 export const subscribeToAllCashFlow = (callback: (cashFlow: CashFlow[]) => void) => {
@@ -4629,17 +4658,26 @@ export const subscribeToAllCashFlow = (callback: (cashFlow: CashFlow[]) => void)
     callback([]);
     return () => {};
   }
-  const q = query(collection(db, CASHFLOW_COL));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as CashFlow));
-    callback(data);
-  }, (error) => {
-    console.warn("Firestore all cashflow subscription error:", error);
+  try {
+    const q = query(collection(db, CASHFLOW_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as CashFlow));
+      callback(data);
+    }, (error) => {
+      console.warn("Firestore all cashflow subscription error:", error);
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore all cashflow setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 export const subscribeToAllOfficials = (callback: (officials: Official[]) => void) => {
@@ -4647,17 +4685,26 @@ export const subscribeToAllOfficials = (callback: (officials: Official[]) => voi
     callback([]);
     return () => {};
   }
-  const q = query(collection(db, OFFICIALS_COL));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as Official));
-    callback(data);
-  }, (error) => {
-    console.warn("Firestore all officials subscription error:", error);
+  try {
+    const q = query(collection(db, OFFICIALS_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as Official));
+      callback(data);
+    }, (error) => {
+      console.warn("Firestore all officials subscription error:", error);
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore all officials setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 // --- SUPPORT TICKETS SERVICES (RT HELPDESK & SUPER ADMIN TRIAGE) ---
@@ -4671,24 +4718,33 @@ export const subscribeToSupportTickets = (
     callback([]);
     return () => {};
   }
-  const q = query(collection(db, SUPPORT_TICKETS_COL));
-  return onSnapshot(q, (snapshot) => {
-    let data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as HelpdeskTicket));
-    
-    // Sort descending by createdAt
-    data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  try {
+    const q = query(collection(db, SUPPORT_TICKETS_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      let data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as HelpdeskTicket));
+      
+      // Sort descending by createdAt
+      data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
-    if (tenantIdFilter) {
-      data = data.filter(t => matchesTenant(t.tenantId, tenantIdFilter));
-    }
-    callback(data);
-  }, (error) => {
-    console.warn("Firestore support tickets subscription error:", error);
+      if (tenantIdFilter) {
+        data = data.filter(t => matchesTenant(t.tenantId, tenantIdFilter));
+      }
+      callback(data);
+    }, (error) => {
+      console.warn("Firestore support tickets subscription error:", error);
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore support tickets setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 export const createSupportTicket = async (ticketData: Omit<HelpdeskTicket, 'id'> & { id?: string }): Promise<string> => {
@@ -4863,55 +4919,82 @@ export const calculateFleetAggregates = (
 // --- REALTIME ALL-FLEET CIVIC SERVICES (REPORTS & LETTERS) ---
 export const subscribeToAllReports = (callback: (reports: Report[]) => void) => {
   if (!isFirebaseConfigured || !db) return () => {};
-  const q = query(collection(db, REPORTS_COL));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as Report));
-    data.sort((a, b) => new Date(b.date || (b as any).createdAt || 0).getTime() - new Date(a.date || (a as any).createdAt || 0).getTime());
-    callback(data);
-  }, (error) => {
-    console.warn("Firestore all reports subscription error:", error);
+  try {
+    const q = query(collection(db, REPORTS_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as Report));
+      data.sort((a, b) => new Date(b.date || (b as any).createdAt || 0).getTime() - new Date(a.date || (a as any).createdAt || 0).getTime());
+      callback(data);
+    }, (error) => {
+      console.warn("Firestore all reports subscription error:", error);
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore all reports setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 export const subscribeToAllLetters = (callback: (letters: LetterRequest[]) => void) => {
   if (!isFirebaseConfigured || !db) return () => {};
-  const q = query(collection(db, LETTERS_COL));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as LetterRequest));
-    data.sort((a, b) => new Date(b.date || (b as any).createdAt || 0).getTime() - new Date(a.date || (a as any).createdAt || 0).getTime());
-    callback(data);
-  }, (error) => {
-    console.warn("Firestore all letters subscription error:", error);
+  try {
+    const q = query(collection(db, LETTERS_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as LetterRequest));
+      data.sort((a, b) => new Date(b.date || (b as any).createdAt || 0).getTime() - new Date(a.date || (a as any).createdAt || 0).getTime());
+      callback(data);
+    }, (error) => {
+      console.warn("Firestore all letters subscription error:", error);
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore all letters setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 // --- REALTIME SYSTEM BROADCASTS ---
 export const subscribeToSystemBroadcasts = (callback: (broadcasts: SystemBroadcast[]) => void) => {
   if (!isFirebaseConfigured || !db) return () => {};
-  const q = query(collection(db, SYSTEM_BROADCASTS_COL));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as SystemBroadcast));
-    data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-    callback(data);
-  }, (error) => {
-    if (error?.code === 'permission-denied') {
-      console.info("Firestore Broadcasts: Sistem siaran cloud belum aktif (Cloud rules belum dideploy).");
-    } else {
-      console.warn("Firestore system broadcasts subscription error:", error);
-    }
+  try {
+    const q = query(collection(db, SYSTEM_BROADCASTS_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as SystemBroadcast));
+      data.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      callback(data);
+    }, (error) => {
+      if (error?.code === 'permission-denied') {
+        console.info("Firestore Broadcasts: Sistem siaran cloud belum aktif (Cloud rules belum dideploy).");
+      } else {
+        console.warn("Firestore system broadcasts subscription error:", error);
+      }
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore system broadcasts setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 export const createSystemBroadcast = async (broadcast: Omit<SystemBroadcast, 'id'> & { id?: string }): Promise<string> => {
@@ -4959,18 +5042,27 @@ export const deleteSystemBroadcast = async (id: string): Promise<void> => {
 // --- REALTIME SYSTEM AUDIT LOGS ---
 export const subscribeToSystemAuditLogs = (callback: (logs: PlatformAuditEvent[]) => void, limitCount: number = 100) => {
   if (!isFirebaseConfigured || !db) return () => {};
-  const q = query(collection(db, SYSTEM_AUDIT_LOGS_COL), limit(limitCount));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as PlatformAuditEvent));
-    data.sort((a, b) => new Date(b.timestamp || (b as any).createdAt || 0).getTime() - new Date(a.timestamp || (a as any).createdAt || 0).getTime());
-    callback(data);
-  }, (error) => {
-    console.warn("Firestore system audit logs subscription error:", error);
+  try {
+    const q = query(collection(db, SYSTEM_AUDIT_LOGS_COL), limit(limitCount));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as PlatformAuditEvent));
+      data.sort((a, b) => new Date(b.timestamp || (b as any).createdAt || 0).getTime() - new Date(a.timestamp || (a as any).createdAt || 0).getTime());
+      callback(data);
+    }, (error) => {
+      console.warn("Firestore system audit logs subscription error:", error);
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore system audit logs setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 export const logPlatformAuditEvent = async (event: Omit<PlatformAuditEvent, 'id'> & { id?: string }): Promise<string> => {
@@ -5008,17 +5100,26 @@ export const clearSystemAuditLogs = async (): Promise<void> => {
 // --- REALTIME GLOBAL LETTER TEMPLATES ---
 export const subscribeToGlobalLetterTemplates = (callback: (templates: LetterTemplate[]) => void) => {
   if (!isFirebaseConfigured || !db) return () => {};
-  const q = query(collection(db, GLOBAL_LETTER_TEMPLATES_COL));
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(docSnap => ({
-      ...docSnap.data(),
-      id: docSnap.id
-    } as LetterTemplate));
-    callback(data);
-  }, (error) => {
-    console.warn("Firestore global letter templates subscription error:", error);
+  try {
+    const q = query(collection(db, GLOBAL_LETTER_TEMPLATES_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        id: docSnap.id
+      } as LetterTemplate));
+      callback(data);
+    }, (error) => {
+      console.warn("Firestore global letter templates subscription error:", error);
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) { /* ignore teardown assertion */ }
+    };
+  } catch (err) {
+    console.warn("Firestore global letter templates setup error:", err);
     callback([]);
-  });
+    return () => {};
+  }
 };
 
 export const deployGlobalLetterTemplates = async (templates: LetterTemplate[]): Promise<void> => {
