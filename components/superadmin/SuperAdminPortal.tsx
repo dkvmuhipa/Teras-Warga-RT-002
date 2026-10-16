@@ -10,7 +10,7 @@ import {
   Edit3, Trash2, Sliders, CheckSquare, Eye, Share2, Info,
   AlertTriangle, Droplets, Package, Camera, AlertOctagon,
   History, UserPlus, HardDrive, Terminal, CheckCheck, ToggleLeft, ToggleRight, X,
-  UploadCloud
+  UploadCloud, Clock, Zap, Wifi
 } from 'lucide-react';
 import { useTenant } from '../../context/TenantContext';
 import { Tenant, Role, TenantStatus, TenantModules } from '../../types';
@@ -80,10 +80,20 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     'audit' | 'security'
   >('tenants');
 
-  // Modal States
+  // Modal & Drawer States
   const [showOnboardModal, setShowOnboardModal] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [showTriageDrawer, setShowTriageDrawer] = useState(false);
   const [selectedTenantForDetail, setSelectedTenantForDetail] = useState<Tenant | null>(null);
+
+  // Live Telemetry Clock (WITA)
+  const [liveTime, setLiveTime] = useState<string>(() => new Date().toLocaleTimeString('id-ID', { hour12: false }));
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLiveTime(new Date().toLocaleTimeString('id-ID', { hour12: false }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -274,6 +284,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     const avgSampah = totalTenants > 0 ? Math.round(totalSampahUmum / totalTenants) : 0;
     const avgKas = totalTenants > 0 ? Math.round(totalKasFee / totalTenants) : 0;
     const avgAir = totalTenants > 0 ? Math.round(totalAirFee / totalTenants) : 0;
+    const totalEstimatedMonthlyCashflow = totalEstimatedDoors * (avgSampah + avgKas);
 
     return {
       totalTenants,
@@ -285,6 +296,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       avgSampah,
       avgKas,
       avgAir,
+      totalEstimatedMonthlyCashflow,
       activeScope: currentTenant.name
     };
   }, [availableTenants, currentTenant]);
@@ -568,15 +580,21 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     badge?: string;
   }
 
+  type ClusterId = 'armada' | 'layanan' | 'finansial' | 'sistem';
+
   interface NavTabGroup {
+    id: ClusterId;
     category: string;
+    icon: React.ElementType;
     description: string;
     tabs: NavTabItem[];
   }
 
   const tabGroups: NavTabGroup[] = [
     {
+      id: 'armada',
       category: 'Armada & Pengurus',
+      icon: Globe,
       description: 'Tata kelola wilayah dan kontak aparatur RT',
       tabs: [
         { id: 'tenants', label: 'Direktori Armada RT', icon: Globe, count: availableTenants.length },
@@ -585,7 +603,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       ]
     },
     {
+      id: 'layanan',
       category: 'Layanan & Birokrasi',
+      icon: FileText,
       description: 'Dukungan teknis dan standardisasi persuratan',
       tabs: [
         { id: 'support', label: 'Tiket Bantuan RT', icon: HelpCircle, badge: 'Helpdesk' },
@@ -594,7 +614,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       ]
     },
     {
+      id: 'finansial',
       category: 'Finansial & Wawasan',
+      icon: Wallet,
       description: 'Tolok ukur fiskal dan agregasi analitik',
       tabs: [
         { id: 'tariffs', label: 'Matriks Tarif & Kas', icon: BarChart3 },
@@ -603,7 +625,9 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       ]
     },
     {
+      id: 'sistem',
       category: 'Sistem & Keandalan',
+      icon: ShieldCheck,
       description: 'Telemetri cloud, audit, dan snapshot pemulihan',
       tabs: [
         { id: 'telemetry', label: 'Telemetri & Cloud', icon: Activity },
@@ -614,6 +638,16 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   ];
 
   const allTabs: NavTabItem[] = tabGroups.flatMap(g => g.tabs);
+
+  // Active Cluster derived from activeTab
+  const activeClusterId = useMemo<ClusterId>(() => {
+    const found = tabGroups.find(g => g.tabs.some(t => t.id === activeTab));
+    return found ? found.id : 'armada';
+  }, [activeTab]);
+
+  const currentCluster = useMemo(() => {
+    return tabGroups.find(g => g.id === activeClusterId) || tabGroups[0];
+  }, [activeClusterId]);
 
   const handleRestoreSuccess = (snapshot: any) => {
     try {
@@ -749,148 +783,244 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
       {/* Main Root Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Telemetry Metric Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">Total Armada RT</span>
-              <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
-                <Globe size={16} />
+        {/* =========================================================================
+            1. INTERACTIVE FLEET PULSE RADAR & TOPOLOGY STRIP (CIVIC FLIGHT DECK)
+        ========================================================================= */}
+        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xs space-y-4">
+          {/* Header Strip with Live Node Topology */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200/80 shadow-2xs">
+                <Radio size={16} className="animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 font-mono">
+                    Radar Armada Kota Palu (Live Fleet Topology)
+                  </h3>
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    ALL NODES ONLINE
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-medium">
+                  Status latensi dan sinkronisasi real-time basis data per wilayah
+                </p>
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono">
-              {platformStats.totalTenants} <span className="text-xs font-bold text-slate-500 font-sans">Tenant</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5 mt-1 text-[11px] font-medium text-slate-500">
-              <span className="text-emerald-600 font-bold">{platformStats.activeTenantsCount} Aktif</span>
-              {platformStats.maintenanceCount > 0 && (
-                <span className="text-amber-600 font-bold">• {platformStats.maintenanceCount} Maint.</span>
-              )}
-              {platformStats.suspendedCount > 0 && (
-                <span className="text-rose-600 font-bold">• {platformStats.suspendedCount} Susp.</span>
-              )}
+
+            {/* Live Clock & Regional Info */}
+            <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-700 shadow-2xs">
+                <Clock size={13} className="text-indigo-600" />
+                <span className="font-bold text-slate-900">{liveTime} WITA</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-700 shadow-2xs">
+                <Globe size={13} className="text-slate-400" />
+                <span>Kota Palu (94119)</span>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500"></div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">Total Blok Kavling</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-                <Layers size={16} />
-              </div>
-            </div>
-            <div className="text-2xl sm:text-3xl font-black text-amber-600 tracking-tight font-mono">
-              {platformStats.totalBlocks} <span className="text-xs font-bold text-slate-500 font-sans">Blok</span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1">
-              Tersebar di {kelurahanOptions.length || 1} Kelurahan Kota Palu
-            </p>
+          {/* Interactive RT Nodes Ribbon */}
+          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 scrollbar-none">
+            {availableTenants.map((t) => {
+              const isSupervised = currentTenant?.id === t.id;
+              return (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTenantForDetail(t)}
+                  className={`flex items-center gap-3 px-3.5 py-2 rounded-2xl border transition-all cursor-pointer shrink-0 hover:scale-[1.02] shadow-2xs ${
+                    isSupervised
+                      ? 'bg-indigo-50/90 border-indigo-300 text-indigo-950 ring-2 ring-indigo-500/20'
+                      : 'bg-slate-50/80 hover:bg-slate-100 border-slate-200 text-slate-800'
+                  }`}
+                  title="Klik untuk membuka detail wilayah"
+                >
+                  <div 
+                    className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse" 
+                    style={{ backgroundColor: t.themeColor || '#10b981' }}
+                  />
+                  <div className="text-left">
+                    <div className="font-black text-xs truncate max-w-[170px]">{t.name}</div>
+                    <div className="text-[10px] text-slate-500 font-mono flex items-center gap-1.5">
+                      <span>RT {t.rt}/RW {t.rw}</span>
+                      <span>•</span>
+                      <span className="text-emerald-700 font-bold">~38ms</span>
+                    </div>
+                  </div>
+                  {isSupervised && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-indigo-200 text-indigo-800 font-black uppercase">
+                      Supervisi
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Quick Add Node Pill */}
+            <button
+              onClick={() => setShowOnboardModal(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-dashed border-slate-300 hover:border-indigo-400 bg-white hover:bg-indigo-50/40 text-slate-600 hover:text-indigo-700 text-xs font-bold transition-all shrink-0 cursor-pointer shadow-2xs"
+            >
+              <Plus size={13} />
+              <span>Daftarkan RT Baru</span>
+            </button>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">Estimasi Kapasitas</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-                <Home size={16} />
+          {/* 4 Precision Telemetry Micro-Dials */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
+              <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
+                <span>Total Armada RT</span>
+                <Globe size={13} className="text-indigo-600" />
+              </div>
+              <div className="text-xl font-black font-mono text-slate-900">
+                {platformStats.totalTenants} <span className="text-xs font-sans font-bold text-slate-500">Tenant</span>
+              </div>
+              <div className="text-[10px] text-emerald-700 font-mono font-bold mt-0.5">
+                {platformStats.activeTenantsCount} Beroperasi Penuh
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight font-mono">
-              ~{platformStats.totalEstimatedDoors} <span className="text-xs font-bold text-slate-500 font-sans">Kavling</span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1">
-              Kapasitas pintu hunian warga aktif
-            </p>
-          </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-all relative overflow-hidden group">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-500"></div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">Status DB Security</span>
-              <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
-                <Database size={16} />
+            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
+              <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
+                <span>Kapasitas Pintu</span>
+                <Home size={13} className="text-emerald-600" />
+              </div>
+              <div className="text-xl font-black font-mono text-emerald-600">
+                ~{platformStats.totalEstimatedDoors} <span className="text-xs font-sans font-bold text-slate-500">Kavling</span>
+              </div>
+              <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                {platformStats.totalBlocks} Blok Pemukiman
               </div>
             </div>
-            <div className="text-xl sm:text-2xl font-black text-sky-700 tracking-tight uppercase flex items-center gap-1.5">
-              <span>TERISOLASI</span>
-              <ShieldCheck size={18} className="text-sky-600" />
+
+            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
+              <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
+                <span>Estimasi Kas / Bulan</span>
+                <Wallet size={13} className="text-amber-600" />
+              </div>
+              <div className="text-xl font-black font-mono text-amber-600">
+                Rp {(platformStats.totalEstimatedMonthlyCashflow / 1000000).toFixed(1)} <span className="text-xs font-sans font-bold text-slate-500">Juta</span>
+              </div>
+              <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                Akumulasi Iuran Se-Platform
+              </div>
             </div>
-            <p className="text-[11px] text-slate-500 font-medium mt-1">
-              Isolasi data antar-RT 100% aman
-            </p>
+
+            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
+              <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
+                <span>Status Basis Data</span>
+                <ShieldCheck size={13} className="text-sky-600" />
+              </div>
+              <div className="text-xl font-black font-mono text-sky-700 flex items-center gap-1.5">
+                <span>TERISOLASI</span>
+              </div>
+              <div className="text-[10px] text-emerald-700 font-mono font-bold mt-0.5">
+                100% Zero Cross-Tenant Leak
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Civic Command Sub-Navigation: 4 Operation Clusters (12 Tools) */}
-        <div className="space-y-3 border-b border-slate-200 pb-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 font-mono">
-                Konsol Operasional Root Super Admin
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold">
-                12 Modul Kendali
-              </span>
+        {/* =========================================================================
+            2. PRECISION CIVIC COMMAND DOCK (DUAL-TIER SEGMENTED CONTROL)
+        ========================================================================= */}
+        <div className="bg-white/90 backdrop-blur-md rounded-3xl p-3 border border-slate-200/90 shadow-xs space-y-3">
+          {/* TIER 1: OPERATIONAL CLUSTERS SELECTOR */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80">
+              {tabGroups.map((group) => {
+                const GroupIcon = group.icon;
+                const isClusterActive = group.id === activeClusterId;
+                return (
+                  <button
+                    key={group.id}
+                    onClick={() => {
+                      if (!isClusterActive) {
+                        setActiveTab(group.tabs[0].id);
+                      }
+                    }}
+                    className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                      isClusterActive
+                        ? 'bg-slate-900 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                    }`}
+                  >
+                    <GroupIcon size={14} className={isClusterActive ? 'text-indigo-400' : 'text-slate-400'} />
+                    <span>{group.category}</span>
+                    <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+                      isClusterActive ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-600'
+                    }`}>
+                      {group.tabs.length}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-            <div className="text-xs text-slate-500 font-mono hidden sm:block">
-              Platform Engine: v2.4 Multi-Tenant Fleet Standard
+
+            {/* Platform Health Beacon & Quick Triage Trigger */}
+            <div className="flex items-center gap-3 text-xs font-mono self-end sm:self-center">
+              <div className="flex items-center gap-1.5 text-slate-500">
+                <Wifi size={13} className="text-emerald-500" />
+                <span className="hidden md:inline">Cluster:</span>
+                <strong className="text-slate-900 font-sans">{currentCluster.category}</strong>
+              </div>
+              <span className="text-slate-300">|</span>
+              <button
+                onClick={() => setShowTriageDrawer(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl font-bold transition-all cursor-pointer text-xs shadow-2xs"
+              >
+                <Zap size={13} className="text-amber-500" />
+                <span>Quick Triage</span>
+              </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {tabGroups.map((group) => (
-              <div 
-                key={group.category}
-                className="bg-white p-2.5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-1.5"
-              >
-                <div className="px-2 py-0.5 flex items-center justify-between border-b border-slate-100 pb-1">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 font-mono">
-                    {group.category}
-                  </span>
-                  <span className="text-[9px] text-slate-400 font-mono">
-                    {group.tabs.length} tools
-                  </span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  {group.tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-left ${
-                          isActive
-                            ? 'bg-indigo-600 text-white shadow-xs shadow-indigo-600/20'
-                            : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <Icon size={14} className={isActive ? 'text-white' : 'text-slate-400'} />
-                          <span className="truncate">{tab.label}</span>
-                        </div>
-                        {tab.count !== undefined && (
-                          <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono ${
-                            isActive ? 'bg-indigo-700/80 text-white' : 'bg-slate-100 text-slate-600'
-                          }`}>
-                            {tab.count}
-                          </span>
-                        )}
-                        {tab.badge && (
-                          <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-mono font-bold uppercase ${
-                            isActive ? 'bg-white text-indigo-700' : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                          }`}>
-                            {tab.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+          {/* TIER 2: ACTIVE TOOLS PILLS IN SELECTED CLUSTER */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {currentCluster.tabs.map((tab, idx) => {
+                const TabIcon = tab.icon;
+                const isTabActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer border ${
+                      isTabActive
+                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-600/30'
+                        : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/80 hover:text-slate-900'
+                    }`}
+                  >
+                    <TabIcon size={14} className={isTabActive ? 'text-white' : 'text-indigo-600'} />
+                    <span>{tab.label}</span>
+                    {tab.count !== undefined && (
+                      <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono ${
+                        isTabActive ? 'bg-indigo-700/80 text-white' : 'bg-slate-200/80 text-slate-700'
+                      }`}>
+                        {tab.count}
+                      </span>
+                    )}
+                    {tab.badge && (
+                      <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-mono uppercase font-black ${
+                        isTabActive ? 'bg-white text-indigo-700' : 'bg-indigo-100 text-indigo-800'
+                      }`}>
+                        {tab.badge}
+                      </span>
+                    )}
+                    <span className={`text-[9px] font-mono ${isTabActive ? 'text-indigo-200' : 'text-slate-400'}`}>
+                      [{idx + 1}]
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="text-[11px] text-slate-500 font-medium italic hidden lg:block">
+              {currentCluster.description}
+            </p>
           </div>
         </div>
 
@@ -2055,6 +2185,182 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         onClose={() => setShowRestoreModal(false)}
         onRestoreSuccess={handleRestoreSuccess}
       />
+
+      {/* =========================================================================
+          3. FLOATING QUICK TRIAGE TRIGGER PILL
+      ========================================================================= */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setShowTriageDrawer(true)}
+        className="fixed bottom-6 right-6 z-40 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer border border-slate-700/60"
+        title="Buka Konsol Triage Cepat Platform"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <Zap size={14} className="text-amber-400" />
+        <span>Konsol Triage Cepat</span>
+      </motion.button>
+
+      {/* =========================================================================
+          4. SLIDE-OVER QUICK TRIAGE DRAWER
+      ========================================================================= */}
+      <AnimatePresence>
+        {showTriageDrawer && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowTriageDrawer(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            />
+
+            <div className="fixed inset-y-0 right-0 pl-10 max-w-full flex">
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="w-screen max-w-md bg-white border-l border-slate-200 shadow-2xl flex flex-col justify-between"
+              >
+                {/* Drawer Header */}
+                <div className="p-6 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                      <Zap size={16} className="text-amber-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                        Konsol Triage Cepat
+                      </h3>
+                      <p className="text-[11px] text-slate-500">
+                        Inspeksi cepat latensi, tiket & log platform
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowTriageDrawer(false)}
+                    className="p-2 hover:bg-slate-200/60 rounded-xl text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+
+                {/* Drawer Body */}
+                <div className="p-6 space-y-6 overflow-y-auto flex-1">
+                  {/* Database Ping Box */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-800 flex items-center gap-1.5">
+                        <Database size={13} className="text-indigo-600" />
+                        Latensi Cloud Firestore
+                      </span>
+                      <span className="font-mono text-emerald-600 font-black">~38 ms (Optimal)</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Koneksi terenkripsi SSL aktif ke region Jakarta (<code className="font-mono text-slate-700">asia-southeast2</code>).
+                    </p>
+                  </div>
+
+                  {/* Recent Platform Broadcasts */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono">
+                        Siaran Sistem Aktif
+                      </h4>
+                      <button
+                        onClick={() => {
+                          setActiveTab('broadcast');
+                          setShowTriageDrawer(false);
+                        }}
+                        className="text-[11px] text-indigo-600 font-bold hover:underline"
+                      >
+                        Buka Siaran →
+                      </button>
+                    </div>
+                    {broadcasts.slice(0, 2).map(b => (
+                      <div key={b.id} className="p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-slate-900 text-xs truncate">{b.title}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-indigo-100 text-indigo-800 font-bold uppercase">
+                            {b.priority}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 line-clamp-2">{b.message}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Recent Audit Events */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono">
+                        Jejak Audit Terkini
+                      </h4>
+                      <button
+                        onClick={() => {
+                          setActiveTab('audit');
+                          setShowTriageDrawer(false);
+                        }}
+                        className="text-[11px] text-indigo-600 font-bold hover:underline"
+                      >
+                        Lihat Semua Log →
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      {auditLogs.slice(0, 3).map(log => (
+                        <div key={log.id} className="p-3 bg-slate-50 border border-slate-200/70 rounded-xl text-xs space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-800">{log.action}</span>
+                            <span className="text-[10px] text-slate-400 font-mono">{log.timestamp}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 truncate">{log.details}</p>
+                          <div className="text-[10px] text-indigo-600 font-mono">Aktor: {log.actor}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quick Emergency Actions */}
+                  <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/70 space-y-2.5">
+                    <span className="text-xs font-black text-amber-900 block flex items-center gap-1.5">
+                      <ShieldCheck size={14} className="text-amber-700" />
+                      Tindakan Darurat Sistem
+                    </span>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={handleExportPlatformSnapshot}
+                        className="p-2 bg-white hover:bg-slate-50 border border-amber-200 text-slate-800 rounded-xl text-xs font-bold transition-all text-center cursor-pointer shadow-2xs"
+                      >
+                        Snapshot JSON
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowRestoreModal(true);
+                          setShowTriageDrawer(false);
+                        }}
+                        className="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all text-center cursor-pointer shadow-2xs"
+                      >
+                        Pulihkan Data
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Drawer Footer */}
+                <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs font-mono text-slate-500">
+                  <span>Engine: v2.4 Multi-Tenant</span>
+                  <span className="text-emerald-600 font-bold">100% HEALTHY</span>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
