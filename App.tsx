@@ -629,13 +629,13 @@ export const App = () => {
                         ) : (
                             <ErrorBoundary>
                                 <React.Suspense fallback={
-                                    <div className="min-h-screen bg-[#0B0F19] flex flex-col items-center justify-center p-8 font-sans">
+                                    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-8 font-sans">
                                         <div className="relative flex items-center justify-center mb-4">
-                                            <div className="w-16 h-16 border-4 border-indigo-950 border-t-indigo-500 rounded-full animate-spin"></div>
-                                            <Loader2 className="absolute text-indigo-400 animate-pulse" size={24} />
+                                            <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                                            <Loader2 className="absolute text-indigo-600 animate-pulse" size={24} />
                                         </div>
-                                        <h3 className="text-white font-black text-sm tracking-wide uppercase">Memuat Super Admin Portal</h3>
-                                        <p className="text-slate-400 text-xs mt-1">Mengautentikasi otorisasi root platform...</p>
+                                        <h3 className="text-slate-800 font-black text-sm tracking-wide uppercase">Memuat Super Admin Portal</h3>
+                                        <p className="text-slate-500 text-xs mt-1">Mengautentikasi otorisasi root platform...</p>
                                     </div>
                                 }>
                                     <SuperAdminPortal 
