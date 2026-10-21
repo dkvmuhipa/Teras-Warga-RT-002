@@ -2,10 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { 
   Users, Search, Filter, Phone, MessageSquare, ShieldCheck, 
   ExternalLink, Edit3, CheckCircle2, UserCheck, Building2, 
-  ArrowRight, Mail, ChevronRight, Copy, Home, Shield, Award
+  ArrowRight, Mail, ChevronRight, Copy, Home, Shield, Award, Key
 } from 'lucide-react';
 import { Tenant, Official } from '../../types';
 import { matchesTenant } from '../../services/tenantService';
+import { CreateOfficialAccountModal, OfficialAccountTarget } from './CreateOfficialAccountModal';
 import { toast } from 'sonner';
 
 interface OfficialsDirectoryTabProps {
@@ -25,6 +26,7 @@ interface OfficialEntry {
   name: string;
   phone: string;
   houseId?: string;
+  email?: string;
   photo?: string;
   themeColor?: string;
   isVerified: boolean;
@@ -42,6 +44,7 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | 'Ketua RT' | 'Sekretaris' | 'Bendahara' | 'seksi'>('all');
   const [copiedPhone, setCopiedPhone] = useState<string | null>(null);
+  const [accountTarget, setAccountTarget] = useState<OfficialAccountTarget | null>(null);
 
   // Flatten officials list from all tenants + live Firestore officials collection
   const officialsList = useMemo(() => {
@@ -94,6 +97,7 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
             roleTitle: o.role || 'Seksi RT',
             name: o.name,
             phone: o.phone || '',
+            email: o.email || '',
             houseId: o.houseId,
             photo: o.photo,
             themeColor: t.themeColor,
@@ -407,6 +411,11 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
                           </div>
                           <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono">
                             <span>ID: {item.tenantId}</span>
+                            {item.email && (
+                              <span className="text-indigo-600 font-mono font-bold flex items-center gap-0.5">
+                                • {item.email}
+                              </span>
+                            )}
                             {item.houseId && (
                               <span className="text-indigo-600 font-bold bg-indigo-50 px-1 rounded">
                                 Blok {item.houseId}
@@ -484,6 +493,17 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
                             <span>WhatsApp</span>
                           </button>
                         )}
+                        <button
+                          onClick={() => setAccountTarget(item)}
+                          className={`p-1.5 rounded-xl transition-colors cursor-pointer border ${
+                            item.email
+                              ? 'bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 border-slate-200'
+                              : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border-indigo-200 font-bold'
+                          }`}
+                          title={item.email ? "Kelola / Reset Akun Login" : "Buat Akun Login Pengurus RT"}
+                        >
+                          <Key size={13} />
+                        </button>
                         {parentTenant && (
                           <button
                             onClick={() => onEditTenant(parentTenant)}
@@ -510,6 +530,13 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
               )}
             </tbody>
           </table>
+
+      {/* Account Provisioning Modal */}
+      <CreateOfficialAccountModal 
+        isOpen={!!accountTarget}
+        target={accountTarget}
+        onClose={() => setAccountTarget(null)}
+      />
         </div>
       </div>
     </div>

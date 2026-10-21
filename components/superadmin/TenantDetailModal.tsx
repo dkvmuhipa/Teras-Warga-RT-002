@@ -5,7 +5,7 @@ import {
   DollarSign, Palette, AlertTriangle, ArrowRight, ShieldCheck,
   Calendar, CheckCircle2, Sliders, Eye, ToggleLeft, ToggleRight,
   Droplets, Package, FileText, AlertOctagon, Activity, Camera,
-  CheckSquare, Square, Download
+  CheckSquare, Square, Download, Key, Mail
 } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'motion/react';
@@ -16,6 +16,7 @@ import {
 } from '../../types';
 import { useTenant } from '../../context/TenantContext';
 import { matchesTenant } from '../../services/tenantService';
+import { CreateOfficialAccountModal, OfficialAccountTarget } from './CreateOfficialAccountModal';
 import { toast } from 'sonner';
 
 const isPlaceholderName = (name?: string) => {
@@ -64,7 +65,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [copiedLink, setCopiedLink] = useState<'public' | 'register' | null>(null);
+  const [copiedLink, setCopiedLink] = useState<'public' | 'register' | 'admin' | null>(null);
+  const [accountTarget, setAccountTarget] = useState<OfficialAccountTarget | null>(null);
 
   // Keyboard Accessibility: Close on Escape key
   useEffect(() => {
@@ -95,6 +97,36 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   const liveTreasurer = useMemo(() => {
     return tenantOfficials.find(o => (o.role || '').toLowerCase().includes('bendahara'));
   }, [tenantOfficials]);
+
+  const handleCreateChairmanAccount = () => {
+    if (!tenant) return;
+    setAccountTarget({
+      id: liveChairman?.id || `${tenant.id}-chairman`,
+      name: (!isPlaceholderName(tenant.chairmanName) ? tenant.chairmanName : liveChairman?.name) || tenant.chairmanName || 'Ketua RT',
+      roleTitle: 'Ketua RT',
+      tenantId: tenant.id,
+      tenantName: tenant.name,
+      tenantRt: tenant.rt,
+      kelurahan: tenant.kelurahan,
+      phone: tenant.chairmanPhone || liveChairman?.phone || '',
+      email: liveChairman?.email || ''
+    });
+  };
+
+  const handleCreateOfficialAccount = (off: Official) => {
+    if (!tenant) return;
+    setAccountTarget({
+      id: off.id,
+      name: off.name,
+      roleTitle: off.role,
+      tenantId: tenant.id,
+      tenantName: tenant.name,
+      tenantRt: tenant.rt,
+      kelurahan: tenant.kelurahan,
+      phone: off.phone || '',
+      email: off.email || ''
+    });
+  };
 
   const tenantHouses = useMemo(() => {
     if (!tenant || !houses) return [];
@@ -702,6 +734,46 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           {/* TAB 2: PENGURUS INTI */}
           {activeTab === 'officials' && (
             <div className="space-y-4">
+              {/* Akun Login Admin RT Card */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/90 via-white to-slate-50 border border-indigo-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/20">
+                    <Key size={18} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                        Akun Login Admin RT
+                      </h4>
+                      {liveChairman?.email ? (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase">
+                          ✓ Akun Aktif
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase">
+                          Belum Ada Akun
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                      {liveChairman?.email ? (
+                        <>Email login terdaftar: <span className="font-mono font-bold text-indigo-700">{liveChairman.email}</span></>
+                      ) : (
+                        <>Wilayah RT ini belum memiliki akun login mandiri untuk masuk ke portal admin.</>
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleCreateChairmanAccount}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5 cursor-pointer transition-all shrink-0 active:scale-95"
+                >
+                  <Key size={14} />
+                  <span>{liveChairman?.email ? 'Kelola / Reset Akun' : '🔑 Buat Akun Admin RT'}</span>
+                </button>
+              </div>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs font-black text-indigo-700 uppercase tracking-wider">
@@ -847,17 +919,32 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                             </div>
                           </div>
                         </div>
-                        {off.phone && (
-                          <a
-                            href={`https://wa.me/${off.phone.replace(/[^0-9]/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold border border-emerald-200 flex items-center gap-1 shrink-0"
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {off.phone && (
+                            <a
+                              href={`https://wa.me/${off.phone.replace(/[^0-9]/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold border border-emerald-200 flex items-center gap-1 shrink-0"
+                            >
+                              <span>{off.phone}</span>
+                              <ExternalLink size={9} />
+                            </a>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleCreateOfficialAccount(off)}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-bold border flex items-center gap-1 shrink-0 cursor-pointer ${
+                              off.email 
+                                ? 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                                : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-black'
+                            }`}
+                            title={off.email ? `Akun: ${off.email}` : "Buat Akun Login"}
                           >
-                            <span>{off.phone}</span>
-                            <ExternalLink size={9} />
-                          </a>
-                        )}
+                            <Key size={10} />
+                            <span>{off.email ? 'Kelola Akun' : 'Buat Akun'}</span>
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1239,6 +1326,47 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           {/* TAB 5: TAUTAN & AKSES */}
           {activeTab === 'links' && (
             <div className="space-y-4">
+              {/* Tautan & Akun Portal Admin RT */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 border border-indigo-200/90 space-y-2.5 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                    <Key size={14} className="text-indigo-600" />
+                    <span>Tautan Portal Admin RT & Kredensial</span>
+                  </span>
+                  {liveChairman?.email ? (
+                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full">
+                      Akun: {liveChairman.email}
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-black rounded-full">
+                      Belum Ada Akun Admin
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${window.location.origin}/?rt=${tenant.slug || tenant.id}#/admin`}
+                    className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 font-mono shadow-2xs"
+                  />
+                  <button
+                    onClick={() => handleCopy(`${window.location.origin}/?rt=${tenant.slug || tenant.id}#/admin`, 'admin')}
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
+                  >
+                    {copiedLink === 'admin' ? <Check size={14} /> : <Copy size={14} />}
+                    <span>{copiedLink === 'admin' ? 'Tersalin' : 'Salin Link'}</span>
+                  </button>
+                  <button
+                    onClick={handleCreateChairmanAccount}
+                    className="px-3.5 py-2 bg-white hover:bg-slate-100 text-indigo-700 font-black border border-indigo-200 rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <Key size={13} />
+                    <span>{liveChairman?.email ? 'Kelola Akun' : 'Buat Akun'}</span>
+                  </button>
+                </div>
+              </div>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
                 <span className="text-xs font-bold text-slate-700 block">Tautan Portal Publik Warga</span>
                 <div className="flex items-center gap-2">
@@ -1332,6 +1460,13 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             )}
           </div>
         </div>
+
+        {/* Account Provisioning Modal for Super Admin */}
+        <CreateOfficialAccountModal
+          isOpen={!!accountTarget}
+          target={accountTarget}
+          onClose={() => setAccountTarget(null)}
+        />
       </motion.div>
     </div>
   );

@@ -1,0 +1,350 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  X, Check, Mail, Lock, Eye, EyeOff, Sparkles, Key, 
+  Copy, CheckCircle2, MessageSquare, AlertCircle, Shield 
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { createTenantAdminAccount, suggestRtAdminEmail, generateTemporaryPassword } from '../../services/authAdminService';
+import { updateOfficialInDb, addOfficialToDb } from '../../services/databaseService';
+import { toast } from 'sonner';
+
+export interface OfficialAccountTarget {
+  id: string;
+  name: string;
+  roleTitle: string;
+  tenantId: string;
+  tenantName: string;
+  tenantRt: string;
+  kelurahan: string;
+  phone: string;
+  email?: string;
+}
+
+interface CreateOfficialAccountModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  target: OfficialAccountTarget | null;
+  onSuccess?: () => void;
+}
+
+export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProps> = ({
+  isOpen,
+  onClose,
+  target,
+  onSuccess
+}) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('Ketua RT');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [createdResult, setCreatedResult] = useState<{ email: string; password: string } | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (target && isOpen) {
+      const suggestedEmail = target.email || suggestRtAdminEmail(target.tenantRt, target.kelurahan);
+      setEmail(suggestedEmail);
+      setPassword(generateTemporaryPassword(target.tenantRt));
+      setRole(target.roleTitle || 'Ketua RT');
+      setCreatedResult(null);
+    }
+  }, [target, isOpen]);
+
+  if (!isOpen || !target) return null;
+
+  const handleCopy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    toast.success('Disalin ke clipboard!');
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const handleShareWhatsApp = () => {
+    if (!createdResult || !target.phone) return;
+    let cleanPhone = target.phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+
+    const portalUrl = `${window.location.origin}/?rt=${target.tenantId}#/admin`;
+    const message = encodeURIComponent(
+      `Halo Bpk/Ibu ${target.name},\n\n` +
+      `Akun login Admin untuk *${target.tenantName}* telah diaktifkan oleh Super Admin di portal Teras Warga:\n\n` +
+      `🔑 *Kredensial Akses Admin RT*\n` +
+      `• URL Portal: ${portalUrl}\n` +
+      `• Email Login: ${createdResult.email}\n` +
+      `• Password Sementara: ${createdResult.password}\n` +
+      `• Peran: ${role}\n\n` +
+      `Silakan login untuk mengelola data warga, iuran, persuratan, dan ronda lingkungan Anda.`
+    );
+    window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !email.includes('@')) {
+      toast.error('Masukkan alamat email yang valid.');
+      return;
+    }
+    if (password.length < 6) {
+      toast.error('Password minimal 6 karakter.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // 1. Create account in Firebase Auth using secondary isolated app
+      await createTenantAdminAccount({
+        email,
+        password,
+        name: target.name,
+        phone: target.phone,
+        role,
+        tenantId: target.tenantId
+      });
+
+      // 2. If this target already exists as a distinct Firestore official document, sync their email
+      if (target.id && !target.id.includes('-chairman') && !target.id.includes('-secretary') && !target.id.includes('-treasurer')) {
+        try {
+          await updateOfficialInDb(target.id, { email: email.trim().toLowerCase(), role });
+        } catch (dbErr) {
+          console.warn('Update official document warning:', dbErr);
+        }
+      }
+
+      setCreatedResult({ email: email.trim().toLowerCase(), password });
+      toast.success(`Akun login untuk ${target.name} berhasil dibuat!`);
+      if (onSuccess) onSuccess();
+    } catch (err: any) {
+      console.error('Failed to create official account:', err);
+      toast.error('Gagal Membuat Akun Login', {
+        description: err.message || 'Terjadi kesalahan saat membuat akun.'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden"
+      >
+        {/* Header */}
+        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20">
+              <Key size={18} />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900">
+                {createdResult ? 'Akun Login Berhasil Dibuat!' : 'Buat Akun Login Pengurus RT'}
+              </h3>
+              <p className="text-xs text-slate-500 font-medium">
+                {target.tenantName}
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          {createdResult ? (
+            /* Result State */
+            <div className="space-y-5 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
+                <CheckCircle2 size={36} />
+              </div>
+
+              <div>
+                <h4 className="text-lg font-black text-slate-900">Kredensial Siap Digunakan</h4>
+                <p className="text-xs text-slate-500 mt-1">
+                  Akun login telah aktif di cloud Firebase Authentication. Silakan bagikan kredensial ini kepada pengurus terkait.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-left space-y-2.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400 font-medium">Pengurus / Peran:</span>
+                  <span className="font-bold text-slate-800">{target.name} ({role})</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400 font-medium">Email Login:</span>
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-slate-900">
+                    <span>{createdResult.email}</span>
+                    <button 
+                      onClick={() => handleCopy(createdResult.email, 'email')}
+                      className="p-1 text-slate-400 hover:text-indigo-600 cursor-pointer"
+                    >
+                      {copiedKey === 'email' ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-400 font-medium">Password Sementara:</span>
+                  <div className="flex items-center gap-1.5 font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">
+                    <span>{createdResult.password}</span>
+                    <button 
+                      onClick={() => handleCopy(createdResult.password, 'pass')}
+                      className="p-1 text-indigo-500 hover:text-indigo-800 cursor-pointer"
+                    >
+                      {copiedKey === 'pass' ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                {target.phone && (
+                  <button
+                    type="button"
+                    onClick={handleShareWhatsApp}
+                    className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/25 cursor-pointer transition-all"
+                  >
+                    <MessageSquare size={16} />
+                    <span>Kirim via WhatsApp</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="py-3 px-6 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs cursor-pointer"
+                >
+                  Selesai
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Form State */
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-[11px] text-slate-400 block font-medium">Calon Pemilik Akun:</span>
+                  <span className="font-black text-slate-900 text-sm">{target.name}</span>
+                </div>
+                <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold">
+                  {target.roleTitle}
+                </span>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-700">
+                    Email Login <span className="text-rose-500">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setEmail(suggestRtAdminEmail(target.tenantRt, target.kelurahan))}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"
+                  >
+                    Reset Rekomendasi
+                  </button>
+                </div>
+                <div className="relative">
+                  <Mail size={15} className="absolute left-3 top-3 text-slate-400" />
+                  <input 
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                    placeholder="nama@teraswarga.id"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-bold text-slate-700">
+                    Password Sementara <span className="text-rose-500">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setPassword(generateTemporaryPassword(target.tenantRt))}
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"
+                  >
+                    Acak Password
+                  </button>
+                </div>
+                <div className="relative">
+                  <Lock size={15} className="absolute left-3 top-3 text-slate-400" />
+                  <input 
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                    placeholder="Minimal 6 karakter"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 mb-1 block">
+                  Peran / Akses di Lingkungan RT
+                </label>
+                <select
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none bg-white"
+                >
+                  <option value="Ketua RT">Ketua RT (Akses Penuh Admin)</option>
+                  <option value="Sekretaris">Sekretaris (Administrasi & Persuratan)</option>
+                  <option value="Bendahara">Bendahara (Keuangan & Iuran)</option>
+                  <option value="Admin">Admin Wilayah Umum</option>
+                </select>
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl text-[11px] text-amber-800 flex items-start gap-2">
+                <AlertCircle size={15} className="shrink-0 mt-0.5 text-amber-600" />
+                <span>
+                  Akun dibuat langsung di Firebase Authentication tanpa memutus sesi login Super Admin Anda saat ini.
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isLoading}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/25 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <span>Memproses di Cloud...</span>
+                  ) : (
+                    <>
+                      <Sparkles size={14} />
+                      <span>Buat Akun Sekarang</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};

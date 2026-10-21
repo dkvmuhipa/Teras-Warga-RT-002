@@ -14,7 +14,8 @@ import {
   syncTenantsFromRemote
 } from '../services/tenantService';
 import { setActiveTenantScope, addTenantToDb, updateTenantInDb, deleteTenantFromDb, subscribeToTenants } from '../services/databaseService';
-import { auth } from '../services/firebaseConfig';
+import { auth, db } from '../services/firebaseConfig';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { isSuperAdminEmail } from '../constants';
 import { toast } from 'sonner';
@@ -74,8 +75,33 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   // Sync auth state with Super Admin privileges
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      setIsSuperAdmin(isSuperAdminEmail(user?.email));
+    const unsubAuth = onAuthStateChanged(auth, async (user) => {
+      const superStatus = isSuperAdminEmail(user?.email);
+      setIsSuperAdmin(superStatus);
+
+      // Auto-switch to assigned RT tenant if non-superadmin logs in as an official
+      if (user?.email && !superStatus && db) {
+        try {
+          const q = query(collection(db, "officials"), where("email", "==", user.email));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const offData = snap.docs[0].data();
+            if (offData.tenantId) {
+              const matchedTenant = getTenantById(offData.tenantId);
+              if (matchedTenant && matchedTenant.id !== currentTenant.id) {
+                setCurrentTenant(matchedTenant);
+                setActiveTenantScope(matchedTenant.id);
+                setActiveTenant(matchedTenant);
+                try {
+                  localStorage.setItem('active_tenant_id', matchedTenant.id);
+                } catch (e) {}
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("[TenantContext] Error syncing official tenant:", err);
+        }
+      }
     });
     return () => unsubAuth();
   }, []);

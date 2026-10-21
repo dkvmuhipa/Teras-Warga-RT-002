@@ -1,12 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Building2, X, Check, ArrowRight, ArrowLeft, Sparkles, 
   MapPin, UserCheck, ShieldCheck, Phone, Wallet, 
-  Layers, Palette, CheckCircle2, AlertCircle, Plus, Trash2
+  Layers, Palette, CheckCircle2, AlertCircle, Plus, Trash2,
+  Key, Lock, Mail, Eye, EyeOff, Copy, MessageSquare, ExternalLink
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTenant } from '../context/TenantContext';
-import { Tenant, BlockRangeConfig } from '../types';
+import { Tenant, BlockRangeConfig, Role } from '../types';
+import { createTenantAdminAccount, suggestRtAdminEmail, generateTemporaryPassword } from '../services/authAdminService';
 import { toast } from 'sonner';
 
 interface TenantRegistrationModalProps {
@@ -34,6 +36,9 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [createdTenant, setCreatedTenant] = useState<Tenant | null>(null);
+  const [createdAdminInfo, setCreatedAdminInfo] = useState<{ email: string; password: string } | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Form States
   const [formData, setFormData] = useState({
@@ -52,12 +57,16 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
     blockInput: 'A1, A2, B1, B2',
     unitsPerBlock: 20,
 
-    // Step 2: Pengurus & Tema
+    // Step 2: Pengurus & Akun Login
     chairmanName: '',
     chairmanPhone: '',
     secretaryName: '',
     treasurerName: '',
     themeColor: '#4F46E5',
+    createAdminAccount: true,
+    adminEmail: 'rt003.tondo@teraswarga.id',
+    adminPassword: 'TerasWarga!003#88',
+    isEmailCustomized: false,
 
     // Step 3: Tarif Iuran
     sampahUmum: 20000,
@@ -68,6 +77,19 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Auto-sync suggested admin email & password when RT or Kelurahan changes
+  useEffect(() => {
+    if (!formData.isEmailCustomized) {
+      const suggested = suggestRtAdminEmail(formData.rt, formData.kelurahan);
+      const generatedPass = generateTemporaryPassword(formData.rt);
+      setFormData(prev => ({
+        ...prev,
+        adminEmail: suggested,
+        adminPassword: prev.adminPassword || generatedPass
+      }));
+    }
+  }, [formData.rt, formData.kelurahan]);
 
   // Parse blocks
   const parsedBlocks = useMemo(() => {
@@ -89,6 +111,31 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
   const rtFormatted = formData.rt.padStart(3, '0');
   const rwFormatted = formData.rw.padStart(3, '0');
   const displayNamePreview = `RT ${rtFormatted} / RW ${rwFormatted} ${formData.housingName ? formData.housingName : ''}`.trim();
+
+  const handleCopyText = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    toast.success('Disalin ke clipboard!');
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const handleSendWhatsAppToChairman = () => {
+    if (!createdTenant || !createdAdminInfo) return;
+    let cleanPhone = createdTenant.chairmanPhone.replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
+
+    const portalUrl = `${window.location.origin}/?rt=${createdTenant.slug}#/admin`;
+    const message = encodeURIComponent(
+      `Halo Bpk/Ibu ${createdTenant.chairmanName},\n\n` +
+      `Selamat! Portal digital mandiri untuk *${createdTenant.name}* telah berhasil didaftarkan dan aktif di sistem Teras Warga.\n\n` +
+      `🔑 *Akses Login Portal Admin RT:*\n` +
+      `• URL Portal Admin: ${portalUrl}\n` +
+      `• Email Login: ${createdAdminInfo.email}\n` +
+      `• Password Sementara: ${createdAdminInfo.password}\n\n` +
+      `Silakan login untuk mulai mengelola kependudukan, iuran warga, dan persuratan digital lingkungan Anda.`
+    );
+    window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+  };
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
@@ -113,6 +160,19 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
         newErrors.chairmanPhone = 'Nomor WhatsApp Ketua RT wajib diisi';
       } else if (!/^[0-9+\s-]{8,20}$/.test(formData.chairmanPhone)) {
         newErrors.chairmanPhone = 'Format nomor WhatsApp tidak valid';
+      }
+
+      if (formData.createAdminAccount) {
+        if (!formData.adminEmail.trim()) {
+          newErrors.adminEmail = 'Email login Admin RT wajib diisi';
+        } else if (!formData.adminEmail.includes('@') || !formData.adminEmail.includes('.')) {
+          newErrors.adminEmail = 'Format email tidak valid';
+        }
+        if (!formData.adminPassword.trim()) {
+          newErrors.adminPassword = 'Password login wajib diisi';
+        } else if (formData.adminPassword.length < 6) {
+          newErrors.adminPassword = 'Password minimal 6 karakter';
+        }
       }
     }
 
@@ -141,6 +201,11 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
 
       const fullAddress = `${formData.address}${formData.housingName ? ` ${formData.housingName}` : ''}, Kel. ${formData.kelurahan}, Kec. ${formData.kecamatan}, ${formData.city}`;
 
+      const chairmanFormattedName = formData.chairmanName.trim().startsWith('Bpk.') || formData.chairmanName.trim().startsWith('Ibu') 
+        ? formData.chairmanName.trim() 
+        : `Bpk. ${formData.chairmanName.trim()}`;
+
+      // 1. Register Tenant in Firestore
       const newTenant = await registerTenant({
         name: displayNamePreview,
         rt: rtFormatted,
@@ -151,9 +216,7 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
         province: formData.province.trim(),
         postalCode: formData.postalCode.trim() || '94119',
         address: fullAddress,
-        chairmanName: formData.chairmanName.trim().startsWith('Bpk.') || formData.chairmanName.trim().startsWith('Ibu') 
-          ? formData.chairmanName.trim() 
-          : `Bpk. ${formData.chairmanName.trim()}`,
+        chairmanName: chairmanFormattedName,
         chairmanPhone: cleanPhone,
         secretaryName: formData.secretaryName.trim() || `Sekretaris RT ${rtFormatted}`,
         treasurerName: formData.treasurerName.trim() || `Bendahara RT ${rtFormatted}`,
@@ -170,6 +233,29 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
         themeColor: formData.themeColor,
         isPilotDemo: false
       });
+
+      // 2. Create Firebase Auth Admin Account if toggled
+      if (formData.createAdminAccount) {
+        try {
+          await createTenantAdminAccount({
+            email: formData.adminEmail,
+            password: formData.adminPassword,
+            name: chairmanFormattedName,
+            phone: cleanPhone,
+            role: Role.ADMIN,
+            tenantId: newTenant.id
+          });
+          setCreatedAdminInfo({
+            email: formData.adminEmail.trim().toLowerCase(),
+            password: formData.adminPassword.trim()
+          });
+        } catch (authErr: any) {
+          console.warn("Gagal membuat akun login Admin RT:", authErr);
+          toast.warning("RT Terdaftar, Namun Akun Admin Gagal Dibuat", {
+            description: authErr.message || "Email mungkin sudah dipakai. Akun dapat dibuat terpisah di Direktori Aparatur."
+          });
+        }
+      }
 
       setCreatedTenant(newTenant);
       setIsSuccess(true);
@@ -194,6 +280,7 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
     setIsSuccess(false);
     onClose();
     setCurrentStep(0);
+    setCreatedAdminInfo(null);
   };
 
   if (!isOpen) return null;
@@ -223,7 +310,7 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
 
         {isSuccess && createdTenant ? (
           /* ================= SUCCESS STATE ================= */
-          <div className="p-8 sm:p-10 text-center space-y-6">
+          <div className="p-6 sm:p-10 text-center space-y-6 max-h-[88vh] overflow-y-auto">
             <div 
               className="w-20 h-20 rounded-3xl text-white flex items-center justify-center mx-auto shadow-xl shadow-indigo-500/20"
               style={{ backgroundColor: createdTenant.themeColor || '#4F46E5' }}
@@ -243,7 +330,82 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 text-left text-xs space-y-2.5 max-w-md mx-auto">
+            {/* Created Admin Account Credentials Card */}
+            {createdAdminInfo && (
+              <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 text-left space-y-3 max-w-md mx-auto shadow-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
+                    <Key size={13} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-indigo-950 uppercase tracking-wide">
+                      Akun Login Admin RT Siap Pakai
+                    </h4>
+                    <p className="text-[10px] text-indigo-700">Kredensial login untuk Ketua / Pengurus RT</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-xs pt-1">
+                  <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-indigo-100">
+                    <span className="text-slate-500 font-medium">Email Login:</span>
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-slate-900">
+                      <span>{createdAdminInfo.email}</span>
+                      <button
+                        onClick={() => handleCopyText(createdAdminInfo.email, 'email')}
+                        className="p-1 text-slate-400 hover:text-indigo-600 cursor-pointer"
+                        title="Salin email"
+                      >
+                        {copiedKey === 'email' ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-indigo-100">
+                    <span className="text-slate-500 font-medium">Password Sementara:</span>
+                    <div className="flex items-center gap-1.5 font-mono font-bold text-indigo-700">
+                      <span>{createdAdminInfo.password}</span>
+                      <button
+                        onClick={() => handleCopyText(createdAdminInfo.password, 'pass')}
+                        className="p-1 text-indigo-500 hover:text-indigo-800 cursor-pointer"
+                        title="Salin password"
+                      >
+                        {copiedKey === 'pass' ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-white px-3 py-2 rounded-xl border border-indigo-100">
+                    <span className="text-slate-500 font-medium">Portal Admin:</span>
+                    <div className="flex items-center gap-1 font-mono text-emerald-700 font-bold truncate max-w-[200px]">
+                      <span>?rt={createdTenant.slug}#/admin</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-1 flex gap-2">
+                  <button
+                    onClick={handleSendWhatsAppToChairman}
+                    className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 cursor-pointer transition-all"
+                  >
+                    <MessageSquare size={14} />
+                    <span>Kirim Kredensial via WA</span>
+                  </button>
+                  <button
+                    onClick={() => handleCopyText(
+                      `Akses Admin ${createdTenant.name}:\nPortal: ${window.location.origin}/?rt=${createdTenant.slug}#/admin\nEmail: ${createdAdminInfo.email}\nPassword: ${createdAdminInfo.password}`,
+                      'all'
+                    )}
+                    className="py-2.5 px-3 rounded-xl bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-bold text-xs flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <Copy size={13} />
+                    <span>Salin Semua</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Tenant Summary */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-left text-xs space-y-2 max-w-md mx-auto">
               <div className="flex justify-between">
                 <span className="text-slate-400 font-bold">Wilayah:</span>
                 <span className="font-black text-slate-800">{createdTenant.name}</span>
@@ -253,16 +415,8 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
                 <span className="font-black text-slate-800">{createdTenant.kelurahan}, {createdTenant.kecamatan}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400 font-bold">Blok Kavling:</span>
-                <span className="font-black text-indigo-700">{createdTenant.blocks.join(', ')} ({createdTenant.blocks.length} Blok)</span>
-              </div>
-              <div className="flex justify-between">
                 <span className="text-slate-400 font-bold">Ketua RT:</span>
                 <span className="font-black text-slate-800">{createdTenant.chairmanName} ({createdTenant.chairmanPhone})</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400 font-bold">Tautan Wilayah Langsung:</span>
-                <span className="font-mono text-emerald-700 font-bold">?rt={createdTenant.slug}</span>
               </div>
             </div>
 
@@ -287,7 +441,7 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
                 Daftarkan RT / RW Baru
               </h2>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Isi formulir di bawah ini untuk mengaktifkan portal digital mandiri bagi lingkungan rukun tetangga Anda.
+                Isi formulir di bawah ini untuk mengaktifkan portal digital mandiri beserta akun login admin bagi lingkungan Anda.
               </p>
             </div>
 
@@ -296,7 +450,7 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
               {[
                 { title: 'Identitas', desc: 'RT/RW' },
                 { title: 'Kavling', desc: 'Blok' },
-                { title: 'Pengurus', desc: 'Kontak' },
+                { title: 'Pengurus & Akun', desc: 'Kontak' },
                 { title: 'Iuran', desc: 'Tarif' },
               ].map((step, idx) => {
                 const isActive = currentStep === idx;
@@ -358,25 +512,25 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
 
                   <div>
                     <label className="text-xs font-bold text-slate-700 mb-1 block">
-                      Nama Perumahan / Lingkungan / Kompleks
+                      Nama Perumahan / Komplek / Wilayah
                     </label>
                     <input 
                       type="text"
-                      placeholder="Contoh: Perumahan Huntap Tondo 2"
+                      placeholder="Contoh: Huntap Tondo 2"
                       value={formData.housingName}
                       onChange={e => setFormData({ ...formData, housingName: e.target.value })}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
                     />
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-bold text-slate-700 mb-1 block">
-                        Kelurahan <span className="text-rose-500">*</span>
+                        Kelurahan / Desa <span className="text-rose-500">*</span>
                       </label>
                       <input 
                         type="text"
-                        placeholder="Tondo"
+                        placeholder="Contoh: Tondo"
                         value={formData.kelurahan}
                         onChange={e => setFormData({ ...formData, kelurahan: e.target.value })}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
@@ -389,25 +543,40 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
                       </label>
                       <input 
                         type="text"
-                        placeholder="Mantikulore"
+                        placeholder="Contoh: Mantikulore"
                         value={formData.kecamatan}
                         onChange={e => setFormData({ ...formData, kecamatan: e.target.value })}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
                       />
                       {errors.kecamatan && <p className="text-[10px] text-rose-500 font-bold mt-1">{errors.kecamatan}</p>}
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs font-bold text-slate-700 mb-1 block">
-                        Kota/Kab. <span className="text-rose-500">*</span>
+                        Kota / Kabupaten <span className="text-rose-500">*</span>
                       </label>
                       <input 
                         type="text"
-                        placeholder="Kota Palu"
+                        placeholder="Contoh: Kota Palu"
                         value={formData.city}
                         onChange={e => setFormData({ ...formData, city: e.target.value })}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
                       />
                       {errors.city && <p className="text-[10px] text-rose-500 font-bold mt-1">{errors.city}</p>}
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 mb-1 block">
+                        Provinsi
+                      </label>
+                      <input 
+                        type="text"
+                        placeholder="Contoh: Sulawesi Tengah"
+                        value={formData.province}
+                        onChange={e => setFormData({ ...formData, province: e.target.value })}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                      />
                     </div>
                   </div>
 
@@ -488,7 +657,7 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
                 </motion.div>
               )}
 
-              {/* STEP 2: Pengurus & Tema */}
+              {/* STEP 2: Pengurus & Akun Login */}
               {currentStep === 2 && (
                 <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -498,7 +667,7 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
                       </label>
                       <input 
                         type="text"
-                        placeholder="Contoh: Bpk. Hendra Gunawan"
+                        placeholder="Contoh: Hendra Gunawan"
                         value={formData.chairmanName}
                         onChange={e => setFormData({ ...formData, chairmanName: e.target.value })}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
@@ -518,6 +687,113 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
                       />
                       {errors.chairmanPhone && <p className="text-[10px] text-rose-500 font-bold mt-1">{errors.chairmanPhone}</p>}
                     </div>
+                  </div>
+
+                  {/* Interactive Admin Account Provisioning Card */}
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/80 via-white to-slate-50 border border-indigo-200/80 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20">
+                          <Key size={15} />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+                            <span>Buat Akun Login Admin RT</span>
+                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase">
+                              Cloud Auth
+                            </span>
+                          </h4>
+                          <p className="text-[10px] text-slate-500 font-medium">
+                            Kredensial login portal admin mandiri untuk Ketua RT ini
+                          </p>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.createAdminAccount}
+                          onChange={e => setFormData({ ...formData, createAdminAccount: e.target.checked })}
+                          className="sr-only peer"
+                        />
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                      </label>
+                    </div>
+
+                    {formData.createAdminAccount && (
+                      <div className="pt-2.5 border-t border-indigo-100/70 space-y-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="text-[11px] font-bold text-slate-700">
+                                Email Login <span className="text-rose-500">*</span>
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ 
+                                  ...formData, 
+                                  adminEmail: suggestRtAdminEmail(formData.rt, formData.kelurahan),
+                                  isEmailCustomized: false 
+                                })}
+                                className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                              >
+                                Reset Rekomendasi
+                              </button>
+                            </div>
+                            <div className="relative">
+                              <Mail size={14} className="absolute left-3 top-2.5 text-slate-400" />
+                              <input 
+                                type="email"
+                                value={formData.adminEmail}
+                                onChange={e => setFormData({ ...formData, adminEmail: e.target.value, isEmailCustomized: true })}
+                                className="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                                placeholder="rt003.tondo@teraswarga.id"
+                              />
+                            </div>
+                            {errors.adminEmail && <p className="text-[10px] text-rose-500 font-bold mt-1">{errors.adminEmail}</p>}
+                          </div>
+
+                          <div>
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="text-[11px] font-bold text-slate-700">
+                                Password Sementara <span className="text-rose-500">*</span>
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ 
+                                  ...formData, 
+                                  adminPassword: generateTemporaryPassword(formData.rt) 
+                                })}
+                                className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                              >
+                                Acak Baru
+                              </button>
+                            </div>
+                            <div className="relative">
+                              <Lock size={14} className="absolute left-3 top-2.5 text-slate-400" />
+                              <input 
+                                type={showPassword ? "text" : "password"}
+                                value={formData.adminPassword}
+                                onChange={e => setFormData({ ...formData, adminPassword: e.target.value })}
+                                className="w-full pl-9 pr-9 py-2 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                                placeholder="Minimal 6 karakter"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                              >
+                                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                              </button>
+                            </div>
+                            {errors.adminPassword && <p className="text-[10px] text-rose-500 font-bold mt-1">{errors.adminPassword}</p>}
+                          </div>
+                        </div>
+
+                        <p className="text-[10px] text-slate-500">
+                          💡 Akun dibuat otomatis di Firebase Auth tanpa memutus sesi Super Admin Anda.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -624,6 +900,9 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
                       <p>• <strong>Wilayah:</strong> Kel. {formData.kelurahan}, Kec. {formData.kecamatan}, {formData.city}</p>
                       <p>• <strong>Kavling:</strong> {parsedBlocks.join(', ')} ({parsedBlocks.length} Blok)</p>
                       <p>• <strong>Pengurus:</strong> {formData.chairmanName} ({formData.chairmanPhone})</p>
+                      {formData.createAdminAccount && (
+                        <p>• <strong>Akun Admin RT:</strong> {formData.adminEmail} (Otomatis dibuat)</p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
