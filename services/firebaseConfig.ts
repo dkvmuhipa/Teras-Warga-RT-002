@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { 
   getFirestore, 
   initializeFirestore, 
-  persistentLocalCache 
+  memoryLocalCache
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getMessaging, isSupported } from "firebase/messaging";
@@ -34,7 +34,7 @@ try {
   if (typeof window !== 'undefined') {
     try {
       db = initializeFirestore(app, {
-        localCache: persistentLocalCache({})
+        localCache: memoryLocalCache()
       });
     } catch {
       db = getFirestore(app);
