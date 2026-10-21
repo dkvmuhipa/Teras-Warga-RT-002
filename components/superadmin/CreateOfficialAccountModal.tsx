@@ -183,42 +183,43 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden"
+        className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden max-h-[92dvh] flex flex-col"
       >
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20">
+        <div className="px-5 sm:px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
               <Key size={18} />
             </div>
-            <div>
-              <h3 className="text-base font-black text-slate-900">
+            <div className="min-w-0">
+              <h3 className="text-base font-black text-slate-900 truncate">
                 {createdResult 
                   ? 'Akun Login Berhasil Dibuat!' 
                   : target.email 
                     ? 'Kelola / Perbarui Akun Login' 
                     : 'Buat Akun Login Pengurus RT'}
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-slate-500 font-medium truncate">
                 {target.tenantName}
               </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer shrink-0"
+            aria-label="Tutup modal"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-5 sm:p-6 overflow-y-auto">
           {createdResult ? (
             /* Result State */
             <div className="space-y-5 text-center">
@@ -309,10 +310,10 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                     type="button"
                     onClick={handleDeleteAccount}
                     disabled={isDeleting || isLoading}
-                    className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-black flex items-center gap-1 cursor-pointer transition-all shrink-0"
+                    className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-black flex items-center gap-1.5 cursor-pointer transition-all shrink-0 min-h-[36px]"
                     title="Hapus akun login ini"
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={13} />
                     <span>{isDeleting ? 'Menghapus...' : 'Hapus Akun'}</span>
                   </button>
                 </div>
@@ -326,19 +327,19 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                   <button
                     type="button"
                     onClick={() => setEmail(suggestRtAdminEmail(target.tenantRt, target.kelurahan))}
-                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer py-1 px-1.5"
                   >
                     Reset Rekomendasi
                   </button>
                 </div>
-                <div className="relative">
-                  <Mail size={15} className="absolute left-3 top-3 text-slate-400" />
+                <div className="relative flex items-center">
+                  <Mail size={16} className="absolute left-3.5 text-slate-400 pointer-events-none" />
                   <input 
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                    className="w-full pl-10 pr-3.5 py-3 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none min-h-[44px]"
                     placeholder="nama@teraswarga.id"
                   />
                 </div>
@@ -352,27 +353,28 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                   <button
                     type="button"
                     onClick={() => setPassword(generateTemporaryPassword(target.tenantRt))}
-                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer py-1 px-1.5"
                   >
                     {target.email ? '+ Buat Password Acak' : 'Acak Password'}
                   </button>
                 </div>
-                <div className="relative">
-                  <Lock size={15} className="absolute left-3 top-3 text-slate-400" />
+                <div className="relative flex items-center">
+                  <Lock size={16} className="absolute left-3.5 text-slate-400 pointer-events-none" />
                   <input 
                     type={showPassword ? "text" : "password"}
                     required={!target.email}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                    className="w-full pl-10 pr-11 py-3 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none min-h-[44px]"
                     placeholder={target.email ? "•••••••• (Biarkan kosong jika tidak ingin mengubah password)" : "Minimal 6 karakter"}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    className="absolute right-1 top-0 bottom-0 w-10 flex items-center justify-center text-slate-400 hover:text-slate-600 cursor-pointer rounded-lg"
+                    aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
                   >
-                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
                 {target.email && (
@@ -407,13 +409,13 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                 </span>
               </div>
 
-              <div className="flex items-center justify-between pt-3">
+              <div className="flex items-center justify-between pt-3 gap-2">
                 {target.email ? (
                   <button
                     type="button"
                     onClick={handleDeleteAccount}
                     disabled={isDeleting || isLoading}
-                    className="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[44px] shrink-0"
                   >
                     <Trash2 size={14} />
                     <span>{isDeleting ? 'Menghapus...' : 'Hapus Akun'}</span>
@@ -427,14 +429,14 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                     type="button"
                     onClick={onClose}
                     disabled={isLoading || isDeleting}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer min-h-[44px]"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
                     disabled={isLoading || isDeleting}
-                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/25 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/25 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[44px]"
                   >
                     {isLoading ? (
                       <span>Memproses di Cloud...</span>

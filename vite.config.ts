@@ -135,10 +135,11 @@ export default defineConfig(({ mode }) => {
               if (id.includes('firebase')) return 'firebase';
               if (id.includes('recharts') || id.includes('d3')) return 'charts';
               if (id.includes('lucide-react')) return 'icons';
-              if (id.includes('jspdf')) return 'pdf';
-              if (id.includes('exceljs')) return 'excel';
+              if (id.includes('jspdf') || id.includes('html2canvas')) return 'pdf';
+              if (id.includes('exceljs') || id.includes('file-saver')) return 'excel';
               if (id.includes('react-router-dom') || id.includes('react-router')) return 'router';
               if (id.includes('motion')) return 'motion';
+              if (id.includes('@vis.gl') || id.includes('google-maps')) return 'maps';
               return 'vendor';
             }
           }

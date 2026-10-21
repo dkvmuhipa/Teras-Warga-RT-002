@@ -141,6 +141,32 @@ async function startServer() {
   const app = express();
   app.use(cors()); // Add CORS middleware
   app.use(express.json()); // Add JSON body parser
+
+  // In-memory rate limiter for sensitive admin endpoints
+  const adminRateLimitMap = new Map<string, { count: number; resetTime: number }>();
+  const adminRateLimiter = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const windowMs = 60 * 1000; // 1 minute
+    const maxAttempts = 45; // max 45 requests per minute
+
+    const record = adminRateLimitMap.get(ip);
+    if (!record || now > record.resetTime) {
+      adminRateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
+      return next();
+    }
+
+    if (record.count >= maxAttempts) {
+      return res.status(429).json({
+        error: "Terlalu banyak permintaan ke server. Silakan tunggu 1 menit sebelum mencoba lagi."
+      });
+    }
+
+    record.count++;
+    next();
+  };
+  app.use("/api/admin", adminRateLimiter);
+
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
@@ -289,6 +315,25 @@ async function startServer() {
         console.warn("⚠️ [Firebase Admin] Write to admins doc warning:", adminDocErr.message);
       }
 
+      // 4. Log event to Firestore auditLogs
+      try {
+        await firestore.collection("auditLogs").add({
+          action: isExisting ? "UPDATE_OFFICIAL_ACCOUNT" : "CREATE_OFFICIAL_ACCOUNT",
+          title: isExisting ? "Perbarui Akun Pengurus" : "Buat Akun Pengurus",
+          description: `${isExisting ? 'Memperbarui' : 'Membuat'} akun login untuk ${cleanName || cleanEmail} sebagai ${assignedRole} (${tenantId})`,
+          targetEmail: cleanEmail,
+          targetName: cleanName,
+          role: assignedRole,
+          tenantId: tenantId,
+          officialId: resolvedOfficialId || "",
+          performedBy: "Super Admin",
+          timestamp: new Date().toISOString(),
+          createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (auditErr: any) {
+        console.warn("⚠️ [Firebase Admin] Write to auditLogs error:", auditErr.message);
+      }
+
       return res.json({
         success: true,
         uid,
@@ -364,6 +409,21 @@ async function startServer() {
             try {
               await firestore.collection("admins").doc(cleanEmail).delete();
               console.log(`✅ [Firebase Admin] Removed ${cleanEmail} from admins collection.`);
+            } catch (_) {}
+
+            // Log account deletion to auditLogs
+            try {
+              await firestore.collection("auditLogs").add({
+                action: "DELETE_OFFICIAL_ACCOUNT",
+                title: "Hapus Akun Pengurus",
+                description: `Mencabut & menghapus akun login untuk ${cleanEmail} (${tenantId || 'Semua RT'})`,
+                targetEmail: cleanEmail,
+                tenantId: tenantId || "",
+                officialId: officialId || "",
+                performedBy: "Super Admin",
+                timestamp: new Date().toISOString(),
+                createdAt: admin.firestore.FieldValue.serverTimestamp()
+              });
             } catch (_) {}
           
         } catch (dbErr: any) {
