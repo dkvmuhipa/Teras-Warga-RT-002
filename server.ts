@@ -107,6 +107,7 @@ async function startServer() {
     const cleanEmail = email.trim().toLowerCase();
     let authUserDeleted = false;
     let uidDeleted: string | null = null;
+    let authErrorDetails: string | null = null;
 
     try {
       if (admin.apps.length) {
@@ -123,17 +124,25 @@ async function startServer() {
           if (authError.code === "auth/user-not-found") {
             console.log(`ℹ️ [Firebase Admin] User ${cleanEmail} not found in Firebase Auth (already removed).`);
           } else {
-            console.warn(`⚠️ [Firebase Admin] Warning deleting user ${cleanEmail}:`, authError.message);
+            console.error(`❌ [Firebase Admin] Error deleting user ${cleanEmail}:`, authError.message);
+            authErrorDetails = authError.message;
           }
+        }
+
+        if (!authUserDeleted && authErrorDetails) {
+          return res.status(500).json({ error: `Gagal menghapus user dari Firebase Auth: ${authErrorDetails}` });
         }
 
         // 2. Unlink or clean in Firestore officials
         try {
           const firestore = admin.firestore();
           if (officialId && !officialId.includes('-chairman') && !officialId.includes('-secretary') && !officialId.includes('-treasurer')) {
-            await firestore.collection("officials").doc(officialId).update({ email: "" });
-            console.log(`✅ [Firebase Admin] Official ${officialId} email unlinked.`);
-          } else {
+            try {
+              await firestore.collection("officials").doc(officialId).update({ email: "" });
+              console.log(`✅ [Firebase Admin] Official ${officialId} email unlinked.`);
+            } catch (_) {}
+          }
+          
             const querySnap = await firestore.collection("officials").where("email", "==", cleanEmail).get();
             for (const docSnap of querySnap.docs) {
               await docSnap.ref.update({ email: "" });
@@ -141,7 +150,7 @@ async function startServer() {
             if (!querySnap.empty) {
               console.log(`✅ [Firebase Admin] Unlinked email ${cleanEmail} from ${querySnap.size} official record(s).`);
             }
-          }
+          
         } catch (dbErr: any) {
           console.warn(`⚠️ [Firebase Admin] Firestore unlink warning:`, dbErr.message);
         }

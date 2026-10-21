@@ -227,9 +227,9 @@ export const deleteAdminAccount = async (
         tenantId: params.tenantId
       })
     });
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      console.warn('Backend /api/admin/delete-account response non-200:', data);
+      throw new Error(data.error || 'Gagal menghapus akun di server');
     }
   } catch (apiErr) {
     console.warn('Backend /api/admin/delete-account fetch error:', apiErr);
