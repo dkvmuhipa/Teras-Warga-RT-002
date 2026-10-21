@@ -132,7 +132,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
     setIsLoading(true);
     try {
       // 1. Create account in Firebase Auth using secondary isolated app
-      await createTenantAdminAccount({
+      const result = await createTenantAdminAccount({
         email,
         password,
         name: target.name,
@@ -152,7 +152,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
       }
 
       setCreatedResult({ email: email.trim().toLowerCase(), password });
-      toast.success(`Akun login untuk ${target.name} berhasil dibuat!`);
+      toast.success(result?.isExisting ? `Akun ${email} berhasil diperbarui & ditautkan!` : `Akun login untuk ${target.name} berhasil dibuat!`);
       if (onSuccess) onSuccess();
     } catch (err: any) {
       console.error('Failed to create official account:', err);

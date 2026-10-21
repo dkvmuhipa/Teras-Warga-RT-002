@@ -96,6 +96,122 @@ async function startServer() {
 
   const PORT = 3000;
 
+  // Super Admin: Create or Update Admin Account in Firebase Auth & Firestore
+  app.post("/api/admin/create-or-update-account", async (req, res) => {
+    const { email, password, name, phone, role, tenantId, officialId, houseId } = req.body;
+
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: "Alamat email tidak valid" });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: "Password minimal 6 karakter" });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = (name || '').trim();
+    const cleanPhone = (phone || '').trim();
+    const assignedRole = role || 'Admin';
+
+    try {
+      if (!admin.apps.length) {
+        return res.status(500).json({ error: "Firebase Admin is not initialized on the server." });
+      }
+
+      let uid: string;
+      let isExisting = false;
+
+      // 1. Create or Update user in Firebase Authentication
+      try {
+        const existingUser = await admin.auth().getUserByEmail(cleanEmail);
+        uid = existingUser.uid;
+        isExisting = true;
+        await admin.auth().updateUser(uid, {
+          password: password,
+          displayName: cleanName || undefined
+        });
+        console.log(`✅ [Firebase Admin] Existing user ${cleanEmail} password updated.`);
+      } catch (err: any) {
+        if (err.code === "auth/user-not-found") {
+          const newUser = await admin.auth().createUser({
+            email: cleanEmail,
+            password: password,
+            displayName: cleanName || undefined
+          });
+          uid = newUser.uid;
+          console.log(`✅ [Firebase Admin] New user ${cleanEmail} created (UID: ${uid}).`);
+        } else {
+          throw err;
+        }
+      }
+
+      // 2. Link in Firestore officials collection
+      const firestore = admin.firestore();
+      let resolvedOfficialId = officialId;
+
+      if (resolvedOfficialId && !resolvedOfficialId.includes('-chairman') && !resolvedOfficialId.includes('-secretary') && !resolvedOfficialId.includes('-treasurer')) {
+        try {
+          await firestore.collection("officials").doc(resolvedOfficialId).set({
+            email: cleanEmail,
+            role: assignedRole,
+            phone: cleanPhone || undefined,
+            name: cleanName || undefined,
+            tenantId: tenantId
+          }, { merge: true });
+        } catch (_) {}
+      } else {
+        const snap = await firestore.collection("officials").where("tenantId", "==", tenantId).get();
+        const normTarget = cleanName.toLowerCase().replace(/^(bpk.|bapak|ibu|sdr.|sdri.)s*/i, '').trim();
+        let targetDocId: string | null = null;
+        for (const docItem of snap.docs) {
+          const dName = (docItem.data().name || '').toLowerCase().replace(/^(bpk.|bapak|ibu|sdr.|sdri.)s*/i, '').trim();
+          if (dName === normTarget) {
+            targetDocId = docItem.id;
+            break;
+          }
+        }
+
+        if (targetDocId) {
+          await firestore.collection("officials").doc(targetDocId).update({
+            email: cleanEmail,
+            role: assignedRole,
+            phone: cleanPhone || undefined
+          });
+          resolvedOfficialId = targetDocId;
+        } else {
+          const newDoc = await firestore.collection("officials").add({
+            name: cleanName,
+            role: assignedRole,
+            email: cleanEmail,
+            phone: cleanPhone,
+            tenantId: tenantId,
+            houseId: houseId || 'Kantor RT',
+            duties: [
+              'Pengelolaan data kependudukan dan sensus warga',
+              'Pencatatan dan verifikasi pembayaran iuran lingkungan',
+              'Penerbitan surat pengantar dan administrasi digital',
+              'Manajemen jadwal ronda dan keamanan lingkungan'
+            ]
+          });
+          resolvedOfficialId = newDoc.id;
+        }
+      }
+
+      return res.json({
+        success: true,
+        uid,
+        email: cleanEmail,
+        officialId: resolvedOfficialId,
+        isExisting,
+        message: isExisting 
+          ? `Akun ${cleanEmail} sudah ada dan berhasil ditautkan sebagai ${assignedRole} dengan password yang diperbarui.` 
+          : `Akun login baru ${cleanEmail} berhasil dibuat di Firebase Auth.`
+      });
+    } catch (err: any) {
+      console.error("❌ Error provisioning admin account:", err);
+      return res.status(500).json({ error: err.message || "Gagal membuat/menautkan akun" });
+    }
+  });
+
   // Super Admin: Delete Account from Firebase Auth & Firestore
   app.post("/api/admin/delete-account", async (req, res) => {
     const { email, officialId, tenantId } = req.body;

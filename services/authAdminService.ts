@@ -54,7 +54,7 @@ export const generateTemporaryPassword = (rt: string = '001'): string => {
  */
 export const createTenantAdminAccount = async (
   params: CreateRtAdminAccountParams
-): Promise<CreateRtAdminAccountResult> => {
+): Promise<CreateRtAdminAccountResult & { isExisting?: boolean }> => {
   const cleanEmail = params.email.trim().toLowerCase();
   const password = params.password.trim();
   const cleanName = params.name.trim();
@@ -69,23 +69,45 @@ export const createTenantAdminAccount = async (
     throw new Error('Password minimal harus 6 karakter.');
   }
 
-  // 1. Check if email already registered in officials collection
-  if (db) {
-    try {
-      const q = query(collection(db, 'officials'), where('email', '==', cleanEmail));
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        throw new Error(`Email ${cleanEmail} sudah terdaftar sebagai pengurus di database.`);
+  // 1. Try server-side provisioning via Firebase Admin SDK (handles both new and existing users seamlessly!)
+  try {
+    const res = await fetch('/api/admin/create-or-update-account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: cleanEmail,
+        password: password,
+        name: cleanName,
+        phone: cleanPhone,
+        role: assignedRole,
+        tenantId: params.tenantId,
+        officialId: params.officialId,
+        houseId: params.houseId
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        success: true,
+        uid: data.uid,
+        email: cleanEmail,
+        officialId: data.officialId,
+        isExisting: data.isExisting
+      };
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      if (errData.error) {
+        throw new Error(errData.error);
       }
-    } catch (err: any) {
-      if (err.message?.includes('sudah terdaftar')) {
-        throw err;
-      }
-      console.warn('Pre-check officials collection warning:', err);
     }
+  } catch (apiErr: any) {
+    if (apiErr.message && !apiErr.message.includes('fetch')) {
+      throw apiErr;
+    }
+    console.warn('Backend /api/admin/create-or-update-account fallback to client SDK:', apiErr);
   }
 
-  // 2. Initialize secondary isolated Firebase app
+  // 2. Client-side fallback if server endpoint is unreachable
   const secondaryAppName = `SecondaryAuth_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const secondaryConfig = {
     apiKey: firebaseAppletConfig.apiKey,
@@ -100,12 +122,8 @@ export const createTenantAdminAccount = async (
 
   try {
     const secondaryAuth = getAuth(secondaryApp);
-
-    // 3. Create user in Firebase Authentication
     const credential = await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, password);
     createdUid = credential.user.uid;
-
-    // 4. Sign out from secondary app so no residue state remains
     await signOut(secondaryAuth);
   } catch (error: any) {
     console.error('Error creating Firebase user in secondary app:', error);
@@ -121,7 +139,6 @@ export const createTenantAdminAccount = async (
     }
     throw new Error(friendlyMessage);
   } finally {
-    // 5. Always cleanly dispose secondary Firebase app
     try {
       await deleteApp(secondaryApp);
     } catch (delErr) {
@@ -129,7 +146,6 @@ export const createTenantAdminAccount = async (
     }
   }
 
-  // 6. Record or update official profile in Firestore (avoiding duplicate rows!)
   let officialId: string | undefined = params.officialId;
   if (db) {
     try {
@@ -137,7 +153,6 @@ export const createTenantAdminAccount = async (
       if (officialId && !officialId.includes('-chairman') && !officialId.includes('-secretary') && !officialId.includes('-treasurer')) {
         targetDocId = officialId;
       } else {
-        // Query to check if an official with this name already exists in this tenant
         const qTenant = query(
           collection(db, 'officials'),
           where('tenantId', '==', params.tenantId)
@@ -154,7 +169,6 @@ export const createTenantAdminAccount = async (
       }
 
       if (targetDocId) {
-        // Update existing official document with email, role & phone (NEVER create duplicates!)
         const officialRef = doc(db, 'officials', targetDocId);
         await updateDoc(officialRef, {
           email: cleanEmail,
@@ -163,7 +177,6 @@ export const createTenantAdminAccount = async (
         });
         officialId = targetDocId;
       } else {
-        // Only create new document if official does not already exist
         const officialDocData: Omit<Official, 'id'> = {
           name: cleanName,
           role: assignedRole as string,
@@ -195,7 +208,6 @@ export const createTenantAdminAccount = async (
     officialId
   };
 };
-
 
 export interface DeleteAdminAccountParams {
   email: string;
