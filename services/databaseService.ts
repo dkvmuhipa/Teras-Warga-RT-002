@@ -2110,6 +2110,8 @@ export const batchUpdateHouses = async (housesData: any[]) => {
     for (const house of housesData) {
        const cleanData = deepSanitize(house);
        if (!cleanData || !cleanData.id) continue;
+       if (!cleanData.tenantId) cleanData.tenantId = activeTenantScope;
+       cleanData.updatedAt = new Date().toISOString();
        
        const ref = doc(db, HOUSES_COL, cleanData.id);
        batch.set(ref, cleanData, { merge: true });
@@ -4444,7 +4446,7 @@ export const STBM_COL = "stbm_records";
 
 export const subscribeToSTBMRecords = (callback: (records: STBMRecord[]) => void) => {
   if (!db) {
-    const cached = localStorage.getItem("rt02_stbm_records");
+    const cached = localStorage.getItem(`${activeTenantScope}_stbm_records`);
     if (cached) {
       try {
         callback(JSON.parse(cached));
@@ -4460,12 +4462,13 @@ export const subscribeToSTBMRecords = (callback: (records: STBMRecord[]) => void
       ...doc.data()
     })) as STBMRecord[];
     try {
-      localStorage.setItem("rt02_stbm_records", JSON.stringify(records));
+      localStorage.setItem(`${activeTenantScope}_stbm_records`, JSON.stringify(records));
     } catch (e) {}
-    callback(records);
+    const filtered = filterByActiveTenant(records);
+    callback(filtered);
   }, (error) => {
     console.warn("STBM Firestore sync error, using local fallback:", error);
-    const cached = localStorage.getItem("rt02_stbm_records");
+    const cached = localStorage.getItem(`${activeTenantScope}_stbm_records`);
     if (cached) {
       try {
         callback(JSON.parse(cached));
@@ -4479,12 +4482,13 @@ export const saveSTBMRecord = async (record: STBMRecord) => {
   const cleanData = deepSanitize({
     ...record,
     id: docId,
+    tenantId: record.tenantId || activeTenantScope,
     updatedAt: new Date().toISOString()
   });
 
   // Update local cache immediately
   try {
-    const cached = localStorage.getItem("rt02_stbm_records");
+    const cached = localStorage.getItem(`${activeTenantScope}_stbm_records`);
     const list: STBMRecord[] = cached ? JSON.parse(cached) : [];
     const idx = list.findIndex(r => r.id === docId || r.houseId === record.houseId);
     if (idx >= 0) {
@@ -4492,7 +4496,7 @@ export const saveSTBMRecord = async (record: STBMRecord) => {
     } else {
       list.push(cleanData);
     }
-    localStorage.setItem("rt02_stbm_records", JSON.stringify(list));
+    localStorage.setItem(`${activeTenantScope}_stbm_records`, JSON.stringify(list));
   } catch (e) {}
 
   if (!db) return;
@@ -4510,19 +4514,20 @@ export const batchSaveSTBMRecords = async (records: STBMRecord[]) => {
     return deepSanitize({
       ...r,
       id: docId,
+      tenantId: r.tenantId || activeTenantScope,
       updatedAt: new Date().toISOString()
     }) as STBMRecord;
   });
 
   // Save to local cache
   try {
-    const cached = localStorage.getItem("rt02_stbm_records");
+    const cached = localStorage.getItem(`${activeTenantScope}_stbm_records`);
     const list: STBMRecord[] = cached ? JSON.parse(cached) : [];
     const map = new Map<string, STBMRecord>();
     list.forEach(item => map.set(item.houseId, item));
     cleanList.forEach(item => map.set(item.houseId, item));
     const merged = Array.from(map.values());
-    localStorage.setItem("rt02_stbm_records", JSON.stringify(merged));
+    localStorage.setItem(`${activeTenantScope}_stbm_records`, JSON.stringify(merged));
   } catch (e) {}
 
   if (!db) return;

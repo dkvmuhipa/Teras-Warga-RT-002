@@ -2422,7 +2422,8 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         doc.setTextColor(150);
         doc.text(`Halaman ${j} dari ${totalPages}`, pageWidth - margin, pageHeight - 10, { align: "right" });
     }
-    doc.save(`Data_Warga_RT02_${new Date().toISOString().split('T')[0]}.pdf`);
+    const rtSuffix = (pdfConfig?.rtName || 'RT').replace(/\s+/g, '_');
+    doc.save(`Data_Warga_${rtSuffix}_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
 export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfConfig) => {

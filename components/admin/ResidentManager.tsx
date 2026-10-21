@@ -74,6 +74,7 @@ import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { useConfirm, usePrompt } from '../../context/ConfirmContext';
+import { useTenant } from '../../context/TenantContext';
 
 interface ResidentManagerProps {
   role: Role;
@@ -104,6 +105,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   initialViewMode = 'grid'
 }) => {
   const confirm = useConfirm();
+  const { currentTenant } = useTenant();
   const prompt = usePrompt();
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'mutations' | 'requests' | 'health' | 'guests' | 'officials'>('grid');
   
@@ -465,7 +467,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   };
 
   const handleDownloadTemplate = () => {
-    generateExcelTemplate();
+    generateExcelTemplate(currentTenant);
   };
 
   const handlePerformExport = async () => {
@@ -473,7 +475,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     const resolvedHouses = exportTarget === 'all' ? houses : filteredHouses;
     try {
       if (exportFormat === 'excel') {
-        await generateProfessionalExcel(resolvedHouses, selectedExportCols);
+        await generateProfessionalExcel(resolvedHouses, selectedExportCols, currentTenant);
         toast.success(`Berhasil mengunduh Excel berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
       } else {
         await generateResidentReportPDF(resolvedHouses, pdfConfig, selectedExportCols);
@@ -656,12 +658,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
           // Check if there are actual changes
           if (previewItem.changes.length > 0) {
-            updatesToApply.push({ id: previewItem.existingHouse.id, ...updates });
+            updatesToApply.push({ id: previewItem.existingHouse.id, tenantId: currentTenant?.id || previewItem.existingHouse.tenantId, ...updates });
           }
         } else {
           // Add new house
           addsToApply.push({
             ...houseData,
+            tenantId: currentTenant?.id,
             headOfFamily: houseData.headOfFamily || '-',
             location: { x: 0, y: 0 },
             familyMembers: [],
@@ -1684,10 +1687,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse hidden md:block"></div>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            Administrasi kependudukan &amp; sistem pemantauan hunian RT 02
+            Administrasi kependudukan &amp; sistem pemantauan hunian {currentTenant ? `RT ${currentTenant.rt}` : 'RT'}
           </p>
         </motion.div>
-        <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+        <motion.div variants={itemVariants} className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full md:w-auto overflow-x-auto pb-1 sm:pb-0">
           {selectedIds.size > 0 && (
             <div className="flex items-center gap-2 pr-3 border-r border-slate-200">
               <button 

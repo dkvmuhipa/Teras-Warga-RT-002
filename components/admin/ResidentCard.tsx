@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
+import { useTenant } from '../../context/TenantContext';
 
 interface ResidentCardProps {
   house: House;
@@ -29,6 +30,8 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
   onUpdatePBB,
   dynamicStatusAir, dynamicStatusSampah, arrears = []
 }) => {
+  const { currentTenant } = useTenant();
+  const rtDisplayName = currentTenant ? `Pengurus RT ${currentTenant.rt} / RW ${currentTenant.rw}` : 'Pengurus RT';
   const statusAir = dynamicStatusAir || house.paymentStatusAir;
   const statusSampah = dynamicStatusSampah || house.paymentStatusSampah;
 
@@ -58,7 +61,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
       if (cleaned.startsWith('0')) {
         cleaned = '62' + cleaned.slice(1);
       }
-      const text = encodeURIComponent(`Halo Bapak/Ibu ${house.headOfFamily}, kami dari Pengurus RT 02 / RW 020 Huntap Tondo 2 ingin berkoordinasi mengenai administrasi warga.`);
+      const text = encodeURIComponent(`Halo Bapak/Ibu ${house.headOfFamily}, kami dari ${rtDisplayName} ingin berkoordinasi mengenai administrasi warga.`);
       window.open(`https://wa.me/${cleaned}?text=${text}`, '_blank');
     }
   };
@@ -104,7 +107,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                 {house.headOfFamily && house.headOfFamily !== '-' ? house.headOfFamily : (house.ownerName ? `Hunian: ${house.ownerName}` : 'Rumah Kosong')}
               </h4>
               <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
-                {house.ownerName && house.ownerName !== house.headOfFamily ? `Pemilik: ${house.ownerName}` : `Keluarga RT 02`}
+                {house.ownerName && house.ownerName !== house.headOfFamily ? `Pemilik: ${house.ownerName}` : (currentTenant ? `Keluarga RT ${currentTenant.rt}` : 'Keluarga Warga')}
               </p>
               
               {/* Civic Score Honor Badge */}

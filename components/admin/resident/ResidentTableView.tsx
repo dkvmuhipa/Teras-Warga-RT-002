@@ -32,6 +32,7 @@ import { useFinancial } from '../../../context/FinancialContext';
 import { generateResidentCardPDF } from '../../../services/pdfService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { useTenant } from '../../../context/TenantContext';
 
 interface ResidentTableViewProps {
   filteredHouses: House[];
@@ -59,6 +60,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
   handleUpdateHouse,
 }) => {
   const { getPaymentStatus, getArrearsForHouse } = useFinancial();
+  const { currentTenant } = useTenant();
   const [sortField, setSortField] = useState<'number' | 'headOfFamily' | 'occupants' | 'arrears' | 'pbbStatus' | 'residenceType' | 'status'>('number');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -350,7 +352,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                     title={house.addressKtp ? `Alamat KTP: ${house.addressKtp}` : `Status KTP: ${house.ktpStatus || 'Belum Terdata'}`}
                                   >
                                     <span>🪪</span>
-                                    <span>{(house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')))) ? 'KTP RT 02' : 'KTP Luar'}</span>
+                                    <span>{(house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')))) ? (currentTenant ? `KTP RT ${currentTenant.rt}` : 'KTP Lokal') : 'KTP Luar'}</span>
                                   </span>
                                 </div>
                               )}

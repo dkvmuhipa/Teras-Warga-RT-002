@@ -1,6 +1,17 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { House, PaymentStatus, STBMRecord } from '../types';
+import { House, PaymentStatus, STBMRecord, Tenant } from '../types';
+import { getTenantById } from './tenantService';
+import { getActiveTenantScope } from './databaseService';
+
+export const getExcelTenantMeta = (tenant?: Tenant) => {
+  const t = tenant || getTenantById(getActiveTenantScope());
+  const rtNum = t?.rt || '02';
+  const rtLabel = `RT_${rtNum}`;
+  const rtDisplayName = `RT ${rtNum}`;
+  const fullTitle = t?.name || `${rtDisplayName} / RW ${t?.rw || '020'}`;
+  return { t, rtNum, rtLabel, rtDisplayName, fullTitle };
+};
 
 export const naturalSortBlockAndNumber = (
   blockA: string | undefined | null,
@@ -51,9 +62,10 @@ export const naturalSortBlockAndNumber = (
   return 0;
 };
 
-export const generateProfessionalExcel = async (houses: House[], selectedCols?: string[]) => {
+export const generateProfessionalExcel = async (houses: House[], selectedCols?: string[], tenant?: Tenant) => {
+  const { rtLabel, fullTitle } = getExcelTenantMeta(tenant);
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Data Warga RT 02');
+  const worksheet = workbook.addWorksheet(`Data Warga ${rtLabel}`);
 
   // Sort houses by block and number naturally (C5, C7 to C12)
   const sortedHouses = [...houses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
@@ -508,10 +520,11 @@ export const generateProfessionalExcel = async (houses: House[], selectedCols?: 
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Data_Lengkap_Warga_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+  saveAs(blob, `Data_Lengkap_Warga_${rtLabel}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
-export const generateExcelTemplate = async () => {
+export const generateExcelTemplate = async (tenant?: Tenant) => {
+  const { rtLabel, fullTitle } = getExcelTenantMeta(tenant);
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Template Data Warga');
 
@@ -622,7 +635,7 @@ export const generateExcelTemplate = async () => {
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, 'Template_Data_Warga_Lengkap_RT02.xlsx');
+  saveAs(blob, `Template_Data_Warga_Lengkap_${rtLabel}.xlsx`);
 };
 
 export const parseExcelFile = async (file: File): Promise<Partial<House>[]> => {
@@ -1126,7 +1139,7 @@ export const generatePopulationReportExcel = async (reportsInput: any | any[], l
   // Generate and Save
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Laporan_Mutasi_Kependudukan_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+  saveAs(blob, `Laporan_Mutasi_Kependudukan_${getExcelTenantMeta().rtLabel}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
 export const generateOfficialLettersExcel = async (letters: any[]) => {
@@ -1184,7 +1197,7 @@ export const generateOfficialLettersExcel = async (letters: any[]) => {
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Arsip_Surat_Resmi_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+  saveAs(blob, `Arsip_Surat_Resmi_${getExcelTenantMeta().rtLabel}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
 export const generateCashFlowExcel = async (cashFlow: any[], selectedMonth?: string) => {
@@ -1290,16 +1303,16 @@ export const generateCashFlowExcel = async (cashFlow: any[], selectedMonth?: str
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   const filenameSuffix = selectedMonth ? `_${selectedMonth.replace(/\s+/g, '_')}` : '';
-  saveAs(blob, `Arus_Kas_RT02${filenameSuffix}.xlsx`);
+  saveAs(blob, `Arus_Kas_${getExcelTenantMeta().rtLabel}${filenameSuffix}.xlsx`);
 };
 
 export const generateMutationReportExcel = async (logs: any[]) => {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Log Mutasi Kependudukan RT 02');
+  const worksheet = workbook.addWorksheet(`Log Mutasi ${getExcelTenantMeta().rtLabel}`);
 
   worksheet.mergeCells('A1:G1');
   const titleCell = worksheet.getCell('A1');
-  titleCell.value = 'LAPORAN REKAPITULASI MUTASI KEPENDUDUKAN RT 02';
+  titleCell.value = `LAPORAN REKAPITULASI MUTASI KEPENDUDUKAN ${getExcelTenantMeta().fullTitle.toUpperCase()}`;
   titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF1E293B' } };
   titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
@@ -1351,16 +1364,16 @@ export const generateMutationReportExcel = async (logs: any[]) => {
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Log_Mutasi_Kependudukan_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+  saveAs(blob, `Log_Mutasi_Kependudukan_${getExcelTenantMeta().rtLabel}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
 export const generateGuestReportExcel = async (guests: any[]) => {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Laporan Tamu RT 02');
+  const worksheet = workbook.addWorksheet(`Laporan Tamu ${getExcelTenantMeta().rtLabel}`);
 
   worksheet.mergeCells('A1:G1');
   const titleCell = worksheet.getCell('A1');
-  titleCell.value = 'LAPORAN WAJIB LAPOR TAMU 24 JAM RT 02';
+  titleCell.value = `LAPORAN WAJIB LAPOR TAMU 24 JAM ${getExcelTenantMeta().fullTitle.toUpperCase()}`;
   titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FF1E293B' } };
   titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
@@ -1408,7 +1421,7 @@ export const generateGuestReportExcel = async (guests: any[]) => {
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Laporan_Tamu_RT02_${new Date().toISOString().split('T')[0]}.xlsx`);
+  saveAs(blob, `Laporan_Tamu_${getExcelTenantMeta().rtLabel}_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
 export const generateIuranBatchTemplateExcel = async (houses: House[], monthYear: string) => {
@@ -1418,7 +1431,7 @@ export const generateIuranBatchTemplateExcel = async (houses: House[], monthYear
   // Title
   worksheet.mergeCells('A1:G1');
   const titleCell = worksheet.getCell('A1');
-  titleCell.value = `TEMPLATE PENAGIHAN IURAN WARGA RT 02 - PERIODE ${monthYear.toUpperCase()}`;
+  titleCell.value = `TEMPLATE PENAGIHAN IURAN WARGA ${getExcelTenantMeta().rtDisplayName.toUpperCase()} - PERIODE ${monthYear.toUpperCase()}`;
   titleCell.font = { name: 'Arial', size: 12, bold: true, color: { argb: 'FF1E293B' } };
   titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
 
@@ -1472,7 +1485,7 @@ export const generateIuranBatchTemplateExcel = async (houses: House[], monthYear
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Template_Penagihan_Iuran_RT02_${monthYear.replace(/\s+/g, '_')}.xlsx`);
+  saveAs(blob, `Template_Penagihan_Iuran_${getExcelTenantMeta().rtLabel}_${monthYear.replace(/\s+/g, '_')}.xlsx`);
 };
 
 export const exportProfessionalMonthlyReportExcel = async (
@@ -1722,7 +1735,7 @@ export const exportProfessionalMonthlyReportExcel = async (
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Laporan_Kegiatan_RT02_${monthLabel.replace(/\s+/g, '_')}.xlsx`);
+  saveAs(blob, `Laporan_Kegiatan_${getExcelTenantMeta().rtLabel}_${monthLabel.replace(/\s+/g, '_')}.xlsx`);
 };
 
 export const parseIuranBatchExcel = async (file: File): Promise<Array<{
@@ -2447,7 +2460,7 @@ export const exportSTBMReportExcel = async (
   const buffer = await workbook.xlsx.writeBuffer();
   const dateStr = new Date().toISOString().split('T')[0];
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Laporan_Eksekutif_5_Pilar_STBM_RT02_${dateStr}.xlsx`);
+  saveAs(blob, `Laporan_Eksekutif_5_Pilar_STBM_${getExcelTenantMeta().rtLabel}_${dateStr}.xlsx`);
 };
 
 
