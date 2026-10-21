@@ -83,7 +83,61 @@ if (!admin.apps.length) {
   }
 }
 
+async function syncAdminsToFirestore() {
+  if (!admin.apps.length) return;
+  try {
+    const firestore = admin.firestore();
+    const defaults = ["admin@teras.id", "dkvsmkmuhipa@gmail.com", "irfanarianto.id@gmail.com"];
+    for (const email of defaults) {
+      await firestore.collection("admins").doc(email).set({
+        email,
+        role: email === "irfanarianto.id@gmail.com" ? "Ketua RT" : "Super Admin",
+        tenantId: email === "irfanarianto.id@gmail.com" ? "rt002" : "all",
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+
+      try {
+        const u = await admin.auth().getUserByEmail(email);
+        await admin.auth().setCustomUserClaims(u.uid, {
+          admin: true,
+          role: email === "irfanarianto.id@gmail.com" ? "Ketua RT" : "Super Admin",
+          tenantId: email === "irfanarianto.id@gmail.com" ? "rt002" : "all"
+        });
+      } catch (_) {}
+    }
+
+    const officialsSnap = await firestore.collection("officials").get();
+    for (const doc of officialsSnap.docs) {
+      const data = doc.data();
+      if (data.email && typeof data.email === "string" && data.email.includes("@")) {
+        const clean = data.email.trim().toLowerCase();
+        await firestore.collection("admins").doc(clean).set({
+          email: clean,
+          name: data.name || "",
+          role: data.role || "Admin",
+          tenantId: data.tenantId || "",
+          officialId: doc.id,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        try {
+          const u = await admin.auth().getUserByEmail(clean);
+          await admin.auth().setCustomUserClaims(u.uid, {
+            admin: true,
+            role: data.role || "Admin",
+            tenantId: data.tenantId || ""
+          });
+        } catch (_) {}
+      }
+    }
+    console.log("✅ [Firebase Admin] Synced active admins into Firestore 'admins' collection & Auth claims.");
+  } catch (err: any) {
+    console.warn("⚠️ [Firebase Admin] Admin sync warning:", err.message);
+  }
+}
+
 async function startServer() {
+  syncAdminsToFirestore();
   const app = express();
   app.use(cors()); // Add CORS middleware
   app.use(express.json()); // Add JSON body parser
@@ -210,6 +264,31 @@ async function startServer() {
         }
       }
 
+      // 3. Grant Admin privileges: Auth Custom Claims & Firestore admins collection
+      try {
+        await admin.auth().setCustomUserClaims(uid, {
+          admin: true,
+          role: assignedRole,
+          tenantId: tenantId
+        });
+      } catch (claimsErr: any) {
+        console.warn("⚠️ [Firebase Admin] Set custom claims warning:", claimsErr.message);
+      }
+
+      try {
+        await firestore.collection("admins").doc(cleanEmail).set({
+          email: cleanEmail,
+          uid,
+          name: cleanName,
+          role: assignedRole,
+          tenantId: tenantId,
+          officialId: resolvedOfficialId,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+      } catch (adminDocErr: any) {
+        console.warn("⚠️ [Firebase Admin] Write to admins doc warning:", adminDocErr.message);
+      }
+
       return res.json({
         success: true,
         uid,
@@ -280,6 +359,12 @@ async function startServer() {
             if (!querySnap.empty) {
               console.log(`✅ [Firebase Admin] Unlinked email ${cleanEmail} from ${querySnap.size} official record(s).`);
             }
+
+            // Remove from admins collection
+            try {
+              await firestore.collection("admins").doc(cleanEmail).delete();
+              console.log(`✅ [Firebase Admin] Removed ${cleanEmail} from admins collection.`);
+            } catch (_) {}
           
         } catch (dbErr: any) {
           console.warn(`⚠️ [Firebase Admin] Firestore unlink warning:`, dbErr.message);

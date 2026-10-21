@@ -8,6 +8,7 @@
     "dev:frontend": "vite",
     "dev:python": "cd backend && .\\.venv\\Scripts\\python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
     "build": "vite build",
+    "deploy:rules": "node scripts/deployRules.cjs",
     "start": "node server.ts",
     "preview": "vite preview",
     "lint": "tsc --noEmit"

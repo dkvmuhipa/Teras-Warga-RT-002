@@ -10,11 +10,23 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
+    function isSuperAdmin() {
       return isAuthenticated() &&
         (request.auth.token.email == "admin@teras.id" ||
          request.auth.token.email == "dkvsmkmuhipa@gmail.com" ||
-         exists(/databases/$(database)/documents/admins/$(request.auth.token.email)));
+         request.auth.token.superAdmin == true ||
+         exists(/databases/$(database)/documents/platform_admins/$(request.auth.token.email)) ||
+         exists(/databases/$(database)/documents/platformAdmins/$(request.auth.token.email)));
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (isSuperAdmin() ||
+         request.auth.token.admin == true ||
+         request.auth.token.email == "irfanarianto.id@gmail.com" ||
+         exists(/databases/$(database)/documents/admins/$(request.auth.token.email)) ||
+         exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+         isAuthenticated());
     }
 
     // ===============================================================
