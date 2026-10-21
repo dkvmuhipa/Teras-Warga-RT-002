@@ -164,14 +164,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   ];
 
   const allowedItems = navItemsList.filter(item => {
-    if (role === Role.ADMIN || role === Role.SUPER_ADMIN) return true;
+    const roleStr = String(role || '').toLowerCase();
+    const isTreasurer = role === Role.TREASURER || roleStr.includes('bendahara');
+    const isSecretary = role === Role.SECRETARY || roleStr.includes('sekretaris');
     
-    if (role === Role.TREASURER) {
+    if (isTreasurer) {
       const allowed = ['overview', 'analytics', 'finance', 'water-meter', 'reports-lpj', 'settings', 'notifications'];
       return allowed.includes(item.id);
     }
     
-    if (role === Role.SECRETARY) {
+    if (isSecretary) {
       const allowed = [
         'overview', 'analytics', 'residents', 'mutations', 'rentals',
         'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'reports-warga', 'documents', 'activities', 
@@ -180,7 +182,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       return allowed.includes(item.id);
     }
     
-    return false;
+    // Ketua RT, Admin, Super Admin & staf pengurus lainnya mendapatkan akses penuh
+    return true;
   });
 
   const bottomNavItems = [
@@ -190,18 +193,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'services', icon: FileText, label: 'Surat' },
   ].filter(item => {
     if (item.id === 'overview') return true;
-    
-    if (role === Role.ADMIN || role === Role.SUPER_ADMIN) return true;
-    
-    if (role === Role.TREASURER) {
+    const roleStr = String(role || '').toLowerCase();
+    if (role === Role.TREASURER || roleStr.includes('bendahara')) {
       return ['finance'].includes(item.id);
     }
-    
-    if (role === Role.SECRETARY) {
+    if (role === Role.SECRETARY || roleStr.includes('sekretaris')) {
       return ['residents', 'services'].includes(item.id);
     }
-    
-    return false;
+    return true;
   });
 
   React.useEffect(() => {

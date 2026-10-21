@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, Check, Mail, Lock, Eye, EyeOff, Sparkles, Key, 
-  Copy, CheckCircle2, MessageSquare, AlertCircle, Shield 
+  Copy, CheckCircle2, MessageSquare, AlertCircle, Shield, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { createTenantAdminAccount, suggestRtAdminEmail, generateTemporaryPassword } from '../../services/authAdminService';
+import { 
+  createTenantAdminAccount, 
+  suggestRtAdminEmail, 
+  generateTemporaryPassword,
+  deleteAdminAccount 
+} from '../../services/authAdminService';
 import { updateOfficialInDb, addOfficialToDb } from '../../services/databaseService';
 import { toast } from 'sonner';
 
@@ -38,6 +43,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
   const [role, setRole] = useState('Ketua RT');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [createdResult, setCreatedResult] = useState<{ email: string; password: string } | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -48,6 +54,8 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
       setPassword(generateTemporaryPassword(target.tenantRt));
       setRole(target.roleTitle || 'Ketua RT');
       setCreatedResult(null);
+      setIsDeleting(false);
+      setIsLoading(false);
     }
   }, [target, isOpen]);
 
@@ -79,6 +87,37 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
     window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
   };
 
+  const handleDeleteAccount = async () => {
+    const targetEmail = target.email || email;
+    if (!targetEmail) return;
+
+    const confirmed = window.confirm(
+      `Apakah Anda yakin ingin menghapus akun login untuk ${target.name} (${targetEmail})?\n\n` +
+      `Pengurus ini tidak akan bisa login lagi ke portal admin RT.`
+    );
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteAdminAccount({
+        email: targetEmail,
+        officialId: target.id,
+        tenantId: target.tenantId
+      });
+
+      toast.success(`Akun ${targetEmail} berhasil dihapus dari Firebase Auth.`);
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (err: any) {
+      console.error('Failed to delete admin account:', err);
+      toast.error('Gagal Menghapus Akun', {
+        description: err?.message || 'Terjadi kesalahan saat menghapus akun.'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !email.includes('@')) {
@@ -99,7 +138,8 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
         name: target.name,
         phone: target.phone,
         role,
-        tenantId: target.tenantId
+        tenantId: target.tenantId,
+        officialId: target.id
       });
 
       // 2. If this target already exists as a distinct Firestore official document, sync their email
@@ -140,7 +180,11 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
             </div>
             <div>
               <h3 className="text-base font-black text-slate-900">
-                {createdResult ? 'Akun Login Berhasil Dibuat!' : 'Buat Akun Login Pengurus RT'}
+                {createdResult 
+                  ? 'Akun Login Berhasil Dibuat!' 
+                  : target.email 
+                    ? 'Kelola / Perbarui Akun Login' 
+                    : 'Buat Akun Login Pengurus RT'}
               </h3>
               <p className="text-xs text-slate-500 font-medium">
                 {target.tenantName}
@@ -235,6 +279,27 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                 </span>
               </div>
 
+              {/* If target already has an account */}
+              {target.email && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200/80 rounded-xl flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                    <span className="text-emerald-900 font-bold shrink-0">Akun Aktif:</span>
+                    <span className="font-mono text-emerald-800 font-bold truncate">{target.email}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting || isLoading}
+                    className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-black flex items-center gap-1 cursor-pointer transition-all shrink-0"
+                    title="Hapus akun login ini"
+                  >
+                    <Trash2 size={12} />
+                    <span>{isDeleting ? 'Menghapus...' : 'Hapus Akun'}</span>
+                  </button>
+                </div>
+              )}
+
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-bold text-slate-700">
@@ -303,10 +368,10 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                   onChange={(e) => setRole(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none bg-white"
                 >
-                  <option value="Ketua RT">Ketua RT (Akses Penuh Admin)</option>
-                  <option value="Sekretaris">Sekretaris (Administrasi & Persuratan)</option>
-                  <option value="Bendahara">Bendahara (Keuangan & Iuran)</option>
-                  <option value="Admin">Admin Wilayah Umum</option>
+                  <option value="Ketua RT">Ketua RT (Administrator Utama - Akses Penuh)</option>
+                  <option value="Sekretaris">Sekretaris RT (Administrasi, Warga & Persuratan)</option>
+                  <option value="Bendahara">Bendahara RT (Keuangan, Kas & Iuran)</option>
+                  <option value="Admin">Staf / Operator RT (Akses Penuh Admin)</option>
                 </select>
               </div>
 
@@ -317,29 +382,45 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                 </span>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  disabled={isLoading}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/25 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {isLoading ? (
-                    <span>Memproses di Cloud...</span>
-                  ) : (
-                    <>
-                      <Sparkles size={14} />
-                      <span>Buat Akun Sekarang</span>
-                    </>
-                  )}
-                </button>
+              <div className="flex items-center justify-between pt-3">
+                {target.email ? (
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting || isLoading}
+                    className="px-3.5 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    <Trash2 size={14} />
+                    <span>{isDeleting ? 'Menghapus...' : 'Hapus Akun'}</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    disabled={isLoading || isDeleting}
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-100 cursor-pointer"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading || isDeleting}
+                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/25 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {isLoading ? (
+                      <span>Memproses di Cloud...</span>
+                    ) : (
+                      <>
+                        <Sparkles size={14} />
+                        <span>{target.email ? 'Perbarui Kredensial' : 'Buat Akun Sekarang'}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           )}

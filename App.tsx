@@ -460,7 +460,14 @@ export const App = () => {
           const snapshot = await getDocs(q);
           if (!snapshot.empty) {
             const officialData = snapshot.docs[0].data() as Official;
-            setAdminRole(officialData.role as Role);
+            const rawRole = (officialData.role || '').toLowerCase().trim();
+            if (rawRole.includes('bendahara') || rawRole.includes('keuangan')) {
+              setAdminRole(Role.TREASURER);
+            } else if (rawRole.includes('sekretaris')) {
+              setAdminRole(Role.SECRETARY);
+            } else {
+              setAdminRole(Role.ADMIN);
+            }
           } else {
             // Default to ADMIN if not found in officials (for the main admin account)
             setAdminRole(Role.ADMIN);

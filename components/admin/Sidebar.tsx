@@ -158,16 +158,21 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     const matchedItems = group.items.filter(item => {
       // Role validation
       let isAllowed = false;
-      if (role === Role.ADMIN || role === Role.SUPER_ADMIN) {
-        isAllowed = true;
-      } else if (role === Role.TREASURER) {
+      const roleStr = String(role || '').toLowerCase();
+      const isTreasurer = role === Role.TREASURER || roleStr.includes('bendahara');
+      const isSecretary = role === Role.SECRETARY || roleStr.includes('sekretaris');
+
+      if (isTreasurer) {
         isAllowed = ['overview', 'analytics', 'rw-recap', 'finance', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
-      } else if (role === Role.SECRETARY) {
+      } else if (isSecretary) {
         isAllowed = [
           'overview', 'analytics', 'rw-recap', 'residents', 'mutations', 'rentals',
           'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
         ].includes(item.id);
+      } else {
+        // Ketua RT, Admin, Super Admin, dan role pengurus lainnya mendapatkan akses penuh
+        isAllowed = true;
       }
 
       // Search validation

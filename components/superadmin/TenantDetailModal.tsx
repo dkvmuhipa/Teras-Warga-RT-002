@@ -17,6 +17,7 @@ import {
 import { useTenant } from '../../context/TenantContext';
 import { matchesTenant } from '../../services/tenantService';
 import { CreateOfficialAccountModal, OfficialAccountTarget } from './CreateOfficialAccountModal';
+import { deleteAdminAccount } from '../../services/authAdminService';
 import { toast } from 'sonner';
 
 const isPlaceholderName = (name?: string) => {
@@ -80,10 +81,45 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Live officials computation
+  // Live officials computation with deduplication
   const tenantOfficials = useMemo(() => {
     if (!tenant || !officials) return [];
-    return officials.filter(o => matchesTenant(o.tenantId, tenant.id));
+    const matched = officials.filter(o => matchesTenant(o.tenantId, tenant.id));
+
+    const normalizeName = (name: string) => {
+      return (name || '')
+        .toLowerCase()
+        .replace(/^(bpk\.|bapak|ibu|sdr\.|sdri\.)\s*/i, '')
+        .trim();
+    };
+
+    const uniqueMap = new Map<string, Official>();
+    for (const off of matched) {
+      if (!off.name) continue;
+      const key = normalizeName(off.name);
+      const existing = uniqueMap.get(key);
+
+      if (!existing) {
+        uniqueMap.set(key, off);
+      } else {
+        // Merge attributes between duplicate documents:
+        // Keep the real houseId (prefer non-'Kantor RT') and avatar, but attach the email!
+        const preferExistingHouse = existing.houseId && existing.houseId !== 'Kantor RT';
+        const merged: Official = {
+          ...existing,
+          ...off,
+          id: preferExistingHouse ? existing.id : off.id,
+          houseId: preferExistingHouse ? existing.houseId : (off.houseId || existing.houseId),
+          photo: existing.photo || off.photo,
+          email: off.email || existing.email,
+          phone: off.phone || existing.phone,
+          role: existing.role || off.role
+        };
+        uniqueMap.set(key, merged);
+      }
+    }
+
+    return Array.from(uniqueMap.values());
   }, [officials, tenant]);
 
   const liveChairman = useMemo(() => {
@@ -299,10 +335,10 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className="w-full max-w-3xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] text-slate-800"
+        className="w-full max-w-3xl bg-white border border-slate-200 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[88vh] sm:h-[84vh] text-slate-800"
       >
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+        <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <div 
               className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white shadow-xs shrink-0"
@@ -365,7 +401,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="px-6 pt-3 border-b border-slate-200 bg-white flex gap-2 overflow-x-auto text-xs font-bold">
+        <div className="px-6 pt-3 border-b border-slate-200 bg-white flex gap-2 overflow-x-auto text-xs font-bold shrink-0">
           <button
             onClick={() => setActiveTab('operations')}
             className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
@@ -438,7 +474,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         </div>
 
         {/* Modal Content Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6">
           {/* TAB 0: DATA OPERASIONAL REALTIME */}
           {activeTab === 'operations' && (
             <div className="space-y-6">
@@ -765,14 +801,42 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleCreateChairmanAccount}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5 cursor-pointer transition-all shrink-0 active:scale-95"
-                >
-                  <Key size={14} />
-                  <span>{liveChairman?.email ? 'Kelola / Reset Akun' : '🔑 Buat Akun Admin RT'}</span>
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  {liveChairman?.email && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const confirmed = window.confirm(
+                          `Apakah Anda yakin ingin menghapus akun login untuk Ketua RT (${liveChairman.email})?\n\nAkses masuk portal admin RT akan dicabut.`
+                        );
+                        if (!confirmed) return;
+                        try {
+                          await deleteAdminAccount({
+                            email: liveChairman.email,
+                            officialId: liveChairman.id,
+                            tenantId: tenant?.id
+                          });
+                          toast.success(`Akun login ${liveChairman.email} berhasil dihapus.`);
+                        } catch (e: any) {
+                          toast.error(e.message || "Gagal menghapus akun");
+                        }
+                      }}
+                      className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold border border-rose-200 text-xs rounded-xl flex items-center gap-1 cursor-pointer transition-all"
+                      title="Hapus / Cabut Akun Login"
+                    >
+                      <Trash2 size={13} />
+                      <span>Hapus Akun</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleCreateChairmanAccount}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                  >
+                    <Key size={14} />
+                    <span>{liveChairman?.email ? 'Kelola / Reset Akun' : '🔑 Buat Akun Admin RT'}</span>
+                  </button>
+                </div>
               </div>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
@@ -1435,7 +1499,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
           <div className="text-[11px] text-slate-500 font-mono">
             Didaftarkan: {tenant.createdAt ? new Date(tenant.createdAt).toLocaleDateString('id-ID') : 'Default Platform'}
           </div>

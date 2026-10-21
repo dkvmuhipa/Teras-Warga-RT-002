@@ -96,6 +96,69 @@ async function startServer() {
 
   const PORT = 3000;
 
+  // Super Admin: Delete Account from Firebase Auth & Firestore
+  app.post("/api/admin/delete-account", async (req, res) => {
+    const { email, officialId, tenantId } = req.body;
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: "Email wajib disertakan" });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    let authUserDeleted = false;
+    let uidDeleted: string | null = null;
+
+    try {
+      if (admin.apps.length) {
+        // 1. Delete from Firebase Authentication
+        try {
+          const userRecord = await admin.auth().getUserByEmail(cleanEmail);
+          if (userRecord && userRecord.uid) {
+            await admin.auth().deleteUser(userRecord.uid);
+            authUserDeleted = true;
+            uidDeleted = userRecord.uid;
+            console.log(`✅ [Firebase Admin] User ${cleanEmail} (UID: ${userRecord.uid}) deleted from Firebase Auth.`);
+          }
+        } catch (authError: any) {
+          if (authError.code === "auth/user-not-found") {
+            console.log(`ℹ️ [Firebase Admin] User ${cleanEmail} not found in Firebase Auth (already removed).`);
+          } else {
+            console.warn(`⚠️ [Firebase Admin] Warning deleting user ${cleanEmail}:`, authError.message);
+          }
+        }
+
+        // 2. Unlink or clean in Firestore officials
+        try {
+          const firestore = admin.firestore();
+          if (officialId && !officialId.includes('-chairman') && !officialId.includes('-secretary') && !officialId.includes('-treasurer')) {
+            await firestore.collection("officials").doc(officialId).update({ email: "" });
+            console.log(`✅ [Firebase Admin] Official ${officialId} email unlinked.`);
+          } else {
+            const querySnap = await firestore.collection("officials").where("email", "==", cleanEmail).get();
+            for (const docSnap of querySnap.docs) {
+              await docSnap.ref.update({ email: "" });
+            }
+            if (!querySnap.empty) {
+              console.log(`✅ [Firebase Admin] Unlinked email ${cleanEmail} from ${querySnap.size} official record(s).`);
+            }
+          }
+        } catch (dbErr: any) {
+          console.warn(`⚠️ [Firebase Admin] Firestore unlink warning:`, dbErr.message);
+        }
+      }
+
+      return res.json({
+        success: true,
+        message: `Akun login ${cleanEmail} berhasil dihapus dari Firebase Auth dan database.`,
+        authUserDeleted,
+        uid: uidDeleted
+      });
+    } catch (err: any) {
+      console.error("❌ Error deleting admin account:", err);
+      return res.status(500).json({ error: err.message || "Gagal menghapus akun" });
+    }
+  });
+
   // Push Notification Endpoint
   app.post("/api/push/send", async (req, res) => {
     const { tokens, notification, data } = req.body;
