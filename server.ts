@@ -103,11 +103,8 @@ async function startServer() {
     if (!email || !email.includes('@')) {
       return res.status(400).json({ error: "Alamat email tidak valid" });
     }
-    if (!password || password.length < 6) {
-      return res.status(400).json({ error: "Password minimal 6 karakter" });
-    }
-
     const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = (password || '').trim();
     const cleanName = (name || '').trim();
     const cleanPhone = (phone || '').trim();
     const assignedRole = role || 'Admin';
@@ -120,28 +117,45 @@ async function startServer() {
       let uid: string;
       let isExisting = false;
 
-      // 1. Create or Update user in Firebase Authentication
+      // 1. Check if user already exists
+      let existingUser: admin.auth.UserRecord | null = null;
       try {
-        const existingUser = await admin.auth().getUserByEmail(cleanEmail);
+        existingUser = await admin.auth().getUserByEmail(cleanEmail);
         uid = existingUser.uid;
         isExisting = true;
-        await admin.auth().updateUser(uid, {
-          password: password,
-          displayName: cleanName || undefined
-        });
-        console.log(`✅ [Firebase Admin] Existing user ${cleanEmail} password updated.`);
       } catch (err: any) {
-        if (err.code === "auth/user-not-found") {
-          const newUser = await admin.auth().createUser({
-            email: cleanEmail,
-            password: password,
-            displayName: cleanName || undefined
-          });
-          uid = newUser.uid;
-          console.log(`✅ [Firebase Admin] New user ${cleanEmail} created (UID: ${uid}).`);
-        } else {
+        if (err.code !== "auth/user-not-found") {
           throw err;
         }
+      }
+
+      // Password validation: required for new accounts, optional for existing
+      if (!isExisting) {
+        if (!cleanPassword || cleanPassword.length < 6) {
+          return res.status(400).json({ error: "Password sementara minimal 6 karakter untuk akun baru." });
+        }
+      } else {
+        if (cleanPassword && cleanPassword.length < 6) {
+          return res.status(400).json({ error: "Password baru minimal 6 karakter." });
+        }
+      }
+
+      // 2. Create or Update user in Firebase Authentication
+      if (isExisting && uid!) {
+        const updatePayload: admin.auth.UpdateRequest = {};
+        if (cleanName) updatePayload.displayName = cleanName;
+        if (cleanPassword) updatePayload.password = cleanPassword;
+
+        await admin.auth().updateUser(uid, updatePayload);
+        console.log(`✅ [Firebase Admin] Existing user ${cleanEmail} updated (password reset: ${Boolean(cleanPassword)}).`);
+      } else {
+        const newUser = await admin.auth().createUser({
+          email: cleanEmail,
+          password: cleanPassword,
+          displayName: cleanName || undefined
+        });
+        uid = newUser.uid;
+        console.log(`✅ [Firebase Admin] New user ${cleanEmail} created (UID: ${uid}).`);
       }
 
       // 2. Link in Firestore officials collection

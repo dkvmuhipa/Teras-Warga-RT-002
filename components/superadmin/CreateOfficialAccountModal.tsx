@@ -51,7 +51,12 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
     if (target && isOpen) {
       const suggestedEmail = target.email || suggestRtAdminEmail(target.tenantRt, target.kelurahan);
       setEmail(suggestedEmail);
-      setPassword(generateTemporaryPassword(target.tenantRt));
+      // For existing accounts, do not overwrite/generate a random password on open
+      if (target.email) {
+        setPassword('');
+      } else {
+        setPassword(generateTemporaryPassword(target.tenantRt));
+      }
       setRole(target.roleTitle || 'Ketua RT');
       setCreatedResult(null);
       setIsDeleting(false);
@@ -124,17 +129,22 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
       toast.error('Masukkan alamat email yang valid.');
       return;
     }
-    if (password.length < 6) {
+    // Validation: password is required for new accounts; for existing accounts, only validate length if typed
+    if (!target.email && (!password || password.length < 6)) {
+      toast.error('Password sementara minimal 6 karakter.');
+      return;
+    }
+    if (password && password.length < 6) {
       toast.error('Password minimal 6 karakter.');
       return;
     }
 
     setIsLoading(true);
     try {
-      // 1. Create account in Firebase Auth using secondary isolated app
+      // 1. Create or update account in Firebase Auth
       const result = await createTenantAdminAccount({
         email,
-        password,
+        password: password || undefined,
         name: target.name,
         phone: target.phone,
         role,
@@ -151,13 +161,21 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
         }
       }
 
-      setCreatedResult({ email: email.trim().toLowerCase(), password });
-      toast.success(result?.isExisting ? `Akun ${email} berhasil diperbarui & ditautkan!` : `Akun login untuk ${target.name} berhasil dibuat!`);
+      if (password) {
+        setCreatedResult({ email: email.trim().toLowerCase(), password });
+        toast.success(result?.isExisting ? `Akun ${email} berhasil diperbarui & password baru disetel!` : `Akun login untuk ${target.name} berhasil dibuat!`);
+      } else {
+        toast.success(`Data akun ${email} berhasil diperbarui! Password aktif tetap dipertahankan.`);
+        if (onSuccess) onSuccess();
+        onClose();
+        return;
+      }
+
       if (onSuccess) onSuccess();
     } catch (err: any) {
-      console.error('Failed to create official account:', err);
-      toast.error('Gagal Membuat Akun Login', {
-        description: err.message || 'Terjadi kesalahan saat membuat akun.'
+      console.error('Failed to create/update official account:', err);
+      toast.error('Gagal Memproses Akun Login', {
+        description: err.message || 'Terjadi kesalahan saat memproses akun.'
       });
     } finally {
       setIsLoading(false);
@@ -329,25 +347,25 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-bold text-slate-700">
-                    Password Sementara <span className="text-rose-500">*</span>
+                    {target.email ? 'Ganti Password Baru (Opsional)' : 'Password Sementara'} {!target.email && <span className="text-rose-500">*</span>}
                   </label>
                   <button
                     type="button"
                     onClick={() => setPassword(generateTemporaryPassword(target.tenantRt))}
-                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800"
+                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer"
                   >
-                    Acak Password
+                    {target.email ? '+ Buat Password Acak' : 'Acak Password'}
                   </button>
                 </div>
                 <div className="relative">
                   <Lock size={15} className="absolute left-3 top-3 text-slate-400" />
                   <input 
                     type={showPassword ? "text" : "password"}
-                    required
+                    required={!target.email}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-200 text-xs font-mono font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
-                    placeholder="Minimal 6 karakter"
+                    placeholder={target.email ? "•••••••• (Biarkan kosong jika tidak ingin mengubah password)" : "Minimal 6 karakter"}
                   />
                   <button
                     type="button"
@@ -357,6 +375,13 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
+                {target.email && (
+                  <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                    {password 
+                      ? '⚠️ Password akan diubah ke password baru di atas saat Anda klik "Perbarui & Set Password Baru".' 
+                      : 'ℹ️ Password login saat ini tetap aktif dan tidak berubah. Kosongkan jika hanya ingin memperbarui email atau peran pengurus.'}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -416,7 +441,11 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                     ) : (
                       <>
                         <Sparkles size={14} />
-                        <span>{target.email ? 'Perbarui Kredensial' : 'Buat Akun Sekarang'}</span>
+                        <span>
+                          {target.email 
+                            ? (password ? 'Perbarui & Set Password Baru' : 'Simpan Perubahan') 
+                            : 'Buat Akun Sekarang'}
+                        </span>
                       </>
                     )}
                   </button>

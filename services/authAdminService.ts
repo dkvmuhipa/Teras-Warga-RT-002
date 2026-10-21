@@ -7,7 +7,7 @@ import { Role, Official } from "../types";
 
 export interface CreateRtAdminAccountParams {
   email: string;
-  password: string;
+  password?: string;
   name: string;
   phone: string;
   role?: Role | string;
@@ -56,7 +56,7 @@ export const createTenantAdminAccount = async (
   params: CreateRtAdminAccountParams
 ): Promise<CreateRtAdminAccountResult & { isExisting?: boolean }> => {
   const cleanEmail = params.email.trim().toLowerCase();
-  const password = params.password.trim();
+  const password = params.password?.trim() || '';
   const cleanName = params.name.trim();
   const cleanPhone = params.phone.trim();
   const assignedRole = params.role || Role.ADMIN;
@@ -65,7 +65,7 @@ export const createTenantAdminAccount = async (
     throw new Error('Alamat email tidak valid.');
   }
 
-  if (password.length < 6) {
+  if (password && password.length < 6) {
     throw new Error('Password minimal harus 6 karakter.');
   }
 
