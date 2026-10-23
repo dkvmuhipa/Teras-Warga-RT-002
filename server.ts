@@ -11,6 +11,19 @@ import multer from "multer";
 import "dotenv/config";
 import { GoogleGenAI } from "@google/genai";
 
+// Process-level crash prevention for transient stream or network rejections
+process.on('uncaughtException', (err: any) => {
+  if (err?.code === 'EADDRINUSE') {
+    console.error('🚨 [Server] Port is already in use:', err.message);
+    process.exit(1);
+  }
+  console.error('🚨 [Server] Uncaught Exception:', err?.message || err);
+});
+
+process.on('unhandledRejection', (reason: any) => {
+  console.warn('⚠️ [Server] Unhandled Rejection:', reason?.message || reason);
+});
+
 // Initialize Gemini Admin on backend
 let aiAdmin: GoogleGenAI | null = null;
 const getAiAdmin = () => {
@@ -1593,7 +1606,10 @@ Salam hangat rukun warga,
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { 
+        middlewareMode: true,
+        hmr: { server: httpServer }
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);
