@@ -176,6 +176,16 @@ async function startServer() {
 
   const PORT = 3000;
 
+  // Healthcheck endpoint
+  app.get("/api/health", (req, res) => {
+    res.json({
+      status: "ok",
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      firebaseAdmin: Boolean(admin.apps.length)
+    });
+  });
+
   // Super Admin: Create or Update Admin Account in Firebase Auth & Firestore
   app.post("/api/admin/create-or-update-account", async (req, res) => {
     const { email, password, name, phone, role, tenantId, officialId, houseId } = req.body;
