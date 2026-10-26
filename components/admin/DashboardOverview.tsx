@@ -247,10 +247,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <div className="space-y-3 max-w-2xl">
             {/* Top Stacked Badges */}
             <div className="flex flex-col items-start gap-1.5">
-              <span className="bg-[#4f46e5] text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-xs">
+              <span className="bg-[#4f46e5] text-white text-xs font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-xs">
                 Pusat Kendali Eksekutif
               </span>
-              <span className="bg-[#dcfce7] text-[#15803d] text-[10px] font-extrabold px-3 py-1 rounded-full inline-flex items-center gap-1.5 shadow-2xs">
+              <span className="bg-[#dcfce7] text-[#15803d] text-xs font-extrabold px-3 py-1 rounded-full inline-flex items-center gap-1.5 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 Operasional 100% Aktif
               </span>
@@ -302,7 +302,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 disabled={isAiLoading}
                 className="w-full py-3.5 px-5 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] hover:from-[#4f46e5] hover:to-[#6d28d9] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-md shadow-indigo-500/25 relative flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
               >
-                <Sparkles size={16} className="text-white shrink-0 animate-spin-slow" /> 
+                <Sparkles size={16} className="text-white shrink-0 " /> 
                 <span className="tracking-normal font-bold">
                   {isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}
                 </span>
@@ -331,6 +331,100 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       </motion.div>
 
+      {/* Decision-First Priority Action Queue (Prioritas Keputusan Hari Ini) */}
+      <motion.div variants={itemVariants} className="bg-white rounded-3xl p-5 md:p-6 border border-slate-200/90 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3.5">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-indigo-600" />
+              <h3 className="text-sm md:text-base font-extrabold text-slate-900 tracking-tight">
+                Antrean Prioritas Pengurus Hari Ini
+              </h3>
+            </div>
+            <p className="text-xs text-slate-600 font-medium mt-0.5">
+              Tugas administrasi dan verifikasi warga yang membutuhkan tindak lanjut segera.
+            </p>
+          </div>
+          <span className="text-xs font-bold font-mono px-3 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 w-fit">
+            {(residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length + newReports)} Item Menunggu
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div
+            onClick={() => onTabChange('services')}
+            className="p-4 rounded-2xl border border-slate-200/90 hover:border-indigo-400 bg-slate-50/70 hover:bg-white transition-all cursor-pointer flex flex-col justify-between gap-3 group"
+          >
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">Permohonan Surat</span>
+                <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold font-mono ${letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Baru
+                </span>
+              </div>
+              <div className="text-xl font-extrabold font-mono text-slate-900">
+                {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Pengantar
+              </div>
+              <p className="text-xs text-slate-600">
+                Verifikasi berkas &amp; tanda tangan elektronik surat warga.
+              </p>
+            </div>
+            <div className="pt-2.5 border-t border-slate-200/70 flex items-center justify-between text-xs font-bold text-indigo-700 group-hover:translate-x-0.5 transition-transform">
+              <span>Buka Meja Surat</span>
+              <ArrowRight size={14} />
+            </div>
+          </div>
+
+          <div
+            onClick={() => onTabChange('residents')}
+            className="p-4 rounded-2xl border border-slate-200/90 hover:border-emerald-400 bg-slate-50/70 hover:bg-white transition-all cursor-pointer flex flex-col justify-between gap-3 group"
+          >
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">Registrasi &amp; Mutasi KK</span>
+                <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold font-mono ${residentRegistrations.filter(r => r.approvalStatus === 'Pending').length > 0 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length} Calon
+                </span>
+              </div>
+              <div className="text-xl font-extrabold font-mono text-slate-900">
+                {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length} Keluarga
+              </div>
+              <p className="text-xs text-slate-600">
+                Persetujuan warga baru dan pembaruan data kartu keluarga.
+              </p>
+            </div>
+            <div className="pt-2.5 border-t border-slate-200/70 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:translate-x-0.5 transition-transform">
+              <span>Periksa Data Warga</span>
+              <ArrowRight size={14} />
+            </div>
+          </div>
+
+          <div
+            onClick={() => onTabChange('reports-warga')}
+            className="p-4 rounded-2xl border border-slate-200/90 hover:border-rose-400 bg-slate-50/70 hover:bg-white transition-all cursor-pointer flex flex-col justify-between gap-3 group"
+          >
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700">Aduan &amp; Lapor Tamu</span>
+                <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold font-mono ${(newReports + activeGuests) > 0 ? 'bg-amber-500 text-slate-950' : 'bg-slate-200 text-slate-700'}`}>
+                  {newReports} Aduan · {activeGuests} Tamu
+                </span>
+              </div>
+              <div className="text-xl font-extrabold font-mono text-slate-900">
+                {newReports + activeGuests} Laporan
+              </div>
+              <p className="text-xs text-slate-600">
+                Tindak lanjut laporan fasilitas lingkungan dan tamu menginap.
+              </p>
+            </div>
+            <div className="pt-2.5 border-t border-slate-200/70 flex items-center justify-between text-xs font-bold text-slate-800 group-hover:translate-x-0.5 transition-transform">
+              <span>Tindak Lanjuti</span>
+              <ArrowRight size={14} />
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Intelligence AI Strategic Advisor Card */}
       {aiSummary && (
         <motion.div 
@@ -341,7 +435,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <div className="flex items-center justify-between gap-4 mb-4 border-b border-slate-100 pb-3">
             <h4 className="font-extrabold text-sm md:text-base text-slate-900 flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                <Sparkles size={17} className="animate-spin-slow" />
+                <Sparkles size={17} className="" />
               </div>
               <span>Intelligence Advisor (Gemini AI RT02)</span>
             </h4>
@@ -390,7 +484,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#4f46e5] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <Users size={19} className="stroke-[2.2px]" />
             </div>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">
+            <span className="text-xs sm:text-xs font-bold text-slate-700 leading-tight">
               Data<br />Warga
             </span>
           </motion.div>
@@ -405,7 +499,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#059669] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <CreditCard size={19} className="stroke-[2.2px]" />
             </div>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">
+            <span className="text-xs sm:text-xs font-bold text-slate-700 leading-tight">
               Kas &<br />Iuran
             </span>
           </motion.div>
@@ -423,7 +517,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <FileText size={19} className="stroke-[2.2px]" />
             </div>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">
+            <span className="text-xs sm:text-xs font-bold text-slate-700 leading-tight">
               Surat<br />Pengantar
             </span>
           </motion.div>
@@ -438,7 +532,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#0284c7] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <Shield size={19} className="stroke-[2.2px]" />
             </div>
-            <span className="text-[11px] sm:text-xs font-bold text-slate-700 leading-tight">
+            <span className="text-xs sm:text-xs font-bold text-slate-700 leading-tight">
               Keamanan<br />Lingkungan
             </span>
           </motion.div>
@@ -454,7 +548,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               transition={{ duration: 0.25 }}
               className="overflow-hidden pt-4 mt-2 bg-white rounded-2xl p-4 border border-slate-100 shadow-xs"
             >
-              <h5 className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-3">
+              <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">
                 Modul Operasional Tambahan
               </h5>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
@@ -476,12 +570,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all ${item.color} hover:shadow-xs relative cursor-pointer`}
                     >
                       {item.badge && (
-                        <span className="absolute -top-1.5 -right-1 text-[8px] font-black uppercase px-1.5 py-0.5 rounded-full bg-slate-900 text-white shadow-2xs">
+                        <span className="absolute -top-1.5 -right-1 text-xs font-black uppercase px-1.5 py-0.5 rounded-full bg-slate-900 text-white shadow-2xs">
                           {item.badge}
                         </span>
                       )}
                       <Icon size={19} className="stroke-[2.2px] mb-1.5" />
-                      <span className="text-[11px] font-extrabold leading-tight">{item.label}</span>
+                      <span className="text-xs font-extrabold leading-tight">{item.label}</span>
                     </motion.button>
                   );
                 })}
@@ -507,7 +601,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm md:text-base font-extrabold tracking-tight text-slate-900">5 Pilar STBM & ODF</h3>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full">
+                    <span className="text-xs font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full">
                       Kemenkes RI
                     </span>
                   </div>
@@ -525,26 +619,26 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Quick Metrics */}
             <div className="grid grid-cols-3 gap-2 md:gap-3 py-1">
               <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Status BABS</span>
+                <span className="text-xs uppercase font-bold text-slate-400 block">Status BABS</span>
                 <span className="text-base md:text-lg font-extrabold text-emerald-600 mt-0.5 block">100% ODF</span>
-                <span className="text-[9px] text-slate-500 font-medium">Bebas Buang Air Besar</span>
+                <span className="text-xs text-slate-500 font-medium">Bebas Buang Air Besar</span>
               </div>
               <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Kavling Terdata</span>
+                <span className="text-xs uppercase font-bold text-slate-400 block">Kavling Terdata</span>
                 <span className="text-base md:text-lg font-extrabold text-slate-900 mt-0.5 block">{stbmRecords.length || houses.length} KK</span>
-                <span className="text-[9px] text-slate-500 font-medium">129 Huntap PUPR</span>
+                <span className="text-xs text-slate-500 font-medium">129 Huntap PUPR</span>
               </div>
               <div className={`border rounded-2xl p-2.5 text-center ${stbmIssuesCount > 0 ? 'bg-rose-50/80 border-rose-100' : 'bg-emerald-50/80 border-emerald-100'}`}>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Tindak Lanjut</span>
+                <span className="text-xs uppercase font-bold text-slate-400 block">Tindak Lanjut</span>
                 <span className={`text-base md:text-lg font-extrabold mt-0.5 block ${stbmIssuesCount > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                   {stbmIssuesCount > 0 ? `${stbmIssuesCount} Butuh TL` : '0 Nihil (Prima)'}
                 </span>
-                <span className="text-[9px] text-slate-500 font-medium">{stbmIssuesCount > 0 ? 'Perlu Intervensi' : 'Semua Normal'}</span>
+                <span className="text-xs text-slate-500 font-medium">{stbmIssuesCount > 0 ? 'Perlu Intervensi' : 'Semua Normal'}</span>
               </div>
             </div>
 
             {/* Pillar Snapshot Pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[10px] font-bold text-slate-600">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs font-bold text-slate-600">
               <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl">
                 <Check size={12} className="text-emerald-600 shrink-0 stroke-[2.5]" />
                 <span className="truncate">P1: Biotank PUPR</span>
@@ -587,7 +681,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm md:text-base font-extrabold tracking-tight text-slate-900">Stasiun Cuaca Huntap Tondo 2</h3>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="text-xs font-extrabold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Sensor
                     </span>
                   </div>
@@ -595,7 +689,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-[10px] text-slate-400 font-bold block">Standar RI</span>
+                <span className="text-xs text-slate-400 font-bold block">Standar RI</span>
                 <span className="text-xs font-extrabold text-sky-600 uppercase">ISPU KLHK</span>
               </div>
             </div>
@@ -603,45 +697,45 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Weather Metrics Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-1">
               <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
+                <span className="text-xs uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
                   <Sun size={11} className="text-amber-500" /> Suhu
                 </span>
                 <span className="text-base md:text-lg font-extrabold text-slate-900 mt-0.5 block">
                   {weather ? `${weather.temp}°C` : '31°C'}
                 </span>
-                <span className="text-[9px] text-slate-500 font-medium truncate block">
+                <span className="text-xs text-slate-500 font-medium truncate block">
                   {weather?.condition || 'Cerah'}
                 </span>
               </div>
 
               <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
+                <span className="text-xs uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
                   <Droplets size={11} className="text-sky-500" /> Humid
                 </span>
                 <span className="text-base md:text-lg font-extrabold text-sky-600 mt-0.5 block">
                   {weather ? `${weather.humidity}%` : '74%'}
                 </span>
-                <span className="text-[9px] text-slate-500 font-medium truncate block">Relatif (RH)</span>
+                <span className="text-xs text-slate-500 font-medium truncate block">Relatif (RH)</span>
               </div>
 
               <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
+                <span className="text-xs uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
                   <Wind size={11} className="text-teal-500" /> Angin
                 </span>
                 <span className="text-base md:text-lg font-extrabold text-teal-600 mt-0.5 block">
                   {weather ? `${weather.windSpeed} km/h` : '12 km/h'}
                 </span>
-                <span className="text-[9px] text-slate-500 font-medium truncate block">Lembah Palu</span>
+                <span className="text-xs text-slate-500 font-medium truncate block">Lembah Palu</span>
               </div>
 
               <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
+                <span className="text-xs uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
                   <Activity size={11} className="text-emerald-500" /> ISPU
                 </span>
                 <span className="text-base md:text-lg font-extrabold text-emerald-600 mt-0.5 block">
                   {weather ? weather.aqi : 28}
                 </span>
-                <span className="text-[9px] font-extrabold uppercase text-emerald-600 truncate block">
+                <span className="text-xs font-extrabold uppercase text-emerald-600 truncate block">
                   {weather?.aqiLabel || 'Baik'}
                 </span>
               </div>
@@ -651,11 +745,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="bg-slate-50 border border-slate-100 rounded-2xl p-2.5 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2 text-slate-600">
                 <Compass size={14} className="text-sky-500 shrink-0" />
-                <span className="text-[11px] font-medium leading-relaxed truncate">
+                <span className="text-xs font-medium leading-relaxed truncate">
                   {weather?.alertMessage || 'Kualitas udara ISPU dalam kondisi Sehat dan kondusif.'}
                 </span>
               </div>
-              <span className="text-[9px] text-slate-400 font-bold shrink-0 ml-2">
+              <span className="text-xs text-slate-400 font-bold shrink-0 ml-2">
                 PM2.5: {weather?.pm2_5 ? `${weather.pm2_5} µg/m³` : 'Normal'}
               </span>
             </div>
@@ -672,19 +766,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="w-11 h-11 bg-[#f0f2fe] text-[#4f46e5] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
                 <Users size={20} className="stroke-[2.2]" />
               </div>
-              <span className="hidden xs:block text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Demografi</span>
+              <span className="hidden xs:block text-xs font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Demografi</span>
             </div>
             <div className="space-y-1">
               <div className="flex items-baseline gap-1 md:gap-2">
                 <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{totalResidents}</h3>
-                <span className="text-[10px] md:text-xs font-extrabold text-slate-400 uppercase">Jiwa</span>
+                <span className="text-xs md:text-xs font-extrabold text-slate-400 uppercase">Jiwa</span>
               </div>
               <div className="flex items-baseline gap-1 md:gap-2">
                 <h3 className="text-sm md:text-base font-extrabold text-[#4f46e5] font-mono">{occupiedHouses}</h3>
-                <span className="text-[10px] md:text-xs font-bold text-slate-400">KK Terdaftar</span>
+                <span className="text-xs md:text-xs font-bold text-slate-400">KK Terdaftar</span>
               </div>
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-500">
+            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
               <span className="text-emerald-600 font-extrabold flex items-center gap-1"><CheckCircle2 size={12} /> Terverifikasi</span>
               <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-indigo-600 transition-all" />
             </div>
@@ -698,12 +792,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="w-11 h-11 bg-[#e8faf0] text-[#059669] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
                 <DollarSign size={20} className="stroke-[2.2]" />
               </div>
-              <span className="hidden xs:block text-[10px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Saldo Kas</span>
+              <span className="hidden xs:block text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Saldo Kas</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
               <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">Rp{(balance / 1000000).toFixed(1)}jt</h3>
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px]">
+            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
               <span className="text-emerald-600 font-extrabold flex items-center gap-0.5"><TrendingUp size={12} /> +{(income / 1000000).toFixed(1)}jt</span>
               <span className="text-rose-500 font-bold flex items-center gap-0.5"><TrendingDown size={12} /> -{(expense / 1000000).toFixed(1)}jt</span>
             </div>
@@ -717,13 +811,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="w-11 h-11 bg-[#fff1f2] text-[#e11d48] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
                 <AlertTriangle size={20} className="stroke-[2.2]" />
               </div>
-              <span className="hidden xs:block text-[10px] font-extrabold text-rose-700 bg-rose-50 border border-rose-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Aduan</span>
+              <span className="hidden xs:block text-xs font-extrabold text-rose-700 bg-rose-50 border border-rose-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Aduan</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
               <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{newReports}</h3>
-              <span className="text-[10px] md:text-xs font-extrabold text-rose-600 uppercase">Perlu Tindakan</span>
+              <span className="text-xs md:text-xs font-extrabold text-rose-600 uppercase">Perlu Tindakan</span>
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-rose-500">
+            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-500">
               <span className="flex items-center gap-1"><Activity size={12} className="animate-pulse" /> Tindak Lanjut</span>
               <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-rose-600 transition-all" />
             </div>
@@ -737,13 +831,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="w-11 h-11 bg-[#fff4eb] text-[#ea580c] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
                 <ShieldAlert size={20} className="stroke-[2.2]" />
               </div>
-              <span className="hidden xs:block text-[10px] font-extrabold text-amber-700 bg-amber-50 border border-amber-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Log Tamu</span>
+              <span className="hidden xs:block text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Log Tamu</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
               <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{activeGuests}</h3>
-              <span className="text-[10px] md:text-xs font-extrabold text-amber-600 uppercase">Tamu Aktif</span>
+              <span className="text-xs md:text-xs font-extrabold text-amber-600 uppercase">Tamu Aktif</span>
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-amber-600">
+            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
               <span className="flex items-center gap-1"><Clock size={12} /> Wajib 1x24 Jam</span>
               <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-amber-600 transition-all" />
             </div>
@@ -757,11 +851,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="w-11 h-11 bg-[#edf7ff] text-[#0284c7] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
                 <Trash2 size={20} className="stroke-[2.2]" />
               </div>
-              <span className="hidden xs:block text-[10px] font-extrabold text-sky-700 bg-sky-50 border border-sky-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Retribusi</span>
+              <span className="hidden xs:block text-xs font-extrabold text-sky-700 bg-sky-50 border border-sky-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Retribusi</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
               <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{wastePaymentPercentage}%</h3>
-              <span className="text-[10px] md:text-xs font-extrabold text-sky-600 uppercase">Tercapai</span>
+              <span className="text-xs md:text-xs font-extrabold text-sky-600 uppercase">Tercapai</span>
             </div>
             {/* Visual Progress Bar */}
             <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden mt-2">
@@ -770,7 +864,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 style={{ width: `${Math.min(wastePaymentPercentage, 100)}%` }} 
               />
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-sky-600">
+            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600">
               <span>{paidWasteCount} dari {totalOccupiedHouses} Rumah</span>
               <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-sky-600 transition-all" />
             </div>
@@ -788,7 +882,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <h3 className="text-base md:text-lg font-extrabold text-slate-900 tracking-tight">Arus Kas RT</h3>
                 <p className="text-slate-400 text-xs font-semibold mt-0.5">Tren arus transaksi masuk & keluar minggu ini</p>
               </div>
-              <span className="text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full uppercase tracking-wider">Aktual Data</span>
+              <span className="text-xs font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full uppercase tracking-wider">Aktual Data</span>
             </div>
             <div className="h-[200px] sm:h-[240px] md:h-[280px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -831,7 +925,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   </div>
                   <button 
                     onClick={() => onTabChange('health')}
-                    className="text-[10px] font-black text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 px-2.5 py-1 rounded-xl uppercase tracking-wider transition-colors"
+                    className="text-xs font-black text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 px-2.5 py-1 rounded-xl uppercase tracking-wider transition-colors"
                   >
                     Detail
                   </button>
@@ -839,19 +933,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 <div className="grid grid-cols-3 gap-2 my-4">
                   <div className="bg-indigo-50/70 border border-indigo-100 p-3 rounded-2xl text-center">
-                    <p className="text-[10px] font-extrabold text-indigo-600 uppercase">Ibu Hamil</p>
+                    <p className="text-xs font-extrabold text-indigo-600 uppercase">Ibu Hamil</p>
                     <p className="text-xl md:text-2xl font-black text-indigo-900 mt-0.5">
                       {houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0)}
                     </p>
                   </div>
                   <div className="bg-purple-50/70 border border-purple-100 p-3 rounded-2xl text-center">
-                    <p className="text-[10px] font-extrabold text-purple-600 uppercase">Balita</p>
+                    <p className="text-xs font-extrabold text-purple-600 uppercase">Balita</p>
                     <p className="text-xl md:text-2xl font-black text-purple-900 mt-0.5">
                       {houses.reduce((acc, h) => acc + (h.babyCount || 0) + (h.toddlerCount || 0), 0)}
                     </p>
                   </div>
                   <div className="bg-teal-50/70 border border-teal-100 p-3 rounded-2xl text-center">
-                    <p className="text-[10px] font-extrabold text-teal-600 uppercase">Lansia</p>
+                    <p className="text-xs font-extrabold text-teal-600 uppercase">Lansia</p>
                     <p className="text-xl md:text-2xl font-black text-teal-900 mt-0.5">
                       {houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0)}
                     </p>
@@ -886,7 +980,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <h3 className="text-base md:text-lg font-extrabold text-slate-900 tracking-tight">Tingkat Penanganan Aduan</h3>
                     <p className="text-slate-400 text-xs font-semibold mt-0.5">KPI kecepatan respons keluhan warga</p>
                   </div>
-                  <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                  <span className="text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
                     {reports.length > 0 ? `${Math.round((reports.filter(r => r.status === 'Selesai').length / reports.length) * 100)}% Selesai` : '100% Selesai'}
                   </span>
                 </div>
@@ -907,7 +1001,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-slate-500">
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
                 <span>Total Laporan Masuk: <strong className="text-slate-800">{reports.length}</strong></span>
                 <button onClick={() => onTabChange('services')} className="text-indigo-600 hover:text-indigo-700 hover:underline flex items-center gap-1 font-extrabold cursor-pointer">
                   Tindak Lanjut <ArrowRight size={13} />
@@ -924,9 +1018,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="text-base md:text-lg font-extrabold text-slate-900">Persetujuan Tertunda</h3>
-                <p className="text-[11px] font-semibold text-slate-400 mt-0.5">Tindak lanjut registrasi & pengaduan</p>
+                <p className="text-xs font-semibold text-slate-400 mt-0.5">Tindak lanjut registrasi & pengaduan</p>
               </div>
-              <span className="text-[10px] font-extrabold text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
+              <span className="text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
                 {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + 
                  letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length + 
                  guestReports.filter(g => g.status === 'Active' || (g.status as any) === 'Pending').length} Butuh Aksi
@@ -948,10 +1042,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       </div>
                       <div>
                         <h4 className="text-xs font-extrabold text-slate-800 group-hover:text-indigo-700">Registrasi Warga Baru</h4>
-                        <p className="text-[10px] font-medium text-slate-400">Verifikasi berkas calon warga</p>
+                        <p className="text-xs font-medium text-slate-400">Verifikasi berkas calon warga</p>
                       </div>
                     </div>
-                    <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full border ${pendingReg > 0 ? 'bg-indigo-600 text-white border-indigo-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
+                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingReg > 0 ? 'bg-indigo-600 text-white border-indigo-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
                       {pendingReg}
                     </span>
                   </div>
@@ -972,10 +1066,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       </div>
                       <div>
                         <h4 className="text-xs font-extrabold text-slate-800 group-hover:text-violet-700">Pengajuan Surat Pengantar</h4>
-                        <p className="text-[10px] font-medium text-slate-400">Tanda tangan & nomor surat RT</p>
+                        <p className="text-xs font-medium text-slate-400">Tanda tangan & nomor surat RT</p>
                       </div>
                     </div>
-                    <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full border ${pendingLetters > 0 ? 'bg-violet-600 text-white border-violet-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
+                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingLetters > 0 ? 'bg-violet-600 text-white border-violet-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
                       {pendingLetters}
                     </span>
                   </div>
@@ -996,10 +1090,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       </div>
                       <div>
                         <h4 className="text-xs font-extrabold text-slate-800 group-hover:text-amber-700">Laporan Tamu Menginap</h4>
-                        <p className="text-[10px] font-medium text-slate-400">Verifikasi identitas tamu warga</p>
+                        <p className="text-xs font-medium text-slate-400">Verifikasi identitas tamu warga</p>
                       </div>
                     </div>
-                    <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full border ${pendingGuests > 0 ? 'bg-amber-600 text-white border-amber-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
+                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingGuests > 0 ? 'bg-amber-600 text-white border-amber-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
                       {pendingGuests}
                     </span>
                   </div>
@@ -1013,11 +1107,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="font-extrabold text-slate-900 tracking-tight text-sm md:text-base">Live Activity Timeline</h3>
-                <p className="text-slate-400 text-[11px] font-semibold mt-0.5">Jejak aktivitas transaksi & sistem</p>
+                <p className="text-slate-400 text-xs font-semibold mt-0.5">Jejak aktivitas transaksi & sistem</p>
               </div>
               <button 
                 onClick={() => onTabChange('audit')} 
-                className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-wider hover:underline cursor-pointer"
+                className="text-xs font-extrabold text-indigo-600 uppercase tracking-wider hover:underline cursor-pointer"
               >
                 Lihat Log
               </button>
@@ -1039,9 +1133,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-0.5">
                         <p className="text-xs font-bold text-slate-800 truncate group-hover:text-indigo-600 transition-colors">{activity.title}</p>
-                        <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-tight ml-2 shrink-0">{formatTimeAgo(activity.time)}</span>
+                        <span className="text-xs font-extrabold text-slate-400 uppercase tracking-tight ml-2 shrink-0">{formatTimeAgo(activity.time)}</span>
                       </div>
-                      <p className="text-[11px] font-medium text-slate-500 truncate">{activity.desc}</p>
+                      <p className="text-xs font-medium text-slate-500 truncate">{activity.desc}</p>
                     </div>
                   </div>
                 );

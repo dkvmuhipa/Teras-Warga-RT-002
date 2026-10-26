@@ -531,7 +531,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <h1 className="text-sm md:text-base font-black text-slate-900 tracking-tight leading-tight">
                           Dashboard Utama
                         </h1>
-                        <p className="text-[10px] md:text-[11px] font-bold text-slate-400 leading-none mt-0.5">
+                        <p className="text-xs md:text-xs font-bold text-slate-400 leading-none mt-0.5">
                           {currentTenant ? `RT ${currentTenant.rt}` : 'RT 02'} • Pusat Kendali Eksekutif
                         </p>
                       </div>
@@ -550,7 +550,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </div>
                     </div>
                     
-                    <div className="sm:hidden flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/70 px-2.5 py-1 rounded-xl text-[11px] font-black text-slate-800 shadow-xs truncate max-w-[130px]">
+                    <div className="sm:hidden flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/70 px-2.5 py-1 rounded-xl text-xs font-black text-slate-800 shadow-xs truncate max-w-[130px]">
                       <CurrentIcon size={12} className="text-indigo-600 stroke-[2.5px] shrink-0" />
                       <span className="truncate">{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
                     </div>
@@ -565,19 +565,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* Live Operational Capsule: WITA Real-Time Clock */}
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-100/70 hover:bg-slate-100/90 border border-slate-200/70 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition-all select-none">
               <Clock size={13} className="text-indigo-600 stroke-[2.5px]" />
-              <span className="font-mono tracking-tight text-slate-800 font-extrabold text-[11px]">
+              <span className="font-mono tracking-tight text-slate-800 font-extrabold text-xs">
                 {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
-              <span className="text-[9px] uppercase font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md">WITA</span>
+              <span className="text-xs uppercase font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md">WITA</span>
             </div>
 
             {/* Live Operational Capsule: Palu City Weather & ISPU KLHK */}
             {weather && (
               <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-sky-50/70 hover:bg-sky-50 border border-sky-100/80 rounded-2xl text-xs font-bold text-sky-900 shadow-2xs transition-all select-none">
                 <Sun size={13} className="text-amber-500 stroke-[2.5px]" />
-                <span className="font-extrabold text-[11px]">{weather.temp}°C</span>
+                <span className="font-extrabold text-xs">{weather.temp}°C</span>
                 <span className="text-sky-200">•</span>
-                <span className="text-[10px] text-sky-800 flex items-center gap-1 font-bold">
+                <span className="text-xs text-sky-800 flex items-center gap-1 font-bold">
                   ISPU <span className="font-black text-emerald-600">{weather.aqi}</span>
                 </span>
               </div>
@@ -592,8 +592,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               >
                 <AlertTriangle size={17} />
                 <div className="hidden sm:block text-left">
-                  <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-0.5 text-rose-100">SOS AKTIF</p>
-                  <p className="text-[11px] font-extrabold leading-none">{activePanicAlerts.length} Laporan</p>
+                  <p className="text-xs font-black uppercase tracking-widest leading-none mb-0.5 text-rose-100">SOS AKTIF</p>
+                  <p className="text-xs font-extrabold leading-none">{activePanicAlerts.length} Laporan</p>
                 </div>
               </button>
             )}
@@ -609,8 +609,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </span>
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Siskamling</p>
-                  <p className="text-[11px] font-black text-slate-700 leading-none">{activePatrol.officerName} • {Math.round((activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100)}%</p>
+                  <p className="text-xs font-black text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Siskamling</p>
+                  <p className="text-xs font-black text-slate-700 leading-none">{activePatrol.officerName} • {Math.round((activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100)}%</p>
                 </div>
               </div>
             )}
@@ -623,7 +623,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             >
               <Search size={14} className="group-hover:text-indigo-600 transition-colors stroke-[2.2px]" />
               <span className="text-slate-500 font-medium">Cari modul atau aksi...</span>
-              <kbd className="ml-1.5 flex items-center gap-0.5 bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-lg text-[10px] font-black shadow-2xs group-hover:border-indigo-200 group-hover:text-indigo-600">
+              <kbd className="ml-1.5 flex items-center gap-0.5 bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-lg text-xs font-black shadow-2xs group-hover:border-indigo-200 group-hover:text-indigo-600">
                 <Command size={10} /> K
               </kbd>
             </button>
@@ -667,7 +667,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="flex items-center gap-2.5 pl-1">
                 <div className="hidden md:block text-right">
                   <p className="text-xs font-black text-slate-900 leading-tight">Admin {currentTenant ? currentTenant.name : RT_NAME}</p>
-                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-wider mt-0.5">{role}</p>
+                  <p className="text-xs font-black text-emerald-600 uppercase tracking-wider mt-0.5">{role}</p>
                 </div>
                 <div className="relative group">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">
@@ -695,10 +695,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="min-h-[400px] flex flex-col items-center justify-center bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 font-sans">
                     <div className="relative flex items-center justify-center mb-4">
                       <div className="w-14 h-14 border-3 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
-                      <div className="absolute text-indigo-600 animate-pulse text-[10px] font-black">RT02</div>
+                      <div className="absolute text-indigo-600 animate-pulse text-xs font-black">RT02</div>
                     </div>
                     <h3 className="text-slate-800 font-black text-xs tracking-widest uppercase">Memuat Modul</h3>
-                    <p className="text-slate-400 text-[10px] mt-1 font-bold">Mengoptimalkan data operasional...</p>
+                    <p className="text-slate-400 text-xs mt-1 font-bold">Mengoptimalkan data operasional...</p>
                   </div>
                 }>
                   {renderContent()}
@@ -723,7 +723,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   }`}
                 >
                   <Icon size={20} className={isActive ? 'stroke-[2.2px] text-indigo-600' : 'stroke-[1.8px] text-slate-400'} />
-                  <span className={`text-[10px] tracking-tight mt-1 leading-tight ${isActive ? 'text-indigo-600 font-bold' : 'text-slate-500'}`}>
+                  <span className={`text-xs tracking-tight mt-1 leading-tight ${isActive ? 'text-indigo-600 font-bold' : 'text-slate-500'}`}>
                     {item.label}
                   </span>
                 </button>
@@ -775,7 +775,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <Trash2 size={15} />
                     </button>
                   ) : (
-                    <kbd className="text-[10px] font-black uppercase text-slate-400 bg-white border border-slate-200 px-2 py-1 rounded-lg shadow-2xs">
+                    <kbd className="text-xs font-black uppercase text-slate-400 bg-white border border-slate-200 px-2 py-1 rounded-lg shadow-2xs">
                       ESC
                     </kbd>
                   )}
@@ -785,7 +785,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="max-h-[60vh] overflow-y-auto p-3 space-y-4 custom-scrollbar">
                   {/* Modul Navigasi */}
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-3 mb-1.5">
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-wider px-3 mb-1.5">
                       Modul Sistem ({allowedItems.filter(item => 
                         item.label.toLowerCase().includes(spotlightQuery.toLowerCase()) || 
                         item.desc.toLowerCase().includes(spotlightQuery.toLowerCase())
@@ -821,7 +821,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 </div>
                                 <div>
                                   <p className="text-xs md:text-sm font-black text-slate-800">{item.label}</p>
-                                  <p className="text-[11px] text-slate-400 font-medium line-clamp-1">{item.desc}</p>
+                                  <p className="text-xs text-slate-400 font-medium line-clamp-1">{item.desc}</p>
                                 </div>
                               </div>
                               <CornerDownLeft size={14} className="text-slate-300 shrink-0" />
@@ -833,7 +833,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   {/* Quick Shortcuts / Fast Actions */}
                   <div className="pt-2 border-t border-slate-100">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-3 mb-1.5">
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-wider px-3 mb-1.5">
                       Pintasan Eksekutif
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -870,18 +870,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
 
                 {/* Footer Tips */}
-                <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-bold">
+                <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-bold">
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1">
-                      <kbd className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-[9px] font-black text-slate-500">↑↓</kbd>
+                      <kbd className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-xs font-black text-slate-500">↑↓</kbd>
                       Navigasi
                     </span>
                     <span className="flex items-center gap-1">
-                      <kbd className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-[9px] font-black text-slate-500">↵</kbd>
+                      <kbd className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-xs font-black text-slate-500">↵</kbd>
                       Pilih
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-400">Pusat Komando RT 02 / RW 020 Huntap Tondo 2</span>
+                  <span className="text-xs text-slate-400">Pusat Komando RT 02 / RW 020 Huntap Tondo 2</span>
                 </div>
               </motion.div>
             </div>
