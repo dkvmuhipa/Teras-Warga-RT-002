@@ -41,7 +41,7 @@ export const SpotlightAgenda: React.FC<SpotlightAgendaProps> = ({ announcements 
   };
 
   return (
-    <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 rounded-[2.8rem] p-7 md:p-10 text-white border border-indigo-500/30 shadow-2xl relative overflow-hidden group">
+    <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 rounded-3xl md:rounded-[2.8rem] p-5 sm:p-7 md:p-10 text-white border border-indigo-500/30 shadow-2xl relative overflow-hidden group">
       <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-1000" />
       
       <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">

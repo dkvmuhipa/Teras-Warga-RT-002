@@ -473,7 +473,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
 
         {/* 4 Primary Pastel Feature Cards in a 4-Column Grid matching reference */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3.5">
           {/* Card 1: Data Warga (Lavender) */}
           <motion.div
             whileHover={{ y: -2, scale: 1.02 }}
@@ -758,7 +758,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3 md:gap-4">
         {/* Warga Card */}
         <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
           <div className="relative z-10">

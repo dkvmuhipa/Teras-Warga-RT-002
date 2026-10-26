@@ -51,7 +51,7 @@ export const HouseBillChecker: React.FC<HouseBillCheckerProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Kas & Iuran Info Card */}
-      <div className="md:col-span-1 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 p-8 rounded-[3rem] text-white shadow-2xl shadow-slate-200 relative overflow-hidden group">
+      <div className="md:col-span-1 bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[3rem] text-white shadow-2xl shadow-slate-200 relative overflow-hidden group">
         <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
           <Droplets size={140} />
         </div>
@@ -123,7 +123,7 @@ export const HouseBillChecker: React.FC<HouseBillCheckerProps> = ({
       </div>
 
       {/* Cek Tagihan Form Card */}
-      <div className="md:col-span-2 bg-white/80 backdrop-blur-md p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-indigo-500/5 flex flex-col justify-between group">
+      <div className="md:col-span-2 bg-white/80 backdrop-blur-md p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[3rem] border border-slate-100 shadow-xl shadow-indigo-500/5 flex flex-col justify-between group">
         <div className="flex items-center justify-between mb-6">
           <div>
             <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-1">Status Pembayaran</p>
@@ -154,7 +154,7 @@ export const HouseBillChecker: React.FC<HouseBillCheckerProps> = ({
               ))}
             </div>
 
-            <form onSubmit={handleCheckStatus} className="flex gap-3">
+            <form onSubmit={handleCheckStatus} className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
               <label htmlFor="house-number-input" className="sr-only">Nomor Rumah</label>
               <input 
                 id="house-number-input"

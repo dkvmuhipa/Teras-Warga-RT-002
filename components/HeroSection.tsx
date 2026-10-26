@@ -84,7 +84,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
         <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-amber-100/60 via-orange-100/30 to-transparent rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[550px] h-[550px] bg-gradient-to-tr from-emerald-100/50 via-teal-100/25 to-transparent rounded-full blur-3xl pointer-events-none" />
         
-        <div className="relative w-full px-6 py-8 sm:px-10 md:px-12 lg:px-14 xl:px-16 md:py-12 lg:py-14 flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12 z-10">
+        <div className="relative w-full px-4 py-6 sm:px-8 md:px-12 lg:px-14 xl:px-16 md:py-12 lg:py-14 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 md:gap-12 z-10">
           <div className="text-center lg:text-left max-w-3xl xl:max-w-4xl z-10 w-full space-y-4 md:space-y-6">
             {/* Wilayah Badge with Dual Chips */}
             <motion.div 
@@ -111,7 +111,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="text-3xl md:text-5xl lg:text-6xl font-sans font-black leading-tight tracking-tight text-slate-900"
+                className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-sans font-black leading-tight tracking-tight text-slate-900"
               >
                 TERAS WARGA <br className="hidden md:block"/>
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 font-serif italic font-bold">
@@ -183,7 +183,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
               initial={{ y: 15, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.55 }}
-              className="flex flex-row flex-wrap items-center justify-center lg:justify-start gap-3 w-full pt-1"
+              className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-2.5 sm:gap-3 w-full pt-1"
             >
               <button 
                 onClick={onExplore}
@@ -265,10 +265,10 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                 {/* 4 Weather Parameter Cards Grid with Pastel System */}
                 <div 
                   onClick={() => setIsWeatherModalOpen(true)}
-                  className="grid grid-cols-2 gap-3 cursor-pointer group/grid"
+                  className="grid grid-cols-2 gap-2 sm:gap-3 cursor-pointer group/grid"
                   title="Klik untuk melihat detail stasiun cuaca & kualitas udara lengkap"
                 >
-                  <div className="flex items-center gap-3 p-3.5 bg-[#fff1f2] border border-rose-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 bg-[#fff1f2] border border-rose-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                     <div className="w-10 h-10 bg-white text-[#e11d48] rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
                       <Thermometer size={17} className="stroke-[2.5]" />
                     </div>
@@ -278,7 +278,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3 p-3.5 bg-[#e8faf0] border border-emerald-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 bg-[#e8faf0] border border-emerald-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                     <div className="w-10 h-10 bg-white text-[#059669] rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
                       <WindIcon size={17} className="stroke-[2.5]" />
                     </div>
@@ -288,7 +288,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3.5 bg-[#edf7ff] border border-sky-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 bg-[#edf7ff] border border-sky-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                     <div className="w-10 h-10 bg-white text-[#0284c7] rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
                       <Droplets size={17} className="stroke-[2.5]" />
                     </div>
@@ -298,7 +298,7 @@ export const HeroSection = ({ onExplore }: HeroSectionProps) => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 p-3.5 bg-[#f0f2fe] border border-indigo-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+                  <div className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3.5 bg-[#f0f2fe] border border-indigo-100/80 rounded-2xl hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                     <div className="w-10 h-10 bg-white text-[#4f46e5] rounded-xl flex items-center justify-center shrink-0 shadow-2xs">
                       <Cloud size={17} className="stroke-[2.5]" />
                     </div>

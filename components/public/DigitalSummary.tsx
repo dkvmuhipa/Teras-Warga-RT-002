@@ -27,7 +27,7 @@ export const DigitalSummary = () => {
             className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
             {/* Upcoming Activities Card */}
-            <div className="lg:col-span-2 bg-white/80 backdrop-blur-md p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-indigo-500/5 relative overflow-hidden group">
+            <div className="lg:col-span-2 bg-white/80 backdrop-blur-md p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[3rem] border border-slate-100 shadow-xl shadow-indigo-500/5 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl opacity-50 group-hover:opacity-100 transition-opacity" />
                 
                 <div className="relative z-10">
@@ -82,7 +82,7 @@ export const DigitalSummary = () => {
             </div>
 
             {/* Health & Posyandu Card */}
-            <div className="bg-emerald-600 p-8 rounded-[3rem] text-white shadow-xl shadow-emerald-600/20 relative overflow-hidden group cursor-pointer" onClick={() => navigate('/kesehatan')}>
+            <div className="bg-emerald-600 p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[3rem] text-white shadow-xl shadow-emerald-600/20 relative overflow-hidden group cursor-pointer" onClick={() => navigate('/kesehatan')}>
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
                 
                 <div className="relative z-10 h-full flex flex-col justify-between">

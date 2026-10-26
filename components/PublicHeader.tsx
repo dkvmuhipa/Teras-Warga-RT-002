@@ -280,7 +280,7 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
-                className="lg:hidden absolute left-0 right-0 top-full bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-2xl z-[100] max-h-[calc(100vh-5rem)] overflow-y-auto p-4 sm:p-6"
+                className="lg:hidden absolute left-0 right-0 top-full bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-2xl z-[100] max-h-[calc(100dvh-5rem)] pb-12 sm:pb-6 overflow-y-auto p-4 sm:p-6"
               >
                 {/* Mobile Tenant Switcher banner */}
                 <div className="mb-4 p-3 bg-slate-50 border border-slate-200/90 rounded-2xl flex items-center justify-between">

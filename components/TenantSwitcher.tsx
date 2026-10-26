@@ -72,9 +72,9 @@ export const TenantSwitcher: React.FC<TenantSwitcherProps> = ({
           className="w-2 h-2 rounded-full shrink-0"
           style={{ backgroundColor: currentTenant.themeColor || '#2563EB' }}
         />
-        <span className="tracking-tight">
+        <span className="tracking-tight truncate max-w-[130px] sm:max-w-none">
           {currentTenant.rt ? `RT ${currentTenant.rt}` : currentTenant.name}
-          <span className="font-semibold text-slate-400 ml-1">• {currentTenant.kelurahan}</span>
+          <span className="font-semibold text-slate-400 ml-1 hidden sm:inline">• {currentTenant.kelurahan}</span>
         </span>
       </div>
     );

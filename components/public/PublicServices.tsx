@@ -891,14 +891,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="max-w-6xl mx-auto px-4 py-8 mb-24 font-sans"
+      className="max-w-6xl mx-auto px-3.5 sm:px-4 py-6 sm:py-8 mb-24 font-sans"
     >
       {/* Clean Modern Hero Section dengan Animasi Soft Floating */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative bg-white rounded-[2.5rem] p-8 md:p-12 text-slate-900 border border-slate-200/70 shadow-sm mb-10 overflow-hidden"
+        className="relative bg-white rounded-3xl md:rounded-[2.5rem] p-5 sm:p-8 md:p-12 text-slate-900 border border-slate-200/70 shadow-sm mb-6 sm:mb-10 overflow-hidden"
       >
         {/* Animated Background Glow Orbs */}
         <motion.div 
@@ -949,7 +949,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.4 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 max-w-3xl mx-auto text-left"
+            className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 pt-3 max-w-3xl mx-auto text-left"
           >
             {[
               { label: 'Estimasi Selesai', icon: Clock, desc: '1x24 Jam Kerja', bg: 'bg-[#f0f2fe]', border: 'border-indigo-100/80', iconColor: 'text-[#4f46e5]', labelColor: 'text-[#4f46e5]' },

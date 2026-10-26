@@ -19,7 +19,7 @@ export const NightPatrolWidget: React.FC<NightPatrolWidgetProps> = ({ ronda, act
   const todayRonda = ronda.find((r) => r.day === today);
 
   return (
-    <div className="bg-slate-950 text-white p-7 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-950/20 relative overflow-hidden group border border-white/10">
+    <div className="bg-slate-950 text-white p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-xl shadow-slate-950/20 relative overflow-hidden group border border-white/10">
       <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity duration-700 rotate-12 pointer-events-none">
         <Moon size={140} />
       </div>

@@ -504,7 +504,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Executive Command Center Top Bar */}
-        <header className="h-16 md:h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+        <header className="h-15 sm:h-16 md:h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 px-3 sm:px-6 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
           <div className="flex items-center gap-3 md:gap-5">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
@@ -681,8 +681,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-32 custom-scrollbar">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-8 pb-24 md:pb-32 custom-scrollbar">
+          <div className="max-w-7xl 2xl:max-w-screen-2xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}

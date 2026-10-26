@@ -194,7 +194,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
   }, [quickActions, activeCategory]);
 
   return (
-    <div className="bg-white border border-slate-100 rounded-3xl md:rounded-[2.5rem] p-5 sm:p-7 md:p-8 shadow-xs relative z-10">
+    <div className="bg-white border border-slate-100 rounded-3xl md:rounded-[2.5rem] p-4 sm:p-6 md:p-8 shadow-xs relative z-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-7">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
@@ -240,7 +240,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
       </div>
 
       {/* Grid layout */}
-      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-6 gap-x-2.5 sm:gap-x-4 md:gap-x-6 w-full max-w-6xl">
+      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-y-5 sm:gap-y-6 gap-x-2 sm:gap-x-4 md:gap-x-6 w-full">
         {filteredQuickActions.map((action) => (
           <motion.button
             key={action.label}
@@ -261,7 +261,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
             )}
 
             <div className={`
-              w-13 h-13 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl md:rounded-3xl
+              w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-2xl md:rounded-3xl
               ${action.bg} ${action.color} border ${action.border}
               flex items-center justify-center
               shadow-2xs group-hover:scale-105 group-hover:shadow-xs
@@ -270,7 +270,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
               <action.icon size={22} className="group-hover:scale-110 transition-transform duration-200 stroke-[2.2]" />
             </div>
 
-            <span className="font-extrabold text-slate-700 text-[10px] sm:text-[11px] md:text-xs tracking-tight leading-snug mt-2 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[80px] md:max-w-none">
+            <span className="font-extrabold text-slate-700 text-[10px] sm:text-[11px] md:text-xs tracking-tight leading-snug mt-1.5 sm:mt-2 group-hover:text-indigo-600 transition-colors line-clamp-2 max-w-[70px] sm:max-w-[80px] md:max-w-none">
               {action.label}
             </span>
           </motion.button>

@@ -70,14 +70,14 @@ export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, let
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-2">Transparansi Layanan</p>
-          <h2 className="text-4xl font-black text-slate-900 tracking-tighter">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
             Kinerja <span className="italic font-serif text-indigo-600">Pengurus</span>
           </h2>
           <p className="text-slate-500 text-sm font-medium mt-2 max-w-xl">
             Data real-time efektivitas layanan administrasi dan penanganan laporan warga di lingkungan RT 02.
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex flex-col items-start md:items-end gap-2">
           <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-2xl border border-emerald-100">
             <Activity size={14} className="animate-pulse" />
             <span className="text-[10px] font-black uppercase tracking-widest">Sistem Aktif</span>
@@ -88,21 +88,21 @@ export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, let
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {stats.map((stat, idx) => (
           <motion.div
             key={idx}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="bg-white/95 backdrop-blur-md p-8 rounded-[2.5rem] border border-slate-100/90 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 group relative overflow-hidden flex flex-col justify-between"
+            className="bg-white/95 backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-[2.5rem] border border-slate-100/90 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-300 group relative overflow-hidden flex flex-col justify-between"
           >
             {/* Top Accent Gradient Circle */}
             <div className={`absolute top-0 right-0 w-32 h-32 ${stat.bg} opacity-40 rounded-full -mr-12 -mt-12 group-hover:scale-125 transition-transform duration-700 blur-xl pointer-events-none`} />
             
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
-                <div className={`w-14 h-14 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center group-hover:rotate-6 group-hover:scale-110 transition-all duration-300 shadow-md shadow-slate-100 border border-white/60`}>
+              <div className="flex items-center justify-between mb-3 sm:mb-6">
+                <div className={`w-11 h-11 sm:w-14 sm:h-14 ${stat.bg} ${stat.color} rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:rotate-6 group-hover:scale-110 transition-all duration-300 shadow-md shadow-slate-100 border border-white/60`}>
                   <stat.icon size={26} strokeWidth={2.4} />
                 </div>
                 <span className="text-[9px] font-black uppercase tracking-widest px-2.5 py-1 bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 rounded-full border border-slate-100 transition-colors">
@@ -110,7 +110,7 @@ export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, let
                 </span>
               </div>
 
-              <h3 className="text-5xl font-black text-slate-900 mb-2 tracking-tighter tabular-nums group-hover:text-indigo-600 transition-colors">
+              <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-1.5 sm:mb-2 tracking-tighter tabular-nums group-hover:text-indigo-600 transition-colors">
                 {stat.value}
               </h3>
               <p className="text-xs font-black text-slate-800 uppercase tracking-wider mb-1.5">

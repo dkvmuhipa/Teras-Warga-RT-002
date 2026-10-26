@@ -17,16 +17,16 @@ export const AnnouncementsFeed: React.FC<AnnouncementsFeedProps> = ({ announceme
   return (
     <div className="space-y-6">
       {/* Editorial Header & Filter Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 backdrop-blur-md p-6 rounded-[2.5rem] border border-slate-100/90 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white/80 backdrop-blur-md p-4 sm:p-6 rounded-3xl md:rounded-[2.5rem] border border-slate-100/90 shadow-sm">
         <div>
           <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] mb-1">Update Terkini</p>
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
             Warta <span className="italic font-serif text-indigo-600">Warga</span>
           </h2>
         </div>
         
         {/* Filter Tabs */}
-        <div className="flex bg-slate-100/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/80 shrink-0 overflow-x-auto no-scrollbar">
+        <div className="flex bg-slate-100/80 backdrop-blur-sm p-1.5 rounded-2xl border border-slate-200/80 shrink-0 overflow-x-auto no-scrollbar w-full sm:w-auto">
           {[
             { id: 'All', label: 'Semua' },
             { id: 'Lelayu', label: 'Lelayu / Duka' },
@@ -60,7 +60,7 @@ export const AnnouncementsFeed: React.FC<AnnouncementsFeedProps> = ({ announceme
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.08 }}
               whileHover={{ y: -3 }}
-              className={`backdrop-blur-md p-7 rounded-[2.5rem] border shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden ${
+              className={`backdrop-blur-md p-4 sm:p-6 md:p-7 rounded-3xl md:rounded-[2.5rem] border shadow-md hover:shadow-xl transition-all duration-300 group relative overflow-hidden ${
                 isLelayu 
                   ? 'bg-slate-900 text-white border-slate-800 shadow-slate-900/20' 
                   : 'bg-white/95 border-slate-100/90 shadow-indigo-500/5'

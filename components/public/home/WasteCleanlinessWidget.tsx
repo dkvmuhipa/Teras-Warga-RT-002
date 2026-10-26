@@ -16,7 +16,7 @@ export const WasteCleanlinessWidget: React.FC<WasteCleanlinessWidgetProps> = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
       {/* Widget 1: Jadwal & Count Down Pengangkutan Sampah */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden group flex flex-col justify-between">
+      <div className="bg-white p-4 sm:p-6 md:p-8 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden group flex flex-col justify-between">
         <div className="relative z-10 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 px-3 py-1 bg-[#e8faf0] text-[#059669] rounded-full border border-emerald-100/80">
@@ -37,7 +37,7 @@ export const WasteCleanlinessWidget: React.FC<WasteCleanlinessWidgetProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-1">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 gap-2 sm:gap-3 pt-1">
             <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-1">
               <p className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider">Organik / Dapur</p>
               <p className="text-sm font-extrabold text-slate-800">Senin, Rabu, Sabtu</p>

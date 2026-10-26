@@ -103,7 +103,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-6 sm:py-8 space-y-12 mb-24 relative"
+      className="w-full max-w-screen-2xl mx-auto px-3.5 sm:px-6 lg:px-8 xl:px-12 py-4 sm:py-6 md:py-8 space-y-8 sm:space-y-10 md:space-y-12 mb-24 relative"
     >
       {/* Background Ambient Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden pointer-events-none">
@@ -159,7 +159,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       {/* Modern Live Info Marquee Banner */}
       <motion.div 
         variants={itemVariants} 
-        className="bg-white/90 backdrop-blur-md rounded-3xl p-4 border border-slate-200/80 shadow-xs text-slate-800 flex flex-col md:flex-row items-center justify-between gap-3 overflow-hidden"
+        className="bg-white/90 backdrop-blur-md rounded-2xl sm:rounded-3xl p-3 sm:p-4 border border-slate-200/80 shadow-xs text-slate-800 flex flex-col md:flex-row items-center justify-between gap-3 overflow-hidden"
       >
         <div className="flex items-center gap-2.5 shrink-0 px-2">
           <span className="flex h-2.5 w-2.5 relative">
@@ -226,7 +226,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           whileHover={{ y: -4, scale: 1.01 }}
           transition={{ type: "spring", stiffness: 300, damping: 20 }}
           onClick={() => navigate('/rules')}
-          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 md:p-10 text-white border border-slate-800 shadow-xs relative overflow-hidden group flex flex-col justify-between min-h-[300px]"
+          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-5 sm:p-8 md:p-10 text-white border border-slate-800 shadow-xs relative overflow-hidden group flex flex-col justify-between min-h-[260px] sm:min-h-[300px]"
         >
           <div className="relative z-10 space-y-5">
             <div className="flex justify-between items-start gap-4">
@@ -275,7 +275,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         {/* Companion Card: Buku Saku Warga Baru */}
         <div 
           onClick={() => navigate('/welcome')}
-          className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs hover:shadow-md transition-all relative overflow-hidden group flex flex-col justify-between min-h-[300px]"
+          className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-5 sm:p-8 border border-slate-100 shadow-xs hover:shadow-md transition-all relative overflow-hidden group flex flex-col justify-between min-h-[260px] sm:min-h-[300px]"
         >
           <div className="relative z-10 space-y-4">
             <div className="flex items-center gap-3">
@@ -362,7 +362,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       {/* 10. Gallery Warga */}
-      <motion.div variants={itemVariants} className="bg-white/80 backdrop-blur-md p-8 rounded-[3rem] border border-white/50 shadow-2xl shadow-indigo-500/5 group">
+      <motion.div variants={itemVariants} className="bg-white/80 backdrop-blur-md p-4 sm:p-6 md:p-8 rounded-3xl md:rounded-[3rem] border border-white/50 shadow-2xl shadow-indigo-500/5 group">
         <div className="flex items-center justify-between mb-8 px-2">
           <h3 className="text-xl font-black text-slate-800 tracking-tight">Galeri <span className="text-indigo-600 italic font-serif">Warga</span></h3>
           <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
