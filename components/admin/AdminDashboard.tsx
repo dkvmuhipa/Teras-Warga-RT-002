@@ -504,34 +504,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Executive Command Center Top Bar */}
-        <header className="h-15 sm:h-16 md:h-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/70 px-3 sm:px-6 md:px-8 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-          <div className="flex items-center gap-3 md:gap-5">
+        <header className="h-14 sm:h-16 md:h-18 bg-white/90 backdrop-blur-xl border-b border-slate-200/70 px-3 sm:px-5 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs gap-2 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="md:hidden p-2 hover:bg-slate-100 rounded-2xl transition-colors text-slate-600"
+              className="md:hidden p-2 hover:bg-slate-100 rounded-2xl transition-colors text-slate-600 shrink-0"
               aria-label="Buka Menu Navigasi"
             >
               <Menu size={20} />
             </button>
             
-            <div className="flex items-center gap-3">
-              <Logo showText={true} imageSize="h-8 md:h-10" className="hidden sm:flex" />
-              <div className="h-6 w-px bg-slate-200/80 hidden sm:block"></div>
+            {/* Mobile-only compact logo (Desktop has full logo in persistent sidebar) */}
+            <div className="flex md:hidden items-center shrink-0">
+              <Logo showText={false} imageSize="h-7 sm:h-8" />
+            </div>
+
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               {(() => {
                 const currentNavItem = navItemsList.find(item => item.id === activeTab);
                 const CurrentIcon = currentNavItem?.icon || LayoutGrid;
                 
                 if (activeTab === 'overview') {
                   return (
-                    <div className="flex items-center gap-2.5">
+                    <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                       <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-2xs shrink-0">
                         <LayoutGrid size={18} className="stroke-[2.5px]" />
                       </div>
-                      <div>
-                        <h1 className="text-sm md:text-base font-black text-slate-900 tracking-tight leading-tight">
+                      <div className="min-w-0">
+                        <h1 className="text-xs sm:text-sm md:text-base font-black text-slate-900 tracking-tight leading-tight truncate">
                           Dashboard Utama
                         </h1>
-                        <p className="text-xs md:text-xs font-bold text-slate-400 leading-none mt-0.5">
+                        <p className="text-[10px] sm:text-xs font-bold text-slate-400 leading-none mt-0.5 truncate hidden sm:block">
                           {currentTenant ? `RT ${currentTenant.rt}` : 'RT 02'} • Pusat Kendali Eksekutif
                         </p>
                       </div>
@@ -540,41 +543,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 }
 
                 return (
-                  <>
-                    <div className="hidden sm:flex items-center gap-2.5 text-xs md:text-sm font-black text-slate-400">
-                      <span className="text-slate-500 font-extrabold">Executive Command</span>
-                      <span className="text-slate-300 font-normal">/</span>
-                      <div className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/70 px-3 py-1.5 rounded-2xl text-xs font-black text-slate-800 shadow-xs">
-                        <CurrentIcon size={13} className="text-indigo-600 stroke-[2.5px] shrink-0" />
-                        <span>{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
-                      </div>
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs md:text-sm font-black text-slate-400 min-w-0">
+                    <span className="hidden xl:inline text-slate-500 font-extrabold whitespace-nowrap shrink-0">Executive Command</span>
+                    <span className="hidden xl:inline text-slate-300 font-normal shrink-0">/</span>
+                    <div className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/70 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-2xl text-xs font-black text-slate-800 shadow-xs whitespace-nowrap min-w-0">
+                      <CurrentIcon size={13} className="text-indigo-600 stroke-[2.5px] shrink-0" />
+                      <span className="truncate max-w-[120px] sm:max-w-[180px] md:max-w-none">{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
                     </div>
-                    
-                    <div className="sm:hidden flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/70 px-2.5 py-1 rounded-xl text-xs font-black text-slate-800 shadow-xs truncate max-w-[130px]">
-                      <CurrentIcon size={12} className="text-indigo-600 stroke-[2.5px] shrink-0" />
-                      <span className="truncate">{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
-                    </div>
-                  </>
+                  </div>
                 );
               })()}
             </div>
           </div>
 
           {/* Center / Right Operational Capsule & Controls */}
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
             {/* Live Operational Capsule: WITA Real-Time Clock */}
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-100/70 hover:bg-slate-100/90 border border-slate-200/70 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition-all select-none">
-              <Clock size={13} className="text-indigo-600 stroke-[2.5px]" />
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100/70 hover:bg-slate-100/90 border border-slate-200/70 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition-all select-none shrink-0 whitespace-nowrap">
+              <Clock size={13} className="text-indigo-600 stroke-[2.5px] shrink-0" />
               <span className="font-mono tracking-tight text-slate-800 font-extrabold text-xs">
-                {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit' })}
               </span>
-              <span className="text-xs uppercase font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md">WITA</span>
+              <span className="text-[10px] uppercase font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-1 py-0.2 rounded">WITA</span>
             </div>
 
             {/* Live Operational Capsule: Palu City Weather & ISPU KLHK */}
             {weather && (
-              <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 bg-sky-50/70 hover:bg-sky-50 border border-sky-100/80 rounded-2xl text-xs font-bold text-sky-900 shadow-2xs transition-all select-none">
-                <Sun size={13} className="text-amber-500 stroke-[2.5px]" />
+              <div className="hidden 2xl:flex items-center gap-2 px-2.5 py-1.5 bg-sky-50/70 hover:bg-sky-50 border border-sky-100/80 rounded-2xl text-xs font-bold text-sky-900 shadow-2xs transition-all select-none shrink-0 whitespace-nowrap">
+                <Sun size={13} className="text-amber-500 stroke-[2.5px] shrink-0" />
                 <span className="font-extrabold text-xs">{weather.temp}°C</span>
                 <span className="text-sky-200">•</span>
                 <span className="text-xs text-sky-800 flex items-center gap-1 font-bold">
@@ -587,30 +583,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {activePanicAlerts.length > 0 && (
               <button 
                 onClick={() => setActiveTab('facilities')}
-                className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 border border-rose-500 rounded-2xl px-3.5 py-1.5 cursor-pointer animate-pulse shadow-lg shadow-rose-200 text-white transition-colors"
+                className="flex items-center gap-1.5 sm:gap-2 bg-rose-600 hover:bg-rose-700 border border-rose-500 rounded-2xl px-2.5 sm:px-3 py-1.5 cursor-pointer animate-pulse shadow-md shadow-rose-200 text-white transition-colors shrink-0 whitespace-nowrap"
                 title="Ada panggilan darurat aktif!"
               >
-                <AlertTriangle size={17} />
+                <AlertTriangle size={15} className="shrink-0" />
                 <div className="hidden sm:block text-left">
-                  <p className="text-xs font-black uppercase tracking-widest leading-none mb-0.5 text-rose-100">SOS AKTIF</p>
-                  <p className="text-xs font-extrabold leading-none">{activePanicAlerts.length} Laporan</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-0.5 text-rose-100">SOS AKTIF</p>
+                  <p className="text-[11px] font-extrabold leading-none">{activePanicAlerts.length} Laporan</p>
                 </div>
               </button>
             )}
 
             {/* Active Patrol Badge */}
             {activePatrol && (
-              <div className="hidden xl:flex items-center gap-2.5 bg-emerald-50 border border-emerald-100 rounded-2xl px-3.5 py-1.5 shadow-2xs">
-                <div className="relative">
-                  <ShieldCheck size={18} className="text-emerald-600" />
-                  <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+              <div className="hidden 2xl:flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-2xl px-3 py-1.5 shadow-2xs shrink-0 whitespace-nowrap">
+                <div className="relative shrink-0">
+                  <ShieldCheck size={16} className="text-emerald-600" />
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                   </span>
                 </div>
                 <div>
-                  <p className="text-xs font-black text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Siskamling</p>
-                  <p className="text-xs font-black text-slate-700 leading-none">{activePatrol.officerName} • {Math.round((activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100)}%</p>
+                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Siskamling</p>
+                  <p className="text-[11px] font-black text-slate-700 leading-none">{activePatrol.officerName} • {Math.round((activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100)}%</p>
                 </div>
               </div>
             )}
@@ -618,12 +614,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* Spotlight Command Palette Launcher Button */}
             <button
               onClick={() => setIsSpotlightOpen(true)}
-              className="hidden sm:flex items-center gap-2.5 bg-slate-100/70 hover:bg-slate-100 border border-slate-200/70 rounded-2xl px-3.5 py-2 text-slate-500 hover:text-slate-800 text-xs font-semibold shadow-2xs transition-all group"
+              className="hidden sm:flex items-center gap-2 bg-slate-100/70 hover:bg-slate-100 border border-slate-200/70 rounded-2xl px-2.5 md:px-3 py-1.5 md:py-2 text-slate-500 hover:text-slate-800 text-xs font-semibold shadow-2xs transition-all group shrink-0 whitespace-nowrap"
               title="Buka Command Palette (Ctrl+K atau ⌘K)"
             >
-              <Search size={14} className="group-hover:text-indigo-600 transition-colors stroke-[2.2px]" />
-              <span className="text-slate-500 font-medium">Cari modul atau aksi...</span>
-              <kbd className="ml-1.5 flex items-center gap-0.5 bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-lg text-xs font-black shadow-2xs group-hover:border-indigo-200 group-hover:text-indigo-600">
+              <Search size={14} className="group-hover:text-indigo-600 transition-colors stroke-[2.2px] shrink-0" />
+              <span className="hidden xl:inline text-slate-500 font-medium">Cari modul...</span>
+              <span className="xl:hidden text-slate-500 font-medium">Cari</span>
+              <kbd className="ml-1 flex items-center gap-0.5 bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-lg text-[10px] font-black shadow-2xs group-hover:border-indigo-200 group-hover:text-indigo-600 shrink-0">
                 <Command size={10} /> K
               </kbd>
             </button>
@@ -631,7 +628,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* Mobile Search Button */}
             <button
               onClick={() => setIsSpotlightOpen(true)}
-              className="sm:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors"
+              className="sm:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors shrink-0"
               title="Cari Cepat (Ctrl+K)"
               aria-label="Cari Cepat"
             >
@@ -639,20 +636,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </button>
             
             {/* Notification, Support & User Profile */}
-            <div className="flex items-center gap-1.5 md:gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onClick={() => setShowSupportTicketModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
                 title="Buka Pusat Bantuan & Tiket Super Admin"
               >
-                <HelpCircle size={15} className="text-indigo-600" />
-                <span className="hidden sm:inline">Bantuan Super Admin</span>
+                <HelpCircle size={15} className="text-indigo-600 shrink-0" />
+                <span className="hidden md:inline xl:hidden">Bantuan</span>
+                <span className="hidden xl:inline">Bantuan Super Admin</span>
               </button>
 
               <button 
                 onClick={() => setActiveTab('notifications')}
-                className={`p-2 md:p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-all relative ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
+                className={`p-2 sm:p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-all relative shrink-0 ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
                 title="Lihat Notifikasi"
                 aria-label="Notifikasi"
               >
@@ -662,16 +660,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 )}
               </button>
               
-              <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+              <div className="h-6 w-px bg-slate-200 mx-0.5 hidden md:block shrink-0"></div>
               
-              <div className="flex items-center gap-2.5 pl-1">
-                <div className="hidden md:block text-right">
-                  <p className="text-xs font-black text-slate-900 leading-tight">Admin {currentTenant ? currentTenant.name : RT_NAME}</p>
-                  <p className="text-xs font-black text-emerald-600 uppercase tracking-wider mt-0.5">{role}</p>
+              <div className="flex items-center gap-2 sm:gap-2.5 pl-0.5 sm:pl-1 shrink-0">
+                <div className="hidden lg:block text-right min-w-0 max-w-[130px] xl:max-w-[200px]">
+                  <p className="text-xs font-black text-slate-900 leading-tight truncate whitespace-nowrap" title={`Admin ${currentTenant ? currentTenant.name : RT_NAME}`}>
+                    Admin {currentTenant ? currentTenant.name : RT_NAME}
+                  </p>
+                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mt-0.5 truncate whitespace-nowrap">
+                    {role}
+                  </p>
                 </div>
-                <div className="relative group">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">
-                    <User size={17} />
+                <div className="relative group shrink-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">
+                    <User size={16} />
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
                 </div>

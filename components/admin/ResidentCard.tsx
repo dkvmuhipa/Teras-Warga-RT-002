@@ -287,7 +287,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                   title="Hubungi via WhatsApp"
                 >
                   <MessageCircle size={13} className="stroke-[2.5]" />
-                  <span>WhatsApp</span>
+                  <span>WA</span><span className="hidden min-[380px]:inline">tsApp</span>
                 </button>
               )}
             </div>

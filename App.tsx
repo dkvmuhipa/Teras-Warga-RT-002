@@ -493,7 +493,7 @@ export const App = () => {
         
         {/* Persistent Sticky Supervision Mode Banner for Super Admin */}
         {isSupervising && (
-          <div className="sticky top-0 z-[100] bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 px-4 py-2.5 text-xs font-bold flex flex-wrap items-center justify-between gap-2 shadow-md border-b border-amber-500">
+          <div className="sticky top-0 z-[100] bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 text-slate-950 px-3 sm:px-4 py-2 sm:py-2.5 text-xs font-bold flex flex-wrap items-center justify-between gap-2 shadow-md border-b border-amber-500 min-w-0">
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 rounded bg-slate-950 text-amber-300 font-mono text-[10px] uppercase font-black tracking-wider">
                 MODE SUPERVISI READ-ONLY

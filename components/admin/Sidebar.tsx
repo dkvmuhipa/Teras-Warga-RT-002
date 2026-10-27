@@ -9,6 +9,7 @@ import {
 import { Logo } from '../../constants';
 import { Role } from '../../types';
 import { TenantSwitcher } from '../TenantSwitcher';
+import { useTenant } from '../../context/TenantContext';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface SidebarProps {
@@ -202,6 +203,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     return { short: 'RT', full: 'Pengurus RT', bg: 'bg-slate-50 border-slate-200 text-slate-700' };
   };
 
+  const { currentTenant } = useTenant();
   const roleInfo = getRoleBadge();
 
   // Highlight matches in searched text
@@ -263,8 +265,8 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       <motion.aside 
         initial={false}
         animate={{ 
-          width: isCollapsed ? '84px' : '290px',
-          x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 768 ? -290 : 0)
+          width: isCollapsed ? '84px' : '268px',
+          x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth < 768 ? -268 : 0)
         }}
         className={`
           fixed top-0 left-0 z-50 h-full bg-white/95 backdrop-blur-2xl text-slate-700 border-r border-slate-200/80
@@ -446,7 +448,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                   </div>
                   <div className="overflow-hidden">
                     <p className="text-xs font-black text-slate-900 truncate leading-tight mb-0.5">{roleInfo.full}</p>
-                    <p className="text-[10px] font-bold text-slate-400 tracking-wide">Wilayah RT 02 / 020</p>
+                    <p className="text-[10px] font-bold text-slate-400 tracking-wide truncate" title={currentTenant?.name || "Wilayah RT 02 / 020"}>{currentTenant ? currentTenant.name : "Wilayah RT 02 / 020"}</p>
                   </div>
                 </div>
               )}
