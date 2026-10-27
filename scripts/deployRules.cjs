@@ -2,10 +2,39 @@ const { GoogleAuth } = require('google-auth-library');
 const fs = require('fs');
 
 async function deployRules() {
-  const auth = new GoogleAuth({
-    keyFile: './firebase-service-account.json',
-    scopes: ['https://www.googleapis.com/auth/cloud-platform', 'https://www.googleapis.com/auth/firebase']
-  });
+  let auth;
+  const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
+
+  if (serviceAccountVar) {
+    try {
+      let raw = serviceAccountVar.trim();
+      if (!raw.startsWith('{') && !raw.startsWith('[')) {
+        raw = Buffer.from(raw, 'base64').toString('utf8');
+      }
+      const credentials = JSON.parse(raw);
+      auth = new GoogleAuth({
+        credentials,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform', 'https://www.googleapis.com/auth/firebase']
+      });
+      console.log('Using credentials from FIREBASE_SERVICE_ACCOUNT environment variable.');
+    } catch (e) {
+      console.warn('Could not parse FIREBASE_SERVICE_ACCOUNT:', e.message);
+    }
+  }
+
+  if (!auth) {
+    if (!fs.existsSync('./firebase-service-account.json')) {
+      console.error('❌ Service account not found: neither FIREBASE_SERVICE_ACCOUNT env var nor ./firebase-service-account.json file exists.');
+      console.error('💡 To deploy rules via Firebase CLI, run:');
+      console.error('   npx firebase-tools deploy --only firestore:rules');
+      process.exit(1);
+    }
+    auth = new GoogleAuth({
+      keyFile: './firebase-service-account.json',
+      scopes: ['https://www.googleapis.com/auth/cloud-platform', 'https://www.googleapis.com/auth/firebase']
+    });
+  }
+
   const client = await auth.getClient();
   const projectId = 'teras-warga';
   const rulesContent = fs.readFileSync('firestore.rules', 'utf8');

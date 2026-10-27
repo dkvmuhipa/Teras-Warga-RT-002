@@ -425,6 +425,16 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Support Tickets (RT Helpdesk & Super Admin Triage)
+    match /supportTickets/{id} {
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
+    }
+    match /support_tickets/{id} {
+      allow create, read: if true;
+      allow update, delete: if isAdmin();
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;

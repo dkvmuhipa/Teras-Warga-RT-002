@@ -6,7 +6,7 @@ import socketio
 
 from app.config import settings
 from app.services.firebase import init_firebase
-from app.routers import weather, earthquakes, media, whatsapp, push, gemini
+from app.routers import weather, earthquakes, media, whatsapp, push, gemini, admin
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("teras-backend")
@@ -41,6 +41,7 @@ fastapi_app.include_router(media.router)
 fastapi_app.include_router(whatsapp.router)
 fastapi_app.include_router(push.router)
 fastapi_app.include_router(gemini.router)
+fastapi_app.include_router(admin.router)
 
 @fastapi_app.get("/health")
 async def health_check():
