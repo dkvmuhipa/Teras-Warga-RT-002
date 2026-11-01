@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin } from '../_firebaseAdmin';
+import { getFirebaseAdmin, hasFirebaseAdminCredentials } from '../_firebaseAdmin';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -21,6 +21,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'No tokens provided' });
   }
 
+  if (!hasFirebaseAdminCredentials()) {
+    console.warn('⚠️ [Vercel API] Push notification requires FIREBASE_SERVICE_ACCOUNT in Vercel environment.');
+    return res.status(200).json({
+      success: false,
+      warning: 'FIREBASE_SERVICE_ACCOUNT belum dikonfigurasi di Vercel Dashboard.'
+    });
+  }
+
   try {
     const admin = getFirebaseAdmin();
     const response = await admin.messaging().sendEachForMulticast({
@@ -32,6 +40,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({ success: true, response });
   } catch (error: any) {
     console.error('Error sending push notification:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(200).json({
+      success: false,
+      warning: error.message || 'Gagal mengirim push notification di server.'
+    });
   }
 }
