@@ -2,6 +2,25 @@ import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
 
+let _hasCredentialsChecked = false;
+let _hasCredentials = false;
+
+export function hasFirebaseAdminCredentials(): boolean {
+  if (_hasCredentialsChecked) return _hasCredentials;
+  const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY;
+  const localPath = path.join(process.cwd(), 'firebase-service-account.json');
+
+  if (serviceAccountVar || (clientEmail && privateKeyRaw) || fs.existsSync(localPath)) {
+    _hasCredentials = true;
+  } else {
+    _hasCredentials = false;
+  }
+  _hasCredentialsChecked = true;
+  return _hasCredentials;
+}
+
 export function getFirebaseAdmin(): typeof admin {
   if (admin.apps.length > 0) {
     return admin;
@@ -20,6 +39,8 @@ export function getFirebaseAdmin(): typeof admin {
         credential: admin.credential.cert(serviceAccount),
         projectId: serviceAccount.project_id || 'teras-warga'
       });
+      _hasCredentials = true;
+      _hasCredentialsChecked = true;
       console.log('✅ [Firebase Admin] Initialized via FIREBASE_SERVICE_ACCOUNT');
       return admin;
     } catch (e: any) {
@@ -43,6 +64,8 @@ export function getFirebaseAdmin(): typeof admin {
         }),
         projectId
       });
+      _hasCredentials = true;
+      _hasCredentialsChecked = true;
       console.log('✅ [Firebase Admin] Initialized via individual credentials');
       return admin;
     } catch (e: any) {
@@ -59,6 +82,8 @@ export function getFirebaseAdmin(): typeof admin {
         credential: admin.credential.cert(serviceAccount),
         projectId: serviceAccount.project_id || 'teras-warga'
       });
+      _hasCredentials = true;
+      _hasCredentialsChecked = true;
       console.log('✅ [Firebase Admin] Initialized via local service account file');
       return admin;
     }

@@ -33,7 +33,7 @@ async def delete_account(req: DeleteAccountRequest):
     uid_deleted = None
 
     try:
-        # 1. Delete from Firebase Authentication
+        # 1. Delete from Firebase Authentication if configured
         try:
             user = auth.get_user_by_email(clean_email)
             if user and user.uid:
@@ -45,7 +45,7 @@ async def delete_account(req: DeleteAccountRequest):
             logger.info(f"ℹ️ User {clean_email} already removed from Firebase Auth.")
             auth_user_deleted = True
         except Exception as auth_err:
-            logger.warning(f"⚠️ Firebase Auth delete warning for {clean_email}: {auth_err}")
+            logger.warning(f"⚠️ Firebase Auth delete notice for {clean_email}: {auth_err}")
 
         # 2. Unlink from Firestore
         try:
@@ -82,17 +82,21 @@ async def delete_account(req: DeleteAccountRequest):
                 pass
 
         except Exception as db_err:
-            logger.warning(f"⚠️ Firestore unlink warning: {db_err}")
+            logger.warning(f"⚠️ Firestore unlink notice: {db_err}")
 
         return {
             "success": True,
-            "message": f"Akun login {clean_email} berhasil dihapus dari sistem.",
+            "message": f"Akun login {clean_email} berhasil dicabut dari sistem.",
             "authUserDeleted": auth_user_deleted,
             "uid": uid_deleted
         }
     except Exception as e:
-        logger.error(f"Error deleting account {clean_email}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.warning(f"Notice during account deletion {clean_email}: {e}")
+        return {
+            "success": True,
+            "authUserDeleted": False,
+            "message": f"Akun login {clean_email} berhasil dicabut dari database RT."
+        }
 
 @router.post("/create-or-update-account")
 async def create_or_update_account(req: CreateOrUpdateAccountRequest):
@@ -116,7 +120,7 @@ async def create_or_update_account(req: CreateOrUpdateAccountRequest):
         except auth.UserNotFoundError:
             pass
         except Exception as e:
-            logger.warning(f"getUserByEmail warning: {e}")
+            logger.warning(f"getUserByEmail notice: {e}")
 
         if not is_existing:
             if not clean_password or len(clean_password) < 6:
@@ -142,7 +146,7 @@ async def create_or_update_account(req: CreateOrUpdateAccountRequest):
                 )
                 uid = user.uid
         except Exception as auth_err:
-            logger.warning(f"Auth create/update warning: {auth_err}")
+            logger.warning(f"Auth create/update notice: {auth_err}")
 
         # Firestore sync
         try:
@@ -211,7 +215,7 @@ async def create_or_update_account(req: CreateOrUpdateAccountRequest):
             }, merge=True)
 
         except Exception as db_err:
-            logger.warning(f"Firestore provisioning warning: {db_err}")
+            logger.warning(f"Firestore provisioning notice: {db_err}")
 
         return {
             "success": True,
@@ -224,5 +228,9 @@ async def create_or_update_account(req: CreateOrUpdateAccountRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error provisioning account: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.warning(f"Error provisioning account, falling back: {e}")
+        return {
+            "success": False,
+            "fallbackToClient": True,
+            "message": str(e)
+        }

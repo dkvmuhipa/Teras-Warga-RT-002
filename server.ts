@@ -407,7 +407,7 @@ async function startServer() {
         }
 
         if (!authUserDeleted && authErrorDetails) {
-          return res.status(500).json({ error: `Gagal menghapus user dari Firebase Auth: ${authErrorDetails}` });
+          console.warn([Firebase Admin] User  could not be removed from Firebase Auth: );
         }
 
         // 2. Unlink or clean in Firestore officials

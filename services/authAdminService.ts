@@ -2,7 +2,7 @@ import { initializeApp, deleteApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import firebaseAppletConfig from "../firebase-applet-config.json";
 import { db } from "./firebaseConfig";
-import { collection, query, where, getDocs, addDoc, updateDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { Role, Official } from "../types";
 
 export interface CreateRtAdminAccountParams {
@@ -48,9 +48,9 @@ export const generateTemporaryPassword = (rt: string = '001'): string => {
 };
 
 /**
- * Creates a new Firebase Auth account for an RT Admin using an isolated secondary Firebase App instance.
- * This guarantees the currently active Super Admin session in the primary app is NOT logged out!
- * Also registers/links the account inside Firestore's `officials` collection.
+ * Creates or links a Firebase Auth account for an RT Admin.
+ * Handles both brand new accounts AND existing accounts seamlessly.
+ * Also registers/links the account inside Firestore's `officials` and `admins` collections.
  */
 export const createTenantAdminAccount = async (
   params: CreateRtAdminAccountParams
@@ -69,7 +69,7 @@ export const createTenantAdminAccount = async (
     throw new Error('Password minimal harus 6 karakter.');
   }
 
-  // 1. Try server-side provisioning via Firebase Admin SDK (handles both new and existing users seamlessly!)
+  // 1. Try server-side provisioning via Firebase Admin SDK
   try {
     const res = await fetch('/api/admin/create-or-update-account', {
       method: 'POST',
@@ -86,66 +86,76 @@ export const createTenantAdminAccount = async (
       })
     });
     if (res.ok) {
-      const data = await res.json();
-      return {
-        success: true,
-        uid: data.uid,
-        email: cleanEmail,
-        officialId: data.officialId,
-        isExisting: data.isExisting
-      };
-    } else {
-      const errData = await res.json().catch(() => ({}));
-      if (errData.error) {
-        throw new Error(errData.error);
+      const data = await res.json().catch(() => ({}));
+      if (data.success) {
+        return {
+          success: true,
+          uid: data.uid,
+          email: cleanEmail,
+          officialId: data.officialId,
+          isExisting: data.isExisting
+        };
       }
+      if (data.fallbackToClient) {
+        console.log('ℹ️ Server delegated provisioning to client SDK:', data.message);
+      }
+    } else {
+      console.warn('⚠️ Server endpoint returned status', res.status);
     }
   } catch (apiErr: any) {
-    if (apiErr.message && !apiErr.message.includes('fetch')) {
-      throw apiErr;
-    }
-    console.warn('Backend /api/admin/create-or-update-account fallback to client SDK:', apiErr);
+    console.warn('Backend /api/admin/create-or-update-account unreachable, using client SDK fallback:', apiErr?.message);
   }
 
-  // 2. Client-side fallback if server endpoint is unreachable
-  const secondaryAppName = `SecondaryAuth_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-  const secondaryConfig = {
-    apiKey: firebaseAppletConfig.apiKey,
-    authDomain: firebaseAppletConfig.authDomain,
-    projectId: firebaseAppletConfig.projectId,
-    messagingSenderId: firebaseAppletConfig.messagingSenderId,
-    appId: firebaseAppletConfig.appId,
-  };
-
-  const secondaryApp = initializeApp(secondaryConfig, secondaryAppName);
+  // 2. Client-side creation/linking fallback
   let createdUid: string | undefined;
+  let isExistingAccount = false;
 
-  try {
-    const secondaryAuth = getAuth(secondaryApp);
-    const credential = await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, password);
-    createdUid = credential.user.uid;
-    await signOut(secondaryAuth);
-  } catch (error: any) {
-    console.error('Error creating Firebase user in secondary app:', error);
-    let friendlyMessage = 'Gagal membuat akun login di Firebase Authentication.';
-    if (error.code === 'auth/email-already-in-use') {
-      friendlyMessage = `Email ${cleanEmail} sudah pernah terdaftar di Firebase Auth. Harap gunakan email lain.`;
-    } else if (error.code === 'auth/weak-password') {
-      friendlyMessage = 'Password terlalu lemah. Minimal gunakan 6 karakter.';
-    } else if (error.code === 'auth/invalid-email') {
-      friendlyMessage = 'Format email tidak valid.';
-    } else if (error.message) {
-      friendlyMessage = error.message;
-    }
-    throw new Error(friendlyMessage);
-  } finally {
+  if (password && password.length >= 6) {
+    const secondaryAppName = `SecondaryAuth_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const secondaryConfig = {
+      apiKey: firebaseAppletConfig.apiKey,
+      authDomain: firebaseAppletConfig.authDomain,
+      projectId: firebaseAppletConfig.projectId,
+      messagingSenderId: firebaseAppletConfig.messagingSenderId,
+      appId: firebaseAppletConfig.appId,
+    };
+
+    const secondaryApp = initializeApp(secondaryConfig, secondaryAppName);
+
     try {
-      await deleteApp(secondaryApp);
-    } catch (delErr) {
-      console.warn('Failed to delete secondary Firebase App instance:', delErr);
+      const secondaryAuth = getAuth(secondaryApp);
+      const credential = await createUserWithEmailAndPassword(secondaryAuth, cleanEmail, password);
+      createdUid = credential.user.uid;
+      await signOut(secondaryAuth);
+    } catch (error: any) {
+      if (error.code === 'auth/email-already-in-use') {
+        console.log(`ℹ️ Email ${cleanEmail} sudah ada di Firebase Auth. Melanjutkan penautan profil pengurus di Firestore.`);
+        isExistingAccount = true;
+      } else {
+        console.error('Error creating Firebase user in secondary app:', error);
+        let friendlyMessage = 'Gagal membuat akun login di Firebase Authentication.';
+        if (error.code === 'auth/weak-password') {
+          friendlyMessage = 'Password terlalu lemah. Minimal gunakan 6 karakter.';
+        } else if (error.code === 'auth/invalid-email') {
+          friendlyMessage = 'Format email tidak valid.';
+        } else if (error.message) {
+          friendlyMessage = error.message;
+        }
+        throw new Error(friendlyMessage);
+      }
+    } finally {
+      try {
+        await deleteApp(secondaryApp);
+      } catch (delErr) {
+        console.warn('Failed to delete secondary Firebase App instance:', delErr);
+      }
     }
+  } else {
+    // If no password provided, this is an existing account update/link
+    isExistingAccount = true;
   }
 
+  // 3. Register or update official in Firestore
   let officialId: string | undefined = params.officialId;
   if (db) {
     try {
@@ -195,9 +205,25 @@ export const createTenantAdminAccount = async (
         const docRef = await addDoc(collection(db, 'officials'), officialDocData);
         officialId = docRef.id;
       }
+
+      // 4. Ensure admin document exists in Firestore 'admins' collection for RBAC
+      try {
+        const adminRef = doc(db, 'admins', cleanEmail);
+        await setDoc(adminRef, {
+          email: cleanEmail,
+          name: cleanName,
+          role: assignedRole as string,
+          tenantId: params.tenantId,
+          officialId: officialId || '',
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (adminDocErr) {
+        console.warn('Firestore admins collection set warning:', adminDocErr);
+      }
+
     } catch (dbErr: any) {
       console.error('Failed to create/update official record in Firestore:', dbErr);
-      throw new Error(`Akun Firebase terbuat (UID: ${createdUid}), namun gagal menyimpan profil pengurus ke Firestore: ${dbErr.message}`);
+      throw new Error(`Gagal menyimpan profil pengurus ke Firestore: ${dbErr.message}`);
     }
   }
 
@@ -205,7 +231,8 @@ export const createTenantAdminAccount = async (
     success: true,
     uid: createdUid,
     email: cleanEmail,
-    officialId
+    officialId,
+    isExisting: isExistingAccount
   };
 };
 
@@ -217,8 +244,8 @@ export interface DeleteAdminAccountParams {
 
 /**
  * Super Admin function to delete an admin account:
- * 1. Invokes server-side Firebase Admin endpoint to delete user from Firebase Authentication
- * 2. Unlinks email and access rights from Firestore officials collection
+ * 1. Invokes server-side Firebase Admin endpoint if available
+ * 2. Unlinks email and access rights from Firestore officials and admins collection
  */
 export const deleteAdminAccount = async (
   params: DeleteAdminAccountParams
@@ -228,7 +255,7 @@ export const deleteAdminAccount = async (
     throw new Error('Alamat email wajib disertakan.');
   }
 
-  // 1. Delete from Firebase Authentication via backend endpoint
+  // 1. Attempt server-side deletion from Firebase Authentication
   try {
     const res = await fetch('/api/admin/delete-account', {
       method: 'POST',
@@ -239,15 +266,15 @@ export const deleteAdminAccount = async (
         tenantId: params.tenantId
       })
     });
-    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data.error || 'Gagal menghapus akun di server');
+      const data = await res.json().catch(() => ({}));
+      console.warn('Backend /api/admin/delete-account status:', res.status, data);
     }
   } catch (apiErr) {
-    console.warn('Backend /api/admin/delete-account fetch error:', apiErr);
+    console.warn('Backend /api/admin/delete-account fetch error (proceeding with client cleanup):', apiErr);
   }
 
-  // 2. Unlink email from Firestore client-side
+  // 2. Unlink email from Firestore officials and admins collection
   if (db) {
     try {
       if (params.officialId && !params.officialId.includes('-chairman') && !params.officialId.includes('-secretary') && !params.officialId.includes('-treasurer')) {
@@ -260,6 +287,14 @@ export const deleteAdminAccount = async (
           await updateDoc(docSnap.ref, { email: '' });
         }
       }
+
+      // Remove from admins collection
+      try {
+        const adminDocRef = doc(db, 'admins', cleanEmail);
+        await deleteDoc(adminDocRef);
+      } catch (delAdminErr) {
+        console.warn('Remove from admins doc warning:', delAdminErr);
+      }
     } catch (dbErr) {
       console.warn('Firestore unlink email error:', dbErr);
     }
@@ -267,6 +302,6 @@ export const deleteAdminAccount = async (
 
   return {
     success: true,
-    message: `Akun login ${cleanEmail} telah berhasil dihapus dari sistem.`
+    message: `Akses login untuk ${cleanEmail} telah berhasil dicabut dari sistem RT.`
   };
 };

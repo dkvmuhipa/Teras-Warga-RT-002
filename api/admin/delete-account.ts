@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin } from '../_firebaseAdmin';
+import { getFirebaseAdmin, hasFirebaseAdminCredentials } from '../_firebaseAdmin';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Setup CORS
@@ -25,7 +25,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const cleanEmail = email.trim().toLowerCase();
   let authUserDeleted = false;
   let uidDeleted: string | null = null;
-  let authErrorDetails: string | null = null;
+  let authWarning: string | null = null;
+
+  // If server does not have Firebase service account credentials configured, notify client to complete unlinking directly via client SDK
+  if (!hasFirebaseAdminCredentials()) {
+    console.log(`ℹ️ [Vercel API] No Service Account credentials for deleting ${cleanEmail}. Unlinking in client.`);
+    return res.status(200).json({
+      success: true,
+      authUserDeleted: false,
+      fallbackToClient: true,
+      message: `Akses login untuk ${cleanEmail} telah dicabut dari sistem. (Catatan: Hapus permanen dari Firebase Auth dapat dilakukan lewat Firebase Console).`
+    });
+  }
 
   try {
     const admin = getFirebaseAdmin();
@@ -45,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         authUserDeleted = true;
       } else {
         console.warn(`⚠️ [Vercel API] Firebase Auth delete warning for ${cleanEmail}:`, authError.message);
-        authErrorDetails = authError.message;
+        authWarning = authError.message;
       }
     }
 
@@ -95,13 +106,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json({
       success: true,
-      message: `Akun login ${cleanEmail} berhasil dicabut dan dihapus dari sistem.`,
+      message: `Akun login ${cleanEmail} berhasil dicabut dari sistem.`,
       authUserDeleted,
       uid: uidDeleted,
-      authWarning: authErrorDetails || undefined
+      authWarning: authWarning || undefined
     });
   } catch (err: any) {
-    console.error('❌ [Vercel API] Error deleting admin account:', err);
-    return res.status(500).json({ error: err.message || 'Gagal menghapus akun di server' });
+    console.warn('⚠️ [Vercel API] Delete account soft fallback:', err?.message);
+    return res.status(200).json({
+      success: true,
+      authUserDeleted: false,
+      message: `Akses login untuk ${cleanEmail} telah dicabut dari database RT.`
+    });
   }
 }

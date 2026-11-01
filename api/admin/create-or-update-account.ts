@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin } from '../_firebaseAdmin';
+import { getFirebaseAdmin, hasFirebaseAdminCredentials } from '../_firebaseAdmin';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Setup CORS
@@ -27,6 +27,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const cleanName = (name || '').trim();
   const cleanPhone = (phone || '').trim();
   const assignedRole = role || 'Admin';
+
+  // If server does not have Firebase service account credentials configured, notify client to use direct client-side fallback
+  if (!hasFirebaseAdminCredentials()) {
+    console.log('ℹ️ [Vercel API] No Firebase Admin Service Account credentials configured. Yielding to client SDK.');
+    return res.status(200).json({
+      success: false,
+      fallbackToClient: true,
+      message: 'Firebase Service Account tidak dikonfigurasi di server. Penautan dilakukan secara aman melalui client SDK.'
+    });
+  }
 
   try {
     const admin = getFirebaseAdmin();
@@ -190,7 +200,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         : `Akun login baru ${cleanEmail} berhasil dibuat di sistem.`
     });
   } catch (err: any) {
-    console.error('❌ [Vercel API] Error provisioning admin account:', err);
-    return res.status(500).json({ error: err.message || 'Gagal membuat/menautkan akun di server' });
+    console.warn('⚠️ [Vercel API] Provisioning soft fallback:', err?.message);
+    return res.status(200).json({
+      success: false,
+      fallbackToClient: true,
+      message: err.message || 'Gagal memproses di server. Menggunakan client fallback.'
+    });
   }
 }
