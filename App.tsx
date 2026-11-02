@@ -53,31 +53,31 @@ import { FinancialProvider } from './context/FinancialContext';
 import { useConfirm } from './context/ConfirmContext';
 import { useTenant } from './context/TenantContext';
 import { getPdfConfigForTenant } from './services/tenantService';
-import { ResidentRegistrationForm } from './components/ResidentRegistrationForm';
+const ResidentRegistrationForm = React.lazy(() => import('./components/ResidentRegistrationForm').then(m => ({ default: m.ResidentRegistrationForm })));
 import { GuestReportForm } from './components/GuestReportForm';
-import { ChatBot } from './components/ChatBot';
+const ChatBot = React.lazy(() => import('./components/ChatBot').then(m => ({ default: m.ChatBot })));
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { PWAStatusHandler } from './components/PWAStatusHandler';
 import { SystemBroadcastBanner } from './components/common/SystemBroadcastBanner';
 import { PublicHeader } from './components/PublicHeader';
 import { HeroSection } from './components/HeroSection';
 import { PublicHome } from './components/public/PublicHome';
-import { PublicServices } from './components/public/PublicServices';
-import { PublicVerification } from './components/public/PublicVerification';
-import { PublicLetterDownload } from './components/public/PublicLetterDownload';
-import { PublicUMKM } from './components/public/PublicUMKM';
-import { PublicInfo } from './components/public/PublicInfo';
-import { PublicMap } from './components/public/PublicMap';
-import { PublicResidentDashboard } from './components/public/PublicResidentDashboard';
-import { PublicDocuments } from './components/public/PublicDocuments';
-import { PublicActivity } from './components/public/PublicActivity';
-import { PublicWasteBank } from './components/public/PublicWasteBank';
-import { PublicHealth } from './components/public/PublicHealth';
-import PublicDonations from './components/public/PublicDonations';
-import { PublicFAQ } from './components/public/PublicFAQ';
-import { PublicRules } from './components/public/PublicRules';
-import { PublicAbout } from './components/public/PublicAbout';
-import { PublicWelcomeKit } from './components/public/PublicWelcomeKit';
+const PublicServices = React.lazy(() => import('./components/public/PublicServices').then(m => ({ default: m.PublicServices })));
+const PublicVerification = React.lazy(() => import('./components/public/PublicVerification').then(m => ({ default: m.PublicVerification })));
+const PublicLetterDownload = React.lazy(() => import('./components/public/PublicLetterDownload').then(m => ({ default: m.PublicLetterDownload })));
+const PublicUMKM = React.lazy(() => import('./components/public/PublicUMKM').then(m => ({ default: m.PublicUMKM })));
+const PublicInfo = React.lazy(() => import('./components/public/PublicInfo').then(m => ({ default: m.PublicInfo })));
+const PublicMap = React.lazy(() => import('./components/public/PublicMap').then(m => ({ default: m.PublicMap })));
+const PublicResidentDashboard = React.lazy(() => import('./components/public/PublicResidentDashboard').then(m => ({ default: m.PublicResidentDashboard })));
+const PublicDocuments = React.lazy(() => import('./components/public/PublicDocuments').then(m => ({ default: m.PublicDocuments })));
+const PublicActivity = React.lazy(() => import('./components/public/PublicActivity').then(m => ({ default: m.PublicActivity })));
+const PublicWasteBank = React.lazy(() => import('./components/public/PublicWasteBank').then(m => ({ default: m.PublicWasteBank })));
+const PublicHealth = React.lazy(() => import('./components/public/PublicHealth').then(m => ({ default: m.PublicHealth })));
+const PublicDonations = React.lazy(() => import('./components/public/PublicDonations'));
+const PublicFAQ = React.lazy(() => import('./components/public/PublicFAQ').then(m => ({ default: m.PublicFAQ })));
+const PublicRules = React.lazy(() => import('./components/public/PublicRules').then(m => ({ default: m.PublicRules })));
+const PublicAbout = React.lazy(() => import('./components/public/PublicAbout').then(m => ({ default: m.PublicAbout })));
+const PublicWelcomeKit = React.lazy(() => import('./components/public/PublicWelcomeKit').then(m => ({ default: m.PublicWelcomeKit })));
 import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
@@ -689,7 +689,13 @@ return (
                             }}
                         />
                         <div className="pb-24 md:pb-0">
-                            <Routes>
+                            <React.Suspense fallback={
+                                <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 font-sans">
+                                    <div className="w-10 h-10 border-3 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"></div>
+                                    <p className="text-slate-400 text-xs font-medium">Memuat halaman...</p>
+                                </div>
+                            }>
+                                <Routes>
                                 <Route path="/" element={<PublicHome houses={houses} announcements={announcements} ronda={ronda} reports={reports} letters={letters} officials={officials} gallery={gallery} activePatrol={activePatrol} mapPoints={mapPoints} />} />
                                 <Route path="/register" element={<div className="py-12 px-4"><ResidentRegistrationForm houses={houses} onClose={() => window.history.back()} /></div>} />
                                 <Route path="/dokumen" element={<PublicDocuments documents={documents} />} />
@@ -745,8 +751,11 @@ return (
                                     />
                                 } />
                             </Routes>
+                            </React.Suspense>
                         </div>
-                        <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} settings={settings} />
+                        <React.Suspense fallback={null}>
+                            <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} settings={settings} />
+                        </React.Suspense>
                         <PanicButton houses={houses} />
                         <PushNotificationManager userId={localStorage.getItem('resident_house_id') || 'guest_user'} />
                         <PWAInstallPrompt />

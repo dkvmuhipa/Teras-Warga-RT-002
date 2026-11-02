@@ -1,7 +1,7 @@
 import { initializeApp, deleteApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import firebaseAppletConfig from "../firebase-applet-config.json";
-import { db } from "./firebaseConfig";
+import { db, auth } from "./firebaseConfig";
 import { collection, query, where, getDocs, addDoc, updateDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
 import { Role, Official } from "../types";
 
@@ -71,9 +71,13 @@ export const createTenantAdminAccount = async (
 
   // 1. Try server-side provisioning via Firebase Admin SDK
   try {
+    const token = auth?.currentUser ? await auth.currentUser.getIdToken().catch(() => null) : null;
+    const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) reqHeaders['Authorization'] = `Bearer ${token}`;
+
     const res = await fetch('/api/admin/create-or-update-account', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: reqHeaders,
       body: JSON.stringify({
         email: cleanEmail,
         password: password,
@@ -257,9 +261,13 @@ export const deleteAdminAccount = async (
 
   // 1. Attempt server-side deletion from Firebase Authentication
   try {
+    const token = auth?.currentUser ? await auth.currentUser.getIdToken().catch(() => null) : null;
+    const reqHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) reqHeaders['Authorization'] = `Bearer ${token}`;
+
     const res = await fetch('/api/admin/delete-account', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: reqHeaders,
       body: JSON.stringify({
         email: cleanEmail,
         officialId: params.officialId,

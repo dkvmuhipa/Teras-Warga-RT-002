@@ -70,6 +70,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // 1. Verify Authorization Token
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Unauthorized: Header otorisasi tidak ditemukan.' });
+  }
+
+  const fbAdmin = getFirebaseAdmin();
+  const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+  let callerEmail = '';
+  try {
+    const decodedToken = await fbAdmin.auth().verifyIdToken(token);
+    callerEmail = (decodedToken.email || '').toLowerCase().trim();
+    const isSuper = callerEmail === 'admin@teras.id' || callerEmail === 'dkvsmkmuhipa@gmail.com' || decodedToken.superAdmin === true;
+    
+    if (!isSuper) {
+      const firestore = fbAdmin.firestore();
+      const [platformDoc, adminDoc] = await Promise.all([
+        firestore.collection('platform_admins').doc(callerEmail).get().catch(() => null),
+        firestore.collection('admins').doc(callerEmail).get().catch(() => null)
+      ]);
+      if (!platformDoc?.exists && !adminDoc?.exists) {
+        return res.status(403).json({ error: 'Forbidden: Anda tidak memiliki wewenang untuk mengelola akun admin.' });
+      }
+    }
+  } catch (authVerifyErr: any) {
+    return res.status(401).json({ error: 'Unauthorized: Sesi login tidak valid atau telah kedaluwarsa.' });
+  }
+
   const { email, password, name, phone, role, tenantId, officialId, houseId } = req.body || {};
 
   if (!email || typeof email !== 'string' || !email.includes('@')) {

@@ -25,8 +25,15 @@ service cloud.firestore {
          request.auth.token.admin == true ||
          request.auth.token.email == "irfanarianto.id@gmail.com" ||
          exists(/databases/$(database)/documents/admins/$(request.auth.token.email)) ||
-         exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-         isAuthenticated());
+         exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isNotificationOwner() {
+      return isAuthenticated() && (
+        ('userId' in resource.data && resource.data.userId == request.auth.uid) ||
+        ('target' in resource.data && resource.data.target == request.auth.uid) ||
+        ('recipientId' in resource.data && resource.data.recipientId == request.auth.uid)
+      );
     }
 
     // ===============================================================
@@ -42,11 +49,11 @@ service cloud.firestore {
     // Platform Super Admins & Platform Admins
     match /platform_admins/{id} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isSuperAdmin();
     }
     match /platformAdmins/{id} {
       allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow write: if isSuperAdmin();
     }
 
     // System Broadcasts (System-wide alerts & banners)
@@ -153,8 +160,14 @@ service cloud.firestore {
 
     // Notifications
     match /notifications/{id} {
-      allow read, update, delete: if true;
-      allow create: if isAdmin();
+      allow read: if true;
+      allow create: if isAdmin() || isAuthenticated() || 
+        (request.resource.data.keys().hasAll(['title', 'message', 'type', 'date']) &&
+         request.resource.data.title is string && request.resource.data.title.size() <= 200 &&
+         request.resource.data.message is string && request.resource.data.message.size() <= 1000);
+      allow update: if isAdmin() || isNotificationOwner() || 
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']) && request.resource.data.isRead is bool);
+      allow delete: if isAdmin() || isNotificationOwner();
     }
 
     // Ronda Logs

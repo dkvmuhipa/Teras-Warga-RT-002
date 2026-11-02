@@ -265,7 +265,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   const publicUrl = `${window.location.origin}${window.location.pathname}#/?rt=${tenant.slug || tenant.id}`;
   const registerUrl = `${window.location.origin}${window.location.pathname}#/?rt=${tenant.slug || tenant.id}#register`;
 
-  const handleCopy = (text: string, type: 'public' | 'register') => {
+  const handleCopy = (text: string, type: 'public' | 'register' | 'admin') => {
     navigator.clipboard.writeText(text);
     setCopiedLink(type);
     toast.success('Tautan berhasil disalin ke clipboard');
@@ -812,7 +812,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                         if (!confirmed) return;
                         try {
                           await deleteAdminAccount({
-                            email: liveChairman.email,
+                            email: liveChairman.email || '',
                             officialId: liveChairman.id,
                             tenantId: tenant?.id
                           });

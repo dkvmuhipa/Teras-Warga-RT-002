@@ -2422,7 +2422,7 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         doc.setTextColor(150);
         doc.text(`Halaman ${j} dari ${totalPages}`, pageWidth - margin, pageHeight - 10, { align: "right" });
     }
-    const rtSuffix = (pdfConfig?.rtName || 'RT').replace(/\s+/g, '_');
+    const rtSuffix = (config?.rtName || 'RT').replace(/\s+/g, '_');
     doc.save(`Data_Warga_${rtSuffix}_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 

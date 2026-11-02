@@ -121,7 +121,7 @@ export const TenantRegistrationModal: React.FC<TenantRegistrationModalProps> = (
 
   const handleSendWhatsAppToChairman = () => {
     if (!createdTenant || !createdAdminInfo) return;
-    let cleanPhone = createdTenant.chairmanPhone.replace(/[^0-9]/g, '');
+    let cleanPhone = (createdTenant.chairmanPhone || '').replace(/[^0-9]/g, '');
     if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.slice(1);
 
     const portalUrl = `${window.location.origin}/?rt=${createdTenant.slug}#/admin`;

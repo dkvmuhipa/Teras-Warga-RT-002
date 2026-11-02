@@ -1588,6 +1588,7 @@ export interface STBMRecord {
   // Catatan Khusus
   problemType?: string;            // Jenis Masalah (misal: "Tangki septik rembes", "SPAL mampet")
   notes?: string;                  // Keterangan (Ket.)
+  tenantId?: string;
   updatedAt: string;
   updatedBy?: string;
 }
