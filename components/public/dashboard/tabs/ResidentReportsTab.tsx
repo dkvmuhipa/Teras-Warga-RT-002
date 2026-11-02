@@ -32,7 +32,7 @@ export const ResidentReportsTab: React.FC<ResidentReportsTabProps> = ({
     >
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-xl font-black text-slate-800">Laporan Masalah</h3>
+          <h3 className="text-xl font-semibold text-slate-800">Laporan Masalah</h3>
           <p className="text-sm text-slate-500 font-medium">Laporkan masalah keamanan, kebersihan, atau fasilitas di lingkungan.</p>
         </div>
         <Button onClick={onOpenReportModal} className="bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-100">
@@ -45,7 +45,7 @@ export const ResidentReportsTab: React.FC<ResidentReportsTabProps> = ({
           reports.map((report) => (
             <Card 
               key={report.id} 
-              className="p-6 bg-white border-slate-100 shadow-sm flex items-center justify-between group hover:border-rose-200 hover:shadow-md transition-all cursor-pointer"
+              className="p-6 bg-white border-slate-100 shadow-sm flex items-center justify-between group hover:border-rose-200 hover:shadow-md transition-colors cursor-pointer"
               onClick={() => onSelectReportDetail(report)}
             >
               <div className="flex items-center gap-4">
@@ -60,8 +60,8 @@ export const ResidentReportsTab: React.FC<ResidentReportsTabProps> = ({
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-black text-slate-800">Laporan {report.type}</h4>
-                    <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
+                    <h4 className="font-semibold text-slate-800">Laporan {report.type}</h4>
+                    <span className={`px-2 py-0.5 rounded-md text-[8px] font-semibold uppercase tracking-widest ${
                       report.status === 'Selesai' ? 'bg-emerald-100 text-emerald-600' :
                       report.status === 'Diproses' ? 'bg-indigo-100 text-indigo-600' :
                       'bg-rose-100 text-rose-600'
@@ -81,7 +81,7 @@ export const ResidentReportsTab: React.FC<ResidentReportsTabProps> = ({
         ) : (
           <div className="text-center py-20 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
             <AlertTriangle size={48} className="mx-auto text-slate-200 mb-4" />
-            <p className="text-slate-400 font-black uppercase tracking-widest text-xs">Belum ada laporan</p>
+            <p className="text-slate-400 font-semibold uppercase tracking-widest text-xs">Belum ada laporan</p>
           </div>
         )}
       </div>

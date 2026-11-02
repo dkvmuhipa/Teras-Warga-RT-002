@@ -73,7 +73,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
     >
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-xl font-black text-slate-800">Pembaruan Data Mandiri</h3>
+          <h3 className="text-xl font-semibold text-slate-800">Pembaruan Data Mandiri</h3>
           <p className="text-sm text-slate-500 font-medium">Ajukan perubahan data jika ada ketidaksesuaian atau penambahan penghuni.</p>
         </div>
         <Button onClick={() => setIsUpdateModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
@@ -86,7 +86,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
           updateRequests.map((req) => (
             <Card 
               key={req.id} 
-              className="p-6 bg-white border-slate-100 shadow-sm flex items-center justify-between group hover:border-indigo-200 hover:shadow-md transition-all cursor-pointer"
+              className="p-6 bg-white border-slate-100 shadow-sm flex items-center justify-between group hover:border-indigo-200 hover:shadow-md transition-colors cursor-pointer"
               onClick={() => setSelectedRequest(req)}
             >
               <div className="flex items-center gap-4">
@@ -101,8 +101,8 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-black text-slate-800">Permohonan Update Data</h4>
-                    <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
+                    <h4 className="font-semibold text-slate-800">Permohonan Update Data</h4>
+                    <span className={`px-2 py-0.5 rounded-md text-[8px] font-semibold uppercase tracking-widest ${
                       req.status === 'Disetujui' ? 'bg-emerald-100 text-emerald-600' :
                       req.status === 'Ditolak' ? 'bg-rose-100 text-rose-600' :
                       'bg-amber-100 text-amber-600'
@@ -131,7 +131,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-4">
               <FileEdit size={32} />
             </div>
-            <h4 className="font-black text-slate-800 mb-1">Belum Ada Pengajuan</h4>
+            <h4 className="font-semibold text-slate-800 mb-1">Belum Ada Pengajuan</h4>
             <p className="text-xs text-slate-400 font-medium">Data Anda saat ini sudah sesuai dengan catatan RT.</p>
           </div>
         )}
@@ -141,24 +141,24 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
         <form onSubmit={handleUpdateSubmit} className="space-y-6">
           <div className="space-y-4">
             <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-              <h4 className="text-xs font-black text-indigo-900 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <h4 className="text-xs font-semibold text-indigo-900 uppercase tracking-widest mb-3 flex items-center gap-2">
                 <User size={14} /> Identitas Kepala Keluarga / Penghuni
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Kepala Keluarga / Penghuni</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Kepala Keluarga / Penghuni</label>
                   <input 
                     type="text" 
                     required
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.headOfFamily}
                     onChange={e => setUpdateForm({...updateForm, headOfFamily: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Jenis Kelamin</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Jenis Kelamin</label>
                   <select 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.gender}
                     onChange={e => setUpdateForm({...updateForm, gender: e.target.value as any})}
                   >
@@ -167,37 +167,37 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tempat Lahir</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tempat Lahir</label>
                   <input 
                     type="text" 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.birthPlace}
                     onChange={e => setUpdateForm({...updateForm, birthPlace: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal Lahir</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal Lahir</label>
                   <input 
                     type="date" 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.birthDate}
                     onChange={e => setUpdateForm({...updateForm, birthDate: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">No. Telepon (WA)</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">No. Telepon (WA)</label>
                   <input 
                     type="tel" 
                     required
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.phone}
                     onChange={e => setUpdateForm({...updateForm, phone: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Golongan Darah</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Golongan Darah</label>
                   <select 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.bloodType}
                     onChange={e => setUpdateForm({...updateForm, bloodType: e.target.value as any})}
                   >
@@ -212,34 +212,34 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
             </div>
 
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
                 <Shield size={14} /> Data Kependudukan
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">NIK</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">NIK</label>
                   <input 
                     type="text" 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.nik}
                     onChange={e => setUpdateForm({...updateForm, nik: e.target.value})}
                     placeholder="16 digit NIK"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">No. KK</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">No. KK</label>
                   <input 
                     type="text" 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.kkNumber}
                     onChange={e => setUpdateForm({...updateForm, kkNumber: e.target.value})}
                     placeholder="16 digit No. KK"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status Tinggal</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status Tinggal</label>
                   <select 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.residenceType}
                     onChange={e => setUpdateForm({...updateForm, residenceType: e.target.value as any})}
                   >
@@ -253,7 +253,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                 <div className="md:col-span-2 p-3.5 sm:p-4 bg-slate-100/70 border border-slate-200/80 rounded-2xl space-y-3.5 overflow-hidden">
                   <div className="space-y-2">
                     <div className="flex flex-col gap-0.5">
-                      <label className="text-xs font-black text-slate-700">
+                      <label className="text-xs font-semibold text-slate-700">
                         Status Kesesuaian KTP
                       </label>
                       <p className="text-[11px] text-slate-400 font-medium">
@@ -273,7 +273,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                             addressKtp: (!updateForm.addressKtp || updateForm.addressKtp.toLowerCase().includes('tondo') || updateForm.addressKtp.toLowerCase().includes('pue lombe')) ? localAddr : updateForm.addressKtp
                           });
                         }}
-                        className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center ${
+                        className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-center ${
                           updateForm.ktpStatus === 'Sesuai Domisili' || (!updateForm.ktpStatus && updateForm.addressKtp?.toLowerCase().includes('tondo'))
                             ? 'bg-emerald-600 text-white shadow-xs'
                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -285,7 +285,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                       <button
                         type="button"
                         onClick={() => setUpdateForm({ ...updateForm, ktpStatus: 'Luar Wilayah (Belum Mutasi)' })}
-                        className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 text-center ${
+                        className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 text-center ${
                           updateForm.ktpStatus === 'Luar Wilayah (Belum Mutasi)'
                             ? 'bg-amber-600 text-white shadow-xs'
                             : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -315,7 +315,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                         }}
                         className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center justify-center gap-1 cursor-pointer transition-colors self-start sm:self-auto active:scale-95"
                       >
-                        📍 Gunakan Alamat Huntap Tondo 2 (Jl. Pue Lombe)
+                        Gunakan Alamat Huntap Tondo 2 (Jl. Pue Lombe)
                       </button>
                     </div>
                     <textarea
@@ -327,7 +327,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                           ? `Contoh: Jl. Pue Lombe, Huntap Tondo 2 Blok ${currentHouse?.block || ''}-${currentHouse?.number || ''}`
                           : 'Tuliskan alamat lengkap asal sesuai yang tertera di KTP fisik Anda...'
                       }
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none leading-relaxed"
+                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors resize-none leading-relaxed"
                     />
                     {(updateForm.ktpStatus === 'Sesuai Domisili' || (!updateForm.ktpStatus && updateForm.addressKtp?.toLowerCase().includes('tondo'))) && (
                       <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
@@ -342,9 +342,9 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status Perkawinan</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status Perkawinan</label>
                   <select 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.maritalStatus}
                     onChange={e => setUpdateForm({...updateForm, maritalStatus: e.target.value as any})}
                   >
@@ -355,37 +355,37 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Agama</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Agama</label>
                   <input 
                     type="text" 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.religion}
                     onChange={e => setUpdateForm({...updateForm, religion: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pendidikan Terakhir</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pendidikan Terakhir</label>
                   <input 
                     type="text" 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.education}
                     onChange={e => setUpdateForm({...updateForm, education: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pekerjaan</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pekerjaan</label>
                   <input 
                     type="text" 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.job}
                     onChange={e => setUpdateForm({...updateForm, job: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Kewarganegaraan</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Kewarganegaraan</label>
                   <input 
                     type="text" 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.nationality}
                     onChange={e => setUpdateForm({...updateForm, nationality: e.target.value})}
                   />
@@ -394,14 +394,14 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
             </div>
 
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
                 <Activity size={14} /> Data Sosial &amp; Ekonomi
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status BPJS</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status BPJS</label>
                   <select 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.bpjsStatus}
                     onChange={e => setUpdateForm({...updateForm, bpjsStatus: e.target.value as any})}
                   >
@@ -412,9 +412,9 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status Ekonomi</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Status Ekonomi</label>
                   <select 
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.economicStatus}
                     onChange={e => setUpdateForm({...updateForm, economicStatus: e.target.value as any})}
                   >
@@ -424,7 +424,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   </select>
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Bantuan Sosial (Ceklis jika menerima)</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 pl-1">Bantuan Sosial (Ceklis jika menerima)</label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <label className="flex items-center gap-2 p-3 bg-white border border-slate-100 rounded-xl cursor-pointer hover:border-indigo-200 transition-colors">
                       <input type="checkbox" checked={updateForm.isPKH} onChange={e => setUpdateForm({...updateForm, isPKH: e.target.checked})} className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
@@ -446,7 +446,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   {updateForm.isBansosLain && (
                     <input 
                       type="text" 
-                      className="w-full mt-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full mt-2 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                       placeholder="Nama Bantuan Lainnya"
                       value={updateForm.bansosLainName}
                       onChange={e => setUpdateForm({...updateForm, bansosLainName: e.target.value})}
@@ -457,16 +457,16 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
             </div>
 
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
                 <Users size={14} /> Demografi Keluarga
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Jumlah Penghuni</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Jumlah Penghuni</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.occupants} onChange={e => setUpdateForm({...updateForm, occupants: parseInt(e.target.value) || 0})} />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Motor (Roda 2)</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Motor (Roda 2)</label>
                   <input 
                     type="number" 
                     min="0"
@@ -483,7 +483,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Mobil (Roda 4)</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Mobil (Roda 4)</label>
                   <input 
                     type="number" 
                     min="0"
@@ -500,35 +500,35 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Ibu Hamil</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Ibu Hamil</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.pregnantCount} onChange={e => setUpdateForm({...updateForm, pregnantCount: parseInt(e.target.value) || 0})} />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Bayi (0-1th)</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Bayi (0-1th)</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.babyCount} onChange={e => setUpdateForm({...updateForm, babyCount: parseInt(e.target.value) || 0})} />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Balita (1-5th)</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Balita (1-5th)</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.toddlerCount} onChange={e => setUpdateForm({...updateForm, toddlerCount: parseInt(e.target.value) || 0})} />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Anak-anak</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Anak-anak</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.childCount} onChange={e => setUpdateForm({...updateForm, childCount: parseInt(e.target.value) || 0})} />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Remaja</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Remaja</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.teenagerCount} onChange={e => setUpdateForm({...updateForm, teenagerCount: parseInt(e.target.value) || 0})} />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Dewasa</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Dewasa</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.adultCount} onChange={e => setUpdateForm({...updateForm, adultCount: parseInt(e.target.value) || 0})} />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Lansia</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Lansia</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.elderlyCount} onChange={e => setUpdateForm({...updateForm, elderlyCount: parseInt(e.target.value) || 0})} />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Janda/Duda</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Janda/Duda</label>
                   <input type="number" className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold" value={updateForm.widowCount} onChange={e => setUpdateForm({...updateForm, widowCount: parseInt(e.target.value) || 0})} />
                 </div>
               </div>
@@ -536,13 +536,13 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
 
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
               <div className="flex justify-between items-center mb-3">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-widest flex items-center gap-2">
                   <Users size={14} /> Anggota Keluarga
                 </h4>
                 <Button 
                   type="button" 
                   onClick={addFamilyMember}
-                  className="h-7 px-3 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-none shadow-none text-[10px] font-black"
+                  className="h-7 px-3 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border-none shadow-none text-[10px] font-semibold"
                 >
                   + Tambah Anggota
                 </Button>
@@ -561,20 +561,20 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                       </button>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nama Lengkap</label>
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Nama Lengkap</label>
                           <input 
                             type="text" 
                             required
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={member.name}
                             onChange={e => updateFamilyMember(index, 'name', e.target.value)}
                           />
                         </div>
                         <div>
-                          <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">NIK</label>
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">NIK</label>
                           <input 
                             type="text" 
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={member.nik || ''}
                             onChange={e => updateFamilyMember(index, 'nik', e.target.value.replace(/\D/g, ''))}
                             placeholder="16 digit NIK"
@@ -599,9 +599,9 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                           })()}
                         </div>
                         <div>
-                          <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hubungan</label>
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Hubungan</label>
                           <select 
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={member.relation}
                             onChange={e => updateFamilyMember(index, 'relation', e.target.value)}
                           >
@@ -612,9 +612,9 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Jenis Kelamin</label>
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Jenis Kelamin</label>
                           <select 
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={member.gender}
                             onChange={e => updateFamilyMember(index, 'gender', e.target.value)}
                           >
@@ -623,19 +623,19 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Tanggal Lahir</label>
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Tanggal Lahir</label>
                           <input 
                             type="date" 
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={member.birthDate || ''}
                             onChange={e => updateFamilyMember(index, 'birthDate', e.target.value)}
                           />
                         </div>
                         <div>
-                          <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Pekerjaan</label>
+                          <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Pekerjaan</label>
                           <input 
                             type="text" 
-                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={member.job || ''}
                             onChange={e => updateFamilyMember(index, 'job', e.target.value)}
                           />
@@ -657,7 +657,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                 <div className="flex items-center gap-2">
                   <Store size={16} className="text-amber-600" />
                   <div>
-                    <h4 className="text-xs font-black text-amber-950 uppercase tracking-widest">
+                    <h4 className="text-xs font-semibold text-amber-950 uppercase tracking-widest">
                       Pendataan Usaha / UMKM Warga
                     </h4>
                     <p className="text-[10px] text-amber-800/80 font-semibold">
@@ -672,7 +672,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                     onChange={(e) => setUpdateForm({ ...updateForm, hasBusiness: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                  <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-colors peer-checked:bg-amber-600"></div>
                 </label>
               </div>
 
@@ -680,25 +680,25 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                 <div className="space-y-4 pt-2 border-t border-amber-200/50">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
                         Nama Usaha / Toko / Merek
                       </label>
                       <input
                         type="text"
                         required={updateForm.hasBusiness}
                         placeholder="Contoh: Dapur Mama Tondo, Kios Barokah..."
-                        className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                        className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-colors"
                         value={updateForm.businessName}
                         onChange={(e) => setUpdateForm({ ...updateForm, businessName: e.target.value })}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
                         Kategori Usaha
                       </label>
                       <select
-                        className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                        className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-colors"
                         value={updateForm.businessCategory}
                         onChange={(e) => setUpdateForm({ ...updateForm, businessCategory: e.target.value })}
                       >
@@ -714,11 +714,11 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
                         Lokasi Usaha
                       </label>
                       <select
-                        className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                        className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-colors"
                         value={updateForm.businessLocation}
                         onChange={(e) => setUpdateForm({ ...updateForm, businessLocation: e.target.value })}
                       >
@@ -729,13 +729,13 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
                         No. WhatsApp Bisnis
                       </label>
                       <input
                         type="tel"
                         placeholder="08xxxxxxxxxx"
-                        className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all"
+                        className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-colors"
                         value={updateForm.businessPhone}
                         onChange={(e) => setUpdateForm({ ...updateForm, businessPhone: e.target.value })}
                       />
@@ -743,13 +743,13 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5 pl-1">
                       Deskripsi Produk / Jasa
                     </label>
                     <textarea
                       rows={2}
                       placeholder="Jelaskan produk atau jasa yang ditawarkan kepada tetangga dan masyarakat..."
-                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-all resize-none"
+                      className="w-full px-4 py-3 bg-white border border-amber-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none transition-colors resize-none"
                       value={updateForm.businessDescription}
                       onChange={(e) => setUpdateForm({ ...updateForm, businessDescription: e.target.value })}
                     />
@@ -763,7 +763,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                       className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
                     />
                     <div>
-                      <span className="text-xs font-black text-slate-800">
+                      <span className="text-xs font-semibold text-slate-800">
                         Promosikan di Katalog UMKM RT 02 Huntap Tondo
                       </span>
                       <p className="text-[10px] text-slate-500 font-medium">
@@ -780,17 +780,17 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
             </div>
 
             <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
                 <Info size={14} /> Informasi Tambahan
               </h4>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Alasan Perubahan</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Alasan Perubahan</label>
                   <textarea 
                     required
                     rows={3}
                     placeholder="Contoh: Penambahan anggota keluarga baru atau koreksi ejaan nama..."
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors resize-none"
                     value={updateForm.reason}
                     onChange={e => setUpdateForm({...updateForm, reason: e.target.value})}
                   />
@@ -818,7 +818,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
           <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
             <div className="flex justify-between items-start">
               <div>
-                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                <span className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest border ${
                   selectedRequest.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
                   selectedRequest.status === 'Ditolak' ? 'bg-rose-50 text-rose-600 border-rose-200' :
                   'bg-amber-50 text-amber-600 border-amber-200'
@@ -833,37 +833,37 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
 
             <div className="space-y-4">
               <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                <h4 className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h4 className="text-[10px] font-semibold text-indigo-900 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <User size={12} /> Identitas Kepala Keluarga / Penghuni
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-2 bg-white/50 rounded-lg">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Nama Lengkap</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.headOfFamily}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Nama Lengkap</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.headOfFamily}</p>
                   </div>
                   <div className="p-2 bg-white/50 rounded-lg">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Jenis Kelamin</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.gender || '-'}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Jenis Kelamin</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.gender || '-'}</p>
                   </div>
                   <div className="p-2 bg-white/50 rounded-lg">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">TTL</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.birthPlace || '-'}, {selectedRequest.birthDate || '-'}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">TTL</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.birthPlace || '-'}, {selectedRequest.birthDate || '-'}</p>
                   </div>
                   <div className="p-2 bg-white/50 rounded-lg">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Telepon</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.phone}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Telepon</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.phone}</p>
                   </div>
                 </div>
               </div>
 
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h4 className="text-[10px] font-semibold text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Shield size={12} /> Data Kependudukan
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">NIK</p>
-                    <p className="text-xs font-black text-slate-800 font-mono flex items-center justify-between">
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">NIK</p>
+                    <p className="text-xs font-semibold text-slate-800 font-mono flex items-center justify-between">
                       <span>{formatSensitiveNik(selectedRequest.nik || '', !!showFullNiks[`req-${selectedRequest.id}`])}</span>
                       {selectedRequest.nik && (
                         <button 
@@ -876,8 +876,8 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                     </p>
                   </div>
                   <div className="p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">No. KK</p>
-                    <p className="text-xs font-black text-slate-800 font-mono flex items-center justify-between">
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">No. KK</p>
+                    <p className="text-xs font-semibold text-slate-800 font-mono flex items-center justify-between">
                       <span>{formatSensitiveNik(selectedRequest.kkNumber || '', !!showFullNiks[`kk-${selectedRequest.id}`])}</span>
                       {selectedRequest.kkNumber && (
                         <button 
@@ -890,44 +890,44 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                     </p>
                   </div>
                   <div className="p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Agama</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.religion || '-'}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Agama</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.religion || '-'}</p>
                   </div>
                   <div className="p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Pendidikan</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.education || '-'}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Pendidikan</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.education || '-'}</p>
                   </div>
                   <div className="p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Pekerjaan</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.job || '-'}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Pekerjaan</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.job || '-'}</p>
                   </div>
                   <div className="p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Status Tinggal</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.residenceType || '-'}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Status Tinggal</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.residenceType || '-'}</p>
                   </div>
                 </div>
               </div>
 
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <h4 className="text-[10px] font-semibold text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
                   <Activity size={12} /> Sosial &amp; Ekonomi
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">BPJS</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.bpjsStatus || '-'}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">BPJS</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.bpjsStatus || '-'}</p>
                   </div>
                   <div className="p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Ekonomi</p>
-                    <p className="text-xs font-black text-slate-800">{selectedRequest.economicStatus || '-'}</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Ekonomi</p>
+                    <p className="text-xs font-semibold text-slate-800">{selectedRequest.economicStatus || '-'}</p>
                   </div>
                   <div className="col-span-2 p-2 bg-white rounded-lg border border-slate-100">
-                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Bantuan Sosial</p>
+                    <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Bantuan Sosial</p>
                     <div className="flex flex-wrap gap-2">
-                      {selectedRequest.isPKH && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-black">PKH</span>}
-                      {selectedRequest.isBLT && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-black">BLT</span>}
-                      {selectedRequest.isBPNT && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-black">BPNT</span>}
-                      {selectedRequest.isBansosLain && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-black">{selectedRequest.bansosLainName || 'Lainnya'}</span>}
+                      {selectedRequest.isPKH && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-semibold">PKH</span>}
+                      {selectedRequest.isBLT && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-semibold">BLT</span>}
+                      {selectedRequest.isBPNT && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-semibold">BPNT</span>}
+                      {selectedRequest.isBansosLain && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[9px] font-semibold">{selectedRequest.bansosLainName || 'Lainnya'}</span>}
                       {!selectedRequest.isPKH && !selectedRequest.isBLT && !selectedRequest.isBPNT && !selectedRequest.isBansosLain && <span className="text-xs font-bold text-slate-400">Tidak ada bantuan</span>}
                     </div>
                   </div>
@@ -936,15 +936,15 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
 
               {selectedRequest.familyMembers && selectedRequest.familyMembers.length > 0 && (
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <h4 className="text-[10px] font-semibold text-slate-800 uppercase tracking-widest mb-3 flex items-center gap-2">
                     <Users size={12} /> Anggota Keluarga
                   </h4>
                   <div className="space-y-2">
                     {selectedRequest.familyMembers.map((member, idx) => (
                       <div key={idx} className="p-2 bg-white rounded-lg border border-slate-100">
                         <div className="flex justify-between items-center">
-                          <p className="text-xs font-black text-slate-800">{member.name}</p>
-                          <span className="text-[8px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-1.5 py-0.5 rounded">{member.relation}</span>
+                          <p className="text-xs font-semibold text-slate-800">{member.name}</p>
+                          <span className="text-[8px] font-semibold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-1.5 py-0.5 rounded">{member.relation}</span>
                         </div>
                         <div className="flex gap-3 mt-1">
                           <p className="text-[9px] font-bold text-slate-400">{member.job || '-'}</p>
@@ -969,34 +969,34 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
 
               {(selectedRequest.hasBusiness || selectedRequest.businessName) && (
                 <div className="p-4 bg-amber-50/70 rounded-2xl border border-amber-200/80">
-                  <h4 className="text-[10px] font-black text-amber-900 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <h4 className="text-[10px] font-semibold text-amber-900 uppercase tracking-widest mb-3 flex items-center gap-2">
                     <Store size={12} className="text-amber-600" /> Profil Usaha / UMKM Warga
                   </h4>
                   <div className="grid grid-cols-2 gap-3 mb-2">
                     <div className="p-2 bg-white rounded-lg border border-amber-100">
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Nama Usaha</p>
-                      <p className="text-xs font-black text-slate-800">{selectedRequest.businessName || '-'}</p>
+                      <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Nama Usaha</p>
+                      <p className="text-xs font-semibold text-slate-800">{selectedRequest.businessName || '-'}</p>
                     </div>
                     <div className="p-2 bg-white rounded-lg border border-amber-100">
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Kategori</p>
-                      <p className="text-xs font-black text-slate-800">{selectedRequest.businessCategory || '-'}</p>
+                      <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Kategori</p>
+                      <p className="text-xs font-semibold text-slate-800">{selectedRequest.businessCategory || '-'}</p>
                     </div>
                     <div className="p-2 bg-white rounded-lg border border-amber-100">
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Lokasi Operasional</p>
-                      <p className="text-xs font-black text-slate-800">{selectedRequest.businessLocation || '-'}</p>
+                      <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Lokasi Operasional</p>
+                      <p className="text-xs font-semibold text-slate-800">{selectedRequest.businessLocation || '-'}</p>
                     </div>
                     <div className="p-2 bg-white rounded-lg border border-amber-100">
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">No. WhatsApp</p>
-                      <p className="text-xs font-black text-slate-800">{selectedRequest.businessPhone || '-'}</p>
+                      <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">No. WhatsApp</p>
+                      <p className="text-xs font-semibold text-slate-800">{selectedRequest.businessPhone || '-'}</p>
                     </div>
                   </div>
                   {selectedRequest.businessDescription && (
                     <div className="p-2 bg-white rounded-lg border border-amber-100 mb-2">
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Deskripsi Produk/Jasa</p>
+                      <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Deskripsi Produk/Jasa</p>
                       <p className="text-xs font-medium text-slate-700">{selectedRequest.businessDescription}</p>
                     </div>
                   )}
-                  <span className={`inline-block px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                  <span className={`inline-block px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider ${
                     selectedRequest.isUmkmRegistered ? 'bg-amber-200 text-amber-900' : 'bg-slate-200 text-slate-700'
                   }`}>
                     {selectedRequest.isUmkmRegistered ? '✓ Terdaftar di Katalog UMKM' : 'Internal RT Saja'}
@@ -1005,7 +1005,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
               )}
 
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                <h4 className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <h4 className="text-[10px] font-semibold text-slate-800 uppercase tracking-widest mb-2 flex items-center gap-2">
                   <Info size={12} /> Alasan Perubahan
                 </h4>
                 <p className="text-xs font-bold text-slate-600 leading-relaxed">{selectedRequest.reason}</p>
@@ -1013,7 +1013,7 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
 
               {selectedRequest.adminNote && (
                 <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100">
-                  <h4 className="text-[10px] font-black text-rose-900 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <h4 className="text-[10px] font-semibold text-rose-900 uppercase tracking-widest mb-2 flex items-center gap-2">
                     <AlertCircle size={12} /> Catatan Admin
                   </h4>
                   <p className="text-xs font-bold text-rose-700 leading-relaxed">{selectedRequest.adminNote}</p>

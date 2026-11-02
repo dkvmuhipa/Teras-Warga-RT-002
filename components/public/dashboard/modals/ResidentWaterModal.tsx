@@ -62,14 +62,14 @@ export const ResidentWaterModal: React.FC<ResidentWaterModalProps> = ({
                   <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200">Mandiri Warga</span>
                   <span className="bg-white/20 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded">RT 002</span>
                 </div>
-                <h4 className="text-xl font-black tracking-tight text-white">
+                <h4 className="text-xl font-semibold tracking-tight text-white">
                   Rumah Blok {currentHouse?.block}-{currentHouse?.number}
                 </h4>
               </div>
             </div>
             <div className="text-right">
               <span className="text-[10px] uppercase font-bold text-sky-200 tracking-wider block">Pengelola Resmi</span>
-              <span className="inline-flex items-center gap-1.5 bg-white text-blue-900 text-xs font-black px-2.5 py-1 rounded-xl shadow-sm">
+              <span className="inline-flex items-center gap-1.5 bg-white text-blue-900 text-xs font-semibold px-2.5 py-1 rounded-xl shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 {waterUtilityConfig.providerName || 'PDAM Kota Palu'}
               </span>
@@ -117,10 +117,10 @@ export const ResidentWaterModal: React.FC<ResidentWaterModalProps> = ({
           {/* Meter Terkini */}
           <div className="p-3.5 bg-blue-50/60 rounded-2xl border-2 border-blue-400/80 shadow-sm shadow-blue-500/5">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[11px] font-black uppercase tracking-wider text-blue-700">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-blue-700">
                 Meter Terkini <span className="text-rose-500">*</span>
               </label>
-              <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-600 text-white animate-pulse">
+              <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-600 text-white">
                 Input
               </span>
             </div>
@@ -133,9 +133,9 @@ export const ResidentWaterModal: React.FC<ResidentWaterModalProps> = ({
                 placeholder={`≥ ${previousReadingNumber}`}
                 value={waterInputReading}
                 onChange={(e) => setWaterInputReading(e.target.value === '' ? '' : parseFloat(e.target.value))}
-                className="w-full pl-3.5 pr-9 py-2.5 bg-white border-2 border-blue-500 rounded-xl text-base font-black font-mono text-blue-700 focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
+                className="w-full pl-3.5 pr-9 py-2.5 bg-white border-2 border-blue-500 rounded-xl text-base font-semibold font-mono text-blue-700 focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-blue-600">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-blue-600">
                 m³
               </span>
             </div>
@@ -162,7 +162,7 @@ export const ResidentWaterModal: React.FC<ResidentWaterModalProps> = ({
                   <div>
                     <span className="text-[11px] font-bold text-slate-400 block">Estimasi Pemakaian Bersih</span>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-xl font-black font-mono text-white">{usage}</span>
+                      <span className="text-xl font-semibold font-mono text-white">{usage}</span>
                       <span className="text-xs font-bold text-slate-400">m³</span>
                     </div>
                   </div>
@@ -198,12 +198,12 @@ export const ResidentWaterModal: React.FC<ResidentWaterModalProps> = ({
                   </div>
                   <div className="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex p-0.5 border border-slate-700/50">
                     <div 
-                      className={`h-full rounded-full transition-all duration-300 ${isWithinQuota ? 'bg-emerald-500' : 'bg-emerald-400'}`}
+                      className={`h-full rounded-full transition-colors duration-300 ${isWithinQuota ? 'bg-emerald-500' : 'bg-emerald-400'}`}
                       style={{ width: `${Math.min(100, (Math.min(usage, quota) / quota) * 100)}%` }}
                     />
                     {preview.excessUsage > 0 && (
                       <div 
-                        className="h-full rounded-full bg-amber-500 transition-all duration-300 ml-1"
+                        className="h-full rounded-full bg-amber-500 transition-colors duration-300 ml-1"
                         style={{ width: `${Math.min(100, (preview.excessUsage / quota) * 100)}%` }}
                       />
                     )}
@@ -262,7 +262,7 @@ export const ResidentWaterModal: React.FC<ResidentWaterModalProps> = ({
               {/* Total Tagihan Result */}
               <div className="pt-2 border-t border-slate-800 flex items-center justify-between bg-slate-950/50 -mx-4 -mb-4 p-3.5 px-4 rounded-b-2xl">
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
                     Estimasi Tagihan Anda
                   </span>
                   <span className="text-[10px] text-slate-500">
@@ -270,7 +270,7 @@ export const ResidentWaterModal: React.FC<ResidentWaterModalProps> = ({
                   </span>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black font-mono text-emerald-400 tracking-tight">
+                  <div className="text-2xl font-semibold font-mono text-emerald-400 tracking-tight">
                     Rp {preview.totalAmount.toLocaleString('id-ID')}
                   </div>
                 </div>
@@ -323,7 +323,7 @@ export const ResidentWaterModal: React.FC<ResidentWaterModalProps> = ({
           <Button
             type="submit"
             disabled={isSubmittingWater || waterInputReading === ''}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-1.5 transition-all disabled:opacity-50"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-1.5 transition-colors disabled:opacity-50"
           >
             <Check className="w-4 h-4" />
             {isSubmittingWater ? 'Menyimpan Catatan...' : 'Kirim Catatan Meter'}

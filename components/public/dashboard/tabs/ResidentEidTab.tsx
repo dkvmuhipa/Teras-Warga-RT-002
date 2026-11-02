@@ -145,14 +145,14 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
         >
           <div className="flex items-start sm:items-center gap-3.5">
             <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl text-white shrink-0 border border-white/20 shadow-inner">
-              <Droplets size={24} className="text-sky-200 animate-pulse" />
+              <Droplets size={24} className="text-sky-200" />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[9px] font-black uppercase tracking-wider mb-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[9px] font-semibold uppercase tracking-wider mb-1">
                 <Sparkles size={11} className="text-amber-300" />
                 <span>Pengingat Pencatatan Mandiri</span>
               </div>
-              <h5 className="text-sm sm:text-base font-black text-white tracking-tight">
+              <h5 className="text-sm sm:text-base font-semibold text-white tracking-tight">
                 Meteran Air PDAM Periode {currentMonth} Belum Dilaporkan
               </h5>
               <p className="text-xs text-sky-100/90 mt-0.5 font-medium leading-relaxed">
@@ -163,7 +163,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
           <Button
             type="button"
             onClick={() => setIsWaterModalOpen(true)}
-            className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-sky-50 text-blue-900 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-black/10 shrink-0 transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-sky-50 text-blue-900 rounded-2xl text-xs font-semibold uppercase tracking-wider shadow-lg shadow-black/10 shrink-0 transition-transform active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <span>Catat Meter Sekarang</span>
             <span>→</span>
@@ -186,11 +186,11 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                   <CheckCircle2 size={24} className="text-emerald-200" />
                 </div>
                 <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[9px] font-black uppercase tracking-wider mb-1">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-[9px] font-semibold uppercase tracking-wider mb-1">
                     <Check size={11} className="text-emerald-200 stroke-[3]" />
                     <span>Surat Pengantar Siap Diunduh</span>
                   </div>
-                  <h5 className="text-sm sm:text-base font-black text-white tracking-tight">
+                  <h5 className="text-sm sm:text-base font-semibold text-white tracking-tight">
                     {approvedLetter.type} Telah Disetujui Ketua RT
                   </h5>
                   <p className="text-xs text-emerald-100/90 mt-0.5 font-medium leading-relaxed">
@@ -210,7 +210,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                       toast.error('Gagal mengunduh berkas PDF Surat Pengantar.');
                     }
                   }}
-                  className="flex-1 sm:flex-initial px-5 py-3 bg-white hover:bg-emerald-50 text-emerald-950 rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-black/10 shrink-0 transition-transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 sm:flex-initial px-5 py-3 bg-white hover:bg-emerald-50 text-emerald-950 rounded-2xl text-xs font-semibold uppercase tracking-wider shadow-lg shadow-black/10 shrink-0 transition-transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Download size={15} />
                   <span>Unduh PDF</span>
@@ -219,7 +219,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                   type="button"
                   onClick={() => setActiveTab('letters')}
                   variant="outline"
-                  className="px-3.5 py-3 bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-2xl text-xs font-bold transition-all cursor-pointer"
+                  className="px-3.5 py-3 bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-2xl text-xs font-bold transition-colors cursor-pointer"
                   title="Lihat Rincian Timeline"
                 >
                   <Clock size={15} />
@@ -237,7 +237,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
         <motion.div 
           whileHover={{ y: -3 }}
           onClick={() => setIsIuranModalOpen(true)}
-          className={`p-6 rounded-[2rem] border cursor-pointer transition-all ${
+          className={`p-6 rounded-[2rem] border cursor-pointer transition-colors ${
             isAllPaid 
               ? 'bg-gradient-to-br from-emerald-50/70 via-teal-50/40 to-white border-emerald-200/80 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-100/30' 
               : (isMandatory ? 'bg-gradient-to-br from-rose-50/70 via-red-50/40 to-white border-rose-200/80 hover:border-rose-300 hover:shadow-lg hover:shadow-rose-100/30' : 'bg-gradient-to-br from-amber-50/70 via-orange-50/40 to-white border-amber-200/80 hover:border-amber-300 hover:shadow-lg hover:shadow-amber-100/30')
@@ -249,7 +249,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
             }`}>
               <CreditCard size={20} />
             </div>
-            <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+            <span className={`px-2.5 py-1 rounded-xl text-[9px] font-semibold uppercase tracking-widest border ${
               isAllPaid 
                 ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' 
                 : (isMandatory ? 'bg-rose-500/20 text-rose-700 border-rose-500/30' : 'bg-amber-500/20 text-amber-700 border-amber-500/30')
@@ -257,8 +257,8 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
               {isAllPaid ? '✓ Lunas' : (isMandatory ? '⚠ Lewat Tempo' : 'Tagihan Baru')}
             </span>
           </div>
-          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Iuran Kas RT ({currentMonth})</h4>
-          <p className="text-xl font-black text-slate-800">
+          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Iuran Kas RT ({currentMonth})</h4>
+          <p className="text-xl font-semibold text-slate-800">
             {isAllPaid ? 'Lunas Terbayar' : `Rp ${totalRemainingFee.toLocaleString('id-ID')}`}
           </p>
           <p className="text-[11px] text-slate-500 font-semibold mt-1 truncate">
@@ -273,17 +273,17 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
         <motion.div 
           whileHover={{ y: -3 }}
           onClick={() => setActiveTab('water')}
-          className="p-6 rounded-[2rem] bg-gradient-to-br from-cyan-50/70 via-blue-50/40 to-white border border-cyan-200/80 hover:border-cyan-300 hover:shadow-lg hover:shadow-cyan-100/30 cursor-pointer transition-all"
+          className="p-6 rounded-[2rem] bg-gradient-to-br from-cyan-50/70 via-blue-50/40 to-white border border-cyan-200/80 hover:border-cyan-300 hover:shadow-lg hover:shadow-cyan-100/30 cursor-pointer transition-colors"
         >
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 bg-cyan-500/10 text-cyan-600 rounded-2xl">
               <Droplets size={20} />
             </div>
-            <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+            <span className={`px-2.5 py-1 rounded-xl text-[9px] font-semibold uppercase tracking-widest border ${
               currentHouse?.pdamStatus === 'Hilang'
-                ? 'bg-purple-50 text-purple-700 border-purple-300 ring-2 ring-purple-500/10 animate-pulse'
+                ? 'bg-purple-50 text-purple-700 border-purple-300 ring-2 ring-purple-500/10 '
                 : (currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
-                ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 animate-pulse'
+                ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 '
                 : currentWaterReading 
                   ? (currentWaterReading.status === 'Terverifikasi' 
                       ? 'bg-emerald-500/20 text-emerald-700 border-emerald-500/30' 
@@ -291,14 +291,14 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                   : 'bg-rose-500/20 text-rose-700 border-rose-500/30'
             }`}>
               {currentHouse?.pdamStatus === 'Hilang'
-                ? '🚨 Meteran Hilang'
+                ? 'Meteran Hilang'
                 : (currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
                 ? 'Belum Ada Meteran'
                 : currentWaterReading ? (currentWaterReading.status === 'Terverifikasi' ? '✓ Sah' : 'Menunggu') : 'Belum Catat'}
             </span>
           </div>
-          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Meter Air Mandiri</h4>
-          <p className="text-xl font-black text-slate-800">
+          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Meter Air Mandiri</h4>
+          <p className="text-xl font-semibold text-slate-800">
             {currentHouse?.pdamStatus === 'Hilang'
               ? 'Penggantian Unit'
               : (currentHouse?.pdamStatus || 'Terpasang') === 'Belum Terpasang'
@@ -320,24 +320,24 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
             if (pendingLettersCount > 0) setActiveTab('letters');
             else setActiveTab('reports');
           }}
-          className="p-6 rounded-[2rem] bg-gradient-to-br from-indigo-50/40 via-violet-50/20 to-white border border-slate-200/80 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100/20 cursor-pointer transition-all"
+          className="p-6 rounded-[2rem] bg-gradient-to-br from-indigo-50/40 via-violet-50/20 to-white border border-slate-200/80 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-100/20 cursor-pointer transition-colors"
         >
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
               <FileText size={20} />
             </div>
             {pendingLettersCount + activeReportsCount > 0 ? (
-              <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-widest border border-indigo-200">
+              <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 rounded-xl text-[9px] font-semibold uppercase tracking-widest border border-indigo-200">
                 {pendingLettersCount + activeReportsCount} Berkas Aktif
               </span>
             ) : (
-              <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-xl text-[9px] font-black uppercase tracking-widest border border-slate-200">
+              <span className="px-2.5 py-1 bg-slate-100 text-slate-500 rounded-xl text-[9px] font-semibold uppercase tracking-widest border border-slate-200">
                 Semua Beres
               </span>
             )}
           </div>
-          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Administrasi &amp; Aduan</h4>
-          <p className="text-xl font-black text-slate-800">
+          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Administrasi &amp; Aduan</h4>
+          <p className="text-xl font-semibold text-slate-800">
             {pendingLettersCount} Surat • {activeReportsCount} Aduan
           </p>
           <p className="text-[11px] text-slate-500 font-semibold mt-1">
@@ -352,18 +352,18 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
         <motion.div 
           whileHover={{ y: -3 }}
           onClick={() => setActiveTab('update')}
-          className="p-6 rounded-[2rem] bg-gradient-to-br from-emerald-50/40 via-teal-50/20 to-white border border-slate-200/80 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-100/20 cursor-pointer transition-all"
+          className="p-6 rounded-[2rem] bg-gradient-to-br from-emerald-50/40 via-teal-50/20 to-white border border-slate-200/80 hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-100/20 cursor-pointer transition-colors"
         >
           <div className="flex justify-between items-start mb-4">
             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
               <Users size={20} />
             </div>
-            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-[9px] font-black uppercase tracking-widest border border-emerald-200/60">
+            <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-xl text-[9px] font-semibold uppercase tracking-widest border border-emerald-200/60">
               {currentHouse?.isVerified ? '✓ Valid' : 'Cek KK'}
             </span>
           </div>
-          <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Anggota KK &amp; Armada</h4>
-          <p className="text-xl font-black text-slate-800">
+          <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">Anggota KK &amp; Armada</h4>
+          <p className="text-xl font-semibold text-slate-800">
             {currentHouse?.occupants || 0} Jiwa ({maleCount} L / {femaleCount} P)
           </p>
           <p className="text-[11px] text-slate-500 font-semibold mt-1 truncate">
@@ -382,7 +382,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
         <div className="lg:col-span-2">
           <motion.div 
             whileHover={{ y: -4, scale: 1.005 }}
-            className="relative group overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white border border-indigo-400/40 hover:border-indigo-300 shadow-[0_25px_60px_rgba(79,70,229,0.3)] rounded-[2.5rem] p-0 min-h-[380px] transition-all id-card-printable"
+            className="relative group overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white border border-indigo-400/40 hover:border-indigo-300 shadow-[0_25px_60px_rgba(79,70,229,0.3)] rounded-[2.5rem] p-0 min-h-[380px] transition-colors id-card-printable"
           >
             {/* Holographic Sheen Animated Light Overlay */}
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -395,11 +395,11 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
               {/* Card Top Row: EMV Chip & Hologram Seal */}
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-wider mb-2.5 backdrop-blur-md border border-white/20 text-cyan-200">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[9px] font-semibold uppercase tracking-wider mb-2.5 backdrop-blur-md border border-white/20 text-cyan-200">
                     <ShieldCheck size={12} className="text-emerald-400" />
                     <span>E-ID RESMI • HUNTAP TONDO 2</span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-black tracking-tight uppercase whitespace-nowrap">Kartu Warga Digital</h3>
+                  <h3 className="text-xl md:text-2xl font-semibold tracking-tight uppercase whitespace-nowrap">Kartu Warga Digital</h3>
                   <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.25em] text-indigo-300/80">Rukun Tetangga 002 / RW 020 • Tondo</p>
                 </div>
 
@@ -422,8 +422,8 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
               <div className="flex flex-col md:flex-row items-end md:items-center justify-between gap-8 mt-auto">
                 <div className="space-y-4 text-left w-full md:w-auto">
                   <div>
-                    <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-0.5">Kepala Keluarga / Penghuni Utama</p>
-                    <p className="text-2xl md:text-3.5xl font-black tracking-tight text-white">{currentHouse?.headOfFamily}</p>
+                    <p className="text-[9px] font-semibold uppercase tracking-widest text-indigo-300/80 mb-0.5">Kepala Keluarga / Penghuni Utama</p>
+                    <p className="text-2xl md:text-3.5xl font-semibold tracking-tight text-white">{currentHouse?.headOfFamily}</p>
                     <p className="text-[10px] font-mono text-slate-400 mt-0.5">
                       NIK: {formatSensitiveNik(currentHouse?.nik || '', !!showFullNiks['nik'])}
                     </p>
@@ -431,18 +431,18 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
 
                   <div className="flex flex-wrap gap-4 md:gap-8">
                     <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-1">ID Hunian</p>
+                      <p className="text-[9px] font-semibold uppercase tracking-widest text-indigo-300/80 mb-1">ID Hunian</p>
                       <span 
                         onClick={() => currentHouse?.id && copyToClipboard(currentHouse.id, 'houseId')}
-                        className="text-lg md:text-xl font-black hover:text-indigo-200 hover:underline cursor-pointer flex items-center gap-1.5 text-amber-300"
+                        className="text-lg md:text-xl font-semibold hover:text-indigo-200 hover:underline cursor-pointer flex items-center gap-1.5 text-amber-300"
                         title="Klik untuk salin ID Rumah"
                       >
                         Blok {currentHouse?.block}-{currentHouse?.number}
                       </span>
                     </div>
                     <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-1">Status Iuran ({currentMonth})</p>
-                      <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                      <p className="text-[9px] font-semibold uppercase tracking-widest text-indigo-300/80 mb-1">Status Iuran ({currentMonth})</p>
+                      <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest border ${
                         isAllPaid 
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
                         : (isMandatory ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30')
@@ -451,10 +451,10 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                       </span>
                     </div>
                     <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-indigo-300/80 mb-1">Poin Keaktifan</p>
+                      <p className="text-[9px] font-semibold uppercase tracking-widest text-indigo-300/80 mb-1">Poin Keaktifan</p>
                       <span 
                         onClick={() => setActiveTab('points')}
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border bg-white/15 text-amber-300 border-white/20 cursor-pointer hover:bg-white/25 transition-all"
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest border bg-white/15 text-amber-300 border-white/20 cursor-pointer hover:bg-white/25 transition-colors"
                       >
                         <Sparkles size={11} /> {currentPoints} Pts ({citizenTier.badge})
                       </span>
@@ -479,7 +479,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                       includeMargin={false}
                     />
                   </div>
-                  <p className="text-[8px] font-black tracking-widest uppercase text-slate-500 mt-2">Scan QR Warga</p>
+                  <p className="text-[8px] font-semibold tracking-widest uppercase text-slate-500 mt-2">Scan QR Warga</p>
                 </div>
               </div>
             </div>
@@ -491,7 +491,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
               onClick={() => {
                 window.print();
               }}
-              className="py-3 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer"
+              className="py-3 px-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold uppercase tracking-wider flex items-center gap-2 shadow-md shadow-indigo-600/20 cursor-pointer"
             >
               <Printer size={15} /> Cetak Kartu Warga Fisik
             </Button>
@@ -561,7 +561,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                   toast.error('Gagal mengunduh kartu E-ID');
                 }
               }}
-              className="py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 border-slate-200 hover:bg-slate-50 cursor-pointer"
+              className="py-3 px-5 rounded-2xl text-xs font-semibold uppercase tracking-wider flex items-center gap-2 border-slate-200 hover:bg-slate-50 cursor-pointer"
             >
               <Download size={15} /> Unduh Gambar PNG
             </Button>
@@ -578,7 +578,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                   <AlertTriangle size={24} />
                 </div>
                 <div className="flex-1">
-                  <h4 className={`text-sm font-black uppercase tracking-widest mb-1 ${isMandatory ? 'text-rose-900' : 'text-amber-900'}`}>
+                  <h4 className={`text-sm font-semibold uppercase tracking-widest mb-1 ${isMandatory ? 'text-rose-900' : 'text-amber-900'}`}>
                     {isMandatory ? 'Layanan Ditangguhkan' : 'Tagihan Iuran Tersedia'}
                   </h4>
                   <p className={`text-xs font-semibold leading-relaxed mb-4 ${isMandatory ? 'text-rose-700' : 'text-amber-700'}`}>
@@ -589,14 +589,14 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                   <div className="flex flex-col gap-2">
                     <Button 
                       onClick={() => setIsIuranModalOpen(true)}
-                      className={`h-11 px-6 text-[10px] font-black uppercase tracking-widest w-full shadow-md cursor-pointer ${isMandatory ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-100' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-55'}`}
+                      className={`h-11 px-6 text-[10px] font-semibold uppercase tracking-widest w-full shadow-md cursor-pointer ${isMandatory ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-100' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-55'}`}
                     >
                       Lihat Rincian
                     </Button>
                     <Button 
                       variant="secondary" 
                       onClick={() => window.open(`https://wa.me/${(currentHouse?.phone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}`, '_blank')}
-                      className="h-11 px-6 text-[10px] font-black uppercase tracking-widest w-full bg-white border-slate-200 cursor-pointer"
+                      className="h-11 px-6 text-[10px] font-semibold uppercase tracking-widest w-full bg-white border-slate-200 cursor-pointer"
                     >
                       Hubungi Pengurus RT
                     </Button>
@@ -607,40 +607,40 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
           )}
 
           <Card className="bg-white border-slate-100 shadow-sm">
-            <h4 className="font-black text-slate-800 text-sm mb-4 flex items-center gap-2">
+            <h4 className="font-semibold text-slate-800 text-sm mb-4 flex items-center gap-2">
               <Info size={16} className="text-indigo-600" /> Informasi Hunian & Kunci
             </h4>
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b border-slate-50">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Jumlah Penghuni</span>
-                <span className="text-xs font-black text-slate-800">{currentHouse?.occupants || 0} Jiwa</span>
+                <span className="text-xs font-semibold text-slate-800">{currentHouse?.occupants || 0} Jiwa</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-slate-50">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Status Tinggal</span>
-                <span className="text-xs font-black text-slate-800">{currentHouse?.residenceType || 'Tetap'}</span>
+                <span className="text-xs font-semibold text-slate-800">{currentHouse?.residenceType || 'Tetap'}</span>
               </div>
               {currentHouse?.phone && (
                 <div className="flex justify-between items-center py-2 border-b border-slate-50">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">No. Telepon WA</span>
-                  <span className="text-xs font-black text-slate-800">{currentHouse.phone}</span>
+                  <span className="text-xs font-semibold text-slate-800">{currentHouse.phone}</span>
                 </div>
               )}
               <div className="flex justify-between items-center py-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">PIN Akses Rumah</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-black text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 select-all relative group">
+                  <span className="font-mono text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 select-all relative group">
                     {activeShowPin ? currentHouse?.accessCode : '••••••'}
                   </span>
                   <button 
                     onClick={toggleShowPin} 
-                    className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
+                    className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                     title="Tampilkan PIN"
                   >
                     {activeShowPin ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                   <button 
                     onClick={() => currentHouse?.accessCode && copyToClipboard(currentHouse.accessCode, 'pin')} 
-                    className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-all cursor-pointer"
+                    className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
                     title="Salin PIN"
                   >
                     <CreditCard size={14} />
@@ -659,11 +659,11 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                     <Store size={18} />
                   </div>
                   <div>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-amber-700">Usaha Warga Terdata</span>
-                    <h4 className="font-black text-slate-800 text-sm leading-tight">{currentHouse.businessName || 'UMKM Warga'}</h4>
+                    <span className="text-[9px] font-semibold uppercase tracking-widest text-amber-700">Usaha Warga Terdata</span>
+                    <h4 className="font-semibold text-slate-800 text-sm leading-tight">{currentHouse.businessName || 'UMKM Warga'}</h4>
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
+                <span className="px-2.5 py-1 rounded-xl text-[9px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-200">
                   {currentHouse.businessCategory || 'UMKM'}
                 </span>
               </div>
@@ -693,13 +693,13 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                     setIsUpdateModalOpen(true);
                   }}
                   variant="outline"
-                  className="flex-1 h-9 text-[10px] font-black uppercase tracking-wider border-amber-300 text-amber-800 hover:bg-amber-100 rounded-xl cursor-pointer"
+                  className="flex-1 h-9 text-[10px] font-semibold uppercase tracking-wider border-amber-300 text-amber-800 hover:bg-amber-100 rounded-xl cursor-pointer"
                 >
                   Perbarui Data Usaha
                 </Button>
                 <a
                   href="/#/umkm"
-                  className="px-3.5 h-9 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center justify-center transition-colors shadow-xs"
+                  className="px-3.5 h-9 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-semibold uppercase tracking-wider flex items-center justify-center transition-colors shadow-xs"
                 >
                   Katalog
                 </a>
@@ -712,7 +712,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                   <Store size={18} />
                 </div>
                 <div className="flex-1">
-                  <h5 className="text-xs font-black text-slate-800">Punya Usaha atau Jasa?</h5>
+                  <h5 className="text-xs font-semibold text-slate-800">Punya Usaha atau Jasa?</h5>
                   <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
                     Daftarkan usaha Anda dalam pendataan warga untuk promosi gratis di lingkungan RT 02.
                   </p>
@@ -723,7 +723,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                   setActiveTab('update');
                   setIsUpdateModalOpen(true);
                 }}
-                className="w-full mt-3 h-8.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-none cursor-pointer"
+                className="w-full mt-3 h-8.5 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-semibold uppercase tracking-wider rounded-xl shadow-none cursor-pointer"
               >
                 + Daftarkan Usaha Saya
               </Button>
@@ -731,7 +731,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
           )}
 
           <Card className="bg-indigo-50 border-indigo-100 shadow-sm p-5 text-left">
-            <h4 className="font-black text-indigo-900 text-sm mb-2 flex items-center gap-1.5">
+            <h4 className="font-semibold text-indigo-900 text-sm mb-2 flex items-center gap-1.5">
               <QrCode size={16} /> Manfaat E-ID Aktif
             </h4>
             <p className="text-[11px] text-indigo-700 font-medium leading-relaxed mb-4">
@@ -862,7 +862,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                     });
                   }
                 }}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-[10px] font-black uppercase tracking-widest h-11 cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-[10px] font-semibold uppercase tracking-widest h-11 cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Download size={14} /> Unduh & Simpan Kartu E-ID
               </Button>
@@ -879,12 +879,12 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
       <div className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 md:p-8 text-left mt-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-50">
           <div>
-            <h3 className="text-lg font-black text-slate-800">Detail Profil Kepala Keluarga</h3>
+            <h3 className="text-lg font-semibold text-slate-800">Detail Profil Kepala Keluarga</h3>
             <p className="text-xs text-slate-400 font-medium mt-0.5">Rincian data identitas kependudukan, status sosial, dan fasilitas hunian Anda.</p>
           </div>
           <button 
             onClick={() => setActiveTab('update')}
-            className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer"
+            className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-xl text-xs font-semibold uppercase tracking-widest transition-colors cursor-pointer"
           >
             Ajukan Perubahan Data →
           </button>
@@ -892,9 +892,9 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Shield size={11} className="text-slate-450"/> NIK Kepala Keluarga</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Shield size={11} className="text-slate-450"/> NIK Kepala Keluarga</p>
             <div className="flex items-center gap-2">
-              <p className="text-xs font-mono font-black text-slate-800">
+              <p className="text-xs font-mono font-semibold text-slate-800">
                 {formatSensitiveNik(currentHouse?.nik || '', !!showFullNiks['nik'])}
               </p>
               {currentHouse?.nik && (
@@ -910,9 +910,9 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Users size={11} className="text-slate-450"/> Nomor Kartu Keluarga</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Users size={11} className="text-slate-450"/> Nomor Kartu Keluarga</p>
             <div className="flex items-center gap-2">
-              <p className="text-xs font-mono font-black text-slate-800">
+              <p className="text-xs font-mono font-semibold text-slate-800">
                 {formatSensitiveNik(currentHouse?.kkNumber || '', !!showFullNiks['kkNumber'])}
               </p>
               {currentHouse?.kkNumber && (
@@ -928,62 +928,62 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><User size={11} className="text-slate-450"/> Jenis Kelamin</p>
-            <p className="text-xs font-black text-slate-800">{currentHouse?.gender || '-'}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><User size={11} className="text-slate-450"/> Jenis Kelamin</p>
+            <p className="text-xs font-semibold text-slate-800">{currentHouse?.gender || '-'}</p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Calendar size={11} className="text-slate-450"/> Kelahiran</p>
-            <p className="text-xs font-black text-slate-800 truncate">
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Calendar size={11} className="text-slate-450"/> Kelahiran</p>
+            <p className="text-xs font-semibold text-slate-800 truncate">
               {currentHouse?.birthPlace || '-'}{currentHouse?.birthDate ? `, ${currentHouse?.birthDate}` : ''}
             </p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Briefcase size={11} className="text-slate-450"/> Pekerjaan</p>
-            <p className="text-xs font-black text-slate-800 truncate">{currentHouse?.job || currentHouse?.jobCategory || '-'}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Briefcase size={11} className="text-slate-450"/> Pekerjaan</p>
+            <p className="text-xs font-semibold text-slate-800 truncate">{currentHouse?.job || currentHouse?.jobCategory || '-'}</p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><GraduationCap size={11} className="text-slate-450"/> Pendidikan</p>
-            <p className="text-xs font-black text-slate-800 truncate">{currentHouse?.education || '-'}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><GraduationCap size={11} className="text-slate-450"/> Pendidikan</p>
+            <p className="text-xs font-semibold text-slate-800 truncate">{currentHouse?.education || '-'}</p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Heart size={11} className="text-slate-450"/> Golongan Darah</p>
-            <p className="text-xs font-black text-slate-800">{currentHouse?.bloodType || '-'}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Heart size={11} className="text-slate-450"/> Golongan Darah</p>
+            <p className="text-xs font-semibold text-slate-800">{currentHouse?.bloodType || '-'}</p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Globe size={11} className="text-slate-450"/> Kewarganegaraan</p>
-            <p className="text-xs font-black text-slate-800">{currentHouse?.nationality || 'WNI'}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Globe size={11} className="text-slate-450"/> Kewarganegaraan</p>
+            <p className="text-xs font-semibold text-slate-800">{currentHouse?.nationality || 'WNI'}</p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Activity size={11} className="text-slate-450"/> Status BPJS</p>
-            <p className="text-xs font-black text-slate-800">{currentHouse?.bpjsStatus || 'Tidak Ada'}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Activity size={11} className="text-slate-450"/> Status BPJS</p>
+            <p className="text-xs font-semibold text-slate-800">{currentHouse?.bpjsStatus || 'Tidak Ada'}</p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><ShieldCheck size={11} className="text-slate-450"/> Status Vaksinasi</p>
-            <p className="text-xs font-black text-slate-800">{currentHouse?.vaccinationStatus || 'Tidak Ada Data'}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><ShieldCheck size={11} className="text-slate-450"/> Status Vaksinasi</p>
+            <p className="text-xs font-semibold text-slate-800">{currentHouse?.vaccinationStatus || 'Tidak Ada Data'}</p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><DollarSign size={11} className="text-slate-450"/> Status Ekonomi</p>
-            <p className="text-xs font-black text-slate-800">{currentHouse?.economicStatus || 'Sejahtera'}</p>
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><DollarSign size={11} className="text-slate-450"/> Status Ekonomi</p>
+            <p className="text-xs font-semibold text-slate-800">{currentHouse?.economicStatus || 'Sejahtera'}</p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Shield size={11} className="text-slate-450"/> Kewajiban Ronda</p>
-            <p className="text-xs font-black text-slate-800">
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><Shield size={11} className="text-slate-450"/> Kewajiban Ronda</p>
+            <p className="text-xs font-semibold text-slate-800">
               {currentHouse?.rondaExempt ? 'Bebas Tugas Siskamling' : 'Wajib Ronda Aktif'}
             </p>
           </div>
 
           <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><CreditCard size={11} className="text-slate-450"/> Kesesuaian KTP</p>
-            <p className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+            <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><CreditCard size={11} className="text-slate-450"/> Kesesuaian KTP</p>
+            <p className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${(currentHouse?.ktpStatus === 'Sesuai Domisili' || (!currentHouse?.ktpStatus && currentHouse?.addressKtp && (currentHouse.addressKtp.toLowerCase().includes('tondo') || currentHouse.addressKtp.toLowerCase().includes('pue lombe')))) ? 'bg-emerald-500' : 'bg-amber-500'}`} />
               <span>{currentHouse?.ktpStatus || (currentHouse?.addressKtp && (currentHouse.addressKtp.toLowerCase().includes('tondo') || currentHouse.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai Domisili' : (currentHouse?.addressKtp ? 'Luar Wilayah (Belum Mutasi)' : 'Belum Dicatat'))}</span>
             </p>
@@ -991,7 +991,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
 
           {currentHouse?.addressKtp && (
             <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/85 col-span-2 md:col-span-3">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><MapPin size={11} className="text-slate-450"/> Alamat Sesuai KTP</p>
+              <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5"><MapPin size={11} className="text-slate-450"/> Alamat Sesuai KTP</p>
               <p className="text-xs font-bold text-slate-700 leading-relaxed">{currentHouse.addressKtp}</p>
             </div>
           )}
@@ -1002,16 +1002,16 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
       <div className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 md:p-8 text-left mt-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-4 border-b border-slate-50">
           <div>
-            <h3 className="text-lg font-black text-slate-800">Anggota Keluarga Terdaftar</h3>
+            <h3 className="text-lg font-semibold text-slate-800">Anggota Keluarga Terdaftar</h3>
             <p className="text-xs text-slate-400 font-medium mt-0.5">Daftar resmi penghuni rumah yang tercatat pada database kependudukan RT 002.</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-xl text-xs font-black">
+            <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">
               {currentHouse?.occupants || currentHouse?.familyMembers?.length || 1} Jiwa Terdaftar
             </span>
             <button 
               onClick={() => setActiveTab('update')}
-              className="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer"
+              className="px-4 py-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
             >
               Edit KK Mandiri →
             </button>
@@ -1022,19 +1022,19 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Jiwa</span>
-            <span className="text-lg font-black text-slate-800 mt-0.5 block">{currentHouse?.occupants || 0} Orang</span>
+            <span className="text-lg font-semibold text-slate-800 mt-0.5 block">{currentHouse?.occupants || 0} Orang</span>
           </div>
           <div className="p-3 bg-blue-50/50 rounded-2xl border border-blue-100 text-center">
             <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">Laki-Laki</span>
-            <span className="text-lg font-black text-blue-900 mt-0.5 block">{maleCount} Jiwa</span>
+            <span className="text-lg font-semibold text-blue-900 mt-0.5 block">{maleCount} Jiwa</span>
           </div>
           <div className="p-3 bg-pink-50/50 rounded-2xl border border-pink-100 text-center">
             <span className="text-[10px] font-bold text-pink-700 uppercase tracking-wider block">Perempuan</span>
-            <span className="text-lg font-black text-pink-900 mt-0.5 block">{femaleCount} Jiwa</span>
+            <span className="text-lg font-semibold text-pink-900 mt-0.5 block">{femaleCount} Jiwa</span>
           </div>
           <div className="p-3 bg-emerald-50/50 rounded-2xl border border-emerald-100 text-center">
             <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Verifikasi RT</span>
-            <span className="text-lg font-black text-emerald-900 mt-0.5 block">
+            <span className="text-lg font-semibold text-emerald-900 mt-0.5 block">
               {currentHouse?.isVerified ? 'Tervalidasi' : 'Belum'}
             </span>
           </div>
@@ -1045,14 +1045,14 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
             {currentHouse.familyMembers.map((member: any, index: number) => {
               const isMale = member.gender === 'Laki-laki';
               return (
-                <div key={index} className="p-4 bg-slate-50/60 hover:bg-slate-50 rounded-2xl border border-slate-100/90 flex items-start gap-3.5 transition-all shadow-xs">
+                <div key={index} className="p-4 bg-slate-50/60 hover:bg-slate-50 rounded-2xl border border-slate-100/90 flex items-start gap-3.5 transition-colors shadow-xs">
                   <div className={`p-3 rounded-2xl shrink-0 ${isMale ? 'bg-blue-100/70 text-blue-700' : 'bg-pink-100/70 text-pink-700'}`}>
                     <User size={20} />
                   </div>
                   <div className="flex-1 space-y-1.5 overflow-hidden">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className="font-extrabold text-slate-800 text-sm truncate">{member.name || '-' }</h4>
-                      <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                      <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
                         member.relation === 'Kepala Keluarga' 
                           ? 'bg-indigo-100 text-indigo-800' 
                           : member.relation === 'Istri' 
@@ -1116,7 +1116,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
             <Button 
               variant="outline" 
               onClick={() => setActiveTab('update')} 
-              className="mt-3 text-[10px] font-black uppercase tracking-widest cursor-pointer scale-90 border-slate-200"
+              className="mt-3 text-[10px] font-semibold uppercase tracking-widest cursor-pointer scale-90 border-slate-200"
             >
               Lengkapi Anggota KK Sekarang
             </Button>
@@ -1127,7 +1127,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
       {/* B. AKTIVITAS & LOG LAINNYA TERBARU TIMELINE (Recent activity list widget) */}
       <div className="bg-white border border-slate-100 shadow-sm rounded-[2rem] p-6 md:p-8 text-left mt-8">
         <div className="mb-6 pb-4 border-b border-slate-50">
-          <h3 className="text-lg font-black text-slate-800">Timeline Pelacakan & Aktivitas</h3>
+          <h3 className="text-lg font-semibold text-slate-800">Timeline Pelacakan & Aktivitas</h3>
           <p className="text-xs text-slate-400 font-medium mt-0.5">Pantau update terbaru dari segala aduan, surat, dan permohonan yang diajukan oleh hunian Anda.</p>
         </div>
 
@@ -1221,13 +1221,13 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
                     
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-black text-slate-800 hover:text-indigo-600 transition-colors">{act.title}</span>
+                        <span className="text-xs font-semibold text-slate-800 hover:text-indigo-600 transition-colors">{act.title}</span>
                         <span className="text-[10px] font-bold text-slate-400 truncate max-w-[80px] font-mono">#{act.id.slice(0,6)}...</span>
                       </div>
                       
                       <div className="flex items-center gap-2 self-start md:self-auto">
                         <span className="text-[9px] font-mono text-slate-400 font-bold">{dateText}</span>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${badgeStyle}`}>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-widest border ${badgeStyle}`}>
                           {act.status === 'Active' ? 'Aktif' : act.status}
                         </span>
                       </div>

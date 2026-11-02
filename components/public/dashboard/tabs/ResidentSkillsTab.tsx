@@ -34,7 +34,7 @@ export const ResidentSkillsTab: React.FC<ResidentSkillsTabProps> = ({
             <span className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
               <Wrench size={18} />
             </span>
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">Direktori Jasa &amp; Keahlian Warga RT 02</h3>
+            <h3 className="text-xl font-semibold text-slate-800 tracking-tight">Direktori Jasa &amp; Keahlian Warga RT 02</h3>
           </div>
           <p className="text-xs text-slate-500 font-medium">Temukan tukang, teknisi, guru les, atau katering dari tetangga sendiri di lingkungan kita.</p>
         </div>
@@ -49,10 +49,10 @@ export const ResidentSkillsTab: React.FC<ResidentSkillsTabProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {communitySkills.length > 0 ? (
           communitySkills.map((item) => (
-            <Card key={item.id} className="p-6 bg-white border-slate-100 shadow-sm hover:border-indigo-200 transition-all flex flex-col justify-between group">
+            <Card key={item.id} className="p-6 bg-white border-slate-100 shadow-sm hover:border-indigo-200 transition-colors flex flex-col justify-between group">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-wider border border-indigo-100">
+                  <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[9px] font-semibold uppercase tracking-wider border border-indigo-100">
                     {item.category}
                   </span>
                   <span className="text-[10px] font-bold text-slate-400">
@@ -61,15 +61,15 @@ export const ResidentSkillsTab: React.FC<ResidentSkillsTabProps> = ({
                 </div>
 
                 <div>
-                  <h4 className="font-black text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{item.title}</h4>
+                  <h4 className="font-semibold text-slate-900 text-base group-hover:text-indigo-600 transition-colors">{item.title}</h4>
                   <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">{item.description}</p>
                 </div>
 
                 <div className="p-3 bg-slate-50 rounded-xl space-y-1">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Penyedia Jasa</p>
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Penyedia Jasa</p>
                   <p className="text-xs font-bold text-slate-800">{item.providerName}</p>
                   {item.rateInfo && (
-                    <p className="text-[11px] font-semibold text-emerald-600 mt-1">💰 {item.rateInfo}</p>
+                    <p className="text-[11px] font-semibold text-emerald-600 mt-1">{item.rateInfo}</p>
                   )}
                 </div>
               </div>
@@ -81,7 +81,7 @@ export const ResidentSkillsTab: React.FC<ResidentSkillsTabProps> = ({
                     const msg = `Halo Bpk/Ibu ${item.providerName} (Blok ${item.houseId}), saya tetangga di RT 02 ingin menanyakan tentang jasa "${item.title}". Apakah sedang tersedia?`;
                     window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                   }}
-                  className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20"
+                  className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-md shadow-emerald-500/20"
                 >
                   <Phone size={14} /> Hubungi via WhatsApp
                 </button>
@@ -93,7 +93,7 @@ export const ResidentSkillsTab: React.FC<ResidentSkillsTabProps> = ({
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-3 shadow-xs">
               <Wrench size={32} />
             </div>
-            <h4 className="font-black text-slate-700 text-sm mb-1">Belum Ada Daftar Jasa Warga</h4>
+            <h4 className="font-semibold text-slate-700 text-sm mb-1">Belum Ada Daftar Jasa Warga</h4>
             <p className="text-xs text-slate-400 font-medium max-w-sm mx-auto mb-4">Jadilah yang pertama mempromosikan keahlian pertukangan, servis, atau katering Anda!</p>
             <Button 
               onClick={onOpenAddSkillModal}

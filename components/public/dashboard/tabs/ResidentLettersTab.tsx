@@ -45,7 +45,7 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
     >
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-xl font-black text-slate-800">Status Pengajuan Surat</h3>
+          <h3 className="text-xl font-semibold text-slate-800">Status Pengajuan Surat</h3>
           <p className="text-sm text-slate-500 font-medium">Pantau status surat pengantar yang Anda ajukan melalui menu Layanan.</p>
         </div>
         <Button onClick={() => window.location.hash = '#/services'} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100">
@@ -116,7 +116,7 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
               ];
 
               return (
-                <Card key={letter.id} className="bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50/50 transition-all flex flex-col justify-between">
+                <Card key={letter.id} className="bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-50/50 transition-colors flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start mb-4">
                       <div className="flex items-center gap-3">
@@ -124,14 +124,14 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                           <FileText size={20} />
                         </div>
                         <div>
-                          <h4 className="font-black text-slate-800">{letter.type}</h4>
+                          <h4 className="font-semibold text-slate-800">{letter.type}</h4>
                           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex flex-col mt-0.5">
                             <span>Diajukan: {formattedDate}</span>
                             {formattedTime && <span className="text-indigo-600 font-extrabold mt-0.5">{formattedTime}</span>}
                           </div>
                         </div>
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest border ${
                         isApproved ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
                         isRejected ? 'bg-rose-50 text-rose-600 border-rose-200' :
                         'bg-amber-50 text-amber-600 border-amber-200'
@@ -141,7 +141,7 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                     </div>
                     <div className="space-y-3">
                       <div className="p-3 bg-slate-50 rounded-xl">
-                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
+                        <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Keperluan</p>
                         <p className="text-xs font-semibold text-slate-700 leading-relaxed">{letter.purposeDetail}</p>
                       </div>
                       {letter.nik && (
@@ -158,15 +158,15 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                       )}
                       {letter.letterNumber && (
                         <div className="p-3.5 bg-indigo-50/50 border border-indigo-100 rounded-xl text-xs">
-                          <p className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-1">Nomor Surat Resmi</p>
-                          <p className="font-black text-indigo-700">{letter.letterNumber}</p>
+                          <p className="text-[8px] font-semibold text-indigo-400 uppercase tracking-widest mb-1">Nomor Surat Resmi</p>
+                          <p className="font-semibold text-indigo-700">{letter.letterNumber}</p>
                         </div>
                       )}
                     </div>
 
                     {/* Timeline Status Pelacakan */}
                     <div className="mt-5 pt-4 border-t border-slate-100">
-                      <p className="text-[10px] font-black text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-1.5 font-sans">
+                      <p className="text-[10px] font-semibold text-indigo-600 uppercase tracking-wider mb-4 flex items-center gap-1.5 font-sans">
                         <Clock size={12} className="text-indigo-500" /> ALUR PELACAKAN STATUS SURAT
                       </p>
                       <div className="space-y-4 relative pl-3.5 before:absolute before:left-[7px] before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
@@ -180,7 +180,7 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                             titleColor = 'text-slate-800 font-extrabold';
                             iconElement = <Check size={10} className="stroke-[3]" />;
                           } else if (step.status === 'active') {
-                            iconBg = 'bg-indigo-600 text-white animate-pulse';
+                            iconBg = 'bg-indigo-600 text-white ';
                             titleColor = 'text-indigo-700 font-extrabold';
                             iconElement = <Clock size={10} className="stroke-[3]" />;
                           } else if (step.status === 'failed') {
@@ -227,7 +227,7 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
 Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                           window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(msg)}`, '_blank');
                         }}
-                        className="w-full py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-indigo-200 transition-all cursor-pointer"
+                        className="w-full py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-indigo-200 transition-colors cursor-pointer"
                       >
                         <Phone size={14} /> Tanya Ketua RT via WhatsApp
                       </button>
@@ -259,7 +259,7 @@ Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
                             navigator.clipboard.writeText(letter.letterNumber || '');
                             toast.success('Nomor surat berhasil disalin!');
                           }}
-                          className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-all"
+                          className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors"
                           title="Salin Nomor Surat"
                         >
                           <Copy size={13} />

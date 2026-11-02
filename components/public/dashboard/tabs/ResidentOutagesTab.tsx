@@ -32,13 +32,13 @@ export const ResidentOutagesTab: React.FC<ResidentOutagesTabProps> = ({
             <Zap size={22} />
           </span>
           <div>
-            <h3 className="text-xl font-black text-slate-800 tracking-tight">Papan Informasi Pemadaman PLN &amp; Air Bersih</h3>
+            <h3 className="text-xl font-semibold text-slate-800 tracking-tight">Papan Informasi Pemadaman PLN &amp; Air Bersih</h3>
             <p className="text-xs text-slate-500 font-medium">Informasi resmi pemeliharaan jaringan listrik PLN dan perbaikan pipa saluran air bersih RT 02.</p>
           </div>
         </div>
         <button
           onClick={onOpenOutageModal}
-          className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer shadow-md active:scale-95 flex items-center gap-1.5"
+          className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer shadow-md active:scale-95 flex items-center gap-1.5"
         >
           <AlertTriangle size={14} />
           <span>Lapor Gangguan &amp; Posko</span>
@@ -57,7 +57,7 @@ export const ResidentOutagesTab: React.FC<ResidentOutagesTabProps> = ({
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                    <span className={`px-3 py-1 rounded-xl text-[9px] font-semibold uppercase tracking-wider flex items-center gap-1.5 ${
                       outage.type === 'PLN' ? 'bg-amber-100 text-amber-800' :
                       outage.type === 'PDAM' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
                     }`}>
@@ -65,7 +65,7 @@ export const ResidentOutagesTab: React.FC<ResidentOutagesTabProps> = ({
                     </span>
 
                     {outage.impactSeverity && (
-                      <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
+                      <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-semibold uppercase tracking-widest ${
                         outage.impactSeverity === 'Kritis' ? 'bg-rose-100 text-rose-700' :
                         outage.impactSeverity === 'Sedang' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-700'
                       }`}>
@@ -74,19 +74,19 @@ export const ResidentOutagesTab: React.FC<ResidentOutagesTabProps> = ({
                     )}
                   </div>
 
-                  <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-black uppercase tracking-widest ${
-                    outage.status === 'Ongoing' ? 'bg-rose-50 text-rose-600 animate-pulse' :
+                  <span className={`px-2.5 py-0.5 rounded-lg text-[8.5px] font-semibold uppercase tracking-widest ${
+                    outage.status === 'Ongoing' ? 'bg-rose-50 text-rose-600 ' :
                     outage.status === 'Scheduled' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
                   }`}>
-                    {outage.status === 'Ongoing' ? '⚠️ Sedang Berlangsung' : outage.status === 'Scheduled' ? '🗓️ Terjadwal' : '✓ Normal / Selesai'}
+                    {outage.status === 'Ongoing' ? 'Sedang Berlangsung' : outage.status === 'Scheduled' ? 'Terjadwal' : 'Normal / Selesai'}
                   </span>
                 </div>
 
                 <div>
-                  <h4 className="font-black text-slate-900 text-base">{outage.title}</h4>
+                  <h4 className="font-semibold text-slate-900 text-base">{outage.title}</h4>
                   <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-slate-400 mt-1">
-                    {outage.officialRefNumber && <span>📄 No: {outage.officialRefNumber}</span>}
-                    {outage.feederName && <span>🔌 {outage.feederName}</span>}
+                    {outage.officialRefNumber && <span>No: {outage.officialRefNumber}</span>}
+                    {outage.feederName && <span>{outage.feederName}</span>}
                   </div>
                   <p className="text-xs text-slate-600 font-medium leading-relaxed mt-1.5">{outage.description}</p>
                 </div>
@@ -101,7 +101,7 @@ export const ResidentOutagesTab: React.FC<ResidentOutagesTabProps> = ({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Wilayah Terdampak:</span>
-                    <span className="font-black text-slate-700">{outage.affectedBlocks?.join(', ') || 'Semua Blok'}</span>
+                    <span className="font-semibold text-slate-700">{outage.affectedBlocks?.join(', ') || 'Semua Blok'}</span>
                   </div>
                   {outage.contactCenter && (
                     <div className="flex justify-between border-t border-slate-200/50 pt-1 mt-1">
@@ -125,7 +125,7 @@ export const ResidentOutagesTab: React.FC<ResidentOutagesTabProps> = ({
             <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-3 shadow-xs">
               <CheckCircle size={32} />
             </div>
-            <h4 className="font-black text-slate-800 text-sm mb-1">Kondisi Jaringan Listrik &amp; Air Normal</h4>
+            <h4 className="font-semibold text-slate-800 text-sm mb-1">Kondisi Jaringan Listrik &amp; Air Normal</h4>
             <p className="text-xs text-slate-400 font-medium">Tidak ada jadwal pemadaman listrik PLN atau perbaikan air pipa yang tercatat saat ini.</p>
           </div>
         )}

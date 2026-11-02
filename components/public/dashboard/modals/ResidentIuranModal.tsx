@@ -62,19 +62,19 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
             <div className="absolute top-0 right-0 w-36 h-36 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-wider mb-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-semibold uppercase tracking-wider mb-2">
                   <CheckCircle2 size={13} className="text-emerald-200" />
                   <span>Status: Lunas Terbayar</span>
                 </div>
                 <p className="text-xs text-emerald-100 font-semibold">Periode {currentMonth} • Blok {currentHouse?.block}-{currentHouse?.number}</p>
-                <h3 className="text-3xl font-black mt-1">Rp 0</h3>
+                <h3 className="text-3xl font-semibold mt-1">Rp 0</h3>
                 <p className="text-[11px] text-emerald-100/90 mt-1.5 font-medium leading-relaxed">
                   Semua kewajiban iuran lingkungan bulan ini telah terverifikasi lunas. Terima kasih atas partisipasi aktif Bapak/Ibu!
                 </p>
               </div>
               <div className="hidden sm:flex flex-col items-center justify-center p-3.5 bg-white/15 backdrop-blur-md rounded-2xl border border-white/20">
                 <ShieldCheck size={36} className="text-white" />
-                <span className="text-[9px] font-black uppercase tracking-wider mt-1 text-emerald-100">Terverifikasi</span>
+                <span className="text-[9px] font-semibold uppercase tracking-wider mt-1 text-emerald-100">Terverifikasi</span>
               </div>
             </div>
           </div>
@@ -83,13 +83,13 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
             <div className="absolute top-0 right-0 w-44 h-44 bg-indigo-500/10 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none" />
             <div className="flex items-center justify-between relative z-10">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[10px] font-black uppercase tracking-wider mb-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-[10px] font-semibold uppercase tracking-wider mb-2">
                   <Clock size={13} />
                   <span>Menunggu Pembayaran</span>
                 </div>
                 <p className="text-xs text-indigo-200 font-semibold">Periode {currentMonth} • Blok {currentHouse?.block}-{currentHouse?.number}</p>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <h3 className="text-3xl font-black tracking-tight">Rp {totalRemainingFee.toLocaleString('id-ID')}</h3>
+                  <h3 className="text-3xl font-semibold tracking-tight">Rp {totalRemainingFee.toLocaleString('id-ID')}</h3>
                   {totalRemainingFee < totalFee && (
                     <span className="text-xs text-slate-400 line-through">Rp {totalFee.toLocaleString('id-ID')}</span>
                   )}
@@ -101,7 +101,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
               </div>
               <div className="hidden sm:flex flex-col items-center justify-center p-3.5 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10">
                 <Wallet size={36} className="text-indigo-400" />
-                <span className="text-[9px] font-black uppercase tracking-wider mt-1 text-slate-300">Tagihan Aktif</span>
+                <span className="text-[9px] font-semibold uppercase tracking-wider mt-1 text-slate-300">Tagihan Aktif</span>
               </div>
             </div>
           </div>
@@ -109,7 +109,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
 
         {/* Rincian Komponen Iuran Sesuai Aturan Terbaru */}
         <div className="space-y-3">
-          <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider px-1">
+          <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-1">
             Rincian Item &amp; Regulasi Lingkungan
           </h4>
 
@@ -121,7 +121,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-black text-slate-800">Retribusi Sampah TPS3R</span>
+                  <span className="text-sm font-semibold text-slate-800">Retribusi Sampah TPS3R</span>
                   <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-md text-[10px] font-bold">
                     Kategori: {currentHouseWasteTier}
                   </span>
@@ -132,8 +132,8 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
               </div>
             </div>
             <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/50">
-              <span className="text-sm font-black text-slate-900">Rp {sampahFee.toLocaleString('id-ID')}</span>
-              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md mt-1 ${
+              <span className="text-sm font-semibold text-slate-900">Rp {sampahFee.toLocaleString('id-ID')}</span>
+              <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md mt-1 ${
                 isPaidSampah ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
               }`}>
                 {isPaidSampah ? 'Lunas Terbayar' : 'Belum Bayar'}
@@ -149,7 +149,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-black text-slate-800">Air Bersih ({WATER_PROVIDER_NAME})</span>
+                  <span className="text-sm font-semibold text-slate-800">Air Bersih ({WATER_PROVIDER_NAME})</span>
                   <span className="px-2 py-0.5 bg-sky-50 text-sky-700 border border-sky-200 rounded-md text-[10px] font-bold">
                     Sistem Meter Mandiri
                   </span>
@@ -166,16 +166,16 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
                   </div>
                 ) : (
                   <p className="text-[10px] text-slate-400 mt-1">
-                    💡 Catat meter air mandiri tiap akhir bulan via menu Catat Meter PDAM di dashboard.
+                    Catat meter air mandiri tiap akhir bulan via menu Catat Meter PDAM di dashboard.
                   </p>
                 )}
               </div>
             </div>
             <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/50">
-              <span className="text-sm font-black text-slate-900">
+              <span className="text-sm font-semibold text-slate-900">
                 {airFee > 0 ? `Rp ${airFee.toLocaleString('id-ID')}` : 'Mandiri'}
               </span>
-              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md mt-1 ${
+              <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md mt-1 ${
                 airFee === 0 
                   ? 'bg-sky-100 text-sky-700' 
                   : isPaidAir 
@@ -191,10 +191,10 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
         {/* Tata Cara Pembayaran Kas RT 002 */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <h4 className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
               <Wallet size={14} className="text-slate-500" /> Tata Cara &amp; Metode Pembayaran
             </h4>
-            <span className="text-[10px] font-black px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full uppercase tracking-wider">
+            <span className="text-[10px] font-semibold px-2.5 py-0.5 bg-emerald-100 text-emerald-800 rounded-full uppercase tracking-wider">
               Pembayaran Tunai (Cash)
             </span>
           </div>
@@ -205,7 +205,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
               <Wallet size={20} />
             </div>
             <div className="space-y-1">
-              <h5 className="text-xs font-black text-emerald-950 uppercase tracking-wide flex items-center gap-2">
+              <h5 className="text-xs font-semibold text-emerald-950 uppercase tracking-wide flex items-center gap-2">
                 <span>Pembayaran Tunai ke Bendahara {tenant.name || 'RT 002'}</span>
               </h5>
               <p className="text-xs text-emerald-900/90 leading-relaxed font-medium">
@@ -229,7 +229,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
 
           {/* Petunjuk Koordinasi */}
           <div className="p-3.5 bg-amber-50/80 rounded-2xl border border-amber-200/70 text-xs text-amber-900 space-y-1.5">
-            <div className="flex items-center gap-1.5 font-black text-[11px] text-amber-950 uppercase tracking-wide">
+            <div className="flex items-center gap-1.5 font-semibold text-[11px] text-amber-950 uppercase tracking-wide">
               <Phone size={13} className="text-amber-700" />
               <span>Koordinasi Penyerahan &amp; Konfirmasi Pembayaran</span>
             </div>
@@ -241,14 +241,14 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
-          <Button onClick={onClose} variant="outline" className="sm:w-24 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider">
+          <Button onClick={onClose} variant="outline" className="sm:w-24 py-3.5 rounded-2xl text-xs font-semibold uppercase tracking-wider">
             Tutup
           </Button>
           {isAllPaid && (
             <Button
               type="button"
               onClick={handleDownloadReceipt}
-              className="py-3.5 px-4 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-md shadow-teal-600/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+              className="py-3.5 px-4 bg-teal-600 hover:bg-teal-700 text-white rounded-2xl text-xs font-semibold uppercase tracking-wider shadow-md shadow-teal-600/20 flex items-center justify-center gap-2 transition-colors active:scale-95"
             >
               <Receipt size={15} />
               <span>Kwitansi PDF</span>
@@ -258,7 +258,7 @@ export const ResidentIuranModal: React.FC<ResidentIuranModalProps> = ({
             type="button"
             onClick={() => window.print()}
             variant="outline"
-            className="sm:w-32 py-3.5 rounded-2xl text-xs font-black uppercase tracking-wider border-slate-200 hover:bg-slate-100 flex items-center justify-center gap-2"
+            className="sm:w-32 py-3.5 rounded-2xl text-xs font-semibold uppercase tracking-wider border-slate-200 hover:bg-slate-100 flex items-center justify-center gap-2"
           >
             <Printer size={15} />
             <span>Cetak Bukti</span>
@@ -280,7 +280,7 @@ ${airFee > 0 ? `• Iuran Air: Rp ${airFee.toLocaleString('id-ID')}\n` : ''}• 
 Mohon informasi waktu penyerahan atau bantuan verifikasi pencatatan status iuran. Terima kasih!`;
               window.open(`https://wa.me/${waTarget}?text=${encodeURIComponent(message)}`, '_blank');
             }}
-            className={`flex-1 py-3.5 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95 ${
+            className={`flex-1 py-3.5 text-white rounded-2xl text-xs font-semibold uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95 ${
               isAllPaid 
                 ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20' 
                 : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/20'

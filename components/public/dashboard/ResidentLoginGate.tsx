@@ -62,11 +62,11 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
         {/* Left illustration/info column */}
         <div className="md:col-span-7 space-y-6 md:pr-6 relative z-10 text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 shadow-sm">
-            <Shield size={14} className="animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-widest">Warga Hub Portal Mandiri</span>
+            <Shield size={14} className="" />
+            <span className="text-[10px] font-semibold uppercase tracking-widest">Warga Hub Portal Mandiri</span>
           </div>
           
-          <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          <h2 className="text-3xl md:text-5xl font-semibold text-slate-900 tracking-tight leading-tight">
             Akses Portal Mandiri <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-800">Warga RT 02</span>
           </h2>
@@ -87,7 +87,7 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
                   <feat.icon size={16} />
                 </div>
                 <div>
-                  <h5 className="text-xs font-black text-slate-800">{feat.title}</h5>
+                  <h5 className="text-xs font-semibold text-slate-800">{feat.title}</h5>
                   <p className="text-[11px] text-slate-400 font-semibold mt-0.5 leading-snug">{feat.desc}</p>
                 </div>
               </div>
@@ -101,12 +101,12 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             <User size={32} />
           </div>
           
-          <h3 className="text-xl font-black text-slate-800 mb-1 text-left">Pilih Rumah Anda</h3>
+          <h3 className="text-xl font-semibold text-slate-800 mb-1 text-left">Pilih Rumah Anda</h3>
           <p className="text-xs text-slate-400 font-semibold mb-6 text-left">Silakan tentukan identitas hunian aktif Anda di bawah ini:</p>
 
           <div className="space-y-4">
             <select 
-              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm cursor-pointer hover:border-indigo-200"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors shadow-sm cursor-pointer hover:border-indigo-200"
               value={tempHouseId}
               onChange={(e) => {
                 setTempHouseId(e.target.value);
@@ -137,7 +137,7 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Shield size={32} />
             </div>
-            <h3 className="text-lg font-black text-slate-800">Masukkan PIN Rumah</h3>
+            <h3 className="text-lg font-semibold text-slate-800">Masukkan PIN Rumah</h3>
             <p className="text-xs text-slate-500 font-medium mt-1">
               Akses masuk aman untuk warga <span className="font-bold text-indigo-600">Blok {houses.find(h => h.id === tempHouseId)?.block}-{houses.find(h => h.id === tempHouseId)?.number}</span>
             </p>
@@ -168,9 +168,9 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
               return (
                 <div 
                   key={idx} 
-                  className={`w-11 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-black transition-all ${
+                  className={`w-11 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-semibold transition-colors ${
                     pinError 
-                      ? 'border-rose-500 bg-rose-50 text-rose-600 animate-pulse' 
+                      ? 'border-rose-500 bg-rose-50 text-rose-600 ' 
                       : hasValue 
                         ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 shadow-md shadow-indigo-100/50 scale-105' 
                         : 'border-slate-200 bg-white text-slate-300'
@@ -186,7 +186,7 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             <button 
               type="button" 
               onClick={() => setShowPin(!showPin)}
-              className="text-xs font-black text-slate-400 hover:text-slate-600 uppercase tracking-widest flex items-center gap-1 cursor-pointer transition-colors"
+              className="text-xs font-semibold text-slate-400 hover:text-slate-600 uppercase tracking-widest flex items-center gap-1 cursor-pointer transition-colors"
             >
               {showPin ? <EyeOff size={14} /> : <Eye size={14} />}
               <span>{showPin ? "Sembunyikan PIN" : "Tampilkan PIN"}</span>
@@ -194,7 +194,7 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             <button
               type="button"
               onClick={() => setPinInput('')}
-              className="text-xs font-black text-rose-500 hover:text-rose-700 uppercase tracking-widest cursor-pointer transition-colors"
+              className="text-xs font-semibold text-rose-500 hover:text-rose-700 uppercase tracking-widest cursor-pointer transition-colors"
             >
               Hapus Semua
             </button>
@@ -213,14 +213,14 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
                 onClick={() => {
                   if (pinInput.length < 6) setPinInput(prev => prev + num);
                 }}
-                className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-black text-slate-800 rounded-2xl flex items-center justify-center transition-all cursor-pointer border border-slate-100 hover:border-slate-200"
+                className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-semibold text-slate-800 rounded-2xl flex items-center justify-center transition-colors cursor-pointer border border-slate-100 hover:border-slate-200"
               >
                 {num}
               </button>
             ))}
             <button
               type="button"
-              className="w-16 h-16 text-[10px] font-black text-slate-400 uppercase tracking-widest rounded-2xl flex items-center justify-center"
+              className="w-16 h-16 text-[10px] font-semibold text-slate-400 uppercase tracking-widest rounded-2xl flex items-center justify-center"
               disabled
             >
               {/* Blank Spacer */}
@@ -230,14 +230,14 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
               onClick={() => {
                 if (pinInput.length < 6) setPinInput(prev => prev + '0');
               }}
-              className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-black text-slate-800 rounded-2xl flex items-center justify-center transition-all cursor-pointer border border-slate-100 hover:border-slate-200"
+              className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-semibold text-slate-800 rounded-2xl flex items-center justify-center transition-colors cursor-pointer border border-slate-100 hover:border-slate-200"
             >
               0
             </button>
             <button
               type="button"
               onClick={() => setPinInput(prev => prev.slice(0, -1))}
-              className="w-16 h-16 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center transition-all cursor-pointer border border-slate-100 hover:border-slate-200 hover:text-rose-500 hover:bg-rose-50"
+              className="w-16 h-16 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center transition-colors cursor-pointer border border-slate-100 hover:border-slate-200 hover:text-rose-500 hover:bg-rose-50"
               title="Hapus satu angka"
             >
               <ArrowLeft size={18} />
@@ -260,7 +260,7 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             </span>
           </label>
 
-          <Button type="submit" className="w-full py-4.5 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 cursor-pointer font-black text-xs uppercase tracking-widest">
+          <Button type="submit" className="w-full py-4.5 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 cursor-pointer font-semibold text-xs uppercase tracking-widest">
             Verifikasi & Masuk <ChevronRight size={16} />
           </Button>
         </form>

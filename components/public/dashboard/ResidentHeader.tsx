@@ -71,7 +71,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="flex items-start md:items-center gap-4">
             {/* Avatar Initials / Icon */}
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-500/25 border border-white/20 shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xl font-semibold shadow-lg shadow-indigo-500/25 border border-white/20 shrink-0">
               {currentHouse?.headOfFamily ? (
                 currentHouse.headOfFamily.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
               ) : (
@@ -82,7 +82,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             <div className="space-y-1">
               {/* Contextual Greeting & Date */}
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${greeting.color}`}>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${greeting.color}`}>
                   <GreetingIcon size={12} />
                   <span>{greeting.text}</span>
                 </span>
@@ -93,11 +93,11 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
 
               {/* Title & House Block */}
               <div className="flex flex-wrap items-center gap-2.5">
-                <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
                   {currentHouse?.headOfFamily ? currentHouse.headOfFamily : (selectedHouseId ? 'Warga RT 02' : 'Portal Layanan Warga')}
                 </h2>
                 {selectedHouseId && (
-                  <span className="px-3 py-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-xl text-xs font-black uppercase tracking-widest text-indigo-200 border border-white/15">
+                  <span className="px-3 py-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-xl text-xs font-semibold uppercase tracking-widest text-indigo-200 border border-white/15">
                     Blok {currentHouse?.block}-{currentHouse?.number}
                   </span>
                 )}
@@ -138,7 +138,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             {selectedHouseId ? (
               <button 
                 onClick={handleLogout}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest bg-white/10 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/40 border border-white/15 transition-all cursor-pointer text-slate-300"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest bg-white/10 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/40 border border-white/15 transition-colors cursor-pointer text-slate-300"
                 title="Keluar dari sesi warga"
               >
                 <LogOut size={14} /> <span>Keluar Sesi</span>
@@ -146,7 +146,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             ) : (
               <button 
                 onClick={() => setActiveTab('eid')}
-                className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+                className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-semibold uppercase tracking-widest hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-colors cursor-pointer"
               >
                 <QrCode size={14} /> Masuk Portal Warga (PIN)
               </button>
@@ -160,11 +160,11 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
         <div className="mb-4 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 text-white p-4 rounded-3xl border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-indigo-500/20 text-indigo-300 rounded-2xl border border-indigo-400/30">
-              <Vote size={22} className="animate-pulse" />
+              <Vote size={22} className="" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-indigo-500 text-white">E-Voting RT 02</span>
+                <span className="px-2 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider bg-indigo-500 text-white">E-Voting RT 02</span>
                 <span className="text-xs font-bold text-white">1 KK = 1 Hak Suara Sah</span>
               </div>
               <p className="text-[11px] text-indigo-200 mt-0.5">Musyawarah digital penentuan keputusan lingkungan Huntap Tondo 2.</p>
@@ -172,7 +172,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
           </div>
           <button
             onClick={() => setIsVotingModalOpen(true)}
-            className="px-4 py-2 bg-white text-indigo-950 font-black rounded-xl text-xs uppercase tracking-wider hover:bg-indigo-50 transition-all shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
+            className="px-4 py-2 bg-white text-indigo-950 font-semibold rounded-xl text-xs uppercase tracking-wider hover:bg-indigo-50 transition-colors shadow-md active:scale-95 cursor-pointer whitespace-nowrap"
           >
             Buka Bilik Suara →
           </button>
@@ -192,7 +192,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             {/* Water Meter */}
             <button
               onClick={() => setActiveTab('water')}
-              className="p-4 rounded-3xl bg-[#edf7ff] hover:bg-[#e0f2fe] border border-sky-100/80 hover:border-sky-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#edf7ff] hover:bg-[#e0f2fe] border border-sky-100/80 hover:border-sky-300 hover:shadow-md transition-colors text-left group cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-white text-[#0284c7] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
                 <Droplets size={19} className="stroke-[2.5]" />
@@ -204,7 +204,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             {/* Surat Pengantar */}
             <button
               onClick={() => setActiveTab('letters')}
-              className="p-4 rounded-3xl bg-[#f0f2fe] hover:bg-[#e0e7ff] border border-indigo-100/80 hover:border-indigo-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#f0f2fe] hover:bg-[#e0e7ff] border border-indigo-100/80 hover:border-indigo-300 hover:shadow-md transition-colors text-left group cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-white text-[#4f46e5] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
                 <FileText size={19} className="stroke-[2.5]" />
@@ -216,7 +216,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             {/* Lapor Aduan */}
             <button
               onClick={() => setIsReportModalOpen(true)}
-              className="p-4 rounded-3xl bg-[#fff1f2] hover:bg-[#ffe4e6] border border-rose-100/80 hover:border-rose-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#fff1f2] hover:bg-[#ffe4e6] border border-rose-100/80 hover:border-rose-300 hover:shadow-md transition-colors text-left group cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-white text-[#e11d48] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
                 <AlertTriangle size={19} className="stroke-[2.5]" />
@@ -228,7 +228,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             {/* Lapor Tamu */}
             <button
               onClick={() => setActiveTab('guests')}
-              className="p-4 rounded-3xl bg-[#fff4eb] hover:bg-[#ffedd5] border border-amber-100/80 hover:border-amber-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#fff4eb] hover:bg-[#ffedd5] border border-amber-100/80 hover:border-amber-300 hover:shadow-md transition-colors text-left group cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-white text-[#ea580c] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
                 <Users size={19} className="stroke-[2.5]" />
@@ -240,7 +240,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             {/* Rincian Iuran */}
             <button
               onClick={() => setIsIuranModalOpen(true)}
-              className="p-4 rounded-3xl bg-[#e8faf0] hover:bg-[#dcfce7] border border-emerald-100/80 hover:border-emerald-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#e8faf0] hover:bg-[#dcfce7] border border-emerald-100/80 hover:border-emerald-300 hover:shadow-md transition-colors text-left group cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-white text-[#059669] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
                 <CreditCard size={19} className="stroke-[2.5]" />
@@ -252,7 +252,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             {/* Kartu E-ID */}
             <button
               onClick={() => setActiveTab('eid')}
-              className="p-4 rounded-3xl bg-[#f5f3ff] hover:bg-[#ede9fe] border border-purple-100/80 hover:border-purple-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#f5f3ff] hover:bg-[#ede9fe] border border-purple-100/80 hover:border-purple-300 hover:shadow-md transition-colors text-left group cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-white text-[#7c3aed] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
                 <QrCode size={19} className="stroke-[2.5]" />
@@ -264,7 +264,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             {/* 5 Pilar STBM */}
             <button
               onClick={() => setActiveTab('stbm')}
-              className="p-4 rounded-3xl bg-[#e8faf0] hover:bg-[#dcfce7] border border-emerald-100/80 hover:border-emerald-300 hover:shadow-md transition-all text-left group cursor-pointer"
+              className="p-4 rounded-3xl bg-[#e8faf0] hover:bg-[#dcfce7] border border-emerald-100/80 hover:border-emerald-300 hover:shadow-md transition-colors text-left group cursor-pointer"
             >
               <div className="w-10 h-10 rounded-xl bg-white text-[#059669] flex items-center justify-center mb-2.5 shadow-2xs group-hover:scale-110 transition-transform">
                 <CheckSquare size={19} className="stroke-[2.5]" />
@@ -286,7 +286,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             shortLabel: 'Air Bersih', 
             icon: Droplets, 
             badge: currentWaterReading ? '✓ Tercatat' : 'Catat',
-            badgeColor: currentWaterReading ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800 animate-pulse'
+            badgeColor: currentWaterReading ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800 '
           },
           { 
             id: 'points', 
@@ -302,7 +302,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
             shortLabel: 'Sanitasi STBM', 
             icon: CheckSquare, 
             badge: stbmRecord?.needsFollowUp ? 'Perlu TL' : '100% ODF',
-            badgeColor: stbmRecord?.needsFollowUp ? 'bg-rose-100 text-rose-800 animate-pulse' : 'bg-emerald-100 text-emerald-800'
+            badgeColor: stbmRecord?.needsFollowUp ? 'bg-rose-100 text-rose-800 ' : 'bg-emerald-100 text-emerald-800'
           },
           { 
             id: 'letters', 
@@ -343,9 +343,9 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
               key={tab.id}
               whileTap={{ scale: 0.98 }}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap cursor-pointer ${
                 isSelected 
-                ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/40 font-black' 
+                ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/40 font-semibold' 
                 : 'text-slate-500 hover:text-slate-800 font-semibold'
               }`}
             >
@@ -353,7 +353,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
               <span className="hidden md:inline">{tab.label}</span>
               <span className="inline md:hidden">{tab.shortLabel}</span>
               {tab.badge && (
-                <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-tight ${tab.badgeColor || 'bg-slate-200 text-slate-600'}`}>
+                <span className={`px-1.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-tight ${tab.badgeColor || 'bg-slate-200 text-slate-600'}`}>
                   {tab.badge}
                 </span>
               )}

@@ -41,7 +41,7 @@ export const ResidentReportModal: React.FC<ResidentReportModalProps> = ({
         <div className="p-6">
           <form onSubmit={handleSubmitReport} className="space-y-6">
             <div className="space-y-3">
-              <label className="block text-[10.5px] font-black text-slate-400 uppercase tracking-widest ml-1">
+              <label className="block text-[10.5px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                 Pilih Kategori Masalah <span className="text-rose-500">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -60,18 +60,18 @@ export const ResidentReportModal: React.FC<ResidentReportModalProps> = ({
                       type="button"
                       onClick={() => setReportForm({...reportForm, type: item.id as any})}
                       className={`
-                        p-3 rounded-xl border text-left flex gap-3 transition-all duration-200 cursor-pointer w-full
+                        p-3 rounded-xl border text-left flex gap-3 transition-colors duration-200 cursor-pointer w-full
                         ${isSelected 
                           ? `${item.activeBg} border border-rose-500 shadow-sm text-slate-900 ring-2 ring-rose-500/10` 
                           : 'bg-slate-50 hover:bg-slate-100/70 text-slate-600 border-slate-200'
                         }
                       `}
                     >
-                      <div className={`p-2 bg-white rounded-lg shadow-xs self-start shrink-0 ${item.color} transition-all`}>
+                      <div className={`p-2 bg-white rounded-lg shadow-xs self-start shrink-0 ${item.color} transition-colors`}>
                         <Icon size={16} />
                       </div>
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-wide">{item.title}</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide">{item.title}</p>
                         <p className="text-[9.5px] text-slate-400 font-semibold mt-0.5 leading-normal">{item.desc}</p>
                       </div>
                     </button>
@@ -81,13 +81,13 @@ export const ResidentReportModal: React.FC<ResidentReportModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              <label className="block text-[10.5px] font-black text-slate-400 uppercase tracking-widest ml-1">
+              <label className="block text-[10.5px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                 Deskripsi &amp; Kronologi Masalah <span className="text-rose-500">*</span>
               </label>
               <textarea 
                 rows={4}
                 placeholder="Ceritakan kronologi masalah secara jelas, detail, dan apa saja yang berdampak..."
-                className="w-full px-4.5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all resize-none shadow-xs placeholder:font-medium leading-relaxed"
+                className="w-full px-4.5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors resize-none shadow-xs placeholder:font-medium leading-relaxed"
                 value={reportForm.description}
                 onChange={e => setReportForm({...reportForm, description: e.target.value})}
                 required
@@ -108,7 +108,7 @@ export const ResidentReportModal: React.FC<ResidentReportModalProps> = ({
               <Button 
                 type="button" 
                 variant="outline" 
-                className="flex-1 py-4.5 rounded-xl text-xs font-black uppercase tracking-widest"
+                className="flex-1 py-4.5 rounded-xl text-xs font-semibold uppercase tracking-widest"
                 onClick={onClose}
               >
                 Batal
@@ -116,7 +116,7 @@ export const ResidentReportModal: React.FC<ResidentReportModalProps> = ({
               <Button 
                 type="submit" 
                 disabled={isSubmittingReport}
-                className="flex-[2] py-4.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-200/50 hover:shadow-rose-300 transition-all"
+                className="flex-[2] py-4.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold uppercase tracking-widest shadow-lg shadow-rose-200/50 hover:shadow-rose-300 transition-colors"
               >
                 {isSubmittingReport ? 'Mengirim...' : (
                   <span className="flex items-center justify-center gap-2">
@@ -135,24 +135,24 @@ export const ResidentReportModal: React.FC<ResidentReportModalProps> = ({
           <div className="p-6 space-y-6">
             <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status Laporan</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Status Laporan</p>
                 <div className="flex items-center gap-2">
                   <div className={`w-2 h-2 rounded-full ${
                     selectedReportDetail.status === 'Selesai' ? 'bg-emerald-500' :
                     selectedReportDetail.status === 'Diproses' ? 'bg-indigo-500' :
                     'bg-rose-500'
                   }`} />
-                  <span className="text-sm font-black text-slate-800">{selectedReportDetail.status}</span>
+                  <span className="text-sm font-semibold text-slate-800">{selectedReportDetail.status}</span>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Kategori</p>
-                <span className="text-sm font-black text-slate-800">{selectedReportDetail.type}</span>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Kategori</p>
+                <span className="text-sm font-semibold text-slate-800">{selectedReportDetail.type}</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Isi Laporan</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Isi Laporan</p>
               <div className="p-4 bg-white border border-slate-100 rounded-2xl text-sm font-medium text-slate-600 leading-relaxed">
                 {selectedReportDetail.description}
               </div>
@@ -160,18 +160,18 @@ export const ResidentReportModal: React.FC<ResidentReportModalProps> = ({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tanggal Laporan</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Tanggal Laporan</p>
                 <p className="text-sm font-bold text-slate-800">
                   {new Date(selectedReportDetail.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">ID Laporan</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">ID Laporan</p>
                 <p className="text-sm font-bold text-slate-800">#{selectedReportDetail.id.slice(-8)}</p>
               </div>
             </div>
 
-            <Button onClick={onCloseReportDetail} className="w-full py-4 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none rounded-2xl text-xs font-black uppercase tracking-widest">
+            <Button onClick={onCloseReportDetail} className="w-full py-4 bg-slate-100 text-slate-600 hover:bg-slate-200 border-none rounded-2xl text-xs font-semibold uppercase tracking-widest">
               Tutup
             </Button>
           </div>

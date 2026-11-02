@@ -48,7 +48,7 @@ export const ResidentSkillModal: React.FC<ResidentSkillModalProps> = ({
         }
       }} className="space-y-4 text-left">
         <div>
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Kategori Layanan / Jasa</label>
+          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Kategori Layanan / Jasa</label>
           <select
             value={skillForm.category}
             onChange={e => setSkillForm({...skillForm, category: e.target.value as any})}
@@ -65,7 +65,7 @@ export const ResidentSkillModal: React.FC<ResidentSkillModalProps> = ({
         </div>
 
         <div>
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Judul / Nama Jasa</label>
+          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Judul / Nama Jasa</label>
           <input 
             type="text" 
             required
@@ -77,7 +77,7 @@ export const ResidentSkillModal: React.FC<ResidentSkillModalProps> = ({
         </div>
 
         <div>
-          <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Rincian Keahlian &amp; Pengalaman</label>
+          <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Rincian Keahlian &amp; Pengalaman</label>
           <textarea 
             required
             rows={3}
@@ -90,7 +90,7 @@ export const ResidentSkillModal: React.FC<ResidentSkillModalProps> = ({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nomor WhatsApp</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Nomor WhatsApp</label>
             <input 
               type="text" 
               required
@@ -101,7 +101,7 @@ export const ResidentSkillModal: React.FC<ResidentSkillModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Perkiraan Biaya / Tarif</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Perkiraan Biaya / Tarif</label>
             <input 
               type="text" 
               value={skillForm.rateInfo}
@@ -112,7 +112,7 @@ export const ResidentSkillModal: React.FC<ResidentSkillModalProps> = ({
           </div>
         </div>
 
-        <Button type="submit" className="w-full py-3.5 bg-indigo-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/20 mt-2">
+        <Button type="submit" className="w-full py-3.5 bg-indigo-600 text-white text-xs font-semibold uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/20 mt-2">
           Simpan &amp; Publikasikan Jasa
         </Button>
       </form>

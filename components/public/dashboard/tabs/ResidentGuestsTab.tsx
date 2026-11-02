@@ -24,22 +24,22 @@ export const ResidentGuestsTab: React.FC<ResidentGuestsTabProps> = ({ guestRepor
       className="space-y-6"
     >
       <div>
-        <h3 className="text-xl font-black text-slate-800">Log Kunjungan Tamu</h3>
+        <h3 className="text-xl font-semibold text-slate-800">Log Kunjungan Tamu</h3>
         <p className="text-sm text-slate-500 font-medium">Daftar tamu yang melapor berkunjung ke rumah Anda melalui sistem Keamanan RT.</p>
       </div>
 
       <div className="space-y-4">
         {guestReports.length > 0 ? (
           guestReports.map((guest) => (
-            <Card key={guest.id} className="p-6 bg-white border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
+            <Card key={guest.id} className="p-6 bg-white border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-colors">
               <div className="flex items-center gap-4">
                 <div className={`p-4 rounded-2xl ${guest.status === 'Active' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-50 text-slate-400'}`}>
                   <Users size={24} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-black text-slate-800">{guest.guestName}</h4>
-                    <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
+                    <h4 className="font-semibold text-slate-800">{guest.guestName}</h4>
+                    <span className={`px-2 py-0.5 rounded-md text-[8px] font-semibold uppercase tracking-widest ${
                       guest.status === 'Active' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400'
                     }`}>
                       {guest.status === 'Active' ? 'Masih Berkunjung' : 'Sudah Pulang'}
@@ -53,7 +53,7 @@ export const ResidentGuestsTab: React.FC<ResidentGuestsTabProps> = ({ guestRepor
                 </div>
               </div>
               <div className="text-right hidden md:block">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Dilaporkan Pada</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Dilaporkan Pada</p>
                 <p className="text-xs font-bold text-slate-700">{new Date(guest.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Makassar' })} WITA</p>
               </div>
             </Card>
@@ -63,7 +63,7 @@ export const ResidentGuestsTab: React.FC<ResidentGuestsTabProps> = ({ guestRepor
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 mx-auto mb-4">
               <History size={32} />
             </div>
-            <h4 className="font-black text-slate-800 mb-1">Belum Ada Data Tamu</h4>
+            <h4 className="font-semibold text-slate-800 mb-1">Belum Ada Data Tamu</h4>
             <p className="text-xs text-slate-400 font-medium">Tidak ada riwayat tamu yang melapor berkunjung ke rumah Anda.</p>
           </div>
         )}
