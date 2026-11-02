@@ -10,7 +10,7 @@ import {
   Edit3, Trash2, Sliders, CheckSquare, Eye, Share2, Info,
   AlertTriangle, Droplets, Package, Camera, AlertOctagon,
   History, UserPlus, HardDrive, Terminal, CheckCheck, ToggleLeft, ToggleRight, X,
-  UploadCloud, Clock, Zap, Wifi
+  UploadCloud, Clock, Zap, Wifi, FileSpreadsheet
 } from 'lucide-react';
 import { useTenant } from '../../context/TenantContext';
 import { 
@@ -37,6 +37,8 @@ import {
 } from '../../services/databaseService';
 
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
+import { BulkTenantOnboardModal } from './BulkTenantOnboardModal';
+import { exportFleetReportExcel } from '../../services/excelService';
 import { TenantDetailModal } from './TenantDetailModal';
 import { RestoreSnapshotModal } from './RestoreSnapshotModal';
 import { OfficialsDirectoryTab } from './OfficialsDirectoryTab';
@@ -80,6 +82,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
   // Modal & Drawer States
   const [showOnboardModal, setShowOnboardModal] = useState(false);
+  const [showBulkOnboardModal, setShowBulkOnboardModal] = useState(false);
   const [showRestoreModal, setShowRestoreModal] = useState(false);
   const [showTriageDrawer, setShowTriageDrawer] = useState(false);
   const [selectedTenantForDetail, setSelectedTenantForDetail] = useState<Tenant | null>(null);
@@ -368,6 +371,24 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   };
 
   // Export tenants directory as CSV
+    // Export Multi-Sheet Kelurahan Fleet Report (.xlsx)
+  const handleExportFleetExcel = () => {
+    try {
+      exportFleetReportExcel({
+        tenants: availableTenants,
+        houses: allHouses,
+        cashFlows: allCashFlow,
+        officials: allOfficials,
+        kelurahanName: currentTenant?.kelurahan || 'Kelurahan'
+      });
+      logAuditEvent('Ekspor Laporan Wilayah Excel', 'export', 'all', 'Mengunduh laporan rekapitulasi wilayah kelurahan multi-sheet (.xlsx)');
+      toast.success('Laporan kelurahan multi-sheet (.xlsx) berhasil diunduh!');
+    } catch (e: any) {
+      console.error('Fleet Excel export failed:', e);
+      toast.error('Gagal mengekspor laporan wilayah ke Excel');
+    }
+  };
+
   const handleExportCSV = () => {
     try {
       const headers = ['ID Tenant', 'Nama RT', 'RT', 'RW', 'Kelurahan', 'Kecamatan', 'Kota', 'Status', 'Alamat', 'Ketua RT', 'No Telp', 'Blok Terdaftar', 'Modul Aktif', 'Tarif Sampah', 'Kas RT', 'Air PDAM'];
@@ -763,6 +784,27 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <span>Daftarkan RT Baru</span>
           </button>
 
+          {/* Quick Action: Bulk Onboard Tenants */}
+          <button
+            onClick={() => setShowBulkOnboardModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/20 cursor-pointer"
+            title="Pendaftaran Kolektif RT Massal (Rentang Otomatis / Import Excel)"
+          >
+            <Layers size={14} />
+            <span>Onboarding Massal RT</span>
+          </button>
+
+          {/* Export Multi-Sheet Fleet Report Excel */}
+          <button
+            onClick={handleExportFleetExcel}
+            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            title="Unduh Buku Rekap Wilayah Kelurahan Multi-Sheet (.xlsx)"
+          >
+            <FileSpreadsheet size={13} className="text-emerald-700" />
+            <span className="hidden sm:inline">Laporan Wilayah (.xlsx)</span>
+          </button>
+
+
           {/* Snapshot JSON Backup */}
           <button
             onClick={handleExportPlatformSnapshot}
@@ -923,6 +965,17 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               <Plus size={13} />
               <span>Daftarkan RT Baru</span>
             </button>
+
+            {/* Quick Bulk Onboard Pill */}
+            <button
+              onClick={() => setShowBulkOnboardModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl border border-dashed border-violet-300 hover:border-violet-500 bg-white hover:bg-violet-50/40 text-violet-700 text-xs font-bold transition-all shrink-0 cursor-pointer shadow-2xs"
+              title="Pendaftaran Kolektif RT Massal"
+            >
+              <Layers size={13} />
+              <span>Massal</span>
+            </button>
+
           </div>
 
           {/* 4 Precision Telemetry Micro-Dials */}
@@ -2334,6 +2387,17 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         onSuccess={(created) => {
           logAuditEvent('Pendaftaran RT Baru Berhasil', 'lifecycle', created.id, `Wilayah baru ${created.name} berhasil didaftarkan`);
           toast.success(`Tenant ${created.name} Berhasil Didaftarkan oleh Super Admin!`);
+        }}
+      />
+
+            {/* Centralized Bulk Onboarding Modal */}
+      <BulkTenantOnboardModal
+        isOpen={showBulkOnboardModal}
+        onClose={() => setShowBulkOnboardModal(false)}
+        existingTenants={availableTenants}
+        onSuccess={(count) => {
+          logAuditEvent('Pendaftaran Massal RT', 'lifecycle', 'fleet', `Berhasil mendaftarkan ${count} RT secara kolektif`);
+          toast.success(`Berhasil mendaftarkan ${count} RT secara massal!`);
         }}
       />
 

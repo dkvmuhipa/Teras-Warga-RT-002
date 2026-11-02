@@ -5,7 +5,7 @@ import {
   DollarSign, Palette, AlertTriangle, ArrowRight, ShieldCheck,
   Calendar, CheckCircle2, Sliders, Eye, ToggleLeft, ToggleRight,
   Droplets, Package, FileText, AlertOctagon, Activity, Camera,
-  CheckSquare, Square, Download, Key, Mail
+  CheckSquare, Square, Download, Key, Mail, Sparkles
 } from 'lucide-react';
 
 import { motion, AnimatePresence } from 'motion/react';
@@ -61,7 +61,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   onUpdate,
   onDelete
 }) => {
-  const { updateTenant, deleteTenant, startSupervision } = useTenant();
+  const { updateTenant, deleteTenant, startSupervision, availableTenants } = useTenant();
   const [activeTab, setActiveTab] = useState<'info' | 'officials' | 'fees' | 'modules' | 'links' | 'operations'>('operations');
 
   const [isEditing, setIsEditing] = useState(false);
@@ -270,6 +270,69 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
     setCopiedLink(type);
     toast.success('Tautan berhasil disalin ke clipboard');
     setTimeout(() => setCopiedLink(null), 2500);
+  };
+
+    // Replicate RT 002 Preset Configuration (Feature Flags & Fee Matrix)
+  const handleApplyRT002Preset = async () => {
+    const pilotTenant = availableTenants?.find(t => t.id === 'rt-002' || t.slug === 'rt-002' || t.rt === '002' || t.name.includes('002'));
+    const defaultModules: TenantModules = pilotTenant?.modules || {
+      waterMeter: true,
+      assetRental: true,
+      letters: true,
+      panicButton: true,
+      stbmSanitation: true,
+      cctv: true
+    };
+    const defaultFees = pilotTenant?.fees || pilotTenant?.feeConfig || {
+      kasFee: 20000,
+      sampahUmum: 20000,
+      sampahUsaha: 30000,
+      airFee: 3000,
+      baseRate: 3000
+    };
+
+    if (isEditing) {
+      setFormData(prev => ({
+        ...prev,
+        modules: { ...defaultModules },
+        fees: { ...(prev.fees || {}), ...defaultFees },
+        feeConfig: { ...(prev.feeConfig || {}), ...defaultFees }
+      }));
+      toast.success('Preset Modul & Tarif RT 002 (Percontohan) disalin ke form! Klik "Simpan Perubahan" untuk konfirmasi.');
+    } else {
+      const confirmApply = window.confirm(`Terapkan preset standar RT 002 (semua modul aktif & tarif standar) ke ${tenant.name}?`);
+      if (!confirmApply) return;
+
+      setIsSaving(true);
+      try {
+        if (updateTenant) {
+          await updateTenant(tenant.id, {
+            modules: defaultModules,
+            fees: defaultFees,
+            feeConfig: defaultFees
+          });
+        }
+        if (onUpdate) {
+          onUpdate({
+            ...tenant,
+            modules: defaultModules,
+            fees: defaultFees,
+            feeConfig: defaultFees
+          });
+        }
+        setFormData(prev => ({
+          ...prev,
+          modules: defaultModules,
+          fees: defaultFees,
+          feeConfig: defaultFees
+        }));
+        toast.success(`Preset RT 002 berhasil diterapkan ke ${tenant.name}!`);
+      } catch (err) {
+        toast.error('Gagal menerapkan preset RT 002');
+      } finally {
+        setIsSaving(false);
+      }
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -1362,6 +1425,37 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                     )}
                   </div>
                 </div>
+              </div>
+
+                            {/* Preset RT 002 Replication Card */}
+              <div className="p-4.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Sparkles size={18} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-black text-indigo-950 uppercase tracking-wide">
+                        Replikasi Preset RT 002 (Percontohan)
+                      </h4>
+                      <span className="text-[9px] font-mono font-bold bg-indigo-200/80 text-indigo-800 px-1.5 py-0.5 rounded">
+                        STANDAR KELURAHAN
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-indigo-800/80 mt-0.5">
+                      Terapkan konfigurasi modul lengkap (Surat, Keuangan, STBM, CCTV, Tombol Darurat) dan matriks tarif standar dari RT 002.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleApplyRT002Preset}
+                  disabled={isSaving}
+                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  <Copy size={13} />
+                  <span>Terapkan Preset RT 002</span>
+                </button>
               </div>
 
               {/* Mode Supervisi CTA Card */}

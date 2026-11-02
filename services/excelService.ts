@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import { House, PaymentStatus, STBMRecord, Tenant } from '../types';
+import { House, PaymentStatus, STBMRecord, Tenant, CashFlow, Official } from '../types';
 import { getTenantById } from './tenantService';
 import { getActiveTenantScope } from './databaseService';
 
@@ -2776,4 +2776,482 @@ export const exportPBBReportExcel = async (
   const dateStr = new Date().toISOString().split('T')[0];
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
   saveAs(blob, `Laporan_Pendataan_SPPT_PBB_${year}_${meta.rtLabel}_${dateStr}.xlsx`);
+};
+
+// ============================================================================
+// SUPER ADMIN & CIVIC FLEET: MULTI-TENANT RECAPITULATION & ONBOARDING
+// ============================================================================
+
+export interface FleetReportData {
+  tenants: Tenant[];
+  houses: House[];
+  cashFlows: CashFlow[];
+  officials: Official[];
+  kelurahanName?: string;
+}
+
+export interface BulkTenantCandidate {
+  name: string;
+  rt: string;
+  rw: string;
+  kelurahan: string;
+  kecamatan?: string;
+  city?: string;
+  chairmanName: string;
+  chairmanPhone: string;
+  chairmanEmail?: string;
+  blockPrefix?: string;
+  blockStart?: number;
+  blockEnd?: number;
+  housesPerBlock?: number;
+  slug?: string;
+}
+
+/**
+ * Generates and downloads a multi-sheet official Excel report for Super Admin (Kelurahan/Kecamatan).
+ * Sheet 1: Direktori & Profil RT
+ * Sheet 2: Kesehatan Kas & Fiskal
+ * Sheet 3: Rekapitulasi PBB & Demografi
+ */
+export const exportFleetReportExcel = async (data: FleetReportData) => {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Teras Warga Super Admin';
+  workbook.created = new Date();
+
+  const kelurahan = data.kelurahanName || data.tenants[0]?.kelurahan || 'TONDO';
+  const dateStr = new Date().toISOString().split('T')[0];
+  const printTimestamp = new Date().toLocaleString('id-ID');
+
+  const thinBorder: Partial<ExcelJS.Borders> = {
+    top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+    left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+    bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+    right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+  };
+
+  // -------------------------------------------------------------
+  // SHEET 1: DIREKTORI & PROFIL RT
+  // -------------------------------------------------------------
+  const ws1 = workbook.addWorksheet('Direktori RT', {
+    views: [{ showGridLines: true }]
+  });
+
+  ws1.columns = [
+    { key: 'no', width: 6 },
+    { key: 'rt', width: 12 },
+    { key: 'rw', width: 10 },
+    { key: 'kelurahan', width: 18 },
+    { key: 'name', width: 28 },
+    { key: 'chairmanName', width: 26 },
+    { key: 'chairmanPhone', width: 18 },
+    { key: 'chairmanEmail', width: 28 },
+    { key: 'totalHouses', width: 14 },
+    { key: 'occupiedHouses', width: 14 },
+    { key: 'totalPopulation', width: 16 },
+    { key: 'status', width: 14 }
+  ];
+
+  // Header Kop
+  ws1.mergeCells('A1:L1');
+  ws1.getCell('A1').value = `PEMERINTAH KOTA PALU - KELURAHAN ${kelurahan.toUpperCase()}`;
+  ws1.getCell('A1').font = { name: 'Segoe UI', size: 13, bold: true, color: { argb: 'FF1E293B' } };
+  ws1.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+
+  ws1.mergeCells('A2:L2');
+  ws1.getCell('A2').value = `DIREKTORI WILAYAH & STATUS DIGITALISASI RT (TERAS WARGA)`;
+  ws1.getCell('A2').font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF4338CA' } };
+  ws1.getCell('A2').alignment = { vertical: 'middle', horizontal: 'center' };
+
+  ws1.mergeCells('A3:L3');
+  ws1.getCell('A3').value = `Dicetak pada: ${printTimestamp} | Total ${data.tenants.length} Wilayah RT Terdaftar`;
+  ws1.getCell('A3').font = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF64748B' } };
+  ws1.getCell('A3').alignment = { vertical: 'middle', horizontal: 'center' };
+
+  // Table Headers
+  const headers1 = [
+    'No', 'RT', 'RW', 'Kelurahan', 'Nama Tenant / Komunitas', 
+    'Ketua RT', 'No. WhatsApp', 'Email Resmi Login', 
+    'Jumlah Rumah', 'Dihuni (KK)', 'Total Jiwa', 'Status Operasional'
+  ];
+
+  const headerRow1 = ws1.addRow(headers1);
+  headerRow1.height = 28;
+  headerRow1.eachCell((cell) => {
+    cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF312E81' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = thinBorder;
+  });
+
+  // Populate Sheet 1 Rows
+  data.tenants.forEach((t, idx) => {
+    const tHouses = data.houses.filter(h => h.tenantId === t.id);
+    const tOfficials = data.officials.filter(o => o.tenantId === t.id);
+    const chairman = tOfficials.find(o => (o.role || '').toLowerCase().includes('ketua') || o.id?.includes('chairman')) || {
+      name: t.chairmanName || '-',
+      phone: t.chairmanPhone || '-',
+      email: '-'
+    };
+
+    const totalHouses = tHouses.length;
+    const occupiedHouses = tHouses.filter(h => h.status === 'Occupied').length;
+    const totalPopulation = tHouses.reduce((sum, h) => sum + (h.occupants || 0), 0);
+
+    const row = ws1.addRow([
+      idx + 1,
+      `RT ${t.rt || '-'}`,
+      `RW ${t.rw || '-'}`,
+      t.kelurahan || kelurahan,
+      t.name,
+      chairman.name || t.chairmanName || '-',
+      chairman.phone || t.chairmanPhone || '-',
+      chairman.email || '-',
+      totalHouses,
+      occupiedHouses,
+      totalPopulation,
+      t.status === 'active' ? 'AKTIF' : t.status === 'maintenance' ? 'PEMELIHARAAN' : 'DITANGGUHKAN'
+    ]);
+
+    row.height = 20;
+    row.eachCell((cell, colNum) => {
+      cell.border = thinBorder;
+      cell.font = { name: 'Segoe UI', size: 9 };
+      if (colNum === 1 || colNum === 2 || colNum === 3) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      } else if (colNum >= 9 && colNum <= 11) {
+        cell.alignment = { vertical: 'middle', horizontal: 'right', indent: 1 };
+        cell.numFmt = '#,##0';
+      } else if (colNum === 12) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        if (t.status === 'active') {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF065F46' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1FAE5' } };
+        } else {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF991B1B' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+        }
+      } else {
+        cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      }
+    });
+  });
+
+  // -------------------------------------------------------------
+  // SHEET 2: KESEHATAN KAS & FISKAL
+  // -------------------------------------------------------------
+  const ws2 = workbook.addWorksheet('Kesehatan Kas & Fiskal', {
+    views: [{ showGridLines: true }]
+  });
+
+  ws2.columns = [
+    { key: 'no', width: 6 },
+    { key: 'rt', width: 14 },
+    { key: 'kelurahan', width: 18 },
+    { key: 'duesRate', width: 18 },
+    { key: 'wasteRate', width: 18 },
+    { key: 'totalIncome', width: 22 },
+    { key: 'totalExpense', width: 22 },
+    { key: 'balance', width: 22 },
+    { key: 'statusKas', width: 18 }
+  ];
+
+  ws2.mergeCells('A1:I1');
+  ws2.getCell('A1').value = `REKAPITULASI KEUANGAN & SALDO KAS RT SE-KELURAHAN ${kelurahan.toUpperCase()}`;
+  ws2.getCell('A1').font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FF1E293B' } };
+  ws2.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+
+  const headers2 = [
+    'No', 'Wilayah RT', 'Kelurahan', 'Tarif Iuran / KK', 'Tarif Sampah / KK', 
+    'Total Pemasukan (Rp)', 'Total Pengeluaran (Rp)', 'Saldo Kas Berjalan (Rp)', 'Status Kas'
+  ];
+
+  const headerRow2 = ws2.addRow(headers2);
+  headerRow2.height = 28;
+  headerRow2.eachCell((cell) => {
+    cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F766E' } }; // Teal 700
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = thinBorder;
+  });
+
+  data.tenants.forEach((t, idx) => {
+    const tCash = data.cashFlows.filter(c => c.tenantId === t.id);
+    const income = tCash.filter(c => c.type === 'Income').reduce((sum, c) => sum + (c.amount || 0), 0);
+    const expense = tCash.filter(c => c.type === 'Expense').reduce((sum, c) => sum + (c.amount || 0), 0);
+    const balance = income - expense;
+
+    const feeIuran = t.fees?.kasFee || t.feeConfig?.kasFee || 20000;
+    const feeSampah = t.fees?.sampahUmum || t.feeConfig?.sampahUmum || 20000;
+
+    const row = ws2.addRow([
+      idx + 1,
+      `${t.name} (RT ${t.rt})`,
+      t.kelurahan || kelurahan,
+      feeIuran,
+      feeSampah,
+      income,
+      expense,
+      balance,
+      balance >= 1000000 ? 'SEHAT' : balance > 0 ? 'WASPADA' : 'DEFISIT'
+    ]);
+
+    row.height = 20;
+    row.eachCell((cell, colNum) => {
+      cell.border = thinBorder;
+      cell.font = { name: 'Segoe UI', size: 9 };
+      if (colNum === 1) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      } else if (colNum >= 4 && colNum <= 8) {
+        cell.alignment = { vertical: 'middle', horizontal: 'right', indent: 1 };
+        cell.numFmt = '#,##0';
+      } else if (colNum === 9) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        if (balance >= 1000000) {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF065F46' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1FAE5' } };
+        } else if (balance > 0) {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF92400E' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEF3C7' } };
+        } else {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF991B1B' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+        }
+      } else {
+        cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      }
+    });
+  });
+
+  // -------------------------------------------------------------
+  // SHEET 3: REKAPITULASI PBB & FASILITAS
+  // -------------------------------------------------------------
+  const ws3 = workbook.addWorksheet('PBB & Demografi', {
+    views: [{ showGridLines: true }]
+  });
+
+  ws3.columns = [
+    { key: 'no', width: 6 },
+    { key: 'rt', width: 14 },
+    { key: 'kelurahan', width: 18 },
+    { key: 'totalHouses', width: 14 },
+    { key: 'occupied', width: 14 },
+    { key: 'empty', width: 14 },
+    { key: 'pbbLunas', width: 16 },
+    { key: 'pbbBelum', width: 16 },
+    { key: 'pbbRatio', width: 18 }
+  ];
+
+  ws3.mergeCells('A1:I1');
+  ws3.getCell('A1').value = `MONITORING KEPATUHAN PBB & KEPENGHUNIAN RUMAH TANGGA`;
+  ws3.getCell('A1').font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FF1E293B' } };
+  ws3.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+
+  const headers3 = [
+    'No', 'Wilayah RT', 'Kelurahan', 'Total Rumah', 'Rumah Dihuni', 
+    'Rumah Kosong', 'PBB Lunas (Unit)', 'PBB Belum (Unit)', 'Persentase Ketaatan'
+  ];
+
+  const headerRow3 = ws3.addRow(headers3);
+  headerRow3.height = 28;
+  headerRow3.eachCell((cell) => {
+    cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0369A1' } }; // Sky 700
+    cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    cell.border = thinBorder;
+  });
+
+  data.tenants.forEach((t, idx) => {
+    const tHouses = data.houses.filter(h => h.tenantId === t.id);
+    const total = tHouses.length;
+    const occupied = tHouses.filter(h => h.status === 'Occupied').length;
+    const empty = tHouses.filter(h => h.status === 'Empty').length;
+    const pbbLunas = tHouses.filter(h => h.pbbPaymentStatus === 'Lunas').length;
+    const pbbBelum = total - pbbLunas;
+    const ratio = total > 0 ? (pbbLunas / total) : 0;
+
+    const row = ws3.addRow([
+      idx + 1,
+      `${t.name} (RT ${t.rt})`,
+      t.kelurahan || kelurahan,
+      total,
+      occupied,
+      empty,
+      pbbLunas,
+      pbbBelum,
+      ratio
+    ]);
+
+    row.height = 20;
+    row.eachCell((cell, colNum) => {
+      cell.border = thinBorder;
+      cell.font = { name: 'Segoe UI', size: 9 };
+      if (colNum === 1) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      } else if (colNum >= 4 && colNum <= 8) {
+        cell.alignment = { vertical: 'middle', horizontal: 'right', indent: 1 };
+        cell.numFmt = '#,##0';
+      } else if (colNum === 9) {
+        cell.alignment = { vertical: 'middle', horizontal: 'right', indent: 1 };
+        cell.numFmt = '0.0%';
+        if (ratio >= 0.75) {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF065F46' } };
+        } else if (ratio < 0.4) {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF991B1B' } };
+        }
+      } else {
+        cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      }
+    });
+  });
+
+  // Export buffer & download
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Laporan_Wilayah_Kelurahan_${kelurahan.replace(/\s+/g, '_')}_${dateStr}.xlsx`);
+};
+
+/**
+ * Generates an empty / sample template Excel file for Super Admin to distribute or fill for Bulk RT Onboarding.
+ */
+export const generateBulkTenantTemplateExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Teras Warga Super Admin';
+  workbook.created = new Date();
+
+  const ws = workbook.addWorksheet('Template Onboarding RT', {
+    views: [{ showGridLines: true }]
+  });
+
+  ws.columns = [
+    { key: 'no', width: 6 },
+    { key: 'namaRt', width: 24 },
+    { key: 'rt', width: 10 },
+    { key: 'rw', width: 10 },
+    { key: 'kelurahan', width: 18 },
+    { key: 'kecamatan', width: 18 },
+    { key: 'kota', width: 16 },
+    { key: 'chairmanName', width: 26 },
+    { key: 'chairmanPhone', width: 18 },
+    { key: 'chairmanEmail', width: 28 },
+    { key: 'blockPrefix', width: 14 },
+    { key: 'blockStart', width: 12 },
+    { key: 'blockEnd', width: 12 },
+    { key: 'housesPerBlock', width: 16 }
+  ];
+
+  // Title
+  ws.mergeCells('A1:N1');
+  ws.getCell('A1').value = 'TEMPLATE PENDAFTARAN MASSAL RT (BULK ONBOARDING TERAS WARGA)';
+  ws.getCell('A1').font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FF1E293B' } };
+  ws.getCell('A1').alignment = { vertical: 'middle', horizontal: 'center' };
+
+  ws.mergeCells('A2:N2');
+  ws.getCell('A2').value = 'Petunjuk: Isi baris mulai nomor 1 ke bawah. Jangan mengubah urutan kolom.';
+  ws.getCell('A2').font = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF64748B' } };
+  ws.getCell('A2').alignment = { vertical: 'middle', horizontal: 'center' };
+
+  const headers = [
+    'No', 'Nama Wilayah RT', 'No RT', 'No RW', 'Kelurahan', 
+    'Kecamatan', 'Kota', 'Nama Ketua RT', 'No WA Ketua RT', 
+    'Email Ketua RT', 'Prefix Blok', 'Blok Awal', 'Blok Akhir', 'Rumah/Blok'
+  ];
+
+  const headerRow = ws.addRow(headers);
+  headerRow.height = 26;
+  headerRow.eachCell((cell) => {
+    cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4338CA' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+  });
+
+  // Sample Rows
+  const sampleRows = [
+    [1, 'RT 003 RW 020 Tondo', '03', '020', 'Tondo', 'Mantikulore', 'Palu', 'Bpk. Hendra Gunawan', '081234567890', 'rt003.tondo@teraswarga.id', 'C', 5, 8, 20],
+    [2, 'RT 004 RW 020 Tondo', '04', '020', 'Tondo', 'Mantikulore', 'Palu', 'Bpk. Rahmat Hidayat', '081398765432', 'rt004.tondo@teraswarga.id', 'C', 9, 12, 20]
+  ];
+
+  sampleRows.forEach(r => {
+    const row = ws.addRow(r);
+    row.height = 20;
+    row.eachCell((cell, colNum) => {
+      cell.font = { name: 'Segoe UI', size: 9 };
+      cell.alignment = { vertical: 'middle', horizontal: colNum >= 8 && colNum <= 10 ? 'left' : 'center', indent: 1 };
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, 'Template_Bulk_Onboarding_RT.xlsx');
+};
+
+/**
+ * Parses an uploaded Excel (.xlsx) file into an array of validated BulkTenantCandidate objects.
+ */
+export const parseBulkTenantExcel = async (file: File): Promise<BulkTenantCandidate[]> => {
+  const arrayBuffer = await file.arrayBuffer();
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(arrayBuffer);
+
+  const worksheet = workbook.worksheets[0];
+  if (!worksheet) {
+    throw new Error('Berkas spreadsheet kosong atau tidak memiliki lembar kerja.');
+  }
+
+  const candidates: BulkTenantCandidate[] = [];
+
+  worksheet.eachRow((row, rowNumber) => {
+    // Skip title and header rows (rows 1, 2, 3)
+    if (rowNumber <= 3) return;
+
+    const getVal = (idx: number): string => {
+      const v = row.getCell(idx).value;
+      if (v === null || v === undefined) return '';
+      if (typeof v === 'object' && 'text' in v) return String((v as any).text).trim();
+      return String(v).trim();
+    };
+
+    const namaRt = getVal(2);
+    const rt = getVal(3);
+    const rw = getVal(4);
+    const kelurahan = getVal(5);
+    const kecamatan = getVal(6) || 'Mantikulore';
+    const kota = getVal(7) || 'Palu';
+    const chairmanName = getVal(8);
+    const chairmanPhone = getVal(9);
+    const chairmanEmail = getVal(10);
+    const blockPrefix = getVal(11) || 'C';
+    const blockStart = parseInt(getVal(12) || '1', 10);
+    const blockEnd = parseInt(getVal(13) || '5', 10);
+    const housesPerBlock = parseInt(getVal(14) || '20', 10);
+
+    if (!namaRt && !rt) return; // skip empty rows
+
+    const cleanRt = rt.padStart(2, '0');
+    const cleanRw = rw.padStart(3, '0');
+    const name = namaRt || `RT ${cleanRt} RW ${cleanRw} ${kelurahan}`;
+    const slug = `rt${cleanRt.replace(/[^0-9]/g, '')}-rw${cleanRw.replace(/[^0-9]/g, '')}-${kelurahan.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+
+    candidates.push({
+      name,
+      rt: cleanRt,
+      rw: cleanRw,
+      kelurahan: kelurahan || 'Tondo',
+      kecamatan,
+      city: kota,
+      chairmanName: chairmanName || `Ketua RT ${cleanRt}`,
+      chairmanPhone: chairmanPhone || '08123456789',
+      chairmanEmail: chairmanEmail || `rt${cleanRt}.${kelurahan.toLowerCase()}@teraswarga.id`,
+      blockPrefix,
+      blockStart: isNaN(blockStart) ? 1 : blockStart,
+      blockEnd: isNaN(blockEnd) ? 5 : blockEnd,
+      housesPerBlock: isNaN(housesPerBlock) ? 20 : housesPerBlock,
+      slug
+    });
+  });
+
+  if (candidates.length === 0) {
+    throw new Error('Tidak ditemukan baris data RT yang valid pada template spreadsheet.');
+  }
+
+  return candidates;
 };
