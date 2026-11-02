@@ -278,12 +278,37 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <DetailItem icon={<Phone size={13} />} label="Nomor WA / Telp" value={selectedResident.phone || 'N/A'} isUrgent={!!selectedResident.phone} />
                   <DetailItem icon={<MapPin size={13} />} label="Alamat Blok / No" value={`Blok ${selectedResident.block} No. ${selectedResident.number}`} />
                   <DetailItem icon={<Home size={13} />} label="Status Hunian" value={selectedResident.residenceType || 'Tetap'} />
-                  <DetailItem 
-                    icon={<FileText size={13} />} 
-                    label="Status PBB" 
-                    value={selectedResident.pbbStatus || 'Belum Diambil'} 
-                    isUrgent={selectedResident.pbbStatus !== 'Sudah Diambil'} 
-                  />
+                  <div className="col-span-2 p-3 bg-emerald-50/40 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                        <FileText size={15} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">PBB {selectedResident.pbbYear || new Date().getFullYear()}</span>
+                          {selectedResident.pbbNop && (
+                            <span className="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-emerald-900 font-bold">{selectedResident.pbbNop}</span>
+                          )}
+                        </div>
+                        <p className="text-xs font-extrabold text-slate-800">
+                          {selectedResident.pbbPaymentStatus === 'Lunas' ? '✓ Lunas' : 'Belum Lunas'}
+                          <span className="text-slate-400 font-normal"> • </span>
+                          <span className={selectedResident.pbbProofAtRt === 'Ada di RT' ? 'text-sky-700 font-bold' : 'text-slate-500'}>
+                            Bukti: {selectedResident.pbbProofAtRt || 'Belum Ada'}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 self-end sm:self-center">
+                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border ${
+                        selectedResident.pbbStatus === 'Sudah Diambil'
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                          : 'bg-amber-50 text-amber-800 border-amber-200'
+                      }`}>
+                        SPPT: {selectedResident.pbbStatus || 'Belum Diambil'}
+                      </span>
+                    </div>
+                  </div>
                   <div className="col-span-2">
                     <DetailItem 
                       icon={<Droplets size={13} className={selectedResident.pdamStatus === 'Hilang' ? 'text-purple-600' : 'text-blue-500'} />} 

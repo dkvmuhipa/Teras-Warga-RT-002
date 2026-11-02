@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert, AlertTriangle,
-  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen, Building, CheckSquare, Building2
+  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen, Building, CheckSquare, Building2, Landmark
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
@@ -114,6 +114,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       title: "Kependudukan", 
       items: [
         { id: 'residents', icon: Users, label: 'Data Warga' },
+        { id: 'pbb', icon: Landmark, label: 'Pendataan SPPT PBB' },
         { id: 'mutations', icon: FileClock, label: 'Mutasi & Laporan Penduduk' },
         { id: 'rentals', icon: Building, label: 'Rumah Sewa & Kontrakan' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
@@ -164,10 +165,10 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       const isSecretary = role === Role.SECRETARY || roleStr.includes('sekretaris');
 
       if (isTreasurer) {
-        isAllowed = ['overview', 'analytics', 'rw-recap', 'finance', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
+        isAllowed = ['overview', 'analytics', 'rw-recap', 'finance', 'pbb', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
       } else if (isSecretary) {
         isAllowed = [
-          'overview', 'analytics', 'rw-recap', 'residents', 'mutations', 'rentals',
+          'overview', 'analytics', 'rw-recap', 'residents', 'pbb', 'mutations', 'rentals',
           'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
         ].includes(item.id);

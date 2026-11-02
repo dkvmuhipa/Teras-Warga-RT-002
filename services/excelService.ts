@@ -2465,3 +2465,309 @@ export const exportSTBMReportExcel = async (
 
 
 
+
+// =========================================================================
+// PENDATAAN & REKAPITULASI SPPT PBB TINGKAT RT (PAJAK BUMI & BANGUNAN)
+// =========================================================================
+export const exportPBBReportExcel = async (
+  houses: House[],
+  year: string = new Date().getFullYear().toString(),
+  rtRwText?: string
+) => {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Teras Warga RT 002 Huntap Tondo 2';
+  workbook.lastModifiedBy = 'Pengurus RT';
+  workbook.created = new Date();
+  workbook.modified = new Date();
+
+  const meta = getExcelTenantMeta();
+  const labelRt = rtRwText || `${meta.rtDisplayName} / RW 020`;
+
+  // Sort houses naturally by block & number
+  const sorted = [...houses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
+  
+  const totalUnits = sorted.length;
+  const countProofAtRt = sorted.filter(h => h.pbbProofAtRt === 'Ada di RT').length;
+  const countPaid = sorted.filter(h => h.pbbPaymentStatus === 'Lunas').length;
+  const countUnpaid = totalUnits - countPaid;
+  const countSpptAtRt = sorted.filter(h => h.pbbSpptAtRt === 'Ada di RT').length;
+  const countTaken = sorted.filter(h => h.pbbStatus === 'Sudah Diambil').length;
+  const totalAmount = sorted.reduce((acc, h) => acc + (h.pbbAmount || 0), 0);
+  const paidAmount = sorted.filter(h => h.pbbPaymentStatus === 'Lunas').reduce((acc, h) => acc + (h.pbbAmount || 0), 0);
+  const pctPaid = totalUnits > 0 ? Math.round((countPaid / totalUnits) * 100) : 0;
+  const pctProof = totalUnits > 0 ? Math.round((countProofAtRt / totalUnits) * 100) : 0;
+
+  // -------------------------------------------------------------------------
+  // SHEET 1: RINGKASAN & REKAPITULASI PBB RT
+  // -------------------------------------------------------------------------
+  const wsSummary = workbook.addWorksheet('Rekapitulasi PBB', {
+    views: [{ showGridLines: true }]
+  });
+
+  wsSummary.columns = [
+    { width: 6 },   // A: No / Spacing
+    { width: 30 },  // B: Indikator / Blok
+    { width: 22 },  // C: Target / Unit
+    { width: 22 },  // D: Realisasi Lunas
+    { width: 22 },  // E: Bukti di RT
+    { width: 22 },  // F: SPPT di RT
+    { width: 22 },  // G: Diambil Warga
+    { width: 20 },  // H: % Capaian
+  ];
+
+  // Header Title
+  wsSummary.mergeCells('A1:H1');
+  const sumTitle1 = wsSummary.getCell('A1');
+  sumTitle1.value = `PEMERINTAH KOTA PALU • KELURAHAN TONDO • ${labelRt.toUpperCase()}`;
+  sumTitle1.font = { name: 'Segoe UI', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+  sumTitle1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF065F46' } }; // Emerald 800
+  sumTitle1.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  wsSummary.mergeCells('A2:H2');
+  const sumTitle2 = wsSummary.getCell('A2');
+  sumTitle2.value = `LAPORAN PENDATAAN & REALISASI SPPT PBB TAHUN ${year}`;
+  sumTitle2.font = { name: 'Segoe UI', size: 14, bold: true, color: { argb: 'FF065F46' } };
+  sumTitle2.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  wsSummary.mergeCells('A3:H3');
+  const sumTitle3 = wsSummary.getCell('A3');
+  sumTitle3.value = `Dicetak otomatis oleh Sistem Administrasi Teras Warga pada: ${new Date().toLocaleDateString('id-ID', { dateStyle: 'full' })}`;
+  sumTitle3.font = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF64748B' } };
+  sumTitle3.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  wsSummary.addRow([]);
+
+  // KPI Table
+  const kpiRowStart = 5;
+  wsSummary.mergeCells(`B${kpiRowStart}:H${kpiRowStart}`);
+  const kpiHeader = wsSummary.getCell(`B${kpiRowStart}`);
+  kpiHeader.value = 'RINGKASAN INDIKATOR PBB TINGKAT RT';
+  kpiHeader.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+  kpiHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F766E' } };
+  kpiHeader.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+
+  const indicators = [
+    { label: 'Total Unit Rumah / Objek Pajak', val: `${totalUnits} Unit`, note: '100% Terdata di RT' },
+    { label: 'Bukti Pembayaran PBB di Tangan RT', val: `${countProofAtRt} Unit (${pctProof}%)`, note: countProofAtRt === totalUnits ? 'Lengkap di RT' : `${totalUnits - countProofAtRt} Belum Ada Bukti` },
+    { label: 'Status Pembayaran PBB Lunas', val: `${countPaid} Unit (${pctPaid}%)`, note: `${countUnpaid} Belum Lunas` },
+    { label: 'Lembar Fisik SPPT PBB Masuk RT', val: `${countSpptAtRt} Unit`, note: `${totalUnits - countSpptAtRt} Belum Diterima` },
+    { label: 'Lembar SPPT Sudah Diambil Warga', val: `${countTaken} Unit`, note: `${totalUnits - countTaken} Belum Diambil` },
+    { label: 'Total Estimasi Ketetapan PBB', val: `Rp ${totalAmount.toLocaleString('id-ID')}`, note: `Realisasi: Rp ${paidAmount.toLocaleString('id-ID')}` },
+  ];
+
+  indicators.forEach((ind, idx) => {
+    const rowNum = kpiRowStart + 1 + idx;
+    wsSummary.mergeCells(`B${rowNum}:D${rowNum}`);
+    wsSummary.mergeCells(`E${rowNum}:F${rowNum}`);
+    wsSummary.mergeCells(`G${rowNum}:H${rowNum}`);
+
+    const cellLabel = wsSummary.getCell(`B${rowNum}`);
+    cellLabel.value = ind.label;
+    cellLabel.font = { name: 'Segoe UI', size: 9, bold: true };
+    cellLabel.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+
+    const cellVal = wsSummary.getCell(`E${rowNum}`);
+    cellVal.value = ind.val;
+    cellVal.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FF065F46' } };
+    cellVal.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    const cellNote = wsSummary.getCell(`G${rowNum}`);
+    cellNote.value = ind.note;
+    cellNote.font = { name: 'Segoe UI', size: 9, italic: true, color: { argb: 'FF64748B' } };
+    cellNote.alignment = { vertical: 'middle', horizontal: 'center' };
+
+    [cellLabel, cellVal, cellNote].forEach(c => {
+      c.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+      };
+    });
+  });
+
+  // Rekapitulasi per Blok
+  const blockSet = new Set<string>();
+  sorted.forEach(h => { if (h.block) blockSet.add(h.block); });
+  const blockList = Array.from(blockSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+
+  const blockStartRow = kpiRowStart + indicators.length + 3;
+  wsSummary.mergeCells(`B${blockStartRow}:H${blockStartRow}`);
+  const blockHeader = wsSummary.getCell(`B${blockStartRow}`);
+  blockHeader.value = 'REKAPITULASI PBB PER WILAYAH BLOK';
+  blockHeader.font = { name: 'Segoe UI', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+  blockHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+  blockHeader.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+
+  const blockTableHeaders = ['Blok', 'Total Rumah', 'Lunas', 'Belum Lunas', 'Bukti di RT', 'SPPT di RT', '% Lunas'];
+  const blockHeaderRow = wsSummary.addRow(['', ...blockTableHeaders]);
+  blockHeaderRow.height = 24;
+  blockHeaderRow.eachCell((cell, colNum) => {
+    if (colNum >= 2 && colNum <= 8) {
+      cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF334155' } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF0F172A' } },
+        bottom: { style: 'thin', color: { argb: 'FF0F172A' } },
+        left: { style: 'thin', color: { argb: 'FF0F172A' } },
+        right: { style: 'thin', color: { argb: 'FF0F172A' } }
+      };
+    }
+  });
+
+  blockList.forEach(blk => {
+    const blkHouses = sorted.filter(h => h.block === blk);
+    const blkTotal = blkHouses.length;
+    const blkPaid = blkHouses.filter(h => h.pbbPaymentStatus === 'Lunas').length;
+    const blkUnpaid = blkTotal - blkPaid;
+    const blkProof = blkHouses.filter(h => h.pbbProofAtRt === 'Ada di RT').length;
+    const blkSppt = blkHouses.filter(h => h.pbbSpptAtRt === 'Ada di RT').length;
+    const blkPct = blkTotal > 0 ? `${Math.round((blkPaid / blkTotal) * 100)}%` : '0%';
+
+    const r = wsSummary.addRow(['', `Blok ${blk}`, blkTotal, blkPaid, blkUnpaid, blkProof, blkSppt, blkPct]);
+    r.height = 20;
+    r.eachCell((cell, colNum) => {
+      if (colNum >= 2 && colNum <= 8) {
+        cell.font = { name: 'Segoe UI', size: 9 };
+        cell.alignment = { vertical: 'middle', horizontal: colNum === 2 ? 'left' : 'center', indent: colNum === 2 ? 1 : 0 };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+          right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+        };
+      }
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // SHEET 2: DATA RINCI OBJEK SPPT PBB
+  // -------------------------------------------------------------------------
+  const wsDetails = workbook.addWorksheet('Data Rinci Objek PBB', {
+    views: [{ showGridLines: true }]
+  });
+
+  wsDetails.columns = [
+    { width: 6 },   // A: No
+    { width: 10 },  // B: Blok
+    { width: 10 },  // C: No Rumah
+    { width: 28 },  // D: Nama Kepala Keluarga
+    { width: 14 },  // E: Status Hunian
+    { width: 24 },  // F: NOP (18 Digit)
+    { width: 26 },  // G: Nama WP di SPPT
+    { width: 18 },  // H: Bukti di RT
+    { width: 16 },  // I: Status Pembayaran
+    { width: 16 },  // J: Tgl Bayar
+    { width: 16 },  // K: SPPT di RT
+    { width: 16 },  // L: Pengambilan Warga
+    { width: 18 },  // M: Nominal Tagihan
+    { width: 28 },  // N: Catatan
+  ];
+
+  // Header Title
+  wsDetails.mergeCells('A1:N1');
+  const detTitle = wsDetails.getCell('A1');
+  detTitle.value = `DATA RINCI PENDATAAN OBJEK PAJAK BUMI & BANGUNAN (PBB) TAHUN ${year} - ${labelRt.toUpperCase()}`;
+  detTitle.font = { name: 'Segoe UI', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
+  detTitle.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF065F46' } };
+  detTitle.alignment = { vertical: 'middle', horizontal: 'center' };
+
+  const tableHeaders = [
+    'NO', 'BLOK', 'NO. RUMAH', 'NAMA KEPALA KELUARGA / PENGHUNI', 'STATUS HUNIAN',
+    'NOMOR OBJEK PAJAK (NOP)', 'NAMA WAJIB PAJAK (SPPT)', 'BUKTI DI RT',
+    'STATUS BAYAR', 'TGL BAYAR', 'SPPT DI RT', 'AMBIL WARGA', 'NOMINAL (RP)', 'CATATAN'
+  ];
+
+  const headerRow = wsDetails.addRow(tableHeaders);
+  headerRow.height = 26;
+  headerRow.eachCell((cell) => {
+    cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F766E' } };
+    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+    cell.border = {
+      top: { style: 'thin', color: { argb: 'FF065F46' } },
+      bottom: { style: 'thin', color: { argb: 'FF065F46' } },
+      left: { style: 'thin', color: { argb: 'FF065F46' } },
+      right: { style: 'thin', color: { argb: 'FF065F46' } }
+    };
+  });
+
+  sorted.forEach((h, idx) => {
+    const isPaid = h.pbbPaymentStatus === 'Lunas';
+    const isProofAtRt = h.pbbProofAtRt === 'Ada di RT';
+    const isSpptAtRt = h.pbbSpptAtRt === 'Ada di RT';
+    const isTaken = h.pbbStatus === 'Sudah Diambil';
+
+    const row = wsDetails.addRow([
+      idx + 1,
+      h.block || '-',
+      h.number || '-',
+      (h.headOfFamily || '-').toUpperCase(),
+      h.residenceType || 'Tetap',
+      h.pbbNop || '-',
+      h.pbbTaxpayerName || h.headOfFamily || '-',
+      isProofAtRt ? 'Ada di RT' : 'Belum Ada',
+      isPaid ? 'Lunas' : 'Belum Lunas',
+      h.pbbPaidDate || '-',
+      isSpptAtRt ? 'Ada di RT' : 'Belum Ada',
+      isTaken ? 'Sudah Diambil' : 'Belum Diambil',
+      h.pbbAmount ? h.pbbAmount : '-',
+      h.pbbNotes || '-'
+    ]);
+
+    row.height = 20;
+
+    // Formatting & Colors
+    row.eachCell((cell, colNum) => {
+      cell.font = { name: 'Segoe UI', size: 9 };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } }
+      };
+
+      if (colNum === 1 || colNum === 2 || colNum === 3 || colNum === 5 || colNum === 10) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      } else if (colNum === 4 || colNum === 7 || colNum === 14) {
+        cell.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+      } else if (colNum === 6) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.font = { name: 'Consolas', size: 9, bold: true };
+      } else if (colNum === 8) {
+        // Bukti di RT
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        if (isProofAtRt) {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF065F46' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1FAE5' } };
+        } else {
+          cell.font = { name: 'Segoe UI', size: 9, color: { argb: 'FF64748B' } };
+        }
+      } else if (colNum === 9) {
+        // Status Pembayaran
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        if (isPaid) {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FF065F46' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1FAE5' } };
+        } else {
+          cell.font = { name: 'Segoe UI', size: 9, bold: true, color: { argb: 'FFB91C1C' } };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+        }
+      } else if (colNum === 11 || colNum === 12) {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      } else if (colNum === 13) {
+        cell.alignment = { vertical: 'middle', horizontal: 'right', indent: 1 };
+        if (typeof cell.value === 'number') {
+          cell.numFmt = '#,##0';
+        }
+      }
+    });
+  });
+
+  // Download directly
+  const buffer = await workbook.xlsx.writeBuffer();
+  const dateStr = new Date().toISOString().split('T')[0];
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, `Laporan_Pendataan_SPPT_PBB_${year}_${meta.rtLabel}_${dateStr}.xlsx`);
+};

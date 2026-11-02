@@ -413,6 +413,14 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                             <span className={`w-1.5 h-1.5 rounded-full ${house.pbbStatus === 'Sudah Diambil' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
                             <span>{house.pbbStatus === 'Sudah Diambil' ? 'Diambil' : 'Belum'}</span>
                           </button>
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            {house.pbbProofAtRt === 'Ada di RT' && (
+                              <span className="text-[8px] font-extrabold px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 border border-sky-100" title="Bukti PBB sudah ada di tangan RT">Bukti RT</span>
+                            )}
+                            {house.pbbPaymentStatus === 'Lunas' && (
+                              <span className="text-[8px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-100" title="Pembayaran PBB Lunas">Lunas</span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Ownership Type */}

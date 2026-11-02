@@ -340,9 +340,18 @@ export interface House {
   rondaDutyCount?: number; // NEW: Jumlah Tugas dalam sebulan/periode
   rondaLastDuty?: string; // NEW: Tanggal Tugas Terakhir (ISO)
 
-  // PBB Management
-  pbbStatus?: 'Sudah Diambil' | 'Belum Diambil'; // NEW: Status Pengambilan PBB
-  pbbYear?: string; // NEW: Tahun PBB
+  // PBB Management (Pajak Bumi & Bangunan)
+  pbbStatus?: 'Sudah Diambil' | 'Belum Diambil'; // Status Pengambilan SPPT oleh Warga
+  pbbYear?: string; // Tahun Pajak PBB (e.g. '2026')
+  pbbProofAtRt?: 'Ada di RT' | 'Belum Ada'; // Bukti Pembayaran PBB sudah ada di tangan RT atau belum
+  pbbPaymentStatus?: 'Lunas' | 'Belum Lunas'; // Status Pembayaran PBB
+  pbbSpptAtRt?: 'Ada di RT' | 'Belum Ada'; // Fisik Lembar SPPT PBB sudah di tangan RT
+  pbbNop?: string; // Nomor Objek Pajak (18 Digit)
+  pbbTaxpayerName?: string; // Nama Wajib Pajak pada SPPT
+  pbbAmount?: number; // Nominal Ketetapan Tagihan PBB (Rp)
+  pbbPaidDate?: string; // Tanggal Pembayaran PBB (YYYY-MM-DD)
+  pbbPaymentProofUrl?: string; // URL / Lampiran Bukti Pembayaran
+  pbbNotes?: string; // Catatan Khusus PBB
   isInitialData?: boolean; // NEW: Flag for initial sync
   useManualDemographics?: boolean; // NEW: Allow manual override of auto counts
 

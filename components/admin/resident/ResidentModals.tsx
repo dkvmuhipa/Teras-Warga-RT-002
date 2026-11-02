@@ -918,6 +918,79 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                            </div>
                        </div>
 
+                       {/* Administrasi & Pendataan SPPT PBB */}
+                       <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs space-y-3">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-center text-emerald-700">
+                                <FileText size={14} />
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-bold text-slate-800">Administrasi SPPT PBB</h3>
+                                <p className="text-[10px] text-slate-400">Pajak Bumi & Bangunan Unit</p>
+                              </div>
+                            </div>
+                            <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
+                              {formData.pbbYear || new Date().getFullYear()}
+                            </span>
+                          </div>
+
+                          <div className="space-y-3">
+                            <FormField 
+                              label="Nomor Objek Pajak (NOP)"
+                              placeholder="72.71.010.001.002-0003.0"
+                              value={formData.pbbNop || ''}
+                              onChange={(v: any) => setFormData({ ...formData, pbbNop: v })}
+                            />
+
+                            <FormField 
+                              label="Nama WP di SPPT (Bila Berbeda)"
+                              placeholder="Nama wajib pajak di surat..."
+                              value={formData.pbbTaxpayerName || ''}
+                              onChange={(v: any) => setFormData({ ...formData, pbbTaxpayerName: v })}
+                            />
+
+                            <div className="grid grid-cols-2 gap-2 pt-1">
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-600 mb-1">Bukti di RT</label>
+                                <button
+                                  type="button"
+                                  onClick={() => setFormData({
+                                    ...formData,
+                                    pbbProofAtRt: formData.pbbProofAtRt === 'Ada di RT' ? 'Belum Ada' : 'Ada di RT'
+                                  })}
+                                  className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition-all ${
+                                    formData.pbbProofAtRt === 'Ada di RT'
+                                      ? 'bg-sky-50 text-sky-700 border-sky-200'
+                                      : 'bg-slate-50 text-slate-500 border-slate-200'
+                                  }`}
+                                >
+                                  {formData.pbbProofAtRt === 'Ada di RT' ? '✓ Ada di RT' : 'Belum Ada'}
+                                </button>
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-bold text-slate-600 mb-1">Status Bayar</label>
+                                <button
+                                  type="button"
+                                  onClick={() => setFormData({
+                                    ...formData,
+                                    pbbPaymentStatus: formData.pbbPaymentStatus === 'Lunas' ? 'Belum Lunas' : 'Lunas',
+                                    pbbPaidDate: formData.pbbPaymentStatus === 'Lunas' ? '' : (formData.pbbPaidDate || new Date().toISOString().split('T')[0])
+                                  })}
+                                  className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition-all ${
+                                    formData.pbbPaymentStatus === 'Lunas'
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                                  }`}
+                                >
+                                  {formData.pbbPaymentStatus === 'Lunas' ? '✓ Lunas' : 'Belum Lunas'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                       </div>
+
                        {/* Option to generate mutation log (enabled only during edit of occupied house) */}
                        {editingHouseId && formData.status === "Occupied" && (
                          <div className="bg-amber-50/70 p-4 border border-amber-200/80 rounded-xl flex items-start gap-3">

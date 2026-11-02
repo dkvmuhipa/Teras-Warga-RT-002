@@ -245,7 +245,15 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
               <div className="flex items-center gap-2">
                 <FileText size={14} className={house.pbbStatus === 'Sudah Diambil' ? 'text-emerald-600' : 'text-amber-600'} />
                 <div className="text-left">
-                  <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400">PBB {house.pbbYear || new Date().getFullYear()}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400">PBB {house.pbbYear || new Date().getFullYear()}</p>
+                    {house.pbbPaymentStatus === 'Lunas' && (
+                      <span className="text-[8px] font-black text-emerald-700 bg-emerald-100/80 px-1 rounded">LUNAS</span>
+                    )}
+                    {house.pbbProofAtRt === 'Ada di RT' && (
+                      <span className="text-[8px] font-black text-sky-700 bg-sky-100/80 px-1 rounded">BUKTI DI RT</span>
+                    )}
+                  </div>
                   <p className="text-[10px] font-extrabold uppercase leading-none mt-0.5">{house.pbbStatus || 'Belum Diambil'}</p>
                 </div>
               </div>
