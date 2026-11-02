@@ -617,10 +617,10 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <div className="w-16 h-16 rounded-2xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto mb-4">
             <ShieldAlert size={32} />
           </div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-mono uppercase font-black mb-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-mono uppercase font-semibold mb-3">
             Otorisasi Terbatas
           </div>
-          <h2 className="text-xl font-black text-slate-900 mb-2 tracking-tight">
+          <h2 className="text-xl font-semibold text-slate-900 mb-2 tracking-tight">
             Khusus Super Admin Platform
           </h2>
           <p className="text-xs text-slate-600 mb-6 leading-relaxed">
@@ -630,7 +630,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <div className="flex gap-3 justify-center">
             <button
               onClick={() => navigate('/')}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors  cursor-pointer flex items-center gap-1.5"
             >
               <ArrowLeft size={14} />
               <span>Kembali ke Beranda</span>
@@ -755,21 +755,21 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       {/* Top Root Bar */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+          <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center text-white">
             <Server size={20} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-sm sm:text-base font-black text-slate-900 tracking-tight">
+              <h1 className="text-sm sm:text-base font-semibold text-slate-900 tracking-tight">
                 Teras Warga Control Tower
               </h1>
               <span className="text-[10px] font-mono font-bold uppercase text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                SUPER ADMIN ROOT
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                Super Admin
               </span>
             </div>
             <p className="text-[11px] font-medium text-slate-500">
-              Pusat Tata Kelola, Pendaftaran Terpusat & Fleet Multi-Tenant Seluruh RT/RW
+              Portal tata kelola & supervisi wilayah RT/RW
             </p>
           </div>
         </div>
@@ -778,7 +778,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Quick Action: Add New Tenant */}
           <button
             onClick={() => setShowOnboardModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/30 cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors  cursor-pointer"
           >
             <Plus size={14} />
             <span>Daftarkan RT Baru</span>
@@ -787,7 +787,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Quick Action: Bulk Onboard Tenants */}
           <button
             onClick={() => setShowBulkOnboardModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/20 cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-medium transition-colors cursor-pointer"
             title="Pendaftaran Kolektif RT Massal (Rentang Otomatis / Import Excel)"
           >
             <Layers size={14} />
@@ -797,7 +797,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Export Multi-Sheet Fleet Report Excel */}
           <button
             onClick={handleExportFleetExcel}
-            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             title="Unduh Buku Rekap Wilayah Kelurahan Multi-Sheet (.xlsx)"
           >
             <FileSpreadsheet size={13} className="text-emerald-700" />
@@ -808,7 +808,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Snapshot JSON Backup */}
           <button
             onClick={handleExportPlatformSnapshot}
-            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             title="Cadangkan Snapshot Platform (JSON)"
           >
             <HardDrive size={13} className="text-indigo-600" />
@@ -818,7 +818,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Restore JSON Backup */}
           <button
             onClick={() => setShowRestoreModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 text-slate-700 hover:text-rose-700 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             title="Pulihkan Snapshot Armada (Restore JSON)"
           >
             <UploadCloud size={13} className="text-rose-600" />
@@ -828,7 +828,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Export CSV */}
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             title="Ekspor Direktori Tenant ke CSV"
           >
             <Download size={13} />
@@ -859,7 +859,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           {/* Navigate to Public Home */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
             title="Buka Beranda Publik"
           >
             <span className="hidden sm:inline">Web Publik</span>
@@ -887,16 +887,16 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-200/80 shadow-2xs">
-                <Radio size={16} className="animate-pulse" />
+                <Radio size={16} />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900 font-mono">
-                    Radar Armada Kota Palu (Live Fleet Topology)
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-900 font-mono">
+                    Topologi Armada Wilayah
                   </h3>
                   <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-bold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    ALL NODES ONLINE
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                    Semua RT online
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 font-medium">
@@ -929,7 +929,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 <div
                   key={t.id}
                   onClick={() => setSelectedTenantForDetail(t)}
-                  className={`flex items-center gap-3 px-3.5 py-2 rounded-2xl border transition-all cursor-pointer shrink-0 hover:scale-[1.02] shadow-2xs ${
+                  className={`flex items-center gap-3 px-3.5 py-2 rounded-2xl border transition-colors cursor-pointer shrink-0 shadow-2xs ${
                     isSupervised
                       ? 'bg-indigo-50/90 border-indigo-300 text-indigo-950 ring-2 ring-indigo-500/20'
                       : 'bg-slate-50/80 hover:bg-slate-100 border-slate-200 text-slate-800'
@@ -937,11 +937,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   title="Klik untuk membuka detail wilayah"
                 >
                   <div 
-                    className="w-2.5 h-2.5 rounded-full shrink-0 animate-pulse" 
+                    className="w-2.5 h-2.5 rounded-full shrink-0" 
                     style={{ backgroundColor: t.themeColor || '#10b981' }}
                   />
                   <div className="text-left">
-                    <div className="font-black text-xs truncate max-w-[170px]">{t.name}</div>
+                    <div className="font-semibold text-xs truncate max-w-[170px]">{t.name}</div>
                     <div className="text-[10px] text-slate-500 font-mono flex items-center gap-1.5">
                       <span>{doorCount} Pintu</span>
                       <span>•</span>
@@ -949,7 +949,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     </div>
                   </div>
                   {isSupervised && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-indigo-200 text-indigo-800 font-black uppercase">
+                    <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-indigo-200 text-indigo-800 font-semibold uppercase">
                       Supervisi
                     </span>
                   )}
@@ -960,7 +960,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             {/* Quick Add Node Pill */}
             <button
               onClick={() => setShowOnboardModal(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-dashed border-slate-300 hover:border-indigo-400 bg-white hover:bg-indigo-50/40 text-slate-600 hover:text-indigo-700 text-xs font-bold transition-all shrink-0 cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-dashed border-slate-300 hover:border-indigo-400 bg-white hover:bg-indigo-50/40 text-slate-600 hover:text-indigo-700 text-xs font-bold transition-colors shrink-0 cursor-pointer shadow-2xs"
             >
               <Plus size={13} />
               <span>Daftarkan RT Baru</span>
@@ -969,7 +969,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             {/* Quick Bulk Onboard Pill */}
             <button
               onClick={() => setShowBulkOnboardModal(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl border border-dashed border-violet-300 hover:border-violet-500 bg-white hover:bg-violet-50/40 text-violet-700 text-xs font-bold transition-all shrink-0 cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl border border-dashed border-violet-300 hover:border-violet-500 bg-white hover:bg-violet-50/40 text-violet-700 text-xs font-bold transition-colors shrink-0 cursor-pointer shadow-2xs"
               title="Pendaftaran Kolektif RT Massal"
             >
               <Layers size={13} />
@@ -980,12 +980,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
           {/* 4 Precision Telemetry Micro-Dials */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
-            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
+            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-colors">
               <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 <span>Total Armada RT</span>
                 <Globe size={13} className="text-indigo-600" />
               </div>
-              <div className="text-xl font-black font-mono text-slate-900">
+              <div className="text-xl font-semibold font-mono text-slate-900">
                 {platformStats.totalTenants} <span className="text-xs font-sans font-bold text-slate-500">Tenant</span>
               </div>
               <div className="text-[10px] text-emerald-700 font-mono font-bold mt-0.5">
@@ -993,12 +993,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
+            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-colors">
               <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 <span>Pintu & Hunian Riil</span>
                 <Home size={13} className="text-emerald-600" />
               </div>
-              <div className="text-xl font-black font-mono text-emerald-600">
+              <div className="text-xl font-semibold font-mono text-emerald-600">
                 {platformStats.totalEstimatedDoors} <span className="text-xs font-sans font-bold text-slate-500">Pintu</span>
               </div>
               <div className="text-[10px] text-slate-500 font-mono mt-0.5">
@@ -1006,12 +1006,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
+            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-colors">
               <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 <span>Total Saldo Kas Armada</span>
                 <Wallet size={13} className="text-amber-600" />
               </div>
-              <div className="text-xl font-black font-mono text-amber-600">
+              <div className="text-xl font-semibold font-mono text-amber-600">
                 Rp {Math.max(0, platformStats.totalFleetTreasury).toLocaleString('id-ID')}
               </div>
               <div className="text-[10px] text-slate-500 font-mono mt-0.5">
@@ -1019,12 +1019,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               </div>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-all">
+            <div className="p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:bg-white hover:shadow-xs transition-colors">
               <div className="flex items-center justify-between text-[10px] font-mono uppercase font-bold text-slate-500 mb-1">
                 <span>Rata Kepatuhan Iuran</span>
                 <ShieldCheck size={13} className="text-sky-600" />
               </div>
-              <div className="text-xl font-black font-mono text-sky-700 flex items-center gap-1.5">
+              <div className="text-xl font-semibold font-mono text-sky-700 flex items-center gap-1.5">
                 <span>{platformStats.averageCompliance}%</span>
               </div>
               <div className="text-[10px] text-emerald-700 font-mono font-bold mt-0.5">
@@ -1052,7 +1052,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                         setActiveTab(group.tabs[0].id);
                       }
                     }}
-                    className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
                       isClusterActive
                         ? 'bg-slate-900 text-white shadow-xs'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
@@ -1075,12 +1075,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               <span className="text-slate-300">|</span>
               <button
                 onClick={() => setShowTriageDrawer(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl font-bold transition-all cursor-pointer text-xs shadow-2xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-xl font-bold transition-colors cursor-pointer text-xs shadow-2xs"
               >
                 <Zap size={13} className="text-amber-500" />
                 <span>Quick Triage</span>
                 {allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white font-mono text-[9px] font-bold animate-pulse">
+                  <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white font-mono text-[10px] font-medium">
                     {allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length}
                   </span>
                 )}
@@ -1098,7 +1098,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2.5 px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer border ${
+                    className={`flex items-center gap-2.5 px-4 py-2 rounded-2xl text-xs font-bold transition-colors cursor-pointer border ${
                       isTabActive
                         ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm shadow-indigo-600/30'
                         : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200/80 hover:text-slate-900'
@@ -1114,7 +1114,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                       </span>
                     )}
                     {tab.badge && (
-                      <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-mono uppercase font-black ${
+                      <span className={`px-1.5 py-0.2 rounded-md text-[9px] font-mono uppercase font-semibold ${
                         isTabActive ? 'bg-white text-indigo-700' : 'bg-indigo-100 text-indigo-800'
                       }`}>
                         {tab.badge}
@@ -1136,14 +1136,14 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
         {/* CROSS-RT EMERGENCY CRISIS ALERT BANNER */}
         {fleetPanicAlerts.length > 0 && (
-          <div className="bg-rose-600 border-2 border-rose-400 rounded-3xl p-5 text-white shadow-xl animate-pulse space-y-3">
+          <div className="bg-rose-600 border border-rose-500 rounded-2xl p-5 text-white space-y-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-white text-rose-600 flex items-center justify-center font-black shadow-md">
+                <div className="w-10 h-10 rounded-2xl bg-white text-rose-600 flex items-center justify-center font-semibold shadow-md">
                   <ShieldAlert size={24} />
                 </div>
                 <div>
-                  <h2 className="text-sm sm:text-base font-black tracking-tight flex items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-semibold tracking-tight flex items-center gap-2">
                     <span>PERINGATAN DARURAT KRISIS ({fleetPanicAlerts.length} ALARM AKTIF)</span>
                     <span className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-mono uppercase">
                       Live Fleet SOS
@@ -1163,7 +1163,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               {fleetPanicAlerts.map(alert => (
                 <div key={alert.id} className="bg-rose-950/60 backdrop-blur-xs p-3.5 rounded-2xl border border-rose-400/40 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="font-black text-xs text-white truncate flex items-center gap-1.5">
+                    <div className="font-semibold text-xs text-white truncate flex items-center gap-1.5">
                       <span>{alert.residentName}</span>
                       <span className="text-[10px] text-rose-200 font-mono">({alert.location})</span>
                     </div>
@@ -1178,7 +1178,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                         toast.info(`Beralih ke RT ${alert.tenantId} untuk memantau situasi`);
                       }
                     }}
-                    className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-700 font-bold text-[11px] shrink-0 transition-all shadow-xs cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-rose-700 font-bold text-[11px] shrink-0 transition-colors shadow-xs cursor-pointer"
                   >
                     Supervisi RT
                   </button>
@@ -1203,7 +1203,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Cari nama RT, kelurahan, ketua RT, slug..."
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                   />
                   {searchQuery && (
                     <button
@@ -1300,7 +1300,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs text-left">
-                    <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-black border-b border-slate-200">
+                    <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-semibold border-b border-slate-200">
                       <tr>
                         <th className="py-3.5 px-4">Nama Wilayah / Tenant</th>
                         <th className="py-3.5 px-4">RW / Kelurahan</th>
@@ -1321,7 +1321,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                             <td className="py-3.5 px-4 font-bold text-slate-900">
                               <div className="flex items-center gap-2.5">
                                 <div 
-                                  className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs text-white shrink-0 shadow-xs"
+                                  className="w-8 h-8 rounded-xl flex items-center justify-center font-semibold text-xs text-white shrink-0 shadow-xs"
                                   style={{ backgroundColor: t.themeColor || '#4f46e5' }}
                                 >
                                   {t.rt}
@@ -1382,7 +1382,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                               <select
                                 value={status}
                                 onChange={(e) => handleQuickChangeStatus(t.id, e.target.value as TenantStatus)}
-                                className={`text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border cursor-pointer focus:outline-none transition-all ${
+                                className={`text-[10px] font-mono font-bold uppercase px-2.5 py-1 rounded-lg border cursor-pointer focus:outline-none transition-colors ${
                                   status === 'suspended'
                                     ? 'bg-rose-50 border-rose-200 text-rose-700'
                                     : status === 'maintenance'
@@ -1402,7 +1402,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                                 {/* Button Supervisi */}
                                 <button
                                   onClick={() => handleStartSupervision(t)}
-                                  className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 hover:border-amber-600 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1 shadow-2xs"
+                                  className="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 hover:border-amber-600 rounded-xl text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1 shadow-2xs"
                                   title="Inspeksi Dashboard RT ini dalam Mode Supervisi (Read-Only)"
                                 >
                                   <Eye size={12} />
@@ -1412,7 +1412,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                                 {/* Button Kelola */}
                                 <button
                                   onClick={() => setSelectedTenantForDetail(t)}
-                                  className="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 hover:border-indigo-600 rounded-xl text-xs font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                                  className="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white border border-indigo-200 hover:border-indigo-600 rounded-xl text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1"
                                   title="Kelola Identitas, Pengurus, Tarif, & Modul RT"
                                 >
                                   <Edit3 size={12} />
@@ -1421,7 +1421,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                                 <button
                                   onClick={() => copyRegisterLink(t.slug || t.id)}
-                                  className="p-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
+                                  className="p-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-colors cursor-pointer shadow-2xs"
                                   title="Salin Link Registrasi Warga Baru"
                                 >
                                   <UserPlus size={13} />
@@ -1429,7 +1429,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                                 <button
                                   onClick={() => window.open(`#/?rt=${t.slug || t.id}`, '_blank')}
-                                  className="p-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
+                                  className="p-1.5 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-colors cursor-pointer shadow-2xs"
                                   title="Buka Portal Publik RT"
                                 >
                                   <ExternalLink size={13} />
@@ -1456,20 +1456,20 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   return (
                     <div 
                       key={t.id} 
-                      className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                      className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:shadow-md transition-colors flex flex-col justify-between"
                     >
                       <div>
                         {/* Card Top */}
                         <div className="flex items-start justify-between gap-3 mb-3">
                           <div className="flex items-center gap-3">
                             <div 
-                              className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white shrink-0 shadow-xs"
+                              className="w-10 h-10 rounded-2xl flex items-center justify-center font-semibold text-sm text-white shrink-0 shadow-xs"
                               style={{ backgroundColor: t.themeColor || '#4f46e5' }}
                             >
                               {t.rt}
                             </div>
                             <div>
-                              <h3 className="text-sm font-black text-slate-900 leading-tight">{t.name}</h3>
+                              <h3 className="text-sm font-semibold text-slate-900 leading-tight">{t.name}</h3>
                               <p className="text-[10px] text-slate-500 font-mono mt-0.5">RW {t.rw} • Kel. {t.kelurahan}</p>
                             </div>
                           </div>
@@ -1493,7 +1493,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                         {/* Ketua RT & Contact */}
                         <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 mb-3 space-y-1">
-                          <div className="text-[10px] font-mono font-black uppercase text-slate-400">Ketua RT</div>
+                          <div className="text-[10px] font-mono font-semibold uppercase text-slate-400">Ketua RT</div>
                           <div className="text-xs font-bold text-slate-800">{t.chairmanName || 'Belum ditunjuk'}</div>
                           {t.chairmanPhone ? (
                             <a 
@@ -1510,7 +1510,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                         {/* Modules Active Chips */}
                         <div className="mb-4">
-                          <div className="text-[10px] font-mono font-black uppercase text-slate-400 mb-1.5 flex items-center justify-between">
+                          <div className="text-[10px] font-mono font-semibold uppercase text-slate-400 mb-1.5 flex items-center justify-between">
                             <span>Modul Fitur Aktif</span>
                             <span className="text-indigo-600 font-bold">{activeModules.length}/6</span>
                           </div>
@@ -1528,7 +1528,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                       <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                         <button
                           onClick={() => handleStartSupervision(t)}
-                          className="px-3 py-2 bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 hover:border-amber-600 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                          className="px-3 py-2 bg-amber-50 hover:bg-amber-600 text-amber-800 hover:text-white border border-amber-200 hover:border-amber-600 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
                           title="Mode Supervisi Read-Only"
                         >
                           <Eye size={13} />
@@ -1537,7 +1537,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                         <button
                           onClick={() => setSelectedTenantForDetail(t)}
-                          className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shadow-indigo-600/20"
+                          className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs shadow-indigo-600/20"
                         >
                           <Edit3 size={13} />
                           <span>Detail & Kelola</span>
@@ -1545,7 +1545,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                         <button
                           onClick={() => copyRegisterLink(t.slug || t.id)}
-                          className="p-2 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
+                          className="p-2 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-colors cursor-pointer shadow-2xs"
                           title="Salin Link Pendaftaran Warga"
                         >
                           <UserPlus size={13} />
@@ -1553,7 +1553,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                         <button
                           onClick={() => window.open(`#/?rt=${t.slug || t.id}`, '_blank')}
-                          className="p-2 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-all cursor-pointer shadow-2xs"
+                          className="p-2 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl transition-colors cursor-pointer shadow-2xs"
                           title="Buka Web Publik RT"
                         >
                           <ExternalLink size={13} />
@@ -1572,7 +1572,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <Sliders size={16} className="text-indigo-600" />
                   <span>Matriks Feature Flags & Sakelar Modul per RT</span>
                 </h3>
@@ -1589,7 +1589,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-black border-b border-slate-200">
+                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-semibold border-b border-slate-200">
                     <tr>
                       <th className="py-3.5 px-4 min-w-[200px]">Wilayah RT</th>
                       <th className="py-3.5 px-3 text-center">Meter Air PDAM</th>
@@ -1632,7 +1632,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           <td className="py-3.5 px-3 text-center">
                             <button
                               onClick={() => handleQuickToggleModule(t.id, 'waterMeter')}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                                 water 
                                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
                                   : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
@@ -1646,7 +1646,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           <td className="py-3.5 px-3 text-center">
                             <button
                               onClick={() => handleQuickToggleModule(t.id, 'assetRental')}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                                 rental 
                                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
                                   : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
@@ -1660,7 +1660,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           <td className="py-3.5 px-3 text-center">
                             <button
                               onClick={() => handleQuickToggleModule(t.id, 'letters')}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                                 letters 
                                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
                                   : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
@@ -1674,7 +1674,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           <td className="py-3.5 px-3 text-center">
                             <button
                               onClick={() => handleQuickToggleModule(t.id, 'panicButton')}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                                 panic 
                                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
                                   : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
@@ -1688,7 +1688,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           <td className="py-3.5 px-3 text-center">
                             <button
                               onClick={() => handleQuickToggleModule(t.id, 'stbmSanitation')}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                                 stbm 
                                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
                                   : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
@@ -1702,7 +1702,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           <td className="py-3.5 px-3 text-center">
                             <button
                               onClick={() => handleQuickToggleModule(t.id, 'cctv')}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer border ${
+                              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold transition-colors cursor-pointer border ${
                                 cctv 
                                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' 
                                   : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
@@ -1738,7 +1738,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <span>RATA-RATA IURAN SAMPAH</span>
                   <Wallet size={14} className="text-indigo-600" />
                 </div>
-                <div className="text-2xl font-black text-slate-900 font-mono">
+                <div className="text-2xl font-semibold text-slate-900 font-mono">
                   Rp {platformStats.avgSampah.toLocaleString('id-ID')}
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">Tarif kategori Umum antar seluruh RT</p>
@@ -1749,7 +1749,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <span>RATA-RATA KAS RT</span>
                   <BarChart3 size={14} className="text-amber-600" />
                 </div>
-                <div className="text-2xl font-black text-amber-600 font-mono">
+                <div className="text-2xl font-semibold text-amber-600 font-mono">
                   Rp {platformStats.avgKas.toLocaleString('id-ID')}
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">Alokasi operasional kas lingkungan</p>
@@ -1760,7 +1760,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <span>RATA-RATA AIR / PDAM</span>
                   <Activity size={14} className="text-sky-600" />
                 </div>
-                <div className="text-2xl font-black text-sky-600 font-mono">
+                <div className="text-2xl font-semibold text-sky-600 font-mono">
                   Rp {platformStats.avgAir.toLocaleString('id-ID')}
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">Standar retribusi air bersih swadaya</p>
@@ -1771,7 +1771,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
               <div className="p-5 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">Matriks Perbandingan Struktur Tarif Seluruh RT</h3>
+                  <h3 className="text-sm font-semibold text-slate-900">Matriks Perbandingan Struktur Tarif Seluruh RT</h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Data transparan untuk pengawasan disparitas iuran dan sinkronisasi kebijakan wilayah.
                   </p>
@@ -1787,7 +1787,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-black border-b border-slate-200">
+                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-semibold border-b border-slate-200">
                     <tr>
                       <th className="py-3 px-4">Wilayah RT</th>
                       <th className="py-3 px-4">Sampah Umum</th>
@@ -1841,7 +1841,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           <td className="py-3.5 px-4 text-right font-sans">
                             <button
                               onClick={() => setSelectedTenantForDetail(t)}
-                              className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-600 text-slate-700 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                              className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-600 text-slate-700 hover:text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
                             >
                               Edit Tarif
                             </button>
@@ -1866,7 +1866,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <Megaphone size={16} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-slate-900">Buat Siaran Platform</h3>
+                  <h3 className="text-sm font-semibold text-slate-900">Buat Siaran Platform</h3>
                   <p className="text-[11px] text-slate-500">Pemberitahuan resmi ke seluruh dashboard RT</p>
                 </div>
               </div>
@@ -1879,7 +1879,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     value={newBroadcastTitle}
                     onChange={(e) => setNewBroadcastTitle(e.target.value)}
                     placeholder="Contoh: Jadwal Pemeliharaan Server..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                   />
                 </div>
 
@@ -1920,13 +1920,13 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     value={newBroadcastMessage}
                     onChange={(e) => setNewBroadcastMessage(e.target.value)}
                     placeholder="Tuliskan pesan instruksi atau pengumuman platform..."
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none transition-all"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 resize-none transition-colors"
                   ></textarea>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-sm shadow-indigo-600/30 cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors shadow-sm shadow-indigo-600/30 cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Radio size={14} />
                   <span>Terbitkan Siaran Sekarang</span>
@@ -1937,7 +1937,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             {/* Broadcast List & Live Preview */}
             <div className="lg:col-span-2 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                   <span>Daftar Siaran Aktif & Riwayat</span>
                   <span className="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-mono text-slate-600 font-bold">
                     {broadcasts.length}
@@ -1975,7 +1975,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     return (
                       <div 
                         key={bc.id}
-                        className={`rounded-2xl border p-4.5 transition-all shadow-2xs ${borderClass} ${!bc.isActive ? 'opacity-60 grayscale-[30%]' : ''}`}
+                        className={`rounded-2xl border p-4.5 transition-colors shadow-2xs ${borderClass} ${!bc.isActive ? 'opacity-60 grayscale-[30%]' : ''}`}
                       >
                         <div className="flex items-start justify-between gap-3 mb-2">
                           <div className="flex items-center gap-2">
@@ -2036,7 +2036,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     value={auditSearchQuery}
                     onChange={(e) => setAuditSearchQuery(e.target.value)}
                     placeholder="Cari aksi, aktor, atau rincian audit log..."
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                   />
                   {auditSearchQuery && (
                     <button
@@ -2088,7 +2088,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-black border-b border-slate-200">
+                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-mono font-semibold border-b border-slate-200">
                     <tr>
                       <th className="py-3.5 px-4">Waktu (WITA)</th>
                       <th className="py-3.5 px-4">Kategori</th>
@@ -2147,7 +2147,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
             <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                     <ShieldCheck size={16} className="text-emerald-600" />
                     <span>Akun Otorisasi Root Super Admin</span>
                   </h3>
@@ -2171,7 +2171,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           </div>
                         </div>
                         {isCurrent ? (
-                          <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono">
+                          <span className="text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono">
                             Sesi Anda
                           </span>
                         ) : (
@@ -2189,7 +2189,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               <div className="pt-4 border-t border-slate-100">
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                       <UserPlus size={16} className="text-indigo-600" />
                       <span>Administrator Wilayah & Staf Kelurahan (Dynamic RBAC)</span>
                     </h3>
@@ -2248,7 +2248,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
               {/* Disaster Recovery Snapshot Box */}
               <div className="mt-6 pt-5 border-t border-slate-100">
-                <h4 className="text-xs font-black text-slate-900 mb-1 flex items-center gap-1.5">
+                <h4 className="text-xs font-semibold text-slate-900 mb-1 flex items-center gap-1.5">
                   <HardDrive size={14} className="text-indigo-600" />
                   <span>Cadangan Snapshot Bencana (Disaster Recovery)</span>
                 </h4>
@@ -2257,14 +2257,14 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 </p>
                 <button
                   onClick={handleExportPlatformSnapshot}
-                  className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Download size={14} />
                   <span>Unduh Fleet Snapshot Lengkap (.JSON)</span>
                 </button>
                 <button
                   onClick={() => setShowRestoreModal(true)}
-                  className="w-full mt-2 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full mt-2 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-colors shadow-2xs flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <UploadCloud size={14} className="text-rose-600" />
                   <span>Pulihkan dari Berkas JSON (Restore)</span>
@@ -2274,7 +2274,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
             <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs flex flex-col justify-between">
               <div>
-                <h3 className="text-sm font-black text-slate-900 mb-1 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-slate-900 mb-1 flex items-center gap-2">
                   <Database size={16} className="text-indigo-600" />
                   <span>Audit Isolasi & Integritas Multi-Tenant</span>
                 </h3>
@@ -2436,11 +2436,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setShowTriageDrawer(true)}
-        className="fixed bottom-6 right-6 z-40 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 text-xs font-bold transition-all cursor-pointer border border-slate-700/60"
+        className="fixed bottom-6 right-6 z-40 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 text-xs font-bold transition-colors cursor-pointer border border-slate-700/60"
         title="Buka Konsol Triage Cepat Platform"
       >
         <span className="relative flex h-2 w-2">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="hidden"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
         </span>
         <Zap size={14} className="text-amber-400" />
@@ -2477,7 +2477,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                       <Zap size={16} className="text-amber-400" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                      <h3 className="text-sm font-semibold text-slate-900 tracking-tight">
                         Konsol Triage Cepat
                       </h3>
                       <p className="text-[11px] text-slate-500">
@@ -2502,7 +2502,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                         <Database size={13} className="text-indigo-600" />
                         Latensi Cloud Firestore
                       </span>
-                      <span className="font-mono text-emerald-600 font-black">~38 ms (Optimal)</span>
+                      <span className="font-mono text-emerald-600 font-semibold">~38 ms (Optimal)</span>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-relaxed">
                       Koneksi terenkripsi SSL aktif ke region Jakarta (<code className="font-mono text-slate-700">asia-southeast2</code>).
@@ -2512,7 +2512,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   {/* Live Support Tickets Requiring Attention */}
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
                         <MessageSquare size={13} className="text-indigo-600" />
                         <span>Tiket Butuh Respon ({allTickets.filter(t => t.status === 'open' || t.status === 'in_progress').length})</span>
                       </h4>
@@ -2558,7 +2558,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   {/* Realtime Citizen Reports (Aduan Warga Seluruh RT) */}
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
                         <AlertOctagon size={13} className="text-rose-600" />
                         <span>Aduan Warga Realtime ({fleetAggregates.totalPendingReports} Butuh Respon)</span>
                       </h4>
@@ -2591,7 +2591,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   {/* Realtime Letter Requests (Surat Pengantar Warga Seluruh RT) */}
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono flex items-center gap-1.5">
                         <FileText size={13} className="text-indigo-600" />
                         <span>Pengajuan Surat Warga ({fleetAggregates.totalPendingLetters} Verifikasi)</span>
                       </h4>
@@ -2624,7 +2624,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   {/* Recent Platform Broadcasts */}
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">
                         Siaran Sistem Aktif
                       </h4>
                       <button
@@ -2653,7 +2653,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   {/* Recent Audit Events */}
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-500 font-mono">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-500 font-mono">
                         Jejak Audit Terkini
                       </h4>
                       <button
@@ -2682,14 +2682,14 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                   {/* Quick Emergency Actions */}
                   <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/70 space-y-2.5">
-                    <span className="text-xs font-black text-amber-900 block flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-amber-900 block flex items-center gap-1.5">
                       <ShieldCheck size={14} className="text-amber-700" />
                       Tindakan Darurat Sistem
                     </span>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={handleExportPlatformSnapshot}
-                        className="p-2 bg-white hover:bg-slate-50 border border-amber-200 text-slate-800 rounded-xl text-xs font-bold transition-all text-center cursor-pointer shadow-2xs"
+                        className="p-2 bg-white hover:bg-slate-50 border border-amber-200 text-slate-800 rounded-xl text-xs font-bold transition-colors text-center cursor-pointer shadow-2xs"
                       >
                         Snapshot JSON
                       </button>
@@ -2698,7 +2698,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                           setShowRestoreModal(true);
                           setShowTriageDrawer(false);
                         }}
-                        className="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all text-center cursor-pointer shadow-2xs"
+                        className="p-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors text-center cursor-pointer shadow-2xs"
                       >
                         Pulihkan Data
                       </button>
@@ -2735,7 +2735,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   <UserPlus size={18} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black tracking-tight">Tambah Admin Wilayah</h3>
+                  <h3 className="text-sm font-semibold tracking-tight">Tambah Admin Wilayah</h3>
                   <p className="text-[11px] text-slate-400 font-mono">Otorisasi aparatur & staf kelurahan</p>
                 </div>
               </div>
@@ -2757,7 +2757,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   placeholder="Misal: Bpk. Lurah Tondo"
                   value={newAdminName}
                   onChange={(e) => setNewAdminName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                 />
               </div>
 
@@ -2769,7 +2769,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                   placeholder="aparatur@palukota.go.id"
                   value={newAdminEmail}
                   onChange={(e) => setNewAdminEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all font-mono"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors font-mono"
                 />
               </div>
 
@@ -2778,7 +2778,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 <select
                   value={newAdminRole}
                   onChange={(e: any) => setNewAdminRole(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors cursor-pointer"
                 >
                   <option value="kelurahan_officer">Staf Kelurahan (Auditor & Monitoring)</option>
                   <option value="super_admin">Super Admin (Akses Penuh Seluruh Fleet)</option>

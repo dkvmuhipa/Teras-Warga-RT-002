@@ -217,14 +217,14 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Tiket Baru (Open)
             </span>
             <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
               <Clock size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-indigo-600 tracking-tight font-mono">
             {openCount} <span className="text-xs font-bold text-slate-500 font-sans">Menunggu</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -234,14 +234,14 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Dalam Pengerjaan
             </span>
             <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
               <Clock size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-amber-600 tracking-tight font-mono">
             {inProgressCount} <span className="text-xs font-bold text-slate-500 font-sans">Proses</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -251,14 +251,14 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Tiket Kritis
             </span>
             <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
               <AlertTriangle size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-rose-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-rose-600 tracking-tight font-mono">
             {criticalCount} <span className="text-xs font-bold text-slate-500 font-sans">Mendesak</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -268,14 +268,14 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Selesai Dituntaskan
             </span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
               <CheckCircle2 size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-emerald-600 tracking-tight font-mono">
             {resolvedCount} <span className="text-xs font-bold text-slate-500 font-sans">Tiket</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -294,7 +294,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
               placeholder="Cari ID tiket, judul masalah, atau nama RT..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
             />
           </div>
 
@@ -304,7 +304,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                   statusFilter === st
                     ? 'bg-white text-indigo-700 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -331,7 +331,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
 
         <button
           onClick={() => setShowNewModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/30 cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-indigo-600/30 cursor-pointer"
         >
           <Plus size={14} />
           <span>Catat Tiket Manual</span>
@@ -347,16 +347,16 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
               setSelectedTicket(ticket);
               setResponseInput(ticket.adminResponse || '');
             }}
-            className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+            className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs hover:shadow-md hover:border-indigo-300 transition-colors cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-4 group"
           >
             <div className="space-y-1.5 flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                   {ticket.id}
                 </span>
 
                 {/* Priority Badge */}
-                <span className={`text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full ${
+                <span className={`text-[9px] font-mono font-semibold uppercase px-2 py-0.5 rounded-full ${
                   ticket.priority === 'critical'
                     ? 'bg-rose-100 text-rose-800 border border-rose-300'
                     : ticket.priority === 'high'
@@ -370,11 +370,11 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
 
                 {/* Category Badge */}
                 <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
-                  {ticket.category === 'water_meter' ? '💧 Meteran Air' :
-                   ticket.category === 'billing' ? '💳 Iuran & Keuangan' :
-                   ticket.category === 'account' ? '🏠 Penataan Blok & Akun' :
-                   ticket.category === 'feature_request' ? '💡 Permintaan Fitur' :
-                   ticket.category === 'system_bug' ? '⚠️ Gangguan Teknis' : '📋 Umum'}
+                  {ticket.category === 'water_meter' ? 'Meteran air' :
+                   ticket.category === 'billing' ? 'Iuran & keuangan' :
+                   ticket.category === 'account' ? 'Penataan blok & akun' :
+                   ticket.category === 'feature_request' ? 'Permintaan fitur' :
+                   ticket.category === 'system_bug' ? 'Gangguan teknis' : 'Umum'}
                 </span>
 
                 {/* Status Badge */}
@@ -389,7 +389,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                 </span>
               </div>
 
-              <h3 className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight">
+              <h3 className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight">
                 {ticket.title}
               </h3>
 
@@ -413,14 +413,14 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                     e.stopPropagation();
                     openWhatsAppSender(ticket.senderPhone, ticket.id);
                   }}
-                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
                   title="Hubungi via WhatsApp"
                 >
                   <MessageSquare size={13} />
                   <span>WA</span>
                 </button>
               )}
-              <div className="p-2 bg-slate-50 rounded-xl text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-all">
+              <div className="p-2 bg-slate-50 rounded-xl text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors">
                 <ArrowRight size={15} />
               </div>
             </div>
@@ -448,14 +448,14 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
             <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-mono text-xs font-black text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
+                  <span className="font-mono text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
                     {selectedTicket.id}
                   </span>
                   <span className="text-xs text-slate-500 font-bold">
                     {selectedTicket.tenantName}
                   </span>
                 </div>
-                <h2 className="text-base font-black text-slate-900 tracking-tight">
+                <h2 className="text-base font-semibold text-slate-900 tracking-tight">
                   {selectedTicket.title}
                 </h2>
               </div>
@@ -477,7 +477,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                 </div>
                 <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/70">
                   <span className="text-[10px] text-slate-400 uppercase font-bold block">Prioritas</span>
-                  <span className="font-black font-mono uppercase text-slate-800">{selectedTicket.priority}</span>
+                  <span className="font-semibold font-mono uppercase text-slate-800">{selectedTicket.priority}</span>
                 </div>
                 <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/70">
                   <span className="text-[10px] text-slate-400 uppercase font-bold block">Status Saat Ini</span>
@@ -491,7 +491,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
 
               {/* Problem Description */}
               <div className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-1.5">
-                <span className="text-[10px] font-black uppercase text-slate-400 font-mono">
+                <span className="text-[10px] font-semibold uppercase text-slate-400 font-mono">
                   Uraian Laporan / Permohonan:
                 </span>
                 <p className="text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">
@@ -507,7 +507,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                 <div className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleUpdateStatus(selectedTicket.id, 'open')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       selectedTicket.status === 'open'
                         ? 'bg-indigo-600 text-white shadow-xs'
                         : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
@@ -517,7 +517,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                   </button>
                   <button
                     onClick={() => handleUpdateStatus(selectedTicket.id, 'in_progress')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       selectedTicket.status === 'in_progress'
                         ? 'bg-amber-600 text-white shadow-xs'
                         : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
@@ -527,7 +527,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                   </button>
                   <button
                     onClick={() => handleUpdateStatus(selectedTicket.id, 'resolved')}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       selectedTicket.status === 'resolved'
                         ? 'bg-emerald-600 text-white shadow-xs'
                         : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
@@ -561,7 +561,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                 />
                 <button
                   onClick={handleSubmitResponse}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5"
                 >
                   <Send size={13} />
                   <span>Simpan Tanggapan Resmi</span>
@@ -585,14 +585,14 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                     }
                   }
                 }}
-                className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3 py-2 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <Trash2 size={13} />
                 <span>Hapus Tiket</span>
               </button>
               <button
                 onClick={() => setSelectedTicket(null)}
-                className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Tutup
               </button>
@@ -611,7 +611,7 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
           >
             <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
               <div>
-                <h2 className="text-base font-black text-slate-900 tracking-tight">
+                <h2 className="text-base font-semibold text-slate-900 tracking-tight">
                   Catat Tiket Dukungan Manual
                 </h2>
                 <p className="text-xs text-slate-500">
@@ -680,12 +680,12 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                     onChange={(e) => setNewCategory(e.target.value as any)}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
-                    <option value="water_meter">💧 Meteran Air</option>
-                    <option value="billing">💳 Iuran & Keuangan</option>
-                    <option value="account">🏠 Penataan Blok & Akun</option>
-                    <option value="feature_request">💡 Permintaan Fitur</option>
+                    <option value="water_meter">Meteran air</option>
+                    <option value="billing">Iuran & keuangan</option>
+                    <option value="account">Penataan blok & akun</option>
+                    <option value="feature_request">Permintaan fitur</option>
                     <option value="system_bug">⚠️ Gangguan Teknis</option>
-                    <option value="other">📋 Lainnya</option>
+                    <option value="other">Lainnya</option>
                   </select>
                 </div>
                 <div>
@@ -737,13 +737,13 @@ export const HelpdeskSupportTab: React.FC<HelpdeskSupportTabProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/30 cursor-pointer"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-indigo-600/30 cursor-pointer"
                 >
                   Simpan Tiket
                 </button>

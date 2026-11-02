@@ -279,7 +279,7 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
                   Onboarding Massal Kelurahan
                 </span>
               </div>
-              <h2 className="text-base font-black text-white">Pendaftaran Massal Wilayah RT</h2>
+              <h2 className="text-base font-semibold text-white">Pendaftaran Massal Wilayah RT</h2>
             </div>
           </div>
 
@@ -296,7 +296,7 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Execution Progress Overlay */}
           {isExecuting && progress && (
-            <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-6 text-center space-y-3 animate-pulse">
+            <div className="bg-indigo-50 border border-indigo-200 rounded-2xl p-6 text-center space-y-3 ">
               <RefreshCw size={28} className="animate-spin text-indigo-600 mx-auto" />
               <div>
                 <h3 className="font-bold text-sm text-indigo-950">
@@ -308,7 +308,7 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
               </div>
               <div className="w-full bg-indigo-200 rounded-full h-2.5 overflow-hidden">
                 <div 
-                  className="bg-indigo-600 h-2.5 transition-all duration-300"
+                  className="bg-indigo-600 h-2.5 transition-[width] duration-300"
                   style={{ width: `${(progress.current / progress.total) * 100}%` }}
                 />
               </div>
@@ -321,8 +321,8 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 size={18} className="text-emerald-600" />
-                  <h3 className="font-black text-sm text-slate-900">
-                    Laporan Hasil Onboarding Massal
+                  <h3 className="font-semibold text-sm text-slate-900">
+                    Hasil pendaftaran massal
                   </h3>
                 </div>
                 <span className="text-xs font-mono text-slate-500">
@@ -354,7 +354,7 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
                     setExecutionResults(null);
                     onClose();
                   }}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm cursor-pointer"
                 >
                   Tutup & Kembali ke Direktori
                 </button>
@@ -369,20 +369,20 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveMode('range')}
-                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
                     activeMode === 'range'
                       ? 'bg-white text-indigo-700 shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  <Sparkles size={14} className={activeMode === 'range' ? 'text-indigo-600' : 'text-slate-400'} />
-                  <span>Generator Rentang RT (Otomatis)</span>
+                  <Layers size={14} className={activeMode === 'range' ? 'text-indigo-600' : 'text-slate-400'} />
+                  <span>Generator rentang RT</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setActiveMode('excel')}
-                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
                     activeMode === 'excel'
                       ? 'bg-white text-indigo-700 shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
@@ -526,14 +526,14 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
                     <button
                       type="button"
                       onClick={() => generateBulkTenantTemplateExcel()}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0"
                     >
                       <Download size={14} />
                       <span>Unduh Template Excel</span>
                     </button>
                   </div>
 
-                  <div className="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition-all bg-slate-50/50">
+                  <div className="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center transition-colors bg-slate-50/50">
                     <input
                       type="file"
                       accept=".xlsx, .xls"
@@ -570,7 +570,7 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-black uppercase tracking-wider text-slate-700">
+                    <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-700">
                       Pratinjau Data RT ({evaluatedCandidates.length} Unit)
                     </h4>
                     {validCandidates.length > 0 && (
@@ -646,7 +646,7 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={isExecuting}
-              className="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer"
             >
               Batal
             </button>
@@ -655,7 +655,7 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
               type="button"
               onClick={handleExecuteBatch}
               disabled={isExecuting || validCandidates.length === 0}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/30 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-indigo-600/30 flex items-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isExecuting ? (
                 <>

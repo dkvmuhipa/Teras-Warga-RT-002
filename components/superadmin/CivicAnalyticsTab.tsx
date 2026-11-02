@@ -183,7 +183,7 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
               FastAPI AI Intelligence Engine
             </span>
           </div>
-          <h2 className="text-lg font-black tracking-tight text-white">
+          <h2 className="text-lg font-semibold tracking-tight text-white">
             Civic Command Executive Copilot
           </h2>
           <p className="text-xs text-slate-300 max-w-xl font-medium">
@@ -194,7 +194,7 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
         <button
           onClick={handleGenerateFleetAi}
           disabled={isGeneratingAi}
-          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md transition-all shrink-0 hover:scale-[1.02] active:scale-[0.98]"
+          className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md transition-colors shrink-0 hover:scale-[1.02] active:scale-[0.98]"
         >
           {isGeneratingAi ? (
             <>
@@ -216,14 +216,14 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
         {/* Total Population */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Total Populasi Warga
             </span>
             <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
               <Users size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-indigo-600 tracking-tight font-mono">
             {totalPopulation.toLocaleString('id-ID')} <span className="text-xs font-bold text-slate-500 font-sans">Jiwa</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -234,14 +234,14 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
         {/* Real Fee Compliance */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Rata-rata Kepatuhan Iuran
             </span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
               <TrendingUp size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-emerald-600 tracking-tight font-mono">
             {avgCompliance}%
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1 flex items-center gap-1">
@@ -253,14 +253,14 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
         {/* Net Fleet Cashflow Balance */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Total Saldo Kas Riil RT
             </span>
             <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
               <Wallet size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-sky-700 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-sky-700 tracking-tight font-mono">
             Rp {Math.max(0, totalFleetTreasury).toLocaleString('id-ID')}
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -271,14 +271,14 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
         {/* Civic Score */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Indeks Tata Kelola (Civic Score)
             </span>
             <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
               <Award size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-amber-600 tracking-tight font-mono">
             {avgCivicScore} <span className="text-xs font-bold text-slate-500 font-sans">/ 100</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -291,7 +291,7 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Socio-economic Category Chart */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-4">
-          <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
             <Layers size={16} className="text-indigo-600" />
             <span>Distribusi Golongan Warga</span>
           </h3>
@@ -332,14 +332,14 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
           </div>
 
           <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/70 text-[11px] text-slate-600 leading-relaxed">
-            💡 <strong>Keadilan Sosial:</strong> Warga terdaftar PKH secara otomatis mendapatkan penyesuaian tarif retribusi sampah lebih rendah sesuai keputusan musyawarah warga.
+            <strong>Keadilan sosial:</strong> Warga terdaftar PKH secara otomatis mendapatkan penyesuaian tarif retribusi sampah lebih rendah sesuai keputusan musyawarah warga.
           </div>
         </div>
 
         {/* Civic Excellence Leaderboard */}
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
               <Award size={16} className="text-amber-500" />
               <span>Papan Peringkat Kinerja Wilayah (Civic Leaderboard)</span>
             </h3>
@@ -355,10 +355,10 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
             {tenantPerformance.map((item) => (
               <div 
                 key={item.id}
-                className="p-3.5 bg-slate-50 hover:bg-slate-100/70 rounded-2xl border border-slate-200/80 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                className="p-3.5 bg-slate-50 hover:bg-slate-100/70 rounded-2xl border border-slate-200/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-mono font-black text-xs ${
+                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-mono font-semibold text-xs ${
                     item.rank === 1
                       ? 'bg-amber-100 text-amber-800 border border-amber-300'
                       : item.rank === 2
@@ -390,7 +390,7 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
                   </div>
                   <div className="text-right pl-2 border-l border-slate-200">
                     <span className="text-[9px] text-slate-400 font-bold block">Civic Score</span>
-                    <span className="font-black text-indigo-700 text-sm">{item.civicScore}</span>
+                    <span className="font-semibold text-indigo-700 text-sm">{item.civicScore}</span>
                   </div>
                 </div>
               </div>
@@ -417,7 +417,7 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
                   <Bot size={20} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black tracking-tight">Laporan Eksekutif Civic Copilot</h3>
+                  <h3 className="text-sm font-semibold tracking-tight">Laporan Eksekutif Civic Copilot</h3>
                   <p className="text-[11px] text-slate-400 font-mono">Dianalisis dari seluruh RT aktif di wilayah</p>
                 </div>
               </div>
@@ -443,14 +443,14 @@ export const CivicAnalyticsTab: React.FC<CivicAnalyticsTabProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopyAi}
-                  className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-colors"
                 >
                   {copiedAi ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                   <span>{copiedAi ? 'Tersalin' : 'Salin Teks'}</span>
                 </button>
                 <button
                   onClick={handleDownloadTxt}
-                  className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-all"
+                  className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
                 >
                   <Download size={14} />
                   <span>Unduh Dokumen (.txt)</span>

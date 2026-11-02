@@ -261,14 +261,14 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Ketua RT Terdaftar
             </span>
             <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
               <Users size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-indigo-600 tracking-tight font-mono">
             {totalKetua} <span className="text-xs font-bold text-slate-500 font-sans">Pimpinan</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -278,14 +278,14 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Sekretaris Wilayah
             </span>
             <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
               <Building2 size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-sky-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-sky-600 tracking-tight font-mono">
             {totalSekr} <span className="text-xs font-bold text-slate-500 font-sans">Aparatur</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -295,14 +295,14 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Bendahara Kas
             </span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
               <CheckCircle2 size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-emerald-600 tracking-tight font-mono">
             {totalBend} <span className="text-xs font-bold text-slate-500 font-sans">Pengelola</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -312,14 +312,14 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Seksi Lapangan & Ronda
             </span>
             <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
               <Shield size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-purple-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-purple-600 tracking-tight font-mono">
             {totalSeksi} <span className="text-xs font-bold text-slate-500 font-sans">Petugas</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -338,7 +338,7 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
               placeholder="Cari nama pengurus, telepon, atau RT..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full pl-9 pr-3 py-2 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors"
             />
           </div>
 
@@ -353,7 +353,7 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
               <button
                 key={r.id}
                 onClick={() => setRoleFilter(r.id as any)}
-                className={`px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-lg text-xs font-bold whitespace-nowrap transition-colors cursor-pointer ${
                   roleFilter === r.id
                     ? 'bg-white text-indigo-700 shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -375,7 +375,7 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-black uppercase tracking-wider text-[10px]">
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[10px]">
                 <th className="py-3.5 px-4">Nama Pengurus</th>
                 <th className="py-3.5 px-4">Jabatan & Tugas</th>
                 <th className="py-3.5 px-4">Wilayah RT / Lingkungan</th>
@@ -399,14 +399,14 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
                           />
                         ) : (
                           <div 
-                            className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs text-white shadow-2xs shrink-0"
+                            className="w-8 h-8 rounded-xl flex items-center justify-center font-semibold text-xs text-white shadow-2xs shrink-0"
                             style={{ backgroundColor: item.themeColor || '#4F46E5' }}
                           >
                             {item.name.charAt(0)}
                           </div>
                         )}
                         <div>
-                          <div className="font-black text-slate-900 text-xs">
+                          <div className="font-semibold text-slate-900 text-xs">
                             {item.name}
                           </div>
                           <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono">
@@ -486,7 +486,7 @@ export const OfficialsDirectoryTab: React.FC<OfficialsDirectoryTabProps> = ({
                         {item.phone && (
                           <button
                             onClick={() => openWhatsApp(item)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs shadow-emerald-600/20 cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs  cursor-pointer"
                             title="Buka Chat WhatsApp"
                           >
                             <MessageSquare size={13} />

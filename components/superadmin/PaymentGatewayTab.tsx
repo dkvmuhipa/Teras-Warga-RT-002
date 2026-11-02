@@ -146,14 +146,14 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Adopsi QRIS Terintegrasi
             </span>
             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
               <QrCode size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-emerald-600 tracking-tight font-mono">
             {activeQrisCount} <span className="text-xs font-bold text-slate-500 font-sans">/ {records.length} RT</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -163,14 +163,14 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Menunggu Verifikasi Bank
             </span>
             <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
               <CreditCard size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-600 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-amber-600 tracking-tight font-mono">
             {pendingCount} <span className="text-xs font-bold text-slate-500 font-sans">Wilayah</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -180,14 +180,14 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 font-mono">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 font-mono">
               Volume Transaksi Digital
             </span>
             <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
               <Wallet size={16} />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-sky-700 tracking-tight font-mono">
+          <div className="text-2xl sm:text-3xl font-semibold text-sky-700 tracking-tight font-mono">
             {avgDigitalRate}% <span className="text-xs font-bold text-slate-500 font-sans">Cashless</span>
           </div>
           <p className="text-[11px] text-slate-500 font-medium mt-1">
@@ -200,7 +200,7 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
       <div className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
         <div className="p-4 border-b border-slate-200 bg-slate-50/60 flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider font-mono">
+            <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-wider font-mono">
               Matriks Pengaturan QRIS & Rekening Kas RT
             </h3>
             <p className="text-[11px] text-slate-500">
@@ -212,7 +212,7 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-black uppercase tracking-wider text-[10px]">
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[10px]">
                 <th className="py-3.5 px-4">Wilayah Armada RT</th>
                 <th className="py-3.5 px-4">Rekening Penampung Kas</th>
                 <th className="py-3.5 px-4">Status QRIS Statis</th>
@@ -225,7 +225,7 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
               {records.map((r) => (
                 <tr key={r.tenantId} className="hover:bg-slate-50/60 transition-colors">
                   <td className="py-3.5 px-4">
-                    <div className="font-black text-slate-900">{r.tenantName}</div>
+                    <div className="font-semibold text-slate-900">{r.tenantName}</div>
                     <span className="text-[10px] font-mono text-slate-500">ID: {r.tenantId}</span>
                   </td>
 
@@ -267,7 +267,7 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => handleOpenEdit(r)}
-                        className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                        className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
                         title="Edit Rekening Kas"
                       >
                         <Edit3 size={13} />
@@ -275,7 +275,7 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
                       </button>
                       <button
                         onClick={() => handleToggleStatus(r.tenantId)}
-                        className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 transition-all cursor-pointer shadow-2xs"
+                        className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:text-slate-900 transition-colors cursor-pointer shadow-2xs"
                       >
                         {r.qrisStatus === 'active' ? 'Nonaktifkan' : 'Aktifkan QRIS'}
                       </button>
@@ -298,7 +298,7 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
           >
             <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-black text-slate-900">
+                <h3 className="text-sm font-semibold text-slate-900">
                   Konfigurasi Kas & QRIS: {editingRecord.tenantName}
                 </h3>
                 <p className="text-[11px] text-slate-500 font-mono">ID: {editingRecord.tenantId}</p>
@@ -376,13 +376,13 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditingRecord(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm"
                 >
                   <Save size={13} />
                   <span>Simpan Perubahan</span>

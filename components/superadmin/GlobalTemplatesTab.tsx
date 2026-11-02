@@ -128,10 +128,10 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
       {/* Top Banner */}
       <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-mono uppercase font-black mb-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-mono uppercase font-semibold mb-2">
             Standardisasi Birokrasi Warga
           </div>
-          <h2 className="text-base font-black text-slate-900 tracking-tight">
+          <h2 className="text-base font-semibold text-slate-900 tracking-tight">
             Katalog Master Template Persuratan Lingkungan
           </h2>
           <p className="text-xs text-slate-500 max-w-2xl mt-1 leading-relaxed">
@@ -142,7 +142,7 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
         <button
           onClick={handleDeployAll}
           disabled={isDeploying}
-          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-600/30 flex items-center gap-2 shrink-0 cursor-pointer"
+          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm  flex items-center gap-2 shrink-0 cursor-pointer"
         >
           <Send size={14} />
           <span>{isDeploying ? 'Menyinkronkan...' : 'Deploy ke Seluruh Armada RT'}</span>
@@ -154,11 +154,11 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
         {templates.map(tpl => (
           <div
             key={tpl.id}
-            className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all flex flex-col justify-between group"
+            className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md hover:border-indigo-300 transition-colors flex flex-col justify-between group"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
                   {tpl.code}
                 </span>
                 {tpl.isOfficialKemendagri && (
@@ -169,7 +169,7 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
                 )}
               </div>
 
-              <h3 className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors mb-2 tracking-tight">
+              <h3 className="text-sm font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors mb-2 tracking-tight">
                 {tpl.title}
               </h3>
 
@@ -227,10 +227,10 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
           >
             <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-black bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">
+                <span className="font-mono text-xs font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">
                   {selectedTemplate.code}
                 </span>
-                <h2 className="text-base font-black text-slate-900 tracking-tight">
+                <h2 className="text-base font-semibold text-slate-900 tracking-tight">
                   {selectedTemplate.title}
                 </h2>
               </div>
@@ -246,7 +246,7 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
               {/* Paper Preview Simulation */}
               <div className="p-6 bg-white border border-slate-300 rounded-2xl shadow-inner font-serif text-xs text-slate-800 space-y-3">
                 <div className="text-center border-b-2 border-slate-900 pb-3">
-                  <div className="font-sans font-black text-xs uppercase tracking-wider text-slate-900">
+                  <div className="font-sans font-semibold text-xs uppercase tracking-wider text-slate-900">
                     PEMERINTAH KOTA PALU • KECAMATAN MANTIKULORE
                   </div>
                   <div className="font-sans font-bold text-sm text-slate-900">
@@ -305,7 +305,7 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
             <div className="px-6 py-4 border-t border-slate-200 bg-slate-50/60 flex justify-end">
               <button
                 onClick={() => setSelectedTemplate(null)}
-                className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-4 py-2 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Tutup
               </button>

@@ -404,14 +404,14 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 min-w-0">
             <div 
-              className="w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm text-white shadow-xs shrink-0"
+              className="w-10 h-10 rounded-2xl flex items-center justify-center font-semibold text-sm text-white shadow-xs shrink-0"
               style={{ backgroundColor: formData.themeColor || tenant.themeColor || '#4f46e5' }}
             >
               {tenant.rt}
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black text-slate-900 truncate tracking-tight">
+                <h2 className="text-base sm:text-lg font-semibold text-slate-900 truncate tracking-tight">
                   {tenant.name}
                 </h2>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold">
@@ -441,7 +441,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs"
               >
                 <Edit3 size={13} />
                 <span>Edit</span>
@@ -449,7 +449,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             ) : (
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Batal
               </button>
@@ -467,7 +467,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
         <div className="px-6 pt-3 border-b border-slate-200 bg-white flex gap-2 overflow-x-auto text-xs font-bold shrink-0">
           <button
             onClick={() => setActiveTab('operations')}
-            className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-3 px-3 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'operations'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -476,12 +476,12 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             <Activity size={14} />
             <span>Operasional Realtime</span>
             {tenantReports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+              <span className="w-2 h-2 rounded-full bg-rose-500 "></span>
             )}
           </button>
           <button
             onClick={() => setActiveTab('info')}
-            className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-3 px-3 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'info'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -492,7 +492,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('officials')}
-            className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-3 px-3 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'officials'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -503,7 +503,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('fees')}
-            className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-3 px-3 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'fees'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -514,7 +514,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('modules')}
-            className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-3 px-3 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'modules'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -525,7 +525,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           </button>
           <button
             onClick={() => setActiveTab('links')}
-            className={`pb-3 px-3 border-b-2 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+            className={`pb-3 px-3 border-b-2 transition-colors flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
               activeTab === 'links'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -545,7 +545,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Pintu Terdaftar</span>
-                  <div className="text-lg font-black font-mono text-slate-900 mt-0.5">
+                  <div className="text-lg font-semibold font-mono text-slate-900 mt-0.5">
                     {liveStats.totalDoors} <span className="text-xs font-sans font-normal text-slate-500">Pintu</span>
                   </div>
                   <span className="text-[10px] font-mono text-emerald-700 font-bold">
@@ -555,7 +555,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Populasi Warga</span>
-                  <div className="text-lg font-black font-mono text-indigo-600 mt-0.5">
+                  <div className="text-lg font-semibold font-mono text-indigo-600 mt-0.5">
                     {liveStats.population} <span className="text-xs font-sans font-normal text-slate-500">Jiwa</span>
                   </div>
                   <span className="text-[10px] font-mono text-slate-500">
@@ -565,7 +565,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Kas Bersih Riil</span>
-                  <div className="text-lg font-black font-mono text-emerald-600 mt-0.5">
+                  <div className="text-lg font-semibold font-mono text-emerald-600 mt-0.5">
                     Rp {liveStats.balance.toLocaleString('id-ID')}
                   </div>
                   <span className="text-[10px] font-mono text-slate-500">
@@ -575,7 +575,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="text-[10px] font-mono uppercase font-bold text-slate-500 block">Kepatuhan Iuran</span>
-                  <div className="text-lg font-black font-mono text-sky-600 mt-0.5">
+                  <div className="text-lg font-semibold font-mono text-sky-600 mt-0.5">
                     {liveStats.complianceRate}%
                   </div>
                   <span className="text-[10px] font-mono text-slate-500">
@@ -591,7 +591,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <div className="flex items-center gap-2">
                       <AlertOctagon size={15} className="text-rose-600" />
-                      <h4 className="text-xs font-black text-slate-900">Aduan Warga Realtime</h4>
+                      <h4 className="text-xs font-semibold text-slate-900">Aduan Warga Realtime</h4>
                     </div>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-bold">
                       {tenantReports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length} Aktif
@@ -630,7 +630,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <div className="flex items-center gap-2">
                       <FileText size={15} className="text-indigo-600" />
-                      <h4 className="text-xs font-black text-slate-900">Permohonan Surat Pengantar</h4>
+                      <h4 className="text-xs font-semibold text-slate-900">Permohonan Surat Pengantar</h4>
                     </div>
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-bold">
                       {tenantLetters.filter(l => l.status === 'Menunggu' || (l.status as any) === 'Diproses').length} Menunggu
@@ -670,7 +670,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <ShieldCheck size={15} className="text-slate-700" />
-                    <h4 className="text-xs font-black text-slate-900">Tiket Dukungan Teknis Wilayah</h4>
+                    <h4 className="text-xs font-semibold text-slate-900">Tiket Dukungan Teknis Wilayah</h4>
                   </div>
                   <span className="text-[10px] font-mono text-slate-500">
                     Total {tenantTickets.length} Tiket
@@ -704,7 +704,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
               <div className="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                  <h4 className="text-xs font-semibold text-indigo-950 flex items-center gap-1.5">
                     <Download size={14} className="text-indigo-600" />
                     <span>Arsip Cadangan Data RT Mandiri (.JSON)</span>
                   </h4>
@@ -739,7 +739,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                     URL.revokeObjectURL(url);
                     toast.success(`Arsip cadangan untuk ${tenant.name} berhasil diunduh!`);
                   }}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
                 >
                   <Download size={14} />
                   <span>Unduh Arsip JSON</span>
@@ -760,7 +760,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                       type="text"
                       value={formData.name || ''}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                     />
                   ) : (
                     <p className="text-sm font-bold text-slate-900 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
@@ -783,7 +783,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                         type="text"
                         value={formData.themeColor || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, themeColor: e.target.value }))}
-                        className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                        className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                       />
                     </div>
                   ) : (
@@ -802,7 +802,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                     rows={2}
                     value={formData.address || ''}
                     onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                   />
                 ) : (
                   <p className="text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-200 leading-relaxed">
@@ -841,15 +841,15 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">
+                      <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">
                         Akun Login Admin RT
                       </h4>
                       {liveChairman?.email ? (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase">
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold uppercase">
                           ✓ Akun Aktif
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase">
+                        <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-semibold uppercase">
                           Belum Ada Akun
                         </span>
                       )}
@@ -884,7 +884,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                           toast.error(e.message || "Gagal menghapus akun");
                         }
                       }}
-                      className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold border border-rose-200 text-xs rounded-xl flex items-center gap-1 cursor-pointer transition-all"
+                      className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold border border-rose-200 text-xs rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
                       title="Hapus / Cabut Akun Login"
                     >
                       <Trash2 size={13} />
@@ -894,16 +894,16 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   <button
                     type="button"
                     onClick={handleCreateChairmanAccount}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5 cursor-pointer transition-all active:scale-95"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5 cursor-pointer transition-colors active:scale-95"
                   >
                     <Key size={14} />
-                    <span>{liveChairman?.email ? 'Kelola / Reset Akun' : '🔑 Buat Akun Admin RT'}</span>
+                    <span>{liveChairman?.email ? 'Kelola / Reset Akun' : 'Buat Akun Admin RT'}</span>
                   </button>
                 </div>
               </div>
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-black text-indigo-700 uppercase tracking-wider">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-indigo-700 uppercase tracking-wider">
                     <User size={14} />
                     <span>Ketua RT</span>
                   </div>
@@ -921,7 +921,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                         type="text"
                         value={formData.chairmanName || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, chairmanName: e.target.value }))}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                       />
                     ) : (
                       <p className="text-xs font-bold text-slate-900">
@@ -936,7 +936,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                         type="text"
                         value={formData.chairmanPhone || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, chairmanPhone: e.target.value }))}
-                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                        className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                       />
                     ) : (
                       <div className="flex items-center gap-2">
@@ -975,7 +975,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                       type="text"
                       value={formData.secretaryName || ''}
                       onChange={(e) => setFormData(prev => ({ ...prev, secretaryName: e.target.value }))}
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                     />
                   ) : (
                     <div>
@@ -1003,7 +1003,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                       type="text"
                       value={formData.treasurerName || ''}
                       onChange={(e) => setFormData(prev => ({ ...prev, treasurerName: e.target.value }))}
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all"
+                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-colors"
                     />
                   ) : (
                     <div>
@@ -1022,7 +1022,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               {tenantOfficials.length > 0 && (
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <h5 className="text-[11px] font-black text-slate-800 uppercase tracking-wider">
+                    <h5 className="text-[11px] font-semibold text-slate-800 uppercase tracking-wider">
                       Struktur Aparatur Terdaftar di RT ({tenantOfficials.length} Pengurus)
                     </h5>
                     <span className="text-[10px] font-mono text-indigo-600 font-bold">Sinkron Realtime</span>
@@ -1064,7 +1064,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                             className={`px-2 py-1 rounded-lg text-[10px] font-bold border flex items-center gap-1 shrink-0 cursor-pointer ${
                               off.email 
                                 ? 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                                : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-black'
+                                : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-semibold'
                             }`}
                             title={off.email ? `Akun: ${off.email}` : "Buat Akun Login"}
                           >
@@ -1084,7 +1084,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           {activeTab === 'fees' && (
             <div className="space-y-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <h4 className="text-xs font-black text-amber-700 uppercase tracking-wider mb-3">
+                <h4 className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-3">
                   Tarif Retribusi Sampah TPS3R (Perda Kota Palu)
                 </h4>
                 <div className="grid grid-cols-3 gap-3 text-center">
@@ -1179,8 +1179,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
             <div className="space-y-6">
               {/* Status Operasional Selector */}
               <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200">
-                <label className="block text-xs font-black text-slate-900 uppercase tracking-wider mb-2">
-                  Status Operasional Tenant
+                <label className="block text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">
+                  Status operasional
                 </label>
                 <p className="text-xs text-slate-500 mb-3">
                   Mengatur izin akses platform secara keseluruhan untuk warga dan pengurus RT ini:
@@ -1191,39 +1191,39 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, status: 'active' }))}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`p-3 rounded-xl border text-left transition-colors cursor-pointer ${
                         formData.status === 'active'
                           ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-200'
                           : 'bg-white border-slate-200 hover:bg-slate-50'
                       }`}
                     >
-                      <span className="block text-xs font-bold text-emerald-800">✓ Aktif Normal</span>
+                      <span className="block text-xs font-semibold text-emerald-800">Aktif beroperasi</span>
                       <span className="text-[10px] text-slate-500">Layanan penuh aktif untuk warga & admin.</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, status: 'maintenance' }))}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`p-3 rounded-xl border text-left transition-colors cursor-pointer ${
                         formData.status === 'maintenance'
                           ? 'bg-amber-50 border-amber-300 ring-2 ring-amber-200'
                           : 'bg-white border-slate-200 hover:bg-slate-50'
                       }`}
                     >
-                      <span className="block text-xs font-bold text-amber-800">⚠️ Pemeliharaan</span>
+                      <span className="block text-xs font-semibold text-amber-800">Pemeliharaan</span>
                       <span className="text-[10px] text-slate-500">Layar info maintenance ditampilkan ke publik.</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, status: 'suspended' }))}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`p-3 rounded-xl border text-left transition-colors cursor-pointer ${
                         formData.status === 'suspended'
                           ? 'bg-rose-50 border-rose-300 ring-2 ring-rose-200'
                           : 'bg-white border-slate-200 hover:bg-slate-50'
                       }`}
                     >
-                      <span className="block text-xs font-bold text-rose-800">⛔ Ditangguhkan</span>
+                      <span className="block text-xs font-semibold text-rose-800">Ditangguhkan</span>
                       <span className="text-[10px] text-slate-500">Akses dibekukan sementara oleh platform.</span>
                     </button>
                   </div>
@@ -1231,15 +1231,15 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   <div className="flex items-center gap-2">
                     {tenant.status === 'suspended' ? (
                       <span className="px-3 py-1 bg-rose-100 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold font-mono">
-                        ⛔ LAYANAN DITANGGUHKAN (SUSPENDED)
+                        Layanan ditangguhkan
                       </span>
                     ) : tenant.status === 'maintenance' ? (
                       <span className="px-3 py-1 bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold font-mono">
-                        ⚠️ DALAM PEMELIHARAAN (MAINTENANCE)
+                        Dalam pemeliharaan
                       </span>
                     ) : (
                       <span className="px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold font-mono">
-                        ✓ AKTIF BEROPERASI NORMAL
+                        Aktif beroperasi
                       </span>
                     )}
                   </div>
@@ -1249,8 +1249,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               {/* Modular Feature Flags */}
               <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-black text-slate-900 uppercase tracking-wider block">
-                    Sakelar Modul Layanan (Feature Flags)
+                  <label className="text-xs font-semibold text-slate-900 uppercase tracking-wider block">
+                    Modul layanan
                   </label>
                   {isEditing && (
                     <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">
@@ -1266,7 +1266,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   {/* Water Meter */}
                   <div 
                     onClick={() => handleModuleToggle('waterMeter')}
-                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
                       isEditing ? 'cursor-pointer hover:border-slate-300' : ''
                     } ${
                       formData.modules?.waterMeter 
@@ -1293,7 +1293,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   {/* Asset Rental */}
                   <div 
                     onClick={() => handleModuleToggle('assetRental')}
-                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
                       isEditing ? 'cursor-pointer hover:border-slate-300' : ''
                     } ${
                       formData.modules?.assetRental 
@@ -1320,7 +1320,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   {/* Letters */}
                   <div 
                     onClick={() => handleModuleToggle('letters')}
-                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
                       isEditing ? 'cursor-pointer hover:border-slate-300' : ''
                     } ${
                       formData.modules?.letters 
@@ -1347,7 +1347,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   {/* Panic Button */}
                   <div 
                     onClick={() => handleModuleToggle('panicButton')}
-                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
                       isEditing ? 'cursor-pointer hover:border-slate-300' : ''
                     } ${
                       formData.modules?.panicButton 
@@ -1374,7 +1374,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   {/* STBM */}
                   <div 
                     onClick={() => handleModuleToggle('stbmSanitation')}
-                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
                       isEditing ? 'cursor-pointer hover:border-slate-300' : ''
                     } ${
                       formData.modules?.stbmSanitation 
@@ -1401,7 +1401,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   {/* CCTV */}
                   <div 
                     onClick={() => handleModuleToggle('cctv')}
-                    className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                    className={`p-3 rounded-xl border flex items-center justify-between transition-colors ${
                       isEditing ? 'cursor-pointer hover:border-slate-300' : ''
                     } ${
                       formData.modules?.cctv 
@@ -1435,11 +1435,11 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-black text-indigo-950 uppercase tracking-wide">
-                        Replikasi Preset RT 002 (Percontohan)
+                      <h4 className="text-xs font-semibold text-indigo-950 uppercase tracking-wide">
+                        Preset RT 002 (Percontohan)
                       </h4>
                       <span className="text-[9px] font-mono font-bold bg-indigo-200/80 text-indigo-800 px-1.5 py-0.5 rounded">
-                        STANDAR KELURAHAN
+                        Standar kelurahan
                       </span>
                     </div>
                     <p className="text-[11px] text-indigo-800/80 mt-0.5">
@@ -1451,7 +1451,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   type="button"
                   onClick={handleApplyRT002Preset}
                   disabled={isSaving}
-                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
                 >
                   <Copy size={13} />
                   <span>Terapkan Preset RT 002</span>
@@ -1461,9 +1461,9 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               {/* Mode Supervisi CTA Card */}
               <div className="p-4.5 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-1.5 text-amber-900 font-black text-xs">
+                  <div className="flex items-center gap-1.5 text-amber-900 font-semibold text-xs">
                     <Eye size={15} />
-                    <span>Mode Supervisi Read-Only</span>
+                    <span>Mode supervisi</span>
                   </div>
                   <p className="text-[11px] text-amber-800 mt-0.5">
                     Inspeksi langsung dashboard pengurus RT ini tanpa risiko mengubah atau merusak data warga.
@@ -1472,7 +1472,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                 <button
                   type="button"
                   onClick={handleStartSupervision}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-1.5 shrink-0"
                 >
                   <Eye size={14} />
                   <span>Mulai Supervisi</span>
@@ -1485,18 +1485,18 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
           {activeTab === 'links' && (
             <div className="space-y-4">
               {/* Tautan & Akun Portal Admin RT */}
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 border border-indigo-200/90 space-y-2.5 shadow-2xs">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-indigo-950 flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-indigo-950 flex items-center gap-1.5">
                     <Key size={14} className="text-indigo-600" />
                     <span>Tautan Portal Admin RT & Kredensial</span>
                   </span>
                   {liveChairman?.email ? (
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-full">
+                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-semibold rounded-full">
                       Akun: {liveChairman.email}
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-black rounded-full">
+                    <span className="px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-semibold rounded-full">
                       Belum Ada Akun Admin
                     </span>
                   )}
@@ -1511,14 +1511,14 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   />
                   <button
                     onClick={() => handleCopy(`${window.location.origin}/?rt=${tenant.slug || tenant.id}#/admin`, 'admin')}
-                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
                   >
                     {copiedLink === 'admin' ? <Check size={14} /> : <Copy size={14} />}
                     <span>{copiedLink === 'admin' ? 'Tersalin' : 'Salin Link'}</span>
                   </button>
                   <button
                     onClick={handleCreateChairmanAccount}
-                    className="px-3.5 py-2 bg-white hover:bg-slate-100 text-indigo-700 font-black border border-indigo-200 rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1"
+                    className="px-3.5 py-2 bg-white hover:bg-slate-100 text-indigo-700 font-semibold border border-indigo-200 rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1"
                   >
                     <Key size={13} />
                     <span>{liveChairman?.email ? 'Kelola Akun' : 'Buat Akun'}</span>
@@ -1536,7 +1536,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   />
                   <button
                     onClick={() => handleCopy(publicUrl, 'public')}
-                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
                   >
                     {copiedLink === 'public' ? <Check size={14} /> : <Copy size={14} />}
                     <span>{copiedLink === 'public' ? 'Tersalin' : 'Salin'}</span>
@@ -1564,7 +1564,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                   />
                   <button
                     onClick={() => handleCopy(registerUrl, 'register')}
-                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
+                    className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm shadow-indigo-600/20"
                   >
                     {copiedLink === 'register' ? <Check size={14} /> : <Copy size={14} />}
                     <span>{copiedLink === 'register' ? 'Tersalin' : 'Salin'}</span>
@@ -1576,12 +1576,12 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               {tenant.id !== 'tondo-rw20-rt02' && (
                 <div className="mt-6 pt-5 p-4 rounded-2xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h5 className="text-xs font-black text-rose-800">Zona Hapus Tenant</h5>
+                    <h5 className="text-xs font-semibold text-rose-800">Zona Hapus Tenant</h5>
                     <p className="text-[11px] text-rose-600">Hapus wilayah ini dari direktori platform secara permanen.</p>
                   </div>
                   <button
                     onClick={handleDelete}
-                    className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                    className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
                   >
                     <Trash2 size={14} />
                     <span>Hapus Tenant</span>
@@ -1603,7 +1603,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 <Save size={14} />
                 <span>{isSaving ? 'Menyimpan...' : 'Simpan Perubahan'}</span>

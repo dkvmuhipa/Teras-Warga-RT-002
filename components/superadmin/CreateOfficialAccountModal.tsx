@@ -193,11 +193,11 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
         {/* Header */}
         <div className="px-5 sm:px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md  shrink-0">
               <Key size={18} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-black text-slate-900 truncate">
+              <h3 className="text-base font-semibold text-slate-900 truncate">
                 {createdResult 
                   ? 'Akun Login Berhasil Dibuat!' 
                   : target.email 
@@ -228,7 +228,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
               </div>
 
               <div>
-                <h4 className="text-lg font-black text-slate-900">Kredensial Siap Digunakan</h4>
+                <h4 className="text-lg font-semibold text-slate-900">Kredensial Siap Digunakan</h4>
                 <p className="text-xs text-slate-500 mt-1">
                   Akun login telah aktif di cloud Firebase Authentication. Silakan bagikan kredensial ini kepada pengurus terkait.
                 </p>
@@ -270,7 +270,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                   <button
                     type="button"
                     onClick={handleShareWhatsApp}
-                    className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/25 cursor-pointer transition-all"
+                    className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md  cursor-pointer transition-colors"
                   >
                     <MessageSquare size={16} />
                     <span>Kirim via WhatsApp</span>
@@ -291,7 +291,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
               <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs">
                 <div>
                   <span className="text-[11px] text-slate-400 block font-medium">Calon Pemilik Akun:</span>
-                  <span className="font-black text-slate-900 text-sm">{target.name}</span>
+                  <span className="font-semibold text-slate-900 text-sm">{target.name}</span>
                 </div>
                 <span className="px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold">
                   {target.roleTitle}
@@ -310,7 +310,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                     type="button"
                     onClick={handleDeleteAccount}
                     disabled={isDeleting || isLoading}
-                    className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-black flex items-center gap-1.5 cursor-pointer transition-all shrink-0 min-h-[36px]"
+                    className="px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors shrink-0 min-h-[36px]"
                     title="Hapus akun login ini"
                   >
                     <Trash2 size={13} />
@@ -436,7 +436,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
                   <button
                     type="submit"
                     disabled={isLoading || isDeleting}
-                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/25 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[44px]"
+                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md  flex items-center gap-1.5 cursor-pointer disabled:opacity-50 min-h-[44px]"
                   >
                     {isLoading ? (
                       <span>Memproses di Cloud...</span>
