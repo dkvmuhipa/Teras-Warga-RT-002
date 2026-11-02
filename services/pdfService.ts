@@ -3140,11 +3140,39 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
     doc.save(`Laporan_PBB_${year}.pdf`);
 };
 
-export const generatePBBRecapPDF = async (houses: House[], year: string, customConfig?: PdfConfig) => {
+export interface PBBRecapPrintOptions {
+    orientation?: 'landscape' | 'portrait';
+    columns?: {
+        no?: boolean;
+        unit?: boolean;
+        headOfFamily?: boolean;
+        nop?: boolean;
+        taxpayerName?: boolean;
+        proofAtRt?: boolean;
+        paymentStatus?: boolean;
+        paidDate?: boolean;
+        spptAtRt?: boolean;
+        takenStatus?: boolean;
+        signatureCol?: boolean;
+        notes?: boolean;
+    };
+    showStatsBar?: boolean;
+    groupByBlock?: boolean;
+    showSignatureBlock?: boolean;
+    customTitle?: string;
+}
+
+export const generatePBBRecapPDF = async (
+    houses: House[], 
+    year: string, 
+    customConfig?: PdfConfig,
+    options?: PBBRecapPrintOptions
+) => {
     const config = customConfig || getActivePdfConfig();
+    const isLandscape = (options?.orientation || 'landscape') === 'landscape';
     
     const doc = new jsPDF({ 
-        orientation: "landscape", 
+        orientation: isLandscape ? "landscape" : "portrait", 
         unit: "mm", 
         format: "a4",
         compress: true 
@@ -3152,7 +3180,7 @@ export const generatePBBRecapPDF = async (houses: House[], year: string, customC
 
     const sortedHouses = [...houses].sort((a, b) => {
         const getBlockParts = (blockStr: string) => {
-            const matches = (blockStr || '').match(/([a-zA-Z]+)(\d+)/);
+            const matches = (blockStr || '').match(/([a-zA-Z]+)(d+)/);
             if (matches) {
                 return { alpha: matches[1], num: parseInt(matches[2]) };
             }
@@ -3191,78 +3219,249 @@ export const generatePBBRecapPDF = async (houses: House[], year: string, customC
     const takenCount = sortedHouses.filter(h => h.pbbStatus === 'Sudah Diambil').length;
     const pctPaid = totalResidents > 0 ? Math.round((paidCount / totalResidents) * 100) : 0;
 
+    // --- Official Standard Kop & Header ---
     const drawHeader = (isFirstPage = false) => {
         if (isFirstPage) {
+            // Official Logo
             if (logoData) {
-                doc.addImage(logoData, 'PNG', 15, 8, 18, 22);
+                doc.addImage(logoData, 'PNG', margin + 2, 9, 22, 28);
             }
 
-            doc.setFont("times", "normal");
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-
-            doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'} • KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 12, { align: "center" });
+            // Standard Indonesian Official Kop Surat
+            doc.setFont("times", "bold");
             doc.setFontSize(13);
-            doc.setFont("times", "bold");
-            doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'} • PENGURUS ${config.rtName}`, centerX, 18, { align: "center" });
+            doc.setTextColor(0, 0, 0);
+
+            doc.text(`PEMERINTAH KOTA ${config.kota?.toUpperCase() || 'PALU'}`, centerX, 14, { align: "center" });
+            doc.text(`KECAMATAN ${config.kecamatan?.toUpperCase() || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+            doc.text(`KELURAHAN ${config.kelurahan?.toUpperCase() || 'TONDO'}`, centerX, 26, { align: "center" });
+            doc.text(`PENGURUS ${config.rtName?.toUpperCase() || 'RT 002 / RW 002'}`, centerX, 32, { align: "center" });
 
             doc.setFont("times", "normal");
-            doc.setFontSize(9);
-            doc.text(`Sekretariat: ${config.rtAddress}`, centerX, 23, { align: "center" });
+            doc.setFontSize(9.5);
+            doc.text(`Sekretariat: ${config.rtAddress}${config.rtPhone ? ' | Telp/WA: ' + config.rtPhone : ''}`, centerX, 38, { align: "center" });
 
-            doc.setLineWidth(0.8);
-            doc.line(margin, 26, pageWidth - margin, 26);
-            doc.setLineWidth(0.2);
-            doc.line(margin, 27, pageWidth - margin, 27);
+            // Official Double Divider Lines
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.9);
+            doc.line(margin, 41.5, pageWidth - margin, 41.5);
+            doc.setLineWidth(0.25);
+            doc.line(margin, 42.5, pageWidth - margin, 42.5);
 
-            // Title
+            // Document Title
+            const titleText = options?.customTitle || `DAFTAR REKAPITULASI & PENDATAAN REALISASI SPPT PBB TAHUN ${year}`;
             doc.setFont("times", "bold");
-            doc.setFontSize(12);
-            doc.text(`DAFTAR REKAPITULASI & PENDATAAN REALISASI SPPT PBB TAHUN ${year}`, centerX, 34, { align: "center" });
-            
-            // Stats Row
-            doc.setFont("times", "bold");
-            doc.setFontSize(8.5);
-            doc.setFillColor(245, 247, 250);
-            doc.rect(margin, 38, contentWidth, 7, 'F');
-            doc.setDrawColor(220, 226, 235);
-            doc.rect(margin, 38, contentWidth, 7, 'S');
+            doc.setFontSize(11.5);
+            doc.text(titleText, centerX, 49.5, { align: "center" });
 
-            doc.setTextColor(0, 0, 0);
-            doc.text(`TOTAL: ${totalResidents} UNIT`, margin + 5, 43);
+            // Stats KPI Bar (if enabled)
+            if (options?.showStatsBar !== false) {
+                const barY = 53.5;
+                const barH = 7.5;
+                doc.setFillColor(248, 250, 252);
+                doc.rect(margin, barY, contentWidth, barH, 'F');
+                doc.setDrawColor(226, 232, 240);
+                doc.rect(margin, barY, contentWidth, barH, 'S');
 
-            doc.setTextColor(2, 132, 199);
-            doc.text(`BUKTI DI RT: ${proofCount} UNIT`, margin + 50, 43);
+                doc.setFont("times", "bold");
+                doc.setFontSize(8);
 
-            doc.setTextColor(16, 185, 129);
-            doc.text(`LUNAS: ${paidCount} UNIT (${pctPaid}%)`, margin + 110, 43);
+                if (isLandscape) {
+                    doc.setTextColor(15, 23, 42);
+                    doc.text(`TOTAL: ${totalResidents} UNIT`, margin + 4, barY + 5);
 
-            doc.setTextColor(225, 29, 72);
-            doc.text(`BELUM LUNAS: ${unpaidCount} UNIT`, margin + 165, 43);
+                    doc.setTextColor(2, 132, 199);
+                    doc.text(`BUKTI DI RT: ${proofCount} UNIT`, margin + 45, barY + 5);
 
-            doc.setTextColor(100, 116, 139);
-            doc.text(`SPPT DI RT: ${spptCount} | DIAMBIL: ${takenCount}`, pageWidth - margin - 5, 43, { align: "right" });
-            
-            doc.setTextColor(0, 0, 0);
+                    doc.setTextColor(16, 185, 129);
+                    doc.text(`LUNAS: ${paidCount} UNIT (${pctPaid}%)`, margin + 105, barY + 5);
+
+                    doc.setTextColor(225, 29, 72);
+                    doc.text(`BELUM LUNAS: ${unpaidCount} UNIT`, margin + 165, barY + 5);
+
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(`SPPT DI RT: ${spptCount} | DIAMBIL: ${takenCount}`, pageWidth - margin - 4, barY + 5, { align: "right" });
+                } else {
+                    doc.setTextColor(15, 23, 42);
+                    doc.text(`TOTAL: ${totalResidents} UNIT`, margin + 3, barY + 5);
+
+                    doc.setTextColor(2, 132, 199);
+                    doc.text(`BUKTI: ${proofCount}`, margin + 38, barY + 5);
+
+                    doc.setTextColor(16, 185, 129);
+                    doc.text(`LUNAS: ${paidCount} (${pctPaid}%)`, margin + 74, barY + 5);
+
+                    doc.setTextColor(225, 29, 72);
+                    doc.text(`BELUM: ${unpaidCount}`, margin + 115, barY + 5);
+
+                    doc.setTextColor(100, 116, 139);
+                    doc.text(`SPPT: ${spptCount}`, pageWidth - margin - 3, barY + 5, { align: "right" });
+                }
+                doc.setTextColor(0, 0, 0);
+            }
         } else {
+            // Continuation Running Header
             doc.setFont("times", "bold");
             doc.setFontSize(8.5);
-            doc.setTextColor(100, 116, 139);
-            doc.text(`PENGURUS ${config.rtName} | REKAPITULASI PENDATAAN SPPT PBB TAHUN ${year} (Lanjutan)`, margin, 10);
-            doc.setLineWidth(0.2);
-            doc.line(margin, 12, pageWidth - margin, 12);
+            doc.setTextColor(71, 85, 105);
+            doc.text(`PENGURUS ${config.rtName?.toUpperCase()} | REKAPITULASI PENDATAAN SPPT PBB TAHUN ${year} (Lanjutan)`, margin, 11);
+            doc.setDrawColor(203, 213, 225);
+            doc.setLineWidth(0.25);
+            doc.line(margin, 13.5, pageWidth - margin, 13.5);
         }
     };
 
     drawHeader(true);
-    let y = 52;
 
-    const colWidths = [8, 16, 44, 42, 38, 25, 24, 22, 24, 24]; 
-    const headers = [
-        "NO", "BLOK", "NAMA KEPALA KELUARGA", "NOMOR OBJEK PAJAK (NOP)", 
-        "NAMA WP DI SPPT", "BUKTI DI RT", "STATUS BAYAR", "TGL BAYAR", "SPPT DI RT", "AMBIL WARGA"
+    // Dynamic Columns Selection & Scaling
+    const colOptions = options?.columns || {};
+    const isColEnabled = (id: string, defVal = true) => {
+        if (colOptions && id in colOptions) {
+            return !!(colOptions as any)[id];
+        }
+        return defVal;
+    };
+
+    interface ColDef {
+        id: string;
+        header: string;
+        baseWidth: number;
+        align: 'left' | 'center' | 'right';
+        getValue: (house: House, index: number) => { 
+            text: string; 
+            fontName?: 'times' | 'courier';
+            fontStyle?: 'normal' | 'bold' | 'italic';
+            fontSize?: number;
+            color?: [number, number, number];
+        };
+    }
+
+    const availableColumns: ColDef[] = [
+        {
+            id: 'no',
+            header: 'NO',
+            baseWidth: 9,
+            align: 'center',
+            getValue: (h, idx) => ({ text: (idx + 1).toString(), color: [100, 116, 139] })
+        },
+        {
+            id: 'unit',
+            header: 'UNIT',
+            baseWidth: 16,
+            align: 'center',
+            getValue: h => ({ text: `${h.block}-${h.number}`, fontStyle: 'bold', color: [15, 23, 42] })
+        },
+        {
+            id: 'headOfFamily',
+            header: 'NAMA KEPALA KELUARGA',
+            baseWidth: 44,
+            align: 'left',
+            getValue: h => ({ text: (h.headOfFamily || "-").toUpperCase(), color: [15, 23, 42] })
+        },
+        {
+            id: 'nop',
+            header: 'NOMOR OBJEK PAJAK (NOP)',
+            baseWidth: 41,
+            align: 'left',
+            getValue: h => ({ text: h.pbbNop || "-", fontName: 'courier', fontStyle: 'bold', fontSize: 7.2, color: [15, 23, 42] })
+        },
+        {
+            id: 'taxpayerName',
+            header: 'NAMA WP DI SPPT',
+            baseWidth: 38,
+            align: 'left',
+            getValue: h => ({ text: (h.pbbTaxpayerName || h.headOfFamily || "-").toUpperCase(), color: [30, 41, 59] })
+        },
+        {
+            id: 'proofAtRt',
+            header: 'BUKTI DI RT',
+            baseWidth: 24,
+            align: 'center',
+            getValue: h => {
+                const hasProof = h.pbbProofAtRt === 'Ada di RT';
+                return { 
+                    text: hasProof ? "Ada di RT" : "Belum Ada", 
+                    fontStyle: hasProof ? 'bold' : 'normal', 
+                    color: hasProof ? [2, 132, 199] : [148, 163, 184] 
+                };
+            }
+        },
+        {
+            id: 'paymentStatus',
+            header: 'STATUS BAYAR',
+            baseWidth: 23,
+            align: 'center',
+            getValue: h => {
+                const isPaid = h.pbbPaymentStatus === 'Lunas';
+                return { 
+                    text: isPaid ? "LUNAS" : "BELUM", 
+                    fontStyle: 'bold', 
+                    color: isPaid ? [16, 185, 129] : [225, 29, 72] 
+                };
+            }
+        },
+        {
+            id: 'paidDate',
+            header: 'TGL BAYAR',
+            baseWidth: 22,
+            align: 'center',
+            getValue: h => ({ text: h.pbbPaidDate || "-", fontSize: 7.5, color: [100, 116, 139] })
+        },
+        {
+            id: 'spptAtRt',
+            header: 'SPPT DI RT',
+            baseWidth: 23,
+            align: 'center',
+            getValue: h => {
+                const atRt = h.pbbSpptAtRt === 'Ada di RT';
+                return { 
+                    text: atRt ? "Ada di RT" : "Belum", 
+                    color: atRt ? [15, 23, 42] : [148, 163, 184] 
+                };
+            }
+        },
+        {
+            id: 'takenStatus',
+            header: 'AMBIL WARGA',
+            baseWidth: 24,
+            align: 'center',
+            getValue: h => {
+                const taken = h.pbbStatus === 'Sudah Diambil';
+                return { 
+                    text: taken ? "Sudah Diambil" : "Belum", 
+                    color: taken ? [16, 185, 129] : [100, 116, 139] 
+                };
+            }
+        },
+        {
+            id: 'signatureCol',
+            header: 'PARAF WARGA',
+            baseWidth: 26,
+            align: 'center',
+            getValue: (h, idx) => ({ text: `${idx + 1}. .........`, fontSize: 7, color: [148, 163, 184] })
+        },
+        {
+            id: 'notes',
+            header: 'KETERANGAN',
+            baseWidth: 28,
+            align: 'left',
+            getValue: h => ({ text: h.pbbNotes || "-", fontSize: 7.5, color: [100, 116, 139] })
+        }
     ];
-    
+
+    const activeColumns = availableColumns.filter(c => {
+        if (c.id === 'no') return true;
+        if (c.id === 'signatureCol') return isColEnabled('signatureCol', false);
+        if (c.id === 'notes') return isColEnabled('notes', false);
+        return isColEnabled(c.id, true);
+    });
+
+    const totalBaseWidth = activeColumns.reduce((sum, c) => sum + c.baseWidth, 0);
+    const colWidths = activeColumns.map(c => (c.baseWidth / totalBaseWidth) * contentWidth);
+
+    let y = (options?.showStatsBar !== false) ? 68.5 : 57.5;
+    const maxTableY = pageHeight - (margin + 8);
+
     const drawTableHeaders = (startY: number) => {
         doc.setFillColor(30, 41, 59);
         doc.rect(margin, startY - 5, contentWidth, 7.5, 'F');
@@ -3271,20 +3470,16 @@ export const generatePBBRecapPDF = async (houses: House[], year: string, customC
         doc.setFontSize(7.5);
         doc.setTextColor(255, 255, 255);
         let curX = margin;
-        headers.forEach((h, i) => {
-            const align = (i === 0 || i === 1 || i === 5 || i === 6 || i === 7 || i === 8 || i === 9) ? "center" : "left";
-            const xPos = align === "center" ? curX + (colWidths[i] / 2) : curX + 2;
-            doc.text(h, xPos, startY, { align });
-            curX += colWidths[i];
+        activeColumns.forEach((col, i) => {
+            const width = colWidths[i];
+            const xPos = col.align === "center" ? curX + (width / 2) : curX + 2;
+            doc.text(col.header, xPos, startY, { align: col.align });
+            curX += width;
         });
     };
 
     drawTableHeaders(y);
     y += 7.5;
-
-    doc.setFont("times", "normal");
-    doc.setFontSize(8);
-    doc.setTextColor(0, 0, 0);
 
     let currentBlock = "";
 
@@ -3292,13 +3487,13 @@ export const generatePBBRecapPDF = async (houses: House[], year: string, customC
         const houseBlock = (house.block || '').toString().toUpperCase();
         const isNewBlock = houseBlock !== currentBlock;
         
-        if (isNewBlock) {
+        if (options?.groupByBlock !== false && isNewBlock) {
             currentBlock = houseBlock;
             
-            if (y > 185) {
+            if (y > maxTableY - 10) {
                 doc.addPage();
                 drawHeader(false);
-                y = 18;
+                y = 19;
                 drawTableHeaders(y);
                 y += 7.5;
             }
@@ -3313,99 +3508,40 @@ export const generatePBBRecapPDF = async (houses: House[], year: string, customC
             y += 6;
         }
 
-        if (y > 188) {
+        if (y > maxTableY) {
             doc.addPage();
             drawHeader(false);
-            y = 18;
+            y = 19;
             drawTableHeaders(y);
             y += 7.5;
-            doc.setFont("times", "normal");
-            doc.setFontSize(8);
         }
 
         let curX = margin;
-        
-        // 0: No
-        doc.setTextColor(100, 116, 139);
-        doc.text((index + 1).toString(), curX + (colWidths[0] / 2), y, { align: "center" });
-        curX += colWidths[0];
+        activeColumns.forEach((col, i) => {
+            const width = colWidths[i];
+            const item = col.getValue(house, index);
+            
+            doc.setFont(item.fontName || "times", item.fontStyle || "normal");
+            doc.setFontSize(item.fontSize || 8);
+            if (item.color) {
+                doc.setTextColor(item.color[0], item.color[1], item.color[2]);
+            } else {
+                doc.setTextColor(0, 0, 0);
+            }
 
-        // 1: Unit
-        doc.setTextColor(0, 0, 0);
-        doc.setFont("times", "bold");
-        doc.text(`${house.block}-${house.number}`, curX + (colWidths[1] / 2), y, { align: "center" });
-        doc.setFont("times", "normal");
-        curX += colWidths[1];
+            let renderedText = item.text;
+            const maxTextWidth = width - 2.5;
+            if (doc.getTextWidth(renderedText) > maxTextWidth) {
+                const chunks = doc.splitTextToSize(renderedText, maxTextWidth);
+                renderedText = (chunks[0] || '').slice(0, -2) + '..';
+            }
 
-        // 2: Name
-        const name = (house.headOfFamily || "-").toUpperCase();
-        const truncName = doc.getTextWidth(name) > colWidths[2] - 3 
-            ? doc.splitTextToSize(name, colWidths[2] - 3)[0] + '..' 
-            : name;
-        doc.text(truncName, curX + 2, y);
-        curX += colWidths[2];
+            const xPos = col.align === 'center' ? curX + (width / 2) : curX + 1.5;
+            doc.text(renderedText, xPos, y, { align: col.align });
+            curX += width;
+        });
 
-        // 3: NOP
-        const nop = house.pbbNop || "-";
-        doc.setFont("courier", "bold");
-        doc.setFontSize(7.5);
-        doc.text(nop, curX + 2, y);
-        doc.setFont("times", "normal");
-        doc.setFontSize(8);
-        curX += colWidths[3];
-
-        // 4: Nama WP SPPT
-        const wp = (house.pbbTaxpayerName || house.headOfFamily || "-").toUpperCase();
-        const truncWp = doc.getTextWidth(wp) > colWidths[4] - 3 
-            ? doc.splitTextToSize(wp, colWidths[4] - 3)[0] + '..' 
-            : wp;
-        doc.text(truncWp, curX + 2, y);
-        curX += colWidths[4];
-
-        // 5: Bukti di RT
-        const hasProof = house.pbbProofAtRt === 'Ada di RT';
-        if (hasProof) {
-            doc.setTextColor(2, 132, 199);
-            doc.setFont("times", "bold");
-        } else {
-            doc.setTextColor(148, 163, 184);
-            doc.setFont("times", "normal");
-        }
-        doc.text(hasProof ? "[Ada di RT]" : "Belum Ada", curX + (colWidths[5] / 2), y, { align: "center" });
-        curX += colWidths[5];
-
-        // 6: Status Bayar
-        const isPaid = house.pbbPaymentStatus === 'Lunas';
-        if (isPaid) {
-            doc.setTextColor(16, 185, 129);
-            doc.setFont("times", "bold");
-        } else {
-            doc.setTextColor(225, 29, 72);
-            doc.setFont("times", "bold");
-        }
-        doc.text(isPaid ? "LUNAS" : "BELUM", curX + (colWidths[6] / 2), y, { align: "center" });
-        curX += colWidths[6];
-
-        // 7: Tgl Bayar
-        doc.setTextColor(100, 116, 139);
-        doc.setFont("times", "normal");
-        doc.setFontSize(7.5);
-        doc.text(house.pbbPaidDate || "-", curX + (colWidths[7] / 2), y, { align: "center" });
-        doc.setFontSize(8);
-        curX += colWidths[7];
-
-        // 8: SPPT di RT
-        const spptAtRt = house.pbbSpptAtRt === 'Ada di RT';
-        doc.setTextColor(spptAtRt ? 15 : 148, spptAtRt ? 23 : 163, spptAtRt ? 42 : 184);
-        doc.text(spptAtRt ? "Ada di RT" : "Belum", curX + (colWidths[8] / 2), y, { align: "center" });
-        curX += colWidths[8];
-
-        // 9: Ambil Warga
-        const isTaken = house.pbbStatus === 'Sudah Diambil';
-        doc.setTextColor(isTaken ? 16 : 100, isTaken ? 185 : 116, isTaken ? 129 : 139);
-        doc.text(isTaken ? "Sudah Diambil" : "Belum", curX + (colWidths[9] / 2), y, { align: "center" });
-
-        // Separator line
+        // Row Separator Line
         doc.setDrawColor(241, 245, 249);
         doc.setLineWidth(0.2);
         doc.line(margin, y + 2, pageWidth - margin, y + 2);
@@ -3414,47 +3550,53 @@ export const generatePBBRecapPDF = async (houses: House[], year: string, customC
     });
 
     // Signature Area
-    const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-    if (y > 165) {
-        doc.addPage();
-        y = 25;
-    } else {
-        y += 10;
+    if (options?.showSignatureBlock !== false) {
+        const dateString = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        if (y > pageHeight - 55) {
+            doc.addPage();
+            drawHeader(false);
+            y = 25;
+        } else {
+            y += 10;
+        }
+
+        const signX = pageWidth - (isLandscape ? 55 : 45);
+        doc.setFont("times", "normal");
+        doc.setFontSize(9.5);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`${config.kota || 'Palu'}, ${dateString}`, signX, y, { align: "center" });
+        y += 5;
+        doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
+        
+        const signSpaceY = y + 2;
+        y += 20;
+        doc.setFont("times", "bold");
+        doc.text(config.rtChairman, signX, y, { align: "center" });
+        const chairmanWidth = doc.getTextWidth(config.rtChairman);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.line(signX - (chairmanWidth / 2), y + 1.2, signX + (chairmanWidth / 2), y + 1.2);
+
+        try {
+            if (config.signature) {
+                const signImg = await getImageData(config.signature);
+                if (signImg) doc.addImage(signImg, 'PNG', signX - 12, signSpaceY + 1, 24, 16);
+            }
+            if (config.stamp) {
+                const stampImg = await getImageData(config.stamp);
+                if (stampImg) doc.addImage(stampImg, 'PNG', signX - 22, signSpaceY - 1, 18, 18);
+            }
+        } catch (e) { console.error(e); }
     }
 
-    const signX = pageWidth - 50;
-    doc.setFont("times", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Palu, ${dateString}`, signX, y, { align: "center" });
-    y += 5;
-    doc.text(`Ketua ${config.rtName}`, signX, y, { align: "center" });
-    
-    const signSpaceY = y + 2;
-    y += 20;
-    doc.setFont("times", "bold");
-    doc.text(config.rtChairman, signX, y, { align: "center" });
-    const chairmanWidth = doc.getTextWidth(config.rtChairman);
-    doc.line(signX - (chairmanWidth / 2), y + 1.5, signX + (chairmanWidth / 2), y + 1.5);
-
-    try {
-        if (config.signature) {
-            const signImg = await getImageData(config.signature);
-            if (signImg) doc.addImage(signImg, 'PNG', signX - 12, signSpaceY + 1, 24, 16);
-        }
-        if (config.stamp) {
-            const stampImg = await getImageData(config.stamp);
-            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 22, signSpaceY - 1, 18, 18);
-        }
-    } catch (e) { console.error(e); }
-
+    // Page Numbers
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         doc.setFontSize(7.5);
         doc.setFont("times", "italic");
-        doc.setTextColor(150, 150, 150);
-        doc.text(`Halaman ${i} dari ${totalPages} - Rekapitulasi SPPT PBB ${year} | ${config.rtName}`, centerX, pageHeight - 7, { align: "center" });
+        doc.setTextColor(148, 163, 184);
+        doc.text(`Halaman ${i} dari ${totalPages} — Rekapitulasi SPPT PBB ${year} | Sistem Informasi Warga ${config.rtName}`, centerX, pageHeight - 6, { align: "center" });
     }
 
     doc.save(`Rekapitulasi_SPPT_PBB_${year}.pdf`);

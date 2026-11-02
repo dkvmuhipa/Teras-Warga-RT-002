@@ -10,7 +10,7 @@ import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
 import { updateHouseData } from '../../services/databaseService';
 import { naturalSortBlockAndNumber, exportPBBReportExcel } from '../../services/excelService';
-import { generatePBBReportPDF, generatePBBRecapPDF } from '../../services/pdfService';
+import { generatePBBReportPDF, generatePBBRecapPDF, PBBRecapPrintOptions } from '../../services/pdfService';
 import { useConfirm } from '../../context/ConfirmContext';
 
 interface PBBManagerProps {
@@ -41,6 +41,48 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
   const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [printColumns, setPrintColumns] = useState({
+    unit: true,
+    headOfFamily: true,
+    nop: true,
+    taxpayerName: true,
+    proofAtRt: true,
+    paymentStatus: true,
+    paidDate: true,
+    spptAtRt: true,
+    takenStatus: true,
+    signatureCol: false,
+    notes: false
+  });
+  const [printOrientation, setPrintOrientation] = useState<'landscape' | 'portrait'>('landscape');
+  const [printShowStatsBar, setPrintShowStatsBar] = useState(true);
+  const [printGroupByBlock, setPrintGroupByBlock] = useState(true);
+  const [printShowSignature, setPrintShowSignature] = useState(true);
+  const [printFilterScope, setPrintFilterScope] = useState<'filtered' | 'all'>('filtered');
+
+  const handleExecutePrint = () => {
+    const targetHouses = printFilterScope === 'filtered' ? filteredHouses : houses;
+    if (targetHouses.length === 0) {
+      toast.error('Tidak ada data warga yang akan dicetak.');
+      return;
+    }
+
+    const options: PBBRecapPrintOptions = {
+      orientation: printOrientation,
+      columns: printColumns,
+      showStatsBar: printShowStatsBar,
+      groupByBlock: printGroupByBlock,
+      showSignatureBlock: printShowSignature
+    };
+
+    setIsPrintModalOpen(false);
+    toast.promise(generatePBBRecapPDF(targetHouses, selectedYear, pdfConfig, options), {
+      loading: 'Menyusun laporan PDF Rekapitulasi sesuai pengaturan...',
+      success: 'Laporan Rekapitulasi PBB PDF siap diunduh!',
+      error: 'Gagal mencetak PDF'
+    });
+  };
   const [isSaving, setIsSaving] = useState(false);
 
   // Edit Form State
@@ -411,17 +453,11 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
               <span>Export Excel</span>
             </button>
 
-            {/* Print PDF Recap (Landscape) */}
+            {/* Print PDF Recap */}
             <button
-              onClick={() => {
-                toast.promise(generatePBBRecapPDF(filteredHouses, selectedYear, pdfConfig), {
-                  loading: 'Menyusun laporan PDF Rekapitulasi...',
-                  success: 'Laporan Rekapitulasi PBB PDF siap diunduh!',
-                  error: 'Gagal mencetak PDF'
-                });
-              }}
+              onClick={() => setIsPrintModalOpen(true)}
               className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs shadow-indigo-600/20 active:scale-95 cursor-pointer"
-              title="Cetak Laporan Rekapitulasi Lengkap Format Lanskap"
+              title="Atur Kolom & Cetak Laporan Rekapitulasi PDF"
             >
               <Printer size={13} />
               <span>Cetak Rekap PDF</span>
@@ -1237,6 +1273,260 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
           </div>
         </div>
       </Modal>
+
+      {/* Modal Pengaturan Cetak Rekapitulasi PDF */}
+      <Modal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        title="Pengaturan Cetak Rekapitulasi PBB"
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-4 text-slate-700">
+          {/* Header description with badge */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5">
+              <Printer size={16} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-800">Kustomisasi Dokumen Rekapitulasi SPPT PBB Tahun {selectedYear}</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Pilih kolom tabel yang ingin dicetak, orientasi kertas, dan opsi kelengkapan administrasi kop surat resmi.
+              </p>
+            </div>
+          </div>
+
+          {/* Preset Buttons */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-slate-700">Pilihan Cepat (Preset):</span>
+              <button 
+                type="button"
+                onClick={() => setPrintColumns({
+                  unit: true, headOfFamily: true, nop: true, taxpayerName: true,
+                  proofAtRt: true, paymentStatus: true, paidDate: true, spptAtRt: true,
+                  takenStatus: true, signatureCol: true, notes: true
+                })}
+                className="text-[11px] text-indigo-600 hover:text-indigo-700 font-bold hover:underline cursor-pointer"
+              >
+                Centang Semua Kolom
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPrintColumns({
+                    unit: true, headOfFamily: true, nop: true, taxpayerName: true,
+                    proofAtRt: true, paymentStatus: true, paidDate: true, spptAtRt: true,
+                    takenStatus: true, signatureCol: false, notes: false
+                  });
+                  setPrintOrientation('landscape');
+                }}
+                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-all cursor-pointer group"
+              >
+                <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-700">1. Standar Lengkap</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Semua data operasional PBB (Lanskap)</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPrintColumns({
+                    unit: true, headOfFamily: true, nop: true, taxpayerName: false,
+                    proofAtRt: false, paymentStatus: true, paidDate: false, spptAtRt: true,
+                    takenStatus: true, signatureCol: true, notes: false
+                  });
+                  setPrintOrientation('landscape');
+                }}
+                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-all cursor-pointer group"
+              >
+                <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-700">2. Lembar Tanda Terima</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">+ Kolom paraf penyerahan warga</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPrintColumns({
+                    unit: true, headOfFamily: true, nop: true, taxpayerName: false,
+                    proofAtRt: true, paymentStatus: true, paidDate: true, spptAtRt: false,
+                    takenStatus: false, signatureCol: false, notes: false
+                  });
+                  setPrintOrientation('portrait');
+                }}
+                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-all cursor-pointer group"
+              >
+                <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-700">3. Rekap Pelunasan</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Fokus bukti setor pajak (Potret)</p>
+              </button>
+            </div>
+          </div>
+
+          {/* Kolom Tabel yang Ditampilkan */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-2">
+              Kolom Tabel yang Dimunculkan:
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {[
+                { id: 'unit', label: 'Unit / Blok Rumah', locked: true },
+                { id: 'headOfFamily', label: 'Nama Kepala Keluarga' },
+                { id: 'nop', label: 'Nomor Objek Pajak (NOP)' },
+                { id: 'taxpayerName', label: 'Nama WP di Lembar SPPT' },
+                { id: 'proofAtRt', label: 'Bukti PBB di Tangan RT' },
+                { id: 'paymentStatus', label: 'Status Pelunasan (Lunas/Belum)' },
+                { id: 'paidDate', label: 'Tanggal Pelunasan' },
+                { id: 'spptAtRt', label: 'Lembar SPPT di RT' },
+                { id: 'takenStatus', label: 'Pengambilan oleh Warga' },
+                { id: 'signatureCol', label: 'Kolom Paraf / Tanda Tangan' },
+                { id: 'notes', label: 'Catatan / Keterangan' }
+              ].map(col => {
+                const isChecked = col.locked ? true : (printColumns as any)[col.id];
+                return (
+                  <label 
+                    key={col.id} 
+                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-medium cursor-pointer transition-all select-none ${
+                      isChecked 
+                        ? 'bg-indigo-50/70 border-indigo-200 text-indigo-900 font-bold' 
+                        : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    <input 
+                      type="checkbox"
+                      disabled={col.locked}
+                      checked={isChecked}
+                      onChange={(e) => {
+                        if (!col.locked) {
+                          setPrintColumns(prev => ({ ...prev, [col.id]: e.target.checked }));
+                        }
+                      }}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5"
+                    />
+                    <span className="truncate">{col.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Layout & Pengaturan Dokumen */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+            {/* Orientasi Kertas */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Orientasi Kertas:
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPrintOrientation('landscape')}
+                  className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    printOrientation === 'landscape'
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="w-3.5 h-2.5 border-2 border-current rounded-xs inline-block" />
+                  <span>Lanskap (Mendatar)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPrintOrientation('portrait')}
+                  className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    printOrientation === 'portrait'
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="w-2.5 h-3.5 border-2 border-current rounded-xs inline-block" />
+                  <span>Potret (Tegak)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Cakupan Data */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                Cakupan Data yang Dicetak:
+              </label>
+              <div className="space-y-1">
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="printFilterScope"
+                    checked={printFilterScope === 'filtered'}
+                    onChange={() => setPrintFilterScope('filtered')}
+                    className="text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Data filter aktif saat ini (<strong>{filteredHouses.length}</strong> unit)</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="printFilterScope"
+                    checked={printFilterScope === 'all'}
+                    onChange={() => setPrintFilterScope('all')}
+                    className="text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span>Seluruh data rumah RT (<strong>{houses.length}</strong> unit)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Elemen Pendukung Laporan */}
+          <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Elemen Pendukung:</span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={printShowStatsBar}
+                  onChange={(e) => setPrintShowStatsBar(e.target.checked)}
+                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span>Ringkasan Statistik (KPI)</span>
+              </label>
+              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={printGroupByBlock}
+                  onChange={(e) => setPrintGroupByBlock(e.target.checked)}
+                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span>Grup per Blok Wilayah</span>
+              </label>
+              <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={printShowSignature}
+                  onChange={(e) => setPrintShowSignature(e.target.checked)}
+                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span>Tanda Tangan &amp; Cap RT</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => setIsPrintModalOpen(false)}
+              className="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              onClick={handleExecutePrint}
+              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-95 cursor-pointer"
+            >
+              <Printer size={14} />
+              <span>Cetak &amp; Unduh PDF</span>
+            </button>
+          </div>
+        </div>
+      </Modal>
+
     </div>
   );
 };
