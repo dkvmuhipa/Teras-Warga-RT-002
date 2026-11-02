@@ -22,11 +22,14 @@ export const naturalSortBlockAndNumber = (
   const bA = (blockA || '').trim();
   const bB = (blockB || '').trim();
 
-  const blockMatchA = bA.match(/^([A-Za-z]+)?(\d+)?$/);
-  const blockMatchB = bB.match(/^([A-Za-z]+)?(\d+)?$/);
+  const cleanBA = bA.replace(/[\s\-_]+/g, '');
+  const cleanBB = bB.replace(/[\s\-_]+/g, '');
 
-  const letterA = blockMatchA ? (blockMatchA[1] || '') : bA;
-  const letterB = blockMatchB ? (blockMatchB[1] || '') : bB;
+  const blockMatchA = cleanBA.match(/^([A-Za-z]+)?(\d+)?$/);
+  const blockMatchB = cleanBB.match(/^([A-Za-z]+)?(\d+)?$/);
+
+  const letterA = blockMatchA ? (blockMatchA[1] || '') : cleanBA;
+  const letterB = blockMatchB ? (blockMatchB[1] || '') : cleanBB;
   const valA = blockMatchA && blockMatchA[2] ? parseInt(blockMatchA[2], 10) : -1;
   const valB = blockMatchB && blockMatchB[2] ? parseInt(blockMatchB[2], 10) : -1;
 
@@ -42,11 +45,14 @@ export const naturalSortBlockAndNumber = (
   const nA = (numA || '').trim();
   const nB = (numB || '').trim();
 
-  const numMatchA = nA.match(/^([A-Za-z]+)?(\d+)?$/);
-  const numMatchB = nB.match(/^([A-Za-z]+)?(\d+)?$/);
+  const cleanNA = nA.replace(/[\s\-_]+/g, '');
+  const cleanNB = nB.replace(/[\s\-_]+/g, '');
 
-  const numLetterA = numMatchA ? (numMatchA[1] || '') : nA;
-  const numLetterB = numMatchB ? (numMatchB[1] || '') : nB;
+  const numMatchA = cleanNA.match(/^([A-Za-z]+)?(\d+)?$/);
+  const numMatchB = cleanNB.match(/^([A-Za-z]+)?(\d+)?$/);
+
+  const numLetterA = numMatchA ? (numMatchA[1] || '') : cleanNA;
+  const numLetterB = numMatchB ? (numMatchB[1] || '') : cleanNB;
   const numValA = numMatchA && numMatchA[2] ? parseInt(numMatchA[2], 10) : -1;
   const numValB = numMatchB && numMatchB[2] ? parseInt(numMatchB[2], 10) : -1;
 

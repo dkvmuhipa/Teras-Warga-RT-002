@@ -2858,33 +2858,8 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
     });
 
     // --- SORTING LOGIC ---
-    // Custom sort to handle alphanumeric blocks like C5, C10, etc.
-    const sortedHouses = [...houses].sort((a, b) => {
-        // Extract block code and number
-        const getBlockParts = (blockStr: string) => {
-            const matches = (blockStr || '').match(/([a-zA-Z]+)(\d+)/);
-            if (matches) {
-                return { alpha: matches[1], num: parseInt(matches[2]) };
-            }
-            return { alpha: blockStr || '', num: 0 };
-        };
-
-        const partsA = getBlockParts(a.block || '');
-        const partsB = getBlockParts(b.block || '');
-
-        // Sort by alpha first (e.g., 'C')
-        if (partsA.alpha < partsB.alpha) return -1;
-        if (partsA.alpha > partsB.alpha) return 1;
-
-        // Then sort by block number (e.g., 5 vs 10)
-        if (partsA.num < partsB.num) return -1;
-        if (partsA.num > partsB.num) return 1;
-        
-        // Then sort by house number numerically
-        const numA = parseInt((a.number || '0').replace(/\D/g, '')) || 0;
-        const numB = parseInt((b.number || '0').replace(/\D/g, '')) || 0;
-        return numA - numB;
-    });
+    // Urutkan alami berdasarkan Blok (C5 - C12) dan nomor rumah
+    const sortedHouses = [...houses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -2996,7 +2971,7 @@ export const generatePBBReportPDF = async (houses: House[], year: string, custom
     let currentBlock = "";
 
     sortedHouses.forEach((house, index) => {
-        const houseBlock = (house.block || '').toString().toUpperCase();
+        const houseBlock = (house.block || '').toString().trim().toUpperCase();
         const isNewBlock = houseBlock !== currentBlock;
         
         if (isNewBlock) {
@@ -3178,27 +3153,8 @@ export const generatePBBRecapPDF = async (
         compress: true 
     });
 
-    const sortedHouses = [...houses].sort((a, b) => {
-        const getBlockParts = (blockStr: string) => {
-            const matches = (blockStr || '').match(/([a-zA-Z]+)(d+)/);
-            if (matches) {
-                return { alpha: matches[1], num: parseInt(matches[2]) };
-            }
-            return { alpha: blockStr || '', num: 0 };
-        };
-
-        const partsA = getBlockParts(a.block || '');
-        const partsB = getBlockParts(b.block || '');
-
-        if (partsA.alpha < partsB.alpha) return -1;
-        if (partsA.alpha > partsB.alpha) return 1;
-        if (partsA.num < partsB.num) return -1;
-        if (partsA.num > partsB.num) return 1;
-        
-        const numA = parseInt((a.number || '0').replace(/\D/g, '')) || 0;
-        const numB = parseInt((b.number || '0').replace(/\D/g, '')) || 0;
-        return numA - numB;
-    });
+    // Urutkan alami berdasarkan Blok (C5 - C12) dan nomor rumah
+    const sortedHouses = [...houses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
 
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -4001,12 +3957,7 @@ export const generateBillReportPDF = async (houses: House[], iuranPayments: any[
     };
 
     const filteredHouses = houses.filter(h => h.status === 'Occupied');
-    const sortedHouses = [...filteredHouses].sort((a, b) => {
-        const blockA = a.block || "";
-        const blockB = b.block || "";
-        if (blockA !== blockB) return blockA.localeCompare(blockB);
-        return a.number.localeCompare(b.number, undefined, { numeric: true });
-    });
+    const sortedHouses = [...filteredHouses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
 
     const totalResidents = filteredHouses.length;
     const paidCount = filteredHouses.filter(h => checkIsPaid(h)).length;
