@@ -576,11 +576,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <LayoutGrid size={18} className="stroke-[2.5px]" />
                       </div>
                       <div className="min-w-0">
-                        <h1 className="text-xs sm:text-sm md:text-base font-black text-slate-900 tracking-tight leading-tight truncate">
+                        <h1 className="text-xs sm:text-sm md:text-base font-bold text-slate-900 tracking-tight leading-tight truncate">
                           Dashboard Utama
                         </h1>
-                        <p className="text-[10px] sm:text-xs font-bold text-slate-400 leading-none mt-0.5 truncate hidden sm:block">
-                          {currentTenant ? `RT ${currentTenant.rt}` : 'RT 02'} • Pusat Kendali Eksekutif
+                        <p className="text-xs font-normal text-slate-500 leading-none mt-1 truncate hidden sm:block">
+                          {currentTenant ? `RT ${currentTenant.rt}` : 'RT 02'} • Administrasi Warga
                         </p>
                       </div>
                     </div>
@@ -588,11 +588,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 }
 
                 return (
-                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs md:text-sm font-black text-slate-400 min-w-0">
-                    <span className="hidden xl:inline text-slate-500 font-extrabold whitespace-nowrap shrink-0">Executive Command</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 text-xs md:text-sm font-medium text-slate-400 min-w-0">
+                    <span className="hidden xl:inline text-slate-500 whitespace-nowrap shrink-0">Admin</span>
                     <span className="hidden xl:inline text-slate-300 font-normal shrink-0">/</span>
-                    <div className="flex items-center gap-1.5 bg-slate-100/90 border border-slate-200/70 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-2xl text-xs font-black text-slate-800 shadow-xs whitespace-nowrap min-w-0">
-                      <CurrentIcon size={13} className="text-indigo-600 stroke-[2.5px] shrink-0" />
+                    <div className="flex items-center gap-1.5 bg-slate-100 border border-slate-200/80 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-semibold text-slate-800 whitespace-nowrap min-w-0">
+                      <CurrentIcon size={14} className="text-indigo-600 stroke-[1.75px] shrink-0" />
                       <span className="truncate max-w-[120px] sm:max-w-[180px] md:max-w-none">{currentNavItem?.label || activeTab.replace('-', ' ')}</span>
                     </div>
                   </div>
@@ -609,7 +609,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <span className="font-mono tracking-tight text-slate-800 font-extrabold text-xs">
                 {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit' })}
               </span>
-              <span className="text-[10px] uppercase font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-1 py-0.2 rounded">WITA</span>
+              <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded">WITA</span>
             </div>
 
             {/* Live Operational Capsule: Palu City Weather & ISPU KLHK */}
@@ -628,30 +628,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {activePanicAlerts.length > 0 && (
               <button 
                 onClick={() => setActiveTab('facilities')}
-                className="flex items-center gap-1.5 sm:gap-2 bg-rose-600 hover:bg-rose-700 border border-rose-500 rounded-2xl px-2.5 sm:px-3 py-1.5 cursor-pointer animate-pulse shadow-md shadow-rose-200 text-white transition-colors shrink-0 whitespace-nowrap"
+                className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 border border-rose-600 rounded-xl px-3 py-1.5 cursor-pointer text-white transition-colors shrink-0 whitespace-nowrap"
                 title="Ada panggilan darurat aktif!"
               >
                 <AlertTriangle size={15} className="shrink-0" />
                 <div className="hidden sm:block text-left">
-                  <p className="text-[9px] font-black uppercase tracking-widest leading-none mb-0.5 text-rose-100">SOS AKTIF</p>
-                  <p className="text-[11px] font-extrabold leading-none">{activePanicAlerts.length} Laporan</p>
+                  <p className="text-[10px] font-medium leading-none mb-0.5 text-rose-100">Panggilan Darurat</p>
+                  <p className="text-xs font-semibold leading-none">{activePanicAlerts.length} Laporan</p>
                 </div>
               </button>
             )}
 
             {/* Active Patrol Badge */}
             {activePatrol && (
-              <div className="hidden 2xl:flex items-center gap-2 bg-emerald-50 border border-emerald-100 rounded-2xl px-3 py-1.5 shadow-2xs shrink-0 whitespace-nowrap">
-                <div className="relative shrink-0">
+              <div className="hidden 2xl:flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 shrink-0 whitespace-nowrap">
+                <div className="relative shrink-0 flex items-center">
                   <ShieldCheck size={16} className="text-emerald-600" />
-                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-0.5">Siskamling</p>
-                  <p className="text-[11px] font-black text-slate-700 leading-none">{activePatrol.officerName} • {Math.round((activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100)}%</p>
+                  <p className="text-[10px] font-medium text-slate-500 leading-none mb-0.5">Siskamling aktif</p>
+                  <p className="text-xs font-semibold text-slate-800 leading-none">{activePatrol.officerName} • {Math.round((activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100)}%</p>
                 </div>
               </div>
             )}

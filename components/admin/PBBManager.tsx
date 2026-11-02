@@ -482,75 +482,73 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
         </div>
       </div>
 
-      {/* KPI Cards / Executive Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3.5">
+      {/* KPI Cards / Realisasi PBB */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
         {/* Total Unit Objek Pajak */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-3xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Objek RT</span>
-            <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
-              <Building2 size={13} />
-            </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200/80">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-medium text-slate-500">Total objek</span>
+            <span className="text-[11px] font-mono tabular-nums text-slate-400">100%</span>
           </div>
-          <div className="text-2xl font-black text-slate-900 tracking-tight">{stats.total}</div>
-          <p className="text-[10px] text-slate-500 font-medium mt-1">
-            {stats.withNop} unit telah ada NOP ({stats.total > 0 ? Math.round((stats.withNop / stats.total) * 100) : 0}%)
+          <div className="text-2xl font-semibold text-slate-900 font-mono tabular-nums tracking-tight">{stats.total}</div>
+          <p className="text-[11px] text-slate-500 font-normal mt-1">
+            {stats.withNop} unit ber-NOP ({stats.total > 0 ? Math.round((stats.withNop / stats.total) * 100) : 0}%)
           </p>
         </div>
 
         {/* Bukti di Tangan RT */}
-        <div className="bg-white p-4 rounded-2xl border border-sky-100 shadow-3xs bg-gradient-to-b from-sky-50/30 to-white">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-sky-700">Bukti di Tangan RT</span>
-            <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-black text-xs">
-              {stats.pctProof}%
-            </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200/80">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-medium text-slate-600">Bukti di tangan RT</span>
+            <span className="text-[11px] font-mono tabular-nums font-semibold text-sky-700">{stats.pctProof}%</span>
           </div>
-          <div className="text-2xl font-black text-sky-900 tracking-tight">{stats.proofAtRt} <span className="text-xs font-normal text-slate-400">/ {stats.total}</span></div>
-          <div className="w-full bg-sky-100 rounded-full h-1.5 mt-2 overflow-hidden">
-            <div className="bg-sky-600 h-full rounded-full transition-all duration-500" style={{ width: `${stats.pctProof}%` }} />
+          <div className="text-2xl font-semibold text-slate-900 font-mono tabular-nums tracking-tight">
+            {stats.proofAtRt} <span className="text-xs font-normal text-slate-400">/ {stats.total}</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-1 mt-2 overflow-hidden">
+            <div className="bg-sky-600 h-full rounded-full transition-all duration-300" style={{ width: `${stats.pctProof}%` }} />
           </div>
         </div>
 
         {/* Status Pelunasan Warga */}
-        <div className="bg-white p-4 rounded-2xl border border-emerald-100 shadow-3xs bg-gradient-to-b from-emerald-50/30 to-white">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700">Realisasi Lunas</span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-black text-xs">
-              {stats.pctPaid}%
-            </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200/80">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-medium text-slate-600">Realisasi pelunasan</span>
+            <span className="text-[11px] font-mono tabular-nums font-semibold text-emerald-700">{stats.pctPaid}%</span>
           </div>
-          <div className="text-2xl font-black text-emerald-900 tracking-tight">{stats.paid} <span className="text-xs font-normal text-slate-400">/ {stats.total}</span></div>
-          <div className="w-full bg-emerald-100 rounded-full h-1.5 mt-2 overflow-hidden">
-            <div className="bg-emerald-600 h-full rounded-full transition-all duration-500" style={{ width: `${stats.pctPaid}%` }} />
+          <div className="text-2xl font-semibold text-slate-900 font-mono tabular-nums tracking-tight">
+            {stats.paid} <span className="text-xs font-normal text-slate-400">/ {stats.total}</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-1 mt-2 overflow-hidden">
+            <div className="bg-emerald-600 h-full rounded-full transition-all duration-300" style={{ width: `${stats.pctPaid}%` }} />
           </div>
         </div>
 
         {/* Fisik SPPT di RT */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-3xs">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Lembar SPPT di RT</span>
-            <div className="w-7 h-7 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-              <FileText size={13} />
-            </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200/80">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-medium text-slate-600">Lembar SPPT di RT</span>
+            <span className="text-[11px] font-mono tabular-nums text-slate-400">arsip</span>
           </div>
-          <div className="text-2xl font-black text-slate-900 tracking-tight">{stats.spptAtRt} <span className="text-xs font-normal text-slate-400">Unit</span></div>
-          <p className="text-[10px] text-slate-500 font-medium mt-1">
+          <div className="text-2xl font-semibold text-slate-900 font-mono tabular-nums tracking-tight">
+            {stats.spptAtRt} <span className="text-xs font-normal text-slate-400">unit</span>
+          </div>
+          <p className="text-[11px] text-slate-500 font-normal mt-1">
             {stats.total - stats.spptAtRt} unit belum masuk RT
           </p>
         </div>
 
         {/* SPPT Diambil Warga */}
-        <div className="bg-white p-4 rounded-2xl border border-indigo-100 shadow-3xs bg-gradient-to-b from-indigo-50/30 to-white col-span-2 md:col-span-1">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700">SPPT Diambil</span>
-            <div className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-black text-xs">
-              {stats.pctTaken}%
-            </div>
+        <div className="bg-white p-4 rounded-xl border border-slate-200/80 col-span-2 md:col-span-1">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-medium text-slate-600">SPPT diambil warga</span>
+            <span className="text-[11px] font-mono tabular-nums font-semibold text-slate-700">{stats.pctTaken}%</span>
           </div>
-          <div className="text-2xl font-black text-indigo-900 tracking-tight">{stats.taken} <span className="text-xs font-normal text-slate-400">Unit</span></div>
-          <div className="w-full bg-indigo-100 rounded-full h-1.5 mt-2 overflow-hidden">
-            <div className="bg-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${stats.pctTaken}%` }} />
+          <div className="text-2xl font-semibold text-slate-900 font-mono tabular-nums tracking-tight">
+            {stats.taken} <span className="text-xs font-normal text-slate-400">unit</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-1 mt-2 overflow-hidden">
+            <div className="bg-slate-700 h-full rounded-full transition-all duration-300" style={{ width: `${stats.pctTaken}%` }} />
           </div>
         </div>
       </div>
@@ -672,68 +670,49 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-900 text-white text-[11px] font-extrabold uppercase tracking-wider">
-                <th className="py-3.5 px-4 text-center w-12">No</th>
+              <tr className="bg-slate-900 text-white text-xs font-semibold">
+                <th className="py-3 px-4 text-center w-12 font-medium text-slate-400">No</th>
                 <th 
                   onClick={() => { setSortBy('unit'); setSortAsc(!sortAsc); }}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 transition-colors"
+                  className="py-3 px-4 cursor-pointer hover:bg-slate-800 transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>Unit / Kavling</span>
-                    <ArrowUpDown size={11} className="text-slate-400" />
+                    <span>Unit / kavling</span>
+                    <ArrowUpDown size={12} className="text-slate-400" />
                   </div>
                 </th>
                 <th 
                   onClick={() => { setSortBy('name'); setSortAsc(!sortAsc); }}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 transition-colors"
+                  className="py-3 px-4 cursor-pointer hover:bg-slate-800 transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>Nama Kepala Keluarga / Warga</span>
-                    <ArrowUpDown size={11} className="text-slate-400" />
+                    <span>Kepala keluarga</span>
+                    <ArrowUpDown size={12} className="text-slate-400" />
                   </div>
                 </th>
                 <th 
                   onClick={() => { setSortBy('nop'); setSortAsc(!sortAsc); }}
-                  className="py-3.5 px-4 cursor-pointer hover:bg-slate-800 transition-colors"
+                  className="py-3 px-4 cursor-pointer hover:bg-slate-800 transition-colors"
                 >
                   <div className="flex items-center gap-1.5">
-                    <span>NOP &amp; Nama di SPPT</span>
-                    <ArrowUpDown size={11} className="text-slate-400" />
+                    <span>NOP &amp; nama SPPT</span>
+                    <ArrowUpDown size={12} className="text-slate-400" />
                   </div>
                 </th>
-                <th className="py-3.5 px-4 text-center">
-                  <div className="flex flex-col items-center">
-                    <span>Bukti PBB di RT</span>
-                    <span className="text-[9px] font-normal text-slate-400 lowercase">(klik utk toggle)</span>
-                  </div>
-                </th>
+                <th className="py-3 px-4 text-center">Bukti di RT</th>
                 <th 
                   onClick={() => { setSortBy('status'); setSortAsc(!sortAsc); }}
-                  className="py-3.5 px-4 text-center cursor-pointer hover:bg-slate-800 transition-colors"
+                  className="py-3 px-4 text-center cursor-pointer hover:bg-slate-800 transition-colors"
                 >
-                  <div className="flex flex-col items-center">
-                    <div className="flex items-center gap-1">
-                      <span>Status Bayar</span>
-                      <ArrowUpDown size={11} className="text-slate-400" />
-                    </div>
-                    <span className="text-[9px] font-normal text-slate-400 lowercase">(klik utk toggle)</span>
+                  <div className="flex items-center justify-center gap-1">
+                    <span>Status bayar</span>
+                    <ArrowUpDown size={12} className="text-slate-400" />
                   </div>
                 </th>
-                <th className="py-3.5 px-4 text-center">
-                  <div className="flex flex-col items-center">
-                    <span>Lembar SPPT di RT</span>
-                    <span className="text-[9px] font-normal text-slate-400 lowercase">(klik toggle)</span>
-                  </div>
-                </th>
-                <th className="py-3.5 px-4 text-center">
-                  <div className="flex flex-col items-center">
-                    <span>Pengambilan Warga</span>
-                    <span className="text-[9px] font-normal text-slate-400 lowercase">(klik toggle)</span>
-                  </div>
-                </th>
-                <th className="py-3.5 px-4 text-center">Aksi</th>
-              </tr>
-            </thead>
+                <th className="py-3 px-4 text-center">SPPT di RT</th>
+                <th className="py-3 px-4 text-center">Ambil warga</th>
+                <th className="py-3 px-4 text-center">Aksi</th>
+              </tr></thead>
             <tbody className="divide-y divide-slate-100 text-xs">
               {filteredHouses.length === 0 ? (
                 <tr>
@@ -770,7 +749,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                       {/* Unit / Blok */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
-                          <span className="font-black text-slate-900 font-mono text-sm">
+                          <span className="px-2 py-0.5 rounded-md font-mono tabular-nums text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200/80">
                             {house.block}-{house.number}
                           </span>
                           <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider ${
@@ -820,7 +799,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                       <td className="py-3.5 px-4 text-center">
                         <button
                           onClick={(e) => handleToggleProofAtRt(house, e)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border transition-all active:scale-95 shadow-3xs cursor-pointer ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors duration-150 transition-colors duration-150 cursor-pointer ${
                             hasProof
                               ? 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100'
                               : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100 hover:text-slate-600'
@@ -845,7 +824,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                       <td className="py-3.5 px-4 text-center">
                         <button
                           onClick={(e) => handleTogglePaymentStatus(house, e)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black border transition-all active:scale-95 shadow-3xs cursor-pointer ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors duration-150 transition-colors duration-150 cursor-pointer ${
                             isPaid
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                               : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'
@@ -854,7 +833,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                         >
                           {isPaid ? (
                             <>
-                              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
                               <span>Lunas</span>
                             </>
                           ) : (
@@ -990,7 +969,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, pbbProofAtRt: 'Ada di RT' })}
-                      className={`py-2 px-3 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      className={`py-2 px-3 rounded-xl text-xs font-medium border transition-colors duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${
                         formData.pbbProofAtRt === 'Ada di RT'
                           ? 'bg-sky-600 text-white border-sky-600 shadow-xs'
                           : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -1002,7 +981,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, pbbProofAtRt: 'Belum Ada' })}
-                      className={`py-2 px-3 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      className={`py-2 px-3 rounded-xl text-xs font-medium border transition-colors duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${
                         formData.pbbProofAtRt === 'Belum Ada'
                           ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                           : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -1027,7 +1006,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                         pbbPaymentStatus: 'Lunas',
                         pbbPaidDate: formData.pbbPaidDate || new Date().toISOString().split('T')[0]
                       })}
-                      className={`py-2 px-3 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      className={`py-2 px-3 rounded-xl text-xs font-medium border transition-colors duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${
                         formData.pbbPaymentStatus === 'Lunas'
                           ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                           : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -1039,7 +1018,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, pbbPaymentStatus: 'Belum Lunas' })}
-                      className={`py-2 px-3 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                      className={`py-2 px-3 rounded-xl text-xs font-medium border transition-colors duration-150 cursor-pointer flex items-center justify-center gap-1.5 ${
                         formData.pbbPaymentStatus === 'Belum Lunas'
                           ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
                           : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'

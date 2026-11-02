@@ -58,7 +58,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   const [expandedGroups, setExpandedGroups] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('rt02_admin_expanded_groups');
-      return saved ? JSON.parse(saved) : ["Pusat Kendali", "Kependudukan", "Layanan & Keuangan", "Operasional & Media", "Sistem"];
+      return saved ? JSON.parse(saved) : ["Pusat kendali", "Kependudukan", "Layanan & keuangan", "Operasional & media", "Sistem"];
     } catch {
       return ["Pusat Kendali", "Kependudukan", "Layanan & Keuangan", "Operasional & Media", "Sistem"];
     }
@@ -104,7 +104,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
   const navGroups = [
     { 
-      title: "Pusat Kendali", 
+      title: "Pusat kendali", 
       items: [
         { id: 'overview', icon: LayoutDashboard, label: 'Dashboard Utama' },
         { id: 'analytics', icon: BarChart3, label: 'Analitik & Demografi' },
@@ -307,7 +307,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                   placeholder="Cari modul... (Tekan /)" 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-slate-50/80 hover:bg-slate-100/70 border border-slate-200/80 rounded-2xl py-2 pl-9 pr-8 text-xs font-bold focus:outline-none focus:ring-3 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all placeholder:text-slate-400 text-slate-700"
+                  className="w-full bg-slate-50/80 hover:bg-slate-100/70 border border-slate-200/80 rounded-xl py-2 pl-9 pr-8 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors placeholder:text-slate-400 text-slate-800"
                 />
                 {searchTerm ? (
                   <button 
@@ -332,7 +332,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                 {!isCollapsed ? (
                   <button 
                     onClick={() => toggleGroup(group.title)}
-                    className="w-full flex items-center justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest my-2 px-3 hover:text-indigo-600 transition-colors"
+                    className="w-full flex items-center justify-between text-xs font-semibold text-slate-400 my-2 px-3 hover:text-slate-700 transition-colors"
                   >
                     <span>{group.title}</span>
                     <motion.div
@@ -368,30 +368,27 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                             }}
                             title={isCollapsed ? `${item.label}${pendingCount > 0 ? ` (${pendingCount} tertunda)` : ''}` : ''}
                             className={`
-                              w-full flex items-center gap-3 rounded-2xl transition-all duration-200 font-bold text-xs group relative overflow-hidden
-                              ${isCollapsed ? 'justify-center p-3' : 'px-3.5 py-2.5'}
+                              w-full flex items-center gap-3 rounded-xl transition-colors duration-150 font-medium text-xs group relative overflow-hidden
+                              ${isCollapsed ? 'justify-center p-2.5' : 'px-3 py-2'}
                               ${isActive 
-                                ? 'bg-gradient-to-r from-indigo-50/90 to-violet-50/70 text-indigo-700 shadow-2xs border border-indigo-200/70 font-black' 
-                                : 'text-slate-600 hover:bg-slate-100/70 hover:text-slate-900 border border-transparent hover:translate-x-0.5'
+                                ? 'bg-slate-100/90 text-slate-900 font-semibold border border-slate-200/80 shadow-3xs' 
+                                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent'
                               }
                             `}
                           >
                             <div className="relative shrink-0 flex items-center justify-center">
                               <item.icon 
-                                size={17} 
-                                className={`transition-all duration-300 ${
+                                size={16} 
+                                className={`transition-colors duration-150 stroke-[1.75px] ${
                                   isActive 
-                                    ? 'text-indigo-600 scale-110 stroke-[2.4px]' 
-                                    : 'text-slate-400 group-hover:scale-110 group-hover:text-indigo-600 stroke-[2px]'
+                                    ? 'text-indigo-600' 
+                                    : 'text-slate-400 group-hover:text-slate-700'
                                 }`} 
                               />
                               
-                              {/* Pulsing notification dot for collapsed mode */}
+                              {/* Clean status dot for collapsed mode */}
                               {isCollapsed && pendingCount > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500 border border-white"></span>
-                                </span>
+                                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
                               )}
                             </div>
 
@@ -399,13 +396,13 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                               <span className="truncate text-left flex-1 tracking-tight">{renderHighlightedLabel(item.label)}</span>
                             )}
                             
-                            {/* Detailed dynamic badge for expanded mode */}
+                            {/* Clean count badge for expanded mode */}
                             {!isCollapsed && pendingCount > 0 && (
                               <span className={`
-                                ml-auto text-[9px] font-black px-2 py-0.5 rounded-full shadow-2xs border
+                                ml-auto text-[11px] font-mono tabular-nums font-medium px-1.5 py-0.5 rounded-md border
                                 ${item.id === 'guests' || item.id === 'facilities'
-                                  ? 'bg-rose-50 text-rose-700 border-rose-200' 
-                                  : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                  ? 'bg-rose-50 text-rose-700 border-rose-200/80' 
+                                  : 'bg-slate-100 text-slate-700 border-slate-200/80'
                                 }
                               `}>
                                 {pendingCount}
@@ -415,7 +412,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                             {isActive && !isCollapsed && (
                               <motion.div 
                                 layoutId="activeTabIndicator"
-                                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-gradient-to-b from-indigo-600 to-violet-600 shadow-sm shadow-indigo-500/50"
+                                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 rounded-r bg-indigo-600"
                                 transition={{ type: "spring", stiffness: 350, damping: 32 }}
                               />
                             )}
