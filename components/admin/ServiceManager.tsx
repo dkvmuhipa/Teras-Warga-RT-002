@@ -37,6 +37,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
   initialTab = 'letters'
 }) => {
   const [activeTab, setActiveTab] = useState<'letters' | 'reports' | 'official-letters' | 'incoming_mails' | 'letter-archive' | 'settings'>(initialTab);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const [showArchived, setShowArchived] = useState(false);

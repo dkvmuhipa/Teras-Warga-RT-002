@@ -720,6 +720,7 @@ export const App = () => {
                                 <Route path="/kegiatan" element={<PublicActivity />} />
                                 <Route path="/sampah" element={<PublicWasteBank houseId={localStorage.getItem('resident_house_id') || ''} houses={houses} />} />
                                 <Route path="/kesehatan" element={<PublicHealth />} />
+                                <Route path="/health" element={<Navigate to="/kesehatan" replace />} />
                                 <Route path="/donasi" element={<PublicDonations campaigns={donationCampaigns} houses={houses} />} />
                                 <Route path="/resident" element={<PublicResidentDashboard houses={houses} />} />
                                 <Route path="/faq" element={<PublicFAQ faqItems={faqItems} />} />

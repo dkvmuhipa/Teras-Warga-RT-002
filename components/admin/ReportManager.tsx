@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Award, Calendar, ChevronRight, Layers, FileCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { House, PdfConfig, CashFlow, PopulationReport, InventoryItem } from '../../types';
@@ -29,6 +29,12 @@ export const ReportManager: React.FC<ReportManagerProps> = ({
   initialSubTab = 'monthly'
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<'monthly' | 'annual'>(initialSubTab);
+
+  useEffect(() => {
+    if (initialSubTab) {
+      setActiveSubTab(initialSubTab);
+    }
+  }, [initialSubTab]);
 
   return (
     <div className="space-y-6">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
@@ -104,7 +104,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const confirm = useConfirm();
   const { currentTenant, switchTenant } = useTenant();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTabState] = useState(() => urlTab || 'overview');
+
+  React.useEffect(() => {
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTabState(urlTab);
+    }
+  }, [urlTab]);
+
+  const setActiveTab = (tab: string) => {
+    setActiveTabState(tab);
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      if (tab === 'overview') {
+        next.delete('tab');
+      } else {
+        next.set('tab', tab);
+      }
+      return next;
+    }, { replace: true });
+  };
   const [contentSubTab, setContentSubTab] = useState<'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>('announcements');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
@@ -269,6 +290,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'officials':
         return (
           <ResidentManager 
+            key={activeTab}
             role={role} 
             houses={houses} 
             reports={reports} 
@@ -306,6 +328,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'incoming_mails':
         return (
           <ServiceManager 
+            key={activeTab}
             letters={letters} 
             reports={reports} 
             houses={houses}
@@ -429,6 +452,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <DocumentManager documents={documents} />;
       case 'rentals':
         return <RentalManager houses={houses} />;
+      case 'pbb':
+        return <PBBManager houses={houses} pdfConfig={pdfConfig} />;
       case 'stbm':
         return <STBMManager houses={houses} />;
       case 'meeting-minutes':

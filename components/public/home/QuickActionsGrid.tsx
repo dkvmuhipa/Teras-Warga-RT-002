@@ -182,7 +182,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
       bg: 'bg-[#e8faf0]', 
       color: 'text-[#059669]', 
       border: 'border-emerald-100/80',
-      link: '/health?tab=stbm',
+      link: '/kesehatan?tab=stbm',
       badge: '100% ODF',
       badgeColor: 'bg-emerald-600'
     }

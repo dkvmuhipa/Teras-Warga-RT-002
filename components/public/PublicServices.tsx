@@ -30,6 +30,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const initialHouseId = searchParams.get('houseId') || '';
   
   const [activeTab, setActiveTab] = useState<'surat' | 'lapor' | 'tamu' | 'mutasi' | 'sewa' | 'history'>(initialTab);
+
+  useEffect(() => {
+    if (tabParam && ['surat', 'lapor', 'tamu', 'mutasi', 'sewa', 'history'].includes(tabParam)) {
+      setActiveTab(tabParam as any);
+    }
+  }, [tabParam]);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
   const [statusSearchId, setStatusSearchId] = useState('');
   const [searchResult, setSearchResult] = useState<any>(null);
