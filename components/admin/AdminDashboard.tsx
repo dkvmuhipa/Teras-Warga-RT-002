@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../services/firebaseConfig';
 import { 
@@ -104,28 +104,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const confirm = useConfirm();
   const { currentTenant, switchTenant } = useTenant();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTabState] = useState(() => urlTab || 'overview');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  React.useEffect(() => {
-    if (urlTab && urlTab !== activeTab) {
-      setActiveTabState(urlTab);
+  // Extract active tab from URL pathname (e.g. /admin/pbb -> 'pbb', /admin/residents -> 'residents')
+  const currentTabFromUrl = React.useMemo(() => {
+    const segments = location.pathname.split('/').filter(Boolean);
+    if (segments[0] === 'admin' && segments[1]) {
+      return segments[1];
     }
-  }, [urlTab]);
+    const queryTab = searchParams.get('tab');
+    if (queryTab) return queryTab;
+    return 'overview';
+  }, [location.pathname, searchParams]);
 
-  const setActiveTab = (tab: string) => {
+  const [activeTab, setActiveTabState] = useState(currentTabFromUrl);
+
+  // Sync state if URL path changes (e.g. browser back/forward buttons or direct link)
+  React.useEffect(() => {
+    if (currentTabFromUrl !== activeTab) {
+      setActiveTabState(currentTabFromUrl);
+    }
+  }, [currentTabFromUrl]);
+
+  // Cleanly migrate legacy ?tab= query parameter to /admin/:tab
+  React.useEffect(() => {
+    const queryTab = searchParams.get('tab');
+    if (queryTab) {
+      navigate(`/admin/${queryTab}`, { replace: true });
+    }
+  }, [searchParams, navigate]);
+
+  const setActiveTab = React.useCallback((tab: string) => {
     setActiveTabState(tab);
-    setSearchParams(prev => {
-      const next = new URLSearchParams(prev);
-      if (tab === 'overview') {
-        next.delete('tab');
-      } else {
-        next.set('tab', tab);
-      }
-      return next;
-    }, { replace: true });
-  };
+    if (tab === 'overview') {
+      navigate('/admin/overview');
+    } else {
+      navigate(`/admin/${tab}`);
+    }
+  }, [navigate]);
   const [contentSubTab, setContentSubTab] = useState<'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>('announcements');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
@@ -134,7 +152,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showSupportTicketModal, setShowSupportTicketModal] = useState(false);
   const { weather } = useWeather();
-  const navigate = useNavigate();
+  // navigate already declared above
 
   // Real-time clock for WITA (GMT+8)
   React.useEffect(() => {

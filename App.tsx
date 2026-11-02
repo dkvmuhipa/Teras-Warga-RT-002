@@ -483,7 +483,68 @@ export const App = () => {
     return () => unsubscribe();
   }, []);
 
-  return (
+    const adminElement = (
+    <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
+                            {adminRole === Role.SUPER_ADMIN && !isSupervising ? (
+                                <Navigate to="/superadmin" replace />
+                            ) : (
+                                <ErrorBoundary>
+                                    <React.Suspense fallback={
+                                        <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-8 font-sans">
+                                            <div className="relative flex items-center justify-center mb-4">
+                                                <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                                                <Loader2 className="absolute text-indigo-600 animate-pulse" size={24} />
+                                            </div>
+                                            <h3 className="text-slate-800 font-black text-sm tracking-wide uppercase">Memuat Dasbor Admin</h3>
+                                            <p className="text-slate-400 text-xs mt-1">Mengoptimalkan bundle aplikasi...</p>
+                                        </div>
+                                    }>
+                                        <AdminDashboard 
+                                            role={adminRole || Role.ADMIN}
+                                            houses={houses} 
+                                            announcements={announcements} 
+                                            news={news} 
+                                            cashFlow={cashFlow} 
+                                            officials={officials} 
+                                            reports={reports} 
+                                            letters={letters} 
+                                            ronda={ronda} 
+                                            rondaAttendance={rondaAttendance}
+                                            inventory={inventory} 
+                                            umkm={umkm} 
+                                            bills={bills} 
+                                            rondaLogs={rondaLogs} 
+                                            rondaSwapRequests={rondaSwapRequests} 
+                                            gallery={gallery} 
+                                            pdfConfig={pdfConfig} 
+                                            setPdfConfig={setPdfConfig} 
+                                            notifications={notifications} 
+                                            documents={documents} 
+                                            populationReports={populationReports} 
+                                            setPopulationReports={setPopulationReports} 
+                                            populationLogs={populationLogs} 
+                                            setPopulationLogs={setPopulationLogs} 
+                                            events={events} 
+                                            updateRequests={updateRequests}
+                                            incomingMails={incomingMails}
+                                            mapPoints={mapPoints} 
+                                            activePatrol={activePatrol} 
+                                            iuranPayments={iuranPayments} 
+                                            residentRegistrations={residentRegistrations} 
+                                            guestReports={guestReports} 
+                                            inventoryLogs={inventoryLogs} 
+                                            auditLogs={auditLogs} 
+                                            faqItems={faqItems} 
+                                            settings={settings}
+                                            onUpdateSettings={handleUpdateSettings}
+                                        />
+                                    </React.Suspense>
+                                </ErrorBoundary>
+                            )}
+                        </AdminRouteWrapper>
+  );
+
+return (
     <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ScrollToTop />
         <Toaster position="top-right" richColors />
@@ -551,66 +612,8 @@ export const App = () => {
             settings={settings}
         >
             <Routes>
-                <Route path="/admin" element={
-                    <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
-                        {adminRole === Role.SUPER_ADMIN && !isSupervising ? (
-                            <Navigate to="/superadmin" replace />
-                        ) : (
-                            <ErrorBoundary>
-                                <React.Suspense fallback={
-                                    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-8 font-sans">
-                                        <div className="relative flex items-center justify-center mb-4">
-                                            <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-                                            <Loader2 className="absolute text-indigo-600 animate-pulse" size={24} />
-                                        </div>
-                                        <h3 className="text-slate-800 font-black text-sm tracking-wide uppercase">Memuat Dasbor Admin</h3>
-                                        <p className="text-slate-400 text-xs mt-1">Mengoptimalkan bundle aplikasi...</p>
-                                    </div>
-                                }>
-                                    <AdminDashboard 
-                                        role={adminRole || Role.ADMIN}
-                                        houses={houses} 
-                                        announcements={announcements} 
-                                        news={news} 
-                                        cashFlow={cashFlow} 
-                                        officials={officials} 
-                                        reports={reports} 
-                                        letters={letters} 
-                                        ronda={ronda} 
-                                        rondaAttendance={rondaAttendance}
-                                        inventory={inventory} 
-                                        umkm={umkm} 
-                                        bills={bills} 
-                                        rondaLogs={rondaLogs} 
-                                        rondaSwapRequests={rondaSwapRequests} 
-                                        gallery={gallery} 
-                                        pdfConfig={pdfConfig} 
-                                        setPdfConfig={setPdfConfig} 
-                                        notifications={notifications} 
-                                        documents={documents} 
-                                        populationReports={populationReports} 
-                                        setPopulationReports={setPopulationReports} 
-                                        populationLogs={populationLogs} 
-                                        setPopulationLogs={setPopulationLogs} 
-                                        events={events} 
-                                        updateRequests={updateRequests}
-                                        incomingMails={incomingMails}
-                                        mapPoints={mapPoints} 
-                                        activePatrol={activePatrol} 
-                                        iuranPayments={iuranPayments} 
-                                        residentRegistrations={residentRegistrations} 
-                                        guestReports={guestReports} 
-                                        inventoryLogs={inventoryLogs} 
-                                        auditLogs={auditLogs} 
-                                        faqItems={faqItems} 
-                                        settings={settings}
-                                        onUpdateSettings={handleUpdateSettings}
-                                    />
-                                </React.Suspense>
-                            </ErrorBoundary>
-                        )}
-                    </AdminRouteWrapper>
-                }/>
+                <Route path="/admin" element={adminElement} />
+                <Route path="/admin/*" element={adminElement} />
                 <Route path="/master" element={
                     <ErrorBoundary>
                         <React.Suspense fallback={
