@@ -1,5 +1,59 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin, hasFirebaseAdminCredentials } from '../_firebaseAdmin';
+import admin from 'firebase-admin';
+
+function getFirebaseAdmin(): typeof admin {
+  if (admin.apps.length > 0) {
+    return admin;
+  }
+
+  const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (serviceAccountVar) {
+    try {
+      let raw = serviceAccountVar.trim();
+      if (!raw.startsWith('{') && !raw.startsWith('[')) {
+        raw = Buffer.from(raw, 'base64').toString('utf8');
+      }
+      const serviceAccount = JSON.parse(raw);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.project_id || 'teras-warga'
+      });
+      console.log('✅ [Vercel API] Firebase Admin initialized with service account.');
+      return admin;
+    } catch (e: any) {
+      console.warn('⚠️ [Vercel API] Failed parsing FIREBASE_SERVICE_ACCOUNT:', e.message);
+    }
+  }
+
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY;
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'teras-warga';
+
+  if (clientEmail && privateKeyRaw) {
+    try {
+      const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey
+        }),
+        projectId
+      });
+      return admin;
+    } catch (e: any) {
+      console.warn('⚠️ [Vercel API] Failed initializing with individual credentials:', e.message);
+    }
+  }
+
+  try {
+    admin.initializeApp({ projectId });
+  } catch (e: any) {
+    console.warn('⚠️ [Vercel API] Default initializeApp warning:', e.message);
+  }
+
+  return admin;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Setup CORS
@@ -27,25 +81,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let uidDeleted: string | null = null;
   let authWarning: string | null = null;
 
-  // If server does not have Firebase service account credentials configured, notify client to complete unlinking directly via client SDK
-  if (!hasFirebaseAdminCredentials()) {
-    console.log(`ℹ️ [Vercel API] No Service Account credentials for deleting ${cleanEmail}. Unlinking in client.`);
-    return res.status(200).json({
-      success: true,
-      authUserDeleted: false,
-      fallbackToClient: true,
-      message: `Akses login untuk ${cleanEmail} telah dicabut dari sistem. (Catatan: Hapus permanen dari Firebase Auth dapat dilakukan lewat Firebase Console).`
-    });
-  }
-
   try {
-    const admin = getFirebaseAdmin();
+    const fbAdmin = getFirebaseAdmin();
 
     // 1. Delete user from Firebase Authentication
     try {
-      const userRecord = await admin.auth().getUserByEmail(cleanEmail);
+      const userRecord = await fbAdmin.auth().getUserByEmail(cleanEmail);
       if (userRecord && userRecord.uid) {
-        await admin.auth().deleteUser(userRecord.uid);
+        await fbAdmin.auth().deleteUser(userRecord.uid);
         authUserDeleted = true;
         uidDeleted = userRecord.uid;
         console.log(`✅ [Vercel API] User ${cleanEmail} (UID: ${userRecord.uid}) deleted from Firebase Auth.`);
@@ -55,14 +98,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.log(`ℹ️ [Vercel API] User ${cleanEmail} not found in Firebase Auth (already removed).`);
         authUserDeleted = true;
       } else {
-        console.warn(`⚠️ [Vercel API] Firebase Auth delete warning for ${cleanEmail}:`, authError.message);
+        console.warn(`⚠️ [Vercel API] Firebase Auth delete notice for ${cleanEmail}:`, authError.message);
         authWarning = authError.message;
       }
     }
 
     // 2. Unlink or clean in Firestore officials and admins
     try {
-      const firestore = admin.firestore();
+      const firestore = fbAdmin.firestore();
 
       if (officialId && !officialId.includes('-chairman') && !officialId.includes('-secretary') && !officialId.includes('-treasurer')) {
         try {
@@ -101,7 +144,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       } catch (_) {}
 
     } catch (dbErr: any) {
-      console.warn(`⚠️ [Vercel API] Firestore unlink warning:`, dbErr.message);
+      console.warn(`⚠️ [Vercel API] Firestore unlink notice:`, dbErr.message);
     }
 
     return res.status(200).json({

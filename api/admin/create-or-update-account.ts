@@ -1,5 +1,59 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getFirebaseAdmin, hasFirebaseAdminCredentials } from '../_firebaseAdmin';
+import admin from 'firebase-admin';
+
+function getFirebaseAdmin(): typeof admin {
+  if (admin.apps.length > 0) {
+    return admin;
+  }
+
+  const serviceAccountVar = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (serviceAccountVar) {
+    try {
+      let raw = serviceAccountVar.trim();
+      if (!raw.startsWith('{') && !raw.startsWith('[')) {
+        raw = Buffer.from(raw, 'base64').toString('utf8');
+      }
+      const serviceAccount = JSON.parse(raw);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.project_id || 'teras-warga'
+      });
+      console.log('✅ [Vercel API] Firebase Admin initialized with service account.');
+      return admin;
+    } catch (e: any) {
+      console.warn('⚠️ [Vercel API] Failed parsing FIREBASE_SERVICE_ACCOUNT:', e.message);
+    }
+  }
+
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKeyRaw = process.env.FIREBASE_PRIVATE_KEY;
+  const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || 'teras-warga';
+
+  if (clientEmail && privateKeyRaw) {
+    try {
+      const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId,
+          clientEmail,
+          privateKey
+        }),
+        projectId
+      });
+      return admin;
+    } catch (e: any) {
+      console.warn('⚠️ [Vercel API] Failed initializing with individual credentials:', e.message);
+    }
+  }
+
+  try {
+    admin.initializeApp({ projectId });
+  } catch (e: any) {
+    console.warn('⚠️ [Vercel API] Default initializeApp warning:', e.message);
+  }
+
+  return admin;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Setup CORS
@@ -28,30 +82,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const cleanPhone = (phone || '').trim();
   const assignedRole = role || 'Admin';
 
-  // If server does not have Firebase service account credentials configured, notify client to use direct client-side fallback
-  if (!hasFirebaseAdminCredentials()) {
-    console.log('ℹ️ [Vercel API] No Firebase Admin Service Account credentials configured. Yielding to client SDK.');
-    return res.status(200).json({
-      success: false,
-      fallbackToClient: true,
-      message: 'Firebase Service Account tidak dikonfigurasi di server. Penautan dilakukan secara aman melalui client SDK.'
-    });
-  }
-
   try {
-    const admin = getFirebaseAdmin();
+    const fbAdmin = getFirebaseAdmin();
 
     let uid: string | undefined;
     let isExisting = false;
 
     // 1. Check if user already exists in Firebase Auth
     try {
-      const existingUser = await admin.auth().getUserByEmail(cleanEmail);
+      const existingUser = await fbAdmin.auth().getUserByEmail(cleanEmail);
       uid = existingUser.uid;
       isExisting = true;
     } catch (err: any) {
       if (err.code !== 'auth/user-not-found') {
-        console.warn('⚠️ [Vercel API] getUserByEmail warning:', err.message);
+        console.warn('⚠️ [Vercel API] getUserByEmail notice:', err.message);
       }
     }
 
@@ -73,10 +117,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (cleanName) updatePayload.displayName = cleanName;
         if (cleanPassword) updatePayload.password = cleanPassword;
 
-        await admin.auth().updateUser(uid, updatePayload);
+        await fbAdmin.auth().updateUser(uid, updatePayload);
         console.log(`✅ [Vercel API] User ${cleanEmail} updated in Auth.`);
       } else {
-        const newUser = await admin.auth().createUser({
+        const newUser = await fbAdmin.auth().createUser({
           email: cleanEmail,
           password: cleanPassword,
           displayName: cleanName || undefined
@@ -85,13 +129,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.log(`✅ [Vercel API] User ${cleanEmail} created in Auth (UID: ${uid}).`);
       }
     } catch (authErr: any) {
-      console.warn('⚠️ [Vercel API] Auth create/update warning:', authErr.message);
+      console.warn('⚠️ [Vercel API] Auth create/update notice:', authErr.message);
     }
 
     // 3. Link in Firestore officials collection
     let resolvedOfficialId = officialId;
     try {
-      const firestore = admin.firestore();
+      const firestore = fbAdmin.firestore();
 
       if (resolvedOfficialId && !resolvedOfficialId.includes('-chairman') && !resolvedOfficialId.includes('-secretary') && !resolvedOfficialId.includes('-treasurer')) {
         try {
@@ -144,13 +188,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // 4. Grant Admin privileges: Auth Custom Claims & Firestore admins collection
       if (uid) {
         try {
-          await admin.auth().setCustomUserClaims(uid, {
+          await fbAdmin.auth().setCustomUserClaims(uid, {
             admin: true,
             role: assignedRole,
             tenantId: tenantId
           });
         } catch (claimsErr: any) {
-          console.warn('⚠️ [Vercel API] Set custom claims warning:', claimsErr.message);
+          console.warn('⚠️ [Vercel API] Set custom claims notice:', claimsErr.message);
         }
       }
 
@@ -165,7 +209,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           updatedAt: admin.firestore.FieldValue.serverTimestamp()
         }, { merge: true });
       } catch (adminDocErr: any) {
-        console.warn('⚠️ [Vercel API] Write to admins doc warning:', adminDocErr.message);
+        console.warn('⚠️ [Vercel API] Write to admins doc notice:', adminDocErr.message);
       }
 
       // 5. Log event to Firestore auditLogs
@@ -186,7 +230,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       } catch (_) {}
 
     } catch (dbErr: any) {
-      console.warn('⚠️ [Vercel API] Firestore provisioning warning:', dbErr.message);
+      console.warn('⚠️ [Vercel API] Firestore provisioning notice:', dbErr.message);
     }
 
     return res.status(200).json({
