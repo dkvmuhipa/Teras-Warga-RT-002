@@ -1,9 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
 import { Moon, ShieldCheck, Clock, Calendar, ChevronRight } from 'lucide-react';
 import { RondaSchedule, PatrolSession } from '../../../types';
-import { Button } from '../../ui/Button';
 
 interface NightPatrolWidgetProps {
   ronda: RondaSchedule[];
@@ -19,69 +17,58 @@ export const NightPatrolWidget: React.FC<NightPatrolWidgetProps> = ({ ronda, act
   const todayRonda = ronda.find((r) => r.day === today);
 
   return (
-    <div className="bg-slate-950 text-white p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] shadow-xl shadow-slate-950/20 relative overflow-hidden group border border-white/10">
-      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity duration-700 rotate-12 pointer-events-none">
-        <Moon size={140} />
-      </div>
-      
-      <div className="relative z-10 space-y-6">
+    <div className="bg-slate-900 text-white p-5 sm:p-6 md:p-7 rounded-3xl border border-slate-800 shadow-sm relative overflow-hidden">
+      <div className="relative z-10 space-y-5">
         {activePatrol && (
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl backdrop-blur-md"
-          >
-            <div className="flex items-center justify-between mb-3">
+          <div className="p-3.5 bg-slate-800/80 border border-slate-700 rounded-2xl">
+            <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                </span>
-                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Live Patrol</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white inline-block shrink-0"></span>
+                <span className="text-xs font-medium text-emerald-400">Patroli Berlangsung</span>
               </div>
-              <span className="text-[9px] font-black text-emerald-300 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-                {new Date(activePatrol.startTime).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}
+              <span className="text-[11px] font-mono font-medium text-slate-300 bg-slate-700 px-2 py-0.5 rounded border border-slate-600">
+                {new Date(activePatrol.startTime).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})} WITA
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
-                <ShieldCheck size={20} />
+              <div className="w-9 h-9 rounded-xl bg-slate-700 flex items-center justify-center text-emerald-400 border border-slate-600 shrink-0">
+                <ShieldCheck size={18} />
               </div>
               <div>
-                <p className="font-black text-white text-sm leading-tight">{activePatrol.officerName}</p>
-                <p className="text-[9px] text-emerald-400/60 font-black uppercase tracking-widest mt-0.5">Petugas Aktif</p>
+                <p className="font-semibold text-white text-xs leading-tight">{activePatrol.officerName}</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Petugas Pos Ronda</p>
               </div>
             </div>
-          </motion.div>
+          </div>
         )}
 
-        <div className="pb-5 border-b border-white/10 flex justify-between items-end">
+        <div className="pb-4 border-b border-slate-800 flex justify-between items-end">
           <div>
-            <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.25em] mb-1">Jadwal Siskamling</p>
-            <p className="text-3xl font-black text-white leading-none tracking-tight">{today}</p>
-            <p className="text-[11px] text-slate-400 font-bold flex items-center gap-1.5 mt-1.5">
-              <Calendar size={13} className="text-indigo-400" /> {fullDate}
+            <p className="text-xs font-medium text-slate-400 mb-0.5">Jadwal Siskamling</p>
+            <p className="text-2xl font-semibold text-white leading-tight tracking-tight">{today}</p>
+            <p className="text-xs text-slate-400 font-normal flex items-center gap-1.5 mt-1">
+              <Calendar size={13} className="text-slate-500" /> {fullDate}
             </p>
           </div>
-          <div className="bg-indigo-600/20 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-indigo-500/30">
-            <span className="text-[9px] font-black uppercase tracking-wider text-indigo-300">Shift Malam</span>
+          <div className="bg-slate-800 px-3 py-1 rounded-lg border border-slate-700">
+            <span className="text-xs font-medium text-slate-300">Shift Malam</span>
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {todayRonda && (todayRonda.shifts || todayRonda.members.length > 0) ? (
             todayRonda.shifts ? (
               todayRonda.shifts.map((shift, i) => (
-                <div key={shift.id} className="space-y-2 p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                <div key={shift.id} className="space-y-2 p-3.5 rounded-xl bg-slate-800/50 border border-slate-800 hover:bg-slate-800/80 transition-colors">
                   <div className="flex items-center justify-between">
-                    <p className="text-[9px] font-black text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
-                      <Clock size={11} strokeWidth={2.5} /> {shift.time}
+                    <p className="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+                      <Clock size={12} className="text-slate-400" /> {shift.time}
                     </p>
-                    <span className="text-[8px] font-black bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30 uppercase">Shift {i+1}</span>
+                    <span className="text-[10px] font-medium bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-600">Shift {i+1}</span>
                   </div>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {shift.members.map((member, j) => (
-                      <span key={j} className="text-[10px] font-bold text-white/80 bg-white/5 px-2.5 py-1 rounded-lg border border-white/10">
+                      <span key={j} className="text-xs font-normal text-slate-200 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700">
                         {member}
                       </span>
                     ))}
@@ -90,28 +77,28 @@ export const NightPatrolWidget: React.FC<NightPatrolWidgetProps> = ({ ronda, act
               ))
             ) : (
               todayRonda.members.map((member, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-black text-xs border border-indigo-500/30">
+                <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-800/50 border border-slate-800 hover:bg-slate-800/80 transition-colors">
+                  <div className="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center font-mono font-semibold text-xs border border-slate-700 shrink-0">
                     {i + 1}
                   </div>
-                  <span className="font-bold text-sm tracking-tight text-white/90">{member}</span>
+                  <span className="font-normal text-xs text-slate-200">{member}</span>
                 </div>
               ))
             )
           ) : (
-            <div className="text-center py-6 border-2 border-dashed border-slate-800 rounded-2xl text-slate-500 text-xs font-bold uppercase tracking-wider">
+            <div className="text-center py-6 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs font-normal">
               Jadwal belum diatur
             </div>
           )}
         </div>
 
-        <Button 
+        <button 
           onClick={() => navigate('/info')} 
-          variant="secondary"
-          className="w-full py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest gap-2"
+          className="w-full py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-200 rounded-xl text-xs font-medium transition-colors border border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          Selengkapnya <ChevronRight size={14} strokeWidth={3}/>
-        </Button>
+          <span>Buka Jadwal Lengkap</span>
+          <ChevronRight size={14} />
+        </button>
       </div>
     </div>
   );
