@@ -41,46 +41,46 @@ export const SpotlightAgenda: React.FC<SpotlightAgendaProps> = ({ announcements 
   };
 
   return (
-    <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 md:p-9 text-white border border-slate-800 shadow-sm relative overflow-hidden">
+    <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-950 rounded-3xl md:rounded-[2.8rem] p-6 sm:p-8 md:p-10 text-white border border-indigo-500/30 shadow-xl relative overflow-hidden group">
       <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2.5 py-0.5 bg-slate-800 text-slate-300 border border-slate-700 rounded-md text-xs font-medium flex items-center gap-1.5">
-              <Calendar size={12} className="text-slate-400" /> Agenda Terdekat
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-xs font-bold flex items-center gap-1.5">
+              <Calendar size={12} className="text-amber-400" /> Agenda Terdekat
             </span>
-            <span className="px-2.5 py-0.5 bg-slate-800 text-amber-300 border border-slate-700 rounded-md text-xs font-mono font-medium flex items-center gap-1.5">
+            <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-xs font-mono font-bold flex items-center gap-1.5">
               <Clock size={12} /> {countdownLabel}
             </span>
-            <span className="text-xs font-medium text-slate-400">
-              {eventDateFormatted}
+            <span className="text-xs font-medium text-slate-300 flex items-center gap-1">
+              <Calendar size={12} className="text-indigo-400" /> {eventDateFormatted}
             </span>
           </div>
 
-          <h3 className="text-xl md:text-2xl font-semibold text-white tracking-tight">
+          <h3 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
             {event.title}
           </h3>
 
-          <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
             {event.content}
           </p>
 
-          <div className="flex items-center gap-2 pt-1 text-xs text-slate-400">
+          <div className="flex items-center gap-2 pt-1 text-xs text-slate-300">
             <MapPin size={13} className="text-rose-400 shrink-0" />
             <span>Titik Kumpul: Wilayah {currentTenant.name}, Kel. {currentTenant.kelurahan}, {currentTenant.city}</span>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 w-full sm:w-auto">
           <button
             onClick={handleShareAgendaWA}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
           >
-            <Share2 size={14} />
+            <Share2 size={15} />
             <span>Bagikan ke WhatsApp RT</span>
           </button>
           <button
             onClick={() => navigate('/info')}
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors border border-slate-700 cursor-pointer"
+            className="px-5 py-3 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border border-white/10 cursor-pointer"
           >
             <span>Lihat Semua Agenda</span>
             <ChevronRight size={14} />

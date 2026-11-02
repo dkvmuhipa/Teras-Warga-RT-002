@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, ChevronRight, ArrowRight, ShieldCheck, 
-  BookOpen, Scale, Zap, Radio
+  BookOpen, Scale, Zap
 } from 'lucide-react';
-import { motion } from 'motion/react';
 import { 
   House, Announcement, Report, Official, RondaSchedule, 
   GalleryItem, PatrolSession, LetterRequest, MapPoint, 
@@ -68,6 +67,14 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
     };
   }, []);
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 11) return 'Selamat Pagi';
+    if (hour < 15) return 'Selamat Siang';
+    if (hour < 19) return 'Selamat Sore';
+    return 'Selamat Malam';
+  };
+
   const dateObj = new Date();
   const today = dateObj.toLocaleDateString('id-ID', { weekday: 'long' });
   const fullDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -86,24 +93,24 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
       {/* Live Active Utility Outage Alert Banner */}
       {activeOutage && (
-        <div className="bg-amber-50 border border-amber-200 text-amber-950 rounded-2xl p-4 md:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xs">
+        <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white rounded-3xl p-4 md:p-5 shadow-lg shadow-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/20">
           <div className="flex items-center gap-3.5 w-full sm:w-auto">
-            <div className="p-2.5 bg-amber-100 text-amber-800 rounded-xl shrink-0">
-              <Zap size={20} />
+            <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl shrink-0">
+              <Zap size={22} className="text-amber-200" />
             </div>
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 bg-amber-200/80 rounded text-[10px] font-semibold text-amber-900 uppercase">
-                  Siaga Utilitas
+                <span className="px-2 py-0.5 bg-black/30 rounded-md text-[10px] font-bold uppercase tracking-wider text-amber-200">
+                  Siaga Utilitas Aktif
                 </span>
-                <span className="text-xs text-amber-800 font-medium">
+                <span className="text-xs font-semibold text-amber-100">
                   {activeOutage.type} &bull; Waktu: {activeOutage.startTime} - {activeOutage.endTime}
                 </span>
               </div>
-              <h4 className="font-semibold text-sm md:text-base text-amber-950">
+              <h4 className="font-bold text-sm md:text-base leading-snug">
                 {activeOutage.title}
               </h4>
-              <p className="text-xs text-amber-800/90 font-normal line-clamp-1">
+              <p className="text-xs text-amber-100/90 font-medium line-clamp-1">
                 Wilayah Terdampak: {activeOutage.affectedBlocks?.join(', ') || `Semua Blok ${currentTenant.name}`}
               </p>
             </div>
@@ -112,7 +119,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
             <button
               onClick={() => setIsOutageModalOpen(true)}
-              className="w-full sm:w-auto px-4 py-2 bg-amber-900 hover:bg-amber-950 text-white rounded-xl text-xs font-medium transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-amber-50 text-slate-900 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
             >
               <span>Detail &amp; Lapor Cepat</span>
               <ArrowRight size={13} />
@@ -122,46 +129,46 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       )}
 
       {/* Live Info Marquee Banner */}
-      <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-3 sm:p-4 text-slate-800 flex flex-col md:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 shrink-0 px-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white inline-block"></span>
-          <span className="text-xs font-medium text-slate-700 bg-white border border-slate-200 px-2.5 py-1 rounded-md">
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl sm:rounded-3xl p-3 sm:p-4 border border-slate-200/80 shadow-xs text-slate-800 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 shrink-0 px-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-200 inline-block"></span>
+          <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-full flex items-center gap-1">
             Informasi Terkini {currentTenant.rt ? `RT ${currentTenant.rt}` : 'Warga'}
           </span>
         </div>
 
         <div className="flex-1 w-full overflow-hidden text-center md:text-left">
-          <p className="text-xs text-slate-600 truncate font-normal">
-            <span className="font-medium text-slate-900">Ronda malam ini ({today}):</span> {todayRonda && todayRonda.members.length > 0 ? todayRonda.members.slice(0, 3).join(', ') : 'Satgas Siskamling Standby'} &nbsp;&bull;&nbsp; 
-            <span className="font-medium text-slate-900">Iuran terkumpul:</span> Rp {(summaries.totalCollected || 0).toLocaleString('id-ID')} &nbsp;&bull;&nbsp;
-            <span className="font-medium text-slate-900">Regulasi RT:</span> 13 BAB Peraturan Lingkungan Resmi Disahkan
+          <p className="text-xs text-slate-600 truncate font-medium">
+            <span className="font-bold text-slate-900">Ronda malam ini ({today}):</span> {todayRonda && todayRonda.members.length > 0 ? todayRonda.members.slice(0, 3).join(', ') : 'Satgas Siskamling Standby'} &nbsp;&bull;&nbsp; 
+            <span className="font-bold text-emerald-700">Iuran terkumpul:</span> Rp {(summaries.totalCollected || 0).toLocaleString('id-ID')} &nbsp;&bull;&nbsp;
+            <span className="font-bold text-amber-700">Regulasi RT:</span> 13 BAB Peraturan Lingkungan Resmi Disahkan
           </p>
         </div>
 
         <button 
           onClick={() => navigate('/info')}
-          className="shrink-0 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white border border-slate-200 px-3.5 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+          className="shrink-0 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
         >
-          <span>Pusat Informasi</span>
+          <span>Pusat Info</span>
           <ChevronRight size={13} />
         </button>
       </div>
 
-      {/* Contextual Section Header */}
-      <div ref={contentRef} className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-center sm:text-left border-b border-slate-200/80 pb-4">
+      {/* Greeting Header */}
+      <div ref={contentRef} className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-center sm:text-left border-b border-slate-200/60 pb-5">
         <div>
-          <span className="text-xs font-medium text-slate-500 mb-0.5 block">
-            {currentTenant.name} &bull; RW 020
+          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-1 block">
+            {currentTenant.name}
           </span>
-          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">
-            Pusat Informasi &amp; Transparansi Lingkungan
+          <h2 className="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+            {getGreeting()}, <span className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-600 bg-clip-text text-transparent">Warga!</span>
           </h2>
-          <p className="text-slate-500 font-normal text-xs sm:text-sm mt-0.5">
-            Layanan mandiri, jadwal kegiatan, dan transparansi administrasi warga {currentTenant.name}.
+          <p className="text-slate-500 font-medium text-xs sm:text-sm mt-1">
+            Selamat datang di pusat layanan mandiri dan transparansi digital lingkungan {currentTenant.name}.
           </p>
         </div>
-        <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-medium text-slate-600 shrink-0">
-          <Calendar size={13} className="text-slate-500" />
+        <div className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-600 shrink-0 shadow-2xs">
+          <Calendar size={13} className="text-indigo-600" />
           <span>{today}, {fullDate}</span>
         </div>
       </div>
@@ -177,48 +184,48 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       <DigitalSummary />
 
       {/* 3. Peraturan RT - RT2LAW & Buku Saku Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* RT2LAW Card */}
         <div 
           onClick={() => navigate('/rules')}
-          className="lg:col-span-2 cursor-pointer bg-slate-900 rounded-3xl p-6 sm:p-8 text-white border border-slate-800 shadow-xs flex flex-col justify-between min-h-[250px] sm:min-h-[270px] hover:border-slate-700 transition-colors"
+          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 md:p-10 text-white border border-slate-800 shadow-xs relative overflow-hidden group flex flex-col justify-between min-h-[260px] sm:min-h-[290px] hover:border-indigo-500/40 transition-all"
         >
-          <div className="space-y-4">
+          <div className="relative z-10 space-y-4">
             <div className="flex justify-between items-start gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-400 text-slate-950 rounded-xl flex items-center justify-center shrink-0">
-                  <Scale size={20} strokeWidth={2} />
+                <div className="w-12 h-12 bg-amber-500 text-slate-950 rounded-2xl flex items-center justify-center shadow-xs">
+                  <Scale size={24} strokeWidth={2.4} />
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-amber-400 block leading-tight">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 block leading-tight">
                     Landasan Hukum {currentTenant.rt ? `RT ${currentTenant.rt}` : 'Warga'}
                   </span>
-                  <span className="text-xs text-slate-300">Resmi Disahkan Warga &amp; Pengurus</span>
+                  <span className="text-xs font-semibold text-slate-300">Resmi Disahkan Warga &amp; Pengurus</span>
                 </div>
               </div>
 
-              <span className="px-2.5 py-1 bg-slate-800 border border-slate-700 text-amber-300 rounded-lg text-xs font-medium flex items-center gap-1.5">
+              <span className="px-3.5 py-1.5 bg-amber-500/20 border border-amber-500/30 text-amber-300 rounded-full text-xs font-bold flex items-center gap-1.5">
                 13 BAB Resmi
               </span>
             </div>
 
             <div className="space-y-1.5 pt-1">
-              <h3 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">
-                RT2LAW
+              <h3 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                RT2<span className="text-amber-400">LAW</span>
               </h3>
-              <p className="text-slate-300 text-xs sm:text-sm font-normal leading-relaxed max-w-xl">
-                Konstitusi dan tata tertib lingkungan 13 BAB yang mengatur norma sosial, ketertiban ronda, hingga sanksi keberadaban demi keharmonisan bersama.
+              <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed max-w-xl">
+                Konstitusi &amp; Tata Tertib Lingkungan Terpadu 13 BAB yang mengatur norma sosial, ketertiban ronda, hingga sanksi keberadaban demi keharmonisan bersama.
               </p>
             </div>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-800 flex items-center justify-between">
-            <span className="text-slate-400 text-xs font-medium flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-slate-400" /> Kelurahan {currentTenant.kelurahan} &bull; {currentTenant.city}
+          <div className="relative z-10 pt-4 mt-4 border-t border-white/10 flex items-center justify-between">
+            <span className="text-slate-400 font-bold text-xs flex items-center gap-1.5">
+              <ShieldCheck size={14} className="text-amber-400" /> Kelurahan {currentTenant.kelurahan} &bull; {currentTenant.city}
             </span>
-            <span className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl font-semibold text-xs flex items-center gap-1.5 transition-colors">
+            <span className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors">
               <span>Buka Regulasi</span>
-              <ChevronRight size={14} />
+              <ChevronRight size={15} strokeWidth={2.5} />
             </span>
           </div>
         </div>
@@ -226,35 +233,35 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         {/* Companion Card: Buku Saku Warga Baru */}
         <div 
           onClick={() => navigate('/welcome')}
-          className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:border-slate-300 transition-colors flex flex-col justify-between min-h-[250px] sm:min-h-[270px]"
+          className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs hover:shadow-md transition-all relative overflow-hidden group flex flex-col justify-between min-h-[260px] sm:min-h-[290px]"
         >
-          <div className="space-y-4">
+          <div className="relative z-10 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center shrink-0 border border-slate-200/80">
-                <BookOpen size={18} />
+              <div className="w-12 h-12 bg-indigo-50 text-[#4f46e5] rounded-2xl flex items-center justify-center border border-indigo-100/70 shadow-2xs">
+                <BookOpen size={22} />
               </div>
               <div>
-                <span className="text-xs font-medium text-slate-500 block">Panduan Adaptasi</span>
-                <span className="text-xs font-semibold text-slate-800">Warga Baru &amp; Kontrak</span>
+                <span className="text-xs font-bold text-[#4f46e5] block">Selamat Datang</span>
+                <span className="text-xs font-semibold text-slate-400">Panduan &amp; Adaptasi</span>
               </div>
             </div>
 
             <div className="space-y-1 pt-1">
-              <h3 className="text-xl font-semibold text-slate-900 leading-tight">
-                Buku Saku Warga Baru
+              <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
+                Buku Saku <span className="text-[#4f46e5]">Warga Baru</span>
               </h3>
-              <p className="text-xs font-normal text-slate-500 leading-relaxed">
-                Panduan praktis warga baru &amp; penghuni kontrak: 4 langkah adaptasi awal, jadwal sampah, tata tertib, dan direktori kontak lingkungan.
+              <p className="text-xs font-medium text-slate-500 leading-relaxed">
+                Panduan praktis warga baru &amp; penghuni kontrak: 4 langkah adaptasi awal, jadwal sampah, tata tertib, dan direktori kontak darurat lingkungan.
               </p>
             </div>
           </div>
 
-          <div className="pt-4 mt-4 border-t border-slate-100">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400 font-medium">Panduan Resmi</span>
-              <span className="flex items-center gap-1 text-slate-900 font-medium hover:text-slate-700 transition-colors">
+          <div className="relative z-10 pt-4 mt-4 border-t border-slate-100">
+            <div className="flex items-center justify-between text-xs font-bold">
+              <span className="text-slate-400 font-semibold">Sistem Teras RT</span>
+              <span className="flex items-center gap-1 text-slate-900 font-bold group-hover:text-indigo-600 transition-colors">
                 <span>Buka Buku Saku</span>
-                <ChevronRight size={14} />
+                <ChevronRight size={15} />
               </span>
             </div>
           </div>
@@ -282,7 +289,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       {/* 7. Interactive Map Section */}
-      <div className="w-full bg-slate-50 border border-slate-200/80 p-3.5 rounded-3xl shadow-xs">
+      <div className="w-full bg-white/70 backdrop-blur-md p-3.5 rounded-[2.5rem] shadow-sm border border-slate-200/80">
         <HouseMap 
           houses={houses} 
           isAdmin={false} 
@@ -299,7 +306,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       {/* 9. Warta Warga & Night Patrol Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2">
           <AnnouncementsFeed announcements={announcements} />
         </div>
@@ -310,19 +317,19 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
       </div>
 
       {/* 10. Gallery Warga */}
-      <div className="bg-white p-5 sm:p-7 md:p-8 rounded-3xl border border-slate-200/80 shadow-xs">
+      <div className="bg-white/90 backdrop-blur-md p-5 sm:p-7 md:p-8 rounded-3xl border border-slate-200/80 shadow-xs">
         <div className="flex items-center justify-between mb-6 px-1">
-          <h3 className="text-lg font-semibold text-slate-900 tracking-tight">Dokumentasi &amp; Galeri Lingkungan</h3>
+          <h3 className="text-lg font-bold text-slate-900 tracking-tight">Galeri <span className="text-indigo-600">Warga</span></h3>
           <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
             <ArrowRight size={15} />
           </div>
         </div>
         {gallery.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {gallery.slice(0, 4).map((item) => (
               <div 
                 key={item.id} 
-                className="relative aspect-[4/5] rounded-2xl overflow-hidden group/img cursor-pointer border border-slate-200/80 bg-slate-100"
+                className="relative aspect-[4/5] rounded-2xl overflow-hidden group/img cursor-pointer border border-slate-200/80 shadow-2xs"
               >
                 <SmartImage 
                   src={item.image} 
@@ -331,7 +338,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
                   width={400}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-end p-4 pointer-events-none">
-                  <p className="text-xs text-white font-medium leading-tight">
+                  <p className="text-xs text-white font-bold leading-tight">
                     {item.title}
                   </p>
                 </div>
@@ -339,8 +346,8 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
             ))}
           </div>
         ) : (
-          <div className="text-center py-10 text-slate-400 text-xs font-normal border border-dashed border-slate-200 rounded-2xl">
-            Galeri kegiatan lingkungan belum memiliki dokumentasi
+          <div className="text-center py-10 text-slate-400 text-xs font-semibold border-2 border-dashed border-slate-100 rounded-2xl">
+            Galeri masih kosong
           </div>
         )}
       </div>
