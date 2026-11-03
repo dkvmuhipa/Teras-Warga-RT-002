@@ -726,9 +726,8 @@ _Pengurus RT 002 Huntap Tondo 2_`;
   return (
     <div className="space-y-6 text-left">
       {/* Header Banner */}
-      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-[2.5rem] p-6 sm:p-8 text-white relative overflow-hidden shadow-xl border border-indigo-900/40">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="bg-slate-900 rounded-3xl md:rounded-[2.5rem] p-6 sm:p-8 text-white relative overflow-hidden shadow-sm border border-slate-800">
+        
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">

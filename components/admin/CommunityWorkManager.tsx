@@ -268,8 +268,8 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
           {activeWork && (
             <div className="lg:col-span-2 space-y-6">
               {/* Active Agenda Banner */}
-              <div className="bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-800 text-white rounded-[2.5rem] p-6 sm:p-8 shadow-xl shadow-2xs relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="bg-emerald-700 text-white rounded-3xl md:rounded-[2.5rem] p-6 sm:p-8 shadow-sm relative overflow-hidden">
+                
                 
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 relative z-10">
                   <div>

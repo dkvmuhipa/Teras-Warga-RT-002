@@ -281,7 +281,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && (
               <button 
                 onClick={() => setIsOpen(false)} 
-                className="ml-auto md:hidden text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+                className="ml-auto md:hidden text-slate-400 hover:text-slate-700 min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl hover:bg-slate-100 transition-colors"
                 aria-label="Tutup Sidebar"
               >
                 <X size={18} />
@@ -369,7 +369,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                             title={isCollapsed ? `${item.label}${pendingCount > 0 ? ` (${pendingCount} tertunda)` : ''}` : ''}
                             className={`
                               w-full flex items-center gap-3 rounded-xl transition-colors duration-150 font-medium text-xs group relative overflow-hidden
-                              ${isCollapsed ? 'justify-center p-2.5' : 'px-3 py-2'}
+                              ${isCollapsed ? 'justify-center p-2' : 'px-3 py-2.5 md:py-2'} min-h-[40px] md:min-h-[36px]
                               ${isActive 
                                 ? 'bg-slate-100/90 text-slate-900 font-semibold border border-slate-200/80 shadow-3xs' 
                                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent'

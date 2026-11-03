@@ -553,7 +553,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="md:hidden p-2 hover:bg-slate-100 rounded-2xl transition-colors text-slate-600 shrink-0"
+              className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 hover:bg-slate-100 rounded-2xl transition-colors text-slate-600 shrink-0"
               aria-label="Buka Menu Navigasi"
             >
               <Menu size={20} />
@@ -670,7 +670,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* Mobile Search Button */}
             <button
               onClick={() => setIsSpotlightOpen(true)}
-              className="sm:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors shrink-0"
+              className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors shrink-0"
               title="Cari Cepat (Ctrl+K)"
               aria-label="Cari Cepat"
             >
@@ -692,7 +692,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               <button 
                 onClick={() => setActiveTab('notifications')}
-                className={`p-2 sm:p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors relative shrink-0 ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
+                className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 sm:p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors relative shrink-0 ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
                 title="Lihat Notifikasi"
                 aria-label="Notifikasi"
               >
@@ -762,7 +762,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <button 
                   key={item.id} 
                   onClick={() => setActiveTab(item.id)} 
-                  className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition-colors ${
+                  className={`flex flex-col items-center justify-center flex-1 min-h-[48px] py-1 transition-colors ${
                     isActive ? 'text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600 font-medium'
                   }`}
                 >

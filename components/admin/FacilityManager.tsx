@@ -629,9 +629,9 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           {/* Emergency Lapor Insiden Button */}
           <Button 
             onClick={() => setIsReportModalOpen(true)} 
-            className="bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-200 rounded-2xl px-5 py-3 text-xs font-semibold uppercase tracking-wider"
+            className="bg-rose-600 hover:bg-rose-700 text-white shadow-xs rounded-2xl px-5 py-3 text-xs font-bold uppercase tracking-wider"
           >
-            <AlertTriangle size={16} className="mr-2 animate-bounce" /> Laporkan Insiden
+            <AlertTriangle size={16} className="mr-2" /> Laporkan Insiden
           </Button>
         </div>
       </div>
@@ -800,7 +800,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 </Button>
                 {activePanicAlerts.length > 0 && (
                   <div className="px-4 py-2.5 bg-rose-600/30 border border-rose-500/40 text-rose-200 font-semibold text-[10px] rounded-xl flex items-center gap-2 uppercase tracking-wider">
-                    <AlertTriangle size={14} className="text-rose-400 animate-bounce" /> {activePanicAlerts.length} Panggilan Darurat
+                    <AlertTriangle size={14} className="text-rose-400 animate-pulse" /> {activePanicAlerts.length} Panggilan Darurat
                   </div>
                 )}
               </div>
@@ -990,7 +990,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                         <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full blur-xl opacity-20 bg-rose-600" />
                         
                         <div className="flex items-center gap-3 mb-3 relative z-10">
-                          <div className={`p-2 rounded-xl ${alert.status === 'Active' ? 'bg-rose-600 text-white animate-bounce' : 'bg-amber-500 text-white'}`}>
+                          <div className={`p-2 rounded-xl ${alert.status === 'Active' ? 'bg-rose-600 text-white animate-pulse' : 'bg-amber-500 text-white'}`}>
                             <AlertTriangle size={18} />
                           </div>
                           <div>
@@ -1462,7 +1462,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
                             return (
                               <div key={shift.id} className="bg-slate-900 text-white rounded-[2rem] p-6 border border-slate-800 shadow-xl relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                                
                                 
                                 <div className="flex justify-between items-center mb-5 relative z-10">
                                   <div className="flex items-center gap-2">
@@ -1665,12 +1665,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <div className="space-y-6 md:space-y-8">
                 {/* Visual Top Podium Row (Podium Keaktifan) */}
                 <div className="bg-slate-900 rounded-[2.5rem] p-6 md:p-8 text-white relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                  <div className="absolute bottom-0 left-0 w-60 h-60 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                  
+                  
 
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/10 pb-6 mb-8 relative z-10">
                     <div>
-                      <h3 className="text-lg md:text-xl font-semibold text-white tracking-tight flex items-center gap-2">🏆 Podium Warga Teladan RT 02
+                      <h3 className="text-lg md:text-xl font-semibold text-white tracking-tight flex items-center gap-2">Podium Warga Teladan RT 02
                       </h3>
                       <p className="text-slate-300 text-[11px] font-bold uppercase tracking-widest mt-1">Apresiasi keaktifan tugas ronda siskamling lingkungan</p>
                     </div>
@@ -1856,7 +1856,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
         {activeTab === 'logs' && (
           <motion.div variants={itemVariants} className="lg:col-span-3 bg-slate-900 text-white rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
 
             <div className="p-6 md:p-8 border-b border-slate-800/80 relative z-10">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6">
@@ -2050,7 +2050,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
             {/* Portal Absensi Main Console */}
             <div className="bg-slate-900 text-white rounded-[2.5rem] border border-slate-800 shadow-2xl p-6 md:p-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+              
 
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-800 pb-6 relative z-10">
                 <div>

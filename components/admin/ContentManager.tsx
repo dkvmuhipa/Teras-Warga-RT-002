@@ -56,9 +56,8 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
       className="space-y-8"
     >
       {/* Futuristic Media Hub Hero Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2.5rem] p-6 md:p-8 border border-slate-800 shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
+      <div className="relative overflow-hidden bg-slate-900 text-white rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-slate-800 shadow-sm">
+        
         
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2">
@@ -70,7 +69,7 @@ export const ContentManager: React.FC<ContentManagerProps> = ({
               <span>LIVE MEDIA BROADCASTER</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-semibold tracking-tight leading-tight">
-              Pusat Informasi & Studio Penyiaran Digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-violet-300">RT 02</span>
+              Pusat Informasi & Studio Penyiaran Digital <span className="text-indigo-400">RT 02</span>
             </h1>
             <p className="text-slate-400 text-xs md:text-sm max-w-2xl font-medium leading-relaxed">
               Portal berita resmi warga RT 02 untuk siaran pengumuman darurat, artikel berita lingkungan, katalog UMKM warga, dan galeri dokumentasi kegiatan.

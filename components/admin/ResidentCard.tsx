@@ -73,7 +73,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
       className="relative bg-white p-5 md:p-6 rounded-[2rem] border border-slate-200/80 shadow-2xs hover:border-indigo-400/50 hover:shadow-xl hover:shadow-2xs transition-colors duration-300 group overflow-hidden flex flex-col justify-between select-none"
     >
       {/* Ambient background glow */}
-      <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors pointer-events-none" />
+      
 
       <div>
         {/* Header: Identity Section */}

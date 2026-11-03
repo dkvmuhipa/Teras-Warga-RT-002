@@ -353,10 +353,9 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* 1. EXECUTIVE HEADER BANNER */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-emerald-950 to-teal-950 rounded-3xl p-6 md:p-8 text-white shadow-2xl border border-emerald-900/60">
+      <div className="relative overflow-hidden bg-slate-900 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 text-white shadow-sm border border-slate-800">
         {/* Ambient Decorative Lighting */}
-        <div className="absolute top-0 right-0 -mt-16 -mr-16 w-80 h-80 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 -mb-16 w-64 h-64 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
+        
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3">

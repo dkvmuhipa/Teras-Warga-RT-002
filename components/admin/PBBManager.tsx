@@ -390,7 +390,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
     <div className="space-y-6">
       {/* Top Banner & Context */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-emerald-100/40 via-teal-50/20 to-transparent rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
+        
         
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
           <div>

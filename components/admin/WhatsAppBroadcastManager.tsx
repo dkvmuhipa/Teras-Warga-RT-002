@@ -273,7 +273,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
       const result = await response.json();
       if (result.success && result.text) {
         setDraft(result.text);
-        toast.success(`Draf ${tone} berhasil dirancang oleh Gemini ✨`);
+        toast.success(`Draf ${tone} berhasil dirancang oleh Gemini`);
       } else {
         throw new Error(result.error || 'Gagal merancang teks.');
       }
@@ -298,7 +298,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
       return toast.error('Belum ada teks draf untuk disalin.');
     }
     navigator.clipboard.writeText(draft);
-    toast.success('Draf pesan berhasil disalin ke clipboard! 📋');
+    toast.success('Draf pesan berhasil disalin ke clipboard!');
   };
 
   const handleSendViaGateway = async () => {
@@ -319,7 +319,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
       const response = await sendWhatsAppViaGateway(targetStr, draft);
       
       if (response && response.success) {
-        toast.success(`Berhasil! Siaran dikirim ke ${targetCount} target. 🚀`);
+        toast.success(`Berhasil! Siaran dikirim ke ${targetCount} target.`);
       } else {
         toast.error(`Gagal mengirim via gateway: ${response?.error || 'Sedang sibuk'}`);
       }
@@ -402,7 +402,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                     setBroadcastType('announcement');
                     setAnnouncementTopic(tmpl.topic);
                     setDraft(tmpl.text);
-                    toast.success(`Template "${tmpl.title}" dimuat! 🚀 Silakan sesuaikan detail tanggal/waktu di kolom kanan.`);
+                    toast.success(`Template "${tmpl.title}" dimuat. Silakan sesuaikan detail tanggal/waktu di kolom kanan.`);
                   }}
                   className={`w-full text-left p-3 rounded-2xl border transition-colors flex items-start gap-3 ${
                     isActive
@@ -571,21 +571,21 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                 onClick={() => { setTone('Formal'); if (broadcastType === 'billing') setTimeout(() => generateLocalBillingTemplate(), 50); }}
                 className={`py-2 rounded-xl text-xs font-bold transition-colors ${tone === 'Formal' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
-                Formal 💼
+                Formal
               </button>
               <button 
                 type="button"
                 onClick={() => { setTone('Kasual'); if (broadcastType === 'billing') setTimeout(() => generateLocalBillingTemplate(), 50); }}
                 className={`py-2 rounded-xl text-xs font-bold transition-colors ${tone === 'Kasual' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
-                Kasual 😊
+                Kasual
               </button>
               <button 
                 type="button"
                 onClick={() => { setTone('Mendesak'); if (broadcastType === 'billing') setTimeout(() => generateLocalBillingTemplate(), 50); }}
                 className={`py-2 rounded-xl text-xs font-bold transition-colors ${tone === 'Mendesak' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
-                Mendesak 📢
+                Mendesak
               </button>
             </div>
           </div>

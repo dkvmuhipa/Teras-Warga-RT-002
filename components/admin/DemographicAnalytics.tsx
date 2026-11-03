@@ -729,9 +729,9 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6 md:p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden border border-slate-800"
+              className="bg-slate-900 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] text-white shadow-sm relative overflow-hidden border border-slate-800"
             >
-              <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+              
               <div className="relative z-10 space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-5">
                   <div>
@@ -823,7 +823,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                     <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-indigo-600">Visualisasi BPS Interaktif</span>
                   </div>
                   <h3 className="text-xl md:text-3xl font-semibold text-slate-900 tracking-tight">
-                    Piramida Penduduk <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-pink-600">RT 002 / RW 020</span>
+                    Piramida Penduduk <span className="text-indigo-600">RT 002 / RW 020</span>
                   </h3>
                   <p className="text-xs font-medium text-slate-500 mt-1 max-w-xl">
                     Distribusi simetris struktur demografi warga berdasarkan kelompok umur standar BPS dan jenis kelamin.
@@ -1069,9 +1069,9 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 rounded-[3rem] shadow-xl shadow-2xs text-white relative overflow-hidden"
+                className="bg-indigo-600 p-8 rounded-3xl md:rounded-[2.5rem] shadow-sm text-white relative overflow-hidden"
               >
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+                
                 <h3 className="text-xl font-semibold tracking-tight mb-2 relative z-10">Keseimbangan Gender</h3>
                 <p className="text-xs font-bold text-white/60 uppercase tracking-widest mb-10 relative z-10">Rasio Laki-laki & Perempuan</p>
                 
