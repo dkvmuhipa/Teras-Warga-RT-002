@@ -1656,9 +1656,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   };
 
   const handleSendWhatsApp = async (house: House) => {
-    if (!house.phone) return toast.error('Nomor WhatsApp tidak tersedia.');
+    const rawPhone = (house.phone || '').trim();
+    const digits = rawPhone.replace(/\D/g, '');
+    if (!rawPhone || rawPhone === '-' || digits.length < 8) {
+      return toast.error('Nomor WhatsApp warga belum valid atau belum terdata.');
+    }
     
-    const defaultMsg = `Halo Bapak/Ibu ${house.headOfFamily}, ada informasi dari pengurus RT 02...`;
+    const defaultMsg = `Halo Bapak/Ibu ${house.headOfFamily || 'Warga'}, ada informasi dari pengurus RT 02...`;
     const message = await prompt({
       title: `Kirim WhatsApp ke ${house.headOfFamily}`,
       message: 'Masukkan pesan yang ingin dikirim:',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { House, PaymentStatus, CivicScoreRecord } from '../../types';
-import { Award, ShieldCheck, CheckCircle2, Sparkles, HeartHandshake, Shield, Check, Flame } from 'lucide-react';
+import { Award, ShieldCheck, CheckCircle2, HeartHandshake, Users } from 'lucide-react';
 import { useFinancial } from '../../context/FinancialContext';
 
 export interface CivicScoreOptions {
@@ -122,31 +122,35 @@ export const CivicScoreBadge: React.FC<CivicScoreBadgeProps> = ({
     switch (tier) {
       case 'Teladan Utama':
         return {
-          bg: 'bg-[#fff4eb] text-[#ea580c] border-amber-100',
+          bg: 'bg-[#fff4eb] text-[#ea580c] border-amber-200/80',
           badgeBg: 'bg-[#ea580c] text-white',
           pillBg: 'bg-white/80 text-[#ea580c] border border-amber-150',
-          icon: '🥇'
+          icon: <Award size={12} className="text-[#ea580c] stroke-[2.5]" />,
+          iconLg: <Award size={18} className="text-[#ea580c] stroke-[2.5]" />
         };
       case 'Aktif Berdaya':
         return {
-          bg: 'bg-[#f0f2fe] text-[#4f46e5] border-indigo-100',
+          bg: 'bg-[#f0f2fe] text-[#4f46e5] border-indigo-200/80',
           badgeBg: 'bg-indigo-600 text-white',
           pillBg: 'bg-white/80 text-indigo-700 border border-indigo-150',
-          icon: '🥈'
+          icon: <ShieldCheck size={12} className="text-indigo-600 stroke-[2.5]" />,
+          iconLg: <ShieldCheck size={18} className="text-indigo-600 stroke-[2.5]" />
         };
       case 'Partisipatif':
         return {
-          bg: 'bg-[#e8faf0] text-[#059669] border-emerald-100',
+          bg: 'bg-[#e8faf0] text-[#059669] border-emerald-200/80',
           badgeBg: 'bg-emerald-600 text-white',
           pillBg: 'bg-white/80 text-[#059669] border border-emerald-150',
-          icon: '🥉'
+          icon: <HeartHandshake size={12} className="text-[#059669] stroke-[2.5]" />,
+          iconLg: <HeartHandshake size={18} className="text-[#059669] stroke-[2.5]" />
         };
       default:
         return {
           bg: 'bg-slate-50 text-slate-700 border-slate-200/80',
           badgeBg: 'bg-slate-500 text-white',
           pillBg: 'bg-white/80 text-slate-700 border border-slate-200',
-          icon: '🌱'
+          icon: <Users size={12} className="text-slate-600 stroke-[2.5]" />,
+          iconLg: <Users size={18} className="text-slate-600 stroke-[2.5]" />
         };
     }
   };
@@ -160,7 +164,7 @@ export const CivicScoreBadge: React.FC<CivicScoreBadgeProps> = ({
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10px] font-bold border shadow-2xs transition-all ${colors.bg} ${className}`}
         title={`Civic Score: ${civic.score}/100 (${civic.tier})`}
       >
-        <span className="text-xs leading-none">{colors.icon}</span>
+        <span className="flex items-center leading-none">{colors.icon}</span>
         <span className="font-extrabold tracking-tight">{civic.tier}</span>
         <span className="opacity-40 font-normal">|</span>
         <span className="font-black font-mono tracking-tight">{civic.score}</span>
@@ -173,7 +177,7 @@ export const CivicScoreBadge: React.FC<CivicScoreBadgeProps> = ({
     <div className={`space-y-2.5 ${className}`}>
       <div className={`flex items-center justify-between p-3.5 rounded-2xl border shadow-2xs ${colors.bg}`}>
         <div className="flex items-center gap-2.5">
-          <span className="text-xl leading-none">{colors.icon}</span>
+          <span className="p-2 rounded-xl bg-white/90 border border-slate-100 flex items-center justify-center leading-none">{colors.iconLg}</span>
           <div>
             <span className="text-[9px] uppercase font-black tracking-wider opacity-60 block">Civic Score RT 02</span>
             <span className="text-xs font-black tracking-tight">{civic.tier}</span>

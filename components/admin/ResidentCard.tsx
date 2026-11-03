@@ -4,7 +4,7 @@ import { House, PaymentStatus, Bill } from '../../types';
 import { 
   Phone, CheckCircle, DollarSign, Edit2, AlertCircle, 
   MessageCircle, MapPin, ShieldCheck, FileText, Users, 
-  Copy, ArrowRight
+  Copy, ArrowRight, Building2, HeartHandshake, Shield
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
@@ -44,24 +44,32 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
   const hasElderly = Boolean((house.elderlyCount && house.elderlyCount > 0) || house.hasElderly);
   const hasPregnant = Boolean((house.pregnantCount && house.pregnantCount > 0) || house.hasPregnant);
 
+  const rawPhone = (house.phone || '').trim();
+  const digits = rawPhone.replace(/\D/g, '');
+  const hasValidPhone = Boolean(rawPhone && rawPhone !== '-' && rawPhone !== '0' && digits.length >= 8);
+
   const handleCopyPhone = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (house.phone) {
-      navigator.clipboard.writeText(house.phone);
+    if (hasValidPhone) {
+      navigator.clipboard.writeText(rawPhone);
       toast.success('Nomor telepon disalin ke clipboard!');
     }
   };
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!hasValidPhone) {
+      toast.error('Nomor telepon WhatsApp warga belum terdata.');
+      return;
+    }
     if (onSendWhatsApp) {
       onSendWhatsApp(house);
-    } else if (house.phone) {
-      let cleaned = house.phone.replace(/[^0-9]/g, '');
+    } else {
+      let cleaned = digits;
       if (cleaned.startsWith('0')) {
         cleaned = '62' + cleaned.slice(1);
       }
-      const text = encodeURIComponent(`Halo Bapak/Ibu ${house.headOfFamily}, kami dari ${rtDisplayName} ingin berkoordinasi mengenai administrasi warga.`);
+      const text = encodeURIComponent(`Halo Bapak/Ibu ${house.headOfFamily || 'Warga'}, kami dari ${rtDisplayName} ingin berkoordinasi mengenai administrasi warga.`);
       window.open(`https://wa.me/${cleaned}?text=${text}`, '_blank');
     }
   };
@@ -83,7 +91,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
             <div className="relative shrink-0">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-semibold text-base shadow-xs transition-colors ${
                 house.status === 'Occupied' 
-                  ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 text-white shadow-2xs ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white' 
+                  ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white' 
                   : house.status === 'Visiting'
                   ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-2xs'
                   : 'bg-slate-100 text-slate-400 border border-slate-200'
@@ -147,7 +155,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                     className="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border bg-[#fff4eb] text-[#ea580c] border-amber-100/80 flex items-center gap-1 shadow-2xs"
                     title={`Usaha Warga: ${house.businessName || 'Aktif'}`}
                   >
-                    <span>🏪</span>
+                    <Building2 size={10} className="text-[#ea580c]" />
                     <span className="truncate max-w-[110px]">{house.businessName || 'UMKM'}</span>
                   </span>
                 )}
@@ -161,7 +169,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                     }`}
                     title={house.addressKtp ? `Alamat KTP: ${house.addressKtp}` : `Status KTP: ${house.ktpStatus || 'Belum Terdata'}`}
                   >
-                    <span>🪪</span>
+                    <FileText size={10} />
                     <span>{(house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')))) ? 'KTP RT 02' : 'KTP Luar'}</span>
                   </span>
                 )}
@@ -180,21 +188,21 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
 
             {hasBabyOrToddler && (
               <span className="flex items-center gap-1 bg-purple-50 text-purple-700 px-2 py-0.5 rounded-lg border border-purple-200/70 font-extrabold">
-                <span>👶</span>
+                <Users size={11} className="text-purple-600" />
                 <span>{toddlerTotal > 0 ? `${toddlerTotal} Balita` : 'Balita'}</span>
               </span>
             )}
 
             {hasElderly && (
               <span className="flex items-center gap-1 bg-teal-50 text-teal-700 px-2 py-0.5 rounded-lg border border-teal-200/70 font-extrabold">
-                <span>🧓</span>
+                <HeartHandshake size={11} className="text-teal-600" />
                 <span>{house.elderlyCount ? `${house.elderlyCount} Lansia` : 'Lansia'}</span>
               </span>
             )}
 
             {hasPregnant && (
               <span className="flex items-center gap-1 bg-pink-50 text-pink-700 px-2 py-0.5 rounded-lg border border-pink-200/70 font-extrabold">
-                <span>🤰</span>
+                <Shield size={11} className="text-pink-600" />
                 <span>Bumil</span>
               </span>
             )}
@@ -270,32 +278,44 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
 
         {/* Contact Quick Link Bar */}
         <div className="mb-4 relative z-10">
-          <div className="flex items-center justify-between p-2.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl transition-colors hover:bg-slate-100/70">
+          <div className="flex items-center justify-between p-2.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl transition-colors hover:bg-slate-100/70 gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <Phone size={13} className="text-slate-400 shrink-0" />
-              <span className="text-[11px] font-bold text-slate-700 tracking-tight truncate font-mono">
-                {house.phone || 'Belum ada nomor HP'}
-              </span>
+              {hasValidPhone ? (
+                <span className="text-[11px] font-bold text-slate-800 tracking-tight truncate font-mono">
+                  {rawPhone}
+                </span>
+              ) : (
+                <span className="text-[11px] font-medium text-slate-400 italic truncate">
+                  Belum ada kontak HP
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-1.5 shrink-0">
-              {house.phone && (
-                <button
-                  onClick={handleCopyPhone}
-                  className="p-1.5 rounded-xl bg-white hover:bg-slate-200/70 text-slate-500 border border-slate-200/80 transition-colors shadow-2xs"
-                  title="Salin Nomor HP"
-                >
-                  <Copy size={12} />
-                </button>
-              )}
-              {house.phone && (
-                <button 
-                  onClick={handleWhatsAppClick} 
-                  className="px-2.5 py-1.5 rounded-xl bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white border border-[#25D366]/30 transition-colors flex items-center gap-1 text-[10px] font-extrabold shadow-2xs"
-                  title="Hubungi via WhatsApp"
-                >
-                  <MessageCircle size={13} className="stroke-[2.5]" />
-                  <span>WA</span><span className="hidden min-[380px]:inline">tsApp</span>
-                </button>
+              {hasValidPhone ? (
+                <>
+                  <button
+                    onClick={handleCopyPhone}
+                    className="p-1.5 rounded-xl bg-white hover:bg-slate-200/70 text-slate-500 border border-slate-200/80 transition-colors shadow-2xs cursor-pointer"
+                    title="Salin Nomor HP"
+                    aria-label="Salin Nomor HP"
+                  >
+                    <Copy size={12} />
+                  </button>
+                  <button 
+                    onClick={handleWhatsAppClick} 
+                    className="px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200/80 transition-colors flex items-center gap-1.5 text-xs font-bold shadow-2xs cursor-pointer"
+                    title="Hubungi via WhatsApp"
+                    aria-label="Hubungi via WhatsApp"
+                  >
+                    <MessageCircle size={13} className="stroke-[2.5]" />
+                    <span>WhatsApp</span>
+                  </button>
+                </>
+              ) : (
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-lg border border-slate-200/60 select-none">
+                  Tanpa Kontak
+                </span>
               )}
             </div>
           </div>
@@ -306,7 +326,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
       <div className="flex items-center gap-2 pt-3.5 border-t border-slate-100/90 relative z-10 mt-auto">
         <button 
           onClick={() => onOpenDetail(house)} 
-          className="flex-1 py-2.5 px-4 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-colors active:scale-[0.98] shadow-md shadow-2xs flex items-center justify-center gap-1.5"
+          className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors active:scale-[0.98] shadow-xs flex items-center justify-center gap-2 cursor-pointer"
         >
           <span>Detail Warga</span>
           <ArrowRight size={13} className="stroke-[2.5]" />
@@ -331,7 +351,7 @@ const IconButton = ({ icon, onClick, color = 'slate', title }: { icon: any, onCl
   return (
     <button 
       onClick={(e) => { e.stopPropagation(); onClick(); }}
-      className={`p-2.5 rounded-xl border transition-colors duration-200 shadow-2xs active:scale-95 ${themes[color]}`}
+      className={`min-w-[42px] min-h-[42px] flex items-center justify-center rounded-2xl border transition-colors duration-200 shadow-2xs active:scale-95 cursor-pointer ${themes[color]}`}
       title={title}
     >
       {React.cloneElement(icon as React.ReactElement, { size: 16, className: 'stroke-[2.4px]' })}
