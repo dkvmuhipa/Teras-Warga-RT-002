@@ -1087,7 +1087,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                 <h4 className="text-xs font-semibold text-amber-700 uppercase tracking-wider mb-3">
                   Tarif Retribusi Sampah TPS3R (Perda Kota Palu)
                 </h4>
-                <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                   <div className="bg-white p-2.5 rounded-xl border border-slate-200 shadow-2xs">
                     <span className="block text-[10px] text-slate-500 font-bold mb-1">Umum</span>
                     {isEditing ? (
@@ -1138,7 +1138,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
                   <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Iuran Kas RT</span>
                   {isEditing ? (

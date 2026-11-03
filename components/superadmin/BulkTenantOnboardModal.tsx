@@ -585,8 +585,8 @@ export const BulkTenantOnboardModal: React.FC<BulkTenantOnboardModalProps> = ({
                 </div>
 
                 <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
-                  <div className="max-h-56 overflow-y-auto">
-                    <table className="w-full text-left border-collapse text-xs">
+                  <div className="max-h-56 overflow-auto custom-scrollbar">
+                    <table className="w-full text-left border-collapse text-xs min-w-[650px]">
                       <thead>
                         <tr className="bg-slate-100 border-b border-slate-200 text-slate-600 font-bold sticky top-0 z-10">
                           <th className="py-2.5 px-3">No</th>

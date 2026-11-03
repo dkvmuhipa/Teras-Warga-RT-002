@@ -637,7 +637,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
   }
 
   return (
-    <div className="bg-white p-6 md:p-10 rounded-[2.5rem] shadow-2xl max-w-4xl mx-auto border border-slate-100 relative">
+    <div className="bg-white p-4 sm:p-6 md:p-10 rounded-2xl sm:rounded-[2.5rem] shadow-2xl max-w-4xl mx-auto border border-slate-100 relative">
       {/* Header Wilayah Resmi */}
       <div className="flex items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-100">
         <div className="flex items-center gap-3.5">

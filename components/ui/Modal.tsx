@@ -58,7 +58,7 @@ export const Modal: React.FC<ModalProps> = ({
             >
               <div className="flex flex-col border-b border-slate-100 shrink-0">
                 <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-5">
-                  <h3 className="text-base sm:text-lg font-black text-slate-800 tracking-tight truncate pr-2">{title}</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 tracking-tight truncate pr-2">{title}</h3>
                   <button 
                     onClick={onClose}
                     aria-label="Tutup modal"

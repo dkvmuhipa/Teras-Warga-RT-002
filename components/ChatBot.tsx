@@ -207,8 +207,8 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-            className="fixed bottom-36 right-4 md:bottom-28 md:right-10 z-50 w-[92vw] md:w-[380px] bg-white rounded-3xl shadow-2xl border border-slate-150 overflow-hidden flex flex-col"
-            style={{ height: '530px', maxHeight: '72vh' }}
+            className="fixed bottom-22 sm:bottom-24 right-3 sm:right-6 md:bottom-28 md:right-10 z-[95] w-[calc(100vw-1.5rem)] sm:w-[380px] max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col"
+            style={{ height: '520px', maxHeight: 'calc(100dvh - 7rem)' }}
           >
             {/* Header branding with online dots */}
             <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-cyan-500 p-4 shrink-0 flex items-center justify-between text-white shadow-md relative overflow-hidden">

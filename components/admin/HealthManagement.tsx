@@ -465,7 +465,7 @@ export const HealthManagement: React.FC<HealthManagementProps> = ({ houses }) =>
               <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">Metrik Medis</span>
             </div>
 
-            <div className="grid grid-cols-3 gap-6 relative z-10">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 relative z-10">
               <div className="space-y-2">
                 <label className="text-[9px] font-semibold text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                   <Scale size={12} className="text-blue-500" /> Berat (kg)

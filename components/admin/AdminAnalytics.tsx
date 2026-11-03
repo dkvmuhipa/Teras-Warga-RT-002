@@ -697,8 +697,8 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                     </div>
 
                     {filteredArrearsHouses.length > 0 ? (
-                      <div className="max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-inner">
-                        <table className="w-full text-left border-collapse text-xs">
+                      <div className="max-h-72 overflow-auto custom-scrollbar rounded-2xl border border-slate-200 bg-white shadow-inner">
+                        <table className="w-full text-left border-collapse text-xs min-w-[550px]">
                           <thead>
                             <tr className="bg-slate-100 text-slate-600 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-200">
                               <th className="p-4">No. Rumah / Blok</th>
