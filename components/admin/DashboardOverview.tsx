@@ -247,7 +247,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <div className="space-y-3 max-w-2xl">
             {/* Top Stacked Badges */}
             <div className="flex flex-col items-start gap-1.5">
-              <span className="bg-[#4f46e5] text-white text-xs font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-xs">
+              <span className="bg-[#4f46e5] text-white text-xs font-semibold uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-xs">
                 Pusat Kendali Eksekutif
               </span>
               <span className="bg-[#dcfce7] text-[#15803d] text-xs font-extrabold px-3 py-1 rounded-full inline-flex items-center gap-1.5 shadow-2xs">
@@ -280,8 +280,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       <path d="M12 4 C6 9 6 19 12 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                       <path d="M7 8 C3 11 3 17 7 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </svg>
-                    <span className="text-5xl sm:text-6xl inline-block transform rotate-[-6deg] filter drop-shadow-xs">
-                      👋
+                    <span className="text-5xl sm:text-6xl inline-block transform rotate-[-6deg] filter drop-shadow-xs">👋
                     </span>
                     <svg className="absolute -right-2 top-0 w-4 h-7 text-[#4f46e5]" viewBox="0 0 16 28" fill="none">
                       <path d="M4 4 C10 9 10 19 4 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
@@ -300,9 +299,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <button 
                 onClick={handleGenerateSummary} 
                 disabled={isAiLoading}
-                className="w-full py-3.5 px-5 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] hover:from-[#4f46e5] hover:to-[#6d28d9] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-md shadow-indigo-500/25 relative flex items-center justify-center gap-2 transition-all active:scale-[0.99] cursor-pointer"
+                className="w-full py-3.5 px-5 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] hover:from-[#4f46e5] hover:to-[#6d28d9] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-md shadow-2xs relative flex items-center justify-center gap-2 transition-colors active:scale-[0.99] cursor-pointer"
               >
-                <Sparkles size={16} className="text-white shrink-0 " /> 
+                <Sparkles size={16} className="text-white shrink-0" /> 
                 <span className="tracking-normal font-bold">
                   {isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}
                 </span>
@@ -312,7 +311,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                 <button 
                   onClick={handleExportData} 
-                  className="flex items-center justify-center gap-2 py-3 px-3 bg-white hover:bg-slate-50 border border-slate-200/90 rounded-2xl text-xs font-bold text-slate-800 transition-all shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer"
+                  className="flex items-center justify-center gap-2 py-3 px-3 bg-white hover:bg-slate-50 border border-slate-200/90 rounded-2xl text-xs font-bold text-slate-800 transition-colors shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer"
                 >
                   <Download size={14} className="text-slate-600" />
                   <span>Ekspor Ringkasan</span>
@@ -320,7 +319,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 
                 <button 
                   onClick={() => onTabChange('residents')} 
-                  className="flex items-center justify-center gap-2 py-3 px-3 bg-[#dcfce7] hover:bg-[#cbfada] border border-emerald-200/80 text-[#15803d] rounded-2xl text-xs font-bold transition-all shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer"
+                  className="flex items-center justify-center gap-2 py-3 px-3 bg-[#dcfce7] hover:bg-[#cbfada] border border-emerald-200/80 text-[#15803d] rounded-2xl text-xs font-bold transition-colors shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer"
                 >
                   <Plus size={15} className="text-[#15803d] stroke-[2.5px]" />
                   <span>Tambah Warga</span>
@@ -353,7 +352,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           <div
             onClick={() => onTabChange('services')}
-            className="p-4 rounded-2xl border border-slate-200/90 hover:border-indigo-400 bg-slate-50/70 hover:bg-white transition-all cursor-pointer flex flex-col justify-between gap-3 group"
+            className="p-4 rounded-2xl border border-slate-200/90 hover:border-indigo-400 bg-slate-50/70 hover:bg-white transition-colors cursor-pointer flex flex-col justify-between gap-3 group"
           >
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -377,7 +376,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
           <div
             onClick={() => onTabChange('residents')}
-            className="p-4 rounded-2xl border border-slate-200/90 hover:border-emerald-400 bg-slate-50/70 hover:bg-white transition-all cursor-pointer flex flex-col justify-between gap-3 group"
+            className="p-4 rounded-2xl border border-slate-200/90 hover:border-emerald-400 bg-slate-50/70 hover:bg-white transition-colors cursor-pointer flex flex-col justify-between gap-3 group"
           >
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -401,7 +400,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
           <div
             onClick={() => onTabChange('reports-warga')}
-            className="p-4 rounded-2xl border border-slate-200/90 hover:border-rose-400 bg-slate-50/70 hover:bg-white transition-all cursor-pointer flex flex-col justify-between gap-3 group"
+            className="p-4 rounded-2xl border border-slate-200/90 hover:border-rose-400 bg-slate-50/70 hover:bg-white transition-colors cursor-pointer flex flex-col justify-between gap-3 group"
           >
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
@@ -479,7 +478,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             whileHover={{ y: -2, scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onTabChange('residents')}
-            className="bg-[#f0f2fe] hover:bg-[#e4e7fd] border border-indigo-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-all shadow-2xs cursor-pointer group"
+            className="bg-[#f0f2fe] hover:bg-[#e4e7fd] border border-indigo-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-colors shadow-2xs cursor-pointer group"
           >
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#4f46e5] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <Users size={19} className="stroke-[2.2px]" />
@@ -494,7 +493,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             whileHover={{ y: -2, scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onTabChange('finance')}
-            className="bg-[#e8faf0] hover:bg-[#d5f6e3] border border-emerald-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-all shadow-2xs cursor-pointer group"
+            className="bg-[#e8faf0] hover:bg-[#d5f6e3] border border-emerald-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-colors shadow-2xs cursor-pointer group"
           >
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#059669] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <CreditCard size={19} className="stroke-[2.2px]" />
@@ -509,10 +508,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             whileHover={{ y: -2, scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onTabChange('services')}
-            className="bg-[#fff4eb] hover:bg-[#ffe6d4] border border-amber-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-all shadow-2xs cursor-pointer group relative"
+            className="bg-[#fff4eb] hover:bg-[#ffe6d4] border border-amber-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-colors shadow-2xs cursor-pointer group relative"
           >
             {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0 && (
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500" />
             )}
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <FileText size={19} className="stroke-[2.2px]" />
@@ -527,7 +526,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             whileHover={{ y: -2, scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => onTabChange('reports-warga')}
-            className="bg-[#edf7ff] hover:bg-[#dbeffe] border border-sky-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-all shadow-2xs cursor-pointer group"
+            className="bg-[#edf7ff] hover:bg-[#dbeffe] border border-sky-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-colors shadow-2xs cursor-pointer group"
           >
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#0284c7] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
               <Shield size={19} className="stroke-[2.2px]" />
@@ -548,7 +547,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               transition={{ duration: 0.25 }}
               className="overflow-hidden pt-4 mt-2 bg-white rounded-2xl p-4 border border-slate-100 shadow-xs"
             >
-              <h5 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-3">
+              <h5 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
                 Modul Operasional Tambahan
               </h5>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
@@ -567,10 +566,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                       whileHover={{ y: -2, scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => onTabChange(item.tab, item.subTab)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-all ${item.color} hover:shadow-xs relative cursor-pointer`}
+                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border text-center transition-colors ${item.color} hover:shadow-xs relative cursor-pointer`}
                     >
                       {item.badge && (
-                        <span className="absolute -top-1.5 -right-1 text-xs font-black uppercase px-1.5 py-0.5 rounded-full bg-slate-900 text-white shadow-2xs">
+                        <span className="absolute -top-1.5 -right-1 text-xs font-semibold uppercase px-1.5 py-0.5 rounded-full bg-slate-900 text-white shadow-2xs">
                           {item.badge}
                         </span>
                       )}
@@ -610,7 +609,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
               <button 
                 onClick={() => onTabChange('stbm')}
-                className="text-xs font-extrabold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                className="text-xs font-extrabold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 Detail <ArrowRight size={13} />
               </button>
@@ -682,7 +681,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <div className="flex items-center gap-2">
                     <h3 className="text-sm md:text-base font-extrabold tracking-tight text-slate-900">Stasiun Cuaca Huntap Tondo 2</h3>
                     <span className="text-xs font-extrabold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Live Sensor
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live Sensor
                     </span>
                   </div>
                   <p className="text-slate-500 text-xs font-medium">Huntap Tondo 2 (-0.8917, 119.8707)</p>
@@ -760,7 +759,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3 md:gap-4">
         {/* Warga Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div className="w-11 h-11 bg-[#f0f2fe] text-[#4f46e5] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
@@ -780,13 +779,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
             <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
               <span className="text-emerald-600 font-extrabold flex items-center gap-1"><CheckCircle2 size={12} /> Terverifikasi</span>
-              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-indigo-600 transition-all" />
+              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-indigo-600 transition-colors" />
             </div>
           </div>
         </motion.div>
 
         {/* Keuangan Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div className="w-11 h-11 bg-[#e8faf0] text-[#059669] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
@@ -805,7 +804,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </motion.div>
 
         {/* Laporan Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('services')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('services')}>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div className="w-11 h-11 bg-[#fff1f2] text-[#e11d48] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
@@ -818,14 +817,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <span className="text-xs md:text-xs font-extrabold text-rose-600 uppercase">Perlu Tindakan</span>
             </div>
             <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-500">
-              <span className="flex items-center gap-1"><Activity size={12} className="animate-pulse" /> Tindak Lanjut</span>
-              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-rose-600 transition-all" />
+              <span className="flex items-center gap-1"><Activity size={12} className="" /> Tindak Lanjut</span>
+              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-rose-600 transition-colors" />
             </div>
           </div>
         </motion.div>
 
         {/* Tamu Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('guests')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('guests')}>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div className="w-11 h-11 bg-[#fff4eb] text-[#ea580c] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
@@ -839,13 +838,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
             <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
               <span className="flex items-center gap-1"><Clock size={12} /> Wajib 1x24 Jam</span>
-              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-amber-600 transition-all" />
+              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-amber-600 transition-colors" />
             </div>
           </div>
         </motion.div>
 
         {/* Retribusi Sampah Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-all group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
+        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4">
               <div className="w-11 h-11 bg-[#edf7ff] text-[#0284c7] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
@@ -860,13 +859,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Visual Progress Bar */}
             <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden mt-2">
               <div 
-                className="bg-gradient-to-r from-sky-500 to-indigo-600 h-full rounded-full transition-all duration-500" 
+                className="bg-gradient-to-r from-sky-500 to-indigo-600 h-full rounded-full transition-colors duration-500" 
                 style={{ width: `${Math.min(wastePaymentPercentage, 100)}%` }} 
               />
             </div>
             <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600">
               <span>{paidWasteCount} dari {totalOccupiedHouses} Rumah</span>
-              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-sky-600 transition-all" />
+              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-sky-600 transition-colors" />
             </div>
           </div>
         </motion.div>
@@ -920,12 +919,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight">Kesehatan & Demografi</h3>
+                    <h3 className="text-base md:text-lg font-semibold text-slate-900 tracking-tight">Kesehatan & Demografi</h3>
                     <p className="text-slate-400 text-xs font-semibold mt-0.5">Kelompok warga prioritas posyandu</p>
                   </div>
                   <button 
                     onClick={() => onTabChange('health')}
-                    className="text-xs font-black text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 px-2.5 py-1 rounded-xl uppercase tracking-wider transition-colors"
+                    className="text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 px-2.5 py-1 rounded-xl uppercase tracking-wider transition-colors"
                   >
                     Detail
                   </button>
@@ -934,19 +933,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <div className="grid grid-cols-3 gap-2 my-4">
                   <div className="bg-indigo-50/70 border border-indigo-100 p-3 rounded-2xl text-center">
                     <p className="text-xs font-extrabold text-indigo-600 uppercase">Ibu Hamil</p>
-                    <p className="text-xl md:text-2xl font-black text-indigo-900 mt-0.5">
+                    <p className="text-xl md:text-2xl font-semibold text-indigo-900 mt-0.5">
                       {houses.reduce((acc, h) => acc + (h.pregnantCount || 0), 0)}
                     </p>
                   </div>
                   <div className="bg-purple-50/70 border border-purple-100 p-3 rounded-2xl text-center">
                     <p className="text-xs font-extrabold text-purple-600 uppercase">Balita</p>
-                    <p className="text-xl md:text-2xl font-black text-purple-900 mt-0.5">
+                    <p className="text-xl md:text-2xl font-semibold text-purple-900 mt-0.5">
                       {houses.reduce((acc, h) => acc + (h.babyCount || 0) + (h.toddlerCount || 0), 0)}
                     </p>
                   </div>
                   <div className="bg-teal-50/70 border border-teal-100 p-3 rounded-2xl text-center">
                     <p className="text-xs font-extrabold text-teal-600 uppercase">Lansia</p>
-                    <p className="text-xl md:text-2xl font-black text-teal-900 mt-0.5">
+                    <p className="text-xl md:text-2xl font-semibold text-teal-900 mt-0.5">
                       {houses.reduce((acc, h) => acc + (h.elderlyCount || 0), 0)}
                     </p>
                   </div>
@@ -987,7 +986,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
                 <div className="space-y-2.5 my-4">
                   <div className="flex items-center justify-between p-2.5 bg-rose-50/60 border border-rose-100 rounded-2xl text-xs font-bold">
-                    <span className="text-rose-900 flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span> Laporan Baru</span>
+                    <span className="text-rose-900 flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Laporan Baru</span>
                     <span className="text-rose-700 bg-white px-2.5 py-1 rounded-xl shadow-2xs border border-rose-100 font-extrabold">{reports.filter(r => r.status === 'Baru').length} Laporan</span>
                   </div>
                   <div className="flex items-center justify-between p-2.5 bg-amber-50/60 border border-amber-100 rounded-2xl text-xs font-bold">
@@ -1034,7 +1033,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 return (
                   <div 
                     onClick={() => onTabChange('residents')}
-                    className="p-3.5 bg-slate-50/80 hover:bg-indigo-50/60 border border-slate-100 hover:border-indigo-100 rounded-2xl transition-all cursor-pointer flex items-center justify-between group"
+                    className="p-3.5 bg-slate-50/80 hover:bg-indigo-50/60 border border-slate-100 hover:border-indigo-100 rounded-2xl transition-colors cursor-pointer flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-indigo-50 text-[#4f46e5] rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
@@ -1045,7 +1044,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <p className="text-xs font-medium text-slate-400">Verifikasi berkas calon warga</p>
                       </div>
                     </div>
-                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingReg > 0 ? 'bg-indigo-600 text-white border-indigo-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
+                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingReg > 0 ? 'bg-indigo-600 text-white border-indigo-600 ' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
                       {pendingReg}
                     </span>
                   </div>
@@ -1058,7 +1057,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 return (
                   <div 
                     onClick={() => onTabChange('services')}
-                    className="p-3.5 bg-slate-50/80 hover:bg-violet-50/60 border border-slate-100 hover:border-violet-100 rounded-2xl transition-all cursor-pointer flex items-center justify-between group"
+                    className="p-3.5 bg-slate-50/80 hover:bg-violet-50/60 border border-slate-100 hover:border-violet-100 rounded-2xl transition-colors cursor-pointer flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-violet-50 text-violet-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
@@ -1069,7 +1068,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <p className="text-xs font-medium text-slate-400">Tanda tangan & nomor surat RT</p>
                       </div>
                     </div>
-                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingLetters > 0 ? 'bg-violet-600 text-white border-violet-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
+                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingLetters > 0 ? 'bg-violet-600 text-white border-violet-600 ' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
                       {pendingLetters}
                     </span>
                   </div>
@@ -1082,7 +1081,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 return (
                   <div 
                     onClick={() => onTabChange('guests')}
-                    className="p-3.5 bg-slate-50/80 hover:bg-amber-50/60 border border-slate-100 hover:border-amber-100 rounded-2xl transition-all cursor-pointer flex items-center justify-between group"
+                    className="p-3.5 bg-slate-50/80 hover:bg-amber-50/60 border border-slate-100 hover:border-amber-100 rounded-2xl transition-colors cursor-pointer flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
@@ -1093,7 +1092,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                         <p className="text-xs font-medium text-slate-400">Verifikasi identitas tamu warga</p>
                       </div>
                     </div>
-                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingGuests > 0 ? 'bg-amber-600 text-white border-amber-600 animate-pulse' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
+                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border ${pendingGuests > 0 ? 'bg-amber-600 text-white border-amber-600 ' : 'bg-slate-200/70 text-slate-500 border-slate-300'}`}>
                       {pendingGuests}
                     </span>
                   </div>
@@ -1121,7 +1120,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {recentActivity.map((activity, i) => {
                 const IconComponent = activity.icon;
                 return (
-                  <div key={`${activity.type}-${activity.time.getTime()}-${i}`} className="flex items-center gap-3 p-3 bg-slate-50/70 hover:bg-slate-100/60 border border-slate-100 rounded-2xl transition-all group cursor-pointer">
+                  <div key={`${activity.type}-${activity.time.getTime()}-${i}`} className="flex items-center gap-3 p-3 bg-slate-50/70 hover:bg-slate-100/60 border border-slate-100 rounded-2xl transition-colors group cursor-pointer">
                     <div className={`p-2.5 rounded-xl text-white shrink-0 shadow-2xs ${
                       activity.color === 'emerald' ? 'bg-emerald-500' :
                       activity.color === 'rose' ? 'bg-rose-500' :

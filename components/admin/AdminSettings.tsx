@@ -244,9 +244,9 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2.5 h-6 bg-indigo-600 rounded-full"></div>
-            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Sistem & Keamanan</span>
+            <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest">Sistem & Keamanan</span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pengaturan Admin Digital</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Pengaturan Admin Digital</h2>
           <p className="text-slate-500 font-medium text-xs md:text-sm mt-0.5">Kelola akun administrator, integrasi WA Gateway, tarif iuran bulanan warga, dan cadangan database.</p>
         </div>
 
@@ -262,9 +262,9 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-black transition-all shrink-0 whitespace-nowrap ${
+              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-semibold transition-colors shrink-0 whitespace-nowrap ${
                 activeTab === tab.id 
-                  ? 'bg-white text-indigo-600 shadow-xs border border-indigo-100 font-black' 
+                  ? 'bg-white text-indigo-600 shadow-xs border border-indigo-100 font-semibold' 
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -282,28 +282,28 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           <div className="lg:col-span-7">
             <Card title="Profil Admin Utama" icon={User} className="border-slate-200/80 rounded-[2.5rem] p-6 md:p-8">
               <div className="flex items-center gap-4 mb-6 p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100">
-                <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-md">
+                <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-semibold text-xl shadow-md">
                   A
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-900 text-base">Administrator Utama RT 02</h3>
                   <p className="text-xs text-slate-500 font-semibold">{auth.currentUser?.email || 'admin@teras.id'}</p>
-                  <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-black text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                  <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md uppercase tracking-wider">
                     <ShieldCheck size={10} /> Status: Verified Super Admin
                   </span>
                 </div>
               </div>
 
               <form onSubmit={handlePasswordChange} className="space-y-4">
-                <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Pembaruan Password Akun</p>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-1">Pembaruan Password Akun</p>
 
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-black text-slate-500 uppercase tracking-wider">Password Baru</label>
+                  <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Password Baru</label>
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <input 
                       type={showPassword ? "text" : "password"} 
-                      className="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       placeholder="Masukkan minimal 6 karakter..." 
                       value={newPassword} 
                       onChange={e => setNewPassword(e.target.value)} 
@@ -317,23 +317,23 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 
                 {passwordStrength && (
                   <div className="space-y-1 pt-1">
-                    <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                    <div className="flex justify-between items-center text-[10px] font-semibold uppercase">
                       <span className="text-slate-400">Kekuatan Password:</span>
                       <span className={passwordStrength.color.split(' ')[1]}>{passwordStrength.label}</span>
                     </div>
                     <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full ${passwordStrength.color.split(' ')[0]} transition-all duration-300 ${passwordStrength.width}`} />
+                      <div className={`h-full ${passwordStrength.color.split(' ')[0]} transition-colors duration-300 ${passwordStrength.width}`} />
                     </div>
                   </div>
                 )}
 
                 <div className="space-y-1">
-                  <label className="block text-[11px] font-black text-slate-500 uppercase tracking-wider">Konfirmasi Password Baru</label>
+                  <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Konfirmasi Password Baru</label>
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <input 
                       type={showPassword ? "text" : "password"} 
-                      className="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       placeholder="Ketik ulang password baru..." 
                       value={confirmPassword} 
                       onChange={e => setConfirmPassword(e.target.value)} 
@@ -344,7 +344,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 
                 <Button 
                   type="submit" 
-                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20 transition-all mt-2" 
+                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-2xs transition-colors mt-2" 
                   disabled={!newPassword || isChangingPassword}
                 >
                   {isChangingPassword ? 'Memproses Keamanan...' : 'Simpan Password Baru'}
@@ -362,7 +362,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                     <ShieldCheck size={22} />
                   </div>
                   <div>
-                    <h4 className="font-black text-base text-slate-100">Hak Akses & Lisensi</h4>
+                    <h4 className="font-semibold text-base text-slate-100">Hak Akses & Lisensi</h4>
                     <p className="text-[10px] font-mono text-indigo-400 uppercase tracking-widest mt-0.5">ADMIN PRIVILEGE CONTROL</p>
                   </div>
                 </div>
@@ -371,27 +371,26 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
               <div className="space-y-3 text-xs">
                 <div className="p-3.5 bg-slate-800/80 rounded-2xl border border-slate-700/60 flex items-center justify-between">
                   <span className="text-slate-400 font-medium">Verifikasi Surat Warga</span>
-                  <span className="font-black text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12} /> FULL ACCESS</span>
+                  <span className="font-semibold text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12} /> FULL ACCESS</span>
                 </div>
 
                 <div className="p-3.5 bg-slate-800/80 rounded-2xl border border-slate-700/60 flex items-center justify-between">
                   <span className="text-slate-400 font-medium">Pencatatan Keuangan Kas RT</span>
-                  <span className="font-black text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12} /> FULL ACCESS</span>
+                  <span className="font-semibold text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12} /> FULL ACCESS</span>
                 </div>
 
                 <div className="p-3.5 bg-slate-800/80 rounded-2xl border border-slate-700/60 flex items-center justify-between">
                   <span className="text-slate-400 font-medium">Manajemen Presensi Siskamling</span>
-                  <span className="font-black text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12} /> FULL ACCESS</span>
+                  <span className="font-semibold text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12} /> FULL ACCESS</span>
                 </div>
 
                 <div className="p-3.5 bg-slate-800/80 rounded-2xl border border-slate-700/60 flex items-center justify-between">
                   <span className="text-slate-400 font-medium">Siaran WhatsApp Direct</span>
-                  <span className="font-black text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12} /> FULL ACCESS</span>
+                  <span className="font-semibold text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12} /> FULL ACCESS</span>
                 </div>
               </div>
 
-              <div className="p-4 bg-indigo-950/40 rounded-2xl border border-indigo-800/50 text-[10.5px] text-indigo-200 leading-relaxed font-medium">
-                🔒 Sesi administrator terlindungi enkripsi SSL/TLS 256-bit dengan proteksi ganda Firestore Security Rules.
+              <div className="p-4 bg-indigo-950/40 rounded-2xl border border-indigo-800/50 text-[10.5px] text-indigo-200 leading-relaxed font-medium">🔒 Sesi administrator terlindungi enkripsi SSL/TLS 256-bit dengan proteksi ganda Firestore Security Rules.
               </div>
             </div>
           </div>
@@ -412,25 +411,25 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                   <div className="flex items-center justify-between border-b border-emerald-200/60 pb-2.5">
                     <div className="flex items-center gap-2">
                       <Trash2 size={16} className="text-emerald-700" />
-                      <span className="text-xs font-black uppercase tracking-wider text-emerald-950">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-emerald-950">
                         Tarif Retribusi Sampah TPS3R (Aturan Kota Palu)
                       </span>
                     </div>
-                    <span className="text-[9px] font-black uppercase px-2 py-0.5 bg-emerald-600 text-white rounded-md">
+                    <span className="text-[9px] font-semibold uppercase px-2 py-0.5 bg-emerald-600 text-white rounded-md">
                       Huntap Tondo 2
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label className="block text-[10px] font-black mb-1 text-slate-700 uppercase tracking-widest">
+                      <label className="block text-[10px] font-semibold mb-1 text-slate-700 uppercase tracking-widest">
                         Warga Umum (Rp)
                       </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">Rp</span>
                         <input 
                           type="number"
-                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-800 focus:border-emerald-500 outline-none transition-all font-mono"
+                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:border-emerald-500 outline-none transition-colors font-mono"
                           value={sampahUmum}
                           onChange={(e) => setSampahUmum(Number(e.target.value))}
                         />
@@ -439,14 +438,14 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-black mb-1 text-slate-700 uppercase tracking-widest">
+                      <label className="block text-[10px] font-semibold mb-1 text-slate-700 uppercase tracking-widest">
                         Penerima PKH (Rp)
                       </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">Rp</span>
                         <input 
                           type="number"
-                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-800 focus:border-emerald-500 outline-none transition-all font-mono"
+                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:border-emerald-500 outline-none transition-colors font-mono"
                           value={sampahPkh}
                           onChange={(e) => setSampahPkh(Number(e.target.value))}
                         />
@@ -455,14 +454,14 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-black mb-1 text-slate-700 uppercase tracking-widest">
+                      <label className="block text-[10px] font-semibold mb-1 text-slate-700 uppercase tracking-widest">
                         ASN / PNS (Rp)
                       </label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">Rp</span>
                         <input 
                           type="number"
-                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-800 focus:border-emerald-500 outline-none transition-all font-mono"
+                          className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:border-emerald-500 outline-none transition-colors font-mono"
                           value={sampahPns}
                           onChange={(e) => setSampahPns(Number(e.target.value))}
                         />
@@ -477,11 +476,11 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                   <div className="flex items-center justify-between border-b border-sky-200/60 pb-2">
                     <div className="flex items-center gap-2">
                       <Droplets size={16} className="text-sky-700" />
-                      <span className="text-xs font-black uppercase tracking-wider text-sky-950">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-sky-950">
                         Pengelolaan Air Bersih PDAM Kota Palu
                       </span>
                     </div>
-                    <span className="text-[9px] font-black uppercase px-2 py-0.5 bg-sky-600 text-white rounded-md">
+                    <span className="text-[9px] font-semibold uppercase px-2 py-0.5 bg-sky-600 text-white rounded-md">
                       PDAM Palu
                     </span>
                   </div>
@@ -491,14 +490,14 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                   </p>
 
                   <div>
-                    <label className="block text-[10px] font-black mb-1.5 text-slate-700 uppercase tracking-widest">
+                    <label className="block text-[10px] font-semibold mb-1.5 text-slate-700 uppercase tracking-widest">
                       Tarif Titip / Cadangan Iuran Air RT (Rp, Opsional)
                     </label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">Rp</span>
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">Rp</span>
                       <input 
                         type="number"
-                        className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-800 focus:border-sky-500 outline-none transition-all font-mono"
+                        className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:border-sky-500 outline-none transition-colors font-mono"
                         value={airFee}
                         onChange={(e) => setAirFee(Number(e.target.value))}
                       />
@@ -507,7 +506,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20">
+                <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-2xs">
                   Simpan Konfigurasi Tarif Lingkungan
                 </Button>
               </form>
@@ -519,7 +518,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
               <div className="flex items-center gap-3 border-b border-indigo-800 pb-3">
                 <Wallet className="text-emerald-400" size={24} />
                 <div>
-                  <h4 className="font-black text-base">Matriks Tarif Resmi Lingkungan</h4>
+                  <h4 className="font-semibold text-base">Matriks Tarif Resmi Lingkungan</h4>
                   <p className="text-[10px] font-mono text-indigo-300 uppercase">TPS3R HUNTAP TONDO 2 & PDAM</p>
                 </div>
               </div>
@@ -543,8 +542,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 </div>
               </div>
 
-              <div className="p-3 bg-emerald-950/40 rounded-xl border border-emerald-800/40 text-[10px] text-emerald-200 leading-relaxed">
-                🏛️ <strong>Dasar Regulasi:</strong> Penetapan tarif retribusi persampahan ini disesuaikan dengan aturan retribusi sampah Pemerintah Kota Palu untuk unit pengelolaan TPS3R mandiri di lingkungan Huntap Tondo 2.
+              <div className="p-3 bg-emerald-950/40 rounded-xl border border-emerald-800/40 text-[10px] text-emerald-200 leading-relaxed">🏛️ <strong>Dasar Regulasi:</strong> Penetapan tarif retribusi persampahan ini disesuaikan dengan aturan retribusi sampah Pemerintah Kota Palu untuk unit pengelolaan TPS3R mandiri di lingkungan Huntap Tondo 2.
               </div>
             </div>
           </div>
@@ -560,10 +558,10 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
               </p>
               <form onSubmit={handleUpdateCleanliness} className="space-y-6">
                 <div>
-                  <label className="block text-xs font-black mb-2 text-slate-700 uppercase tracking-widest">Periode Bulan & Tahun Evaluation</label>
+                  <label className="block text-xs font-semibold mb-2 text-slate-700 uppercase tracking-widest">Periode Bulan & Tahun Evaluation</label>
                   <input 
                     type="text"
-                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-black text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
                     value={cleanestMonth}
                     onChange={(e) => setCleanestMonth(e.target.value)}
                     placeholder="Contoh: Agustus 2026"
@@ -572,12 +570,12 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 </div>
 
                 <div className="space-y-4 pt-2 border-t border-slate-100">
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Input Peringkat Blok (Juara 1 - 5)</h4>
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Input Peringkat Blok (Juara 1 - 5)</h4>
                   
                   {cleanestRankings.map((rankItem, index) => (
                     <div key={rankItem.rank} className="p-4 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wider ${
                           index === 0 ? 'bg-amber-500 text-white' : index === 1 ? 'bg-slate-300 text-slate-800' : index === 2 ? 'bg-amber-700 text-white' : 'bg-slate-200 text-slate-700'
                         }`}>
                           {index === 0 ? '🥇 Juara 1 (Emas)' : index === 1 ? '🥈 Juara 2 (Perak)' : index === 2 ? '🥉 Juara 3 (Perunggu)' : `Peringkat ${rankItem.rank}`}
@@ -639,7 +637,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                   ))}
                 </div>
 
-                <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20">
+                <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-2xs">
                   Simpan Pengaturan Peringkat Kebersihan
                 </Button>
               </form>
@@ -651,22 +649,22 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
               <div className="flex items-center gap-3 border-b border-amber-500/20 pb-3">
                 <ShieldCheck className="text-amber-400" size={24} />
                 <div>
-                  <h4 className="font-black text-base text-amber-300">Preview Papan Kebersihan</h4>
+                  <h4 className="font-semibold text-base text-amber-300">Preview Papan Kebersihan</h4>
                   <p className="text-[10px] font-mono text-amber-200/70 uppercase">LIVE DISPLAY HOMEPAGE</p>
                 </div>
               </div>
               <div className="p-4 bg-slate-950/80 rounded-2xl border border-amber-500/30 space-y-3 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400 font-medium">Juara Terbersih:</span>
-                  <span className="font-black text-amber-300">{cleanestBlock}</span>
+                  <span className="font-semibold text-amber-300">{cleanestBlock}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400 font-medium">Nilai Score:</span>
-                  <span className="font-black text-emerald-400">{cleanestScore} / 100</span>
+                  <span className="font-semibold text-emerald-400">{cleanestScore} / 100</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400 font-medium">Periode Evaluasi:</span>
-                  <span className="font-black text-indigo-300">{cleanestMonth}</span>
+                  <span className="font-semibold text-indigo-300">{cleanestMonth}</span>
                 </div>
               </div>
             </div>
@@ -685,7 +683,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 
               <form onSubmit={handleUpdateGateway} className="space-y-4">
                 <div>
-                  <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">URL Endpoint WA Gateway</label>
+                  <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-1">URL Endpoint WA Gateway</label>
                   <input 
                     type="text"
                     className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:bg-white focus:border-indigo-500 outline-none"
@@ -697,7 +695,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">API Key / Secret Token</label>
+                  <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-1">API Key / Secret Token</label>
                   <div className="relative">
                     <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <input 
@@ -710,7 +708,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20">
+                <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-2xs">
                   Simpan Konfigurasi WA Gateway
                 </Button>
               </form>
@@ -721,7 +719,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
             <div className="bg-emerald-950 rounded-[2.5rem] p-6 text-white border border-emerald-800 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-emerald-800/80 pb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
+                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full" />
                   <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-widest">GATEWAY STATUS</span>
                 </div>
                 <Radio size={16} className="text-emerald-400" />
@@ -730,7 +728,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
               <div className="p-4 bg-[#0b141a] rounded-2xl border border-emerald-900/60 space-y-2 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400 font-medium">Koneksi Sesi WA:</span>
-                  <span className="font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">ONLINE (CONNECTED)</span>
+                  <span className="font-semibold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">ONLINE (CONNECTED)</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400 font-medium">Nomor Sesi Pengirim:</span>
@@ -756,7 +754,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                     <h4 className="font-extrabold text-sm text-slate-800">Cadangkan Data (JSON)</h4>
                     <p className="text-xs text-slate-500 font-semibold mt-0.5">Unduh seluruh arsip data RT 02 ke file JSON lokal.</p>
                   </div>
-                  <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl" onClick={handleExportData}>
+                  <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl" onClick={handleExportData}>
                     <Download size={14} className="mr-1" /> Ekspor JSON
                   </Button>
                 </div>
@@ -766,7 +764,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                     <h4 className="font-extrabold text-sm text-slate-800">Pulihkan Data (JSON Import)</h4>
                     <p className="text-xs text-slate-500 font-semibold mt-0.5">Unggah dan pulihkan arsip cadangan data JSON.</p>
                   </div>
-                  <label className="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl px-3 py-2 cursor-pointer transition-all flex items-center gap-1">
+                  <label className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl px-3 py-2 cursor-pointer transition-colors flex items-center gap-1">
                     <Upload size={14} /> Impor JSON
                     <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
                   </label>
@@ -780,7 +778,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                       <p className="text-xs text-rose-700 font-medium leading-relaxed mt-0.5">Tindakan ini akan menghapus data dan mengembalikannya ke data sampel awal.</p>
                     </div>
                   </div>
-                  <Button onClick={handleResetSystem} className="w-full py-3 bg-white text-rose-600 border border-rose-200 hover:bg-rose-600 hover:text-white font-black text-xs rounded-xl shadow-xs transition-all">
+                  <Button onClick={handleResetSystem} className="w-full py-3 bg-white text-rose-600 border border-rose-200 hover:bg-rose-600 hover:text-white font-semibold text-xs rounded-xl shadow-xs transition-colors">
                     <Trash size={16} className="mr-1.5" /> Reset Database Ke Awal
                   </Button>
                 </div>
@@ -790,7 +788,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
 
           <div className="lg:col-span-5">
             <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white border border-slate-800 shadow-xl space-y-4">
-              <h4 className="font-black text-base text-slate-100">Informasi Pemeliharaan System</h4>
+              <h4 className="font-semibold text-base text-slate-100">Informasi Pemeliharaan System</h4>
               <p className="text-xs text-slate-400 leading-relaxed font-medium">
                 Pencadangan rutin JSON disarankan dilakukan sebulan sekali oleh administrator RT untuk pengamanan arsip fisik independen.
               </p>

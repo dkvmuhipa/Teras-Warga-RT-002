@@ -797,7 +797,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
             {initialTab === 'reports' ? 'Aspirasi & Pengaduan Warga' : 'Persuratan RT'}
           </h2>
           <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">
@@ -851,7 +851,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   }
                 );
               }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-indigo-600/20 border border-indigo-500/30"
+              className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-2xl transition-colors shadow-md shadow-2xs border border-indigo-500/30"
             >
               <Printer size={15} />
               <span>Cetak Rekap Surat</span>
@@ -863,7 +863,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <div className="flex min-w-max w-full">
                 <button 
                   onClick={() => setActiveTab('letters')} 
-                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-semibold uppercase tracking-widest transition-colors ${
                     activeTab === 'letters' 
                       ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
                       : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
@@ -874,7 +874,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </button>
                 <button 
                   onClick={() => setActiveTab('official-letters')} 
-                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-semibold uppercase tracking-widest transition-colors ${
                     activeTab === 'official-letters' 
                       ? 'bg-white text-amber-600 shadow-md ring-1 ring-black/5' 
                       : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
@@ -885,7 +885,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </button>
                 <button 
                   onClick={() => setActiveTab('incoming_mails')} 
-                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-semibold uppercase tracking-widest transition-colors ${
                     activeTab === 'incoming_mails' 
                       ? 'bg-white text-teal-600 shadow-md ring-1 ring-black/5' 
                       : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
@@ -896,7 +896,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </button>
                 <button 
                   onClick={() => setActiveTab('letter-archive')} 
-                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-semibold uppercase tracking-widest transition-colors ${
                     activeTab === 'letter-archive' 
                       ? 'bg-white text-indigo-600 shadow-md ring-1 ring-black/5' 
                       : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
@@ -907,7 +907,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </button>
                 <button 
                   onClick={() => setActiveTab('settings')} 
-                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
+                  className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-[10px] sm:text-xs font-semibold uppercase tracking-widest transition-colors ${
                     activeTab === 'settings' 
                       ? 'bg-white text-slate-800 shadow-md ring-1 ring-black/5' 
                       : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
@@ -925,9 +925,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       {/* Summary Analytics Card Widget */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* KPI: Surat Menunggu */}
-        <div className="bg-[#fff4eb] border border-amber-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-all hover:translate-y-[-2px]">
+        <div className="bg-[#fff4eb] border border-amber-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-colors hover:translate-y-[-2px]">
           <div className="w-11 h-11 rounded-2xl bg-white text-[#ea580c] flex items-center justify-center shadow-2xs shrink-0">
-            <Clock size={19} className="stroke-[2.5] animate-pulse" />
+            <Clock size={19} className="stroke-[2.5]" />
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-extrabold text-[#ea580c] tracking-widest uppercase truncate">Surat Pending</p>
@@ -938,7 +938,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         </div>
 
         {/* KPI: Surat Disetujui */}
-        <div className="bg-[#e8faf0] border border-emerald-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-all hover:translate-y-[-2px]">
+        <div className="bg-[#e8faf0] border border-emerald-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-colors hover:translate-y-[-2px]">
           <div className="w-11 h-11 rounded-2xl bg-white text-[#059669] flex items-center justify-center shadow-2xs shrink-0">
             <CheckCircle2 size={19} className="stroke-[2.5]" />
           </div>
@@ -951,7 +951,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         </div>
 
         {/* KPI: Aduan Baru */}
-        <div className="bg-[#fff1f2] border border-rose-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-all hover:translate-y-[-2px]">
+        <div className="bg-[#fff1f2] border border-rose-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-colors hover:translate-y-[-2px]">
           <div className="w-11 h-11 rounded-2xl bg-white text-[#e11d48] flex items-center justify-center shadow-2xs shrink-0">
             <AlertTriangle size={19} className="stroke-[2.5]" />
           </div>
@@ -964,7 +964,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         </div>
 
         {/* KPI: Aduan Diproses */}
-        <div className="bg-[#edf7ff] border border-sky-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-all hover:translate-y-[-2px]">
+        <div className="bg-[#edf7ff] border border-sky-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-colors hover:translate-y-[-2px]">
           <div className="w-11 h-11 rounded-2xl bg-white text-[#0284c7] flex items-center justify-center shadow-2xs shrink-0">
             <RefreshCw size={19} className="stroke-[2.5]" />
           </div>
@@ -1003,7 +1003,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <input 
               type="text" 
               placeholder={activeTab === 'letters' ? "Cari pemohon atau jenis surat..." : "Cari pelapor atau isi laporan..."}
-              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+              className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -1029,7 +1029,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             )}
             <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
                <Filter size={14} className="text-slate-400"/>
-               <select className="bg-transparent border-none text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" value={filterStatus} onChange={(e:any) => setFilterStatus(e.target.value)}>
+               <select className="bg-transparent border-none text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" value={filterStatus} onChange={(e:any) => setFilterStatus(e.target.value)}>
                  <option value="All">Semua Status</option>
                  {activeTab === 'letters' ? (
                    <>
@@ -1048,7 +1048,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             </div>
             <button 
               onClick={() => setShowArchived(!showArchived)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all text-[10px] font-black uppercase tracking-widest ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-colors text-[10px] font-semibold uppercase tracking-widest ${
                 showArchived 
                   ? 'bg-indigo-600 text-white border-indigo-600' 
                   : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
@@ -1060,7 +1060,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             {!showArchived && (
               <button 
                 onClick={handleAutoArchive}
-                className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-2xl hover:bg-amber-100 transition-all text-[10px] font-black uppercase tracking-widest"
+                className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-2xl hover:bg-amber-100 transition-colors text-[10px] font-semibold uppercase tracking-widest"
                 title="Arsipkan data yang sudah selesai lebih dari 30 hari"
               >
                 <Archive size={14} />
@@ -1118,7 +1118,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <Settings size={22} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Pengaturan Kop Surat & Dokumen Resmi</h3>
+                    <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Pengaturan Kop Surat & Dokumen Resmi</h3>
                     <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">Kelola identitas RT, stempel digital, logo, template surat, dan integrasi broadcast WhatsApp.</p>
                   </div>
                 </div>
@@ -1128,7 +1128,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <div className="flex bg-slate-100/70 p-1.5 rounded-2xl border border-slate-200/60 shadow-inner overflow-x-auto no-scrollbar">
                 <button
                   onClick={() => setSettingSubTab('identity')}
-                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                     settingSubTab === 'identity'
                       ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
                       : 'text-slate-500 hover:text-slate-800'
@@ -1139,7 +1139,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </button>
                 <button
                   onClick={() => setSettingSubTab('assets')}
-                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                     settingSubTab === 'assets'
                       ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
                       : 'text-slate-500 hover:text-slate-800'
@@ -1150,7 +1150,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </button>
                 <button
                   onClick={() => setSettingSubTab('templates')}
-                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                     settingSubTab === 'templates'
                       ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
                       : 'text-slate-500 hover:text-slate-800'
@@ -1161,7 +1161,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </button>
                 <button
                   onClick={() => setSettingSubTab('fields')}
-                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                     settingSubTab === 'fields'
                       ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
                       : 'text-slate-500 hover:text-slate-800'
@@ -1172,7 +1172,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </button>
                 <button
                   onClick={() => setSettingSubTab('whatsapp')}
-                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`flex-1 min-w-max flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                     settingSubTab === 'whatsapp'
                       ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/80'
                       : 'text-slate-500 hover:text-slate-800'
@@ -1201,10 +1201,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama RT (Kop Surat)</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Nama RT (Kop Surat)</label>
                           <input 
                             type="text"
-                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                             value={pdfConfig.rtName || ''} 
                             onChange={e => {
                               const newConfig = {...pdfConfig, rtName: e.target.value};
@@ -1215,10 +1215,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Ketua RT</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Nama Ketua RT</label>
                           <input 
                             type="text"
-                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                             value={pdfConfig.rtChairman || ''} 
                             onChange={e => {
                               const newConfig = {...pdfConfig, rtChairman: e.target.value};
@@ -1231,10 +1231,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="space-y-1.5">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kelurahan</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Kelurahan</label>
                           <input 
                             type="text"
-                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                             value={pdfConfig.kelurahan || ''} 
                             onChange={e => {
                               const newConfig = {...pdfConfig, kelurahan: e.target.value};
@@ -1245,10 +1245,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kecamatan</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Kecamatan</label>
                           <input 
                             type="text"
-                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                             value={pdfConfig.kecamatan || ''} 
                             onChange={e => {
                               const newConfig = {...pdfConfig, kecamatan: e.target.value};
@@ -1259,10 +1259,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Kota / Kabupaten</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Kota / Kabupaten</label>
                           <input 
                             type="text"
-                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                             value={pdfConfig.kota || ''} 
                             onChange={e => {
                               const newConfig = {...pdfConfig, kota: e.target.value};
@@ -1275,10 +1275,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Alamat Sekertariat / RT</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Alamat Sekertariat / RT</label>
                         <textarea 
                           rows={3}
-                          className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all resize-none" 
+                          className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-colors resize-none" 
                           value={pdfConfig.rtAddress || ''} 
                           onChange={e => {
                             const newConfig = {...pdfConfig, rtAddress: e.target.value};
@@ -1290,11 +1290,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       </div>
 
                       <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
-                        <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Counter Nomor Surat Terakhir</label>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest ml-1">Counter Nomor Surat Terakhir</label>
                         <div className="flex gap-2">
                           <input 
                             type="number"
-                            className="flex-1 p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-black text-indigo-700 focus:outline-none" 
+                            className="flex-1 p-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-semibold text-indigo-700 focus:outline-none" 
                             value={pdfConfig.lastLetterNumber || 0} 
                             onChange={e => {
                               const newConfig = {...pdfConfig, lastLetterNumber: parseInt(e.target.value) || 0};
@@ -1326,7 +1326,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                                 toast.error("Belum ada data nomor surat di database.");
                               }
                             }}
-                            className="px-4 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5"
+                            className="px-4 py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-2xl text-xs font-bold transition-colors flex items-center gap-1.5"
                           >
                             <RefreshCw size={14} /> Sinkronkan Database
                           </button>
@@ -1342,7 +1342,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         {/* Logo Upload Card */}
                         <div className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 space-y-3">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Logo Resmi RT / Kota</h4>
+                            <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">Logo Resmi RT / Kota</h4>
                             {pdfConfig.logo && <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Terpasang</span>}
                           </div>
                           <div className="relative aspect-[4/3] bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload shadow-inner">
@@ -1375,7 +1375,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         {/* Stempel Upload Card */}
                         <div className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 space-y-3">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Stempel Transparan RT</h4>
+                            <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">Stempel Transparan RT</h4>
                             {pdfConfig.stamp && <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Terpasang</span>}
                           </div>
                           <div className="relative aspect-[4/3] bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden group/upload shadow-inner">
@@ -1408,7 +1408,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                       {/* Signature Pad Card */}
                       <div className="bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 space-y-3">
-                        <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Tanda Tangan Digital Ketua RT</h4>
+                        <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">Tanda Tangan Digital Ketua RT</h4>
                         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                           <SignaturePad 
                             initialValue={pdfConfig.signature}
@@ -1428,9 +1428,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Teks Pembuka Surat (Intro)</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Teks Pembuka Surat (Intro)</label>
                           <textarea 
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed"
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none transition-colors h-24 resize-none leading-relaxed"
                             value={pdfConfig.introText || `Yang bertanda tangan di bawah ini Ketua ${pdfConfig.rtName}, Kel. ${pdfConfig.kelurahan || 'Tondo'}, Kec. ${pdfConfig.kecamatan || 'Mantikulore'}, Kota ${pdfConfig.kota || 'Palu'}, Provinsi Sulawesi Tengah menerangkan dengan sebenarnya bahwa :`}
                             onChange={(e) => {
                               const newConfig = { ...pdfConfig, introText: e.target.value };
@@ -1440,9 +1440,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Teks Penutup Surat (Closing)</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Teks Penutup Surat (Closing)</label>
                           <textarea 
-                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none transition-all h-20 resize-none leading-relaxed"
+                            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:bg-white focus:border-indigo-500 outline-none transition-colors h-20 resize-none leading-relaxed"
                             value={pdfConfig.closingText || "Demikian surat keterangan ini dibuat, untuk dipergunakan sebagaimana mestinya."}
                             onChange={(e) => {
                               const newConfig = { ...pdfConfig, closingText: e.target.value };
@@ -1455,7 +1455,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                       <div className="space-y-4 pt-4 border-t border-slate-100">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-xs font-black text-slate-700 uppercase tracking-widest">Daftar Jenis Surat & Template Keperluan</h4>
+                          <h4 className="text-xs font-semibold text-slate-700 uppercase tracking-widest">Daftar Jenis Surat & Template Keperluan</h4>
                           <div className="flex items-center gap-2">
                             <button 
                               type="button"
@@ -1478,7 +1478,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                                 setPdfConfig({ ...pdfConfig, letterTemplates: defaultTemplates });
                                 toast.success("13 Template Jenis Surat & Keperluan standar berhasil diisi!");
                               }}
-                              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1"
+                              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
                             >
                               <RefreshCw size={12} /> Isi 13 Template Standar
                             </button>
@@ -1554,10 +1554,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         <CheckSquare size={20} className="text-indigo-600 shrink-0 mt-0.5" />
                         <div className="flex-1">
                           <div className="flex items-center justify-between gap-2 flex-wrap">
-                            <h4 className="text-xs font-black text-indigo-900 uppercase tracking-widest">
+                            <h4 className="text-xs font-semibold text-indigo-900 uppercase tracking-widest">
                               Poin Data Warga pada Surat Pengantar
                             </h4>
-                            <span className="px-2.5 py-0.5 bg-indigo-100/80 text-indigo-700 text-[10px] font-black rounded-full border border-indigo-200/80">
+                            <span className="px-2.5 py-0.5 bg-indigo-100/80 text-indigo-700 text-[10px] font-semibold rounded-full border border-indigo-200/80">
                               {SP_FIELDS.filter(f => pdfConfig.visibleFields ? pdfConfig.visibleFields[f.id] !== false : true).length} dari {SP_FIELDS.length} Poin Aktif
                             </span>
                           </div>
@@ -1569,7 +1569,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                       {/* Quick Action Toolbar */}
                       <div className="flex items-center justify-between gap-2 flex-wrap p-3 bg-slate-50/80 border border-slate-200/70 rounded-2xl">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 ml-1">Aksi Cepat:</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 ml-1">Aksi Cepat:</span>
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <button
                             type="button"
@@ -1581,7 +1581,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                               localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                               toast.success("Semua 15 poin data diaktifkan!");
                             }}
-                            className="px-3 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 hover:border-indigo-200 rounded-xl text-[11px] font-bold transition-all shadow-xs"
+                            className="px-3 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 hover:border-indigo-200 rounded-xl text-[11px] font-bold transition-colors shadow-xs"
                           >
                             Pilih Semua
                           </button>
@@ -1596,7 +1596,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                               localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                               toast.success("Diatur ke 8 poin data pokok.");
                             }}
-                            className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-bold transition-all shadow-xs"
+                            className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-bold transition-colors shadow-xs"
                           >
                             Hanya Poin Pokok
                           </button>
@@ -1614,7 +1614,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                               localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                               toast.success("Pengaturan poin dan label di-reset ke standar bawaan.");
                             }}
-                            className="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-slate-200 hover:border-rose-200 rounded-xl text-[11px] font-bold transition-all shadow-xs flex items-center gap-1"
+                            className="px-3 py-1.5 bg-white hover:bg-rose-50 text-rose-600 border border-slate-200 hover:border-rose-200 rounded-xl text-[11px] font-bold transition-colors shadow-xs flex items-center gap-1"
                           >
                             <RefreshCw size={11} /> Reset Default
                           </button>
@@ -1631,7 +1631,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           return (
                             <div
                               key={field.id}
-                              className={`p-4 rounded-2xl border transition-all flex flex-col justify-between gap-3 ${
+                              className={`p-4 rounded-2xl border transition-colors flex flex-col justify-between gap-3 ${
                                 isVisible 
                                   ? 'bg-white border-slate-200/90 shadow-xs hover:border-indigo-300' 
                                   : 'bg-slate-50/70 border-slate-200/50 opacity-60 hover:opacity-90'
@@ -1646,8 +1646,8 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-1.5">
-                                      <span className="text-[10px] font-black text-slate-400">#{idx + 1}</span>
-                                      <span className="text-xs font-black text-slate-800">{field.defaultLabel}</span>
+                                      <span className="text-[10px] font-semibold text-slate-400">#{idx + 1}</span>
+                                      <span className="text-xs font-semibold text-slate-800">{field.defaultLabel}</span>
                                     </div>
                                     <p className="text-[10px] text-slate-400 leading-tight">{field.desc}</p>
                                   </div>
@@ -1669,12 +1669,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                                       localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                                     }}
                                   />
-                                  <div className="w-10 h-5.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+                                  <div className="w-10 h-5.5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-colors peer-checked:bg-indigo-600 shadow-inner"></div>
                                 </label>
                               </div>
 
                               <div className="space-y-1">
-                                <label className="block text-[9px] font-black uppercase tracking-wider text-slate-400">
+                                <label className="block text-[9px] font-semibold uppercase tracking-wider text-slate-400">
                                   Label Teks di Surat:
                                 </label>
                                 <input
@@ -1691,7 +1691,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                                     localStorage.setItem('pdf_config', safeJsonStringify(newConfig));
                                   }}
                                   placeholder={field.defaultLabel}
-                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500 transition-all disabled:text-slate-400 disabled:bg-slate-100/50"
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-indigo-500 transition-colors disabled:text-slate-400 disabled:bg-slate-100/50"
                                 />
                               </div>
 
@@ -1714,7 +1714,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       <div className="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 flex items-start gap-3">
                         <MessageCircle size={20} className="text-emerald-600 shrink-0 mt-0.5" />
                         <div>
-                          <h4 className="text-xs font-black text-emerald-900 uppercase tracking-widest">Pengaturan Broadcast WhatsApp Warga</h4>
+                          <h4 className="text-xs font-semibold text-emerald-900 uppercase tracking-widest">Pengaturan Broadcast WhatsApp Warga</h4>
                           <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
                             Menghubungkan pengiriman notifikasi otomatis saat surat warga diterbitkan atau pengumuman RT disiarkan.
                           </p>
@@ -1723,7 +1723,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                       <div className="space-y-4">
                         <div className="space-y-1.5">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">WhatsApp Group ID (JID)</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">WhatsApp Group ID (JID)</label>
                           <div className="flex gap-2">
                             <input 
                               className="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-800 outline-none" 
@@ -1735,7 +1735,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                               type="button" 
                               onClick={handleVerifyGroup}
                               disabled={isVerifyingGroup}
-                              className="px-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 text-xs font-bold transition-all"
+                              className="px-4 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-100 text-xs font-bold transition-colors"
                             >
                               {isVerifyingGroup ? 'Verifikasi...' : 'Cari Grup'}
                             </button>
@@ -1763,7 +1763,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Tampilan Grup WhatsApp</label>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Nama Tampilan Grup WhatsApp</label>
                           <input 
                             className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 outline-none" 
                             placeholder="Cth: Warga RT 02 Official"
@@ -1779,7 +1779,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="pt-6 border-t border-slate-100">
                     <Button 
                       onClick={handleSaveConfig} 
-                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 rounded-2xl font-black text-xs uppercase tracking-widest"
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 rounded-2xl font-semibold text-xs uppercase tracking-widest"
                       disabled={isSaving}
                     >
                       <Save size={18} className="mr-2" /> 
@@ -1793,7 +1793,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <div className="lg:col-span-5 sticky top-24">
                   <div className="bg-slate-900 text-white p-5 rounded-[2rem] shadow-xl space-y-4 border border-slate-800">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-400 flex items-center gap-1.5">
                         <Sparkles size={12} /> Pratinjau KOP Surat Real-Time
                       </span>
                       <span className="text-[9px] font-mono text-slate-400 bg-slate-800 px-2 py-0.5 rounded-full">A4 Document</span>
@@ -1817,7 +1817,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             <p className="text-[9px] font-bold uppercase tracking-tight text-slate-800">PEMERINTAH KOTA {pdfConfig.kota || 'PALU'}</p>
                             <p className="text-[9px] font-bold uppercase tracking-tight text-slate-800">KECAMATAN {pdfConfig.kecamatan || 'MANTIKULORE'}</p>
                             <p className="text-[9px] font-bold uppercase tracking-tight text-slate-800">KELURAHAN {pdfConfig.kelurahan || 'TONDO'}</p>
-                            <p className="text-[10px] font-black uppercase tracking-wider text-indigo-900 mt-0.5">PENGURUS {pdfConfig.rtName || 'RT 02'}</p>
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-900 mt-0.5">PENGURUS {pdfConfig.rtName || 'RT 02'}</p>
                             <p className="text-[7px] font-sans font-medium text-slate-500 mt-0.5 line-clamp-1">{pdfConfig.rtAddress || 'Alamat RT...'}</p>
                           </div>
                         </div>
@@ -1917,7 +1917,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <motion.div 
                   key={letter.id}
                   layout
-                  className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/40 transition-all group relative overflow-hidden flex flex-col justify-between"
+                  className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-2xs transition-colors group relative overflow-hidden flex flex-col justify-between"
                 >
                   <div>
                     {/* Status badge ring absolute indicator */}
@@ -1928,7 +1928,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     }`}>
                       {isWaiting && (
                         <div className="relative">
-                          <span className="absolute -inset-1 rounded-full bg-amber-400/20 animate-ping" />
+                          <span className="absolute -inset-1 rounded-full bg-amber-400/20" />
                           <Clock size={20} className="relative" />
                         </div>
                       )}
@@ -1937,10 +1937,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     </div>
 
                     <div className="mb-5 relative z-10">
-                      <span className="inline-flex px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-3 border border-indigo-100/50">
+                      <span className="inline-flex px-3 py-1 rounded-lg bg-indigo-50 text-indigo-600 text-[9px] sm:text-[10px] font-semibold uppercase tracking-widest mb-3 border border-indigo-100/50">
                         {letter.type}
                       </span>
-                      <h3 className="text-lg font-black text-slate-900 leading-tight mb-1 group-hover:text-indigo-650 transition-colors">
+                      <h3 className="text-lg font-semibold text-slate-900 leading-tight mb-1 group-hover:text-indigo-650 transition-colors">
                         {letter.applicantName}
                       </h3>
                       <div className="flex flex-wrap gap-2 text-[11px] font-bold text-slate-500 mt-1">
@@ -1962,7 +1962,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           <Clock size={12} />
                           <span>Waktu Pengajuan:</span>
                         </div>
-                        <div className="pl-5 text-slate-700 font-black flex flex-col">
+                        <div className="pl-5 text-slate-700 font-semibold flex flex-col">
                           <span>{formattedDate}</span>
                           {formattedTime && <span className="text-indigo-600 text-[11px] font-bold">{formattedTime}</span>}
                         </div>
@@ -1986,7 +1986,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                               );
                               sendWhatsAppMessage(letter.phone, templateText);
                             }}
-                            className="p-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors flex items-center gap-1 shadow-sm shadow-emerald-600/10"
+                            className="p-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-colors flex items-center gap-1 shadow-sm shadow-2xs"
                             title="Kirim status update via WhatsApp"
                           >
                             <MessageCircle size={10} /> Kirim WA
@@ -2005,7 +2005,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="flex flex-wrap sm:flex-nowrap gap-2 relative z-10 pt-4 border-t border-slate-100 mt-auto">
                     <button 
                       onClick={() => setSelectedLetter(letter)}
-                      className="flex-1 py-3 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-extrabold text-xs shadow-md shadow-indigo-500/25 hover:opacity-95 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                      className="flex-1 py-3 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-extrabold text-xs shadow-md shadow-2xs hover:opacity-95 active:scale-95 transition-colors flex items-center justify-center gap-1.5"
                     >
                       <Eye size={14} className="stroke-[2.5]" /> Detail &amp; Proses
                     </button>
@@ -2021,7 +2021,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             toast.error("Gagal mencetak surat. Pastikan data lengkap.");
                           }
                         }}
-                        className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-100 hover:scale-[1.03] transition-all border border-emerald-100"
+                        className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-100 hover:scale-[1.03] transition-colors border border-emerald-100"
                         title="Cetak File PDF Surat"
                       >
                         <Printer size={15} />
@@ -2030,7 +2030,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     <button 
                       onClick={() => handleDeleteLetter(letter.id)}
-                      className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 hover:scale-[1.03] transition-all border border-rose-100"
+                      className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 hover:scale-[1.03] transition-colors border border-rose-100"
                       title="Hapus Permanen"
                     >
                       <Trash2 size={15} />
@@ -2039,7 +2039,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     {!letter.archived && (isApproved || isRejected) && (
                       <button 
                         onClick={() => handleArchiveLetter(letter.id)}
-                        className="p-3 bg-amber-50 text-amber-600 rounded-2xl hover:bg-amber-100 hover:scale-[1.03] transition-all border border-amber-100"
+                        className="p-3 bg-amber-50 text-amber-600 rounded-2xl hover:bg-amber-100 hover:scale-[1.03] transition-colors border border-amber-100"
                         title="Arsipkan data"
                       >
                         <Archive size={15} />
@@ -2066,7 +2066,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <motion.div 
                   key={report.id}
                   layout
-                  className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md hover:shadow-slate-100 transition-all flex flex-col md:flex-row gap-5 items-start md:items-center justify-between group relative overflow-hidden"
+                  className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md hover:shadow-slate-100 transition-colors flex flex-col md:flex-row gap-5 items-start md:items-center justify-between group relative overflow-hidden"
                 >
                   <div className="flex flex-col md:flex-row gap-5 items-start md:items-center flex-1 min-w-0">
                     <div className={`p-4 rounded-2xl shrink-0 ${
@@ -2079,20 +2079,20 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex flex-wrap items-center gap-2.5 mb-1">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-widest border ${
                           isNew ? 'bg-rose-100/60 text-rose-700 border-rose-200/50' :
                           isProcessing ? 'bg-amber-150/60 text-amber-700 border-amber-200/50' :
                           'bg-emerald-100/60 text-emerald-700 border-emerald-200/50'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${isNew ? 'bg-rose-500 animate-ping' : isProcessing ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${isNew ? 'bg-rose-500 ' : isProcessing ? 'bg-amber-500 ' : 'bg-emerald-500'}`} />
                           {report.status}
                         </span>
                         <span className="text-xs font-bold text-slate-300">•</span>
-                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest text-[9px]">{report.type}</span>
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-widest text-[9px]">{report.type}</span>
                         <span className="text-xs font-bold text-slate-300">•</span>
                         <span className="text-xs font-semibold text-slate-400">{new Date(report.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                       </div>
-                      <h3 className="text-base sm:text-lg font-black text-slate-850 mb-0.5 leading-snug text-slate-900 pr-4">{report.description}</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-slate-850 mb-0.5 leading-snug text-slate-900 pr-4">{report.description}</h3>
                       <p className="text-xs sm:text-sm font-medium text-slate-500 flex items-center gap-1.5">
                         Pelapor: <span className="text-slate-800 font-bold">{report.reporterName}</span> 
                         {(() => {
@@ -2112,7 +2112,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     {isNew && (
                       <button 
                         onClick={() => handleUpdateReportStatus(report.id, 'Diproses')}
-                        className="flex-1 sm:flex-none px-4 py-3 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200/60 rounded-2xl font-black text-[11px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                        className="flex-1 sm:flex-none px-4 py-3 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200/60 rounded-2xl font-semibold text-[11px] uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
                         title="Langsung respon dan tandai sedang dikerjakan"
                       >
                         <RefreshCw size={13} className="animate-spin-slow" /> Tangani
@@ -2121,7 +2121,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     {isProcessing && (
                       <button 
                         onClick={() => handleUpdateReportStatus(report.id, 'Selesai')}
-                        className="flex-1 sm:flex-none px-4 py-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60 rounded-2xl font-black text-[11px] uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                        className="flex-1 sm:flex-none px-4 py-3 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60 rounded-2xl font-semibold text-[11px] uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
                         title="Tandai aduan warga selesai tuntas ditangani"
                       >
                         <CheckCircle2 size={13} /> Selesai
@@ -2130,7 +2130,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     <button 
                       onClick={() => setSelectedReport(report)}
-                      className="flex-1 sm:flex-none px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white border-none rounded-2xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-[0.98]"
+                      className="flex-1 sm:flex-none px-5 py-3 bg-slate-900 hover:bg-slate-800 text-white border-none rounded-2xl font-bold text-xs transition-colors shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-[0.98]"
                     >
                       <Eye size={13} /> Detail
                     </button>
@@ -2138,7 +2138,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     {onDeleteReport && (
                       <button 
                         onClick={() => onDeleteReport(report.id)}
-                        className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 hover:scale-[1.03] transition-all border border-rose-100"
+                        className="p-3 bg-rose-50 text-rose-600 rounded-2xl hover:bg-rose-100 hover:scale-[1.03] transition-colors border border-rose-100"
                         title="Hapus Laporan permanen"
                       >
                         <Trash2 size={15} />
@@ -2148,7 +2148,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     {!report.archived && report.status === 'Selesai' && (
                       <button 
                         onClick={() => handleArchiveReport(report.id)}
-                        className="p-3 bg-amber-50 text-amber-600 rounded-2xl hover:bg-amber-100 hover:scale-[1.03] transition-all border border-amber-100"
+                        className="p-3 bg-amber-50 text-amber-600 rounded-2xl hover:bg-amber-100 hover:scale-[1.03] transition-colors border border-amber-100"
                         title="Arsipkan laporan"
                       >
                         <Archive size={15} />
@@ -2171,9 +2171,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <button
                     type="button"
                     onClick={() => setDetailModalTab('profil')}
-                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all flex items-center justify-center gap-1 sm:gap-2 ${
+                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider sm:tracking-widest transition-colors flex items-center justify-center gap-1 sm:gap-2 ${
                       detailModalTab === 'profil'
-                        ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
+                        ? 'bg-white text-indigo-600 shadow-md shadow-2xs border border-slate-150'
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
@@ -2183,9 +2183,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <button
                     type="button"
                     onClick={() => setDetailModalTab('keperluan')}
-                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all flex items-center justify-center gap-1 sm:gap-2 ${
+                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider sm:tracking-widest transition-colors flex items-center justify-center gap-1 sm:gap-2 ${
                       detailModalTab === 'keperluan'
-                        ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
+                        ? 'bg-white text-indigo-600 shadow-md shadow-2xs border border-slate-150'
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
@@ -2195,9 +2195,9 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <button
                     type="button"
                     onClick={() => setDetailModalTab('penerbitan')}
-                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest transition-all flex items-center justify-center gap-1 sm:gap-2 ${
+                    className={`flex-1 py-2 sm:py-2.5 px-1.5 sm:px-3 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider sm:tracking-widest transition-colors flex items-center justify-center gap-1 sm:gap-2 ${
                       detailModalTab === 'penerbitan'
-                        ? 'bg-white text-indigo-600 shadow-md shadow-indigo-100/50 border border-slate-150'
+                        ? 'bg-white text-indigo-600 shadow-md shadow-2xs border border-slate-150'
                         : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
@@ -2215,19 +2215,19 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   >
                     {/* Section 1: Identitas Pokok & KK */}
                     <div className="bg-slate-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 space-y-3 sm:space-y-4">
-                      <h4 className="text-[11px] sm:text-xs font-black text-indigo-655 uppercase tracking-widest flex items-center gap-2 mb-0.5">
+                      <h4 className="text-[11px] sm:text-xs font-semibold text-indigo-655 uppercase tracking-widest flex items-center gap-2 mb-0.5">
                         <CreditCard size={13} className="text-indigo-500" />
                         <span>Identitas Pokok & Kartu Keluarga (KK)</span>
                       </h4>
                       
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <User size={10} className="text-indigo-500" /> Nama Lengkap Sesuai KTP
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.applicantName || ''}
                             onChange={e => setEditLetterData({...editLetterData, applicantName: e.target.value})}
                             placeholder="Contoh: Budi Santoso"
@@ -2235,12 +2235,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Hash size={10} className="text-indigo-500" /> NIK (16 Digit)
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.nik || ''}
                             onChange={e => setEditLetterData({...editLetterData, nik: e.target.value})}
                             placeholder="Contoh: 7271xxxxxxxxxxxx"
@@ -2248,12 +2248,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Users size={10} className="text-indigo-500" /> Nama Kepala Keluarga (KK)
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.familyHeadName || ''}
                             onChange={e => setEditLetterData({...editLetterData, familyHeadName: e.target.value})}
                             placeholder="Nama Kepala Keluarga di Kartu Keluarga"
@@ -2261,11 +2261,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <UserCheck size={10} className="text-indigo-500" /> Hubungan Keluarga
                           </label>
                           <select 
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.familyStatus || ''}
                             onChange={e => setEditLetterData({...editLetterData, familyStatus: e.target.value as any})}
                           >
@@ -2288,19 +2288,19 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     {/* Section 2: Birth, Gender & Marital Status */}
                     <div className="bg-slate-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 space-y-3 sm:space-y-4">
-                      <h4 className="text-[11px] sm:text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
+                      <h4 className="text-[11px] sm:text-xs font-semibold text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
                         <Calendar size={13} className="text-indigo-500" />
                         <span>Kelahiran, Jenis Kelamin, & Perkawinan</span>
                       </h4>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <MapPin size={10} className="text-indigo-500" /> Tempat Kelahiran
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.birthPlace || ''}
                             onChange={e => setEditLetterData({...editLetterData, birthPlace: e.target.value})}
                             placeholder="Contoh: Palu"
@@ -2308,12 +2308,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Calendar size={10} className="text-indigo-500" /> Tanggal Lahir (Format Terang / ISO)
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.birthDate || ''}
                             onChange={e => setEditLetterData({...editLetterData, birthDate: e.target.value})}
                             placeholder="Format: DD-MM-YYYY, misal: 15-08-1995"
@@ -2321,11 +2321,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <UserCheck size={10} className="text-indigo-500" /> Jenis Kelamin
                           </label>
                           <select 
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.gender || 'Laki-laki'}
                             onChange={e => setEditLetterData({...editLetterData, gender: e.target.value as any})}
                           >
@@ -2335,11 +2335,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Heart size={10} className="text-indigo-500" /> Status Perkawinan
                           </label>
                           <select 
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.maritalStatus || 'Belum Kawin'}
                             onChange={e => setEditLetterData({...editLetterData, maritalStatus: e.target.value as any})}
                           >
@@ -2354,18 +2354,18 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     {/* Section 3: Sosial, Pendidikan & Latar Belakang */}
                     <div className="bg-slate-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 space-y-3 sm:space-y-4">
-                      <h4 className="text-[11px] sm:text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
+                      <h4 className="text-[11px] sm:text-xs font-semibold text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
                         <BookOpen size={13} className="text-indigo-500" />
                         <span>Sosial, Pendidikan, Agama & Latar Belakang</span>
                       </h4>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Info size={10} className="text-indigo-500" /> Agama / Keyakinan
                           </label>
                           <select 
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.religion || ''}
                             onChange={e => setEditLetterData({...editLetterData, religion: e.target.value})}
                           >
@@ -2380,12 +2380,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Flag size={10} className="text-indigo-500" /> Kewarganegaraan
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.nationality || ''}
                             onChange={e => setEditLetterData({...editLetterData, nationality: e.target.value})}
                             placeholder="Contoh: WNI atau WNA"
@@ -2393,12 +2393,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <BookOpen size={10} className="text-indigo-500" /> Pendidikan Terakhir
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.education || ''}
                             onChange={e => setEditLetterData({...editLetterData, education: e.target.value})}
                             placeholder="Contoh: SMA, Diploma, S1, S2, dll."
@@ -2406,12 +2406,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Briefcase size={10} className="text-indigo-500" /> Pekerjaan Saat Ini
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.job || ''}
                             onChange={e => setEditLetterData({...editLetterData, job: e.target.value})}
                             placeholder="Contoh: PNS, Swasta, Mahasiswa, Ibu Rumah Tangga"
@@ -2422,19 +2422,19 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     {/* Section 4: Kontak & Medis */}
                     <div className="bg-slate-50/50 p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 space-y-3 sm:space-y-4">
-                      <h4 className="text-[11px] sm:text-xs font-black text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
+                      <h4 className="text-[11px] sm:text-xs font-semibold text-indigo-650 uppercase tracking-widest flex items-center gap-2 mb-0.5">
                         <Phone size={13} className="text-indigo-500" />
                         <span>Kontak & Data Medis</span>
                       </h4>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                         <div className="space-y-1 col-span-1">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Phone size={10} className="text-indigo-500" /> No. WhatsApp
                           </label>
                           <input 
                             type="text"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.phone || ''}
                             onChange={e => setEditLetterData({...editLetterData, phone: e.target.value})}
                             placeholder="Contoh: 081234567890"
@@ -2442,12 +2442,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1 col-span-1 border-t sm:border-t-0 pt-2.5 sm:pt-0">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Mail size={10} className="text-indigo-500" /> Alamat Email
                           </label>
                           <input 
                             type="email"
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.email || ''}
                             onChange={e => setEditLetterData({...editLetterData, email: e.target.value})}
                             placeholder="Contoh: email@domain.com"
@@ -2455,11 +2455,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         </div>
 
                         <div className="space-y-1 col-span-1 border-t sm:border-t-0 pt-2.5 sm:pt-0">
-                          <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                          <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                             <Heart size={10} className="text-indigo-500" /> Golongan Darah
                           </label>
                           <select 
-                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-2.5 sm:p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             value={editLetterData.bloodType || ''}
                             onChange={e => setEditLetterData({...editLetterData, bloodType: e.target.value as any})}
                           >
@@ -2484,11 +2484,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   >
                     <div className="grid grid-cols-1 gap-4">
                       <div className="space-y-1">
-                        <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                        <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                           <FileText size={10} className="text-indigo-500" /> Format / Jenis Surat Keterangan <span className="text-rose-500">*</span>
                         </label>
                         <select 
-                          className="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                          className="w-full p-2.5 sm:p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                           value={editLetterData.type || ''}
                           onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
                         >
@@ -2514,7 +2514,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                        <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                           <ClipboardList size={10} className="text-indigo-500" /> Detail Keperluan & Maksud Pembuatan Surat
                         </label>
                         <button 
@@ -2539,13 +2539,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             const template = templates.find(t => t.type === editLetterData.type)?.suggestion;
                             if (template) setEditLetterData({...editLetterData, purposeDetail: template});
                           }}
-                          className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                          className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
                         >
                           <Sparkles size={10} /> Isi Otomatis
                         </button>
                       </div>
                       <textarea 
-                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 sm:h-24 resize-none"
+                        className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors h-20 sm:h-24 resize-none"
                         value={editLetterData.purposeDetail || ''}
                         onChange={e => setEditLetterData({...editLetterData, purposeDetail: e.target.value})}
                         placeholder="Detail keperluan warga (misal: pengurusan pendaftaran beasiswa anak, pembuatan paspor dsb.)"
@@ -2554,11 +2554,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                        <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                           <MapPin size={10} className="text-indigo-500" /> Alamat Sesuai KTP Resmi
                         </label>
                         <textarea 
-                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 sm:h-24 resize-none"
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors h-20 sm:h-24 resize-none"
                           value={editLetterData.addressKtp || ''}
                           onChange={e => setEditLetterData({...editLetterData, addressKtp: e.target.value})}
                           placeholder="Tulis alamat persis sesuai KTP daerah asal"
@@ -2566,11 +2566,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
+                        <label className="text-[9px] sm:text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 ml-1">
                           <Home size={10} className="text-indigo-500" /> Alamat Domisili Saat Ini (RT 02)
                         </label>
                         <textarea 
-                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all h-20 sm:h-24 resize-none"
+                          className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium text-slate-800 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors h-20 sm:h-24 resize-none"
                           value={editLetterData.currentAddress || ''}
                           onChange={e => setEditLetterData({...editLetterData, currentAddress: e.target.value})}
                           placeholder="Alamat domisili saat ini di wilayah RT"
@@ -2592,10 +2592,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       {selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending' ? (
                         <div className="bg-amber-50/80 border-amber-100 p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3">
                           <div className="p-2 bg-amber-100 text-amber-600 rounded-xl shrink-0">
-                            <Clock size={16} className="animate-pulse" />
+                            <Clock size={16} className="" />
                           </div>
                           <div>
-                            <h4 className="text-[11px] sm:text-xs font-black text-amber-800 uppercase tracking-wide">Status: Menunggu Persetujuan Ketua RT</h4>
+                            <h4 className="text-[11px] sm:text-xs font-semibold text-amber-800 uppercase tracking-wide">Status: Menunggu Persetujuan Ketua RT</h4>
                             <p className="text-[10px] sm:text-[11px] text-amber-700 mt-0.5 leading-relaxed">
                               Permohonan masuk antrean. Anda dapat menyelaraskan format nomor surat di bawah, membubuhkan tanda tangan (opsional) atau langsung mencetak format resmi.
                             </p>
@@ -2607,7 +2607,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             <CheckCircle2 size={16} />
                           </div>
                           <div>
-                            <h4 className="text-[11px] sm:text-xs font-black text-emerald-800 uppercase tracking-wide">Status: Telah Disetujui (Diterbitkan)</h4>
+                            <h4 className="text-[11px] sm:text-xs font-semibold text-emerald-800 uppercase tracking-wide">Status: Telah Disetujui (Diterbitkan)</h4>
                             <p className="text-[10px] sm:text-[11px] text-emerald-700 mt-0.5 leading-relaxed">
                               Dokumen pengantar telah selesai diproses dengan nomor surat <span className="font-extrabold">{selectedLetter.letterNumber}</span>. Berkas siap cetak kapan saja diperlukan.
                             </p>
@@ -2619,7 +2619,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             <XCircle size={16} />
                           </div>
                           <div>
-                            <h4 className="text-[11px] sm:text-xs font-black text-rose-800 uppercase tracking-wide">Status: Pengajuan Ditolak</h4>
+                            <h4 className="text-[11px] sm:text-xs font-semibold text-rose-800 uppercase tracking-wide">Status: Pengajuan Ditolak</h4>
                             <p className="text-[10px] sm:text-[11px] text-rose-700 mt-0.5 leading-relaxed">
                               Permohonan tidak disetujui karena ketidaksesuaian administrasi RT. Silakan komunikasikan perbaikan kepada pemohon bersangkutan.
                             </p>
@@ -2631,7 +2631,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     {/* Letter Number Input Group WITH SYNC BUTTON - Extremely User Friendly & Professional */}
                     <div className="bg-slate-50/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-4.5 border border-slate-150 space-y-4">
                       <div>
-                        <label className="block text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">
+                        <label className="block text-[9px] sm:text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1.5 ml-1">
                           Nomor Surat Resmi (Format Terbuka untuk Diedit)
                         </label>
                         <div className="flex flex-col sm:flex-row gap-2">
@@ -2641,7 +2641,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                             </div>
                             <input 
                               type="text"
-                              className="w-full pl-10 pr-4 py-2.5 sm:py-3.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all placeholder:text-slate-300"
+                              className="w-full pl-10 pr-4 py-2.5 sm:py-3.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-colors placeholder:text-slate-300"
                               value={letterNumberInput}
                               onChange={(e) => setLetterNumberInput(e.target.value)}
                               placeholder="Contoh: SK/008/RT02/VI/2026"
@@ -2652,7 +2652,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           <button
                             type="button"
                             onClick={handleSyncLetterSequence}
-                            className="py-2.5 px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                            className="py-2.5 px-4 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded-xl text-[10px] sm:text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
                             title="Samakan nomor surat dengan data historis tertinggi di database"
                           >
                             <RefreshCw size={13} className="animate-spin-slow text-amber-600 shrink-0" />
@@ -2672,7 +2672,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     {/* Signature pad - only for pending */}
                     {(selectedLetter.status === 'Menunggu' || selectedLetter.status === 'Pending') && (
                       <div className="p-3 sm:p-4 bg-indigo-50/50 rounded-xl sm:rounded-2xl border border-indigo-100/70">
-                        <p className="text-[9px] sm:text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-2 flex items-center gap-1">
+                        <p className="text-[9px] sm:text-[10px] font-semibold text-indigo-500 uppercase tracking-widest mb-2 flex items-center gap-1">
                           <Sparkles size={11} /> Tanda Tangan Digital Ketua RT (Opsional Untuk Persetujuan Instan)
                         </p>
                         <div className="bg-white rounded-xl border border-indigo-150 overflow-hidden shadow-sm">
@@ -2709,7 +2709,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         <>
                           <Button 
                             onClick={() => handleUpdateLetterStatus(selectedLetter.id, 'Ditolak')}
-                            className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none py-2.5 sm:py-3.5 text-[10px] sm:text-xs hover:scale-[1.01] transition-all"
+                            className="bg-white text-rose-600 border border-rose-200 hover:bg-rose-50 shadow-none py-2.5 sm:py-3.5 text-[10px] sm:text-xs hover:scale-[1.01] transition-colors"
                           >
                             <XCircle size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Tolak
                           </Button>
@@ -2721,7 +2721,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                                 letterNumber: letterNumberInput,
                               }, tempSignature);
                             }}
-                            className="flex-1 bg-emerald-600 hover:bg-emerald-750 font-black tracking-wide text-[10px] sm:text-xs py-2.5 sm:py-3.5 hover:scale-[1.01] transition-all shadow-md shadow-emerald-200"
+                            className="flex-1 bg-emerald-600 hover:bg-emerald-750 font-semibold tracking-wide text-[10px] sm:text-xs py-2.5 sm:py-3.5 hover:scale-[1.01] transition-colors shadow-md shadow-emerald-200"
                           >
                             <CheckCircle2 size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Setujui & Terbitkan
                           </Button>
@@ -2729,7 +2729,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       ) : (
                         <Button 
                           onClick={handleSaveLetterDetails}
-                          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-black tracking-wide text-[10px] sm:text-xs py-2.5 sm:py-3.5 shadow-md"
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold tracking-wide text-[10px] sm:text-xs py-2.5 sm:py-3.5 shadow-md"
                         >
                           <Save size={14} className="mr-1 sm:mr-1.5 shrink-0" /> Simpan Detail Surat
                         </Button>
@@ -2759,7 +2759,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         letterNumberInput || selectedLetter.letterNumber
                       )
                     )}
-                    className="w-full sm:flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.01] transition-all font-bold py-2.5 sm:py-3 text-xs shadow-md shadow-emerald-200"
+                    className="w-full sm:flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.01] transition-colors font-bold py-2.5 sm:py-3 text-xs shadow-md shadow-emerald-200"
                   >
                     <MessageCircle size={14} className="mr-1.5 shrink-0" /> Kirim Update WhatsApp
                   </Button>
@@ -2786,7 +2786,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <div className="space-y-6">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                 <User size={16} className="text-slate-400" />
-                <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest">Data Pemohon</h4>
+                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Data Pemohon</h4>
               </div>
               
               <div className="space-y-4">
@@ -2833,7 +2833,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <div className="group">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Lengkap</label>
                   <input 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-300" 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors placeholder:text-slate-300" 
                     value={adminForm.applicantName || ''} 
                     onChange={e=>setAdminForm({...adminForm, applicantName: e.target.value})} 
                     placeholder="Sesuai KTP"
@@ -2844,7 +2844,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">NIK</label>
                     <input 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors placeholder:text-slate-300" 
                       value={adminForm.nik || ''} 
                       onChange={e=>setAdminForm({...adminForm, nik: e.target.value})} 
                       placeholder="16 digit NIK"
@@ -2853,7 +2853,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nama Kepala Keluarga / Penghuni</label>
                     <input 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors placeholder:text-slate-300" 
                       value={adminForm.familyHeadName || ''} 
                       onChange={e=>setAdminForm({...adminForm, familyHeadName: e.target.value})} 
                       placeholder="Nama di KK"
@@ -2865,7 +2865,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tempat Lahir</label>
                     <input 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.birthPlace || ''} 
                       onChange={e=>setAdminForm({...adminForm, birthPlace: e.target.value})} 
                     />
@@ -2874,7 +2874,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Tanggal Lahir</label>
                     <input 
                       type="date" 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.birthDate || ''} 
                       onChange={e=>setAdminForm({...adminForm, birthDate: e.target.value})} 
                     />
@@ -2885,7 +2885,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Kelamin</label>
                     <select 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.gender || 'Laki-laki'} 
                       onChange={e=>setAdminForm({...adminForm, gender: e.target.value as any})}
                     >
@@ -2896,7 +2896,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Agama</label>
                     <select 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.religion || 'Islam'} 
                       onChange={e=>setAdminForm({...adminForm, religion: e.target.value})}
                     >
@@ -2909,7 +2909,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pekerjaan</label>
                     <input 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.job || ''} 
                       onChange={e=>setAdminForm({...adminForm, job: e.target.value})} 
                     />
@@ -2917,7 +2917,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Golongan Darah</label>
                     <select 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.bloodType || '-'} 
                       onChange={e=>setAdminForm({...adminForm, bloodType: e.target.value as any})}
                     >
@@ -2930,7 +2930,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Pendidikan</label>
                     <select 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.education || 'SMA/Sederajat'} 
                       onChange={e=>setAdminForm({...adminForm, education: e.target.value})}
                     >
@@ -2940,7 +2940,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Hubungan Keluarga</label>
                     <select 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.familyStatus || 'Kepala Keluarga'} 
                       onChange={e=>setAdminForm({...adminForm, familyStatus: e.target.value as any})}
                     >
@@ -2964,7 +2964,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Status Perkawinan</label>
                     <select 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.maritalStatus || 'Kawin'} 
                       onChange={e=>setAdminForm({...adminForm, maritalStatus: e.target.value as any})}
                     >
@@ -2977,7 +2977,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Kewarganegaraan</label>
                     <input 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.nationality || ''} 
                       onChange={e=>setAdminForm({...adminForm, nationality: e.target.value})} 
                     />
@@ -2988,7 +2988,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="group">
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">No. HP / WhatsApp</label>
                     <input 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.phone || ''} 
                       onChange={e=>setAdminForm({...adminForm, phone: e.target.value})} 
                       placeholder="0812..."
@@ -2998,7 +2998,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Email (Opsional)</label>
                     <input 
                       type="email"
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.email || ''} 
                       onChange={e=>setAdminForm({...adminForm, email: e.target.value})} 
                       placeholder="email@contoh.com"
@@ -3012,7 +3012,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <div className="space-y-6">
               <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                 <FileText size={16} className="text-slate-400" />
-                <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest">Detail Surat</h4>
+                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Detail Surat</h4>
               </div>
 
               <div className="space-y-4">
@@ -3020,7 +3020,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Nomor Surat (Otomatis)</label>
                   <input 
                     type="text"
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-indigo-600 focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-indigo-600 focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                     value={adminLetterNumber || ''} 
                     onChange={e => setAdminLetterNumber(e.target.value)}
                     placeholder="Contoh: SPK/001/RT02/III/2026"
@@ -3031,7 +3031,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Surat</label>
                   <div className="relative">
                     <select 
-                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all appearance-none" 
+                      className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors appearance-none" 
                       value={adminForm.type} 
                       onChange={e=>setAdminForm({...adminForm, type: e.target.value})}
                     >
@@ -3063,7 +3063,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <div className="relative">
                     <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold uppercase focus:bg-white focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold uppercase focus:bg-white focus:border-indigo-500 outline-none transition-colors" 
                       value={adminForm.houseId || ''} 
                       onChange={e=>setAdminForm({...adminForm, houseId: e.target.value})} 
                       placeholder="Cth: C7-02" 
@@ -3096,13 +3096,13 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         const template = templates.find(t => t.type === adminForm.type)?.suggestion;
                         if (template) setAdminForm({...adminForm, purposeDetail: template});
                       }}
-                      className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
+                      className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest hover:underline flex items-center gap-1"
                     >
                       <Sparkles size={10} /> Isi Otomatis
                     </button>
                   </div>
                   <textarea 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-32 resize-none leading-relaxed" 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors h-32 resize-none leading-relaxed" 
                     value={adminForm.purposeDetail || ''} 
                     onChange={e=>setAdminForm({...adminForm, purposeDetail: e.target.value})} 
                     placeholder="Jelaskan keperluan surat..."
@@ -3112,7 +3112,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <div className="group">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Lengkap (Sesuai KTP)</label>
                   <textarea 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed" 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors h-24 resize-none leading-relaxed" 
                     value={adminForm.addressKtp || ''} 
                     onChange={e=>setAdminForm({...adminForm, addressKtp: e.target.value})} 
                     placeholder="Jalan, RT/RW, Kelurahan, Kecamatan..."
@@ -3122,7 +3122,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 <div className="group">
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Alamat Domisili Saat Ini</label>
                   <textarea 
-                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all h-24 resize-none leading-relaxed" 
+                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors h-24 resize-none leading-relaxed" 
                     value={adminForm.currentAddress || ''} 
                     onChange={e=>setAdminForm({...adminForm, currentAddress: e.target.value})} 
                     placeholder="Kosongkan jika sama dengan KTP"
@@ -3132,7 +3132,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             </div>
 
             <div className="lg:col-span-2 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 mt-4">
-              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3">Tanda Tangan Ketua RT (Opsional)</p>
+              <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-widest mb-3">Tanda Tangan Ketua RT (Opsional)</p>
               <div className="bg-white rounded-xl border border-indigo-200 overflow-hidden">
                 <SignaturePad 
                   onSave={(sig) => setTempSignature(sig)} 
@@ -3278,7 +3278,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <div className="relative">
                 <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input 
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-colors" 
                   value={adminReportForm.reporterName || ''} 
                   onChange={e=>setAdminReportForm({...adminReportForm, reporterName: e.target.value})} 
                   placeholder="Nama warga"
@@ -3291,7 +3291,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
               <div className="relative">
                 <Home size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10" />
                 <select 
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all appearance-none"
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-colors appearance-none"
                   value={adminReportForm.houseId || ''} 
                   onChange={e=>setAdminReportForm({...adminReportForm, houseId: e.target.value})} 
                 >
@@ -3314,7 +3314,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <div className="group">
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Jenis Laporan/Aspirasi</label>
               <select 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-colors" 
                 value={adminReportForm.type} 
                 onChange={e=>setAdminReportForm({...adminReportForm, type: e.target.value as any})}
               >
@@ -3331,7 +3331,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <div className="group">
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Status Awal</label>
               <select 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all" 
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-colors" 
                 value={adminReportForm.status} 
                 onChange={e=>setAdminReportForm({...adminReportForm, status: e.target.value as any})}
               >
@@ -3345,7 +3345,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
           <div className="group">
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 ml-1">Isi Laporan / Aspirasi</label>
             <textarea 
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-all h-32 resize-none leading-relaxed" 
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-rose-500 outline-none transition-colors h-32 resize-none leading-relaxed" 
               value={adminReportForm.description || ''} 
               onChange={e=>setAdminReportForm({...adminReportForm, description: e.target.value})} 
               placeholder="Jelaskan detail laporan, aspirasi, atau temuan di lokasi..."
@@ -3393,7 +3393,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
             <div className="space-y-6">
               {/* Header Status Stepper Tracker */}
               <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 mb-3">
                   Status Penanganan Aduan Lingkungan
                 </p>
                 <div className="grid grid-cols-3 gap-2 relative">
@@ -3403,16 +3403,16 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                     return (
                       <div 
                         key={st} 
-                        className={`p-2.5 rounded-xl border text-center transition-all ${
+                        className={`p-2.5 rounded-xl border text-center transition-colors ${
                           isCurrent 
-                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20' 
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-2xs' 
                             : isDone
                             ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-bold'
                             : 'bg-white text-slate-400 border-slate-200'
                         }`}
                       >
                         <p className="text-[9px] font-mono font-bold uppercase tracking-wider">Tahap {idx + 1}</p>
-                        <p className="text-xs font-black">{st}</p>
+                        <p className="text-xs font-semibold">{st}</p>
                       </div>
                     );
                   })}
@@ -3431,12 +3431,12 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       <AlertTriangle size={22} />
                     </div>
                     <div>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Kategori Laporan</span>
-                      <h4 className="font-black text-slate-800 text-base leading-tight">{selectedReport.type}</h4>
+                      <span className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Kategori Laporan</span>
+                      <h4 className="font-semibold text-slate-800 text-base leading-tight">{selectedReport.type}</h4>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tanggal Lapor</span>
+                    <span className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Tanggal Lapor</span>
                     <p className="text-xs font-bold text-slate-700">
                       {new Date(selectedReport.date).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
@@ -3444,7 +3444,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                 </div>
                 
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Uraian Aspirasi / Keluhan Warga</p>
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Uraian Aspirasi / Keluhan Warga</p>
                   <p className="font-medium text-slate-800 bg-white p-4 rounded-2xl border border-slate-200 leading-relaxed text-sm">
                     "{selectedReport.description}"
                   </p>
@@ -3452,14 +3452,14 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200 text-xs">
                   <div className="p-3 bg-white rounded-xl border border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Identitas Pelapor</p>
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Identitas Pelapor</p>
                     <p className="font-bold text-slate-800">{selectedReport.reporterName}</p>
                     {reporterPhone && (
                       <p className="text-[11px] font-mono text-slate-500 mt-0.5">{reporterPhone}</p>
                     )}
                   </div>
                   <div className="p-3 bg-white rounded-xl border border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Lokasi / Blok Rumah</p>
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">Lokasi / Blok Rumah</p>
                     <p className="font-bold text-indigo-700">
                       {reporterHouse ? `Blok ${reporterHouse.block} No. ${reporterHouse.number}` : (selectedReport.houseId || 'Warga RT 002')}
                     </p>
@@ -3474,7 +3474,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                         <CheckSquare size={18} />
                       </div>
                       <div>
-                        <p className="text-xs font-black text-emerald-950">Sinkronisasi 5 Pilar STBM Kavling</p>
+                        <p className="text-xs font-semibold text-emerald-950">Sinkronisasi 5 Pilar STBM Kavling</p>
                         <p className="text-[10px] text-emerald-700 font-semibold leading-relaxed">
                           Tandai status tindak lanjut sanitasi pada kavling Blok {reporterHouse.block}-{reporterHouse.number} ({reporterHouse.headOfFamily})
                         </p>
@@ -3509,7 +3509,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           toast.error('Gagal memperbarui status STBM.');
                         }
                       }}
-                      className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider shrink-0 transition-all shadow-sm cursor-pointer active:scale-95 text-center"
+                      className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-semibold uppercase tracking-wider shrink-0 transition-colors shadow-sm cursor-pointer active:scale-95 text-center"
                     >
                       Tandai di Buku STBM
                     </button>
@@ -3523,7 +3523,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   {selectedReport.status === 'Baru' && (
                     <Button 
                       onClick={() => handleUpdateReportStatus(selectedReport.id, 'Diproses')}
-                      className="col-span-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 text-xs font-black"
+                      className="col-span-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-2xs text-xs font-semibold"
                     >
                       <Clock size={16} className="mr-2" /> Tindak Lanjuti & Tandai Sedang Diproses
                     </Button>
@@ -3531,7 +3531,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   {selectedReport.status === 'Diproses' && (
                     <Button 
                       onClick={() => handleUpdateReportStatus(selectedReport.id, 'Selesai')}
-                      className="col-span-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 text-xs font-black"
+                      className="col-span-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-2xs text-xs font-semibold"
                     >
                       <CheckCircle2 size={16} className="mr-2" /> Tandai Penanganan Selesai (Tuntas)
                     </Button>
@@ -3546,7 +3546,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       const text = `Halo Bapak/Ibu ${selectedReport.reporterName},\n\nLaporan aspirasi/pengaduan Anda mengenai "${selectedReport.description.slice(0, 50)}..." telah ditindaklanjuti oleh Pengurus RT 002 / RW 020 Kelurahan Tondo dengan status terkini: *${selectedReport.status}*.\n\nTerima kasih atas kepedulian Anda menjaga lingkungan kita bersama.`;
                       window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(text)}`, '_blank');
                     }}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold transition-all"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold transition-colors"
                   >
                     <Phone size={14} className="text-emerald-600" />
                     <span>Kirim Pesan Konfirmasi Progres ke WhatsApp Warga</span>

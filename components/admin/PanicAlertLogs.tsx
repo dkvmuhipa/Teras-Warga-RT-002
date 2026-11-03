@@ -79,10 +79,9 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
       {/* Header Banner */}
       <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <span className="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-100 rounded-full text-[10px] font-mono font-black uppercase tracking-widest mb-2 inline-block">
-            🆘 RESPON DARURAT SATPAM RT 02
+          <span className="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-100 rounded-full text-[10px] font-mono font-semibold uppercase tracking-widest mb-2 inline-block">🆘 RESPON DARURAT SATPAM RT 02
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Log Panic Button & Insiden Darurat</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Log Panic Button & Insiden Darurat</h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
             Rekap riwayat penekanan Panic Button oleh warga (Kebakaran, Maling/Keamanan, Darurat Medis).
           </p>
@@ -93,8 +92,8 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">DARURAT AKTIF</p>
-            <p className="text-2xl font-black text-rose-600">{activeAlertsCount} <span className="text-xs font-bold text-slate-400">Insiden</span></p>
+            <p className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-0.5">DARURAT AKTIF</p>
+            <p className="text-2xl font-semibold text-rose-600">{activeAlertsCount} <span className="text-xs font-bold text-slate-400">Insiden</span></p>
           </div>
           <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100">
             <ShieldAlert size={24} />
@@ -103,8 +102,8 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
 
         <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">SELESAI (AMAN)</p>
-            <p className="text-2xl font-black text-emerald-600">{resolvedAlertsCount} <span className="text-xs font-bold text-slate-400">Penanganan</span></p>
+            <p className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-0.5">SELESAI (AMAN)</p>
+            <p className="text-2xl font-semibold text-emerald-600">{resolvedAlertsCount} <span className="text-xs font-bold text-slate-400">Penanganan</span></p>
           </div>
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
             <CheckCircle size={24} />
@@ -113,8 +112,8 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
 
         <div className="bg-white border border-slate-200/80 p-5 rounded-3xl shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-0.5">TOTAL INSIDEN</p>
-            <p className="text-2xl font-black text-slate-900">{alerts.length} <span className="text-xs font-bold text-slate-400">Kejadian</span></p>
+            <p className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-0.5">TOTAL INSIDEN</p>
+            <p className="text-2xl font-semibold text-slate-900">{alerts.length} <span className="text-xs font-bold text-slate-400">Kejadian</span></p>
           </div>
           <div className="p-3 bg-slate-50 text-slate-600 rounded-2xl border border-slate-100">
             <Shield size={24} />
@@ -129,7 +128,7 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
           <input 
             type="text" 
             placeholder="Cari jenis darurat, nama warga, atau blok..." 
-            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all shadow-sm"
+            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -139,7 +138,7 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
-              className={`px-4 py-2 rounded-xl text-xs font-mono font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold uppercase tracking-wider transition-colors whitespace-nowrap ${
                 statusFilter === st 
                 ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/80' 
                 : 'text-slate-500 hover:text-slate-800'
@@ -157,11 +156,11 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
           <table className="w-full text-left border-collapse min-w-[750px]">
             <thead>
               <tr className="bg-slate-50/60 border-b border-slate-200/80">
-                <th className="px-6 py-4 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Jenis Darurat</th>
-                <th className="px-6 py-4 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Warna / Pelapor</th>
-                <th className="px-6 py-4 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Waktu Terdeteksi</th>
-                <th className="px-6 py-4 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Status Penanganan</th>
-                <th className="px-6 py-4 text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                <th className="px-6 py-4 text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Jenis Darurat</th>
+                <th className="px-6 py-4 text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Warna / Pelapor</th>
+                <th className="px-6 py-4 text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Waktu Terdeteksi</th>
+                <th className="px-6 py-4 text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Status Penanganan</th>
+                <th className="px-6 py-4 text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -169,26 +168,26 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
                 <tr key={alert.id} className={`transition-colors group ${alert.status === 'Active' ? 'bg-rose-50/30 hover:bg-rose-50/60' : 'hover:bg-slate-50/50'}`}>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl border ${alert.status === 'Active' ? 'bg-rose-500 text-white border-rose-600 animate-pulse' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                      <div className={`p-2.5 rounded-xl border ${alert.status === 'Active' ? 'bg-rose-500 text-white border-rose-600 ' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
                         <AlertTriangle size={18} />
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-900 leading-none mb-1">{alert.location || 'Lokasi Terdaftar'}</p>
+                        <p className="text-sm font-semibold text-slate-900 leading-none mb-1">{alert.location || 'Lokasi Terdaftar'}</p>
                         <p className="text-[10px] text-slate-400 font-medium">Lat/Long Terdeteksi</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm font-black text-slate-900 leading-none mb-1">{alert.residentName}</p>
+                    <p className="text-sm font-semibold text-slate-900 leading-none mb-1">{alert.residentName}</p>
                     <p className="text-[10px] font-mono text-emerald-600 font-bold">Blok {getHouseLabel(alert.houseId)}</p>
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-xs font-bold text-slate-800">{new Date(alert.timestamp).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} WIB</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-xl text-[9px] font-mono font-black uppercase tracking-widest border ${
+                    <span className={`px-3 py-1 rounded-xl text-[9px] font-mono font-semibold uppercase tracking-widest border ${
                       alert.status === 'Active' 
-                        ? 'bg-rose-100 text-rose-800 border-rose-300 animate-pulse' 
+                        ? 'bg-rose-100 text-rose-800 border-rose-300 ' 
                         : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                     }`}>
                       {alert.status === 'Active' ? '🚨 SOS AKTIF' : '✓ AMAN / SELESAI'}
@@ -199,14 +198,14 @@ export const PanicAlertLogs: React.FC<PanicAlertLogsProps> = ({ houses }) => {
                       {alert.status === 'Active' && (
                         <button 
                           onClick={() => handleResolveAlert(alert.id)}
-                          className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                          className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm"
                         >
                           Tandai Aman
                         </button>
                       )}
                       <button 
                         onClick={() => handleDeleteAlert(alert.id)}
-                        className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                        className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
                         title="Hapus Log"
                       >
                         <Trash2 size={16} />

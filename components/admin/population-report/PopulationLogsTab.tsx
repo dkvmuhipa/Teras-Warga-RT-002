@@ -132,40 +132,40 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider">Warga Baru (Bulan Ini)</p>
-            <p className="text-xl font-black text-slate-900 mt-0.5">+{currentMonthLogStats.newcomer} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
+            <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider">Warga Baru (Bulan Ini)</p>
+            <p className="text-xl font-semibold text-slate-900 mt-0.5">+{currentMonthLogStats.newcomer} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
           </div>
           <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl"><User size={18} /></div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black text-amber-600 uppercase tracking-wider">Pindah Keluar (Bulan Ini)</p>
-            <p className="text-xl font-black text-slate-900 mt-0.5">-{currentMonthLogStats.movedOut} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
+            <p className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider">Pindah Keluar (Bulan Ini)</p>
+            <p className="text-xl font-semibold text-slate-900 mt-0.5">-{currentMonthLogStats.movedOut} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
           </div>
           <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><ArrowRight size={18} /></div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-wider">Kelahiran (Bulan Ini)</p>
-            <p className="text-xl font-black text-slate-900 mt-0.5">+{currentMonthLogStats.birth} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
+            <p className="text-[10px] font-semibold text-indigo-600 uppercase tracking-wider">Kelahiran (Bulan Ini)</p>
+            <p className="text-xl font-semibold text-slate-900 mt-0.5">+{currentMonthLogStats.birth} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
           </div>
           <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl"><Baby size={18} /></div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black text-rose-600 uppercase tracking-wider">Kematian (Bulan Ini)</p>
-            <p className="text-xl font-black text-slate-900 mt-0.5">-{currentMonthLogStats.death} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
+            <p className="text-[10px] font-semibold text-rose-600 uppercase tracking-wider">Kematian (Bulan Ini)</p>
+            <p className="text-xl font-semibold text-slate-900 mt-0.5">-{currentMonthLogStats.death} <span className="text-xs font-semibold text-slate-400">Jiwa</span></p>
           </div>
           <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl"><Activity size={18} /></div>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs flex items-center justify-between col-span-2 lg:col-span-1">
           <div>
-            <p className="text-[10px] font-black text-purple-600 uppercase tracking-wider">Menunggu Verifikasi</p>
-            <p className="text-xl font-black text-slate-900 mt-0.5">{currentMonthLogStats.pendingVerification} <span className="text-xs font-semibold text-slate-400">Dokumen</span></p>
+            <p className="text-[10px] font-semibold text-purple-600 uppercase tracking-wider">Menunggu Verifikasi</p>
+            <p className="text-xl font-semibold text-slate-900 mt-0.5">{currentMonthLogStats.pendingVerification} <span className="text-xs font-semibold text-slate-400">Dokumen</span></p>
           </div>
           <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl"><AlertCircle size={18} /></div>
         </div>
@@ -178,7 +178,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><Activity size={18} /></div>
             <div>
-              <h3 className="text-base font-black text-slate-900 tracking-tight">Log Mutasi Warga</h3>
+              <h3 className="text-base font-semibold text-slate-900 tracking-tight">Log Mutasi Warga</h3>
               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Peristiwa kependudukan real-time, pengolahan & audit trail</p>
             </div>
           </div>
@@ -188,7 +188,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
             <div className="flex items-center bg-slate-200/60 p-1 rounded-xl border border-slate-200">
               <button
                 onClick={() => setLogViewMode('table')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                   logViewMode === 'table' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -196,7 +196,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
               </button>
               <button
                 onClick={() => setLogViewMode('timeline')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                   logViewMode === 'timeline' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
@@ -211,14 +211,14 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                 placeholder="Cari nama, rumah..."
                 value={logSearchTerm}
                 onChange={(e) => { setLogSearchTerm(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-sans"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-colors font-sans"
               />
             </div>
             
             <select 
               value={logTypeFilter}
               onChange={(e) => { setLogTypeFilter(e.target.value as any); setCurrentPage(1); }}
-              className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
+              className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-colors cursor-pointer font-sans"
             >
               <option value="All">Semua Mutasi</option>
               <option value="Newcomer">Warga Baru</option>
@@ -230,7 +230,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
             <select 
               value={verificationFilter}
               onChange={(e) => { setVerificationFilter(e.target.value as any); setCurrentPage(1); }}
-              className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all cursor-pointer font-sans"
+              className="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-colors cursor-pointer font-sans"
             >
               <option value="All">Semua Verifikasi</option>
               <option value="Approved">Disetujui</option>
@@ -243,7 +243,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
         {/* Extended Filters Bar: Date Range Picker */}
         <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2 flex-wrap w-full md:w-auto">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
               <Calendar size={13} /> Periode Tanggal:
             </span>
             <input 
@@ -262,7 +262,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
             {(startDateFilter || endDateFilter) && (
               <button 
                 onClick={() => { setStartDateFilter(''); setEndDateFilter(''); setCurrentPage(1); }}
-                className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black uppercase hover:bg-slate-200 transition-all cursor-pointer"
+                className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-semibold uppercase hover:bg-slate-200 transition-colors cursor-pointer"
               >
                 Reset Tanggal
               </button>
@@ -297,7 +297,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                   key={statusTab.id}
                   type="button"
                   onClick={() => { setLogStatusFilter(statusTab.id as any); setCurrentPage(1); }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-colors duration-200 cursor-pointer ${
                     isActive 
                       ? 'bg-white text-indigo-700 shadow-xs border border-indigo-100/50' 
                       : 'text-slate-500 hover:text-slate-850'
@@ -319,26 +319,26 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
           {/* Bulk Action Toolbar */}
           {selectedLogIds.length > 0 && (
             <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200 p-1.5 rounded-2xl animate-fade-in">
-              <span className="text-[10px] font-black text-indigo-700 px-2 uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-indigo-700 px-2 uppercase tracking-wider">
                 {selectedLogIds.length} Terpilih
               </span>
               <button 
                 onClick={() => onBulkVerifyStatus('Approved')}
-                className="px-2.5 py-1 bg-emerald-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-emerald-700 transition-all cursor-pointer"
+                className="px-2.5 py-1 bg-emerald-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-emerald-700 transition-colors cursor-pointer"
                 title="Setujui Verifikasi Massal"
               >
                 <CheckCircle size={12} /> Setujui
               </button>
               <button 
                 onClick={() => onBulkMarkGenerated(true)}
-                className="px-2.5 py-1 bg-indigo-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-indigo-700 transition-all cursor-pointer"
+                className="px-2.5 py-1 bg-indigo-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-indigo-700 transition-colors cursor-pointer"
                 title="Tandai Sudah Lapor"
               >
                 <RefreshCw size={12} /> Tandai Lapor
               </button>
               <button 
                 onClick={onBulkDelete}
-                className="px-2.5 py-1 bg-rose-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-rose-700 transition-all cursor-pointer"
+                className="px-2.5 py-1 bg-rose-600 text-white rounded-xl font-bold text-[10px] uppercase flex items-center gap-1 hover:bg-rose-700 transition-colors cursor-pointer"
                 title="Hapus Terpilih"
               >
                 <Trash2 size={12} /> Hapus
@@ -379,11 +379,11 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                       {/* Timeline Card Content */}
                       <div 
                         onClick={() => onSelectLogForDetail(log)}
-                        className="bg-white border border-slate-200/80 hover:border-indigo-300 p-5 rounded-2xl shadow-xs hover:shadow-md transition-all cursor-pointer space-y-3"
+                        className="bg-white border border-slate-200/80 hover:border-indigo-300 p-5 rounded-2xl shadow-xs hover:shadow-md transition-colors cursor-pointer space-y-3"
                       >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                           <div className="flex items-center gap-2">
-                            <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                            <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider ${
                               log.type === 'Newcomer' ? 'bg-emerald-50 text-emerald-700' :
                               log.type === 'MovedOut' ? 'bg-amber-50 text-amber-700' :
                               log.type === 'Birth' ? 'bg-indigo-50 text-indigo-700' : 'bg-rose-50 text-rose-700'
@@ -402,12 +402,12 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                           <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150">
-                            <span className="text-[9px] font-black uppercase text-slate-400 block">Kavling / Rumah</span>
+                            <span className="text-[9px] font-semibold uppercase text-slate-400 block">Kavling / Rumah</span>
                             <span className="font-bold text-slate-800 font-mono">{houseLabel}</span>
                           </div>
 
                           <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150 col-span-2">
-                            <span className="text-[9px] font-black uppercase text-slate-400 block">Keterangan Peristiwa</span>
+                            <span className="text-[9px] font-semibold uppercase text-slate-400 block">Keterangan Peristiwa</span>
                             <span className="font-medium text-slate-700 italic">{log.description || '-'}</span>
                           </div>
                         </div>
@@ -419,7 +419,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                           <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                             <button
                               onClick={() => generateSingleMutationCertificatePDF(log, pdfConfig)}
-                              className="px-2.5 py-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-all cursor-pointer"
+                              className="px-2.5 py-1 text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors cursor-pointer"
                             >
                               Cetak PDF
                             </button>
@@ -476,7 +476,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                       <td className="p-4 font-mono text-xs font-bold text-slate-800 whitespace-nowrap">{log.date}</td>
                       <td className="p-4">
                         <span className={`
-                          px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1
+                          px-2.5 py-1 rounded-full text-[9px] font-semibold uppercase tracking-wider inline-flex items-center gap-1
                           ${log.type === 'Newcomer' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/50' : 
                             log.type === 'MovedOut' ? 'bg-amber-50 text-amber-700 border border-amber-200/50' : 
                             log.type === 'Birth' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/50' : 
@@ -499,7 +499,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                         {(() => {
                           const targetHouse = (houses || []).find(h => h.id === log.houseId);
                           return (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-black w-fit border border-slate-200/50">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs font-semibold w-fit border border-slate-200/50">
                               {targetHouse ? `Blok ${targetHouse.block}-${targetHouse.number}` : log.houseId}
                             </div>
                           );
@@ -510,7 +510,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                           const resType = log.details?.residenceType || 'Tetap';
                           const isMusiman = resType === 'Sewa' || resType === 'Rumah Keluarga';
                           return (
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-mono font-black uppercase tracking-wider ${
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-mono font-semibold uppercase tracking-wider ${
                               isMusiman 
                                 ? 'bg-amber-100 text-amber-800 border border-amber-200/80' 
                                 : 'bg-indigo-100 text-indigo-800 border border-indigo-200/80'
@@ -525,7 +525,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                       </td>
                       <td className="p-4 text-center">
                         <span className={`
-                          px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider inline-flex items-center gap-1
+                          px-2.5 py-1 rounded-full text-[9px] font-semibold uppercase tracking-wider inline-flex items-center gap-1
                           ${(!log.verificationStatus || log.verificationStatus === 'Approved') ? 'bg-emerald-100 text-emerald-800' :
                             log.verificationStatus === 'Pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}
                         `}>
@@ -537,14 +537,14 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => generateSingleMutationCertificatePDF(log, pdfConfig)}
-                            className="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/50 rounded-lg transition-all cursor-pointer"
+                            className="p-1.5 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/50 rounded-lg transition-colors cursor-pointer"
                             title="Cetak Surat PDF"
                           >
                             <Printer size={14} />
                           </button>
                           <button 
                             onClick={() => onSelectLogForDetail(log)}
-                            className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
+                            className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                             title="Rincian Lengkap"
                           >
                             <FileText size={14} />
@@ -559,7 +559,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
                       <div className="flex flex-col items-center gap-3">
                         <div className="p-5 bg-slate-50 rounded-full text-slate-300"><Clock size={40} /></div>
                         <div>
-                          <p className="font-black text-slate-800 text-base">Tidak ada data mutasi</p>
+                          <p className="font-semibold text-slate-800 text-base">Tidak ada data mutasi</p>
                         </div>
                       </div>
                     </td>
@@ -581,7 +581,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
               <button 
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="p-2 bg-white border border-slate-200 rounded-xl text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all cursor-pointer"
+                className="p-2 bg-white border border-slate-200 rounded-xl text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -593,7 +593,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
               <button 
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="p-2 bg-white border border-slate-200 rounded-xl text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-all cursor-pointer"
+                className="p-2 bg-white border border-slate-200 rounded-xl text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <ChevronRight size={16} />
               </button>

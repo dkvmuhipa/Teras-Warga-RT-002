@@ -221,9 +221,9 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
         <div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-6 bg-pink-600 rounded-full"></div>
-            <span className="text-[10px] font-black text-pink-600 uppercase tracking-widest">Pemberdayaan Ekonomi Lokal</span>
+            <span className="text-[10px] font-semibold text-pink-600 uppercase tracking-widest">Pemberdayaan Ekonomi Lokal</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">Bursa UMKM Warga RT 02</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mt-1">Bursa UMKM Warga RT 02</h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Katalog produk lokal warga, pemesanan produk rumah tangga, dan pemberdayaan usaha.</p>
         </div>
         
@@ -231,13 +231,13 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
           <div className="flex p-1 bg-slate-100 rounded-2xl">
             <button 
               onClick={() => setActiveTab('list')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'list' ? 'bg-white text-pink-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest transition-colors ${activeTab === 'list' ? 'bg-white text-pink-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
             >
               Katalog UMKM
             </button>
             <button 
               onClick={() => setActiveTab('orders')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'orders' ? 'bg-white text-pink-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
+              className={`px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-widest transition-colors ${activeTab === 'orders' ? 'bg-white text-pink-600 shadow-xs' : 'text-slate-500 hover:text-slate-700'}`}
             >
               Pesanan ({orders.filter(o => o.status === 'Pending').length})
             </button>
@@ -246,7 +246,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
           {activeTab === 'list' && (
             <Button 
               onClick={() => { resetForms(); setIsModalOpen(true); }} 
-              className="w-full sm:w-auto px-6 py-3.5 bg-pink-600 hover:bg-pink-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-pink-600/20 active:scale-[0.98] flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-3.5 bg-pink-600 hover:bg-pink-700 text-white rounded-2xl text-xs font-semibold uppercase tracking-widest transition-colors shadow-lg shadow-2xs active:scale-[0.98] flex items-center justify-center gap-2"
             >
               <Plus size={18} /> Daftarkan UMKM
             </Button>
@@ -261,7 +261,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
               <input 
                 type="text" 
                 placeholder="Cari nama toko, pemilik, atau produk unggulan warga..." 
-                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-pink-500/20 focus:bg-white focus:border-pink-500 outline-none transition-all"
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-pink-500/20 focus:bg-white focus:border-pink-500 outline-none transition-colors"
                 value={searchUmkm}
                 onChange={(e) => setSearchUmkm(e.target.value)}
               />
@@ -277,7 +277,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                     key={u.id} 
                     variants={itemVariants}
                     layout
-                    className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-pink-100/30 transition-all group overflow-hidden flex flex-col justify-between"
+                    className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-2xs transition-colors group overflow-hidden flex flex-col justify-between"
                   >
                     <div>
                       <div className="h-48 bg-slate-100 relative overflow-hidden">
@@ -290,19 +290,18 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                             (e.target as HTMLElement).style.display = 'none';
                           }}
                         />
-                        <span className="absolute top-4 left-4 px-3 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-xl border border-white/20">
+                        <span className="absolute top-4 left-4 px-3 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-semibold uppercase tracking-widest rounded-xl border border-white/20">
                           {u.category}
                         </span>
 
                         {u.houseId && (
-                          <span className="absolute bottom-3 left-4 px-2.5 py-0.5 bg-pink-600/90 backdrop-blur-xs text-white text-[8.5px] font-black rounded-md flex items-center gap-1">
-                            📍 Blok {u.houseId}
+                          <span className="absolute bottom-3 left-4 px-2.5 py-0.5 bg-pink-600/90 backdrop-blur-xs text-white text-[8.5px] font-semibold rounded-md flex items-center gap-1">📍 Blok {u.houseId}
                           </span>
                         )}
 
                         <div className="absolute top-4 right-4 flex gap-1">
-                          <button onClick={() => openEditUMKM(u)} className="p-2 bg-white/90 backdrop-blur-md text-slate-700 hover:text-pink-600 rounded-xl transition-all shadow-sm" title="Edit Profil UMKM"><Edit2 size={15} /></button>
-                          <button onClick={() => handleDeleteUMKM(u.id)} className="p-2 bg-white/90 backdrop-blur-md text-rose-600 hover:bg-rose-50 rounded-xl transition-all shadow-sm" title="Hapus UMKM"><Trash2 size={15} /></button>
+                          <button onClick={() => openEditUMKM(u)} className="p-2 bg-white/90 backdrop-blur-md text-slate-700 hover:text-pink-600 rounded-xl transition-colors shadow-sm" title="Edit Profil UMKM"><Edit2 size={15} /></button>
+                          <button onClick={() => handleDeleteUMKM(u.id)} className="p-2 bg-white/90 backdrop-blur-md text-rose-600 hover:bg-rose-50 rounded-xl transition-colors shadow-sm" title="Hapus UMKM"><Trash2 size={15} /></button>
                         </div>
                       </div>
 
@@ -312,7 +311,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                           <span className="text-amber-500 flex items-center gap-0.5"><Star size={12} className="fill-amber-400" /> 5.0</span>
                         </div>
 
-                        <h3 className="text-xl font-black text-slate-900 leading-snug group-hover:text-pink-600 transition-colors line-clamp-1">
+                        <h3 className="text-xl font-semibold text-slate-900 leading-snug group-hover:text-pink-600 transition-colors line-clamp-1">
                           {u.name}
                         </h3>
 
@@ -337,7 +336,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                         href={`https://wa.me/${u.contact.replace(/[^0-9]/g, '')}`} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-[11px] font-black transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-[11px] font-semibold transition-colors"
                       >
                         <MessageCircle size={14} /> Hubungi WhatsApp
                       </a>
@@ -364,13 +363,13 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-mono font-bold text-slate-400">#{o.id.slice(-6)}</span>
-                    <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${
+                    <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-wider ${
                       o.status === 'Completed' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
                     }`}>
                       {o.status}
                     </span>
                   </div>
-                  <h4 className="font-black text-slate-900 text-base">{o.umkmName || 'Produk UMKM Warga'}</h4>
+                  <h4 className="font-semibold text-slate-900 text-base">{o.umkmName || 'Produk UMKM Warga'}</h4>
                   <p className="text-xs text-slate-500 font-medium">Pemesan: {o.customerName} (Blok {o.houseId}) • WA: {o.customerPhone}</p>
                   <p className="text-xs font-bold text-slate-700 mt-2">
                     Item: {typeof o.items === 'string' ? o.items : o.items.map((item: any) => `${item.name} (x${item.quantity})`).join(', ')}
@@ -380,7 +379,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                 <div className="flex items-center gap-3">
                   <div className="text-right mr-3">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Total Bayar</span>
-                    <span className="text-lg font-black text-emerald-600">Rp {(o.totalPrice || o.totalAmount || 0).toLocaleString('id-ID')}</span>
+                    <span className="text-lg font-semibold text-emerald-600">Rp {(o.totalPrice || o.totalAmount || 0).toLocaleString('id-ID')}</span>
                   </div>
 
                   {o.status === 'Pending' && (
@@ -409,9 +408,9 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <form onSubmit={handleSubmitUMKM} className="lg:col-span-7 space-y-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Nama Usaha / Toko</label>
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Nama Usaha / Toko</label>
               <input 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors" 
                 value={umkmForm.name} 
                 onChange={e=>setUmkmForm({...umkmForm, name: e.target.value})} 
                 placeholder="Contoh: Dapur Mama RT 02 / Katering Berkah..." 
@@ -421,9 +420,9 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Nama Pemilik Usaha</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Nama Pemilik Usaha</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors" 
                   value={umkmForm.owner} 
                   onChange={e=>setUmkmForm({...umkmForm, owner: e.target.value})} 
                   placeholder="Nama pemilik usaha..." 
@@ -432,9 +431,9 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Kategori Kemitraan</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kategori Kemitraan</label>
                 <select 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all cursor-pointer" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors cursor-pointer" 
                   value={umkmForm.category} 
                   onChange={e=>setUmkmForm({...umkmForm, category: e.target.value})}
                 >
@@ -443,16 +442,16 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                   <option value="Retail">🏪 Toko Kelontong / Retail</option>
                   <option value="Fashion">👕 Pakaian & Fashion</option>
                   <option value="Kerajinan">🎨 Kerajinan & Handcraft</option>
-                  <option value="Lainnya">📌 Lainnya</option>
+                  <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Produk Unggulan</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Produk Unggulan</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors" 
                   value={umkmForm.featuredProduct} 
                   onChange={e=>setUmkmForm({...umkmForm, featuredProduct: e.target.value})} 
                   placeholder="Contoh: Nasi Kuning Khas Palu / Kue Nastar" 
@@ -460,9 +459,9 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Kisaran Harga (Price Range)</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kisaran Harga (Price Range)</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors" 
                   value={umkmForm.priceRange} 
                   onChange={e=>setUmkmForm({...umkmForm, priceRange: e.target.value})} 
                   placeholder="Contoh: Rp 10.000 - Rp 50.000" 
@@ -472,9 +471,9 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">WhatsApp Bisnis / Kontak</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">WhatsApp Bisnis / Kontak</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors" 
                   value={umkmForm.contact} 
                   onChange={e=>setUmkmForm({...umkmForm, contact: e.target.value})} 
                   placeholder="08123456789" 
@@ -483,16 +482,16 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Jam Operasional & ID Blok</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Jam Operasional & ID Blok</label>
                 <div className="grid grid-cols-2 gap-2">
                   <input 
-                    className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all" 
+                    className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors" 
                     value={umkmForm.operatingHours} 
                     onChange={e=>setUmkmForm({...umkmForm, operatingHours: e.target.value})} 
                     placeholder="08:00 - 21:00"
                   />
                   <input 
-                    className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all" 
+                    className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors" 
                     value={umkmForm.houseId} 
                     onChange={e=>setUmkmForm({...umkmForm, houseId: e.target.value})} 
                     placeholder="Blok (Contoh: A-12)"
@@ -503,22 +502,22 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
 
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Deskripsi Layanan & Promosi</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Deskripsi Layanan & Promosi</label>
                 <button 
                   type="button" 
                   onClick={handleGenerateWithAi} 
-                  className="inline-flex items-center gap-1.5 bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200/70 text-[11px] font-black py-1.5 px-3 rounded-full transition-all shrink-0 active:scale-95"
+                  className="inline-flex items-center gap-1.5 bg-pink-50 text-pink-700 hover:bg-pink-100 border border-pink-200/70 text-[11px] font-semibold py-1.5 px-3 rounded-full transition-colors shrink-0 active:scale-95"
                 >
                   {isAiLoading ? (
                     <Sparkles size={13} className="animate-spin text-pink-600" />
                   ) : (
-                    <Sparkles size={13} className="text-pink-600 animate-pulse" />
+                    <Sparkles size={13} className="text-pink-600" />
                   )}
                   <span>{isAiLoading ? 'Menyusun Draft...' : 'Bantu Tulis Promosi AI'}</span>
                 </button>
               </div>
               <textarea 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all min-h-[100px] resize-none" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors min-h-[100px] resize-none" 
                 rows={4} 
                 value={umkmForm.description} 
                 onChange={e=>setUmkmForm({...umkmForm, description: e.target.value})} 
@@ -528,9 +527,9 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
             </div>
 
             <div className="space-y-1">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Link Foto Sampul / Banner Bisnis</label>
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Link Foto Sampul / Banner Bisnis</label>
               <input 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-all" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none transition-colors" 
                 value={umkmForm.image} 
                 onChange={e=>setUmkmForm({...umkmForm, image: e.target.value})} 
                 placeholder="https://images.unsplash.com/... (URL Foto Banner)" 
@@ -538,7 +537,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
             </div>
 
             <div className="pt-2 border-t border-slate-100">
-              <Button type="submit" className="w-full py-3.5 text-xs font-black uppercase tracking-wider rounded-2xl bg-pink-600 hover:bg-pink-700 text-white shadow-lg shadow-pink-600/20 flex justify-center items-center gap-2 group/submit" disabled={isUploading}>
+              <Button type="submit" className="w-full py-3.5 text-xs font-semibold uppercase tracking-wider rounded-2xl bg-pink-600 hover:bg-pink-700 text-white shadow-lg shadow-2xs flex justify-center items-center gap-2 group/submit" disabled={isUploading}>
                 {isUploading ? (
                   <><Loader2 size={16} className="animate-spin" /> Sedang Mengunggah...</>
                 ) : editingUmkmId ? (
@@ -554,7 +553,7 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
             <div>
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 bg-pink-400 rounded-full animate-ping" />
+                  <div className="w-2.5 h-2.5 bg-pink-400 rounded-full" />
                   <span className="text-[10px] font-mono text-pink-400 font-bold uppercase tracking-widest">LIVE SHOP CARD MOCKUP</span>
                 </div>
                 <Store size={15} className="text-pink-400" />
@@ -571,23 +570,22 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                       <span className="text-[9px] font-bold text-slate-400 mt-1">Pratinjau Foto Usaha</span>
                     </div>
                   )}
-                  <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest rounded-lg">
+                  <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[8px] font-semibold uppercase tracking-widest rounded-lg">
                     {umkmForm.category}
                   </span>
                   {umkmForm.houseId && (
-                    <span className="absolute bottom-2.5 left-3 px-2 py-0.5 bg-pink-600 text-white text-[8px] font-bold rounded-md">
-                      📍 Blok {umkmForm.houseId}
+                    <span className="absolute bottom-2.5 left-3 px-2 py-0.5 bg-pink-600 text-white text-[8px] font-bold rounded-md">📍 Blok {umkmForm.houseId}
                     </span>
                   )}
                 </div>
 
                 <div className="p-4 space-y-2">
                   <div className="flex items-center justify-between text-[9px] text-slate-400 font-bold">
-                    <span>👤 {umkmForm.owner || 'Pemilik Usaha'}</span>
+                    <span>{umkmForm.owner || 'Pemilik Usaha'}</span>
                     <span className="text-amber-500 font-bold">★ 5.0 (TERVERIFIKASI)</span>
                   </div>
 
-                  <h4 className="font-black text-base text-slate-900 leading-snug">
+                  <h4 className="font-semibold text-base text-slate-900 leading-snug">
                     {umkmForm.name || '[Nama Usaha / Toko Warga]'}
                   </h4>
 
@@ -603,8 +601,8 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                 </div>
 
                 <div className="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[9.5px] font-bold text-slate-600">
-                  <span>💰 {umkmForm.priceRange || 'Harga Terjangkau'}</span>
-                  <span className="text-emerald-600 font-black flex items-center gap-1">
+                  <span>{umkmForm.priceRange || 'Harga Terjangkau'}</span>
+                  <span className="text-emerald-600 font-semibold flex items-center gap-1">
                     <MessageCircle size={12} /> WA SEKARANG
                   </span>
                 </div>

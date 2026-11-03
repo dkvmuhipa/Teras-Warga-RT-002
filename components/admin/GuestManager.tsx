@@ -111,25 +111,25 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Manajemen Wajib Lapor Tamu 24 Jam</h2>
+          <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">Manajemen Wajib Lapor Tamu 24 Jam</h2>
           <p className="text-slate-500 font-medium text-xs mt-0.5">Pemantauan & pengawasan tamu yang menginap di lingkungan RT 02 demi keamanan wilayah.</p>
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={() => generateGuestReportExcel(guestReports)}
-            className="flex items-center gap-2 px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-all active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-colors active:scale-95"
           >
             <Download size={14} /> Ekspor Excel
           </button>
           <button 
             onClick={() => generateGuestReportPDF(guestReports, pdfConfig)}
-            className="flex items-center gap-2 px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-colors active:scale-95"
           >
             <ExternalLink size={14} /> Ekspor PDF
           </button>
           <button 
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-rose-600/20 transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-md shadow-2xs transition-colors active:scale-95"
           >
             <Plus size={16} /> Catat Tamu Baru
           </button>
@@ -140,8 +140,8 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase text-rose-600 tracking-wider">Tamu Menginap Aktif</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{activeGuests.length} <span className="text-xs font-semibold text-slate-400">Orang</span></p>
+            <p className="text-[10px] font-semibold uppercase text-rose-600 tracking-wider">Tamu Menginap Aktif</p>
+            <p className="text-2xl font-semibold text-slate-900 mt-1">{activeGuests.length} <span className="text-xs font-semibold text-slate-400">Orang</span></p>
           </div>
           <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
             <ShieldAlert size={20} />
@@ -150,8 +150,8 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
 
         <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">Tamu Sudah Pulang</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{departedGuests.length} <span className="text-xs font-semibold text-slate-400">Arsip</span></p>
+            <p className="text-[10px] font-semibold uppercase text-emerald-600 tracking-wider">Tamu Sudah Pulang</p>
+            <p className="text-2xl font-semibold text-slate-900 mt-1">{departedGuests.length} <span className="text-xs font-semibold text-slate-400">Arsip</span></p>
           </div>
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
             <UserCheck size={20} />
@@ -160,8 +160,8 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
 
         <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase text-indigo-600 tracking-wider">Total Laporan Bulan Ini</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{guestReports.length} <span className="text-xs font-semibold text-slate-400">Laporan</span></p>
+            <p className="text-[10px] font-semibold uppercase text-indigo-600 tracking-wider">Total Laporan Bulan Ini</p>
+            <p className="text-2xl font-semibold text-slate-900 mt-1">{guestReports.length} <span className="text-xs font-semibold text-slate-400">Laporan</span></p>
           </div>
           <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
             <FileText size={20} />
@@ -170,8 +170,8 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
 
         <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Proteksi Keamanan</p>
-            <p className="text-xs font-black text-emerald-600 mt-1 flex items-center gap-1">
+            <p className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider">Proteksi Keamanan</p>
+            <p className="text-xs font-semibold text-emerald-600 mt-1 flex items-center gap-1">
               <CheckCircle size={14} /> Terkendali 24 Jam
             </p>
           </div>
@@ -187,14 +187,14 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
             <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
               <Clock size={20} />
             </div>
-            <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest">Tamu Sedang Menginap</h3>
+            <h3 className="text-lg font-semibold text-slate-800 uppercase tracking-widest">Tamu Sedang Menginap</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {activeGuests.map((guest) => (
               <div key={guest.id} className="bg-slate-50 border border-slate-200 rounded-[2rem] p-6 relative group overflow-hidden">
                 <div className="absolute top-0 right-0 p-4">
-                  <span className="px-3 py-1 bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest rounded-full">Aktif</span>
+                  <span className="px-3 py-1 bg-emerald-500 text-white text-[8px] font-semibold uppercase tracking-widest rounded-full">Aktif</span>
                 </div>
                 
                 <div className="flex items-center gap-4 mb-6">
@@ -202,7 +202,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <User size={28} />
                   </div>
                   <div>
-                    <h4 className="font-black text-slate-800 text-lg leading-tight">{guest.guestName}</h4>
+                    <h4 className="font-semibold text-slate-800 text-lg leading-tight">{guest.guestName}</h4>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">{guest.relationship}</p>
                   </div>
                 </div>
@@ -229,13 +229,13 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                 <div className="flex gap-2">
                   <button 
                     onClick={() => setSelectedGuest(guest)}
-                    className="flex-1 py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-100 transition-all"
+                    className="flex-1 py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-100 transition-colors"
                   >
                     <Info size={12} /> Detail
                   </button>
                   <button 
                     onClick={() => handleStatusUpdate(guest.id, 'Departed')}
-                    className="flex-1 py-3 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-100 transition-all"
+                    className="flex-1 py-3 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-emerald-100 transition-colors"
                   >
                     <CheckCircle size={12} /> Pulang
                   </button>
@@ -247,13 +247,13 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                 <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-100">
                   <ShieldAlert size={32} />
                 </div>
-                <h4 className="font-black text-slate-900 text-base mb-1">Tidak Ada Tamu Yang Sedang Menginap</h4>
+                <h4 className="font-semibold text-slate-900 text-base mb-1">Tidak Ada Tamu Yang Sedang Menginap</h4>
                 <p className="text-xs text-slate-400 font-semibold max-w-md mx-auto mb-4">
                   Lingkungan RT 02 dalam kondisi aman dan terkendali. Tidak ada laporan tamu menginap aktif 24 jam saat ini.
                 </p>
                 <button
                   onClick={() => setIsAddModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors"
                 >
                   <Plus size={14} /> Catat Laporan Tamu Baru
                 </button>
@@ -267,18 +267,18 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
             <div className="w-10 h-10 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center">
               <History size={20} />
             </div>
-            <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest">Riwayat Tamu</h3>
+            <h3 className="text-lg font-semibold text-slate-800 uppercase tracking-widest">Riwayat Tamu</h3>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-100">
-                  <th className="text-left py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nama Tamu</th>
-                  <th className="text-left py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rumah Dikunjungi</th>
-                  <th className="text-left py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal</th>
-                  <th className="text-left py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                  <th className="text-right py-4 px-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Aksi</th>
+                  <th className="text-left py-4 px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Nama Tamu</th>
+                  <th className="text-left py-4 px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Rumah Dikunjungi</th>
+                  <th className="text-left py-4 px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Tanggal</th>
+                  <th className="text-left py-4 px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Status</th>
+                  <th className="text-right py-4 px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -295,7 +295,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                       <p className="text-sm font-medium text-slate-600">{new Date(guest.arrivalDate).toLocaleDateString('id-ID')}</p>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="px-3 py-1 bg-slate-200 text-slate-600 text-[8px] font-black uppercase tracking-widest rounded-full">Sudah Pulang</span>
+                      <span className="px-3 py-1 bg-slate-200 text-slate-600 text-[8px] font-semibold uppercase tracking-widest rounded-full">Sudah Pulang</span>
                     </td>
                     <td className="py-4 px-4 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -338,13 +338,13 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                   <User size={24} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-slate-800 tracking-tight">Detail Laporan Tamu</h3>
+                  <h3 className="text-xl font-semibold text-slate-800 tracking-tight">Detail Laporan Tamu</h3>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">ID: {selectedGuest.id}</p>
                 </div>
               </div>
               <button 
                 onClick={() => setSelectedGuest(null)}
-                className="w-10 h-10 bg-white border border-slate-200 text-slate-400 rounded-xl flex items-center justify-center hover:text-slate-900 transition-all"
+                className="w-10 h-10 bg-white border border-slate-200 text-slate-400 rounded-xl flex items-center justify-center hover:text-slate-900 transition-colors"
               >
                 <Trash2 size={20} className="rotate-45" />
               </button>
@@ -354,13 +354,13 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Guest Info */}
                 <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Informasi Tamu</h4>
+                  <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Informasi Tamu</h4>
                   
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <User className="text-indigo-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nama Lengkap</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Nama Lengkap</p>
                         <p className="font-bold text-slate-800">{selectedGuest.guestName}</p>
                       </div>
                     </div>
@@ -368,7 +368,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <FileText className="text-indigo-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">NIK Tamu</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">NIK Tamu</p>
                         <p className="font-bold text-slate-800">{selectedGuest.guestNik || '-'}</p>
                       </div>
                     </div>
@@ -376,7 +376,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <FileText className="text-indigo-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Pekerjaan Tamu</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Pekerjaan Tamu</p>
                         <p className="font-bold text-slate-800">{selectedGuest.guestJob || '-'}</p>
                       </div>
                     </div>
@@ -384,7 +384,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <UserCheck className="text-indigo-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Jenis Kelamin</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Jenis Kelamin</p>
                         <p className="font-bold text-slate-800">{selectedGuest.gender || '-'}</p>
                       </div>
                     </div>
@@ -392,7 +392,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <Phone className="text-indigo-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nomor HP</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Nomor HP</p>
                         <p className="font-bold text-slate-800">{selectedGuest.phone}</p>
                       </div>
                     </div>
@@ -400,7 +400,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <MapPin className="text-indigo-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Alamat Asal</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Alamat Asal</p>
                         <p className="font-bold text-slate-800 text-sm leading-relaxed">{selectedGuest.guestAddress || '-'}</p>
                       </div>
                     </div>
@@ -409,13 +409,13 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
 
                 {/* Visit Info */}
                 <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Informasi Kunjungan</h4>
+                  <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 pb-2">Informasi Kunjungan</h4>
                   
                   <div className="space-y-4">
                     <div className="flex items-start gap-3">
                       <MapPin className="text-emerald-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Rumah Dikunjungi</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Rumah Dikunjungi</p>
                         <p className="font-bold text-slate-800">{selectedGuest.residentName}</p>
                       </div>
                     </div>
@@ -423,7 +423,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <UserCheck className="text-emerald-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Hubungan</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Hubungan</p>
                         <p className="font-bold text-slate-800">{selectedGuest.relationship}</p>
                       </div>
                     </div>
@@ -431,7 +431,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <Calendar className="text-emerald-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Rencana Menginap</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Rencana Menginap</p>
                         <p className="font-bold text-slate-800">{new Date(selectedGuest.arrivalDate).toLocaleDateString('id-ID')} s/d {selectedGuest.departureDate ? new Date(selectedGuest.departureDate).toLocaleDateString('id-ID') : '-'}</p>
                         <p className="text-xs text-slate-500 mt-1">Durasi: {selectedGuest.stayDuration}</p>
                       </div>
@@ -440,7 +440,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <Info className="text-emerald-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Keperluan</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Keperluan</p>
                         <p className="font-bold text-slate-800 text-sm leading-relaxed">{selectedGuest.purpose || '-'}</p>
                       </div>
                     </div>
@@ -448,7 +448,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <div className="flex items-start gap-3">
                       <Car className="text-emerald-500 mt-1" size={18} />
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Informasi Kendaraan</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Informasi Kendaraan</p>
                         <p className="font-bold text-slate-800">{selectedGuest.vehicleInfo || 'Tidak membawa kendaraan'}</p>
                       </div>
                     </div>
@@ -459,7 +459,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
               {/* KTP Image */}
               {selectedGuest.ktpUrl && (
                 <div className="mt-10 pt-8 border-t border-slate-100">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Identitas (KTP)</h4>
+                  <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-4">Identitas (KTP)</h4>
                   <div className="relative group rounded-3xl overflow-hidden border border-slate-200 bg-slate-50 aspect-video flex items-center justify-center">
                     <img 
                       src={selectedGuest.ktpUrl} 
@@ -471,7 +471,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                       href={selectedGuest.ktpUrl} 
                       target="_blank" 
                       rel="noreferrer"
-                      className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-white font-black uppercase tracking-widest text-xs gap-2"
+                      className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-colors flex items-center justify-center text-white font-semibold uppercase tracking-widest text-xs gap-2"
                     >
                       <ExternalLink size={20} /> Lihat Ukuran Penuh
                     </a>
@@ -524,11 +524,11 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
           {/* Header Identitas Resmi RT 002 / RW 020 */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-rose-50 via-slate-50 to-rose-50/30 border border-rose-100/80 rounded-2xl">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+              <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-semibold text-xs shadow-sm">
                 <ShieldAlert size={16} />
               </div>
               <div>
-                <p className="text-[11px] font-black text-slate-800 tracking-tight leading-tight">
+                <p className="text-[11px] font-semibold text-slate-800 tracking-tight leading-tight">
                   Sistem Registrasi Wajib Lapor 1x24 Jam RT 002 / RW 020
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
@@ -536,7 +536,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-wider bg-rose-100/80 text-rose-700 px-3 py-1 rounded-lg border border-rose-200">
+            <span className="text-[10px] font-semibold uppercase tracking-wider bg-rose-100/80 text-rose-700 px-3 py-1 rounded-lg border border-rose-200">
               Ketertiban & Siskamling
             </span>
           </div>
@@ -546,7 +546,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
             <div className="lg:col-span-7 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     Nama Lengkap Tamu *
                   </label>
                   <div className="relative">
@@ -555,14 +555,14 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                       type="text"
                       required
                       placeholder="Contoh: Ahmad Subagja"
-                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors"
                       value={addFormData.guestName}
                       onChange={e => setAddFormData(prev => ({ ...prev, guestName: e.target.value }))}
                     />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     No. Telp / WhatsApp Tamu
                   </label>
                   <div className="relative">
@@ -570,7 +570,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                     <input 
                       type="text"
                       placeholder="0812xxxxxxx"
-                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors"
                       value={addFormData.phone}
                       onChange={e => setAddFormData(prev => ({ ...prev, phone: e.target.value }))}
                     />
@@ -580,27 +580,27 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     ID Kavling / Blok Rumah *
                   </label>
                   <input 
                     type="text"
                     required
                     placeholder="Contoh: B-12 atau Blok C No. 5"
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors"
                     value={addFormData.residentHouseId}
                     onChange={e => setAddFormData(prev => ({ ...prev, residentHouseId: e.target.value }))}
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     Nama Tuan Rumah (Warga) *
                   </label>
                   <input 
                     type="text"
                     required
                     placeholder="Nama pemilik rumah..."
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors"
                     value={addFormData.residentName}
                     onChange={e => setAddFormData(prev => ({ ...prev, residentName: e.target.value }))}
                   />
@@ -609,11 +609,11 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
 
               {/* Hubungan */}
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                   Hubungan dengan Tuan Rumah
                 </label>
                 <select
-                  className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all cursor-pointer"
+                  className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors cursor-pointer"
                   value={addFormData.relationship}
                   onChange={e => setAddFormData(prev => ({ ...prev, relationship: e.target.value }))}
                 >
@@ -630,7 +630,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                       key={rel}
                       type="button"
                       onClick={() => setAddFormData(prev => ({ ...prev, relationship: rel }))}
-                      className={`px-2.5 py-1 rounded-lg text-[9px] font-black transition-all ${
+                      className={`px-2.5 py-1 rounded-lg text-[9px] font-semibold transition-colors ${
                         addFormData.relationship === rel 
                           ? 'bg-rose-600 text-white shadow-xs' 
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -645,14 +645,14 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
               {/* Durasi Menginap & Tanggal Kedatangan */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     Rencana Durasi Menginap *
                   </label>
                   <input 
                     type="text"
                     required
                     placeholder="Contoh: 2 Hari / 1 Minggu"
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors"
                     value={addFormData.stayDuration}
                     onChange={e => setAddFormData(prev => ({ ...prev, stayDuration: e.target.value }))}
                   />
@@ -671,13 +671,13 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     Tgl Kedatangan *
                   </label>
                   <input 
                     type="date"
                     required
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all cursor-pointer"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors cursor-pointer"
                     value={addFormData.arrivalDate}
                     onChange={e => setAddFormData(prev => ({ ...prev, arrivalDate: e.target.value }))}
                   />
@@ -686,14 +686,14 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
 
               {/* Keperluan Kunjungan */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                   Keperluan / Maksud Kunjungan *
                 </label>
                 <textarea 
                   rows={2}
                   required
                   placeholder="Jelaskan secara singkat alasan kunjungan/menginap..."
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all resize-none"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-colors resize-none"
                   value={addFormData.purpose}
                   onChange={e => setAddFormData(prev => ({ ...prev, purpose: e.target.value }))}
                 />
@@ -703,20 +703,20 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
             {/* Kolom Kanan: Live Digital Visitor Card Preview (5 Kolom) */}
             <div className="lg:col-span-5 space-y-4">
               <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <UserCheck size={13} className="text-rose-600" />
                   Pratinjau Kartu Izin Tamu Digital
                 </span>
-                <span className="text-[9px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/60 uppercase">
+                <span className="text-[9px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/60 uppercase">
                   Wajib Lapor
                 </span>
               </div>
 
               {/* Kartu Izin Tamu RT 002 / RW 020 */}
-              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-slate-200/50 space-y-3.5 relative overflow-hidden text-xs">
+              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-2xs space-y-3.5 relative overflow-hidden text-xs">
                 {/* Header Kartu */}
                 <div className="text-center pb-2.5 border-b border-dashed border-slate-200">
-                  <p className="text-[10px] font-black text-slate-800 uppercase tracking-wider">
+                  <p className="text-[10px] font-semibold text-slate-800 uppercase tracking-wider">
                     SURAT KETERANGAN TAMU SEMENTARA
                   </p>
                   <p className="text-[9px] font-bold text-slate-400">
@@ -780,7 +780,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="flex-[2] py-3.5 rounded-2xl text-xs font-black shadow-lg bg-rose-600 hover:bg-rose-700 shadow-rose-600/25 text-white transition-all"
+              className="flex-[2] py-3.5 rounded-2xl text-xs font-semibold shadow-lg bg-rose-600 hover:bg-rose-700 shadow-2xs text-white transition-colors"
             >
               {isSubmitting ? 'Menyimpan...' : 'Simpan & Daftarkan Laporan Tamu'}
             </Button>

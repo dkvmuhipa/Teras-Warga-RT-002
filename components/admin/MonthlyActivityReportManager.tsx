@@ -275,16 +275,15 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
       {/* Header Banner - Apple Minimalist Style */}
       <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-[10px] font-mono font-black uppercase tracking-widest mb-2 inline-block">
-            📑 DOKUMEN & ARSIP RESMI RT
+          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-[10px] font-mono font-semibold uppercase tracking-widest mb-2 inline-block">📑 DOKUMEN & ARSIP RESMI RT
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Laporan Kegiatan Bulanan RT</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Laporan Kegiatan Bulanan RT</h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
             Pusat pembuatan dan unduhan format PDF resmi laporan bulanan kegiatan, uraian program kerja, notulensi, dan lokasi acara RT 02.
           </p>
         </div>
 
-        <Button onClick={handleOpenCreateModal} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 text-xs py-3.5 px-6 rounded-2xl font-black uppercase tracking-wider">
+        <Button onClick={handleOpenCreateModal} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-2xs text-xs py-3.5 px-6 rounded-2xl font-semibold uppercase tracking-wider">
           <Plus size={16} className="mr-2" /> Buat Laporan Bulan Ini
         </Button>
       </div>
@@ -293,11 +292,11 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
       {isEndOfMonth && !isCurrentMonthReportCreated && (
         <div className="bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border border-amber-300/80 rounded-3xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/20">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-2xs">
               <AlertCircle size={20} />
             </div>
             <div>
-              <h4 className="text-sm font-black text-slate-900">Pengingat Laporan Akhir Bulan ({getIndonesianMonthYear(currentMonthKey)})</h4>
+              <h4 className="text-sm font-semibold text-slate-900">Pengingat Laporan Akhir Bulan ({getIndonesianMonthYear(currentMonthKey)})</h4>
               <p className="text-xs text-slate-600 font-medium mt-0.5">
                 Sudah memasuki akhir bulan. Silakan susun dan terbitkan Laporan Pertanggungjawaban Bulanan Terpadu RT 02.
               </p>
@@ -314,7 +313,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
           {/* Left Column: List of Monthly Reports */}
           <div className="space-y-3">
             <div className="flex justify-between items-center px-1">
-              <h4 className="text-xs font-mono font-black text-slate-400 uppercase tracking-widest">
+              <h4 className="text-xs font-mono font-semibold text-slate-400 uppercase tracking-widest">
                 DAFTAR PERIODE BULANAN
               </h4>
               <span className="text-[10px] font-mono font-bold text-slate-400">{reports.length} Periode</span>
@@ -338,14 +337,14 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                   <div
                     key={rep.id}
                     onClick={() => setActiveReport(rep)}
-                    className={`p-5 rounded-3xl border transition-all cursor-pointer ${
+                    className={`p-5 rounded-3xl border transition-colors cursor-pointer ${
                       isSelected 
-                        ? 'bg-slate-900 text-white border-slate-800 shadow-xl shadow-slate-900/20' 
+                        ? 'bg-slate-900 text-white border-slate-800 shadow-xl shadow-2xs' 
                         : 'bg-white text-slate-800 border-slate-200/80 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider ${
+                      <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-semibold uppercase tracking-wider ${
                         isSelected ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-indigo-50 text-indigo-700'
                       }`}>
                         {getIndonesianMonthYear(rep.month)}
@@ -355,7 +354,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                       </span>
                     </div>
 
-                    <h3 className="font-black text-sm line-clamp-1 mb-1">{rep.title}</h3>
+                    <h3 className="font-semibold text-sm line-clamp-1 mb-1">{rep.title}</h3>
                     <p className={`text-xs line-clamp-2 ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>
                       {rep.executiveSummary || 'Laporan kinerja program kerja lingkungan RT 02.'}
                     </p>
@@ -369,15 +368,15 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
           {activeReport && (
             <div className="lg:col-span-2 space-y-6">
               {/* Report Header Card */}
-              <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2.5rem] p-6 sm:p-8 shadow-xl shadow-indigo-950/20 relative overflow-hidden">
+              <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2.5rem] p-6 sm:p-8 shadow-xl shadow-2xs relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
                 
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 relative z-10">
                   <div>
-                    <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-[9px] font-mono font-black uppercase tracking-widest">
+                    <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-[9px] font-mono font-semibold uppercase tracking-widest">
                       PERIODE: {getIndonesianMonthYear(activeReport.month)}
                     </span>
-                    <h2 className="text-2xl font-black mt-2 tracking-tight">{activeReport.title}</h2>
+                    <h2 className="text-2xl font-semibold mt-2 tracking-tight">{activeReport.title}</h2>
                     <p className="text-xs text-slate-300 font-medium mt-1 leading-relaxed max-w-xl">
                       {activeReport.executiveSummary}
                     </p>
@@ -389,7 +388,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                       <button
                         type="button"
                         onClick={() => setPdfOrientation('portrait')}
-                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                           pdfOrientation === 'portrait' 
                             ? 'bg-white text-slate-900 shadow-sm' 
                             : 'text-slate-300 hover:text-white'
@@ -401,7 +400,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                       <button
                         type="button"
                         onClick={() => setPdfOrientation('landscape')}
-                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                           pdfOrientation === 'landscape' 
                             ? 'bg-white text-slate-900 shadow-sm' 
                             : 'text-slate-300 hover:text-white'
@@ -417,7 +416,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                       <button
                         type="button"
                         onClick={() => setIncludeSignature(!includeSignature)}
-                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                           includeSignature 
                             ? 'bg-indigo-500 text-white shadow-sm' 
                             : 'bg-white/5 text-slate-400 hover:text-slate-200 line-through opacity-70'
@@ -429,56 +428,55 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                       <button
                         type="button"
                         onClick={() => setIncludeStamp(!includeStamp)}
-                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                        className={`px-2.5 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                           includeStamp 
                             ? 'bg-purple-600 text-white shadow-sm' 
                             : 'bg-white/5 text-slate-400 hover:text-slate-200 line-through opacity-70'
                         }`}
                         title={includeStamp ? "Stempel/Cap RT Digital Aktif" : "Stempel/Cap Dikosongkan (Cap Basah)"}
-                      >
-                        💮 Cap: {includeStamp ? 'ON' : 'OFF'}
+                      >💮 Cap: {includeStamp ? 'ON' : 'OFF'}
                       </button>
                     </div>
 
                     <button
                       onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig, pdfOrientation, includeSignature, includeStamp, stbmRecords)}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/30 transition-transform active:scale-95 cursor-pointer border border-indigo-400/30"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-semibold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-2xs transition-transform active:scale-95 cursor-pointer border border-indigo-400/30"
                       title={`Download Dokumen Lengkap Terpadu format ${pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'}`}
                     >
-                      <Sparkles size={14} className="text-amber-300 animate-pulse" /> 
+                      <Sparkles size={14} className="text-amber-300" /> 
                       <span>Unduh Terpadu</span>
                     </button>
                     <button
                       onClick={() => generateDedicatedMonthlyActivityReportPDF(activeReport, pdfConfig, pdfOrientation, includeSignature, includeStamp)}
-                      className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-white/10"
+                      className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 font-bold rounded-xl text-xs uppercase tracking-wider transition-colors active:scale-95 cursor-pointer border border-white/10"
                       title={`Download PDF Khusus Agenda format ${pdfOrientation === 'portrait' ? 'Vertical' : 'Landscape'}`}
                     >
                       <Download size={14} /> Khusus Agenda
                     </button>
                     <button
                       onClick={() => handleExportExcel(activeReport)}
-                      className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-600/80 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-emerald-500/30"
+                      className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-600/80 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs uppercase tracking-wider transition-colors active:scale-95 cursor-pointer border border-emerald-500/30"
                       title="Ekspor Laporan Resmi ke Format Excel (.xlsx)"
                     >
                       <FileSpreadsheet size={14} /> Excel (.xlsx)
                     </button>
                     <button
                       onClick={() => handleBroadcastWhatsApp(activeReport)}
-                      className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-xl text-xs uppercase tracking-wider transition-all active:scale-95 cursor-pointer border border-emerald-500/30"
+                      className="flex items-center gap-1.5 px-3 py-2.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 font-bold rounded-xl text-xs uppercase tracking-wider transition-colors active:scale-95 cursor-pointer border border-emerald-500/30"
                       title="Kirim Ringkasan Laporan ke WhatsApp Group RT"
                     >
                       <Share2 size={14} /> WhatsApp
                     </button>
                     <button 
                       onClick={() => handleEditReport(activeReport)}
-                      className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all cursor-pointer"
+                      className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors cursor-pointer"
                       title="Edit Laporan"
                     >
                       <Edit2 size={15} />
                     </button>
                     <button 
                       onClick={() => handleDeleteReport(activeReport.id, activeReport.month)}
-                      className="p-2.5 bg-white/10 hover:bg-rose-600 text-white rounded-xl transition-all cursor-pointer"
+                      className="p-2.5 bg-white/10 hover:bg-rose-600 text-white rounded-xl transition-colors cursor-pointer"
                       title="Hapus Laporan"
                     >
                       <Trash2 size={15} />
@@ -500,7 +498,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
               </div>
 
               {/* Capaian Kesehatan Lingkungan & 5 Pilar STBM (Kelurahan & Puskesmas) */}
-              <div className="bg-gradient-to-br from-emerald-950 via-slate-900 to-emerald-950 rounded-[2rem] p-6 border border-emerald-500/30 text-white space-y-4 shadow-xl shadow-emerald-950/20">
+              <div className="bg-gradient-to-br from-emerald-950 via-slate-900 to-emerald-950 rounded-[2rem] p-6 border border-emerald-500/30 text-white space-y-4 shadow-xl shadow-2xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400">
@@ -508,20 +506,20 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-[9px] font-black uppercase tracking-wider">
+                        <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-[9px] font-semibold uppercase tracking-wider">
                           Puskesmas &amp; Kelurahan Tondo
                         </span>
                         <span className="px-2 py-0.5 bg-white/10 text-slate-300 rounded text-[9px] font-mono font-bold">
                           100% ODF
                         </span>
                       </div>
-                      <h4 className="text-base font-black text-white mt-1">Capaian Kesehatan Lingkungan &amp; 5 Pilar STBM</h4>
+                      <h4 className="text-base font-semibold text-white mt-1">Capaian Kesehatan Lingkungan &amp; 5 Pilar STBM</h4>
                     </div>
                   </div>
 
                   <button
                     onClick={() => generateIntegratedMonthlyReportPDF(activeReport, houses, cashFlow, populationReports, pdfConfig, pdfOrientation, includeSignature, includeStamp, stbmRecords)}
-                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 self-start sm:self-auto shadow-md cursor-pointer active:scale-95"
+                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 self-start sm:self-auto shadow-md cursor-pointer active:scale-95"
                     title="Cetak Laporan Lengkap Terpadu Termasuk Capaian STBM"
                   >
                     <Download size={14} /> Cetak Lembar Terpadu
@@ -538,15 +536,14 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                   ].map((item, idx) => (
                     <div key={idx} className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1">
                       <span className="text-[9px] font-bold uppercase text-emerald-300 block">{item.pilar}</span>
-                      <p className="text-xs font-black text-white">{item.status}</p>
+                      <p className="text-xs font-semibold text-white">{item.status}</p>
                       <p className="text-[9px] text-slate-400 font-medium">{item.desc}</p>
                     </div>
                   ))}
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-emerald-200/80 bg-emerald-900/30 p-3 rounded-xl border border-emerald-500/20 gap-2">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    🍃 <b>Indeks Kualitas Udara (ISPU):</b> Kategori Baik (Bebas Asap &amp; Emisi)
+                  <span className="flex items-center gap-1.5 font-medium">🍃 <b>Indeks Kualitas Udara (ISPU):</b> Kategori Baik (Bebas Asap &amp; Emisi)
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">
                     Data Terintegrasi 129 KK Huntap Tondo 2
@@ -558,7 +555,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
               <div className="bg-white rounded-[2rem] border border-slate-200/80 shadow-sm overflow-hidden space-y-4 p-6">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="text-sm font-black text-slate-900 tracking-tight">Rincian Agenda & Lokasi Kegiatan</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 tracking-tight">Rincian Agenda & Lokasi Kegiatan</h4>
                     <p className="text-xs text-slate-500 font-medium">Uraian seluruh program kerja yang terlaksana pada periode ini</p>
                   </div>
                   <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full font-mono text-xs font-bold">
@@ -575,10 +572,9 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
                             <span className="w-6 h-6 rounded-lg bg-indigo-600 text-white font-mono text-xs font-bold flex items-center justify-center shrink-0">
                               {index + 1}
                             </span>
-                            <h5 className="font-black text-sm text-slate-900">{act.title}</h5>
+                            <h5 className="font-semibold text-sm text-slate-900">{act.title}</h5>
                           </div>
-                          <span className="text-[11px] font-mono font-bold text-slate-500">
-                            📅 {act.date} {act.startTime ? `• ⏰ ${act.startTime}${act.endTime ? ` - ${act.endTime}` : ''} WITA` : ''}
+                          <span className="text-[11px] font-mono font-bold text-slate-500">📅 {act.date} {act.startTime ? `• ⏰ ${act.startTime}${act.endTime ? ` - ${act.endTime}` : ''} WITA` : ''}
                           </span>
                         </div>
 
@@ -617,7 +613,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
           <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-3xl flex items-center justify-center mx-auto mb-3 border border-slate-100">
             <FileText size={32} />
           </div>
-          <h4 className="text-base font-black text-slate-800 mb-1">Belum Ada Laporan Kegiatan Bulanan</h4>
+          <h4 className="text-base font-semibold text-slate-800 mb-1">Belum Ada Laporan Kegiatan Bulanan</h4>
           <p className="text-xs text-slate-400 max-w-xs mx-auto mb-4">
             Buat laporan bulanan resmi yang merangkum seluruh kegiatan, uraian hasil, dan lokasi acara RT 02 yang dapat langsung didownload format PDF.
           </p>
@@ -633,7 +629,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
           {/* Month & Title */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Periode Bulan Laporan</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Periode Bulan Laporan</label>
               <input
                 type="month"
                 required
@@ -651,7 +647,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Judul Dokumen Laporan</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Judul Dokumen Laporan</label>
               <input
                 type="text"
                 required
@@ -665,7 +661,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
 
           {/* Executive & Security Summaries */}
           <div>
-            <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Ringkasan Situasi & Kinerja Pengurus RT</label>
+            <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Ringkasan Situasi & Kinerja Pengurus RT</label>
             <textarea
               rows={2}
               value={form.executiveSummary}
@@ -676,7 +672,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
           </div>
 
           <div>
-            <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Laporan Situasi Kamtibmas / Siskamling (Opsional)</label>
+            <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Laporan Situasi Kamtibmas / Siskamling (Opsional)</label>
             <textarea
               rows={2}
               value={form.securitySummary}
@@ -690,7 +686,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
           <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <div>
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wide">Rincian Agenda, Uraian & Lokasi Kegiatan</h4>
+                <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wide">Rincian Agenda, Uraian & Lokasi Kegiatan</h4>
                 <p className="text-[10px] text-slate-500 font-medium">Tambahkan seluruh kegiatan yang terlaksana pada bulan ini</p>
               </div>
               <button
@@ -705,7 +701,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
             {form.activities.map((act, index) => (
               <div key={act.id || index} className="p-4 bg-white rounded-2xl border border-slate-200 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 font-mono text-[9px] font-black rounded uppercase">
+                  <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 font-mono text-[9px] font-semibold rounded uppercase">
                     Kegiatan #{index + 1}
                   </span>
                   <button
@@ -931,7 +927,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
           {/* Signatures */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Dibuat Oleh (Sekretaris)</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Dibuat Oleh (Sekretaris)</label>
               <input
                 type="text"
                 value={form.preparedBy}
@@ -940,7 +936,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Disetujui Oleh (Ketua RT)</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Disetujui Oleh (Ketua RT)</label>
               <input
                 type="text"
                 value={form.approvedBy}
@@ -950,7 +946,7 @@ export const MonthlyActivityReportManager: React.FC<MonthlyActivityReportManager
             </div>
           </div>
 
-          <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-xs tracking-wider rounded-xl shadow-lg shadow-indigo-600/20">
+          <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold uppercase text-xs tracking-wider rounded-xl shadow-lg shadow-2xs">
             {editingReportId ? "Simpan Perubahan Laporan" : "Terbitkan & Simpan Laporan"}
           </Button>
         </form>

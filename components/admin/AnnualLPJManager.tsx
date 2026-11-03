@@ -418,14 +418,13 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
   return (
     <div className="space-y-6">
       {/* Header Banner - Apple Luxury Style */}
-      <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white rounded-[2.5rem] p-6 md:p-8 shadow-xl shadow-indigo-950/20 relative overflow-hidden flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+      <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 text-white rounded-[2.5rem] p-6 md:p-8 shadow-xl shadow-2xs relative overflow-hidden flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10">
-          <span className="px-3.5 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-[10px] font-mono font-black uppercase tracking-widest mb-2.5 inline-block">
-            🏆 AKUNTABILITAS & TRANSPARANSI RT
+          <span className="px-3.5 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-[10px] font-mono font-semibold uppercase tracking-widest mb-2.5 inline-block">🏆 AKUNTABILITAS & TRANSPARANSI RT
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight">Laporan Pertanggungjawaban (LPJ) RT</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Laporan Pertanggungjawaban (LPJ) RT</h2>
           <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1 max-w-2xl leading-relaxed">
             Kompilasi otomatis laporan akhir tahun & semesteran yang merangkum neraca kas, demografi kependudukan, realisasi program kerja, dan status aset RT 02 siap unduh format PDF resmi.
           </p>
@@ -434,7 +433,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
         <div className="flex flex-wrap items-center gap-3 relative z-10">
           <Button 
             onClick={handleOpenCreateModal} 
-            className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-emerald-500/20 text-xs py-3.5 px-6 rounded-2xl font-black uppercase tracking-wider transition-transform active:scale-95"
+            className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-lg shadow-2xs text-xs py-3.5 px-6 rounded-2xl font-semibold uppercase tracking-wider transition-transform active:scale-95"
           >
             <Plus size={16} className="mr-2" /> Buat LPJ Baru (Auto-Compile)
           </Button>
@@ -446,7 +445,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
           {/* Left Column: List of LPJ Archives */}
           <div className="space-y-3">
             <div className="flex justify-between items-center px-1">
-              <h4 className="text-xs font-mono font-black text-slate-400 uppercase tracking-widest">
+              <h4 className="text-xs font-mono font-semibold text-slate-400 uppercase tracking-widest">
                 ARSIP LPJ TAHUNAN / SEMESTER
               </h4>
               <span className="text-[10px] font-mono font-bold text-slate-400">{reports.length} Laporan</span>
@@ -459,14 +458,14 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                   <div
                     key={rep.id}
                     onClick={() => setActiveReport(rep)}
-                    className={`p-5 rounded-3xl border transition-all cursor-pointer ${
+                    className={`p-5 rounded-3xl border transition-colors cursor-pointer ${
                       isSelected 
-                        ? 'bg-slate-900 text-white border-slate-800 shadow-xl shadow-slate-900/20' 
+                        ? 'bg-slate-900 text-white border-slate-800 shadow-xl shadow-2xs' 
                         : 'bg-white text-slate-800 border-slate-200/80 hover:border-slate-300'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider ${
+                      <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-semibold uppercase tracking-wider ${
                         isSelected ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-indigo-50 text-indigo-700'
                       }`}>
                         Tahun {rep.year} ({rep.periodType})
@@ -476,7 +475,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                       </span>
                     </div>
 
-                    <h3 className="font-black text-sm line-clamp-1 mb-1">{rep.title}</h3>
+                    <h3 className="font-semibold text-sm line-clamp-1 mb-1">{rep.title}</h3>
                     <p className={`text-xs line-clamp-2 ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>
                       {rep.executiveSummary || 'Laporan pertanggungjawaban program kerja dan keuangan RT 02.'}
                     </p>
@@ -493,10 +492,10 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
               <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 sm:p-8 shadow-sm space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pb-6 border-b border-slate-100">
                   <div>
-                    <span className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-[9px] font-mono font-black uppercase tracking-widest">
+                    <span className="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-[9px] font-mono font-semibold uppercase tracking-widest">
                       PERIODE: {activeReport.startDate} s/d {activeReport.endDate}
                     </span>
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-2">{activeReport.title}</h2>
+                    <h2 className="text-2xl font-semibold text-slate-900 tracking-tight mt-2">{activeReport.title}</h2>
                     {activeReport.theme && (
                       <p className="text-xs text-indigo-600 font-bold italic mt-1">"{activeReport.theme}"</p>
                     )}
@@ -505,21 +504,21 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setIsPdfModalOpen(true)}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-black rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-indigo-600/20 transition-transform active:scale-95 cursor-pointer"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-2xs transition-transform active:scale-95 cursor-pointer"
                       title="Download Dokumen Bundle PDF LPJ Resmi"
                     >
                       <Download size={15} /> Unduh Bundle PDF
                     </button>
                     <button 
                       onClick={() => handleEditReport(activeReport)}
-                      className="p-2.5 bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl transition-all cursor-pointer"
+                      className="p-2.5 bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 rounded-xl transition-colors cursor-pointer"
                       title="Edit LPJ"
                     >
                       <Edit2 size={15} />
                     </button>
                     <button 
                       onClick={() => handleDeleteReport(activeReport.id, activeReport.year, activeReport.periodType)}
-                      className="p-2.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 rounded-xl transition-all cursor-pointer"
+                      className="p-2.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 rounded-xl transition-colors cursor-pointer"
                       title="Hapus LPJ"
                     >
                       <Trash2 size={15} />
@@ -532,14 +531,14 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                   {/* Pillar 1: Keuangan & Kas */}
                   <div className="p-5 rounded-3xl bg-emerald-50/60 border border-emerald-100 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-mono font-black text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono font-semibold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
                         <DollarSign size={14} /> NERACA KEUANGAN KAS
                       </span>
                       <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9px] font-bold">
                         Kelancaran: {activeReport.financialSummary?.iuranCollectionRate || 0}%
                       </span>
                     </div>
-                    <p className="text-2xl font-black text-emerald-950">
+                    <p className="text-2xl font-semibold text-emerald-950">
                       Rp {(activeReport.financialSummary?.endingBalance || 0).toLocaleString('id-ID')}
                     </p>
                     <div className="grid grid-cols-2 gap-2 text-[11px] font-mono pt-2 border-t border-emerald-200/60">
@@ -557,14 +556,14 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                   {/* Pillar 2: Demografi Kependudukan */}
                   <div className="p-5 rounded-3xl bg-blue-50/60 border border-blue-100 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-mono font-black text-blue-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono font-semibold text-blue-800 uppercase tracking-wider flex items-center gap-1.5">
                         <Users size={14} /> DEMOGRAFI & POPULASI
                       </span>
                       <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-[9px] font-bold">
                         {activeReport.populationSummary?.totalOccupiedHouses || 0} Rumah
                       </span>
                     </div>
-                    <p className="text-2xl font-black text-blue-950">
+                    <p className="text-2xl font-semibold text-blue-950">
                       {activeReport.populationSummary?.totalPopulation || 0} <span className="text-sm font-bold text-blue-600">Jiwa</span>
                     </p>
                     <div className="grid grid-cols-2 gap-2 text-[11px] font-mono pt-2 border-t border-blue-200/60">
@@ -582,14 +581,14 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                   {/* Pillar 3: Realisasi Program Kerja */}
                   <div className="p-5 rounded-3xl bg-purple-50/60 border border-purple-100 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-mono font-black text-purple-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono font-semibold text-purple-800 uppercase tracking-wider flex items-center gap-1.5">
                         <Calendar size={14} /> PROGRAM KERJA
                       </span>
                       <span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded text-[9px] font-bold">
                         Partisipasi: {activeReport.activitySummary?.averageAttendanceRate || 85}%
                       </span>
                     </div>
-                    <p className="text-2xl font-black text-purple-950">
+                    <p className="text-2xl font-semibold text-purple-950">
                       {activeReport.activitySummary?.totalEventsHeld || 0} <span className="text-sm font-bold text-purple-600">Kegiatan Terlaksana</span>
                     </p>
                     <p className="text-xs text-purple-900/80 font-medium">
@@ -600,14 +599,14 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                   {/* Pillar 4: Aset & Inventaris RT */}
                   <div className="p-5 rounded-3xl bg-amber-50/60 border border-amber-100 space-y-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] font-mono font-black text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono font-semibold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
                         <Box size={14} /> STATUS ASET & FASUM
                       </span>
                       <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-[9px] font-bold">
                         Kondisi Baik: {activeReport.assetSummary?.goodConditionCount || 0}
                       </span>
                     </div>
-                    <p className="text-2xl font-black text-amber-950">
+                    <p className="text-2xl font-semibold text-amber-950">
                       {activeReport.assetSummary?.totalItemsCount || 0} <span className="text-sm font-bold text-amber-600">Unit Barang</span>
                     </p>
                     <p className="text-xs text-amber-900/80 font-medium line-clamp-1">
@@ -631,7 +630,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
           <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-3xl flex items-center justify-center mx-auto mb-3 border border-slate-100">
             <Award size={32} />
           </div>
-          <h4 className="text-base font-black text-slate-800 mb-1">Belum Ada Arsip LPJ Akhir Tahun</h4>
+          <h4 className="text-base font-semibold text-slate-800 mb-1">Belum Ada Arsip LPJ Akhir Tahun</h4>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             Klik tombol di bawah untuk membuat Laporan Pertanggungjawaban (LPJ) otomatis yang mengompilasi data seluruh modul RT 02.
           </p>
@@ -680,7 +679,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
             <button
               type="button"
               onClick={() => handleAutoCompileData(form.year, form.periodType)}
-              className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-colors cursor-pointer"
             >
               <RefreshCw size={14} /> Hitung & Kompilasi Otomatis
             </button>
@@ -689,7 +688,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
           {/* Title & Theme */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Judul Dokumen LPJ</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Judul Dokumen LPJ</label>
               <input
                 type="text"
                 required
@@ -699,7 +698,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Slogan / Tema LPJ</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Slogan / Tema LPJ</label>
               <input
                 type="text"
                 value={form.theme || ''}
@@ -712,7 +711,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
 
           {/* Executive Summary */}
           <div>
-            <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Kata Pengantar & Ringkasan Kinerja Umum</label>
+            <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Kata Pengantar & Ringkasan Kinerja Umum</label>
             <textarea
               rows={3}
               value={form.executiveSummary}
@@ -724,7 +723,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
           {/* Evaluasi & Rencana Masa Depan */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Evaluasi & Hambatan Kinerja</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Evaluasi & Hambatan Kinerja</label>
               <textarea
                 rows={2}
                 value={form.evaluationAndChallenges || ''}
@@ -734,7 +733,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
               />
             </div>
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Rencana Program Kerja Selanjutnya</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Rencana Program Kerja Selanjutnya</label>
               <textarea
                 rows={2}
                 value={form.futureWorkPlans || ''}
@@ -776,7 +775,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
             </div>
           </div>
 
-          <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-xs tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20">
+          <Button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold uppercase text-xs tracking-wider rounded-2xl shadow-lg shadow-2xs">
             {editingReportId ? "Simpan Perubahan Dokumen LPJ" : "Terbitkan & Simpan Dokumen LPJ"}
           </Button>
         </form>
@@ -818,7 +817,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                 setIsPdfModalOpen(false);
               }
             }}
-            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-600/20"
+            className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-2xs"
           >
             <Download size={15} className="mr-2" /> Download File PDF Sekarang
           </Button>

@@ -86,42 +86,42 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
       {/* Quick Stat Cards for Reports */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-xs flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-semibold">
             <FileText size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Total Arsip Laporan</p>
-            <p className="text-xl font-black text-slate-800">{reports.length} <span className="text-xs font-semibold text-slate-400">Periode</span></p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total Arsip Laporan</p>
+            <p className="text-xl font-semibold text-slate-800">{reports.length} <span className="text-xs font-semibold text-slate-400">Periode</span></p>
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-xs flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-black">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-semibold">
             <Baby size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Lahir Thn {currentYearStr}</p>
-            <p className="text-xl font-black text-emerald-600">+{totalBirthsThisYear} <span className="text-xs font-semibold text-emerald-400">Jiwa</span></p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Lahir Thn {currentYearStr}</p>
+            <p className="text-xl font-semibold text-emerald-600">+{totalBirthsThisYear} <span className="text-xs font-semibold text-emerald-400">Jiwa</span></p>
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-xs flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black">
+          <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-semibold">
             <Users size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Masuk Thn {currentYearStr}</p>
-            <p className="text-xl font-black text-blue-600">+{totalNewcomersThisYear} <span className="text-xs font-semibold text-blue-400">Jiwa</span></p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Masuk Thn {currentYearStr}</p>
+            <p className="text-xl font-semibold text-blue-600">+{totalNewcomersThisYear} <span className="text-xs font-semibold text-blue-400">Jiwa</span></p>
           </div>
         </div>
 
         <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-xs flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black">
+          <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-semibold">
             <Activity size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Rata-Rata Jiwa / Bulan</p>
-            <p className="text-xl font-black text-slate-800">{avgPopulation} <span className="text-xs font-semibold text-slate-400">Warga</span></p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Rata-Rata Jiwa / Bulan</p>
+            <p className="text-xl font-semibold text-slate-800">{avgPopulation} <span className="text-xs font-semibold text-slate-400">Warga</span></p>
           </div>
         </div>
       </div>
@@ -129,7 +129,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
       {/* Reports Helper Banner */}
       <div className="bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-transparent p-5 rounded-3xl border border-indigo-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <h4 className="text-xs font-black text-indigo-950 uppercase tracking-wide flex items-center gap-1.5">
+          <h4 className="text-xs font-semibold text-indigo-950 uppercase tracking-wide flex items-center gap-1.5">
             <FileText size={14} className="text-indigo-600" /> Automasi & Arsip Laporan Bulanan
           </h4>
           <p className="text-slate-600 text-xs font-medium leading-relaxed max-w-2xl">
@@ -149,7 +149,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
               value={reportSearchTerm}
               onChange={(e) => setReportSearchTerm(e.target.value)}
               placeholder="Cari bulan (mis: Juni, 2026, 06)..."
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors placeholder:text-slate-400"
             />
             {reportSearchTerm && (
               <button onClick={() => setReportSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
@@ -160,11 +160,11 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
 
           {/* Filter Tahun */}
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Tahun:</span>
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Tahun:</span>
             <select
               value={reportYearFilter}
               onChange={(e) => setReportYearFilter(e.target.value)}
-              className="px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all cursor-pointer"
+              className="px-3 py-2 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors cursor-pointer"
             >
               <option value="All">Semua Tahun</option>
               {Array.from(new Set((reports || []).map(r => r.year || (r.month ? parseInt(r.month.split('-')[0]) : null)).filter(Boolean)))
@@ -180,14 +180,14 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
         <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/50">
           <button 
             onClick={() => setViewMode('table')} 
-            className={`p-2 rounded-xl transition-all ${viewMode === 'table' ? 'bg-white shadow-xs text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`p-2 rounded-xl transition-colors ${viewMode === 'table' ? 'bg-white shadow-xs text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600'}`}
             title="Tampilan Tabel"
           >
             <List size={16}/>
           </button>
           <button 
             onClick={() => setViewMode('grid')} 
-            className={`p-2 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white shadow-xs text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`p-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-white shadow-xs text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600'}`}
             title="Tampilan Grid"
           >
             <LayoutGrid size={16}/>
@@ -199,7 +199,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
       <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-slate-50/40">
           <div>
-            <h3 className="text-base font-black text-slate-900 tracking-tight">Daftar Laporan Bulanan</h3>
+            <h3 className="text-base font-semibold text-slate-900 tracking-tight">Daftar Laporan Bulanan</h3>
             <p className="text-[10px] text-slate-500 font-semibold tracking-wide uppercase">
               Menampilkan {processedReports.length} dari {reports.length} Rekapitulasi Berkas Kependudukan
             </p>
@@ -209,7 +209,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
             <button
               type="button"
               onClick={onAutoGenerateAllYearReports}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs transition-colors shadow-xs flex items-center gap-2 cursor-pointer"
               title="Hapus laporan lama & generate ulang laporan Januari-Agustus secara bersih & presisi"
             >
               <RefreshCw size={14} className={isGeneratingLogs ? "animate-spin" : ""} />
@@ -220,7 +220,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
               type="button"
               onClick={() => generatePopulationReportExcel(processedReports, populationLogs)}
               disabled={processedReports.length === 0}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-xs transition-all shadow-xs flex items-center gap-2 cursor-pointer"
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-2xl font-bold text-xs transition-colors shadow-xs flex items-center gap-2 cursor-pointer"
               title="Unduh Seluruh Rekapitulasi Laporan Bulanan ke dalam 1 File Excel (.xlsx)"
             >
               <FileUp size={15} />
@@ -253,12 +253,12 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
                     <tr key={r.id} className="hover:bg-slate-50/50 transition-colors group">
                       <td className="p-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-black text-xs border border-indigo-100/50 shadow-2xs">
+                          <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-semibold text-xs border border-indigo-100/50 shadow-2xs">
                             {r.month.split('-')[1]}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="font-black text-slate-800 text-sm">{formatIndonesianMonthYear(r.month)}</p>
+                              <p className="font-semibold text-slate-800 text-sm">{formatIndonesianMonthYear(r.month)}</p>
                               {isDuplicate && (
                                 <span className="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-md font-bold text-[9px] uppercase tracking-wider inline-flex items-center gap-1" title="Terdapat lebih dari 1 arsip laporan untuk bulan ini">
                                   <AlertCircle size={10} /> Duplikat
@@ -271,21 +271,21 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
                       </td>
                       <td className="p-5 text-right font-bold text-slate-600">{r.initialPopulation}</td>
                       <td className="p-5 text-right">
-                        <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg font-black text-xs inline-block">+{r.birthCount}</span>
+                        <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg font-semibold text-xs inline-block">+{r.birthCount}</span>
                       </td>
                       <td className="p-5 text-right">
-                        <span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-lg font-black text-xs inline-block">-{r.deathCount || 0}</span>
+                        <span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-lg font-semibold text-xs inline-block">-{r.deathCount || 0}</span>
                       </td>
                       <td className="p-5 text-right">
-                        <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-black text-xs inline-block">+{r.newcomerCount}</span>
+                        <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-semibold text-xs inline-block">+{r.newcomerCount}</span>
                       </td>
                       <td className="p-5 text-right">
-                        <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg font-black text-xs inline-block">-{r.movedOutCount}</span>
+                        <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg font-semibold text-xs inline-block">-{r.movedOutCount}</span>
                       </td>
                       <td className="p-5 text-right">
                         <div className="flex flex-col items-end">
-                          <span className="font-black text-slate-900 text-base">{finalPop}</span>
-                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter">Total Jiwa</span>
+                          <span className="font-semibold text-slate-900 text-base">{finalPop}</span>
+                          <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-tighter">Total Jiwa</span>
                         </div>
                       </td>
                       <td className="p-5 text-center">
@@ -293,7 +293,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
                           {/* Edit Button */}
                           <button 
                             onClick={() => onEditReport(r)}
-                            className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl border border-slate-200/60 transition-all cursor-pointer"
+                            className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl border border-slate-200/60 transition-colors cursor-pointer"
                             title="Edit Laporan"
                           >
                             <Edit2 size={15} />
@@ -302,7 +302,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
                           {/* Download Excel */}
                           <button 
                             onClick={() => generatePopulationReportExcel(r, populationLogs)}
-                            className="p-2 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200/60 rounded-xl transition-all cursor-pointer"
+                            className="p-2 text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 border border-slate-200/60 rounded-xl transition-colors cursor-pointer"
                             title="Download File Excel (.xlsx) Rekapitulasi & Mutasi"
                           >
                             <FileUp size={15} className="text-emerald-600" />
@@ -311,7 +311,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
                           {/* Download PDF Rekap Demografi */}
                           <button 
                             onClick={() => generatePopulationReportPDF(r, pdfConfig)}
-                            className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/60 rounded-xl transition-all cursor-pointer"
+                            className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/60 rounded-xl transition-colors cursor-pointer"
                             title="Download PDF Rekapitulasi Demografi RT"
                           >
                             <Download size={15} className="text-rose-500" />
@@ -320,7 +320,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
                           {/* Download PDF Laporan Mutasi Resmi Kelurahan */}
                           <button 
                             onClick={() => generateMutationReportPDF(r, populationLogs, pdfConfig)}
-                            className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200/60 rounded-xl transition-all cursor-pointer"
+                            className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-200/60 rounded-xl transition-colors cursor-pointer"
                             title="Cetak Laporan Mutasi Bulanan Resmi PDF (Format Kelurahan & Kop Surat)"
                           >
                             <FileText size={15} className="text-emerald-600" />
@@ -340,7 +340,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
                                 toast.success('Laporan berhasil dihapus.');
                               }
                             }} 
-                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-100 border border-transparent rounded-xl transition-all cursor-pointer"
+                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-100 border border-transparent rounded-xl transition-colors cursor-pointer"
                             title="Hapus Laporan"
                           >
                             <Trash2 size={15} />
@@ -355,7 +355,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
                       <div className="flex flex-col items-center gap-3">
                         <div className="p-4 bg-slate-50 rounded-full text-slate-300"><FileText size={40} /></div>
                         <div>
-                          <p className="font-black text-slate-800">Tidak Ada Laporan Bulanan</p>
+                          <p className="font-semibold text-slate-800">Tidak Ada Laporan Bulanan</p>
                           <p className="text-slate-400 text-xs font-semibold mt-1">
                             {reportSearchTerm || reportYearFilter !== 'All' 
                               ? 'Tidak ditemukan laporan yang sesuai dengan kata kunci atau filter tahun.'
@@ -376,15 +376,15 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
               const finalPop = r.initialPopulation + r.birthCount + r.newcomerCount - r.movedOutCount - (r.deathCount || 0);
 
               return (
-                <div key={r.id} className="p-5 bg-white rounded-3xl border border-slate-100 hover:border-indigo-200 hover:shadow-lg transition-all group relative">
+                <div key={r.id} className="p-5 bg-white rounded-3xl border border-slate-100 hover:border-indigo-200 hover:shadow-lg transition-colors group relative">
                   <div className="flex justify-between items-start mb-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 bg-indigo-50 rounded-2xl shadow-2xs flex items-center justify-center font-black text-indigo-600 border border-indigo-100">
+                      <div className="w-11 h-11 bg-indigo-50 rounded-2xl shadow-2xs flex items-center justify-center font-semibold text-indigo-600 border border-indigo-100">
                         {r.month.split('-')[1]}
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <h4 className="font-black text-slate-800 text-sm">{formatIndonesianMonthYear(r.month)}</h4>
+                          <h4 className="font-semibold text-slate-800 text-sm">{formatIndonesianMonthYear(r.month)}</h4>
                           {isDuplicate && (
                             <span className="px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded-md font-bold text-[8px] uppercase tracking-wider" title="Duplikat">
                               Duplikat
@@ -422,11 +422,11 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
 
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="bg-slate-50/60 p-3 rounded-2xl border border-slate-100">
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Awal Bulan</p>
-                      <p className="font-black text-slate-800 text-sm">{r.initialPopulation}</p>
+                      <p className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Awal Bulan</p>
+                      <p className="font-semibold text-slate-800 text-sm">{r.initialPopulation}</p>
                     </div>
                     <div className="bg-indigo-50/40 p-3 rounded-2xl border border-indigo-100">
-                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-1">Akhir Bulan</p>
+                      <p className="text-[8px] font-semibold text-indigo-500 uppercase tracking-widest mb-1">Akhir Bulan</p>
                       <p className="font-extrabold text-indigo-600 text-sm">{finalPop}</p>
                     </div>
                   </div>
@@ -453,7 +453,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
               );
             }) : (
               <div className="col-span-full p-12 text-center">
-                <p className="font-black text-slate-700">Tidak ada laporan ditemukan</p>
+                <p className="font-semibold text-slate-700">Tidak ada laporan ditemukan</p>
               </div>
             )}
           </div>

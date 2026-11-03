@@ -33,13 +33,13 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Tambah Laporan Bulanan" maxWidth="max-w-4xl">
       <form onSubmit={onSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
         {/* Header Info */}
-        <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-3xl text-white shadow-lg shadow-indigo-600/20">
+        <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 p-6 rounded-3xl text-white shadow-lg shadow-2xs">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
               <FileText size={24} />
             </div>
             <div>
-              <h3 className="text-lg font-black tracking-tight">Formulir Laporan Bulanan</h3>
+              <h3 className="text-lg font-semibold tracking-tight">Formulir Laporan Bulanan</h3>
               <p className="text-indigo-100 text-xs font-medium opacity-80">Silakan lengkapi data kependudukan periode ini.</p>
             </div>
           </div>
@@ -48,14 +48,14 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
         {/* Periode Section */}
         <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
           <div className="flex justify-between items-center">
-            <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+            <h4 className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest flex items-center gap-2">
               <Calendar size={14} /> Periode Laporan
             </h4>
             <button
               type="button"
               onClick={onAutoCalculateCurrentMonth}
               disabled={isGeneratingLogs}
-              className="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-2xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-2xl text-xs font-bold transition-colors shadow-md shadow-2xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               title="Hitung otomatis seluruh data demografi & mutasi untuk bulan ini"
             >
               <RefreshCw size={13} className={isGeneratingLogs ? "animate-spin" : ""} />
@@ -80,7 +80,7 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
 
                     setFormData(prev => ({ ...prev, month: newMonth, year, initialPopulation: autoInitial }));
                   }} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all cursor-pointer" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-colors cursor-pointer" 
                 />
               </div>
             </div>
@@ -90,7 +90,7 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
                 type="number" 
                 value={formData.year} 
                 onChange={e => setFormData({...formData, year: parseInt(e.target.value) || new Date().getFullYear()})} 
-                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all" 
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-colors" 
               />
             </div>
           </div>
@@ -98,20 +98,20 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
 
         {/* Live Mathematical Formula Banner */}
         <div className="bg-gradient-to-r from-emerald-500/10 via-indigo-500/10 to-blue-500/10 p-4 rounded-2xl border border-indigo-200/60 text-slate-800 space-y-1">
-          <div className="flex items-center justify-between text-xs font-black uppercase tracking-wider text-indigo-900">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-indigo-900">
             <span className="flex items-center gap-1.5">
               <Sparkles size={14} className="text-amber-500" /> Live Formula Matematika Demografi
             </span>
-            <span className="px-2 py-0.5 bg-emerald-600 text-white rounded-md text-[9px] font-black">Validasi Otomatis</span>
+            <span className="px-2 py-0.5 bg-emerald-600 text-white rounded-md text-[9px] font-semibold">Validasi Otomatis</span>
           </div>
           <p className="text-xs font-mono font-bold text-slate-700 leading-relaxed pt-1">
-            <span className="text-slate-900 font-extrabold">{formData.initialPopulation}</span> (Awal) + <span className="text-emerald-600 font-extrabold">{formData.birthCount}</span> (Lahir) + <span className="text-blue-600 font-extrabold">{formData.newcomerCount}</span> (Datang) - <span className="text-rose-600 font-extrabold">{formData.deathCount || 0}</span> (Mati) - <span className="text-amber-600 font-extrabold">{formData.movedOutCount}</span> (Keluar) = <span className="text-indigo-700 font-black text-sm bg-white px-2 py-0.5 rounded-lg border border-indigo-200 shadow-xs">{formData.initialPopulation + formData.birthCount + formData.newcomerCount - formData.movedOutCount - (formData.deathCount || 0)} Jiwa (Akhir)</span>
+            <span className="text-slate-900 font-extrabold">{formData.initialPopulation}</span> (Awal) + <span className="text-emerald-600 font-extrabold">{formData.birthCount}</span> (Lahir) + <span className="text-blue-600 font-extrabold">{formData.newcomerCount}</span> (Datang) - <span className="text-rose-600 font-extrabold">{formData.deathCount || 0}</span> (Mati) - <span className="text-amber-600 font-extrabold">{formData.movedOutCount}</span> (Keluar) = <span className="text-indigo-700 font-semibold text-sm bg-white px-2 py-0.5 rounded-lg border border-indigo-200 shadow-xs">{formData.initialPopulation + formData.birthCount + formData.newcomerCount - formData.movedOutCount - (formData.deathCount || 0)} Jiwa (Akhir)</span>
           </p>
         </div>
 
         {/* Data Utama Section */}
         <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-5 shadow-sm">
-          <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest flex items-center gap-2">
             <TrendingUp size={14} /> Angka Perubahan & Mutasi per Gender (L/P)
           </h4>
           
@@ -120,7 +120,7 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
             <div className="col-span-full bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
               <div className="flex justify-between items-center">
                 <label className="block text-[10px] font-bold text-slate-400 uppercase">Penduduk Awal Bulan (Total)</label>
-                <span className="text-xs font-black text-slate-700">{formData.initialPopulation} Jiwa</span>
+                <span className="text-xs font-semibold text-slate-700">{formData.initialPopulation} Jiwa</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-white rounded-lg border border-slate-200 text-slate-400"><Users size={18} /></div>
@@ -128,15 +128,15 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
                   type="number" 
                   value={formData.initialPopulation} 
                   onChange={e => setFormData({...formData, initialPopulation: parseInt(e.target.value) || 0})} 
-                  className="w-24 p-2 bg-white border border-slate-200 rounded-xl text-base font-black text-slate-800 outline-none" 
+                  className="w-24 p-2 bg-white border border-slate-200 rounded-xl text-base font-semibold text-slate-800 outline-none" 
                 />
                 <div className="flex-1 grid grid-cols-2 gap-2">
                   <div className="bg-white p-2 rounded-xl border border-slate-200 flex items-center gap-2">
-                    <span className="text-[10px] font-black text-blue-600 uppercase">L:</span>
+                    <span className="text-[10px] font-semibold text-blue-600 uppercase">L:</span>
                     <input type="number" value={formData.initialMaleCount || 0} onChange={e => setFormData({...formData, initialMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-slate-800 text-xs outline-none" placeholder="0" />
                   </div>
                   <div className="bg-white p-2 rounded-xl border border-slate-200 flex items-center gap-2">
-                    <span className="text-[10px] font-black text-pink-600 uppercase">P:</span>
+                    <span className="text-[10px] font-semibold text-pink-600 uppercase">P:</span>
                     <input type="number" value={formData.initialFemaleCount || 0} onChange={e => setFormData({...formData, initialFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-slate-800 text-xs outline-none" placeholder="0" />
                   </div>
                 </div>
@@ -147,23 +147,23 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
             <div className="space-y-4">
               <div className="p-4.5 bg-emerald-50/60 rounded-3xl border border-emerald-200/80 space-y-3 shadow-xs">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="block text-[10px] font-semibold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
                     <Baby size={14} /> Kelahiran (+)
                   </label>
-                  <span className="text-xs font-black text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">+{formData.birthCount} Jiwa</span>
+                  <span className="text-xs font-semibold text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">+{formData.birthCount} Jiwa</span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-emerald-200/80">
-                    <span className="text-[10px] font-black text-slate-400 uppercase w-12 shrink-0">Total:</span>
-                    <input type="number" value={formData.birthCount} onChange={e => setFormData({...formData, birthCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-black text-emerald-800 outline-none" />
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase w-12 shrink-0">Total:</span>
+                    <input type="number" value={formData.birthCount} onChange={e => setFormData({...formData, birthCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-semibold text-emerald-800 outline-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-white p-2 rounded-xl border border-blue-200/80 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-blue-600 shrink-0">L:</span>
+                      <span className="text-[10px] font-semibold text-blue-600 shrink-0">L:</span>
                       <input type="number" value={formData.birthMaleCount || 0} onChange={e => setFormData({...formData, birthMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
                     </div>
                     <div className="bg-white p-2 rounded-xl border border-pink-200/80 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-pink-600 shrink-0">P:</span>
+                      <span className="text-[10px] font-semibold text-pink-600 shrink-0">P:</span>
                       <input type="number" value={formData.birthFemaleCount || 0} onChange={e => setFormData({...formData, birthFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
                     </div>
                   </div>
@@ -172,23 +172,23 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
 
               <div className="p-4.5 bg-blue-50/60 rounded-3xl border border-blue-200/80 space-y-3 shadow-xs">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-blue-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="block text-[10px] font-semibold text-blue-700 uppercase tracking-wider flex items-center gap-1.5">
                     <Users size={14} /> Pendatang Masuk (+)
                   </label>
-                  <span className="text-xs font-black text-blue-700 bg-white px-2 py-0.5 rounded-lg border border-blue-200 shadow-2xs">+{formData.newcomerCount} Jiwa</span>
+                  <span className="text-xs font-semibold text-blue-700 bg-white px-2 py-0.5 rounded-lg border border-blue-200 shadow-2xs">+{formData.newcomerCount} Jiwa</span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-blue-200/80">
-                    <span className="text-[10px] font-black text-slate-400 uppercase w-12 shrink-0">Total:</span>
-                    <input type="number" value={formData.newcomerCount} onChange={e => setFormData({...formData, newcomerCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-black text-blue-800 outline-none" />
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase w-12 shrink-0">Total:</span>
+                    <input type="number" value={formData.newcomerCount} onChange={e => setFormData({...formData, newcomerCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-semibold text-blue-800 outline-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-white p-2 rounded-xl border border-blue-200/80 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-blue-600 shrink-0">L:</span>
+                      <span className="text-[10px] font-semibold text-blue-600 shrink-0">L:</span>
                       <input type="number" value={formData.newcomerMaleCount || 0} onChange={e => setFormData({...formData, newcomerMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
                     </div>
                     <div className="bg-white p-2 rounded-xl border border-pink-200/80 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-pink-600 shrink-0">P:</span>
+                      <span className="text-[10px] font-semibold text-pink-600 shrink-0">P:</span>
                       <input type="number" value={formData.newcomerFemaleCount || 0} onChange={e => setFormData({...formData, newcomerFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
                     </div>
                   </div>
@@ -200,23 +200,23 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
             <div className="space-y-4">
               <div className="p-4.5 bg-rose-50/60 rounded-3xl border border-rose-200/80 space-y-3 shadow-xs">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="block text-[10px] font-semibold text-rose-700 uppercase tracking-wider flex items-center gap-1.5">
                     <Activity size={14} /> Kematian (-)
                   </label>
-                  <span className="text-xs font-black text-rose-700 bg-white px-2 py-0.5 rounded-lg border border-rose-200 shadow-2xs">-{formData.deathCount || 0} Jiwa</span>
+                  <span className="text-xs font-semibold text-rose-700 bg-white px-2 py-0.5 rounded-lg border border-rose-200 shadow-2xs">-{formData.deathCount || 0} Jiwa</span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-rose-200/80">
-                    <span className="text-[10px] font-black text-slate-400 uppercase w-12 shrink-0">Total:</span>
-                    <input type="number" value={formData.deathCount} onChange={e => setFormData({...formData, deathCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-black text-rose-800 outline-none" />
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase w-12 shrink-0">Total:</span>
+                    <input type="number" value={formData.deathCount} onChange={e => setFormData({...formData, deathCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-semibold text-rose-800 outline-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-white p-2 rounded-xl border border-blue-200/80 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-blue-600 shrink-0">L:</span>
+                      <span className="text-[10px] font-semibold text-blue-600 shrink-0">L:</span>
                       <input type="number" value={formData.deathMaleCount || 0} onChange={e => setFormData({...formData, deathMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
                     </div>
                     <div className="bg-white p-2 rounded-xl border border-pink-200/80 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-pink-600 shrink-0">P:</span>
+                      <span className="text-[10px] font-semibold text-pink-600 shrink-0">P:</span>
                       <input type="number" value={formData.deathFemaleCount || 0} onChange={e => setFormData({...formData, deathFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
                     </div>
                   </div>
@@ -225,23 +225,23 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
 
               <div className="p-4.5 bg-amber-50/60 rounded-3xl border border-amber-200/80 space-y-3 shadow-xs">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="block text-[10px] font-semibold text-amber-700 uppercase tracking-wider flex items-center gap-1.5">
                     <ArrowRight size={14} /> Pindah Keluar (-)
                   </label>
-                  <span className="text-xs font-black text-amber-700 bg-white px-2 py-0.5 rounded-lg border border-amber-200 shadow-2xs">-{formData.movedOutCount} Jiwa</span>
+                  <span className="text-xs font-semibold text-amber-700 bg-white px-2 py-0.5 rounded-lg border border-amber-200 shadow-2xs">-{formData.movedOutCount} Jiwa</span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-amber-200/80">
-                    <span className="text-[10px] font-black text-slate-400 uppercase w-12 shrink-0">Total:</span>
-                    <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-black text-amber-800 outline-none" />
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase w-12 shrink-0">Total:</span>
+                    <input type="number" value={formData.movedOutCount} onChange={e => setFormData({...formData, movedOutCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent text-sm font-semibold text-amber-800 outline-none" />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-white p-2 rounded-xl border border-blue-200/80 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-blue-600 shrink-0">L:</span>
+                      <span className="text-[10px] font-semibold text-blue-600 shrink-0">L:</span>
                       <input type="number" value={formData.movedOutMaleCount || 0} onChange={e => setFormData({...formData, movedOutMaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
                     </div>
                     <div className="bg-white p-2 rounded-xl border border-pink-200/80 flex items-center gap-1.5">
-                      <span className="text-[10px] font-black text-pink-600 shrink-0">P:</span>
+                      <span className="text-[10px] font-semibold text-pink-600 shrink-0">P:</span>
                       <input type="number" value={formData.movedOutFemaleCount || 0} onChange={e => setFormData({...formData, movedOutFemaleCount: parseInt(e.target.value) || 0})} className="w-full bg-transparent font-bold text-xs outline-none text-slate-800" placeholder="0" />
                     </div>
                   </div>
@@ -253,24 +253,24 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
 
         {/* Demografi Section */}
         <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
-          <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest flex items-center gap-2">
             <Accessibility size={14} /> Demografi Akhir Bulan
           </h4>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white p-4 rounded-2xl border border-slate-200">
               <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Laki-laki</label>
-              <input type="number" value={formData.maleCount} onChange={e => setFormData({...formData, maleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-black text-slate-800 outline-none" />
+              <input type="number" value={formData.maleCount} onChange={e => setFormData({...formData, maleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-semibold text-slate-800 outline-none" />
             </div>
             <div className="bg-white p-4 rounded-2xl border border-slate-200">
               <label className="block text-[10px] font-bold text-slate-400 mb-1.5 uppercase">Perempuan</label>
-              <input type="number" value={formData.femaleCount} onChange={e => setFormData({...formData, femaleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-black text-slate-800 outline-none" />
+              <input type="number" value={formData.femaleCount} onChange={e => setFormData({...formData, femaleCount: parseInt(e.target.value)})} className="w-full bg-transparent text-lg font-semibold text-slate-800 outline-none" />
             </div>
           </div>
         </div>
 
         {/* Musiman Section */}
         <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-4 shadow-sm">
-          <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[10px] font-semibold text-amber-600 uppercase tracking-widest flex items-center gap-2">
             <Clock size={14} /> Warga Musiman / Sewa
           </h4>
           <div className="grid grid-cols-3 gap-3">
@@ -291,7 +291,7 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
 
         {/* Kelompok Rentan Section */}
         <div className="bg-rose-50/30 p-6 rounded-[2rem] border border-rose-100 space-y-4">
-          <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[10px] font-semibold text-rose-600 uppercase tracking-widest flex items-center gap-2">
             <Heart size={14} /> Kelompok Rentan & Prioritas
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -310,13 +310,13 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
               <div key={field.key} className="bg-white p-3 rounded-2xl border border-rose-100 shadow-sm">
                 <div className="flex items-center gap-1.5 mb-1 text-rose-400">
                   {field.icon}
-                  <label className="block text-[9px] font-black uppercase tracking-tighter">{field.label}</label>
+                  <label className="block text-[9px] font-semibold uppercase tracking-tighter">{field.label}</label>
                 </div>
                 <input 
                   type="number" 
                   value={(formData as any)[field.key]} 
                   onChange={e => setFormData({...formData, [field.key]: parseInt(e.target.value) || 0})} 
-                  className="w-full bg-transparent text-sm font-black text-slate-800 outline-none" 
+                  className="w-full bg-transparent text-sm font-semibold text-slate-800 outline-none" 
                 />
               </div>
             ))}
@@ -327,7 +327,7 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
         <div className="bg-white p-6 rounded-[2rem] border border-slate-200/80 space-y-4 shadow-sm">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
             <div>
-              <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+              <h4 className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest flex items-center gap-2">
                 <Calendar size={14} /> Uraian Kegiatan & Peristiwa RT Bulan Ini
               </h4>
               <p className="text-xs text-slate-500 font-medium">Catatan agenda yang telah terlaksana untuk dilampirkan pada laporan resmi</p>
@@ -349,7 +349,7 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
                   activities: [...(formData.activities || []), newAct]
                 });
               }}
-              className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Plus size={13} /> Tambah Kegiatan
             </button>
@@ -360,7 +360,7 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
               {formData.activities.map((act, index) => (
                 <div key={act.id || index} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/70 space-y-3 relative">
                   <div className="flex justify-between items-center">
-                    <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[9px] font-mono font-black uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[9px] font-mono font-semibold uppercase tracking-wider">
                       Kegiatan #{index + 1}
                     </span>
                     <button
@@ -474,12 +474,12 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
         {/* Summary Card */}
         <div className="bg-slate-900 p-6 rounded-[2rem] text-white">
           <div className="flex justify-between items-center mb-4">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kalkulasi Akhir</p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Kalkulasi Akhir</p>
             <div className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold">Otomatis</div>
           </div>
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-3xl font-black">
+              <p className="text-3xl font-semibold">
                 {formData.initialPopulation + formData.birthCount + formData.newcomerCount - formData.movedOutCount - (formData.deathCount || 0)}
                 <span className="text-sm font-bold text-slate-400 ml-2">Jiwa</span>
               </p>
@@ -493,13 +493,13 @@ export const PopulationReportModal: React.FC<PopulationReportModalProps> = ({
           <button 
             type="button"
             onClick={onClose}
-            className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all cursor-pointer"
+            className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-slate-200 transition-colors cursor-pointer"
           >
             Batal
           </button>
           <button 
             type="submit" 
-            className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 cursor-pointer"
+            className="flex-[2] py-4 bg-indigo-600 text-white rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-indigo-700 shadow-lg shadow-2xs transition-colors active:scale-95 cursor-pointer"
           >
             Simpan Laporan
           </button>

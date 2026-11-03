@@ -55,17 +55,17 @@ export const BillDetailModal: React.FC<BillDetailModalProps> = ({ house, bills, 
       >
         <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
           <div>
-            <h2 className="text-2xl font-black text-slate-800 tracking-tight">Riwayat Tagihan</h2>
+            <h2 className="text-2xl font-semibold text-slate-800 tracking-tight">Riwayat Tagihan</h2>
             <div className="flex items-center gap-2 mt-1">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em]">
                 {house.headOfFamily} • Blok {house.block}-{house.number}
               </p>
             </div>
           </div>
           <button 
             onClick={onClose} 
-            className="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-all rounded-2xl active:scale-95"
+            className="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors rounded-2xl active:scale-95"
           >
             <X size={20} />
           </button>
@@ -74,26 +74,26 @@ export const BillDetailModal: React.FC<BillDetailModalProps> = ({ house, bills, 
         <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
           {houseBills.length > 0 ? (
             houseBills.map(bill => (
-              <div key={bill.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 group transition-all hover:shadow-xl hover:shadow-slate-200/50">
+              <div key={bill.id} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 group transition-colors hover:shadow-xl hover:shadow-2xs">
                 <div className="flex justify-between items-center mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-indigo-500 rounded-full"></div>
-                    <h4 className="font-black text-slate-800 uppercase tracking-widest text-xs">Periode: {bill.month}</h4>
+                    <h4 className="font-semibold text-slate-800 uppercase tracking-widest text-xs">Periode: {bill.month}</h4>
                   </div>
-                  <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border shadow-sm ${bill.total === 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                  <span className={`px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest border shadow-sm ${bill.total === 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                       {bill.total === 0 ? 'LUNAS' : `SISA Rp${bill.total.toLocaleString()}`}
                   </span>
                 </div>
                 <div className="space-y-3">
                   {bill.items.map(item => (
-                    <div key={item.id} className="flex justify-between items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-50 transition-all hover:bg-white hover:border-slate-200">
+                    <div key={item.id} className="flex justify-between items-center bg-slate-50/50 p-4 rounded-2xl border border-slate-50 transition-colors hover:bg-white hover:border-slate-200">
                       <div>
-                          <p className="font-black text-slate-700 text-xs uppercase tracking-wider">{item.name}</p>
+                          <p className="font-semibold text-slate-700 text-xs uppercase tracking-wider">{item.name}</p>
                           <p className="text-[10px] font-bold text-slate-400 mt-0.5">Rp {item.amount.toLocaleString()}</p>
                       </div>
                       {item.status === 'Paid' ? (
                           <div className="flex flex-col items-end">
-                            <span className="text-emerald-600 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest">
+                            <span className="text-emerald-600 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest">
                               <CheckCircle size={14} strokeWidth={3} /> Lunas
                             </span>
                             {item.paymentDate && (
@@ -105,7 +105,7 @@ export const BillDetailModal: React.FC<BillDetailModalProps> = ({ house, bills, 
                       ) : (
                           <button 
                               onClick={() => handleMarkAsPaid(bill.id, item.id)}
-                              className="px-5 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 flex items-center gap-2"
+                              className="px-5 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-indigo-600 transition-colors active:scale-95 flex items-center gap-2"
                           >
                               <DollarSign size={12} /> Bayar
                           </button>
@@ -121,7 +121,7 @@ export const BillDetailModal: React.FC<BillDetailModalProps> = ({ house, bills, 
                 <AlertCircle size={40} />
               </div>
               <div>
-                <p className="text-sm font-black text-slate-800 uppercase tracking-widest">Tidak Ada Data</p>
+                <p className="text-sm font-semibold text-slate-800 uppercase tracking-widest">Tidak Ada Data</p>
                 <p className="text-xs font-bold text-slate-400 mt-1">Belum ada riwayat tagihan untuk rumah ini.</p>
               </div>
             </div>

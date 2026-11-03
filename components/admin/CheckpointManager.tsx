@@ -110,14 +110,14 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
                     <div>
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-mono uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                             POS & CHECKPOINT COMMAND
                         </div>
-                        <h3 className="text-xl md:text-2xl font-black text-slate-100 tracking-tight">Manajemen Pos Ronda & Titik Patroli</h3>
+                        <h3 className="text-xl md:text-2xl font-semibold text-slate-100 tracking-tight">Manajemen Pos Ronda & Titik Patroli</h3>
                         <p className="text-xs text-slate-400 font-medium mt-1">Konfigurasi lokasi pos checkpoint QR Code, koordinat titik siskamling, dan pemetaan posisi patroli</p>
                     </div>
                     
-                    <Button onClick={handleAdd} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-indigo-950/50 py-3.5 px-6 rounded-2xl font-black uppercase tracking-wider text-xs">
+                    <Button onClick={handleAdd} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-xl shadow-2xs py-3.5 px-6 rounded-2xl font-semibold uppercase tracking-wider text-xs">
                         <Plus size={18} className="mr-2" /> Tambah Pos Checkpoint
                     </Button>
                 </div>
@@ -126,14 +126,14 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
             {/* Checkpoint Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {checkpoints.map((cp, idx) => (
-                    <div key={cp.id} className="bg-slate-900 text-white rounded-[2rem] p-6 border border-slate-800 shadow-xl hover:border-indigo-500/50 transition-all relative overflow-hidden group">
+                    <div key={cp.id} className="bg-slate-900 text-white rounded-[2rem] p-6 border border-slate-800 shadow-xl hover:border-indigo-500/50 transition-colors relative overflow-hidden group">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-black shadow-md">
+                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-semibold shadow-md">
                                     P{idx + 1}
                                 </div>
                                 <div>
-                                    <h4 className="font-black text-slate-100 text-sm md:text-base tracking-tight">{cp.name}</h4>
+                                    <h4 className="font-semibold text-slate-100 text-sm md:text-base tracking-tight">{cp.name}</h4>
                                     <p className="text-[9px] font-mono text-indigo-300 uppercase tracking-widest mt-0.5">CHECKPOINT TITIK {idx + 1}</p>
                                 </div>
                             </div>
@@ -151,7 +151,7 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
                         <div className="bg-slate-950 p-3.5 rounded-2xl border border-slate-800/80 mb-4 flex items-center justify-between">
                             <div>
                                 <span className="text-[8px] font-mono text-slate-400 uppercase tracking-widest block mb-0.5">KODE UNIK CHECK-IN</span>
-                                <span className="text-xs font-mono font-black text-emerald-400 tracking-wider">
+                                <span className="text-xs font-mono font-semibold text-emerald-400 tracking-wider">
                                     {cp.qrCode || 'BELUM DIATUR'}
                                 </span>
                             </div>
@@ -188,9 +188,9 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingCheckpoint ? "Edit Pos Checkpoint" : "Tambah Pos Checkpoint Baru"}>
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-[10px] font-mono font-black mb-2 text-slate-500 uppercase tracking-widest">Nama Pos / Lokasi Checkpoint</label>
+                        <label className="block text-[10px] font-mono font-semibold mb-2 text-slate-500 uppercase tracking-widest">Nama Pos / Lokasi Checkpoint</label>
                         <input 
-                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                            className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                             placeholder="Contoh: Pos Garda 01 (Gerbang Utama)"
                             value={name}
                             onChange={e => setName(e.target.value)}
@@ -198,10 +198,10 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
                         />
                     </div>
                     <div>
-                        <label className="block text-[10px] font-mono font-black mb-2 text-slate-500 uppercase tracking-widest">Kode QR Checkpoint (Unik)</label>
+                        <label className="block text-[10px] font-mono font-semibold mb-2 text-slate-500 uppercase tracking-widest">Kode QR Checkpoint (Unik)</label>
                         <div className="flex gap-2">
                             <input 
-                                className="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-black text-indigo-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all uppercase"
+                                className="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-semibold text-indigo-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors uppercase"
                                 placeholder="Contoh: POS_GARDA_01"
                                 value={qrCode}
                                 onChange={e => setQrCode(e.target.value.toUpperCase().replace(/\s+/g, '_'))}
@@ -227,7 +227,7 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-[10px] font-mono font-black mb-2 text-slate-500 uppercase tracking-widest">Posisi X (% Horizontal)</label>
+                            <label className="block text-[10px] font-mono font-semibold mb-2 text-slate-500 uppercase tracking-widest">Posisi X (% Horizontal)</label>
                             <input 
                                 type="number"
                                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 outline-none"
@@ -237,7 +237,7 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
                             />
                         </div>
                         <div>
-                            <label className="block text-[10px] font-mono font-black mb-2 text-slate-500 uppercase tracking-widest">Posisi Y (% Vertikal)</label>
+                            <label className="block text-[10px] font-mono font-semibold mb-2 text-slate-500 uppercase tracking-widest">Posisi Y (% Vertikal)</label>
                             <input 
                                 type="number"
                                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 outline-none"
@@ -250,7 +250,7 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
 
                     {/* Visual Picker */}
                     <div className="space-y-2">
-                        <label className="block text-[10px] font-mono font-black text-slate-500 uppercase tracking-widest">Klik di Peta untuk Menentukan Posisi Penanda</label>
+                        <label className="block text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-widest">Klik di Peta untuk Menentukan Posisi Penanda</label>
                         <div 
                             ref={mapRef}
                             onClick={handleMapClick}
@@ -261,7 +261,7 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
                                 <MapLayout 
                                     houses={houses}
                                     renderBlock={(blockCode) => (
-                                        <div className="bg-slate-700 rounded-lg p-2 text-center text-[8px] font-black text-white">
+                                        <div className="bg-slate-700 rounded-lg p-2 text-center text-[8px] font-semibold text-white">
                                             {blockCode}
                                         </div>
                                     )}
@@ -270,7 +270,7 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
                             
                             {/* Current Point Indicator */}
                             <div 
-                                className="absolute -translate-x-1/2 -translate-y-1/2 p-2 rounded-full shadow-xl border-2 border-white bg-indigo-600 text-white z-10 transition-all duration-300 animate-pulse"
+                                className="absolute -translate-x-1/2 -translate-y-1/2 p-2 rounded-full shadow-xl border-2 border-white bg-indigo-600 text-white z-10 transition-colors duration-300"
                                 style={{ left: `${x}%`, top: `${y}%` }}
                             >
                                 <ShieldCheck size={16} />
@@ -279,8 +279,8 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
                     </div>
 
                     <div className="flex gap-3 pt-3">
-                        <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 rounded-2xl font-black uppercase text-xs">Batal</Button>
-                        <Button type="submit" className="flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase text-xs shadow-lg shadow-indigo-100">Simpan Pos Checkpoint</Button>
+                        <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 rounded-2xl font-semibold uppercase text-xs">Batal</Button>
+                        <Button type="submit" className="flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold uppercase text-xs shadow-lg shadow-indigo-100">Simpan Pos Checkpoint</Button>
                     </div>
                 </form>
             </Modal>

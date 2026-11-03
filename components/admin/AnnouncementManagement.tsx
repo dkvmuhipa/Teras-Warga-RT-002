@@ -251,16 +251,16 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
         <div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-6 bg-indigo-600 rounded-full"></div>
-            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Kanal Broadcast Resmi</span>
+            <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest">Kanal Broadcast Resmi</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">Pengumuman Warga RT 02</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mt-1">Pengumuman Warga RT 02</h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Kelola siaran pengumuman penting, himbauan lingkungan, dan broadcast WhatsApp warga.</p>
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Button 
             onClick={() => { resetForms(); setIsModalOpen(true); }} 
-            className="w-full md:w-auto px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98] flex items-center justify-center gap-2"
+            className="w-full md:w-auto px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold uppercase tracking-widest transition-colors shadow-lg shadow-2xs active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <Plus size={18} /> Buat Pengumuman Baru
           </Button>
@@ -273,7 +273,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
           <input 
             type="text" 
             placeholder="Cari pengumuman atau kata kunci..." 
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -293,7 +293,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                 type="button"
                 onClick={() => setFilterType(type.id)}
                 className={`
-                  px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5
+                  px-4 py-2 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-colors flex items-center gap-1.5
                   ${filterType === type.id 
                     ? 'bg-white text-indigo-600 shadow-sm border border-indigo-100' 
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'}
@@ -317,7 +317,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
               key={a.id} 
               variants={itemVariants}
               layout
-              className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-indigo-100/30 transition-all group relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+              className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-2xs transition-colors group relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
             >
               <div className={`absolute top-0 left-0 w-2 h-full ${
                 a.type === 'Urgent' ? 'bg-rose-500' : 
@@ -326,7 +326,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
 
               <div className="space-y-2 flex-1 pl-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border flex items-center gap-1 ${getTypeColor(a.type)}`}>
+                  <span className={`px-2.5 py-0.5 rounded-md text-[9px] font-semibold uppercase tracking-widest border flex items-center gap-1 ${getTypeColor(a.type)}`}>
                     {getTypeIcon(a.type)}
                     {a.type === 'Urgent' ? 'PENTING' : a.type === 'Event' ? 'KEGIATAN' : 'INFO UMUM'}
                   </span>
@@ -336,7 +336,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                   </span>
                 </div>
 
-                <h3 className="text-lg font-black text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors">
+                <h3 className="text-lg font-semibold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors">
                   {a.title}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed">
@@ -350,7 +350,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                   type="button"
                   onClick={() => handleBroadcast(a)}
                   disabled={isBroadcasting === a.id}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/60 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-colors"
                 >
                   {isBroadcasting === a.id ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                   <span>Broadcast WA</span>
@@ -359,7 +359,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                 <button
                   type="button"
                   onClick={() => handleEdit(a)}
-                  className="p-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl transition-all"
+                  className="p-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl transition-colors"
                   title="Edit Pengumuman"
                 >
                   <Edit2 size={16} />
@@ -368,7 +368,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                 <button
                   type="button"
                   onClick={() => handleDeleteAnnouncement(a.id)}
-                  className="p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl transition-all"
+                  className="p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
                   title="Hapus Pengumuman"
                 >
                   <Trash2 size={16} />
@@ -399,10 +399,10 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
           {/* Form Side */}
           <form onSubmit={handleSaveAnnouncement} className="lg:col-span-7 space-y-5">
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Judul Pengumuman</label>
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Judul Pengumuman</label>
               <div className="relative group/input">
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors" 
                   value={annTitle} 
                   onChange={e=>setAnnTitle(e.target.value)} 
                   placeholder="Contoh: Kerja Bakti Minggu Ini..." 
@@ -414,23 +414,23 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
             
             <div className="space-y-1.5">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Detail & Isi Pengumuman</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Detail & Isi Pengumuman</label>
                 <button 
                   type="button" 
                   onClick={handleGenerateWithAi} 
-                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200/70 text-[11px] font-black py-1.5 px-3 rounded-full transition-all shrink-0 active:scale-95"
+                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200/70 text-[11px] font-semibold py-1.5 px-3 rounded-full transition-colors shrink-0 active:scale-95"
                 >
                   {isAiLoading ? (
                     <Loader2 size={13} className="animate-spin" />
                   ) : (
-                    <Sparkles size={13} className="text-indigo-600 animate-pulse" />
+                    <Sparkles size={13} className="text-indigo-600" />
                   )}
                   <span>{isAiLoading ? 'Menyusun Draft...' : 'Bantu Tulis dengan AI'}</span>
                 </button>
               </div>
               <div className="relative group/textarea">
                 <textarea 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[140px] resize-none" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors min-h-[140px] resize-none" 
                   value={annContent} 
                   onChange={e=>setAnnContent(e.target.value)} 
                   placeholder="Tuliskan detail waktu, tempat, dan instruksi lengkap untuk warga RT 02..." 
@@ -440,7 +440,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
             </div>
             
             <div className="space-y-2">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Tipe / Kategori</label>
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Tipe / Kategori</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                 {[
                   { id: 'General', label: 'Info Umum', desc: 'Informasi reguler', icon: <Info size={16} /> },
@@ -457,7 +457,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                         setAnnTitle('Berita Lelayu: Telah Berpulang ke Rahmatullah');
                       }
                     }}
-                    className={`p-3 rounded-2xl border text-left transition-all relative overflow-hidden group ${
+                    className={`p-3 rounded-2xl border text-left transition-colors relative overflow-hidden group ${
                       annType === type.id 
                         ? type.id === 'Lelayu' ? 'bg-slate-900 border-slate-900 text-white ring-2 ring-slate-900/30' : 'bg-indigo-50 border-indigo-500 ring-2 ring-indigo-500/20' 
                         : 'bg-white border-slate-200 hover:bg-slate-50 hover:border-indigo-200 hover:shadow-sm'
@@ -470,7 +470,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
                     } transition-colors`}>
                       {type.icon}
                     </div>
-                    <p className={`text-[11px] font-black ${annType === type.id ? (type.id === 'Lelayu' ? 'text-white' : 'text-indigo-700') : 'text-slate-700'}`}>{type.label}</p>
+                    <p className={`text-[11px] font-semibold ${annType === type.id ? (type.id === 'Lelayu' ? 'text-white' : 'text-indigo-700') : 'text-slate-700'}`}>{type.label}</p>
                     <p className={`text-[8.5px] font-bold mt-0.5 ${annType === type.id ? (type.id === 'Lelayu' ? 'text-slate-400' : 'text-indigo-500') : 'text-slate-400'}`}>{type.desc}</p>
                     
                     {annType === type.id && (
@@ -486,7 +486,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
             {/* Khusus Formulir Lelayu / Tanggap Duka */}
             {annType === 'Lelayu' && (
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-                <p className="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                <p className="text-xs font-semibold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
                   <HeartHandshake size={14} className="text-rose-500" /> Rincian Informasi Tanggap Duka &amp; Takziah
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -555,7 +555,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
             )}
             
             <div className="pt-3 border-t border-slate-100">
-              <Button type="submit" className="w-full py-3.5 text-xs font-black uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-500/20 flex justify-center items-center gap-2 group/submit">
+              <Button type="submit" className="w-full py-3.5 text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-lg shadow-2xs flex justify-center items-center gap-2 group/submit">
                 {editingId ? (
                   <>Simpan Perubahan <CheckCircle2 size={16} className="group-hover/submit:scale-110 transition-transform" /></>
                 ) : (
@@ -570,7 +570,7 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
             <div>
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
+                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full" />
                   <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-widest">LIVE BROADCAST MOCKUP</span>
                 </div>
                 <MessageCircle size={15} className="text-emerald-400" />
@@ -579,10 +579,9 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
               
               <div className="bg-[#0b141a] p-4 rounded-2xl border border-slate-800/80 space-y-2 text-xs font-sans shadow-inner leading-relaxed">
                 <div className="bg-[#005c4b] text-white p-3.5 rounded-2xl rounded-tr-none shadow-md">
-                  <p className="font-extrabold text-emerald-200 text-xs mb-1">
-                    📢 PENGUMUMAN RT 02 {annType === 'Urgent' ? '⚠️ (PENTING)' : ''}
+                  <p className="font-extrabold text-emerald-200 text-xs mb-1">PENGUMUMAN RT 02 {annType === 'Urgent' ? '(PENTING)' : ''}
                   </p>
-                  <p className="font-black text-white text-sm mb-1.5 leading-snug">{annTitle || '[Judul Pengumuman]'}</p>
+                  <p className="font-semibold text-white text-sm mb-1.5 leading-snug">{annTitle || '[Judul Pengumuman]'}</p>
                   <p className="text-[11px] text-emerald-50 whitespace-pre-wrap leading-relaxed opacity-95">
                     {annContent || '[Isi pengumuman lengkap akan tampil di sini...]'}
                   </p>
@@ -613,13 +612,13 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
           </div>
 
           <div className="space-y-3">
-            <label className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${broadcastTargets.group ? 'bg-white border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
+            <label className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-colors cursor-pointer ${broadcastTargets.group ? 'bg-white border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${broadcastTargets.group ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
                   <MessageCircle size={18} />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-slate-800">{pdfConfig.whatsappGroupName || 'Grup WhatsApp'}</p>
+                  <p className="text-sm font-semibold text-slate-800">{pdfConfig.whatsappGroupName || 'Grup WhatsApp'}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     {pdfConfig.whatsappGroupId ? `ID: ${pdfConfig.whatsappGroupId.substring(0, 15)}...` : 'Belum dikonfigurasi'}
                   </p>
@@ -634,13 +633,13 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
               />
             </label>
 
-            <label className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-all cursor-pointer ${broadcastTargets.individual ? 'bg-white border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
+            <label className={`flex items-center justify-between p-4 rounded-2xl border-2 transition-colors cursor-pointer ${broadcastTargets.individual ? 'bg-white border-indigo-500 shadow-md ring-1 ring-indigo-500' : 'bg-slate-50 border-slate-200 opacity-60'}`}>
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${broadcastTargets.individual ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>
                   <Send size={18} />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-slate-800">Warga Individual</p>
+                  <p className="text-sm font-semibold text-slate-800">Warga Individual</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     {houses.filter(h => !!h.phone).length} Nomor Terdaftar
                   </p>

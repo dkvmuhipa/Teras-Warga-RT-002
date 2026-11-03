@@ -54,10 +54,10 @@ export const PopulationLogDetailModal: React.FC<PopulationLogDetailModalProps> =
                    selectedLog.type === 'Birth' ? <Baby size={20} /> : <Activity size={20} />}
                 </div>
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                     Rincian Log Mutasi Kependudukan
                   </span>
-                  <h3 className="text-lg font-black text-slate-900">{selectedLog.name}</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">{selectedLog.name}</h3>
                 </div>
               </div>
               <button 
@@ -70,12 +70,12 @@ export const PopulationLogDetailModal: React.FC<PopulationLogDetailModalProps> =
 
             <div className="grid grid-cols-2 gap-4 text-xs font-semibold">
               <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
-                <span className="text-[9px] font-black uppercase text-slate-400 block mb-1">Tanggal Peristiwa</span>
+                <span className="text-[9px] font-semibold uppercase text-slate-400 block mb-1">Tanggal Peristiwa</span>
                 <span className="text-slate-800 font-mono font-bold text-sm">{selectedLog.date}</span>
               </div>
               <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
-                <span className="text-[9px] font-black uppercase text-slate-400 block mb-1">Status Verifikasi</span>
-                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                <span className="text-[9px] font-semibold uppercase text-slate-400 block mb-1">Status Verifikasi</span>
+                <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                   (!selectedLog.verificationStatus || selectedLog.verificationStatus === 'Approved') ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                 }`}>
                   {selectedLog.verificationStatus || 'Approved'}
@@ -85,7 +85,7 @@ export const PopulationLogDetailModal: React.FC<PopulationLogDetailModalProps> =
 
             {selectedLog.details && (
               <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/60 space-y-2 text-xs">
-                <span className="text-[10px] font-black uppercase text-slate-400 block mb-2">Detail Spesifik Mutasi</span>
+                <span className="text-[10px] font-semibold uppercase text-slate-400 block mb-2">Detail Spesifik Mutasi</span>
                 {selectedLog.type === 'Newcomer' && (
                   <>
                     <div className="flex justify-between border-b border-slate-200/50 pb-1.5">
@@ -120,7 +120,7 @@ export const PopulationLogDetailModal: React.FC<PopulationLogDetailModalProps> =
             <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-slate-100">
               <button
                 onClick={() => generateSingleMutationCertificatePDF(selectedLog, pdfConfig)}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-indigo-700 transition-all cursor-pointer"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-indigo-700 transition-colors cursor-pointer"
               >
                 <Printer size={16} /> Cetak PDF Surat Pengantar
               </button>
@@ -132,7 +132,7 @@ export const PopulationLogDetailModal: React.FC<PopulationLogDetailModalProps> =
                     if (res?.success) toast.success("WhatsApp berhasil dikirim!");
                     else toast.error("Gagal mengirim pesan.");
                   }}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-emerald-700 transition-all cursor-pointer"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-emerald-700 transition-colors cursor-pointer"
                 >
                   <MessageCircle size={16} /> Kirim WhatsApp
                 </button>

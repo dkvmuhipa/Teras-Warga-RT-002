@@ -391,13 +391,13 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
             className="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex flex-col justify-center items-center p-4"
           >
             <div className="absolute top-6 left-6 text-white">
-              <h4 className="text-[10px] font-black tracking-widest uppercase text-slate-400">Pratinjau Dokumen</h4>
+              <h4 className="text-[10px] font-semibold tracking-widest uppercase text-slate-400">Pratinjau Dokumen</h4>
               <p className="text-lg font-bold">{lightboxImage.title}</p>
             </div>
             
             <button 
               onClick={() => setLightboxImage(null)}
-              className="absolute top-6 right-6 w-11 h-11 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl flex items-center justify-center text-white transition-all active:scale-95"
+              className="absolute top-6 right-6 w-11 h-11 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl flex items-center justify-center text-white transition-colors active:scale-95"
             >
               <X size={18} />
             </button>
@@ -426,7 +426,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                       const text = encodeURIComponent(`Halo Bapak/Ibu *${cleanApplicant}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nTerkait pendaftaran warga baru Anda di sistem Teras Warga RT 002, foto berkas identitas (KTP/KK) Anda belum terunggah dengan jelas di sistem.\n\nMohon bantuannya untuk mengirimkan foto asli fisik KTP & KK via chat WhatsApp ini untuk keperluan validasi kependudukan. Terima kasih atas kerja samanya! 🙏`);
                       window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
                     }}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition-all active:scale-95"
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition-colors active:scale-95"
                   >
                     <Phone size={13} /> Minta Foto via WA
                   </button>
@@ -451,14 +451,14 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
               <div className="absolute bottom-4 right-4 flex items-center gap-2 opacity-90 group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={() => handleDownloadDoc(lightboxImage.url, lightboxImage.title)}
-                  className="px-3.5 py-2 bg-slate-900/90 hover:bg-black text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 bg-slate-900/90 hover:bg-black text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-1.5 transition-colors"
                   title="Unduh Berkas ke Komputer"
                 >
                   <Download size={12} /> Unduh
                 </button>
                 <button 
                   onClick={() => handleOpenDocInNewTab(lightboxImage.url)}
-                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-1.5 transition-all"
+                  className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg shadow-md flex items-center gap-1.5 transition-colors"
                 >
                   <ExternalLink size={12} /> Buka Tab Baru
                 </button>
@@ -471,25 +471,25 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
       {/* Modern Executive KPI Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Pending */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-amber-50/40 to-white border border-amber-200/80 rounded-2xl p-5 shadow-xs transition-all hover:shadow-md hover:border-amber-300">
+        <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-amber-50/40 to-white border border-amber-200/80 rounded-2xl p-5 shadow-xs transition-colors hover:shadow-md hover:border-amber-300">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-700 block">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-700 block">
                 Menunggu Verifikasi
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-slate-900 tracking-tight">{totalPending}</span>
+                <span className="text-3xl font-semibold text-slate-900 tracking-tight">{totalPending}</span>
                 <span className="text-xs font-bold text-slate-400">Berkas</span>
               </div>
               <p className="text-[11px] text-amber-900/80 font-medium">Perlu ditinjau &amp; diverifikasi RT</p>
             </div>
             <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-lg shadow-amber-500/25">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-lg shadow-2xs">
                 <Clock size={22} className="stroke-[2.5]" />
               </div>
               {totalPending > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-amber-500"></span>
                 </span>
               )}
@@ -504,19 +504,19 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
         </div>
 
         {/* Card 2: Approved */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 via-emerald-50/40 to-white border border-emerald-200/80 rounded-2xl p-5 shadow-xs transition-all hover:shadow-md hover:border-emerald-300">
+        <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 via-emerald-50/40 to-white border border-emerald-200/80 rounded-2xl p-5 shadow-xs transition-colors hover:shadow-md hover:border-emerald-300">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 block">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700 block">
                 Telah Disetujui
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-slate-900 tracking-tight">{totalApproved}</span>
+                <span className="text-3xl font-semibold text-slate-900 tracking-tight">{totalApproved}</span>
                 <span className="text-xs font-bold text-slate-400">Warga</span>
               </div>
               <p className="text-[11px] text-emerald-900/80 font-medium">Aktif di database resmi RT 002</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-2xs">
               <UserCheck size={22} className="stroke-[2.5]" />
             </div>
           </div>
@@ -529,19 +529,19 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
         </div>
 
         {/* Card 3: Rejected */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-rose-500/10 via-rose-50/40 to-white border border-rose-200/80 rounded-2xl p-5 shadow-xs transition-all hover:shadow-md hover:border-rose-300">
+        <div className="relative overflow-hidden bg-gradient-to-br from-rose-500/10 via-rose-50/40 to-white border border-rose-200/80 rounded-2xl p-5 shadow-xs transition-colors hover:shadow-md hover:border-rose-300">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-700 block">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-700 block">
                 Permohonan Ditolak
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-slate-900 tracking-tight">{totalRejected}</span>
+                <span className="text-3xl font-semibold text-slate-900 tracking-tight">{totalRejected}</span>
                 <span className="text-xs font-bold text-slate-400">Berkas</span>
               </div>
               <p className="text-[11px] text-rose-900/80 font-medium">Berkas tidak memenuhi syarat</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/25">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-600 text-white flex items-center justify-center shadow-lg shadow-2xs">
               <XCircle size={22} className="stroke-[2.5]" />
             </div>
           </div>
@@ -569,13 +569,13 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
               <button
                 key={status.id}
                 onClick={() => { setFilterStatus(status.id as any); setExpandedRegId(null); }}
-                className={`flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex-1 md:flex-none whitespace-nowrap cursor-pointer ${
+                className={`flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex-1 md:flex-none whitespace-nowrap cursor-pointer ${
                   isSel 
                     ? 'bg-white shadow-xs text-slate-900' 
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
                 }`}
               >
-                {status.alert && <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />}
+                {status.alert && <span className="w-2 h-2 rounded-full bg-amber-500" />}
                 <span>{status.label}</span>
                 <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold ${
                   isSel ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-600'
@@ -593,7 +593,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
           <input
             type="text"
             placeholder="Cari nama, NIK, No. KK, blok..."
-            className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 placeholder:text-slate-400 transition-all shadow-2xs"
+            className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 placeholder:text-slate-400 transition-colors shadow-2xs"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
           />
@@ -623,7 +623,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
             return (
               <div 
                 key={reg.id} 
-                className={`bg-white border transition-all rounded-2xl overflow-hidden ${
+                className={`bg-white border transition-colors rounded-2xl overflow-hidden ${
                   isExpanded 
                     ? 'border-indigo-500/80 shadow-md ring-2 ring-indigo-500/10' 
                     : isPending 
@@ -640,7 +640,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                 >
                   <div className="flex gap-4 items-center min-w-0">
                     {/* Modern Avatar */}
-                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 shadow-xs ${
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-semibold text-sm shrink-0 shadow-xs ${
                       isPending 
                         ? 'bg-amber-100 text-amber-700 border border-amber-300' 
                         : isApproved 
@@ -652,22 +652,22 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h4 className="font-black text-slate-900 text-base tracking-tight truncate">{reg.headOfFamily}</h4>
+                        <h4 className="font-semibold text-slate-900 text-base tracking-tight truncate">{reg.headOfFamily}</h4>
                         
                         {/* Status Verification Pill */}
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5 ${
                           isPending 
                             ? 'bg-amber-100 text-amber-800 border border-amber-300' 
                             : isApproved 
                               ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
                               : 'bg-rose-100 text-rose-800 border border-rose-300'
                         }`}>
-                          {isPending && <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping" />}
+                          {isPending && <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />}
                           {isPending ? 'Menunggu Persetujuan' : isApproved ? '✓ Disetujui' : '✕ Ditolak'}
                         </span>
 
                         {/* Status Hunian Pill */}
-                        <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+                        <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider border ${
                           reg.residenceType === 'Sewa'
                             ? 'bg-teal-50 text-teal-800 border-teal-200'
                             : reg.residenceType === 'Rumah Keluarga'
@@ -681,7 +681,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                         {(() => {
                           const isLocal = reg.ktpStatus === 'Sesuai Domisili' || (!reg.ktpStatus && !!reg.addressKtp && (reg.addressKtp.toLowerCase().includes('tondo') || reg.addressKtp.toLowerCase().includes('pue lombe')));
                           return (
-                            <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider border flex items-center gap-1 ${
+                            <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider border flex items-center gap-1 ${
                               isLocal
                                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                                 : 'bg-amber-50 text-amber-800 border-amber-200'
@@ -755,13 +755,13 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                           );
                           window.open(`https://wa.me/${cleanPhone}?text=${greeting}`, '_blank');
                         }}
-                        className="p-2 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-emerald-600 rounded-xl transition-all active:scale-95 shadow-2xs"
+                        className="p-2 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-emerald-600 rounded-xl transition-colors active:scale-95 shadow-2xs"
                         title="Hubungi via WhatsApp"
                       >
                         <Phone size={14} className="stroke-[2.5]" />
                       </button>
                       
-                      <div className={`p-2 rounded-xl border transition-all ${
+                      <div className={`p-2 rounded-xl border transition-colors ${
                         isExpanded ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-100 text-slate-600 border-slate-200'
                       }`}>
                         {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -790,7 +790,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                 <FileCheck size={16} />
                               </div>
                               <div>
-                                <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                                <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
                                   1. Identitas Resmi Kepala Keluarga (Data Dukcapil)
                                 </h5>
                                 <p className="text-[10px] text-slate-400 font-medium">Validasi identitas kependudukan kepala keluarga pemohon</p>
@@ -805,13 +805,13 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             {/* NIK Card with Copy */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-center justify-between group">
                               <div>
-                                <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">NIK KTP</span>
+                                <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">NIK KTP</span>
                                 <span className="block text-xs font-mono font-bold text-slate-900 mt-0.5">{reg.nik || '-'}</span>
                               </div>
                               {reg.nik && (
                                 <button
                                   onClick={() => handleCopy(reg.nik!, 'NIK')}
-                                  className="p-1.5 hover:bg-white text-slate-400 hover:text-indigo-600 rounded-lg border border-transparent hover:border-slate-200 transition-all opacity-80 group-hover:opacity-100"
+                                  className="p-1.5 hover:bg-white text-slate-400 hover:text-indigo-600 rounded-lg border border-transparent hover:border-slate-200 transition-colors opacity-80 group-hover:opacity-100"
                                   title="Salin NIK"
                                 >
                                   <Copy size={13} />
@@ -822,13 +822,13 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             {/* No KK Card with Copy */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80 flex items-center justify-between group">
                               <div>
-                                <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Nomor KK</span>
+                                <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Nomor KK</span>
                                 <span className="block text-xs font-mono font-bold text-slate-900 mt-0.5">{reg.kkNumber || '-'}</span>
                               </div>
                               {reg.kkNumber && (
                                 <button
                                   onClick={() => handleCopy(reg.kkNumber!, 'Nomor KK')}
-                                  className="p-1.5 hover:bg-white text-slate-400 hover:text-indigo-600 rounded-lg border border-transparent hover:border-slate-200 transition-all opacity-80 group-hover:opacity-100"
+                                  className="p-1.5 hover:bg-white text-slate-400 hover:text-indigo-600 rounded-lg border border-transparent hover:border-slate-200 transition-colors opacity-80 group-hover:opacity-100"
                                   title="Salin No. KK"
                                 >
                                   <Copy size={13} />
@@ -838,19 +838,19 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
 
                             {/* Tempat, Tanggal Lahir & Usia */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Tempat / Tanggal Lahir</span>
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Tempat / Tanggal Lahir</span>
                               <span className="block text-xs font-bold text-slate-900 mt-0.5 truncate">
                                 {reg.birthPlace ? `${reg.birthPlace}, ` : ''}
                                 {reg.birthDate ? new Date(reg.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                               </span>
-                              <span className="text-[10px] font-black text-indigo-600 block mt-0.5">
+                              <span className="text-[10px] font-semibold text-indigo-600 block mt-0.5">
                                 Usia: {calculateAge(reg.birthDate)}
                               </span>
                             </div>
 
                             {/* Jenis Kelamin & Gol Darah */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Gender &amp; Gol. Darah</span>
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Gender &amp; Gol. Darah</span>
                               <span className="block text-xs font-bold text-slate-900 mt-0.5">
                                 {reg.gender || '-'} {reg.bloodType && reg.bloodType !== '-' ? `(Gol. ${reg.bloodType})` : ''}
                               </span>
@@ -858,25 +858,25 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
 
                             {/* Agama */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Agama</span>
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Agama</span>
                               <span className="block text-xs font-bold text-slate-900 mt-0.5">{reg.religion || 'Islam'}</span>
                             </div>
 
                             {/* Pendidikan Terakhir */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Pendidikan Terakhir</span>
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Pendidikan Terakhir</span>
                               <span className="block text-xs font-bold text-slate-900 mt-0.5">{reg.education || '-'}</span>
                             </div>
 
                             {/* Pekerjaan / Profesi */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Pekerjaan / Profesi</span>
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Pekerjaan / Profesi</span>
                               <span className="block text-xs font-bold text-slate-900 mt-0.5">{reg.jobCategory || '-'}</span>
                             </div>
 
                             {/* Jaminan Kesehatan BPJS */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Jaminan Kesehatan</span>
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Jaminan Kesehatan</span>
                               <span className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${
                                 reg.bpjsStatus && reg.bpjsStatus !== 'Tidak Ada'
                                   ? 'bg-emerald-100 text-emerald-800'
@@ -890,11 +890,11 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             <div className="col-span-1 sm:col-span-2 md:col-span-4 p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                               <div className="space-y-1">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Status Kesesuaian KTP Dukcapil:</span>
+                                  <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Status Kesesuaian KTP Dukcapil:</span>
                                   {(() => {
                                     const isLocal = reg.ktpStatus === 'Sesuai Domisili' || (!reg.ktpStatus && !!reg.addressKtp && (reg.addressKtp.toLowerCase().includes('tondo') || reg.addressKtp.toLowerCase().includes('pue lombe')));
                                     return (
-                                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${
+                                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider border ${
                                         isLocal
                                           ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
                                           : 'bg-amber-100 text-amber-800 border-amber-300'
@@ -922,7 +922,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               <Building size={16} />
                             </div>
                             <div>
-                              <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                              <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
                                 2. Domisili, Status Hunian &amp; Aset Lingkungan
                               </h5>
                               <p className="text-[10px] text-slate-400 font-medium">Informasi kepenghunian rumah dan kendaraan di lingkungan RT 002</p>
@@ -932,8 +932,8 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5">
                             {/* Alamat Unit Rumah */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Alamat Kavling</span>
-                              <span className="block text-sm font-black text-indigo-900 mt-0.5">
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Alamat Kavling</span>
+                              <span className="block text-sm font-semibold text-indigo-900 mt-0.5">
                                 Blok {reg.block} - No. {reg.number}
                               </span>
                               <span className="text-[10px] text-slate-400 font-medium block mt-0.5">Huntap Tondo 2 RT 002</span>
@@ -941,7 +941,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
 
                             {/* Status Hak Tempat Tinggal */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">Status Hak Hunian</span>
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">Status Hak Hunian</span>
                               <span className="block text-xs font-bold text-slate-900 mt-0.5">
                                 {reg.residenceType === 'Sewa' ? 'Sewa / Kontrak' : reg.residenceType === 'Rumah Keluarga' ? 'Rumah Keluarga / Kerabat' : 'Hak Milik Pribadi'}
                               </span>
@@ -952,7 +952,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
 
                             {/* Nama Pemilik Rumah Asli */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
                                 {reg.residenceType === 'Sewa' ? 'Pemilik Asli (Induk Semang)' : reg.residenceType === 'Rumah Keluarga' ? 'Pemilik (Keluarga)' : 'Pemilik Rumah'}
                               </span>
                               {(() => {
@@ -970,7 +970,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                   if (resolvedOwner) {
                                     return (
                                       <div className="mt-0.5 space-y-1">
-                                        <span className="block text-xs font-black text-slate-900">{resolvedOwner}</span>
+                                        <span className="block text-xs font-semibold text-slate-900">{resolvedOwner}</span>
                                         <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold ${
                                           hasExplicitOwner 
                                             ? 'bg-blue-50 text-blue-700 border border-blue-200' 
@@ -990,7 +990,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                 }
                                 return (
                                   <div className="mt-0.5">
-                                    <span className="block text-xs font-black text-slate-900">
+                                    <span className="block text-xs font-semibold text-slate-900">
                                       {reg.headOfFamily}
                                     </span>
                                     <span className="text-[9px] text-teal-700 font-bold block mt-0.5">Hak Milik Pribadi</span>
@@ -1001,7 +1001,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
 
                             {/* Kepemilikan Kendaraan */}
                             <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-200/80">
-                              <span className="block text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                              <span className="block text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
                                 Kendaraan Terparkir
                               </span>
                               <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
@@ -1030,7 +1030,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               <Heart size={16} />
                             </div>
                             <div>
-                              <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                              <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
                                 3. Bantuan Sosial &amp; Indikator Kerentanan
                               </h5>
                               <p className="text-[10px] text-slate-400 font-medium">Pemeriksaan profil kesejahteraan sosial &amp; kelompok rentan untuk posyandu/bansos</p>
@@ -1040,13 +1040,13 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                           <div className="space-y-3">
                             {/* Bansos Badges */}
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider mr-1">Status Bansos:</span>
+                              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mr-1">Status Bansos:</span>
                               {hasBansos ? (
                                 <>
-                                  {reg.isPKH && <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-black">PKH Aktif</span>}
-                                  {reg.isBLT && <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-black">BLT Aktif</span>}
-                                  {reg.isBPNT && <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-black">BPNT Aktif</span>}
-                                  {reg.isBansosLain && <span className="px-2.5 py-1 bg-blue-100 text-blue-800 border border-blue-300 rounded-lg text-[10px] font-black">{reg.bansosLainName || 'Bansos Lain'}</span>}
+                                  {reg.isPKH && <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-semibold">PKH Aktif</span>}
+                                  {reg.isBLT && <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-semibold">BLT Aktif</span>}
+                                  {reg.isBPNT && <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-[10px] font-semibold">BPNT Aktif</span>}
+                                  {reg.isBansosLain && <span className="px-2.5 py-1 bg-blue-100 text-blue-800 border border-blue-300 rounded-lg text-[10px] font-semibold">{reg.bansosLainName || 'Bansos Lain'}</span>}
                                 </>
                               ) : (
                                 <span className="px-2.5 py-0.8 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-bold">
@@ -1057,7 +1057,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
 
                             {/* Demographics indicators */}
                             <div className="flex flex-wrap items-center gap-2 pt-1">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider mr-1">Kelompok Rentan:</span>
+                              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mr-1">Kelompok Rentan:</span>
                               {hasDemographics ? (
                                 <>
                                   {!!reg.pregnantCount && (
@@ -1108,7 +1108,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                 <Users size={16} />
                               </div>
                               <div>
-                                <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                                <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
                                   4. Daftar Anggota Keluarga Terlampir ({reg.familyMembers?.length || 0} Jiwa)
                                 </h5>
                                 <p className="text-[10px] text-slate-400 font-medium">Rincian anggota keluarga yang didaftarkan bersama kepala keluarga</p>
@@ -1123,7 +1123,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             <div className="overflow-x-auto">
                               <table className="w-full text-left border-collapse min-w-[550px]">
                                 <thead>
-                                  <tr className="border-b border-slate-200 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                  <tr className="border-b border-slate-200 text-[9px] font-semibold text-slate-400 uppercase tracking-widest">
                                     <th className="pb-2.5">Nama Lengkap</th>
                                     <th className="pb-2.5">Hubungan</th>
                                     <th className="pb-2.5">Gender</th>
@@ -1166,7 +1166,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               <ClipboardList size={16} />
                             </div>
                             <div>
-                              <h5 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                              <h5 className="text-xs font-semibold uppercase tracking-wider text-slate-900">
                                 5. Dokumen Lampiran Fisik (KTP &amp; KK)
                               </h5>
                               <p className="text-[10px] text-slate-400 font-medium">Verifikasi foto dokumen asli kepala keluarga pemohon</p>
@@ -1180,7 +1180,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                             return (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {/* KTP Card */}
-                                <div className={`p-4 rounded-2xl border transition-all ${
+                                <div className={`p-4 rounded-2xl border transition-colors ${
                                   isKtpPlaceholder 
                                     ? 'bg-amber-50/70 border-amber-300 shadow-xs' 
                                     : reg.ktpUrl 
@@ -1199,23 +1199,23 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                         <FileText size={20} />
                                       </div>
                                       <div>
-                                        <h6 className="text-xs font-black text-slate-900">KTP Kepala Keluarga</h6>
+                                        <h6 className="text-xs font-semibold text-slate-900">KTP Kepala Keluarga</h6>
                                         <p className="text-[10px] text-slate-500 font-medium mt-0.5">Identitas e-KTP Pemohon</p>
                                         <div className="mt-2">
                                           {reg.ktpUrl ? (
                                             isKtpPlaceholder ? (
-                                              <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1.5">
+                                              <span className="px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1.5">
                                                 <AlertTriangle size={10} className="text-amber-600" />
                                                 Gagal Unggah (Placeholder Dummy)
                                               </span>
                                             ) : (
-                                              <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1.5">
+                                              <span className="px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1.5">
                                                 <CheckCircle size={11} className="text-emerald-600" />
                                                 Dokumen Asli Tersedia
                                               </span>
                                             )
                                           ) : (
-                                            <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 inline-flex items-center gap-1">
+                                            <span className="px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 inline-flex items-center gap-1">
                                               Tidak Ada Berkas
                                             </span>
                                           )}
@@ -1233,7 +1233,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                             phone: reg.phone,
                                             applicantName: reg.headOfFamily
                                           })}
-                                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer ${
+                                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer ${
                                             isKtpPlaceholder 
                                               ? 'bg-amber-600 hover:bg-amber-700 text-white' 
                                               : 'bg-indigo-600 hover:bg-indigo-700 text-white'
@@ -1243,7 +1243,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                         </button>
                                         <button 
                                           onClick={() => handleOpenDocInNewTab(reg.ktpUrl!)}
-                                          className="px-3 py-1 hover:bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1"
+                                          className="px-3 py-1 hover:bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] font-bold transition-colors flex items-center justify-center gap-1"
                                           title="Buka di Tab Baru"
                                         >
                                           <ExternalLink size={11} /> Tab Baru
@@ -1262,7 +1262,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                           const msg = encodeURIComponent(`Halo Bapak/Ibu *${cleanName}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nMohon kirimkan foto asli fisik KTP Anda melalui chat WhatsApp ini untuk keperluan verifikasi pendaftaran warga di Blok *${reg.block}-${reg.number}*.\n\nTerima kasih atas kerja samanya! 🙏`);
                                           window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
                                         }}
-                                        className="text-[10px] font-black text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 transition-all flex items-center gap-1"
+                                        className="text-[10px] font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 transition-colors flex items-center gap-1"
                                       >
                                         <Phone size={10} /> Chat WA
                                       </button>
@@ -1271,7 +1271,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                 </div>
 
                                 {/* KK Card */}
-                                <div className={`p-4 rounded-2xl border transition-all ${
+                                <div className={`p-4 rounded-2xl border transition-colors ${
                                   isKkPlaceholder 
                                     ? 'bg-amber-50/70 border-amber-300 shadow-xs' 
                                     : reg.kkUrl 
@@ -1290,23 +1290,23 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                         <ClipboardList size={20} />
                                       </div>
                                       <div>
-                                        <h6 className="text-xs font-black text-slate-900">Kartu Keluarga (KK)</h6>
+                                        <h6 className="text-xs font-semibold text-slate-900">Kartu Keluarga (KK)</h6>
                                         <p className="text-[10px] text-slate-500 font-medium mt-0.5">Berkas KK Warga Pemohon</p>
                                         <div className="mt-2">
                                           {reg.kkUrl ? (
                                             isKkPlaceholder ? (
-                                              <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1.5">
+                                              <span className="px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 inline-flex items-center gap-1.5">
                                                 <AlertTriangle size={10} className="text-amber-600" />
                                                 Gagal Unggah (Placeholder Dummy)
                                               </span>
                                             ) : (
-                                              <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1.5">
+                                              <span className="px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1.5">
                                                 <CheckCircle size={11} className="text-emerald-600" />
                                                 Dokumen Asli Tersedia
                                               </span>
                                             )
                                           ) : (
-                                            <span className="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 inline-flex items-center gap-1">
+                                            <span className="px-2.5 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 inline-flex items-center gap-1">
                                               Tidak Ada Berkas
                                             </span>
                                           )}
@@ -1324,7 +1324,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                             phone: reg.phone,
                                             applicantName: reg.headOfFamily
                                           })}
-                                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer ${
+                                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer ${
                                             isKkPlaceholder 
                                               ? 'bg-amber-600 hover:bg-amber-700 text-white' 
                                               : 'bg-indigo-600 hover:bg-indigo-700 text-white'
@@ -1334,7 +1334,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                         </button>
                                         <button 
                                           onClick={() => handleOpenDocInNewTab(reg.kkUrl!)}
-                                          className="px-3 py-1 hover:bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-1"
+                                          className="px-3 py-1 hover:bg-white text-slate-600 border border-slate-200 rounded-xl text-[10px] font-bold transition-colors flex items-center justify-center gap-1"
                                           title="Buka di Tab Baru"
                                         >
                                           <ExternalLink size={11} /> Tab Baru
@@ -1353,7 +1353,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                           const msg = encodeURIComponent(`Halo Bapak/Ibu *${cleanName}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nMohon kirimkan foto asli fisik Kartu Keluarga (KK) Anda melalui chat WhatsApp ini untuk keperluan verifikasi pendaftaran warga di Blok *${reg.block}-${reg.number}*.\n\nTerima kasih atas kerja samanya! 🙏`);
                                           window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
                                         }}
-                                        className="text-[10px] font-black text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 transition-all flex items-center gap-1"
+                                        className="text-[10px] font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 transition-colors flex items-center gap-1"
                                       >
                                         <Phone size={10} /> Chat WA
                                       </button>
@@ -1392,7 +1392,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                   );
                                   window.open(`https://wa.me/${cleanPhone}?text=${greeting}`, '_blank');
                                 }}
-                                className="px-4 py-2.5 border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                                className="px-4 py-2.5 border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                               >
                                 <Phone size={13} /> Chat WhatsApp
                               </button>
@@ -1400,7 +1400,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               <button
                                 disabled={actionLoadingId === reg.id}
                                 onClick={() => handleReject(reg)}
-                                className={`px-4 py-2.5 border border-rose-200 text-rose-600 bg-rose-50/70 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+                                className={`px-4 py-2.5 border border-rose-200 text-rose-600 bg-rose-50/70 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors active:scale-95 cursor-pointer ${
                                   actionLoadingId === reg.id ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
                               >
@@ -1410,7 +1410,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                               <button
                                 disabled={actionLoadingId === reg.id}
                                 onClick={() => handleApprove(reg)}
-                                className={`px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all active:scale-95 shadow-md shadow-indigo-600/20 flex items-center gap-2 cursor-pointer ${
+                                className={`px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors active:scale-95 shadow-md shadow-2xs flex items-center gap-2 cursor-pointer ${
                                   actionLoadingId === reg.id ? 'opacity-50 cursor-not-allowed' : ''
                                 }`}
                               >
@@ -1422,7 +1422,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                         ) : (
                           <div className="pt-3 border-t border-slate-200 flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200/80">
                             <span className="text-xs text-slate-500 font-medium">Status Permohonan:</span>
-                            <div className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 ${
+                            <div className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center gap-2 ${
                               isApproved
                                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 : 'bg-rose-100 text-rose-800 border border-rose-300'
@@ -1453,7 +1453,7 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
             <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto">
               <Search size={22} />
             </div>
-            <h5 className="font-black text-slate-800 text-base">Tidak Ada Berkas Pendaftaran Ditemukan</h5>
+            <h5 className="font-semibold text-slate-800 text-base">Tidak Ada Berkas Pendaftaran Ditemukan</h5>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
               {localSearch ? `Tidak ada data yang cocok dengan pencarian "${localSearch}". Coba kata kunci lain.` : 'Belum ada warga yang mengajukan pendaftaran pada filter ini.'}
             </p>

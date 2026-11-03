@@ -250,9 +250,9 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-6 bg-indigo-600 rounded-full"></div>
-            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Dashboard Analitik Terpadu</span>
+            <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest">Dashboard Analitik Terpadu</span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-1">Analitik & Demografi RT 02</h2>
+          <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight mt-1">Analitik & Demografi RT 02</h2>
           <p className="text-slate-500 font-medium text-xs md:text-sm">Visualisasi data demografi, keuangan, dan efisiensi operasional pengurus.</p>
         </div>
         
@@ -269,7 +269,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                 }
               );
             }}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-2xl transition-all shadow-md shadow-indigo-600/20 shrink-0 border border-indigo-500/30"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-2xl transition-colors shadow-md shadow-2xs shrink-0 border border-indigo-500/30"
           >
             <Download size={15} className="text-white" />
             <span>Cetak Laporan PDF</span>
@@ -288,7 +288,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                   onClick={() => setActiveTab(tab.id as any)}
                   id={`id_analytics` + tab.id}
                   className={`
-                    px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-[11px] sm:text-xs font-black transition-all flex items-center justify-center gap-2 shrink-0 whitespace-nowrap
+                    px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl text-[11px] sm:text-xs font-semibold transition-colors flex items-center justify-center gap-2 shrink-0 whitespace-nowrap
                     ${activeTab === tab.id 
                       ? 'bg-white text-indigo-600 shadow-md border border-indigo-100 font-bold' 
                       : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'}
@@ -308,12 +308,12 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-amber-300 font-black text-xs uppercase tracking-wider">
-              <Sparkles size={16} className="animate-pulse" />
+            <div className="flex items-center gap-2 text-amber-300 font-semibold text-xs uppercase tracking-wider">
+              <Sparkles size={16} className="" />
               <span>Rangkuman Analitik Eksekutif</span>
             </div>
             <h3 className="text-base md:text-lg font-bold text-white leading-relaxed">
-              Tingkat kepatuhan pembayaran kas bulan ini mencapai <strong className="text-emerald-400 font-black">{financialStats.collectionRate.toFixed(0)}%</strong>, dengan efisiensi ronda malam berada pada <strong className="text-indigo-300 font-black">{securityStats.completionRate.toFixed(0)}%</strong>.
+              Tingkat kepatuhan pembayaran kas bulan ini mencapai <strong className="text-emerald-400 font-semibold">{financialStats.collectionRate.toFixed(0)}%</strong>, dengan efisiensi ronda malam berada pada <strong className="text-indigo-300 font-semibold">{securityStats.completionRate.toFixed(0)}%</strong>.
             </h3>
             <p className="text-xs text-indigo-200/80 font-medium">
               Sebanyak {letterStats.totalLetters} surat pengantar telah diterbitkan dengan tingkat kepuasan layanan aduan warga {reports.length > 0 ? `${Math.round((reports.filter(r => r.status === 'Selesai').length / reports.length) * 100)}%` : '100%'}.
@@ -384,11 +384,11 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                       <m.icon size={22} className="shrink-0" />
                     </div>
                     {m.growthType === 'up' ? (
-                      <span className="flex items-center gap-1 text-emerald-600 text-[10px] font-black bg-emerald-50 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-emerald-600 text-[10px] font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
                         <TrendingUp size={10} /> {m.growth}
                       </span>
                     ) : m.growthType === 'down' ? (
-                      <span className="flex items-center gap-1 text-rose-600 text-[10px] font-black bg-rose-50 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-rose-600 text-[10px] font-semibold bg-rose-50 px-2 py-0.5 rounded-full">
                         <TrendingDown size={10} /> {m.growth}
                       </span>
                     ) : (
@@ -398,8 +398,8 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                     )}
                   </div>
                   <div className="relative z-10">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{m.label}</p>
-                    <h3 className="text-2xl font-black text-slate-900 leading-tight mb-1">{m.value}</h3>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">{m.label}</p>
+                    <h3 className="text-2xl font-semibold text-slate-900 leading-tight mb-1">{m.value}</h3>
                     <p className="text-[10px] font-bold text-slate-400">{m.sub}</p>
                   </div>
                 </motion.div>
@@ -412,7 +412,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
               <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <h3 className="font-black text-slate-900 tracking-tight text-lg flex items-center gap-2">
+                    <h3 className="font-semibold text-slate-900 tracking-tight text-lg flex items-center gap-2">
                       <DollarSign className="text-indigo-600" size={18} /> Tren Arus Kas Bulanan
                     </h3>
                     <p className="text-xs text-slate-400 font-bold">Perbandingan real-time Pemasukan vs Pengeluaran.</p>
@@ -424,7 +424,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                       <button
                         key={span}
                         onClick={() => setFinancialTimeSpan(span as any)}
-                        className={`px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-wide transition-all ${financialTimeSpan === span ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}
+                        className={`px-3 py-1 text-[10px] font-semibold rounded-lg uppercase tracking-wide transition-colors ${financialTimeSpan === span ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}
                       >
                         {span === '3m' ? '3 Bulan' : span === '6m' ? '6 Bulan' : '1 Tahun'}
                       </button>
@@ -463,7 +463,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
               <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <h3 className="font-black text-slate-900 tracking-tight text-lg flex items-center gap-2">
+                    <h3 className="font-semibold text-slate-900 tracking-tight text-lg flex items-center gap-2">
                       <Shield className="text-indigo-600" size={18} /> Keaktifan Pengamanan Terpadu
                     </h3>
                     <p className="text-xs text-slate-400 font-bold">Keseimbangan pos jaga ronde malam dan sebaran insiden.</p>
@@ -474,7 +474,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                       <button
                         key={span}
                         onClick={() => setSecurityTimeSpan(span as any)}
-                        className={`px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-wide transition-all ${securityTimeSpan === span ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}
+                        className={`px-3 py-1 text-[10px] font-semibold rounded-lg uppercase tracking-wide transition-colors ${securityTimeSpan === span ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}
                       >
                         {span === '7d' ? '7 Hari' : '30 Hari'}
                       </button>
@@ -536,9 +536,9 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                   <Clock size={24} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rata-Rata Respons Surat</span>
-                  <h3 className="text-2xl font-black text-slate-900 mt-1">2.4 Jam</h3>
-                  <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1">Sangat Cepat (&lt; 24 jam)</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Rata-Rata Respons Surat</span>
+                  <h3 className="text-2xl font-semibold text-slate-900 mt-1">2.4 Jam</h3>
+                  <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1">Sangat Cepat (&lt; 24 jam)</span>
                 </div>
               </div>
 
@@ -547,8 +547,8 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                   <Shield size={24} />
                 </div>
                 <div className="w-full">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kehadiran Petugas Ronda</span>
-                  <h3 className="text-2xl font-black text-slate-900 mt-1">{securityStats.completionRate.toFixed(0)}%</h3>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Kehadiran Petugas Ronda</span>
+                  <h3 className="text-2xl font-semibold text-slate-900 mt-1">{securityStats.completionRate.toFixed(0)}%</h3>
                   <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1.5 w-full">
                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${securityStats.completionRate}%` }}></div>
                   </div>
@@ -557,8 +557,8 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
 
               <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Laporan Operasional PDF</span>
-                  <h3 className="text-lg font-black text-slate-900 mt-1">Cetak Rekap Kinerja</h3>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Laporan Operasional PDF</span>
+                  <h3 className="text-lg font-semibold text-slate-900 mt-1">Cetak Rekap Kinerja</h3>
                   <p className="text-[10px] font-semibold text-slate-400 mt-0.5">Bahan evaluasi rapat bulanan RT</p>
                 </div>
                 <button
@@ -599,7 +599,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                       }
                     );
                   }}
-                  className="p-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-md shadow-indigo-600/20 shrink-0 transition-transform active:scale-95"
+                  className="p-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-md shadow-2xs shrink-0 transition-transform active:scale-95"
                 >
                   <Download size={18} />
                 </button>
@@ -610,17 +610,17 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
             <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="space-y-1">
-                  <h3 className="font-black text-slate-900 tracking-tight text-lg">Kelancaran Tagihan Iuran</h3>
+                  <h3 className="font-semibold text-slate-900 tracking-tight text-lg">Kelancaran Tagihan Iuran</h3>
                   <p className="text-xs text-slate-400 font-bold">Kolektivitas keuangan dan akurasi setoran bulanan warga RT 02.</p>
                 </div>
                 <div className="text-right flex items-center gap-4">
                   <div className="hidden sm:block">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Rasio Koleksi</p>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mb-1">Rasio Koleksi</p>
                     <span className="text-xs font-bold text-slate-500">Target 100% Tercapai</span>
                   </div>
                   <div className="px-5 py-3 bg-emerald-50 rounded-2xl flex flex-col justify-center border border-emerald-100">
-                    <span className="text-3xl font-black text-emerald-600 leading-none mb-0.5">{financialStats.collectionRate.toFixed(0)}%</span>
-                    <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest leading-none">Lunas Terbayar</span>
+                    <span className="text-3xl font-semibold text-emerald-600 leading-none mb-0.5">{financialStats.collectionRate.toFixed(0)}%</span>
+                    <span className="text-[8px] font-semibold text-emerald-500 uppercase tracking-widest leading-none">Lunas Terbayar</span>
                   </div>
                 </div>
               </div>
@@ -641,8 +641,8 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-white rounded-xl text-emerald-600 shadow-sm"><CheckCircle2 size={20}/></div>
                     <div>
-                      <h4 className="font-black text-emerald-800 text-xs uppercase tracking-widest">Sudah Lunas</h4>
-                      <p className="text-2xl font-black text-emerald-950 mt-1">{houses.filter(h => h.status === 'Occupied').length - financialStats.housesWithArrears} <span className="text-xs font-bold text-slate-400 font-sans">Rumah</span></p>
+                      <h4 className="font-semibold text-emerald-800 text-xs uppercase tracking-widest">Sudah Lunas</h4>
+                      <p className="text-2xl font-semibold text-emerald-950 mt-1">{houses.filter(h => h.status === 'Occupied').length - financialStats.housesWithArrears} <span className="text-xs font-bold text-slate-400 font-sans">Rumah</span></p>
                     </div>
                   </div>
                 </div>
@@ -651,14 +651,14 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                   <div className="flex items-center gap-4">
                     <div className="p-3 bg-white rounded-xl text-rose-600 shadow-sm"><Clock size={20}/></div>
                     <div>
-                      <h4 className="font-black text-rose-800 text-xs uppercase tracking-widest">Menunggak Iuran</h4>
-                      <p className="text-2xl font-black text-rose-950 mt-1">{financialStats.housesWithArrears} <span className="text-xs font-bold text-slate-400 font-sans">Rumah</span></p>
+                      <h4 className="font-semibold text-rose-800 text-xs uppercase tracking-widest">Menunggak Iuran</h4>
+                      <p className="text-2xl font-semibold text-rose-950 mt-1">{financialStats.housesWithArrears} <span className="text-xs font-bold text-slate-400 font-sans">Rumah</span></p>
                     </div>
                   </div>
                   
                   <button 
                     onClick={() => setShowArrearsDetailInput(!showArrearsDetailInput)}
-                    className="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-black rounded-xl transition-all flex items-center gap-1.5"
+                    className="px-4 py-2 bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-semibold rounded-xl transition-colors flex items-center gap-1.5"
                   >
                     <span>{showArrearsDetailInput ? 'Sembunyikan' : 'Kelola Daftar'}</span>
                     <ChevronRight size={14} className={`transform transition-transform ${showArrearsDetailInput ? 'rotate-90' : ''}`} />
@@ -678,7 +678,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                   >
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <div className="space-y-1">
-                        <h4 className="font-black text-slate-900 text-sm flex items-center gap-2">
+                        <h4 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
                           <ClipboardList size={16} className="text-rose-600" /> Daftar Pengingat Tunggakan Iuran
                         </h4>
                         <p className="text-xs font-medium text-slate-500">Kirim pengingat WhatsApp santun langsung kepada warga yang tertunda.</p>
@@ -700,7 +700,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                       <div className="max-h-72 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-inner">
                         <table className="w-full text-left border-collapse text-xs">
                           <thead>
-                            <tr className="bg-slate-100 text-slate-600 font-black uppercase tracking-wider text-[10px] border-b border-slate-200">
+                            <tr className="bg-slate-100 text-slate-600 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-200">
                               <th className="p-4">No. Rumah / Blok</th>
                               <th className="p-4">Kepala Keluarga</th>
                               <th className="p-4 text-center">Jumlah Bulan</th>
@@ -713,13 +713,13 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                               <tr key={h.id} className="hover:bg-slate-50 transition-colors">
                                 <td className="p-4 font-bold text-slate-800">Rumah No. {h.number} (Blok {h.block})</td>
                                 <td className="p-4 font-semibold text-slate-700">{h.familyHead}</td>
-                                <td className="p-4 text-center"><span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-black text-[10px]">{h.arrearsCount} Bulan</span></td>
+                                <td className="p-4 text-center"><span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-semibold text-[10px]">{h.arrearsCount} Bulan</span></td>
                                 <td className="p-4 text-slate-500 italic max-w-xs truncate">{h.arrearsDetails}</td>
                                 <td className="p-4 text-right">
                                   {h.phone && h.phone !== '-' ? (
                                     <button
                                       onClick={() => sendWhatsAppReminder(h.familyHead, h.number, h.arrearsCount, h.phone)}
-                                      className="px-3.5 py-1.5 bg-indigo-50 hover:bg-emerald-50 hover:text-emerald-700 text-indigo-600 font-black text-[10px] rounded-lg transition-colors flex items-center justify-center gap-1.5 ml-auto"
+                                      className="px-3.5 py-1.5 bg-indigo-50 hover:bg-emerald-50 hover:text-emerald-700 text-indigo-600 font-semibold text-[10px] rounded-lg transition-colors flex items-center justify-center gap-1.5 ml-auto"
                                     >
                                       <Phone size={11} /> 
                                       <span>Hubungi WA</span>
@@ -748,7 +748,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
               <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-black text-slate-900 tracking-tight text-lg">Keaktifan Surat Menyurat</h3>
+                    <h3 className="font-semibold text-slate-900 tracking-tight text-lg">Keaktifan Surat Menyurat</h3>
                     <p className="text-xs text-slate-400 font-bold">Volume pengajuan surat pengantar pelayanan warga.</p>
                   </div>
                   <div className="bg-slate-100 p-1 rounded-xl flex gap-1 border border-slate-200 shrink-0">
@@ -756,7 +756,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                       <button
                         key={span}
                         onClick={() => setLetterTimeSpan(span as any)}
-                        className={`px-3 py-1 text-[10px] font-black rounded-lg uppercase tracking-wide transition-all ${letterTimeSpan === span ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}
+                        className={`px-3 py-1 text-[10px] font-semibold rounded-lg uppercase tracking-wide transition-colors ${letterTimeSpan === span ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}
                       >
                         {span === '3m' ? '3 Bulan' : '6 Bulan'}
                       </button>
@@ -766,12 +766,12 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
-                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1.5">Total Terbit</p>
-                    <p className="text-3xl font-black text-slate-900 leading-none">{letterStats.totalLetters}</p>
+                    <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-widest mb-1.5">Total Terbit</p>
+                    <p className="text-3xl font-semibold text-slate-900 leading-none">{letterStats.totalLetters}</p>
                   </div>
                   <div className="p-4 bg-amber-50/50 rounded-2xl border border-amber-100">
-                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1.5">Masih Menunggu</p>
-                    <p className="text-3xl font-black text-amber-600 leading-none">{letterStats.pendingLetters}</p>
+                    <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-widest mb-1.5">Masih Menunggu</p>
+                    <p className="text-3xl font-semibold text-amber-600 leading-none">{letterStats.pendingLetters}</p>
                   </div>
                 </div>
 
@@ -789,7 +789,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
 
               <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
                 <div>
-                  <h3 className="font-black text-slate-900 tracking-tight text-lg">Jenis Surat Terpopuler</h3>
+                  <h3 className="font-semibold text-slate-900 tracking-tight text-lg">Jenis Surat Terpopuler</h3>
                   <p className="text-xs text-slate-400 font-bold">Kategori birokrasi yang paling sering diajukan warga.</p>
                 </div>
                 
@@ -822,19 +822,19 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
             {/* Quality Alerts Hub */}
             <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
               <div>
-                <h3 className="font-black text-slate-900 tracking-tight text-lg">Kelengkapan & Validitas Database Warga</h3>
+                <h3 className="font-semibold text-slate-900 tracking-tight text-lg">Kelengkapan & Validitas Database Warga</h3>
                 <p className="text-xs text-slate-400 font-bold">Kecerdasan kualitas data untuk memastikan integritas file warga bersangkutan.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Incomplete Phone numbers alert card */}
-                <div className="border border-slate-100 p-6 rounded-[2rem] bg-slate-50 relative group transition-all">
+                <div className="border border-slate-100 p-6 rounded-[2rem] bg-slate-50 relative group transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl group-hover:scale-115 transition-transform">
                       <AlertTriangle size={24} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-black text-slate-800 text-sm">Data Kontak Belum Lengkap</h4>
+                      <h4 className="font-semibold text-slate-800 text-sm">Data Kontak Belum Lengkap</h4>
                       <p className="text-xs text-slate-500 mt-1">{incompleteHouses.length} rumah belum memiliki nomor telepon kepala keluarga.</p>
                     </div>
                     <button 
@@ -854,7 +854,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                         variants={listCardVariants}
                         className="mt-4 border border-amber-100 bg-white p-4 rounded-xl max-h-48 overflow-y-auto space-y-2 shadow-inner"
                       >
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Daftar Rumah Terdampak:</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Daftar Rumah Terdampak:</p>
                         {incompleteHouses.map(h => (
                           <div key={h.id} className="flex justify-between items-center text-xs py-1.5 border-b border-slate-50 last:border-b-0">
                             <span className="font-bold text-slate-700">Rumah No. {h.number} (Blok {h.block})</span>
@@ -867,13 +867,13 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                 </div>
 
                 {/* Unverified houses alert card */}
-                <div className="border border-slate-100 p-6 rounded-[2rem] bg-slate-50 relative group transition-all">
+                <div className="border border-slate-100 p-6 rounded-[2rem] bg-slate-50 relative group transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl group-hover:scale-115 transition-transform">
                       <UserCheck size={24} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-black text-slate-800 text-sm">Butuh Verifikasi Fisik</h4>
+                      <h4 className="font-semibold text-slate-800 text-sm">Butuh Verifikasi Fisik</h4>
                       <p className="text-xs text-slate-500 mt-1">{unverifiedHouses.length} rumah belum diverifikasi fisiknya oleh pengurus RT.</p>
                     </div>
                     <button 
@@ -893,7 +893,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                         variants={listCardVariants}
                         className="mt-4 border border-rose-100 bg-white p-4 rounded-xl max-h-48 overflow-y-auto space-y-2 shadow-inner"
                       >
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Daftar Rumah Belum Verifikasi:</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Daftar Rumah Belum Verifikasi:</p>
                         {unverifiedHouses.map(h => (
                           <div key={h.id} className="flex justify-between items-center text-xs py-1.5 border-b border-slate-50 last:border-b-0">
                             <span className="font-bold text-slate-700">Rumah No. {h.number} (Blok {h.block})</span>
@@ -912,7 +912,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
               <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full translate-x-1/3 -translate-y-1/3"></div>
               
               <div className="space-y-2 relative z-10">
-                <h3 className="text-xl font-black tracking-tight flex items-center gap-2">
+                <h3 className="text-xl font-semibold tracking-tight flex items-center gap-2">
                   <Sparkles size={20} className="text-indigo-400" /> Analisis Kecepatan Administrasi
                 </h3>
                 <p className="text-sm font-medium text-slate-300 max-w-2xl">
@@ -922,7 +922,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
 
               <div className="relative z-10 shrink-0 w-full md:w-auto p-4 bg-white/5 border border-white/10 rounded-2xl flex flex-col gap-4">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Responsifitas Pelayanan</span>
+                  <span className="text-[10px] font-semibold text-indigo-400 uppercase tracking-widest">Responsifitas Pelayanan</span>
                   <div className="flex justify-between text-xs text-slate-300">
                     <span>Layanan Surat</span>
                     <span className="text-emerald-400 font-bold">Respon Cepat</span>

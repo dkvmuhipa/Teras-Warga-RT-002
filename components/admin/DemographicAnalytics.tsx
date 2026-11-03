@@ -555,9 +555,9 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               <div className="p-2 bg-indigo-600 rounded-lg">
                 <Sparkles size={16} className="text-white" />
               </div>
-              <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Intelligence Center</span>
+              <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-[0.3em]">Intelligence Center</span>
             </div>
-            <h2 className="text-4xl font-black text-slate-900 tracking-tight">Analitik & Demografi</h2>
+            <h2 className="text-4xl font-semibold text-slate-900 tracking-tight">Analitik & Demografi</h2>
             <p className="text-slate-500 font-medium mt-2 max-w-2xl">
               Pusat data terpadu RT 02 untuk memantau demografi warga, tren keuangan, dan kualitas data secara real-time.
             </p>
@@ -568,7 +568,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCopyKelurahanSummary}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-2xl text-xs font-semibold transition-colors cursor-pointer shadow-2xs active:scale-95"
                 title="Salin ringkasan data kependudukan untuk laporan Kelurahan Tondo"
               >
                 <Copy size={14} />
@@ -577,7 +577,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               <button
                 onClick={handlePrintReport}
                 disabled={isPrinting}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-black transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-semibold transition-colors cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
                 title="Cetak dokumen laporan analitik demografi resmi"
               >
                 <Printer size={14} />
@@ -591,7 +591,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               <select
                 value={selectedBlock}
                 onChange={(e) => setSelectedBlock(e.target.value)}
-                className="bg-transparent text-xs font-black text-slate-700 outline-none pr-2 cursor-pointer"
+                className="bg-transparent text-xs font-semibold text-slate-700 outline-none pr-2 cursor-pointer"
               >
                 <option value="ALL">Semua Blok</option>
                 {Array.from(new Set(houses.map(h => h.block || h.number?.charAt(0)).filter(Boolean))).sort().map(b => (
@@ -604,13 +604,13 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
             <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
               <button 
                 onClick={() => setActiveTab('demographics')}
-                className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'demographics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`px-6 py-2.5 rounded-xl text-xs font-semibold transition-colors ${activeTab === 'demographics' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Demografi
               </button>
               <button 
                 onClick={() => setActiveTab('advanced')}
-                className={`px-6 py-2.5 rounded-xl text-xs font-black transition-all ${activeTab === 'advanced' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`px-6 py-2.5 rounded-xl text-xs font-semibold transition-colors ${activeTab === 'advanced' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Operasional & Tren
               </button>
@@ -643,7 +643,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="group bg-white p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all relative overflow-hidden"
+                  className="group bg-white p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200/80 shadow-sm hover:shadow-xl hover:shadow-2xs transition-colors relative overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 w-24 h-24 bg-slate-500/5 rounded-full -translate-y-1/2 translate-x-1/2 group-hover:scale-150 transition-transform duration-700"></div>
                   <div className="flex items-center gap-4 relative z-10">
@@ -651,8 +651,8 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                       <stat.icon size={22} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate">{stat.label}</p>
-                      <h3 className="text-2xl md:text-3xl font-black text-slate-900 leading-none mb-1">{stat.value}</h3>
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1 truncate">{stat.label}</p>
+                      <h3 className="text-2xl md:text-3xl font-semibold text-slate-900 leading-none mb-1">{stat.value}</h3>
                       <p className="text-[10px] font-bold text-slate-400 truncate">{stat.sub}</p>
                     </div>
                   </div>
@@ -670,11 +670,11 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               <div className="relative z-10 space-y-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/10 pb-5">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-wider text-indigo-300 backdrop-blur-md mb-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full text-[10px] font-semibold uppercase tracking-wider text-indigo-300 backdrop-blur-md mb-2">
                       <ShieldCheck size={12} className="text-emerald-400" />
                       STANDAR BPS & KELURAHAN TONDO
                     </div>
-                    <h3 className="text-xl md:text-2xl font-black tracking-tight">
+                    <h3 className="text-xl md:text-2xl font-semibold tracking-tight">
                       Indikator Utama Kependudukan & Rasio Demografi
                     </h3>
                     <p className="text-xs text-slate-400 font-medium">
@@ -684,7 +684,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleCopyKelurahanSummary}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md active:scale-95"
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer shadow-md active:scale-95"
                     >
                       <Share2 size={14} />
                       <span>Kirim ke Kelurahan</span>
@@ -694,49 +694,49 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
-                    <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">Rasio Jenis Kelamin</p>
-                    <p className="text-2xl font-black text-white mt-1">{sexRatio}</p>
+                    <p className="text-[10px] font-semibold text-indigo-300 uppercase tracking-widest">Rasio Jenis Kelamin</p>
+                    <p className="text-2xl font-semibold text-white mt-1">{sexRatio}</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
                       {totalMale} L : {totalFemale} P
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
-                    <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Rasio Tanggungan</p>
-                    <p className="text-2xl font-black text-white mt-1">{dependencyRatio}%</p>
+                    <p className="text-[10px] font-semibold text-amber-300 uppercase tracking-widest">Rasio Tanggungan</p>
+                    <p className="text-2xl font-semibold text-white mt-1">{dependencyRatio}%</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
                       Beban per 100 produktif
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
-                    <p className="text-[10px] font-black text-teal-300 uppercase tracking-widest">Indeks Penuaan</p>
-                    <p className="text-2xl font-black text-white mt-1">{ageingIndex}%</p>
+                    <p className="text-[10px] font-semibold text-teal-300 uppercase tracking-widest">Indeks Penuaan</p>
+                    <p className="text-2xl font-semibold text-white mt-1">{ageingIndex}%</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
                       {elderlyDependents} Lansia vs {youngDependents} Anak
                     </p>
                   </div>
                   <div className="bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-sm">
-                    <p className="text-[10px] font-black text-rose-300 uppercase tracking-widest">Rata Jiwa / KK</p>
-                    <p className="text-2xl font-black text-white mt-1">{averageSoulPerKK}</p>
+                    <p className="text-[10px] font-semibold text-rose-300 uppercase tracking-widest">Rata Jiwa / KK</p>
+                    <p className="text-2xl font-semibold text-white mt-1">{averageSoulPerKK}</p>
                     <p className="text-[10px] text-slate-400 font-medium mt-1">
                       Kepadatan hunian aktif
                     </p>
                   </div>
                   <div className="bg-gradient-to-br from-pink-500/20 to-rose-500/10 border border-pink-400/30 p-4 rounded-2xl backdrop-blur-sm relative overflow-hidden">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-black text-pink-300 uppercase tracking-widest">KK Kepala Keluarga Perempuan</p>
-                      <span className="px-1.5 py-0.5 bg-pink-500/30 text-pink-200 text-[8px] font-black rounded uppercase">PEKKA</span>
+                      <p className="text-[10px] font-semibold text-pink-300 uppercase tracking-widest">KK Kepala Keluarga Perempuan</p>
+                      <span className="px-1.5 py-0.5 bg-pink-500/30 text-pink-200 text-[8px] font-semibold rounded uppercase">PEKKA</span>
                     </div>
-                    <p className="text-2xl font-black text-pink-200 mt-1">{totalFemaleHoF} <span className="text-xs font-bold text-pink-300">KK</span></p>
+                    <p className="text-2xl font-semibold text-pink-200 mt-1">{totalFemaleHoF} <span className="text-xs font-bold text-pink-300">KK</span></p>
                     <p className="text-[10px] text-pink-200/80 font-medium mt-1">
                       {totalOccupied > 0 ? ((totalFemaleHoF / totalOccupied) * 100).toFixed(1) : 0}% dari {totalOccupied} KK aktif
                     </p>
                   </div>
                   <div className="bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-400/30 p-4 rounded-2xl backdrop-blur-sm relative overflow-hidden">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest">Penduduk Pendatang / Tdk Tetap</p>
-                      <span className="px-1.5 py-0.5 bg-amber-500/30 text-amber-200 text-[8px] font-black rounded uppercase">Kelurahan</span>
+                      <p className="text-[10px] font-semibold text-amber-300 uppercase tracking-widest">Penduduk Pendatang / Tdk Tetap</p>
+                      <span className="px-1.5 py-0.5 bg-amber-500/30 text-amber-200 text-[8px] font-semibold rounded uppercase">Kelurahan</span>
                     </div>
-                    <p className="text-2xl font-black text-amber-200 mt-1">{totalNonPermanentSouls} <span className="text-xs font-bold text-amber-300">Jiwa</span></p>
+                    <p className="text-2xl font-semibold text-amber-200 mt-1">{totalNonPermanentSouls} <span className="text-xs font-bold text-amber-300">Jiwa</span></p>
                     <p className="text-[10px] text-amber-200/80 font-medium mt-1">
                       {totalNonPermanentHouses} KK Sewa / Kontrak / Non-Tetap
                     </p>
@@ -754,10 +754,10 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                   <div className="flex items-center gap-2 mb-1.5">
-                    <span className="w-2 h-2 rounded-full bg-indigo-600 animate-ping" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-600">Visualisasi BPS Interaktif</span>
+                    <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-indigo-600">Visualisasi BPS Interaktif</span>
                   </div>
-                  <h3 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight">
+                  <h3 className="text-xl md:text-3xl font-semibold text-slate-900 tracking-tight">
                     Piramida Penduduk <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-pink-600">RT 002 / RW 020</span>
                   </h3>
                   <p className="text-xs font-medium text-slate-500 mt-1 max-w-xl">
@@ -767,10 +767,10 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
 
                 <div className="flex items-center gap-3">
                   {/* Mode Toggle (Count vs Percent) */}
-                  <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-[11px] font-black">
+                  <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-[11px] font-semibold">
                     <button
                       onClick={() => setPyramidDisplayMode('count')}
-                      className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-xl transition-colors cursor-pointer ${
                         pyramidDisplayMode === 'count'
                           ? 'bg-white text-slate-900 shadow-xs'
                           : 'text-slate-500 hover:text-slate-800'
@@ -780,7 +780,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                     </button>
                     <button
                       onClick={() => setPyramidDisplayMode('percent')}
-                      className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-xl transition-colors cursor-pointer ${
                         pyramidDisplayMode === 'percent'
                           ? 'bg-white text-slate-900 shadow-xs'
                           : 'text-slate-500 hover:text-slate-800'
@@ -797,11 +797,11 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 <div className="flex items-center gap-6">
                   <div className="flex items-center gap-2">
                     <span className="w-3.5 h-3.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 shadow-xs" />
-                    <span className="text-xs font-black text-slate-800">Laki-laki ({totalMale} Jiwa)</span>
+                    <span className="text-xs font-semibold text-slate-800">Laki-laki ({totalMale} Jiwa)</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-3.5 h-3.5 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 shadow-xs" />
-                    <span className="text-xs font-black text-slate-800">Perempuan ({totalFemale} Jiwa)</span>
+                    <span className="text-xs font-semibold text-slate-800">Perempuan ({totalFemale} Jiwa)</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500">
@@ -823,13 +823,13 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                       key={cohort.key}
                       onMouseEnter={() => setHoveredCohort(cohort.key)}
                       onMouseLeave={() => setHoveredCohort(null)}
-                      className={`grid grid-cols-12 items-center gap-2 md:gap-4 p-1.5 rounded-2xl transition-all ${
+                      className={`grid grid-cols-12 items-center gap-2 md:gap-4 p-1.5 rounded-2xl transition-colors ${
                         isHovered ? 'bg-indigo-50/70 scale-[1.01]' : 'hover:bg-slate-50/60'
                       }`}
                     >
                       {/* Left: Male Bar (Right Aligned) */}
                       <div className="col-span-5 flex items-center justify-end gap-2">
-                        <span className="text-[11px] md:text-xs font-black text-slate-700 w-12 text-right">
+                        <span className="text-[11px] md:text-xs font-semibold text-slate-700 w-12 text-right">
                           {pyramidDisplayMode === 'count' ? cohort.male : `${cohort.malePct.toFixed(1)}%`}
                         </span>
                         <div className="flex-1 bg-slate-100 h-6 md:h-7 rounded-xl overflow-hidden flex justify-end">
@@ -844,7 +844,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
 
                       {/* Center: Cohort Label */}
                       <div className="col-span-2 text-center">
-                        <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] md:text-xs font-black uppercase tracking-wider ${
+                        <span className={`inline-block px-2.5 py-1 rounded-xl text-[10px] md:text-xs font-semibold uppercase tracking-wider ${
                           cohort.category === 'Muda' 
                             ? 'bg-teal-100 text-teal-800' 
                             : cohort.category === 'Produktif'
@@ -865,7 +865,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                             className="h-full bg-gradient-to-r from-pink-500 via-rose-500 to-rose-400 rounded-xl flex items-center justify-end pr-2 shadow-xs"
                           />
                         </div>
-                        <span className="text-[11px] md:text-xs font-black text-slate-700 w-12 text-left">
+                        <span className="text-[11px] md:text-xs font-semibold text-slate-700 w-12 text-left">
                           {pyramidDisplayMode === 'count' ? cohort.female : `${cohort.femalePct.toFixed(1)}%`}
                         </span>
                       </div>
@@ -878,10 +878,10 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               <div className="mt-8 p-5 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-md">
                       Interpretasi Struktur Demografi
                     </span>
-                    <span className="text-xs font-black text-slate-800">
+                    <span className="text-xs font-semibold text-slate-800">
                       Tipe: Piramida Konstruktif / Bonus Demografi
                     </span>
                   </div>
@@ -891,7 +891,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 </div>
                 <button
                   onClick={handleCopyKelurahanSummary}
-                  className="shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                  className="shrink-0 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
                 >
                   <Copy size={13} />
                   <span>Salin Analisis</span>
@@ -907,7 +907,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
             >
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">Sebaran Penduduk per Blok Huntap</h3>
+                  <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Sebaran Penduduk per Blok Huntap</h3>
                   <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Komparasi Hunian Blok A s/d Blok F</p>
                 </div>
                 <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">
@@ -920,16 +920,16 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   <div
                     key={b.block}
                     onClick={() => setSelectedBlock(b.block.replace('Blok ', ''))}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                    className={`p-4 rounded-2xl border transition-colors cursor-pointer ${
                       selectedBlock === b.block.replace('Blok ', '')
                         ? 'bg-indigo-50/80 border-indigo-300 shadow-sm ring-2 ring-indigo-500/20'
                         : 'bg-slate-50/80 border-slate-200/80 hover:bg-white hover:shadow-md'
                     }`}
                   >
-                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">{b.block}</p>
-                    <p className="text-xl font-black text-slate-900 mt-1">{b.soul} <span className="text-[10px] text-slate-500 font-bold">Jiwa</span></p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{b.block}</p>
+                    <p className="text-xl font-semibold text-slate-900 mt-1">{b.soul} <span className="text-[10px] text-slate-500 font-bold">Jiwa</span></p>
                     <div className="mt-2 text-[10px] font-medium text-slate-500 space-y-0.5">
-                      <p>✅ {b.occupied} Terisi</p>
+                      <p>{b.occupied} Terisi</p>
                       <p>⚪ {b.empty} Kosong</p>
                     </div>
                   </div>
@@ -947,7 +947,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               >
                 <div className="flex justify-between items-start mb-10">
                   <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Distribusi Usia</h3>
+                    <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Distribusi Usia</h3>
                     <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Komposisi Generasi Warga</p>
                   </div>
                   <div className="p-3 bg-slate-50 rounded-2xl text-slate-400">
@@ -988,8 +988,8 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                           <span className="text-sm font-bold text-slate-600">{item.name}</span>
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-sm font-black text-slate-900">{item.value}</span>
-                          <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                          <span className="text-sm font-semibold text-slate-900">{item.value}</span>
+                          <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
                             {totalResidents > 0 ? Math.round((item.value / totalResidents) * 100) : 0}%
                           </span>
                         </div>
@@ -1004,10 +1004,10 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 rounded-[3rem] shadow-xl shadow-indigo-600/20 text-white relative overflow-hidden"
+                className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 rounded-[3rem] shadow-xl shadow-2xs text-white relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-                <h3 className="text-xl font-black tracking-tight mb-2 relative z-10">Keseimbangan Gender</h3>
+                <h3 className="text-xl font-semibold tracking-tight mb-2 relative z-10">Keseimbangan Gender</h3>
                 <p className="text-xs font-bold text-white/60 uppercase tracking-widest mb-10 relative z-10">Rasio Laki-laki & Perempuan</p>
                 
                 <div className="space-y-10 relative z-10">
@@ -1020,7 +1020,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                           </div>
                           <span className="text-sm font-bold">{item.name}</span>
                         </div>
-                        <span className="text-2xl font-black">{item.value} <span className="text-xs font-bold opacity-60">Jiwa</span></span>
+                        <span className="text-2xl font-semibold">{item.value} <span className="text-xs font-bold opacity-60">Jiwa</span></span>
                       </div>
                       <div className="h-3 bg-white/10 rounded-full overflow-hidden">
                         <motion.div 
@@ -1030,7 +1030,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                           className={`h-full rounded-full ${i === 0 ? 'bg-blue-400' : 'bg-pink-400'}`}
                         />
                       </div>
-                      <p className="text-[10px] font-black text-white/40 text-right uppercase tracking-widest">
+                      <p className="text-[10px] font-semibold text-white/40 text-right uppercase tracking-widest">
                         {totalResidents > 0 ? Math.round((item.value / totalResidents) * 100) : 0}% dari total populasi
                       </p>
                     </div>
@@ -1058,11 +1058,11 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               >
                 <div className="flex justify-between items-center mb-10">
                   <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Sebaran Pekerjaan</h3>
+                    <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Sebaran Pekerjaan</h3>
                     <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Profil Profesional Warga</p>
                   </div>
                   <div className="flex gap-2">
-                    <div className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">Top 6 Kategori</div>
+                    <div className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-semibold uppercase tracking-widest">Top 6 Kategori</div>
                   </div>
                 </div>
                 
@@ -1100,7 +1100,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 transition={{ delay: 0.3 }}
                 className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm"
               >
-                <h3 className="text-xl font-black text-slate-900 tracking-tight mb-2">Tingkat Pendidikan</h3>
+                <h3 className="text-xl font-semibold text-slate-900 tracking-tight mb-2">Tingkat Pendidikan</h3>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Kualifikasi Akademik</p>
                 
                 <div className="space-y-5">
@@ -1112,7 +1112,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                       <div className="flex-1">
                         <div className="flex justify-between mb-1">
                           <span className="text-xs font-bold text-slate-700">{item.name}</span>
-                          <span className="text-xs font-black text-indigo-600">{item.value}</span>
+                          <span className="text-xs font-semibold text-indigo-600">{item.value}</span>
                         </div>
                         <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                           <div 
@@ -1137,7 +1137,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 transition={{ delay: 0.4 }}
                 className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm"
               >
-                <h3 className="text-xl font-black text-slate-900 tracking-tight mb-2">Keberagaman Agama</h3>
+                <h3 className="text-xl font-semibold text-slate-900 tracking-tight mb-2">Keberagaman Agama</h3>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Harmoni dalam Perbedaan</p>
                 
                 <div className="h-64 w-full">
@@ -1180,7 +1180,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               >
                 <div className="flex justify-between items-center mb-8">
                   <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Kesejahteraan Ekonomi</h3>
+                    <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Kesejahteraan Ekonomi</h3>
                     <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Pemetaan Status Ekonomi Warga</p>
                   </div>
                   <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-500">
@@ -1216,7 +1216,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
                           <span className="text-sm font-bold text-slate-700">{item.name}</span>
                         </div>
-                        <span className="text-sm font-black text-slate-900">{item.value} KK</span>
+                        <span className="text-sm font-semibold text-slate-900">{item.value} KK</span>
                       </div>
                     ))}
                   </div>
@@ -1229,12 +1229,12 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm"
               >
-                <h3 className="text-xl font-black text-slate-900 tracking-tight mb-2">Cakupan Kesehatan</h3>
+                <h3 className="text-xl font-semibold text-slate-900 tracking-tight mb-2">Cakupan Kesehatan</h3>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">Status BPJS & Vaksinasi</p>
                 
                 <div className="space-y-6">
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Status BPJS</p>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-3">Status BPJS</p>
                     <div className="space-y-2">
                       {bpjsData.map((item, i) => (
                         <div key={item.name} className="flex flex-col gap-1">
@@ -1251,7 +1251,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   </div>
                   
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Vaksinasi</p>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-3">Vaksinasi</p>
                     <div className="space-y-2">
                       {vaccinationData.map((item, i) => (
                         <div key={item.name} className="flex flex-col gap-1">
@@ -1291,12 +1291,12 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   { label: 'Penerima BLT', value: totalBLT, icon: DollarSign, color: 'emerald' },
                   { label: 'Bansos Lain', value: totalBansosLain, icon: Sparkles, color: 'violet' }
                 ].map((item) => (
-                  <div key={item.label} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:bg-slate-50 transition-all">
+                  <div key={item.label} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:bg-slate-50 transition-colors">
                     <div className="p-4 bg-slate-50 text-slate-600 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
                       <item.icon size={20} />
                     </div>
-                    <h4 className="text-2xl font-black text-slate-900 mb-1">{item.value}</h4>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
+                    <h4 className="text-2xl font-semibold text-slate-900 mb-1">{item.value}</h4>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{item.label}</p>
                   </div>
                 ))}
               </motion.div>
@@ -1307,7 +1307,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
               <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-10 items-center">
                 <div className="lg:col-span-2 space-y-4">
-                  <h3 className="text-2xl font-black tracking-tight">Ringkasan Wawasan Demografi</h3>
+                  <h3 className="text-2xl font-semibold tracking-tight">Ringkasan Wawasan Demografi</h3>
                   <p className="text-slate-400 font-medium leading-relaxed">
                     Berdasarkan data terbaru, RT 02 memiliki populasi yang didominasi oleh kelompok usia produktif (Dewasa) sebesar {totalResidents > 0 ? Math.round((ageGroups.dewasa / totalResidents) * 100) : 0}%. 
                     Tingkat partisipasi ekonomi cukup tinggi dengan mayoritas warga bekerja sebagai {occupationData[0]?.name || 'Karyawan'}. 
@@ -1318,7 +1318,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   <button 
                     onClick={handlePrintReport}
                     disabled={isPrinting}
-                    className="px-8 py-4 bg-white text-slate-900 font-black rounded-2xl hover:bg-indigo-50 transition-all shadow-xl shadow-white/5 flex items-center gap-3 disabled:opacity-50 disabled:cursor-wait"
+                    className="px-8 py-4 bg-white text-slate-900 font-semibold rounded-2xl hover:bg-indigo-50 transition-colors shadow-xl shadow-white/5 flex items-center gap-3 disabled:opacity-50 disabled:cursor-wait"
                   >
                     {isPrinting ? 'Menyiapkan...' : 'Cetak Laporan Lengkap'} <FileText size={20} />
                   </button>
@@ -1336,30 +1336,30 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6 group hover:border-amber-200 transition-all"
+                className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6 group hover:border-amber-200 transition-colors"
               >
                 <div className="p-5 bg-amber-50 text-amber-600 rounded-[1.5rem] group-hover:scale-110 transition-transform">
                   <AlertTriangle size={32} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Data Warga Tidak Lengkap</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">Data Warga Tidak Lengkap</h3>
                   <p className="text-sm font-medium text-slate-500 mt-1">{missingPhoneCount} rumah belum memiliki nomor telepon yang valid.</p>
-                  <button className="mt-3 text-xs font-black text-amber-600 uppercase tracking-widest hover:underline">Perbaiki Sekarang</button>
+                  <button className="mt-3 text-xs font-semibold text-amber-600 uppercase tracking-widest hover:underline">Perbaiki Sekarang</button>
                 </div>
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6 group hover:border-rose-200 transition-all"
+                className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6 group hover:border-rose-200 transition-colors"
               >
                 <div className="p-5 bg-rose-50 text-rose-600 rounded-[1.5rem] group-hover:scale-110 transition-transform">
                   <UserCheck size={32} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900">Data Belum Verifikasi</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">Data Belum Verifikasi</h3>
                   <p className="text-sm font-medium text-slate-500 mt-1">{unverifiedHousesCount} rumah memerlukan verifikasi data fisik.</p>
-                  <button className="mt-3 text-xs font-black text-rose-600 uppercase tracking-widest hover:underline">Verifikasi Massal</button>
+                  <button className="mt-3 text-xs font-semibold text-rose-600 uppercase tracking-widest hover:underline">Verifikasi Massal</button>
                 </div>
               </motion.div>
             </div>
@@ -1374,7 +1374,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
               >
                 <div className="flex justify-between items-center mb-10">
                   <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                    <h3 className="text-xl font-semibold text-slate-900 tracking-tight flex items-center gap-3">
                       <TrendingUp className="text-indigo-600" /> Tren Keuangan Bulanan
                     </h3>
                     <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">Perbandingan Pemasukan & Pengeluaran</p>
@@ -1382,11 +1382,11 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase">Income</span>
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase">Income</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                      <span className="text-[10px] font-black text-slate-500 uppercase">Expense</span>
+                      <span className="text-[10px] font-semibold text-slate-500 uppercase">Expense</span>
                     </div>
                   </div>
                 </div>
@@ -1433,7 +1433,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   <div className="p-4 bg-white/10 rounded-2xl w-fit mb-6">
                     <Activity size={24} className="text-indigo-400" />
                   </div>
-                  <h3 className="text-xl font-black tracking-tight mb-4">Efisiensi Operasional</h3>
+                  <h3 className="text-xl font-semibold tracking-tight mb-4">Efisiensi Operasional</h3>
                   <p className="text-sm text-slate-400 leading-relaxed mb-8">
                     Sistem mendeteksi peningkatan efisiensi sebesar 15% dalam pengelolaan administrasi surat-menyurat bulan ini.
                   </p>
@@ -1442,7 +1442,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                     <div className="p-5 bg-white/5 rounded-2xl border border-white/10">
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-xs font-bold text-slate-300">Respon Laporan</span>
-                        <span className="text-xs font-black text-emerald-400">Cepat</span>
+                        <span className="text-xs font-semibold text-emerald-400">Cepat</span>
                       </div>
                       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                         <div className="h-full bg-emerald-500 w-[85%]"></div>
@@ -1451,7 +1451,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                     <div className="p-5 bg-white/5 rounded-2xl border border-white/10">
                       <div className="flex justify-between items-center mb-3">
                         <span className="text-xs font-bold text-slate-300">Koleksi Iuran</span>
-                        <span className="text-xs font-black text-amber-400">72%</span>
+                        <span className="text-xs font-semibold text-amber-400">72%</span>
                       </div>
                       <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                         <div className="h-full bg-amber-500 w-[72%]"></div>
@@ -1460,7 +1460,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                   </div>
                 </div>
                 
-                <button className="relative z-10 mt-10 w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-3">
+                <button className="relative z-10 mt-10 w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-2xl transition-colors shadow-lg shadow-2xs flex items-center justify-center gap-3">
                   Optimalkan Sistem <ChevronRight size={18} />
                 </button>
               </motion.div>

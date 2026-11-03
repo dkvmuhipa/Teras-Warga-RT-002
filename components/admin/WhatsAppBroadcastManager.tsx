@@ -369,10 +369,10 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl">
-                <Sparkles size={20} className="animate-pulse" />
+                <Sparkles size={20} className="" />
               </div>
               <div>
-                <h3 className="font-black text-slate-800 text-sm leading-tight">Template Siaran Sekali Klik</h3>
+                <h3 className="font-semibold text-slate-800 text-sm leading-tight">Template Siaran Sekali Klik</h3>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Draf instan tanpa ketik manual</p>
               </div>
             </div>
@@ -383,7 +383,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                   setDraft('');
                   setAnnouncementTopic('');
                 }}
-                className="text-[10px] font-extrabold text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded-lg transition-all"
+                className="text-[10px] font-extrabold text-rose-500 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded-lg transition-colors"
               >
                 Reset
               </button>
@@ -404,7 +404,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                     setDraft(tmpl.text);
                     toast.success(`Template "${tmpl.title}" dimuat! 🚀 Silakan sesuaikan detail tanggal/waktu di kolom kanan.`);
                   }}
-                  className={`w-full text-left p-3 rounded-2xl border transition-all flex items-start gap-3 ${
+                  className={`w-full text-left p-3 rounded-2xl border transition-colors flex items-start gap-3 ${
                     isActive
                       ? 'bg-emerald-50/70 border-emerald-300 shadow-xs'
                       : 'bg-slate-50/50 border-slate-100 hover:border-slate-200 hover:bg-slate-50'
@@ -437,19 +437,19 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               <Layers size={20} />
             </div>
             <div>
-              <h3 className="font-black text-slate-800 text-lg leading-tight">Konfigurasi Siaran</h3>
+              <h3 className="font-semibold text-slate-800 text-lg leading-tight">Konfigurasi Siaran</h3>
               <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">Tentukan subjek pesan</p>
             </div>
           </div>
 
           {/* Toggle Type */}
           <div className="space-y-2">
-            <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Subjek Siaran</label>
+            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Subjek Siaran</label>
             <div className="grid grid-cols-2 gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
               <button 
                 type="button"
                 onClick={() => setBroadcastType('announcement')}
-                className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${broadcastType === 'announcement' ? 'bg-white shadow-sm text-indigo-600 border border-slate-100' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${broadcastType === 'announcement' ? 'bg-white shadow-sm text-indigo-600 border border-slate-100' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 <Megaphone size={14} />
                 Pengumuman RT
@@ -457,7 +457,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               <button 
                 type="button"
                 onClick={() => setBroadcastType('billing')}
-                className={`py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${broadcastType === 'billing' ? 'bg-white shadow-sm text-indigo-600 border border-slate-100' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 ${broadcastType === 'billing' ? 'bg-white shadow-sm text-indigo-600 border border-slate-100' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 <FileText size={14} />
                 Tagihan Iuran
@@ -469,26 +469,26 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
           {broadcastType === 'announcement' ? (
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Topik Pengumuman</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Topik Pengumuman</label>
                 <textarea 
                   rows={3}
                   value={announcementTopic}
                   onChange={(e) => setAnnouncementTopic(e.target.value)}
                   placeholder="Contoh: Kerja bakti gotong royong hari minggu jam 07.30 pagi dilarang buang sampah sembarangan..."
-                  className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-all placeholder:text-slate-400"
+                  className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-colors placeholder:text-slate-400"
                 />
               </div>
 
               {/* Ideas / Presets */}
               <div className="space-y-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Inspirasi Topik Cepat</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Inspirasi Topik Cepat</span>
                 <div className="flex flex-wrap gap-1.5">
                   {placeholderIdeas.map((idea, index) => (
                     <button
                       key={index}
                       type="button"
                       onClick={() => setAnnouncementTopic(idea.text)}
-                      className="text-[11px] font-bold bg-slate-50 text-slate-600 border border-slate-200/65 py-1 px-2.5 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all text-left"
+                      className="text-[11px] font-bold bg-slate-50 text-slate-600 border border-slate-200/65 py-1 px-2.5 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-colors text-left"
                     >
                       {idea.label}
                     </button>
@@ -500,21 +500,21 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Periode Bulan</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Periode Bulan</label>
                   <input 
                     type="month"
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 px-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 px-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-colors"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Pilih Warga</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pilih Warga</label>
                   <select
                     value={selectedHouseId}
                     onChange={(e) => setSelectedHouseId(e.target.value)}
-                    className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 px-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 px-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-colors"
                   >
                     <option value="">-- Cari Nama Warga --</option>
                     {occupiedHouses.map(h => {
@@ -562,28 +562,28 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
           {/* Tone Selector */}
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Variasi Suasana (Gaya Bahasa)</label>
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Variasi Suasana (Gaya Bahasa)</label>
               <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">RT Modern</span>
             </div>
             <div className="grid grid-cols-3 gap-2 bg-slate-50 p-1 rounded-2xl border border-slate-100">
               <button 
                 type="button"
                 onClick={() => { setTone('Formal'); if (broadcastType === 'billing') setTimeout(() => generateLocalBillingTemplate(), 50); }}
-                className={`py-2 rounded-xl text-xs font-bold transition-all ${tone === 'Formal' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`py-2 rounded-xl text-xs font-bold transition-colors ${tone === 'Formal' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 Formal 💼
               </button>
               <button 
                 type="button"
                 onClick={() => { setTone('Kasual'); if (broadcastType === 'billing') setTimeout(() => generateLocalBillingTemplate(), 50); }}
-                className={`py-2 rounded-xl text-xs font-bold transition-all ${tone === 'Kasual' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`py-2 rounded-xl text-xs font-bold transition-colors ${tone === 'Kasual' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 Kasual 😊
               </button>
               <button 
                 type="button"
                 onClick={() => { setTone('Mendesak'); if (broadcastType === 'billing') setTimeout(() => generateLocalBillingTemplate(), 50); }}
-                className={`py-2 rounded-xl text-xs font-bold transition-all ${tone === 'Mendesak' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                className={`py-2 rounded-xl text-xs font-bold transition-colors ${tone === 'Mendesak' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
               >
                 Mendesak 📢
               </button>
@@ -595,7 +595,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
             type="button"
             onClick={handleGenerateDraftWithAI}
             disabled={isGenerating}
-            className={`w-full py-4 px-6 rounded-2xl font-black text-sm tracking-wide uppercase shadow-md flex items-center justify-center gap-2 transition-all ${isGenerating ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white hover:scale-[1.01] active:scale-[0.99] shadow-indigo-200'}`}
+            className={`w-full py-4 px-6 rounded-2xl font-semibold text-sm tracking-wide uppercase shadow-md flex items-center justify-center gap-2 transition-colors ${isGenerating ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white hover:scale-[1.01] active:scale-[0.99] shadow-indigo-200'}`}
           >
             {isGenerating ? (
               <>
@@ -618,7 +618,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               <Users size={20} />
             </div>
             <div>
-              <h3 className="font-black text-slate-800 text-lg leading-tight">Sasaran & Tujuan No</h3>
+              <h3 className="font-semibold text-slate-800 text-lg leading-tight">Sasaran & Tujuan No</h3>
               <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">Siapa target siaran ini?</p>
             </div>
           </div>
@@ -626,12 +626,12 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
           <div className="space-y-4">
             {/* Target Options */}
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Metode Penerima</label>
+              <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Metode Penerima</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setTargetType('individual')}
-                  className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 ${targetType === 'individual' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-600' : 'bg-transparent border-slate-100 text-slate-500 hover:bg-slate-50/50'}`}
+                  className={`py-3 px-4 rounded-xl border text-xs font-bold transition-colors flex flex-col items-center justify-center gap-1.5 ${targetType === 'individual' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-600' : 'bg-transparent border-slate-100 text-slate-500 hover:bg-slate-50/50'}`}
                 >
                   <User size={16} />
                   <span>Warga Spesifik</span>
@@ -641,7 +641,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                   <button
                     type="button"
                     onClick={() => setTargetType('arrears')}
-                    className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 ${targetType === 'arrears' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-600' : 'bg-transparent border-slate-100 text-slate-500 hover:bg-slate-50/50'}`}
+                    className={`py-3 px-4 rounded-xl border text-xs font-bold transition-colors flex flex-col items-center justify-center gap-1.5 ${targetType === 'arrears' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-600' : 'bg-transparent border-slate-100 text-slate-500 hover:bg-slate-50/50'}`}
                   >
                     <AlertTriangle size={16} />
                     <span>Hanya yang Menunggak ({housesWithArrears.length})</span>
@@ -650,7 +650,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                   <button
                     type="button"
                     onClick={() => setTargetType('group')}
-                    className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 ${targetType === 'group' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-600' : 'bg-transparent border-slate-100 text-slate-500 hover:bg-slate-50/50'}`}
+                    className={`py-3 px-4 rounded-xl border text-xs font-bold transition-colors flex flex-col items-center justify-center gap-1.5 ${targetType === 'group' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-600' : 'bg-transparent border-slate-100 text-slate-500 hover:bg-slate-50/50'}`}
                   >
                     <MessageSquare size={16} />
                     <span>Grup WhatsApp RT</span>
@@ -660,7 +660,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                 <button
                   type="button"
                   onClick={() => setTargetType('all')}
-                  className={`py-3 px-4 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 ${targetType === 'all' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-600' : 'bg-transparent border-slate-100 text-slate-500 hover:bg-slate-50/50'}`}
+                  className={`py-3 px-4 rounded-xl border text-xs font-bold transition-colors flex flex-col items-center justify-center gap-1.5 ${targetType === 'all' ? 'bg-indigo-50/50 border-indigo-200 text-indigo-600' : 'bg-transparent border-slate-100 text-slate-500 hover:bg-slate-50/50'}`}
                 >
                   <Users size={16} />
                   <span>Semua Warga ({occupiedHouses.length})</span>
@@ -673,7 +673,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               <>
                 {broadcastType === 'announcement' ? (
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Masukkan No Telepon Manual</label>
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Masukkan No Telepon Manual</label>
                     <div className="relative">
                       <Smartphone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                       <input 
@@ -681,13 +681,13 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                         value={manuallyEnteredPhone}
                         onChange={(e) => setManuallyEnteredPhone(e.target.value)}
                         placeholder="Contoh: 081234567890 atau 628..."
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 pl-11 pr-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-all"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 pl-11 pr-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-colors"
                       />
                     </div>
                   </div>
                 ) : (
                   <div className="p-4 bg-slate-50 rounded-2xl text-xs font-medium text-slate-500 border border-slate-100 space-y-1.5">
-                    <span className="font-black text-slate-600 block uppercase text-[10px]">Penerima Terkait Kepala Keluarga:</span>
+                    <span className="font-semibold text-slate-600 block uppercase text-[10px]">Penerima Terkait Kepala Keluarga:</span>
                     {selectedHouseId ? (
                       (() => {
                         const h = occupiedHouses.find(house => house.id === selectedHouseId);
@@ -709,7 +709,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
 
             {targetType === 'group' && (
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-500 uppercase tracking-wider">Pilih Grup Utama</label>
+                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pilih Grup Utama</label>
                 {isLoadingGroups ? (
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-500 py-2">
                     <RefreshCw className="animate-spin" size={14} />
@@ -719,7 +719,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                   <select
                     value={selectedGroupId}
                     onChange={(e) => setSelectedGroupId(e.target.value)}
-                    className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 px-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-all"
+                    className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl py-3 px-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 focus:bg-white transition-colors"
                   >
                     <option value="">-- Pilih Grup WhatsApp --</option>
                     {whatsappGroups.map(g => (
@@ -736,14 +736,12 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
             )}
 
             {targetType === 'all' && (
-              <div className="p-4 bg-indigo-50/30 border border-indigo-100/50 rounded-2xl text-xs text-indigo-900 leading-relaxed font-medium">
-                📢 Pesan akan disiarkan langsung ke seluruh <strong>{occupiedHouses.length} KK warga terdaftar</strong> yang memiliki nomor telepon aktif dalam database.
+              <div className="p-4 bg-indigo-50/30 border border-indigo-100/50 rounded-2xl text-xs text-indigo-900 leading-relaxed font-medium">Pesan akan disiarkan langsung ke seluruh <strong>{occupiedHouses.length} KK warga terdaftar</strong> yang memiliki nomor telepon aktif dalam database.
               </div>
             )}
 
             {targetType === 'arrears' && (
-              <div className="p-4 bg-amber-50/30 border border-amber-100/50 rounded-2xl text-xs text-amber-900 leading-relaxed font-medium">
-                ⚠️ Pengingat tagihan akan dikirim massal satu per satu ke <strong>{housesWithArrears.length} KK warga yang menunggak</strong> iuran periode {formatMonthId(selectedMonth)}.
+              <div className="p-4 bg-amber-50/30 border border-amber-100/50 rounded-2xl text-xs text-amber-900 leading-relaxed font-medium">Pengingat tagihan akan dikirim massal satu per satu ke <strong>{housesWithArrears.length} KK warga yang menunggak</strong> iuran periode {formatMonthId(selectedMonth)}.
               </div>
             )}
           </div>
@@ -759,7 +757,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
                 <MessageSquare size={20} />
               </div>
               <div>
-                <h3 className="font-black text-slate-800 text-lg leading-tight">Visualisasi & Draf Pesan</h3>
+                <h3 className="font-semibold text-slate-800 text-lg leading-tight">Visualisasi & Draf Pesan</h3>
                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">Pratinjau pesan WhatsApp</p>
               </div>
             </div>
@@ -776,8 +774,8 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
           {/* Prompt/Guide if draft is empty */}
           {!draft ? (
             <div className="flex-1 min-h-[300px] border border-dashed border-slate-200 rounded-3xl p-8 flex flex-col items-center justify-center text-center bg-slate-50/30">
-              <Sparkles className="text-indigo-600/30 mb-4 animate-pulse" size={48} />
-              <h4 className="font-black text-slate-700 text-base">Rancang Draf Anda dengan AI</h4>
+              <Sparkles className="text-indigo-600/30 mb-4" size={48} />
+              <h4 className="font-semibold text-slate-700 text-base">Rancang Draf Anda dengan AI</h4>
               <p className="text-xs text-slate-400 font-bold max-w-sm mt-1.5 leading-relaxed">
                 Tulis topik atau pilih warga penerima di kolom sebelah kiri, lalu tekan tombol "Rancang Draf dengan Gemini AI" untuk membuat naskah WhatsApp yang terstruktur indah lengkap dengan barisan emoji rapi.
               </p>
@@ -787,7 +785,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               <textarea 
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
-                className="w-full min-h-[220px] bg-slate-50/70 border border-slate-100 hover:border-slate-200 rounded-2xl p-4 text-sm font-medium leading-relaxed font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white resize-none transition-all text-slate-800"
+                className="w-full min-h-[220px] bg-slate-50/70 border border-slate-100 hover:border-slate-200 rounded-2xl p-4 text-sm font-medium leading-relaxed font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:bg-white resize-none transition-colors text-slate-800"
                 placeholder="Rancang teks pengumuman di sini..."
               />
               
@@ -795,7 +793,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               <div className="bg-emerald-950/90 rounded-[2rem] p-4 text-white border border-emerald-800 shadow-xl space-y-3">
                 <div className="flex items-center justify-between border-b border-emerald-800/80 pb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse" />
+                    <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full" />
                     <span className="text-[10px] font-mono text-emerald-300 font-bold uppercase tracking-widest">LIVE WA BUBBLE MOCKUP</span>
                   </div>
                   <span className="text-[9px] font-mono text-slate-400">Pengurus RT 02 → Warga</span>
@@ -825,7 +823,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               <button
                 type="button"
                 onClick={handleCopyDraft}
-                className="w-full py-3.5 px-6 rounded-2xl border border-slate-200 font-bold text-xs uppercase tracking-wider text-slate-600 hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-6 rounded-2xl border border-slate-200 font-bold text-xs uppercase tracking-wider text-slate-600 hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300 transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 <Copy size={16} />
                 Salin Format Siaran
@@ -833,7 +831,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               <button
                 type="button"
                 onClick={handleDirectWhatsAppApp}
-                className="w-full py-3.5 px-6 rounded-2xl border border-emerald-200 font-bold text-xs uppercase tracking-wider text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-6 rounded-2xl border border-emerald-200 font-bold text-xs uppercase tracking-wider text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors active:scale-[0.98] flex items-center justify-center gap-2"
               >
                 <ExternalLink size={16} />
                 WhatsApp Direct (wa.me)
@@ -844,7 +842,7 @@ export const WhatsAppBroadcastManager: React.FC<WhatsAppBroadcastManagerProps> =
               type="button"
               onClick={handleSendViaGateway}
               disabled={isSending || !draft.trim()}
-              className={`w-full py-4 px-6 rounded-2xl font-black text-sm tracking-wide uppercase shadow-md flex items-center justify-center gap-2 transition-all ${isSending || !draft.trim() ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-100 shadow-none' : 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white hover:scale-[1.01] active:scale-[0.99] shadow-emerald-200'}`}
+              className={`w-full py-4 px-6 rounded-2xl font-semibold text-sm tracking-wide uppercase shadow-md flex items-center justify-center gap-2 transition-colors ${isSending || !draft.trim() ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-100 shadow-none' : 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white hover:scale-[1.01] active:scale-[0.99] shadow-emerald-200'}`}
             >
               {isSending ? (
                 <>

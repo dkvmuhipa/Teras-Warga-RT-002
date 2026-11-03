@@ -280,23 +280,23 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       {/* Admin Clean Header Banner */}
       <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-black uppercase tracking-widest mb-2 inline-block">
+          <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-semibold uppercase tracking-widest mb-2 inline-block">
             Panel Pengurus RT 02
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Kelola Bank Sampah Digital</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Kelola Bank Sampah Digital</h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
             Verifikasi fisik setoran warga, perbarui tarif per-kg, dan pantau total saldo terdistribusi.
           </p>
         </div>
 
         <div className="flex flex-wrap sm:flex-nowrap gap-3 w-full lg:w-auto">
-          <Button onClick={handleExportCSV} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 text-xs py-3 px-4 rounded-2xl font-black uppercase tracking-wider">
+          <Button onClick={handleExportCSV} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 text-xs py-3 px-4 rounded-2xl font-semibold uppercase tracking-wider">
             <Download size={16} className="mr-1.5 text-indigo-600" /> Ekspor Rekap
           </Button>
-          <Button onClick={() => setIsPriceModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 text-xs py-3 px-4 rounded-2xl font-black uppercase tracking-wider">
+          <Button onClick={() => setIsPriceModalOpen(true)} variant="outline" className="flex-1 sm:flex-none border-slate-200 text-slate-700 hover:bg-slate-50 text-xs py-3 px-4 rounded-2xl font-semibold uppercase tracking-wider">
             <DollarSign size={16} className="mr-1.5 text-emerald-600" /> Katalog Harga
           </Button>
-          <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 text-xs py-3 px-5 rounded-2xl font-black uppercase tracking-wider">
+          <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-2xs text-xs py-3 px-5 rounded-2xl font-semibold uppercase tracking-wider">
             <Plus size={16} className="mr-1.5" /> Input Setoran Baru
           </Button>
         </div>
@@ -309,8 +309,8 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
             <Package size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">TERKONFIRMASI</p>
-            <p className="text-2xl font-black text-slate-900">Rp {totalConfirmedValue.toLocaleString()}</p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">TERKONFIRMASI</p>
+            <p className="text-2xl font-semibold text-slate-900">Rp {totalConfirmedValue.toLocaleString()}</p>
           </div>
         </div>
 
@@ -319,8 +319,8 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
             <Clock size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">MENUNGGU KONFIRMASI</p>
-            <p className="text-2xl font-black text-slate-900">{pendingCount} <span className="text-xs font-bold text-slate-400">Pengajuan</span></p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">MENUNGGU KONFIRMASI</p>
+            <p className="text-2xl font-semibold text-slate-900">{pendingCount} <span className="text-xs font-bold text-slate-400">Pengajuan</span></p>
           </div>
         </div>
 
@@ -329,8 +329,8 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
             <History size={24} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">TOTAL SETORAN</p>
-            <p className="text-2xl font-black text-slate-900">{deposits.length} <span className="text-xs font-bold text-slate-400">Transaksi</span></p>
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-0.5">TOTAL SETORAN</p>
+            <p className="text-2xl font-semibold text-slate-900">{deposits.length} <span className="text-xs font-bold text-slate-400">Transaksi</span></p>
           </div>
         </div>
       </div>
@@ -342,7 +342,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
           <input 
             type="text" 
             placeholder="Cari nama warga, blok rumah, atau jenis sampah..." 
-            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all shadow-sm"
+            className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors shadow-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -352,7 +352,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
             <button
               key={status}
               onClick={() => setFilterStatus(status)}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+              className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap ${
                 filterStatus === status 
                 ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/80' 
                 : 'text-slate-500 hover:text-slate-800'
@@ -370,11 +370,11 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
           <table className="w-full text-left border-collapse min-w-[750px]">
             <thead>
               <tr className="bg-slate-50/60 border-b border-slate-200/80">
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Identitas Warga</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Kategori & Berat</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nilai Saldo</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status Setoran</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                <th className="px-6 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Identitas Warga</th>
+                <th className="px-6 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Kategori & Berat</th>
+                <th className="px-6 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Nilai Saldo</th>
+                <th className="px-6 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Status Setoran</th>
+                <th className="px-6 py-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -382,29 +382,29 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                 <tr key={deposit.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 font-black flex items-center justify-center border border-emerald-100 text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 font-semibold flex items-center justify-center border border-emerald-100 text-sm shrink-0">
                         {(deposit.residentName || '?').charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-900 leading-none mb-1">{deposit.residentName || '-'}</p>
+                        <p className="text-sm font-semibold text-slate-900 leading-none mb-1">{deposit.residentName || '-'}</p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Blok {getHouseLabel(deposit.houseId)}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[9px] font-black uppercase tracking-widest">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[9px] font-semibold uppercase tracking-widest">
                         {deposit.type}
                       </span>
                     </div>
-                    <p className="text-sm font-black text-slate-800">{deposit.weight} kg</p>
+                    <p className="text-sm font-semibold text-slate-800">{deposit.weight} kg</p>
                   </td>
                   <td className="px-6 py-4">
-                    <p className="text-sm font-black text-emerald-600">Rp {deposit.totalValue.toLocaleString()}</p>
+                    <p className="text-sm font-semibold text-emerald-600">Rp {deposit.totalValue.toLocaleString()}</p>
                     <p className="text-[10px] font-bold text-slate-400">@ Rp {deposit.pricePerUnit.toLocaleString()}/kg</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
+                    <span className={`px-3 py-1 rounded-xl text-[9px] font-semibold uppercase tracking-widest border ${
                       deposit.status === 'Confirmed' 
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' 
                         : 'bg-amber-50 text-amber-700 border-amber-200/60'
@@ -417,7 +417,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                       {deposit.status === 'Pending' && (
                         <button 
                           onClick={() => handleConfirmDeposit(deposit)}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
                           title="Konfirmasi & Tambah Saldo"
                         >
                           <CheckCircle size={14} /> Konfirmasi
@@ -425,7 +425,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                       )}
                       <button 
                         onClick={() => handleDeleteDeposit(deposit.id)}
-                        className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                        className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
                         title="Hapus Data Setoran"
                       >
                         <Trash2 size={16} />
@@ -460,11 +460,11 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
             <>
               <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center font-black shadow-sm">
+                  <div className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center font-semibold shadow-sm">
                     {selectedDeposit.residentName?.[0]}
                   </div>
                   <div>
-                    <p className="text-sm font-black text-slate-800 leading-none mb-1">{selectedDeposit.residentName}</p>
+                    <p className="text-sm font-semibold text-slate-800 leading-none mb-1">{selectedDeposit.residentName}</p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
                       Blok {getHouseLabel(selectedDeposit.houseId)} • {selectedDeposit.type}
                     </p>
@@ -473,21 +473,21 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Berat Aktual (kg)</label>
+                    <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Berat Aktual (kg)</label>
                     <div className="relative">
                       <input 
                         type="number" 
                         step="0.1"
                         autoFocus
-                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-black text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                        className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-semibold text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
                         value={confirmForm.weight}
                         onChange={e => handleConfirmWeightChange(parseFloat(e.target.value) || 0)}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Harga Satuan</label>
-                    <div className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-lg font-black text-slate-500">
+                    <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Harga Satuan</label>
+                    <div className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-lg font-semibold text-slate-500">
                       Rp {confirmForm.pricePerUnit.toLocaleString()}
                     </div>
                   </div>
@@ -495,8 +495,8 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               </div>
 
               <div className="p-6 bg-slate-800 rounded-2xl text-center">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Total Saldo Ditambahkan</p>
-                <p className="text-3xl font-black text-white">Rp {confirmForm.totalValue.toLocaleString()}</p>
+                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-2">Total Saldo Ditambahkan</p>
+                <p className="text-3xl font-semibold text-white">Rp {confirmForm.totalValue.toLocaleString()}</p>
               </div>
 
               <div className="flex gap-3">
@@ -527,9 +527,9 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
       }} title="Input Setoran Sampah">
         <form onSubmit={handleSaveDeposit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pilih Rumah / Warga</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pilih Rumah / Warga</label>
             <select 
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
               value={form.houseId}
               onChange={e => handleHouseChange(e.target.value)}
             >
@@ -556,14 +556,14 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
           </div>
 
           {form.houseId && (
-            <div className={`p-4 rounded-2xl border transition-all ${isPinVerified ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-200'}`}>
+            <div className={`p-4 rounded-2xl border transition-colors ${isPinVerified ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-200'}`}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Shield size={16} className={isPinVerified ? 'text-emerald-600' : 'text-slate-400'} />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Verifikasi PIN Rumah</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Verifikasi PIN Rumah</span>
                 </div>
                 {isPinVerified && (
-                  <span className="flex items-center gap-1 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                  <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-600 uppercase tracking-widest">
                     <CheckCircle size={12} /> Terverifikasi
                   </span>
                 )}
@@ -598,9 +598,9 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Jenis Sampah</label>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Jenis Sampah</label>
               <select 
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
                 value={form.type}
                 onChange={e => setForm({...form, type: e.target.value})}
               >
@@ -610,24 +610,24 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               </select>
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Berat / Volume</label>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Berat / Volume</label>
               <div className="relative">
                 <input 
                   type="number" 
                   step="0.1"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
                   value={form.weight}
                   onChange={e => setForm({...form, weight: parseFloat(e.target.value)})}
                 />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase">kg/ltr</span>
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-400 uppercase">kg/ltr</span>
               </div>
             </div>
           </div>
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal Setoran</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Tanggal Setoran</label>
             <input 
               type="date" 
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
               value={form.date}
               onChange={e => setForm({...form, date: e.target.value})}
             />
@@ -635,7 +635,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
           <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
             <div className="flex justify-between items-center">
               <span className="text-xs font-bold text-emerald-700">Estimasi Nilai Ekonomi:</span>
-              <span className="text-lg font-black text-emerald-700">
+              <span className="text-lg font-semibold text-emerald-700">
                 Rp {((form.weight || 0) * (prices.find(p => p.type === form.type)?.pricePerUnit || 0)).toLocaleString()}
               </span>
             </div>
@@ -664,7 +664,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
             {prices.map((price) => (
               <div key={price.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group/price">
                 <div className="flex-1">
-                  <p className="text-sm font-black text-slate-800 leading-none mb-1">{price.type}</p>
+                  <p className="text-sm font-semibold text-slate-800 leading-none mb-1">{price.type}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Per {price.unit}</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -672,14 +672,14 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                     <span className="text-xs font-bold text-slate-400">Rp</span>
                     <input 
                       type="number" 
-                      className="w-24 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-black text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+                      className="w-24 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
                       value={price.pricePerUnit}
                       onChange={e => handleUpdatePrice(price.id, parseInt(e.target.value))}
                     />
                   </div>
                   <button 
                     onClick={() => handleDeleteCategory(price.id)}
-                    className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                    className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
                   >
                     <Trash2 size={16} />
                   </button>
@@ -701,7 +701,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
               <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Nama Kategori</label>
+                    <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Nama Kategori</label>
                     <input 
                       type="text" 
                       placeholder="Contoh: Kaca"
@@ -711,7 +711,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Satuan</label>
+                    <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Satuan</label>
                     <select 
                       className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20"
                       value={newCategory.unit}
@@ -723,7 +723,7 @@ export const WasteBankManager: React.FC<WasteBankManagerProps> = ({ houses }) =>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Harga per Satuan (Rp)</label>
+                  <label className="block text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Harga per Satuan (Rp)</label>
                   <input 
                     type="number" 
                     className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20"

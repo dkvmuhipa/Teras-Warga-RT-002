@@ -177,7 +177,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {mapPoints.map((point) => (
-                    <div key={point.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                    <div key={point.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-colors">
                         <div className="flex justify-between items-start mb-3">
                             <div className={`p-2 rounded-xl text-white ${getColor(point.type)}`}>
                                 {getIcon(point.type)}
@@ -192,7 +192,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                             </div>
                         </div>
                         <h4 className="font-bold text-slate-800 mb-1">{point.label}</h4>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{point.type}</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">{point.type}</span>
                         <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between text-[10px] text-slate-400 font-bold uppercase">
                             <span>X: {Math.round(point.x)}%</span>
                             <span>Y: {Math.round(point.y)}%</span>
@@ -237,16 +237,16 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                         <div className="p-5 bg-slate-900 text-white rounded-[2rem] border border-slate-800 space-y-4 shadow-xl">
                             <div className="flex items-center gap-2.5 border-b border-slate-800 pb-3">
                                 <div className="p-2 bg-rose-500/20 text-rose-400 rounded-xl">
-                                    <Video size={18} className="animate-pulse" />
+                                    <Video size={18} className="" />
                                 </div>
                                 <div>
-                                    <h4 className="text-xs font-black uppercase tracking-wider text-white">Konfigurasi Pengawasan CCTV Terstandar</h4>
+                                    <h4 className="text-xs font-semibold uppercase tracking-wider text-white">Konfigurasi Pengawasan CCTV Terstandar</h4>
                                     <p className="text-[10px] text-slate-400 font-medium">Pengaturan protokol streaming, resolusi lensa, &amp; zona pengawasan</p>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1.5">
+                                <label className="block text-[10px] font-semibold text-rose-400 uppercase tracking-widest mb-1.5">
                                     URL Live Streaming CCTV
                                 </label>
                                 <input 
@@ -262,7 +262,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Protokol Stream</label>
+                                    <label className="block text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1.5">Protokol Stream</label>
                                     <select 
                                         className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none"
                                         value={cctvStreamType}
@@ -276,22 +276,22 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                                 </div>
 
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Status Kamera</label>
+                                    <label className="block text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1.5">Status Kamera</label>
                                     <select 
                                         className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none"
                                         value={cctvStatus}
                                         onChange={e => setCctvStatus(e.target.value as any)}
                                     >
-                                        <option value="Online">🟢 Online (Aktif Normal)</option>
-                                        <option value="Maintenance">🟡 Maintenance (Perbaikan)</option>
-                                        <option value="Offline">🔴 Offline (Sinyal Terputus)</option>
+                                        <option value="Online">Online (Aktif Normal)</option>
+                                        <option value="Maintenance">Maintenance (Perbaikan)</option>
+                                        <option value="Offline">Offline (Sinyal Terputus)</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Resolusi Lensa</label>
+                                    <label className="block text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1.5">Resolusi Lensa</label>
                                     <select 
                                         className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none"
                                         value={cctvResolution}
@@ -304,7 +304,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                                 </div>
 
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Zona Pengawasan</label>
+                                    <label className="block text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1.5">Zona Pengawasan</label>
                                     <input 
                                         className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none placeholder:text-slate-600"
                                         placeholder="Contoh: Pos Satpam Utama"
@@ -315,7 +315,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                             </div>
 
                             <div>
-                                <label className="block text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1.5">Kontak Penanggung Jawab / Pos Satpam</label>
+                                <label className="block text-[10px] font-semibold text-slate-300 uppercase tracking-widest mb-1.5">Kontak Penanggung Jawab / Pos Satpam</label>
                                 <input 
                                     className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-white focus:border-rose-500 outline-none placeholder:text-slate-600"
                                     placeholder="Contoh: +62 812-4455-8800 (Pos Ronda Siskamling)"
@@ -361,7 +361,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                                 <MapLayout 
                                     houses={houses}
                                     renderBlock={(blockCode) => (
-                                        <div className="bg-slate-400 rounded-lg p-2 text-center text-[8px] font-black text-white">
+                                        <div className="bg-slate-400 rounded-lg p-2 text-center text-[8px] font-semibold text-white">
                                             {blockCode}
                                         </div>
                                     )}
@@ -370,7 +370,7 @@ export const MapPointManager: React.FC<MapPointManagerProps> = ({ mapPoints, hou
                             
                             {/* Current Point Indicator */}
                             <div 
-                                className={`absolute -translate-x-1/2 -translate-y-1/2 p-1 rounded-full shadow-lg border-2 border-white ${getColor(type)} text-white z-10 transition-all duration-300`}
+                                className={`absolute -translate-x-1/2 -translate-y-1/2 p-1 rounded-full shadow-lg border-2 border-white ${getColor(type)} text-white z-10 transition-colors duration-300`}
                                 style={{ left: `${x}%`, top: `${y}%` }}
                             >
                                 {getIcon(type)}

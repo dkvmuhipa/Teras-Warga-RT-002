@@ -1706,9 +1706,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       {/* Header & Actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
         <motion.div variants={itemVariants} className="w-full md:w-auto">
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+          <h2 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
             Data Warga
-            <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse hidden md:block"></div>
+            <div className="h-2 w-2 rounded-full bg-indigo-500 hidden md:block"></div>
           </h2>
           <p className="text-xs text-slate-500 font-medium mt-1">
             Administrasi kependudukan &amp; sistem pemantauan hunian {currentTenant ? `RT ${currentTenant.rt}` : 'RT'}
@@ -1719,14 +1719,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             <div className="flex items-center gap-2 pr-3 border-r border-slate-200">
               <button 
                 onClick={handleBulkVerify}
-                className="group flex items-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
+                className="group flex items-center gap-2 px-4 py-2.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl hover:bg-emerald-600 hover:text-white transition-colors font-semibold text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
               >
                 <CheckCircle size={14} className="group-hover:scale-110 transition-transform" /> 
                 <span>Sahkan ({selectedIds.size})</span>
               </button>
               <button 
                 onClick={handleBulkDelete}
-                className="group flex items-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl hover:bg-rose-600 hover:text-white transition-all font-black text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
+                className="group flex items-center gap-2 px-4 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-2xl hover:bg-rose-600 hover:text-white transition-colors font-semibold text-[10px] uppercase tracking-widest shadow-sm active:scale-95"
               >
                 <Trash2 size={14} className="group-hover:scale-110 transition-transform" /> 
                 <span>Hapus</span>
@@ -1740,11 +1740,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       e.target.value = ""; // Reset value
                     }
                   }}
-                  className="px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
+                  className="px-4 py-2.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-colors border border-indigo-200 rounded-2xl font-semibold text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
                   defaultValue=""
                 >
-                  <option value="" disabled>🏠 Status Kepenghunian</option>
-                  <option value="Tetap" className="bg-white text-slate-850 font-bold">🏠 Tetap (Milik)</option>
+                  <option value="" disabled>Status Kepenghunian</option>
+                  <option value="Tetap" className="bg-white text-slate-850 font-bold">Tetap (Milik)</option>
                   <option value="Sewa" className="bg-white text-slate-850 font-bold">🔑 Sewa (Sewa/Kontrak)</option>
                   <option value="Rumah Keluarga" className="bg-white text-slate-850 font-bold">👨‍👩‍👦 Keluarga</option>
                 </select>
@@ -1758,11 +1758,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       e.target.value = ""; // Reset value
                     }
                   }}
-                  className="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all border border-emerald-200 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
+                  className="px-4 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors border border-emerald-200 rounded-2xl font-semibold text-[10px] uppercase tracking-widest cursor-pointer shadow-sm outline-none"
                   defaultValue=""
                 >
                   <option value="" disabled>🧹 Status Hunian</option>
-                  <option value="Occupied" className="bg-white text-slate-850 font-bold">🏠 Dihuni</option>
+                  <option value="Occupied" className="bg-white text-slate-850 font-bold">Dihuni</option>
                   <option value="Empty" className="bg-white text-slate-850 font-bold">📭 Kosong</option>
                   <option value="Business" className="bg-white text-slate-850 font-bold">🏢 Tempat Usaha</option>
                   <option value="Visiting" className="bg-white text-slate-850 font-bold">🧹 Mengunjungi</option>
@@ -1773,7 +1773,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           
           <button 
             onClick={handleOpenAdd}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs transition-all shadow-md shadow-indigo-600/20 active:scale-95 border border-indigo-500/30 shrink-0"
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold text-xs transition-colors shadow-md shadow-2xs active:scale-95 border border-indigo-500/30 shrink-0"
           >
             <UserPlus size={15} />
             <span>Tambah Warga</span>
@@ -1785,7 +1785,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               setExportTarget('filtered');
               setIsExportModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 rounded-2xl font-bold text-xs transition-all shadow-sm active:scale-95 shrink-0 whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 rounded-2xl font-bold text-xs transition-colors shadow-sm active:scale-95 shrink-0 whitespace-nowrap"
           >
             <Printer size={15} className="text-indigo-600 shrink-0" />
             <span className="whitespace-nowrap">Cetak PDF</span>
@@ -1797,7 +1797,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               setExportTarget('filtered');
               setIsExportModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 rounded-2xl font-bold text-xs transition-all shadow-sm active:scale-95 shrink-0"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-700 rounded-2xl font-bold text-xs transition-colors shadow-sm active:scale-95 shrink-0"
           >
             <Download size={15} className="text-emerald-600" />
             <span>Ekspor Excel</span>
@@ -1806,7 +1806,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <div className="relative shrink-0">
             <button 
               onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-2xl font-bold text-xs transition-all shadow-sm active:scale-95 ${
+              className={`flex items-center gap-2 px-4 py-2.5 bg-white border rounded-2xl font-bold text-xs transition-colors shadow-sm active:scale-95 ${
                 isActionMenuOpen 
                   ? 'border-indigo-500 text-indigo-600 ring-4 ring-indigo-500/5' 
                   : 'border-slate-200/80 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
@@ -1826,10 +1826,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   className="absolute right-0 mt-3 w-64 bg-white/90 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl z-20 overflow-hidden ring-1 ring-black/5"
                 >
                   <div className="p-3 space-y-1.5">
-                    <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Aksi Massal</div>
+                    <div className="px-3 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em]">Aksi Massal</div>
                     <button 
                       onClick={() => { handleGenerateAllPins(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
                       disabled={isGenerating}
                     >
                       <div className="p-2 bg-amber-50 text-amber-500 rounded-xl group-hover:bg-amber-500 group-hover:text-white transition-colors">
@@ -1839,7 +1839,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     </button>
                     <button 
                       onClick={() => { handleCleanupPlaceholders(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-rose-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-rose-600 hover:shadow-sm rounded-2xl transition-colors"
                     >
                       <div className="p-2 bg-rose-50 text-rose-500 rounded-xl group-hover:bg-rose-500 group-hover:text-white transition-colors">
                         <Trash2 size={14} />
@@ -1848,14 +1848,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     </button>
                     
                     <div className="h-px bg-slate-100 mx-3 my-2"></div>
-                    <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Impor & Ekspor</div>
+                    <div className="px-3 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em]">Impor & Ekspor</div>
                     
                     <button 
                       onClick={() => { 
                         handleDownloadTemplate(); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
                     >
                       <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
                         <FileText size={14} />
@@ -1869,7 +1869,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         setIsExportModalOpen(true);
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-colors"
                     >
                       <div className="p-2 bg-emerald-50 text-emerald-500 rounded-xl">
                         <Download size={14} />
@@ -1883,7 +1883,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         setIsExportModalOpen(true);
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
                       disabled={filteredHouses.length === 0}
                     >
                       <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
@@ -1892,7 +1892,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <span>Ekspor Data (Filter Aktif)</span>
                     </button>
                     <div className="h-px bg-slate-100 mx-3 my-2"></div>
-                    <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Laporan PBB</div>
+                    <div className="px-3 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em]">Laporan PBB</div>
                     
                     <button 
                       onClick={() => { 
@@ -1900,7 +1900,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         generatePBBReportPDF(filteredHouses, year, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-amber-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-amber-600 hover:shadow-sm rounded-2xl transition-colors"
                     >
                       <div className="p-2 bg-amber-50 text-amber-500 rounded-xl">
                         <Printer size={14} />
@@ -1915,7 +1915,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         generatePBBReportPDF(takenOnly, year, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-all pl-10"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-colors pl-10"
                     >
                       <span>PBB Sudah Diambil</span>
                     </button>
@@ -1927,20 +1927,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         generatePBBReportPDF(notTakenOnly, year, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:text-rose-600 hover:shadow-sm rounded-2xl transition-all pl-10"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:text-rose-600 hover:shadow-sm rounded-2xl transition-colors pl-10"
                     >
                       <span>PBB Belum Diambil</span>
                     </button>
 
                     <div className="h-px bg-slate-100 mx-3 my-2"></div>
-                    <div className="px-3 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em]">Laporan Iuran</div>
+                    <div className="px-3 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em]">Laporan Iuran</div>
 
                     <button 
                       onClick={() => { 
                         generateBillReportPDF(houses, iuranPayments, 'Air', selectedMonth, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-blue-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-blue-600 hover:shadow-sm rounded-2xl transition-colors"
                     >
                       <div className="p-2 bg-blue-50 text-blue-500 rounded-xl">
                         <Droplets size={14} />
@@ -1953,7 +1953,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         generateBillReportPDF(houses, iuranPayments, 'Sampah', selectedMonth, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-orange-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-orange-600 hover:shadow-sm rounded-2xl transition-colors"
                     >
                       <div className="p-2 bg-orange-50 text-orange-500 rounded-xl">
                         <Trash size={14} />
@@ -1965,7 +1965,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         generateResidentStatsReportPDF(houses, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
                     >
                       <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
                         <Activity size={14} />
@@ -1974,7 +1974,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     </button>
                     <button 
                       onClick={() => { fileInputRef.current?.click(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-black uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-all"
+                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
                       disabled={isUploading}
                     >
                       <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
@@ -2312,11 +2312,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">1. Format Dokumen</label>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1. Format Dokumen</label>
                     <div className="grid grid-cols-2 gap-3">
                       <button
                         onClick={() => setExportFormat('excel')}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border text-center transition-all ${
+                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border text-center transition-colors ${
                           exportFormat === 'excel'
                             ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm'
                             : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -2327,7 +2327,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       </button>
                       <button
                         onClick={() => setExportFormat('pdf')}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border text-center transition-all ${
+                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border text-center transition-colors ${
                           exportFormat === 'pdf'
                             ? 'border-rose-500 bg-rose-50 text-rose-800 shadow-sm'
                             : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -2340,11 +2340,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2">2. Lingkup Data</label>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">2. Lingkup Data</label>
                     <div className="space-y-2">
                       <button
                         onClick={() => setExportTarget('all')}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all ${
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-colors ${
                           exportTarget === 'all'
                             ? 'border-indigo-500 bg-indigo-50 text-indigo-950 font-bold'
                             : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
@@ -2362,7 +2362,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <button
                         onClick={() => setExportTarget('filtered')}
                         disabled={filteredHouses.length === 0}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all ${
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-colors ${
                           exportTarget === 'filtered'
                             ? 'border-indigo-500 bg-indigo-50 text-indigo-950 font-bold'
                             : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50'
@@ -2382,11 +2382,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
                 <div className="md:col-span-2 flex flex-col border border-slate-100 rounded-3xl bg-slate-50/50 p-5">
                   <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
-                    <label className="block text-xs font-black text-slate-650 uppercase tracking-wider">3. Pilih Kolom Untuk Diekspor</label>
+                    <label className="block text-xs font-semibold text-slate-650 uppercase tracking-wider">3. Pilih Kolom Untuk Diekspor</label>
                     <div className="flex gap-2">
                       <button 
                         onClick={() => setSelectedExportCols(['block', 'number', 'headOfFamily', 'phone', 'status', 'residenceType', 'occupants', 'isVerified'])}
-                        className="text-[10px] uppercase font-black text-indigo-600 hover:text-indigo-800"
+                        className="text-[10px] uppercase font-semibold text-indigo-600 hover:text-indigo-800"
                       >
                         Bawaan
                       </button>
@@ -2396,7 +2396,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           'block', 'number', 'headOfFamily', 'phone', 
                           'businessName', 'businessCategory', 'businessLocation', 'businessPhone'
                         ])}
-                        className="text-[10px] uppercase font-black text-amber-600 hover:text-amber-800"
+                        className="text-[10px] uppercase font-semibold text-amber-600 hover:text-amber-800"
                       >
                         Khusus UMKM
                       </button>
@@ -2406,7 +2406,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           'block', 'number', 'headOfFamily', 'phone', 
                           'ktpStatus', 'addressKtp'
                         ])}
-                        className="text-[10px] uppercase font-black text-emerald-600 hover:text-emerald-800"
+                        className="text-[10px] uppercase font-semibold text-emerald-600 hover:text-emerald-800"
                       >
                         Khusus KTP
                       </button>
@@ -2420,14 +2420,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                           'hasBusiness', 'businessName', 'businessCategory', 'businessLocation', 'businessPhone', 'isUmkmRegistered',
                           'isVerified', 'accessCode'
                         ])}
-                        className="text-[10px] uppercase font-black text-indigo-600 hover:text-indigo-800"
+                        className="text-[10px] uppercase font-semibold text-indigo-600 hover:text-indigo-800"
                       >
                         Semua
                       </button>
                       <span className="text-slate-300 text-xs">|</span>
                       <button 
                         onClick={() => setSelectedExportCols(['block', 'number'])}
-                        className="text-[10px] uppercase font-black text-rose-600 hover:text-rose-800"
+                        className="text-[10px] uppercase font-semibold text-rose-600 hover:text-rose-800"
                       >
                         Kosongkan
                       </button>
@@ -2477,7 +2477,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     ].map((group) => {
                       return (
                         <div key={group.name} className="space-y-1.5">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{group.name}</h4>
+                          <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{group.name}</h4>
                           <div className="grid grid-cols-2 gap-2">
                             {group.items.map((col) => {
                               const isChecked = selectedExportCols.includes(col.id);
@@ -2493,7 +2493,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                                       setSelectedExportCols([...selectedExportCols, col.id]);
                                     }
                                   }}
-                                  className={`flex items-center gap-2 px-3 py-2 text-xs rounded-xl border text-left transition-all ${
+                                  className={`flex items-center gap-2 px-3 py-2 text-xs rounded-xl border text-left transition-colors ${
                                     isChecked
                                       ? 'bg-white border-indigo-200 text-slate-800 shadow-sm font-semibold'
                                       : 'bg-slate-100/55 border-slate-200 text-slate-500 hover:bg-slate-150'
@@ -2533,15 +2533,15 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 <div className="flex gap-3 w-full sm:w-auto">
                   <button
                     onClick={() => setIsExportModalOpen(false)}
-                    className="flex-1 sm:flex-initial px-6 py-3 border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider text-slate-600 hover:bg-slate-55 transition-colors"
+                    className="flex-1 sm:flex-initial px-6 py-3 border border-slate-200 rounded-2xl text-xs font-semibold uppercase tracking-wider text-slate-600 hover:bg-slate-55 transition-colors"
                   >
                     Batal
                   </button>
                   <button
                     onClick={handlePerformExport}
                     disabled={isGenerating || selectedExportCols.length === 0}
-                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-indigo-600/20 transition-all ${
-                      isGenerating ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-indigo-600/30'
+                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-2xl text-xs font-semibold uppercase tracking-wider text-white shadow-lg shadow-2xs transition-colors ${
+                      isGenerating ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-2xs'
                     }`}
                   >
                     {isGenerating ? 'Memproses...' : 'Ekspor Laporan'}
@@ -2593,20 +2593,20 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               {/* Statistics Row */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 shrink-0">
                 <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                  <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Total Baris</span>
-                  <p className="text-2xl font-black text-slate-800 mt-1">{excelPreviewData.length}</p>
+                  <span className="text-[10px] font-semibold tracking-widest text-slate-400 uppercase">Total Baris</span>
+                  <p className="text-2xl font-semibold text-slate-800 mt-1">{excelPreviewData.length}</p>
                 </div>
                 <div className="bg-indigo-50/55 rounded-2xl p-4 border border-indigo-50">
-                  <span className="text-[10px] font-black tracking-widest text-indigo-500 uppercase">Warga Baru (Tambah)</span>
-                  <p className="text-2xl font-black text-indigo-650 mt-1">+{previewStats.add}</p>
+                  <span className="text-[10px] font-semibold tracking-widest text-indigo-500 uppercase">Warga Baru (Tambah)</span>
+                  <p className="text-2xl font-semibold text-indigo-650 mt-1">+{previewStats.add}</p>
                 </div>
                 <div className="bg-amber-50/55 rounded-2xl p-4 border border-amber-50">
-                  <span className="text-[10px] font-black tracking-widest text-amber-500 uppercase">Perbarui Data</span>
-                  <p className="text-2xl font-black text-amber-650 mt-1">↺ {previewStats.update}</p>
+                  <span className="text-[10px] font-semibold tracking-widest text-amber-500 uppercase">Perbarui Data</span>
+                  <p className="text-2xl font-semibold text-amber-650 mt-1">↺ {previewStats.update}</p>
                 </div>
                 <div className="bg-rose-50/55 rounded-2xl p-4 border border-rose-50">
-                  <span className="text-[10px] font-black tracking-widest text-rose-500 uppercase">Format Salah</span>
-                  <p className="text-2xl font-black text-rose-650 mt-1">{previewStats.invalid}</p>
+                  <span className="text-[10px] font-semibold tracking-widest text-rose-500 uppercase">Format Salah</span>
+                  <p className="text-2xl font-semibold text-rose-650 mt-1">{previewStats.invalid}</p>
                 </div>
               </div>
 
@@ -2621,7 +2621,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       <button
                         key={tab}
                         onClick={() => setPreviewFilterTab(tab)}
-                        className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                        className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                           isActive
                             ? 'bg-white text-slate-800 shadow-sm'
                             : 'text-slate-400 hover:text-slate-600 hover:bg-white/40'
@@ -2639,11 +2639,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 <table className="w-full text-left border-collapse font-sans">
                   <thead>
                     <tr className="bg-slate-100/80 sticky top-0 border-b border-slate-200">
-                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-24">Blok</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-24">No Rumah</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Kepala Keluarga</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-40 text-center">Rencana Aksi</th>
-                      <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">Detail Perubahan / Pesan Validasi</th>
+                      <th className="px-5 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-widest w-24">Blok</th>
+                      <th className="px-5 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-widest w-24">No Rumah</th>
+                      <th className="px-5 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Kepala Keluarga</th>
+                      <th className="px-5 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-widest w-40 text-center">Rencana Aksi</th>
+                      <th className="px-5 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Detail Perubahan / Pesan Validasi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -2655,12 +2655,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       .map((item, idx) => {
                         return (
                           <tr key={idx} className="hover:bg-slate-100/35 transition-colors">
-                            <td className="px-5 py-4 text-xs font-black text-slate-800 uppercase">
+                            <td className="px-5 py-4 text-xs font-semibold text-slate-800 uppercase">
                               {item.block || (
                                 <span className="text-rose-500 font-bold italic text-[11px]">Kosong</span>
                               )}
                             </td>
-                            <td className="px-5 py-4 text-xs font-black text-slate-800">
+                            <td className="px-5 py-4 text-xs font-semibold text-slate-800">
                               {item.number || (
                                 <span className="text-rose-500 font-bold italic text-[11px]">Kosong</span>
                               )}
@@ -2670,18 +2670,15 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                             </td>
                             <td className="px-5 py-4 text-center">
                               {item.status === 'add' && (
-                                <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-150 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                                  🆕 Baru
+                                <span className="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-150 rounded-xl text-[10px] font-semibold uppercase tracking-widest">🆕 Baru
                                 </span>
                               )}
                               {item.status === 'update' && (
-                                <span className="inline-block px-3 py-1 bg-amber-50 text-amber-700 border border-amber-150 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                                  🔄 Update
+                                <span className="inline-block px-3 py-1 bg-amber-50 text-amber-700 border border-amber-150 rounded-xl text-[10px] font-semibold uppercase tracking-widest">🔄 Update
                                 </span>
                               )}
                               {item.status === 'invalid' && (
-                                <span className="inline-block px-3 py-1 bg-rose-50 text-rose-700 border border-rose-150 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                                  ❌ Lewati
+                                <span className="inline-block px-3 py-1 bg-rose-50 text-rose-700 border border-rose-150 rounded-xl text-[10px] font-semibold uppercase tracking-widest">Lewati
                                 </span>
                               )}
                             </td>
@@ -2689,7 +2686,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                               {item.status === 'invalid' && (
                                 <div className="space-y-1">
                                   {item.errors.map((err: string, i: number) => (
-                                    <div key={i} className="text-rose-600 font-black flex items-center gap-1">
+                                    <div key={i} className="text-rose-600 font-semibold flex items-center gap-1">
                                       <span className="w-1.5 h-1.5 bg-rose-500 rounded-full" />
                                       {err}
                                     </div>
@@ -2749,7 +2746,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
               {previewStats.invalid > 0 && (
                 <div className="mt-4 p-3.5 bg-rose-50 text-rose-700 rounded-2xl flex items-center gap-2 border border-rose-100 shrink-0">
                   <AlertCircle size={16} className="shrink-0" />
-                  <p className="text-xs font-semibold">Terdapat <span className="font-black">{previewStats.invalid}</span> baris dengan kesalahan format. Baris-baris ini akan dilewati secara otomatis untuk mencegah kerusakan data.</p>
+                  <p className="text-xs font-semibold">Terdapat <span className="font-semibold">{previewStats.invalid}</span> baris dengan kesalahan format. Baris-baris ini akan dilewati secara otomatis untuk mencegah kerusakan data.</p>
                 </div>
               )}
 
@@ -2766,19 +2763,19 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
                     disabled={isUploading}
-                    className="flex-1 sm:flex-initial px-6 py-3 border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider text-slate-600 hover:bg-slate-55 transition-colors"
+                    className="flex-1 sm:flex-initial px-6 py-3 border border-slate-200 rounded-2xl text-xs font-semibold uppercase tracking-wider text-slate-600 hover:bg-slate-55 transition-colors"
                   >
                     Batal
                   </button>
                   <button
                     onClick={handlePerformImportPreview}
                     disabled={isUploading || (previewStats.add === 0 && previewStats.update === 0)}
-                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-wider text-white shadow-lg transition-all ${
+                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-2xl text-xs font-semibold uppercase tracking-wider text-white shadow-lg transition-colors ${
                       isUploading 
                         ? 'bg-indigo-400 cursor-not-allowed shadow-none' 
                         : (previewStats.add === 0 && previewStats.update === 0)
                           ? 'bg-slate-300 cursor-not-allowed shadow-none text-slate-400'
-                          : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-indigo-600/30'
+                          : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-2xs'
                     }`}
                   >
                     {isUploading ? 'Menyimpan...' : `Konfirmasi & Import (${previewStats.add + previewStats.update} Data)`}

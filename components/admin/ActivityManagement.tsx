@@ -242,10 +242,10 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Presensi Kegiatan Digital</h2>
+          <h2 className="text-3xl font-semibold text-slate-900 tracking-tight">Presensi Kegiatan Digital</h2>
           <p className="text-slate-500 font-medium mt-1">Buat jadwal agenda rapat atau gotong royong warga, kelola QR kehadiran, dan pantau data presensi.</p>
         </div>
-        <Button onClick={() => { resetForm(); setIsModalOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95">
+        <Button onClick={() => { resetForm(); setIsModalOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-colors hover:scale-105 active:scale-95">
           <Plus size={18} className="mr-2" /> Buat Kegiatan
         </Button>
       </div>
@@ -255,7 +255,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
         <div className="bg-gradient-to-br from-indigo-50 via-white to-indigo-50/30 p-6 rounded-[2rem] border border-indigo-100/60 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">Total Agenda</p>
-            <p className="text-3xl font-black text-indigo-950 leading-none">{totalActivities} <span className="text-xs font-bold text-indigo-500">Kegiatan</span></p>
+            <p className="text-3xl font-semibold text-indigo-950 leading-none">{totalActivities} <span className="text-xs font-bold text-indigo-500">Kegiatan</span></p>
             <p className="text-[11px] text-indigo-600 font-medium">Seluruh kegiatan yang tercatat secara digital</p>
           </div>
           <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-indigo-600">
@@ -265,22 +265,22 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
 
         <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50/30 p-6 rounded-[2rem] border border-amber-100/60 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-[10px] text-amber-500 font-extrabold uppercase tracking-widest font-black text-slate-600">Mendatang (Upcoming)</p>
-            <p className="text-3xl font-black text-amber-950 leading-none">{upcomingActivities} <span className="text-xs font-bold text-amber-500">Agenda</span></p>
+            <p className="text-[10px] text-amber-500 font-extrabold uppercase tracking-widest font-semibold text-slate-600">Mendatang (Upcoming)</p>
+            <p className="text-3xl font-semibold text-amber-950 leading-none">{upcomingActivities} <span className="text-xs font-bold text-amber-500">Agenda</span></p>
             <p className="text-[11px] text-amber-600 font-medium">Kegiatan terjadwal yang akan segera dilaksanakan</p>
           </div>
-          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-600 font-black text-slate-600">
+          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-600 font-semibold text-slate-600">
             <Clock size={24} />
           </div>
         </div>
 
         <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 p-6 rounded-[2rem] border border-emerald-100/60 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest font-black text-slate-600">Sedang Berjalan (Ongoing)</p>
-            <p className="text-3xl font-black text-emerald-950 leading-none">{ongoingActivities} <span className="text-xs font-bold text-emerald-500">Aktif</span></p>
+            <p className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest font-semibold text-slate-600">Sedang Berjalan (Ongoing)</p>
+            <p className="text-3xl font-semibold text-emerald-950 leading-none">{ongoingActivities} <span className="text-xs font-bold text-emerald-500">Aktif</span></p>
             <p className="text-[11px] text-emerald-600 font-medium">Kegiatan sedang berlangsung hari ini</p>
           </div>
-          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-emerald-600 font-black text-slate-600">
+          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-emerald-600 font-semibold text-slate-600">
             <Users size={24} />
           </div>
         </div>
@@ -291,7 +291,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
         <input 
           type="text" 
           placeholder="Cari kegiatan..." 
-          className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-sm"
+          className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors shadow-sm"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -306,11 +306,11 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden flex flex-col"
+              className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-colors group overflow-hidden flex flex-col"
             >
               <div className="p-6 flex-1">
                 <div className="flex justify-between items-start mb-4">
-                  <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                  <span className={`px-3 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-widest ${
                     activity.status === 'Ongoing' ? 'bg-emerald-100 text-emerald-600' :
                     activity.status === 'Completed' ? 'bg-slate-100 text-slate-600' :
                     'bg-indigo-100 text-indigo-600'
@@ -318,19 +318,19 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                     {activity.status}
                   </span>
                   <div className="flex gap-2">
-                    <button onClick={() => openEdit(activity)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
+                    <button onClick={() => openEdit(activity)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors">
                       <Edit2 size={16} />
                     </button>
-                    <button onClick={() => handleDelete(activity.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
+                    <button onClick={() => handleDelete(activity.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors">
                       <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
 
-                <h3 className="text-lg font-black text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{activity.title}</h3>
+                <h3 className="text-lg font-semibold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{activity.title}</h3>
                 {activity.isMandatory && (
                   <div className="flex items-center gap-1.5 mb-2">
-                    <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest border border-rose-100 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-semibold uppercase tracking-widest border border-rose-100 flex items-center gap-1">
                       <AlertTriangle size={10} /> Wajib
                     </span>
                     <span className="text-[10px] font-bold text-slate-400">Kompensasi: Rp {activity.compensationAmount?.toLocaleString()}</span>
@@ -357,7 +357,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
               <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-2">
                 <button 
                   onClick={() => { setSelectedActivity(activity); setIsAttendanceModalOpen(true); }}
-                  className="flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all flex items-center justify-center gap-2"
+                  className="flex-1 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold uppercase tracking-widest text-slate-600 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-colors flex items-center justify-center gap-2"
                 >
                   <Users size={14} /> Presensi
                 </button>
@@ -366,14 +366,14 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                     const text = `*UNDANGAN KEGIATAN TERAS RT 02*\n\n📌 *Agenda:* ${activity.title}\n📅 *Waktu:* ${new Date(activity.date).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}\n📍 *Lokasi:* ${activity.location}\n📂 *Jenis:* ${activity.type}${activity.isMandatory ? ' *(WAJIB HADIR)*' : ''}\n\n📝 *Deskripsi:*\n${activity.description}\n\n_Mohon kehadiran seluruh bapak/ibu warga RT 02 tepat waktu. Terima kasih!_`;
                     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                   }}
-                  className="px-3 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl font-bold transition-all flex items-center justify-center"
+                  className="px-3 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl font-bold transition-colors flex items-center justify-center"
                   title="Sebar Undangan via WhatsApp"
                 >
                   <Share2 size={16} />
                 </button>
                 <button 
                   onClick={() => { setSelectedActivity(activity); }}
-                  className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-indigo-600 transition-all flex items-center justify-center"
+                  className="px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-indigo-600 transition-colors flex items-center justify-center"
                   title="Tampilkan QR Code"
                 >
                   <QrCode size={18} />
@@ -382,7 +382,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
 
               {selectedActivity?.id === activity.id && !isAttendanceModalOpen && (
                 <div className="absolute inset-0 bg-white/95 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center z-10">
-                  <h4 className="font-black text-slate-800 mb-4">Scan QR untuk Presensi</h4>
+                  <h4 className="font-semibold text-slate-800 mb-4">Scan QR untuk Presensi</h4>
                   <div className="p-4 bg-white rounded-3xl shadow-2xl border border-slate-100 mb-6">
                     <QRCodeSVG value={activity.id} size={200} />
                   </div>
@@ -406,10 +406,10 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
           {/* Form Input Side */}
           <form onSubmit={handleSave} className="lg:col-span-7 space-y-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Judul Kegiatan / Agenda</label>
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Judul Kegiatan / Agenda</label>
               <input 
                 type="text" 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                 value={form.title}
                 onChange={e => setForm({...form, title: e.target.value})}
                 placeholder="Contoh: Rapat Kerja Musyawarah Warga RT 02"
@@ -419,9 +419,9 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Jenis Kegiatan</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Jenis Kegiatan</label>
                 <select 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors cursor-pointer"
                   value={form.type}
                   onChange={e => setForm({...form, type: e.target.value as Activity['type']})}
                 >
@@ -434,9 +434,9 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Status Agenda</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Status Agenda</label>
                 <select 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors cursor-pointer"
                   value={form.status}
                   onChange={e => setForm({...form, status: e.target.value as Activity['status']})}
                 >
@@ -449,10 +449,10 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Tanggal & Waktu Acara</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Tanggal & Waktu Acara</label>
                 <input 
                   type="datetime-local" 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                   value={form.date}
                   onChange={e => setForm({...form, date: e.target.value})}
                   required
@@ -460,10 +460,10 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Lokasi Pelaksanaan</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Lokasi Pelaksanaan</label>
                 <input 
                   type="text" 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                   value={form.location}
                   onChange={e => setForm({...form, location: e.target.value})}
                   placeholder="Contoh: Balai Pertemuan RT 02"
@@ -474,7 +474,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
 
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Deskripsi & Agenda Kegiatan</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Deskripsi & Agenda Kegiatan</label>
                 <button 
                   type="button" 
                   onClick={async () => {
@@ -483,14 +483,14 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                     setForm(prev => ({ ...prev, description: draft }));
                     toast.success('Deskripsi agenda kegiatan AI berhasil dibuat!');
                   }}
-                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/70 text-[11px] font-black py-1.5 px-3 rounded-full transition-all shrink-0 active:scale-95"
+                  className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/70 text-[11px] font-semibold py-1.5 px-3 rounded-full transition-colors shrink-0 active:scale-95"
                 >
-                  <Sparkles size={13} className="text-indigo-600 animate-pulse" />
+                  <Sparkles size={13} className="text-indigo-600" />
                   <span>Bantu Tulis AI Agenda</span>
                 </button>
               </div>
               <textarea 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all min-h-[100px] resize-none leading-relaxed" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors min-h-[100px] resize-none leading-relaxed" 
                 rows={4}
                 value={form.description}
                 onChange={e => setForm({...form, description: e.target.value})}
@@ -505,7 +505,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                     <AlertTriangle size={16} />
                   </div>
                   <div>
-                    <p className="text-xs font-black text-slate-900">Agenda Wajib Kehadiran</p>
+                    <p className="text-xs font-semibold text-slate-900">Agenda Wajib Kehadiran</p>
                     <p className="text-[10px] text-slate-500 font-medium">Aktifkan jika berlaku iuran kompensasi bagi warga yang absen</p>
                   </div>
                 </div>
@@ -519,7 +519,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
 
               {form.isMandatory && (
                 <div className="pt-2 border-t border-slate-200/60">
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Besar Iuran Kompensasi Absen (Rp)</label>
+                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Besar Iuran Kompensasi Absen (Rp)</label>
                   <input 
                     type="number" 
                     className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500"
@@ -531,10 +531,10 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
             </div>
 
             <div className="pt-2 border-t border-slate-100 flex gap-3">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 rounded-2xl text-xs font-black uppercase">
+              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)} className="flex-1 py-3.5 rounded-2xl text-xs font-semibold uppercase">
                 Batal
               </Button>
-              <Button type="submit" className="flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black uppercase shadow-lg shadow-indigo-200">
+              <Button type="submit" className="flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold uppercase shadow-lg shadow-indigo-200">
                 {editingActivityId ? "Simpan Perubahan Agenda" : "Terbitkan Agenda Digital"}
               </Button>
             </div>
@@ -545,7 +545,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
             <div>
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-ping" />
+                  <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full" />
                   <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-widest">LIVE EVENT PASS MOCKUP</span>
                 </div>
                 <Calendar size={15} className="text-indigo-400" />
@@ -554,11 +554,11 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
               
               <div className="bg-white text-slate-900 rounded-3xl p-5 border border-slate-800 shadow-2xl space-y-3">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                  <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-[8.5px] font-black uppercase tracking-widest rounded-md">
+                  <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-[8.5px] font-semibold uppercase tracking-widest rounded-md">
                     {form.type || 'Rapat'}
                   </span>
                   {form.isMandatory ? (
-                    <span className="px-2 py-0.5 bg-rose-50 text-rose-600 border border-rose-100 text-[8.5px] font-black uppercase tracking-widest rounded-md">
+                    <span className="px-2 py-0.5 bg-rose-50 text-rose-600 border border-rose-100 text-[8.5px] font-semibold uppercase tracking-widest rounded-md">
                       WAJIB HADIR
                     </span>
                   ) : (
@@ -567,7 +567,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="font-black text-sm text-slate-900 leading-snug">
+                  <h4 className="font-semibold text-sm text-slate-900 leading-snug">
                     {form.title || '[Judul Agenda Kegiatan RT]'}
                   </h4>
                   <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed font-medium">
@@ -609,8 +609,8 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                 <Users size={20} />
               </div>
               <div>
-                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none mb-1">Total Kehadiran Warga</p>
-                <p className="text-xl font-black text-slate-800 leading-none">{attendance.length} Personil / Rumah</p>
+                <p className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest leading-none mb-1">Total Kehadiran Warga</p>
+                <p className="text-xl font-semibold text-slate-800 leading-none">{attendance.length} Personil / Rumah</p>
               </div>
             </div>
             
@@ -623,7 +623,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                 }}
                 size="sm"
                 variant="outline"
-                className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 text-[10px] font-black uppercase tracking-wider py-2"
+                className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 text-[10px] font-semibold uppercase tracking-wider py-2"
               >
                 <Printer size={14} className="mr-1 text-indigo-600" /> Cetak PDF
               </Button>
@@ -635,13 +635,13 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                 }}
                 size="sm"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-wider py-2"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-semibold uppercase tracking-wider py-2"
               >
                 <Share2 size={14} className="mr-1" /> Rekap WA
               </Button>
 
               {selectedActivity?.isMandatory && selectedActivity?.status === 'Completed' && !selectedActivity?.compensationApplied && (
-                <Button onClick={handleApplyCompensations} size="sm" className="bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-black uppercase tracking-wider py-2">
+                <Button onClick={handleApplyCompensations} size="sm" className="bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-semibold uppercase tracking-wider py-2">
                   Terapkan Sanksi
                 </Button>
               )}
@@ -652,7 +652,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
           <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/40">
             <button
               onClick={() => setAttendanceTab('list')}
-              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`flex-1 py-2 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-colors ${
                 attendanceTab === 'list'
                   ? 'bg-white text-indigo-600 shadow-sm'
                   : 'text-slate-500 hover:text-slate-800'
@@ -662,7 +662,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
             </button>
             <button
               onClick={() => setAttendanceTab('manual')}
-              className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`flex-1 py-2 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-colors ${
                 attendanceTab === 'manual'
                   ? 'bg-white text-indigo-600 shadow-sm'
                   : 'text-slate-500 hover:text-slate-800'
@@ -678,24 +678,24 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                 attendance.map((record) => (
                   <div key={record.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 font-black shadow-sm group-hover:text-indigo-600 transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 font-semibold shadow-sm group-hover:text-indigo-600 transition-colors">
                         {record.residentName.charAt(0)}
                       </div>
                       <div>
-                        <p className="text-sm font-black text-slate-800 leading-none mb-1">{record.residentName}</p>
+                        <p className="text-sm font-semibold text-slate-800 leading-none mb-1">{record.residentName}</p>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">Blok {record.houseId}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1 flex items-center gap-1">
+                        <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest leading-none mb-1 flex items-center gap-1">
                           <CheckCircle size={10} /> Hadir
                         </p>
                         <p className="text-[10px] font-bold text-slate-400 leading-none flex items-center gap-1">
                           <Clock size={10} /> {new Date(record.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
-                      <button onClick={() => handleDeleteAttendance(record.id)} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all opacity-0 group-hover:opacity-100">
+                      <button onClick={() => handleDeleteAttendance(record.id)} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
                         <Trash2 size={14} />
                       </button>
                     </div>
@@ -719,7 +719,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                   placeholder="Cari warga atau nomor rumah..."
                   value={manualSearchQuery}
                   onChange={e => setManualSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                 />
               </div>
 
@@ -742,10 +742,10 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                     const currentNameInput = customAttendeeNames[house.id] !== undefined ? customAttendeeNames[house.id] : house.headOfFamily;
                     
                     return (
-                      <div key={house.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-white transition-all gap-3">
+                      <div key={house.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-white transition-colors gap-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-black text-slate-800 text-xs bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-lg border border-indigo-100/30">
+                            <span className="font-semibold text-slate-800 text-xs bg-indigo-50 text-indigo-700 px-2.5 py-0.5 rounded-lg border border-indigo-100/30">
                               {house.id}
                             </span>
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Penghuni Tetap</span>
@@ -757,7 +757,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                                 type="text"
                                 value={currentNameInput}
                                 onChange={e => setCustomAttendeeNames({ ...customAttendeeNames, [house.id]: e.target.value })}
-                                className="px-2 py-1 text-xs border border-slate-200 rounded-lg bg-white font-black text-slate-800 w-full outline-indigo-500"
+                                className="px-2 py-1 text-xs border border-slate-200 rounded-lg bg-white font-semibold text-slate-800 w-full outline-indigo-500"
                               />
                             </div>
                           ) : (
@@ -771,12 +771,12 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                         <div className="flex items-center justify-end">
                           {existingRecord ? (
                             <div className="flex items-center gap-2">
-                              <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-100 flex items-center gap-1">
+                              <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest border border-emerald-100 flex items-center gap-1">
                                 <CheckCircle size={10} /> Hadir
                               </span>
                               <button 
                                 onClick={() => handleDeleteAttendance(existingRecord.id)}
-                                className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                                className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                                 title="Batalkan kehadiran"
                               >
                                 <Trash2 size={14} />
@@ -786,7 +786,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                             <Button 
                               onClick={() => handleMarkAttendance(house)}
                               size="sm"
-                              className="bg-indigo-600 hover:bg-indigo-700 text-[10px] font-black uppercase tracking-widest px-4 py-2 shadow-sm rounded-xl"
+                              className="bg-indigo-600 hover:bg-indigo-700 text-[10px] font-semibold uppercase tracking-widest px-4 py-2 shadow-sm rounded-xl"
                             >
                               + Hadir
                             </Button>

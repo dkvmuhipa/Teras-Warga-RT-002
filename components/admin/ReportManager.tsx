@@ -57,7 +57,7 @@ export const ReportManager: React.FC<ReportManagerProps> = ({
         <div className="inline-flex items-center p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200/60 shadow-inner shrink-0 self-start md:self-center">
           <button
             onClick={() => setActiveSubTab('monthly')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer ${
               activeSubTab === 'monthly'
                 ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/40'
                 : 'text-slate-500 hover:text-slate-800'
@@ -68,7 +68,7 @@ export const ReportManager: React.FC<ReportManagerProps> = ({
           </button>
           <button
             onClick={() => setActiveSubTab('annual')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer ${
               activeSubTab === 'annual'
                 ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/40'
                 : 'text-slate-500 hover:text-slate-800'

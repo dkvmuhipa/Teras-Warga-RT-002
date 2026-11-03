@@ -215,16 +215,16 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
       {/* Header Banner - Apple Minimalist */}
       <div className="bg-white border border-slate-200/80 rounded-[2.5rem] p-6 md:p-8 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-mono font-black uppercase tracking-widest mb-2 inline-block">
+          <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-mono font-semibold uppercase tracking-widest mb-2 inline-block">
             🤝 KEGIATAN & GOTONG ROYONG WARGA
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Agenda Kerja Bakti RT 02</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Agenda Kerja Bakti RT 02</h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
             Manajemen agenda gotong royong, pembagian zona kerja per blok, serta checklist presensi warga.
           </p>
         </div>
 
-        <Button onClick={() => setIsAddModalOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 text-xs py-3.5 px-6 rounded-2xl font-black uppercase tracking-wider">
+        <Button onClick={() => setIsAddModalOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-2xs text-xs py-3.5 px-6 rounded-2xl font-semibold uppercase tracking-wider">
           <Plus size={16} className="mr-2" /> Buat Agenda Kerja Bakti
         </Button>
       </div>
@@ -233,21 +233,21 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Agenda List & Selector */}
           <div className="space-y-3">
-            <h4 className="text-xs font-mono font-black text-slate-400 uppercase tracking-widest px-2">DAFTAR AGENDA KERJA BAKTI</h4>
+            <h4 className="text-xs font-mono font-semibold text-slate-400 uppercase tracking-widest px-2">DAFTAR AGENDA KERJA BAKTI</h4>
             {works.map((work) => {
               const isSelected = activeWork?.id === work.id;
               return (
                 <div
                   key={work.id}
                   onClick={() => setActiveWork(work)}
-                  className={`p-5 rounded-3xl border transition-all cursor-pointer ${
+                  className={`p-5 rounded-3xl border transition-colors cursor-pointer ${
                     isSelected 
-                      ? 'bg-slate-900 text-white border-slate-800 shadow-xl shadow-slate-900/20' 
+                      ? 'bg-slate-900 text-white border-slate-800 shadow-xl shadow-2xs' 
                       : 'bg-white text-slate-800 border-slate-200/80 hover:border-slate-300'
                   }`}
                 >
                   <div className="flex justify-between items-start mb-2">
-                    <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider ${
+                    <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-mono font-semibold uppercase tracking-wider ${
                       isSelected ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-50 text-emerald-700'
                     }`}>
                       {work.status}
@@ -257,7 +257,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                     </span>
                   </div>
 
-                  <h3 className="font-black text-sm line-clamp-1 mb-1">{work.title}</h3>
+                  <h3 className="font-semibold text-sm line-clamp-1 mb-1">{work.title}</h3>
                   <p className={`text-xs line-clamp-2 ${isSelected ? 'text-slate-400' : 'text-slate-500'}`}>{work.description || 'Pembersihan lingkungan bersama warga RT 02.'}</p>
                 </div>
               );
@@ -268,15 +268,15 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
           {activeWork && (
             <div className="lg:col-span-2 space-y-6">
               {/* Active Agenda Banner */}
-              <div className="bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-800 text-white rounded-[2.5rem] p-6 sm:p-8 shadow-xl shadow-emerald-900/15 relative overflow-hidden">
+              <div className="bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-800 text-white rounded-[2.5rem] p-6 sm:p-8 shadow-xl shadow-2xs relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
                 
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 relative z-10">
                   <div>
-                    <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[9px] font-mono font-black uppercase tracking-widest text-emerald-100">
+                    <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[9px] font-mono font-semibold uppercase tracking-widest text-emerald-100">
                       AGENDA AKTIF
                     </span>
-                    <h2 className="text-2xl font-black mt-2 tracking-tight">{activeWork.title}</h2>
+                    <h2 className="text-2xl font-semibold mt-2 tracking-tight">{activeWork.title}</h2>
                     <p className="text-xs text-white/80 font-medium mt-1">{activeWork.description}</p>
                   </div>
 
@@ -284,7 +284,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                     <button
                       type="button"
                       onClick={copyBroadcastInvitation}
-                      className="px-3.5 py-2 bg-white/15 hover:bg-white/25 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                      className="px-3.5 py-2 bg-white/15 hover:bg-white/25 text-white rounded-2xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm active:scale-95"
                       title="Salin Teks Undangan Kerja Bakti ke WhatsApp"
                     >
                       <Copy size={14} /> Salin Undangan
@@ -292,14 +292,14 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                     <button
                       type="button"
                       onClick={shareToWhatsAppGroup}
-                      className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md active:scale-95"
+                      className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-md active:scale-95"
                       title="Buka WhatsApp untuk Broadcast"
                     >
                       <MessageCircle size={14} /> Kirim ke WA
                     </button>
                     <button 
                       onClick={() => handleDeleteWork(activeWork.id)}
-                      className="p-2.5 bg-white/15 hover:bg-rose-600 text-white rounded-2xl transition-all"
+                      className="p-2.5 bg-white/15 hover:bg-rose-600 text-white rounded-2xl transition-colors"
                       title="Hapus Agenda"
                     >
                       <Trash2 size={16} />
@@ -311,7 +311,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono relative z-10 pt-4 border-t border-white/20">
                   <div>
                     <span className="text-emerald-200 block text-[9px] uppercase tracking-wider font-bold">Waktu Pelaksanaan</span>
-                    <p className="font-black text-white">{activeWork.startTime} - {activeWork.endTime} WIB</p>
+                    <p className="font-semibold text-white">{activeWork.startTime} - {activeWork.endTime} WIB</p>
                   </div>
                   <div>
                     <span className="text-emerald-200 block text-[9px] uppercase tracking-wider font-bold">Titik Kumpul</span>
@@ -319,11 +319,11 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                   </div>
                   <div>
                     <span className="text-emerald-200 block text-[9px] uppercase tracking-wider font-bold">Kehadiran Warga</span>
-                    <p className="font-black text-white">{hadirCount} / {totalWarga} Hadir</p>
+                    <p className="font-semibold text-white">{hadirCount} / {totalWarga} Hadir</p>
                   </div>
                   <div>
                     <span className="text-emerald-200 block text-[9px] uppercase tracking-wider font-bold">Zona Selesai</span>
-                    <p className="font-black text-white">{tasksDoneCount} / {activeWork.tasks?.length || 0} Zona</p>
+                    <p className="font-semibold text-white">{tasksDoneCount} / {activeWork.tasks?.length || 0} Zona</p>
                   </div>
                 </div>
               </div>
@@ -337,7 +337,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                       activeTab === tab.id 
                         ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/80' 
                         : 'text-slate-500 hover:text-slate-800'
@@ -353,7 +353,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
               {activeTab === 'tasks' && (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center px-1">
-                    <h4 className="text-xs font-mono font-black text-slate-400 uppercase tracking-widest">ZONA PENUGASAN KERJA BAKTI</h4>
+                    <h4 className="text-xs font-mono font-semibold text-slate-400 uppercase tracking-widest">ZONA PENUGASAN KERJA BAKTI</h4>
                     <button
                       onClick={() => setIsTaskModalOpen(true)}
                       className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
@@ -367,7 +367,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                       <div
                         key={task.id}
                         onClick={() => handleToggleTask(task.id)}
-                        className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-start gap-3.5 ${
+                        className={`p-4 rounded-2xl border transition-colors cursor-pointer flex items-start gap-3.5 ${
                           task.isDone 
                             ? 'bg-emerald-50/60 border-emerald-200 text-emerald-950' 
                             : 'bg-white border-slate-200/80 hover:border-emerald-300'
@@ -382,7 +382,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                           <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[9px] font-mono font-bold uppercase tracking-wider block w-fit mb-1">
                             {task.zone}
                           </span>
-                          <h5 className={`text-xs font-black ${task.isDone ? 'line-through text-slate-500' : 'text-slate-900'}`}>
+                          <h5 className={`text-xs font-semibold ${task.isDone ? 'line-through text-slate-500' : 'text-slate-900'}`}>
                             {task.title}
                           </h5>
                           <p className="text-[10px] text-slate-400 mt-1 font-medium">Koordinator: {task.picName}</p>
@@ -407,17 +407,17 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                 <div className="bg-white rounded-[2rem] border border-slate-200/80 shadow-sm overflow-hidden">
                   <div className="p-4 bg-slate-50/80 border-b border-slate-100 flex flex-wrap justify-between items-center gap-3">
                     <div>
-                      <h4 className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">
+                      <h4 className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">
                         PRESENSI PER KELUARGA / RUMAH
                       </h4>
-                      <span className="text-xs font-mono font-black text-emerald-600">
+                      <span className="text-xs font-mono font-semibold text-emerald-600">
                         Tingkat Partisipasi: {totalWarga > 0 ? Math.round((hadirCount / totalWarga) * 100) : 0}% ({hadirCount} Hadir, {izinCount} Izin, {alphaCount} Absen)
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={copyAttendanceRecap}
-                      className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                      className="px-3.5 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm active:scale-95"
                       title="Salin Rincian Presensi ke Clipboard"
                     >
                       <Copy size={13} /> Salin Rekap Presensi
@@ -432,7 +432,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                             <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[9px] font-mono font-bold">
                               Blok {getHouseLabel(att.houseId)}
                             </span>
-                            <h5 className="text-xs font-black text-slate-900">{att.headOfFamily}</h5>
+                            <h5 className="text-xs font-semibold text-slate-900">{att.headOfFamily}</h5>
                           </div>
                           {att.checkInTime && (
                             <p className="text-[10px] text-emerald-600 font-bold mt-0.5">✓ Hadir pkl {att.checkInTime}</p>
@@ -442,7 +442,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => handleUpdateAttendance(att.houseId, 'Hadir')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
                               att.status === 'Hadir' 
                                 ? 'bg-emerald-600 text-white shadow-md' 
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -452,7 +452,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                           </button>
                           <button
                             onClick={() => handleUpdateAttendance(att.houseId, 'Izin / Diwakilkan')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
                               att.status === 'Izin / Diwakilkan' 
                                 ? 'bg-amber-500 text-white shadow-md' 
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -462,7 +462,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                           </button>
                           <button
                             onClick={() => handleUpdateAttendance(att.houseId, 'Alpha')}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
                               att.status === 'Alpha' 
                                 ? 'bg-slate-800 text-white' 
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -484,7 +484,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
           <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-3xl flex items-center justify-center mx-auto mb-3 border border-slate-100">
             <Users size={32} />
           </div>
-          <h4 className="text-base font-black text-slate-800 mb-1">Belum Ada Agenda Kerja Bakti</h4>
+          <h4 className="text-base font-semibold text-slate-800 mb-1">Belum Ada Agenda Kerja Bakti</h4>
           <p className="text-xs text-slate-400 max-w-xs mx-auto mb-4">
             Buat jadwal kerja bakti baru untuk mengkoordinir gotong royong dan kebersihan lingkungan RT 02.
           </p>
@@ -571,7 +571,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
           return (
             <form onSubmit={handleCreateWork} className="space-y-5 text-left">
               {/* Top Hero Banner */}
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 p-4.5 text-white shadow-lg shadow-emerald-600/15">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 p-4.5 text-white shadow-lg shadow-2xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-inner shrink-0 mt-0.5">
@@ -585,7 +585,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                           {occupiedHousesCount} KK Terdaftar
                         </span>
                       </div>
-                      <h4 className="text-xl font-black tracking-tight text-white mt-0.5">
+                      <h4 className="text-xl font-semibold tracking-tight text-white mt-0.5">
                         Publikasi Agenda Kerja Bakti Warga
                       </h4>
                       <p className="text-xs text-emerald-100 mt-0.5">
@@ -595,7 +595,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                   </div>
 
                   <div className="text-left sm:text-right shrink-0">
-                    <span className="inline-flex items-center gap-1.5 bg-white text-emerald-900 text-xs font-black px-3 py-1.5 rounded-xl shadow-sm">
+                    <span className="inline-flex items-center gap-1.5 bg-white text-emerald-900 text-xs font-semibold px-3 py-1.5 rounded-xl shadow-sm">
                       <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                       Kelurahan Tondo
                     </span>
@@ -627,7 +627,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                         });
                         toast.info(`Template '${tpl.label}' berhasil diterapkan!`);
                       }}
-                      className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-left hover:border-emerald-500 hover:shadow-sm transition-all group"
+                      className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-left hover:border-emerald-500 hover:shadow-sm transition-colors group"
                     >
                       <span className="text-lg block mb-1">{tpl.icon}</span>
                       <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 block group-hover:text-emerald-600">
@@ -651,7 +651,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                       <input 
                         type="text"
                         required
-                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-colors"
                         value={form.title}
                         onChange={e => setForm({...form, title: e.target.value})}
                         placeholder="Contoh: Kerja Bakti Akbar Bersih Lingkungan RT 02"
@@ -666,7 +666,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                     </label>
                     <textarea
                       rows={3}
-                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-colors"
                       value={form.description}
                       onChange={e => setForm({...form, description: e.target.value})}
                       placeholder="Jelaskan fokus pembersihan, target gorong-gorong, serta imbauan untuk seluruh kepala keluarga RT 02..."
@@ -682,7 +682,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                       <input 
                         type="date"
                         required
-                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-colors"
                         value={form.date}
                         onChange={e => setForm({...form, date: e.target.value})}
                       />
@@ -720,7 +720,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                         key={idx}
                         type="button"
                         onClick={() => setForm({ ...form, startTime: qt.start, endTime: qt.end })}
-                        className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono transition-all ${
+                        className={`px-2 py-0.5 rounded-lg border text-[10px] font-mono transition-colors ${
                           form.startTime === qt.start && form.endTime === qt.end
                             ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-bold'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
@@ -779,7 +779,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                             key={idx}
                             type="button"
                             onClick={() => toggleTool(tool)}
-                            className={`text-[10px] px-2 py-0.5 rounded-lg border font-medium transition-all ${
+                            className={`text-[10px] px-2 py-0.5 rounded-lg border font-medium transition-colors ${
                               active
                                 ? 'bg-emerald-600 text-white border-emerald-600 font-bold'
                                 : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-emerald-400'
@@ -815,7 +815,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                     <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-3.5 text-white flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-emerald-200" />
-                        <span className="text-xs font-black uppercase tracking-wider">Pratinjau Pengumuman Warga</span>
+                        <span className="text-xs font-semibold uppercase tracking-wider">Pratinjau Pengumuman Warga</span>
                       </div>
                       <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-bold">
                         RT 02 / RW 020
@@ -827,7 +827,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                         <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest block">
                           Agenda Resmi Mendatang
                         </span>
-                        <h5 className="text-base font-black text-slate-900 dark:text-white leading-tight mt-0.5">
+                        <h5 className="text-base font-semibold text-slate-900 dark:text-white leading-tight mt-0.5">
                           {form.title || 'Judul Kegiatan Kerja Bakti...'}
                         </h5>
                       </div>
@@ -918,7 +918,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
                   </Button>
                   <Button 
                     type="submit" 
-                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-emerald-600/25 flex items-center gap-2 transition-all"
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-2xs flex items-center gap-2 transition-colors"
                   >
                     <Check className="w-4 h-4" />
                     Terbitkan Jadwal Kerja Bakti
@@ -934,7 +934,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
       <Modal isOpen={isTaskModalOpen} onClose={() => setIsTaskModalOpen(false)} title="Tambah Pembagian Zona Tugas">
         <form onSubmit={handleAddTask} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Nama Tugas / Pekerjaan</label>
+            <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Nama Tugas / Pekerjaan</label>
             <input 
               type="text"
               required
@@ -947,7 +947,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Wilayah / Zona</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Wilayah / Zona</label>
               <input 
                 type="text"
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white outline-none"
@@ -958,7 +958,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1.5">Koordinator Lapangan</label>
+              <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Koordinator Lapangan</label>
               <input 
                 type="text"
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white outline-none"

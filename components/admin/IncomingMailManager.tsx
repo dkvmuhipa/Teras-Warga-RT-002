@@ -151,7 +151,7 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
       {/* Header & Stats */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+          <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Inbox className="text-indigo-600" size={24} />
             <span>Manajemen Surat Masuk</span>
           </h2>
@@ -159,7 +159,7 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
         </div>
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md shadow-indigo-600/20 transition-all active:scale-95 shrink-0"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md shadow-2xs transition-colors active:scale-95 shrink-0"
         >
           <Plus size={16} />
           <span>Catat Surat Masuk</span>
@@ -173,8 +173,8 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
             <Inbox size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Total Surat Masuk</p>
-            <p className="text-lg font-black text-slate-800">{totalMails} Berkas</p>
+            <p className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider">Total Surat Masuk</p>
+            <p className="text-lg font-semibold text-slate-800">{totalMails} Berkas</p>
           </div>
         </div>
 
@@ -183,8 +183,8 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
             <Clock size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Perlu Disposisi</p>
-            <p className="text-lg font-black text-amber-600">{pendingDisposition} Surat</p>
+            <p className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider">Perlu Disposisi</p>
+            <p className="text-lg font-semibold text-amber-600">{pendingDisposition} Surat</p>
           </div>
         </div>
 
@@ -193,8 +193,8 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
             <FileText size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Surat Edaran</p>
-            <p className="text-lg font-black text-emerald-600">{edaranCount} Berkas</p>
+            <p className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider">Surat Edaran</p>
+            <p className="text-lg font-semibold text-emerald-600">{edaranCount} Berkas</p>
           </div>
         </div>
 
@@ -203,8 +203,8 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
             <Archive size={20} />
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Diarsipkan</p>
-            <p className="text-lg font-black text-blue-600">{archivedCount} Berkas</p>
+            <p className="text-[10px] font-semibold uppercase text-slate-400 tracking-wider">Diarsipkan</p>
+            <p className="text-lg font-semibold text-blue-600">{archivedCount} Berkas</p>
           </div>
         </div>
       </div>
@@ -216,7 +216,7 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
           <input
             type="text"
             placeholder="Cari no. surat, pengirim, perihal..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 transition-all"
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:border-indigo-500 transition-colors"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -255,7 +255,7 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase text-slate-400 tracking-wider">
+              <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
                 <th className="p-4">No. Agenda & Surat</th>
                 <th className="p-4">Pengirim</th>
                 <th className="p-4">Perihal</th>
@@ -317,7 +317,7 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
                               setIsPreviewOpen(true);
                             }}
                             title="Pratinjau Surat"
-                            className="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-all"
+                            className="p-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-lg transition-colors"
                           >
                             <Eye size={14} />
                           </button>
@@ -325,14 +325,14 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
                         <button
                           onClick={() => handleOpenEdit(mail)}
                           title="Edit & Disposisi"
-                          className="p-1.5 bg-slate-100 text-slate-600 hover:bg-slate-800 hover:text-white rounded-lg transition-all"
+                          className="p-1.5 bg-slate-100 text-slate-600 hover:bg-slate-800 hover:text-white rounded-lg transition-colors"
                         >
                           <Edit3 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(mail.id)}
                           title="Hapus"
-                          className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition-all"
+                          className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>

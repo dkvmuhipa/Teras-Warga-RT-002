@@ -92,7 +92,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
               <HelpCircle size={20} />
             </div>
             <div>
-              <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
+              <h2 className="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                 <span>Pusat Bantuan & Tiket Super Admin</span>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 font-bold uppercase">
                   {currentTenant.name}
@@ -115,7 +115,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
         <div className="px-6 pt-3 border-b border-slate-100 flex items-center gap-3 bg-white">
           <button
             onClick={() => { setActiveView('list'); setSelectedTicket(null); }}
-            className={`pb-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
+            className={`pb-2.5 text-xs font-bold transition-colors border-b-2 cursor-pointer flex items-center gap-1.5 ${
               activeView === 'list' && !selectedTicket
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -126,7 +126,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
           </button>
           <button
             onClick={() => { setActiveView('create'); setSelectedTicket(null); }}
-            className={`pb-2.5 text-xs font-bold transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
+            className={`pb-2.5 text-xs font-bold transition-colors border-b-2 cursor-pointer flex items-center gap-1.5 ${
               activeView === 'create'
                 ? 'border-indigo-600 text-indigo-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -151,7 +151,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
 
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
+                  <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
                     {selectedTicket.id}
                   </span>
                   <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
@@ -165,7 +165,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
                   </span>
                 </div>
 
-                <h3 className="text-sm font-black text-slate-900">{selectedTicket.title}</h3>
+                <h3 className="text-sm font-semibold text-slate-900">{selectedTicket.title}</h3>
                 <p className="text-xs text-slate-700 whitespace-pre-wrap leading-relaxed">
                   {selectedTicket.description}
                 </p>
@@ -227,10 +227,10 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
                   >
                     <option value="water_meter">💧 Pencatatan Meteran Air</option>
                     <option value="billing">💳 Iuran & Keuangan Kas</option>
-                    <option value="account">🏠 Penataan Blok & Data Rumah</option>
-                    <option value="feature_request">💡 Permintaan Fitur Tambahan</option>
-                    <option value="system_bug">⚠️ Gangguan Teknis / Bug</option>
-                    <option value="other">📋 Pertanyaan Umum</option>
+                    <option value="account">Penataan Blok & Data Rumah</option>
+                    <option value="feature_request">Permintaan Fitur Tambahan</option>
+                    <option value="system_bug">Gangguan Teknis / Bug</option>
+                    <option value="other">Pertanyaan Umum</option>
                   </select>
                 </div>
 
@@ -297,14 +297,14 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveView('list')}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm disabled:opacity-50"
                 >
                   <Send size={13} />
                   <span>{isSubmitting ? 'Mengirim...' : 'Kirimkan Tiket ke Super Admin'}</span>
@@ -318,14 +318,14 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
                 <div
                   key={t.id}
                   onClick={() => setSelectedTicket(t)}
-                  className="p-4 bg-slate-50/70 hover:bg-indigo-50/40 border border-slate-200 hover:border-indigo-300 rounded-2xl transition-all cursor-pointer space-y-2"
+                  className="p-4 bg-slate-50/70 hover:bg-indigo-50/40 border border-slate-200 hover:border-indigo-300 rounded-2xl transition-colors cursor-pointer space-y-2"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
+                      <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
                         {t.id}
                       </span>
-                      <span className={`text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full ${
+                      <span className={`text-[9px] font-mono font-semibold uppercase px-2 py-0.5 rounded-full ${
                         t.priority === 'critical' ? 'bg-rose-100 text-rose-800' :
                         t.priority === 'high' ? 'bg-amber-100 text-amber-800' :
                         'bg-slate-100 text-slate-700'
@@ -345,7 +345,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
                     </span>
                   </div>
 
-                  <h4 className="text-xs font-black text-slate-900 line-clamp-1">{t.title}</h4>
+                  <h4 className="text-xs font-semibold text-slate-900 line-clamp-1">{t.title}</h4>
                   <p className="text-[11px] text-slate-500 line-clamp-1">{t.description}</p>
 
                   {t.adminResponse && (
@@ -370,7 +370,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
                   </div>
                   <button
                     onClick={() => setActiveView('create')}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all cursor-pointer inline-flex items-center gap-1.5"
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-colors cursor-pointer inline-flex items-center gap-1.5"
                   >
                     <Plus size={13} />
                     <span>Ajukan Tiket Sekarang</span>
@@ -386,7 +386,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
           <span>Koneksi Live Cloud Firestore</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            className="px-4 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
           >
             Tutup
           </button>

@@ -351,7 +351,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
           <input 
             type="text" 
             placeholder="Cari nomor surat, perihal, atau penerima..."
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -360,7 +360,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
           <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
              <Filter size={14} className="text-slate-400"/>
              <select 
-               className="bg-transparent border-none text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" 
+               className="bg-transparent border-none text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" 
                value={filterType} 
                onChange={(e) => setFilterType(e.target.value)}
              >
@@ -390,12 +390,12 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group"
+              className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-colors overflow-hidden group"
             >
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex gap-2">
-                    <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                    <div className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest ${
                       letter.type === 'Himbauan' ? 'bg-amber-100 text-amber-600' :
                       letter.type === 'Undangan' ? 'bg-indigo-100 text-indigo-600' :
                       'bg-slate-100 text-slate-600'
@@ -403,14 +403,14 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                       {letter.type}
                     </div>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest ${
                     letter.status === 'Published' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
                   }`}>
                     {letter.status}
                   </div>
                 </div>
 
-                <h4 className="text-lg font-black text-slate-900 mb-1 line-clamp-1">{letter.subject}</h4>
+                <h4 className="text-lg font-semibold text-slate-900 mb-1 line-clamp-1">{letter.subject}</h4>
                 <p className="text-xs font-bold text-indigo-600 mb-4">{letter.letterNumber}</p>
 
                 <div className="space-y-2 mb-6">
@@ -427,13 +427,13 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                 <div className="flex items-center gap-2 pt-4 border-t border-slate-50">
                   <button 
                     onClick={() => handleOpenModal(letter)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-all text-[10px] font-black uppercase tracking-widest"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-colors text-[10px] font-semibold uppercase tracking-widest"
                   >
                     <Edit2 size={14} /> Edit
                   </button>
                   <button 
                     onClick={() => handlePrint(letter)}
-                    className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all"
+                    className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
                     title="Cetak PDF"
                   >
                     <Printer size={16} />
@@ -443,7 +443,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                       href={letter.attachmentUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="p-2.5 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-all"
+                      className="p-2.5 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-colors"
                       title="Lihat Lampiran"
                     >
                       <Download size={16} />
@@ -451,15 +451,15 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                   )}
                   <button 
                     onClick={() => handleShareWhatsApp(letter)}
-                    className="p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-1 shadow-sm shadow-emerald-200"
+                    className="p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors flex items-center gap-1 shadow-sm shadow-emerald-200"
                     title="Bagikan ke Broadcast WhatsApp Grup RT"
                   >
                     <Send size={15} />
-                    <span className="text-[10px] font-black uppercase tracking-wider">WA Broadcast</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider">WA Broadcast</span>
                   </button>
                   <button 
                     onClick={() => handleDelete(letter.id)}
-                    className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-all"
+                    className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors"
                     title="Hapus"
                   >
                     <Trash2 size={16} />
@@ -476,7 +476,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <FileText size={40} className="text-slate-200" />
           </div>
-          <h3 className="text-xl font-black text-slate-900 mb-2">Belum Ada Surat Resmi</h3>
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">Belum Ada Surat Resmi</h3>
           <p className="text-slate-500 max-w-xs mx-auto">Klik tombol "Buat Surat Resmi" untuk mulai membuat himbauan atau undangan.</p>
         </div>
       )}
@@ -492,11 +492,11 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
           {/* Header Identitas Resmi RT 002 / RW 020 */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-violet-50 via-slate-50 to-violet-50/30 border border-violet-100/80 rounded-2xl">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+              <div className="w-8 h-8 rounded-xl bg-violet-600 text-white flex items-center justify-center font-semibold text-xs shadow-sm">
                 <FileText size={16} />
               </div>
               <div>
-                <p className="text-[11px] font-black text-slate-800 tracking-tight leading-tight">
+                <p className="text-[11px] font-semibold text-slate-800 tracking-tight leading-tight">
                   Sistem Tata Naskah Surat Dinas Resmi RT 002 / RW 020
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
@@ -504,14 +504,14 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-wider bg-violet-100/80 text-violet-700 px-3 py-1 rounded-lg border border-violet-200">
+            <span className="text-[10px] font-semibold uppercase tracking-wider bg-violet-100/80 text-violet-700 px-3 py-1 rounded-lg border border-violet-200">
               Format Standar Baku RT
             </span>
           </div>
 
           {/* Quick Template Bar (4 Pilihan Instan) */}
           <div className="space-y-1.5 p-3.5 bg-slate-50/80 border border-slate-200/80 rounded-2xl">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
               <Sparkles size={12} className="text-violet-600" />
               Template Surat Cepat (1-Klik Isi Form & Format Baku)
             </p>
@@ -519,33 +519,33 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
               <button
                 type="button"
                 onClick={() => applyOfficialLetterTemplate('gotong-royong')}
-                className="p-2.5 bg-white hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 rounded-xl text-left transition-all group"
+                className="p-2.5 bg-white hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 rounded-xl text-left transition-colors group"
               >
-                <p className="text-xs font-black text-slate-800 group-hover:text-emerald-700">🧹 Kerja Bakti</p>
+                <p className="text-xs font-semibold text-slate-800 group-hover:text-emerald-700">🧹 Kerja Bakti</p>
                 <p className="text-[9px] text-slate-400 leading-tight mt-0.5">Himbauan kebersihan lingkungan</p>
               </button>
               <button
                 type="button"
                 onClick={() => applyOfficialLetterTemplate('rapat')}
-                className="p-2.5 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-xl text-left transition-all group"
+                className="p-2.5 bg-white hover:bg-indigo-50 hover:border-indigo-300 border border-slate-200 rounded-xl text-left transition-colors group"
               >
-                <p className="text-xs font-black text-slate-800 group-hover:text-indigo-700">👥 Rapat Warga</p>
+                <p className="text-xs font-semibold text-slate-800 group-hover:text-indigo-700">Rapat Warga</p>
                 <p className="text-[9px] text-slate-400 leading-tight mt-0.5">Undangan musyawarah RT</p>
               </button>
               <button
                 type="button"
                 onClick={() => applyOfficialLetterTemplate('ronda')}
-                className="p-2.5 bg-white hover:bg-rose-50 hover:border-rose-300 border border-slate-200 rounded-xl text-left transition-all group"
+                className="p-2.5 bg-white hover:bg-rose-50 hover:border-rose-300 border border-slate-200 rounded-xl text-left transition-colors group"
               >
-                <p className="text-xs font-black text-slate-800 group-hover:text-rose-700">🛡️ Edaran Ronda</p>
+                <p className="text-xs font-semibold text-slate-800 group-hover:text-rose-700">🛡️ Edaran Ronda</p>
                 <p className="text-[9px] text-slate-400 leading-tight mt-0.5">Keamanan & wajib lapor tamu</p>
               </button>
               <button
                 type="button"
                 onClick={() => applyOfficialLetterTemplate('iuran')}
-                className="p-2.5 bg-white hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded-xl text-left transition-all group"
+                className="p-2.5 bg-white hover:bg-sky-50 hover:border-sky-300 border border-slate-200 rounded-xl text-left transition-colors group"
               >
-                <p className="text-xs font-black text-slate-800 group-hover:text-sky-700">💧 Iuran & Air PDAM</p>
+                <p className="text-xs font-semibold text-slate-800 group-hover:text-sky-700">💧 Iuran & Air PDAM</p>
                 <p className="text-[9px] text-slate-400 leading-tight mt-0.5">Pemberitahuan tagihan resmi</p>
               </button>
             </div>
@@ -556,24 +556,24 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
             <div className="lg:col-span-7 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Jenis Surat *</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Jenis Surat *</label>
                   <select 
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all cursor-pointer"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-colors cursor-pointer"
                     value={formData.type}
                     onChange={e => setFormData({...formData, type: e.target.value as any})}
                   >
-                    <option value="Himbauan">📢 Himbauan</option>
+                    <option value="Himbauan">Himbauan</option>
                     <option value="Undangan">✉️ Undangan</option>
-                    <option value="Pemberitahuan">📋 Pemberitahuan</option>
+                    <option value="Pemberitahuan">Pemberitahuan</option>
                     <option value="Lainnya">📝 Lainnya</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Tanggal Surat *</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Tanggal Surat *</label>
                   <input 
                     type="date"
                     required
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all cursor-pointer"
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-colors cursor-pointer"
                     value={formData.date}
                     onChange={e => setFormData({...formData, date: e.target.value})}
                   />
@@ -583,11 +583,11 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
               {/* Nomor Surat dengan Tombol Auto-Generate */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Nomor Surat Resmi *</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Nomor Surat Resmi *</label>
                   <button 
                     type="button" 
                     onClick={generateAutoLetterNumber}
-                    className="flex items-center gap-1 text-[10px] font-black text-violet-600 uppercase tracking-widest hover:text-violet-700 transition-colors"
+                    className="flex items-center gap-1 text-[10px] font-semibold text-violet-600 uppercase tracking-widest hover:text-violet-700 transition-colors"
                   >
                     <RefreshCw size={11} /> Buat Format Otomatis
                   </button>
@@ -595,7 +595,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                 <input 
                   type="text"
                   required
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-colors"
                   value={formData.letterNumber}
                   onChange={e => setFormData({...formData, letterNumber: e.target.value})}
                   placeholder="Contoh: HIM/001/RT02/IX/2026"
@@ -604,11 +604,11 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
 
               {/* Perihal / Subjek */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Perihal / Hal *</label>
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Perihal / Hal *</label>
                 <input 
                   type="text"
                   required
-                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all"
+                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-colors"
                   value={formData.subject}
                   onChange={e => setFormData({...formData, subject: e.target.value})}
                   placeholder="Contoh: Himbauan Kerja Bakti Bersama RT 002"
@@ -617,11 +617,11 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
 
               {/* Penerima (Yth.) */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Penerima (Yth.) *</label>
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Penerima (Yth.) *</label>
                 <input 
                   type="text"
                   required
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 outline-none transition-colors"
                   value={formData.recipient}
                   onChange={e => setFormData({...formData, recipient: e.target.value})}
                   placeholder="Contoh: Seluruh Warga RT 002 / RW 020"
@@ -630,10 +630,10 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
 
               {/* Upload Lampiran File */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                   Lampiran Dokumen / Berkas (Opsional)
                 </label>
-                <div className={`relative border-2 border-dashed rounded-2xl p-4 transition-all ${
+                <div className={`relative border-2 border-dashed rounded-2xl p-4 transition-colors ${
                   selectedFile ? 'border-violet-500 bg-violet-50/40' : 'border-slate-200 bg-slate-50 hover:border-violet-300'
                 }`}>
                   <input 
@@ -660,7 +660,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                       <button 
                         type="button"
                         onClick={(e) => { e.preventDefault(); setSelectedFile(null); }}
-                        className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline relative z-10"
+                        className="text-[10px] font-semibold text-rose-500 uppercase tracking-widest hover:underline relative z-10"
                       >
                         Hapus
                       </button>
@@ -673,7 +673,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                       <FileIcon size={14} className="text-emerald-600" />
                       <span>Lampiran aktif tersimpan di cloud</span>
                     </div>
-                    <a href={formData.attachmentUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">
+                    <a href={formData.attachmentUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest hover:underline">
                       Lihat File
                     </a>
                   </div>
@@ -682,7 +682,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
 
               {/* Editor Isi Surat */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                   Isi Surat Lengkap *
                 </label>
                 <div className="quill-editor-container">
@@ -729,7 +729,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                   <button 
                     type="button"
                     onClick={() => setFormData({...formData, status: 'Draft'})}
-                    className={`px-3.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    className={`px-3.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-colors ${
                       formData.status === 'Draft' ? 'bg-slate-800 text-white shadow-xs' : 'bg-white text-slate-400 border border-slate-200'
                     }`}
                   >
@@ -738,7 +738,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                   <button 
                     type="button"
                     onClick={() => setFormData({...formData, status: 'Published'})}
-                    className={`px-3.5 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                    className={`px-3.5 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-colors ${
                       formData.status === 'Published' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-400 border border-slate-200'
                     }`}
                   >
@@ -754,7 +754,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                       <Edit2 size={14} />
                     </div>
                     <div>
-                      <h4 className="text-xs font-black text-violet-900">Tanda Tangan Digital Khusus</h4>
+                      <h4 className="text-xs font-semibold text-violet-900">Tanda Tangan Digital Khusus</h4>
                       <p className="text-[9px] font-bold text-violet-500 uppercase">Tanda tangan khusus untuk surat ini (Opsional)</p>
                     </div>
                   </div>
@@ -773,11 +773,11 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
             {/* Kolom Kanan: Live Official Letter Print Preview (5 Kolom) */}
             <div className="lg:col-span-5 space-y-4">
               <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <Eye size={13} className="text-violet-600" />
                   Pratinjau Cetak Surat Resmi (A4)
                 </span>
-                <span className="text-[9px] font-black text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60 uppercase">
+                <span className="text-[9px] font-semibold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full border border-violet-200/60 uppercase">
                   Kop RT 002 / RW 020
                 </span>
               </div>
@@ -787,7 +787,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
                 {/* Kop Surat Resmi RT 002 / RW 020 */}
                 <div>
                   <div className="text-center pb-2">
-                    <p className="font-serif font-black text-[12px] tracking-wide text-slate-900 uppercase">
+                    <p className="font-serif font-semibold text-[12px] tracking-wide text-slate-900 uppercase">
                       PENGURUS RUKUN TETANGGA 002 / RW 020
                     </p>
                     <p className="font-serif font-bold text-[10px] text-slate-700 uppercase">
@@ -884,7 +884,7 @@ export const OfficialLetterManager: React.FC<OfficialLetterManagerProps> = ({ pd
             <Button 
               type="submit" 
               disabled={isLoading} 
-              className="flex-[2] py-3.5 rounded-2xl text-xs font-black shadow-lg bg-violet-600 hover:bg-violet-700 shadow-violet-600/25 text-white transition-all"
+              className="flex-[2] py-3.5 rounded-2xl text-xs font-semibold shadow-lg bg-violet-600 hover:bg-violet-700 shadow-2xs text-white transition-colors"
             >
               {isLoading ? 'Menyimpan...' : (editingLetter ? 'Simpan Perubahan Surat' : 'Terbitkan Surat Resmi')}
             </Button>

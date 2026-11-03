@@ -29,15 +29,15 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
       <motion.div 
         variants={itemVariants}
         whileHover={{ y: -3 }}
-        className="md:col-span-2 xl:col-span-6 bg-gradient-to-br from-indigo-50/90 via-white to-slate-50/80 p-7 md:p-8 rounded-[2.5rem] border border-indigo-100/80 shadow-sm flex flex-col justify-between group transition-all relative overflow-hidden"
+        className="md:col-span-2 xl:col-span-6 bg-gradient-to-br from-indigo-50/90 via-white to-slate-50/80 p-7 md:p-8 rounded-[2.5rem] border border-indigo-100/80 shadow-sm flex flex-col justify-between group transition-colors relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/10 transition-colors duration-700"></div>
         
         <div className="relative z-10 flex justify-between items-start mb-6">
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse"></div>
-              <span className="text-[10px] font-black text-indigo-700 uppercase tracking-[0.25em]">Smart Citizen Database</span>
+              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+              <span className="text-[10px] font-semibold text-indigo-700 uppercase tracking-[0.25em]">Smart Citizen Database</span>
             </div>
             <p className="text-xs font-semibold text-slate-400">Pusat Terpadu Kependudukan RT 02</p>
           </div>
@@ -72,10 +72,10 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
       <motion.div 
         variants={itemVariants} 
         whileHover={{ y: -3 }}
-        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-indigo-200 transition-all relative overflow-hidden"
+        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-indigo-200 transition-colors relative overflow-hidden"
       >
         <div className="relative z-10 flex justify-between items-start mb-6">
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-sm">
             <ShieldCheck size={20} />
           </div>
           <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/80 px-2.5 py-1 rounded-full uppercase tracking-wider">Valid</span>
@@ -90,10 +90,10 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
       <motion.div 
         variants={itemVariants} 
         whileHover={{ y: -3 }}
-        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-emerald-200 transition-all relative overflow-hidden"
+        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-emerald-200 transition-colors relative overflow-hidden"
       >
         <div className="relative z-10 flex justify-between items-start mb-6">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-sm">
             <Home size={20} />
           </div>
           <span className="text-[9px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100/80 px-2.5 py-1 rounded-full uppercase tracking-wider">Aktif</span>
@@ -108,10 +108,10 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
       <motion.div 
         variants={itemVariants} 
         whileHover={{ y: -3 }}
-        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-slate-300 transition-all relative overflow-hidden"
+        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-slate-300 transition-colors relative overflow-hidden"
       >
         <div className="relative z-10 flex justify-between items-start mb-6">
-          <div className="p-3 bg-slate-100 text-slate-500 rounded-2xl border border-slate-200 group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm">
+          <div className="p-3 bg-slate-100 text-slate-500 rounded-2xl border border-slate-200 group-hover:bg-slate-900 group-hover:text-white transition-colors shadow-sm">
             <UserMinus size={20} />
           </div>
           <span className="text-[9px] font-extrabold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full uppercase tracking-wider">Kosong</span>
@@ -133,7 +133,7 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
                 Status Kesesuaian KTP Warga RT 02 (Laporan Disdukcapil / Kelurahan)
               </h4>
               <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
@@ -151,15 +151,15 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
           <button
             type="button"
             onClick={() => onFilterKtp?.('ktp_local')}
-            className="flex-1 md:flex-none flex items-center justify-between md:justify-start gap-2.5 px-3.5 py-2 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/80 text-emerald-800 transition-all cursor-pointer active:scale-95 text-left group"
+            className="flex-1 md:flex-none flex items-center justify-between md:justify-start gap-2.5 px-3.5 py-2 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/80 text-emerald-800 transition-colors cursor-pointer active:scale-95 text-left group"
             title="Klik untuk filter warga KTP Setempat RT 02"
           >
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-black">KTP Setempat (RT 02)</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-xs font-semibold">KTP Setempat (RT 02)</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-sm font-black text-emerald-900">{ktpLocalCount}</span>
+              <span className="text-sm font-semibold text-emerald-900">{ktpLocalCount}</span>
               <span className="text-[10px] font-bold text-emerald-600 bg-white/80 px-1.5 py-0.5 rounded-md border border-emerald-200">
                 {Math.round((ktpLocalCount / (occupiedHouses || 1)) * 100)}%
               </span>
@@ -170,15 +170,15 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
           <button
             type="button"
             onClick={() => onFilterKtp?.('ktp_external')}
-            className="flex-1 md:flex-none flex items-center justify-between md:justify-start gap-2.5 px-3.5 py-2 rounded-xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200/80 text-amber-800 transition-all cursor-pointer active:scale-95 text-left group"
+            className="flex-1 md:flex-none flex items-center justify-between md:justify-start gap-2.5 px-3.5 py-2 rounded-xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200/80 text-amber-800 transition-colors cursor-pointer active:scale-95 text-left group"
             title="Klik untuk filter warga KTP Luar Wilayah (Belum Mutasi)"
           >
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className="text-xs font-black">Luar Wilayah (Belum Mutasi)</span>
+              <span className="text-xs font-semibold">Luar Wilayah (Belum Mutasi)</span>
             </div>
             <div className="flex items-center gap-1">
-              <span className="text-sm font-black text-amber-900">{ktpExternalCount}</span>
+              <span className="text-sm font-semibold text-amber-900">{ktpExternalCount}</span>
               <span className="text-[10px] font-bold text-amber-600 bg-white/80 px-1.5 py-0.5 rounded-md border border-amber-200">
                 {Math.round((ktpExternalCount / (occupiedHouses || 1)) * 100)}%
               </span>

@@ -215,7 +215,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       <span>
         {parts.map((part, i) => 
           part.toLowerCase() === searchTerm.toLowerCase() ? (
-            <mark key={i} className="bg-amber-100 text-amber-950 rounded px-0.5 font-black">
+            <mark key={i} className="bg-amber-100 text-amber-950 rounded px-0.5 font-semibold">
               {part}
             </mark>
           ) : (
@@ -317,7 +317,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                     <X size={11} className="stroke-[3px]" />
                   </button>
                 ) : (
-                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 bg-white px-1.5 py-0.5 rounded-md border border-slate-200 select-none hidden group-focus-within/search:hidden sm:block shadow-2xs">
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-slate-400 bg-white px-1.5 py-0.5 rounded-md border border-slate-200 select-none hidden group-focus-within/search:hidden sm:block shadow-2xs">
                     /
                   </span>
                 )}
@@ -430,9 +430,9 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
           <div className="hidden md:block px-3.5 py-2 border-t border-slate-100 bg-slate-50/60">
             <button 
               onClick={toggleCollapse}
-              className="w-full flex items-center justify-center py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-all border border-slate-200 hover:border-slate-300 shadow-2xs active:scale-[0.98]"
+              className="w-full flex items-center justify-center py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-800 transition-colors border border-slate-200 hover:border-slate-300 shadow-2xs active:scale-[0.98]"
             >
-              {isCollapsed ? <ChevronRight size={17} /> : <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest"><ChevronLeft size={15} /> Sembunyikan</div>}
+              {isCollapsed ? <ChevronRight size={17} /> : <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest"><ChevronLeft size={15} /> Sembunyikan</div>}
             </button>
           </div>
 
@@ -441,11 +441,11 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
             <div className={`flex flex-col gap-2.5 ${isCollapsed ? 'items-center' : ''}`}>
               {!isCollapsed && (
                 <div className="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-2xs flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs border shadow-2xs ${roleInfo.bg}`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-semibold text-xs border shadow-2xs ${roleInfo.bg}`}>
                     {roleInfo.short}
                   </div>
                   <div className="overflow-hidden">
-                    <p className="text-xs font-black text-slate-900 truncate leading-tight mb-0.5">{roleInfo.full}</p>
+                    <p className="text-xs font-semibold text-slate-900 truncate leading-tight mb-0.5">{roleInfo.full}</p>
                     <p className="text-[10px] font-bold text-slate-400 tracking-wide truncate" title={currentTenant?.name || "Wilayah RT 02 / 020"}>{currentTenant ? currentTenant.name : "Wilayah RT 02 / 020"}</p>
                   </div>
                 </div>
@@ -453,7 +453,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
               <button 
                 onClick={onLogout}
                 className={`
-                  flex items-center gap-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-all duration-200 group
+                  flex items-center gap-2.5 rounded-xl font-bold text-[10px] uppercase tracking-wider transition-colors duration-200 group
                   ${isCollapsed ? 'p-2.5 justify-center bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-100' : 'w-full px-3.5 py-2.5 bg-white text-rose-600 hover:bg-rose-50 border border-slate-200/80 hover:border-rose-200 shadow-2xs'}
                 `}
                 title={isCollapsed ? 'Keluar' : ''}

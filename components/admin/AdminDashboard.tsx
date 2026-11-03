@@ -288,13 +288,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
               <Building2 size={28} />
             </div>
-            <h3 className="text-lg font-black text-slate-900">Portal Master RW Mandiri</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Portal Master RW Mandiri</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
               Pusat kendali dan rekapitulasi seluruh RT di lingkungan RW telah dipisahkan ke portal mandiri dengan proteksi PIN khusus Super Admin / RW.
             </p>
             <a 
               href="#/master"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-2xl shadow-md shadow-2xs transition-colors cursor-pointer"
             >
               <span>Buka Portal Master RW</span>
               <ArrowRight size={14} />
@@ -604,7 +604,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           {/* Center / Right Operational Capsule & Controls */}
           <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
             {/* Live Operational Capsule: WITA Real-Time Clock */}
-            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100/70 hover:bg-slate-100/90 border border-slate-200/70 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition-all select-none shrink-0 whitespace-nowrap">
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100/70 hover:bg-slate-100/90 border border-slate-200/70 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition-colors select-none shrink-0 whitespace-nowrap">
               <Clock size={13} className="text-indigo-600 stroke-[2.5px] shrink-0" />
               <span className="font-mono tracking-tight text-slate-800 font-extrabold text-xs">
                 {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit' })}
@@ -614,12 +614,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             {/* Live Operational Capsule: Palu City Weather & ISPU KLHK */}
             {weather && (
-              <div className="hidden 2xl:flex items-center gap-2 px-2.5 py-1.5 bg-sky-50/70 hover:bg-sky-50 border border-sky-100/80 rounded-2xl text-xs font-bold text-sky-900 shadow-2xs transition-all select-none shrink-0 whitespace-nowrap">
+              <div className="hidden 2xl:flex items-center gap-2 px-2.5 py-1.5 bg-sky-50/70 hover:bg-sky-50 border border-sky-100/80 rounded-2xl text-xs font-bold text-sky-900 shadow-2xs transition-colors select-none shrink-0 whitespace-nowrap">
                 <Sun size={13} className="text-amber-500 stroke-[2.5px] shrink-0" />
                 <span className="font-extrabold text-xs">{weather.temp}°C</span>
                 <span className="text-sky-200">•</span>
                 <span className="text-xs text-sky-800 flex items-center gap-1 font-bold">
-                  ISPU <span className="font-black text-emerald-600">{weather.aqi}</span>
+                  ISPU <span className="font-semibold text-emerald-600">{weather.aqi}</span>
                 </span>
               </div>
             )}
@@ -656,13 +656,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* Spotlight Command Palette Launcher Button */}
             <button
               onClick={() => setIsSpotlightOpen(true)}
-              className="hidden sm:flex items-center gap-2 bg-slate-100/70 hover:bg-slate-100 border border-slate-200/70 rounded-2xl px-2.5 md:px-3 py-1.5 md:py-2 text-slate-500 hover:text-slate-800 text-xs font-semibold shadow-2xs transition-all group shrink-0 whitespace-nowrap"
+              className="hidden sm:flex items-center gap-2 bg-slate-100/70 hover:bg-slate-100 border border-slate-200/70 rounded-2xl px-2.5 md:px-3 py-1.5 md:py-2 text-slate-500 hover:text-slate-800 text-xs font-semibold shadow-2xs transition-colors group shrink-0 whitespace-nowrap"
               title="Buka Command Palette (Ctrl+K atau ⌘K)"
             >
               <Search size={14} className="group-hover:text-indigo-600 transition-colors stroke-[2.2px] shrink-0" />
               <span className="hidden xl:inline text-slate-500 font-medium">Cari modul...</span>
               <span className="xl:hidden text-slate-500 font-medium">Cari</span>
-              <kbd className="ml-1 flex items-center gap-0.5 bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-lg text-[10px] font-black shadow-2xs group-hover:border-indigo-200 group-hover:text-indigo-600 shrink-0">
+              <kbd className="ml-1 flex items-center gap-0.5 bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-lg text-[10px] font-semibold shadow-2xs group-hover:border-indigo-200 group-hover:text-indigo-600 shrink-0">
                 <Command size={10} /> K
               </kbd>
             </button>
@@ -682,7 +682,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowSupportTicketModal(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
                 title="Buka Pusat Bantuan & Tiket Super Admin"
               >
                 <HelpCircle size={15} className="text-indigo-600 shrink-0" />
@@ -692,7 +692,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               <button 
                 onClick={() => setActiveTab('notifications')}
-                className={`p-2 sm:p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-all relative shrink-0 ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
+                className={`p-2 sm:p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors relative shrink-0 ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
                 title="Lihat Notifikasi"
                 aria-label="Notifikasi"
               >
@@ -706,15 +706,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               
               <div className="flex items-center gap-2 sm:gap-2.5 pl-0.5 sm:pl-1 shrink-0">
                 <div className="hidden lg:block text-right min-w-0 max-w-[130px] xl:max-w-[200px]">
-                  <p className="text-xs font-black text-slate-900 leading-tight truncate whitespace-nowrap" title={`Admin ${currentTenant ? currentTenant.name : RT_NAME}`}>
+                  <p className="text-xs font-semibold text-slate-900 leading-tight truncate whitespace-nowrap" title={`Admin ${currentTenant ? currentTenant.name : RT_NAME}`}>
                     Admin {currentTenant ? currentTenant.name : RT_NAME}
                   </p>
-                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-wider mt-0.5 truncate whitespace-nowrap">
+                  <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider mt-0.5 truncate whitespace-nowrap">
                     {role}
                   </p>
                 </div>
                 <div className="relative group shrink-0">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-md shadow-2xs ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">
                     <User size={16} />
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
@@ -739,9 +739,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="min-h-[400px] flex flex-col items-center justify-center bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 font-sans">
                     <div className="relative flex items-center justify-center mb-4">
                       <div className="w-14 h-14 border-3 border-slate-100 border-t-indigo-600 rounded-full animate-spin"></div>
-                      <div className="absolute text-indigo-600 animate-pulse text-xs font-black">RT02</div>
+                      <div className="absolute text-indigo-600 text-xs font-semibold">RT02</div>
                     </div>
-                    <h3 className="text-slate-800 font-black text-xs tracking-widest uppercase">Memuat Modul</h3>
+                    <h3 className="text-slate-800 font-semibold text-xs tracking-widest uppercase">Memuat Modul</h3>
                     <p className="text-slate-400 text-xs mt-1 font-bold">Mengoptimalkan data operasional...</p>
                   </div>
                 }>
@@ -762,7 +762,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <button 
                   key={item.id} 
                   onClick={() => setActiveTab(item.id)} 
-                  className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition-all ${
+                  className={`flex flex-col items-center justify-center flex-1 h-full py-1 transition-colors ${
                     isActive ? 'text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600 font-medium'
                   }`}
                 >
@@ -819,7 +819,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <Trash2 size={15} />
                     </button>
                   ) : (
-                    <kbd className="text-xs font-black uppercase text-slate-400 bg-white border border-slate-200 px-2 py-1 rounded-lg shadow-2xs">
+                    <kbd className="text-xs font-semibold uppercase text-slate-400 bg-white border border-slate-200 px-2 py-1 rounded-lg shadow-2xs">
                       ESC
                     </kbd>
                   )}
@@ -829,7 +829,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="max-h-[60vh] overflow-y-auto p-3 space-y-4 custom-scrollbar">
                   {/* Modul Navigasi */}
                   <div>
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-wider px-3 mb-1.5">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-1.5">
                       Modul Sistem ({allowedItems.filter(item => 
                         item.label.toLowerCase().includes(spotlightQuery.toLowerCase()) || 
                         item.desc.toLowerCase().includes(spotlightQuery.toLowerCase())
@@ -853,7 +853,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                 setIsSpotlightOpen(false);
                                 setSpotlightQuery('');
                               }}
-                              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
+                              className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-colors ${
                                 isActive 
                                   ? 'bg-indigo-50/90 text-indigo-900 font-bold border border-indigo-100' 
                                   : 'hover:bg-slate-100/70 text-slate-700'
@@ -864,7 +864,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                   <Icon size={16} className="stroke-[2.2px]" />
                                 </div>
                                 <div>
-                                  <p className="text-xs md:text-sm font-black text-slate-800">{item.label}</p>
+                                  <p className="text-xs md:text-sm font-semibold text-slate-800">{item.label}</p>
                                   <p className="text-xs text-slate-400 font-medium line-clamp-1">{item.desc}</p>
                                 </div>
                               </div>
@@ -877,7 +877,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                   {/* Quick Shortcuts / Fast Actions */}
                   <div className="pt-2 border-t border-slate-100">
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-wider px-3 mb-1.5">
+                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-1.5">
                       Pintasan Eksekutif
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -898,7 +898,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               setIsSpotlightOpen(false);
                               setSpotlightQuery('');
                             }}
-                            className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200/60 text-left transition-all group"
+                            className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-slate-100/70 border border-transparent hover:border-slate-200/60 text-left transition-colors group"
                           >
                             <div className={`p-1.5 rounded-lg ${action.color}`}>
                               <ActionIcon size={14} className="stroke-[2.2px]" />
@@ -917,11 +917,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400 font-bold">
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1">
-                      <kbd className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-xs font-black text-slate-500">↑↓</kbd>
+                      <kbd className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-xs font-semibold text-slate-500">↑↓</kbd>
                       Navigasi
                     </span>
                     <span className="flex items-center gap-1">
-                      <kbd className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-xs font-black text-slate-500">↵</kbd>
+                      <kbd className="bg-white border border-slate-200 px-1.5 py-0.5 rounded text-xs font-semibold text-slate-500">↵</kbd>
                       Pilih
                     </span>
                   </div>

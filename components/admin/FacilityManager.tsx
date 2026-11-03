@@ -553,7 +553,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <Shield size={24} />
             </div>
             <div>
-              <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pusat Komando Keamanan</h2>
+              <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Pusat Komando Keamanan</h2>
               <p className="text-xs md:text-sm font-medium text-slate-500">Sistem Monitoring Siskamling Digital RT 02 & Tanggap Darurat</p>
             </div>
           </div>
@@ -566,7 +566,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           <div className="relative">
             <button
               onClick={() => setShowActionMenu(!showActionMenu)}
-              className="flex items-center gap-2 px-5 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-wider hover:bg-slate-50 transition-all shadow-sm"
+              className="flex items-center gap-2 px-5 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl text-xs font-semibold uppercase tracking-wider hover:bg-slate-50 transition-colors shadow-sm"
             >
               <Wand2 size={16} className="text-indigo-600" />
               <span>Aksi & Alat</span>
@@ -629,7 +629,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           {/* Emergency Lapor Insiden Button */}
           <Button 
             onClick={() => setIsReportModalOpen(true)} 
-            className="bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-200 rounded-2xl px-5 py-3 text-xs font-black uppercase tracking-wider"
+            className="bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white shadow-lg shadow-rose-200 rounded-2xl px-5 py-3 text-xs font-semibold uppercase tracking-wider"
           >
             <AlertTriangle size={16} className="mr-2 animate-bounce" /> Laporkan Insiden
           </Button>
@@ -641,17 +641,17 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <span className="w-3.5 h-3.5 bg-emerald-500 rounded-full animate-ping absolute inset-0"></span>
-              <span className="w-3.5 h-3.5 bg-emerald-400 rounded-full relative block shadow-lg shadow-emerald-500/50"></span>
+              <span className="w-3.5 h-3.5 bg-emerald-500 rounded-full absolute inset-0"></span>
+              <span className="w-3.5 h-3.5 bg-emerald-400 rounded-full relative block shadow-lg shadow-2xs"></span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-widest bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-0.5 rounded-full">
                   MAIN CONSOLE ONLINE
                 </span>
                 <span className="text-[10px] font-mono text-slate-400">RT 02 DIGITAL NETWORK</span>
               </div>
-              <h3 className="text-lg font-black text-slate-100 tracking-tight mt-1">Terminal Pengawasan & Komando Siskamling</h3>
+              <h3 className="text-lg font-semibold text-slate-100 tracking-tight mt-1">Terminal Pengawasan & Komando Siskamling</h3>
             </div>
           </div>
 
@@ -660,7 +660,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             <Clock size={16} className="text-indigo-400" />
             <div className="text-right">
               <p className="text-[9px] font-mono text-slate-400 uppercase tracking-wider">Waktu Lokal (WITA)</p>
-              <p className="text-sm font-mono font-black text-indigo-300">
+              <p className="text-sm font-mono font-semibold text-indigo-300">
                 {currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} WITA
               </p>
             </div>
@@ -680,7 +680,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex-1 lg:flex-none flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+            className={`flex-1 lg:flex-none flex items-center justify-center gap-2.5 px-5 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap ${
               activeTab === tab.id 
                 ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80' 
                 : 'text-slate-500 hover:text-slate-800'
@@ -689,7 +689,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             <tab.icon size={15} />
             <span>{tab.label}</span>
             {tab.count !== undefined && tab.count > 0 && (
-              <span className="bg-rose-500 text-white px-2 py-0.5 rounded-full text-[9px] font-black animate-pulse">
+              <span className="bg-rose-500 text-white px-2 py-0.5 rounded-full text-[9px] font-semibold">
                 {tab.count}
               </span>
             )}
@@ -709,12 +709,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             <div className="bg-indigo-600 text-white p-4 sm:p-5 rounded-[1.5rem] sm:rounded-3xl flex flex-col sm:flex-row items-center justify-between shadow-xl shadow-indigo-100 border border-indigo-500 gap-4">
               <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <div className="relative">
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-400 rounded-full animate-ping absolute inset-0"></div>
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-400 rounded-full absolute inset-0"></div>
                   <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-emerald-400 rounded-full relative"></div>
                 </div>
                 <div>
                   <p className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest opacity-80">Status Saat Ini</p>
-                  <p className="font-black text-sm sm:text-lg">Patroli Sedang Berlangsung</p>
+                  <p className="font-semibold text-sm sm:text-lg">Patroli Sedang Berlangsung</p>
                 </div>
               </div>
               
@@ -750,13 +750,13 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           <motion.div 
             key={stat.label}
             variants={itemVariants}
-            className="bg-white p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group"
+            className="bg-white p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-colors group"
           >
             <div className={`p-2.5 sm:p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-xl sm:rounded-2xl w-fit mb-3 sm:mb-4 group-hover:scale-110 transition-transform`}>
               <stat.icon size={18} className="sm:w-6 sm:h-6" />
             </div>
             <p className="text-[8px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 sm:mb-1">{stat.label}</p>
-            <h3 className="text-base sm:text-2xl font-black text-slate-900">{stat.value}</h3>
+            <h3 className="text-base sm:text-2xl font-semibold text-slate-900">{stat.value}</h3>
             <p className="text-[8px] sm:text-[10px] font-medium text-slate-400 mt-0.5 sm:mt-1 hidden sm:block">{stat.sub}</p>
           </motion.div>
         ))}
@@ -768,16 +768,16 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             {/* Live Telemetry Overview Header Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2rem] border border-slate-800 shadow-2xl gap-4">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-indigo-600/30 border border-indigo-500/40 text-indigo-400 rounded-2xl shrink-0 shadow-lg shadow-indigo-500/20">
-                  <Eye size={24} className="animate-pulse" />
+                <div className="p-3 bg-indigo-600/30 border border-indigo-500/40 text-indigo-400 rounded-2xl shrink-0 shadow-lg shadow-2xs">
+                  <Eye size={24} className="" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                     </span>
-                    <h3 className="font-black text-xs md:text-sm uppercase tracking-widest text-slate-100">
+                    <h3 className="font-semibold text-xs md:text-sm uppercase tracking-widest text-slate-100">
                       Pusat Kontrol Siskamling & Telemetri Real-Time (Main Console)
                     </h3>
                   </div>
@@ -794,12 +794,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     });
                   }}
                   variant="outline" 
-                  className="border-slate-700 hover:bg-slate-800/80 text-slate-200 text-[10px] font-black uppercase py-2.5 px-4 rounded-xl tracking-wider h-auto bg-slate-800/50 backdrop-blur-sm"
+                  className="border-slate-700 hover:bg-slate-800/80 text-slate-200 text-[10px] font-semibold uppercase py-2.5 px-4 rounded-xl tracking-wider h-auto bg-slate-800/50 backdrop-blur-sm"
                 >
                   <RefreshCw size={14} className="mr-1.5 text-indigo-400" /> Segarkan Jaringan
                 </Button>
                 {activePanicAlerts.length > 0 && (
-                  <div className="px-4 py-2.5 bg-rose-600/30 border border-rose-500/40 text-rose-200 font-black text-[10px] rounded-xl flex items-center gap-2 animate-pulse uppercase tracking-wider">
+                  <div className="px-4 py-2.5 bg-rose-600/30 border border-rose-500/40 text-rose-200 font-semibold text-[10px] rounded-xl flex items-center gap-2 uppercase tracking-wider">
                     <AlertTriangle size={14} className="text-rose-400 animate-bounce" /> {activePanicAlerts.length} Panggilan Darurat
                   </div>
                 )}
@@ -809,7 +809,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             {/* Tactical Live KPI Stats Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {/* Stat 1: Emergency Status */}
-              <div className={`p-5 rounded-3xl border transition-all ${
+              <div className={`p-5 rounded-3xl border transition-colors ${
                 activePanicAlerts.length > 0
                   ? 'bg-gradient-to-br from-rose-500 to-rose-700 text-white border-rose-600 shadow-lg shadow-rose-200'
                   : 'bg-white border-slate-100 shadow-sm'
@@ -820,10 +820,10 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   }`}>
                     Status Lingkungan
                   </span>
-                  <div className={`w-2 h-2 rounded-full ${activePanicAlerts.length > 0 ? 'bg-white animate-ping' : 'bg-emerald-500'}`} />
+                  <div className={`w-2 h-2 rounded-full ${activePanicAlerts.length > 0 ? 'bg-white ' : 'bg-emerald-500'}`} />
                 </div>
                 <div className="mt-4">
-                  <h4 className={`text-sm md:text-lg font-black ${activePanicAlerts.length > 0 ? 'text-white' : 'text-slate-800'}`}>
+                  <h4 className={`text-sm md:text-lg font-semibold ${activePanicAlerts.length > 0 ? 'text-white' : 'text-slate-800'}`}>
                     {activePanicAlerts.length > 0 ? 'ZONA DARURAT' : 'KONDISI AMAN'}
                   </h4>
                   <p className={`text-[9px] font-bold uppercase tracking-wider mt-1 ${activePanicAlerts.length > 0 ? 'text-rose-100' : 'text-slate-400'}`}>
@@ -834,11 +834,11 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
               {/* Stat 2: Active Patrol Officer */}
               <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm">
-                <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[9px] font-semibold uppercase tracking-widest">
                   Petugas Aktif
                 </span>
                 <div className="mt-4">
-                  <h4 className="text-xs md:text-sm font-black text-slate-800 truncate">
+                  <h4 className="text-xs md:text-sm font-semibold text-slate-800 truncate">
                     {activePatrol ? activePatrol.officerName : 'Standby / Menunggu'}
                   </h4>
                   <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1">
@@ -851,17 +851,17 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-center">
-                    <span className="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                    <span className="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg text-[9px] font-semibold uppercase tracking-widest">
                       Pencapaian Pos
                     </span>
-                    <span className="text-[10px] font-black text-slate-600">
+                    <span className="text-[10px] font-semibold text-slate-600">
                       {activePatrol ? `${activePatrol.visitedCheckpoints.length}/${checkpoints.length}` : `0/${checkpoints.length || 5}`}
                     </span>
                   </div>
                   {/* Progress bar */}
                   <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
                     <div 
-                      className="bg-indigo-600 h-1.5 rounded-full transition-all duration-500" 
+                      className="bg-indigo-600 h-1.5 rounded-full transition-colors duration-500" 
                       style={{ 
                         width: checkpoints.length > 0 && activePatrol
                           ? `${(activePatrol.visitedCheckpoints.length / checkpoints.length) * 100}%` 
@@ -877,11 +877,11 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
               {/* Stat 4: Reports Count Current Month */}
               <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm">
-                <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-[9px] font-black uppercase tracking-widest">
+                <span className="px-2 py-1 bg-slate-100 text-slate-600 rounded-lg text-[9px] font-semibold uppercase tracking-widest">
                   Total Laporan
                 </span>
                 <div className="mt-4">
-                  <h4 className="text-sm md:text-lg font-black text-slate-800">
+                  <h4 className="text-sm md:text-lg font-semibold text-slate-800">
                     {reports.length} Laporan
                   </h4>
                   <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mt-1">
@@ -898,8 +898,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 <motion.div variants={itemVariants} className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
                   <div className="p-5 md:p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
                     <div>
-                      <h3 className="font-black text-slate-800 flex items-center gap-2 uppercase tracking-widest text-xs md:text-sm">
-                        <Navigation size={18} className="text-indigo-600 animate-pulse"/> Tracking Real-Time Map
+                      <h3 className="font-semibold text-slate-800 flex items-center gap-2 uppercase tracking-widest text-xs md:text-sm">
+                        <Navigation size={18} className="text-indigo-600"/> Tracking Real-Time Map
                       </h3>
                       <p className="text-[9px] md:text-[10px] text-slate-400 font-bold mt-1">Pantau posisi petugas ronda malam dan lokasi rumah warga secara instan.</p>
                     </div>
@@ -922,18 +922,18 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 <div className="bg-white rounded-[2rem] border border-slate-100 p-5 md:p-6 space-y-4">
                   <div className="flex justify-between items-center border-b border-indigo-50/50 pb-3">
                     <div>
-                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Aktivitas Siskamling Terbaru</h4>
+                      <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-widest">Aktivitas Siskamling Terbaru</h4>
                       <p className="text-[9px] text-slate-400 font-bold mt-0.5">Aliran logs siskamling lingkungan saat ini</p>
                     </div>
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                     </span>
                   </div>
 
                   <div className="space-y-3 max-h-[220px] overflow-y-auto no-scrollbar">
                     {rondaLogs.slice(0, 5).map((log) => (
-                      <div key={log.id} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-slate-200 hover:shadow-sm transition-all text-xs">
+                      <div key={log.id} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl hover:border-slate-200 hover:shadow-sm transition-colors text-xs">
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold ${
                             log.status === 'Aman' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
@@ -941,7 +941,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                             {log.status === 'Aman' ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-black text-slate-800 truncate">
+                            <p className="font-semibold text-slate-800 truncate">
                               {log.officerName} melakukan scan di <span className="text-indigo-600 font-extrabold">{log.location}</span>
                             </p>
                             <p className="text-[9.5px] font-bold text-slate-450 mt-0.5">
@@ -951,7 +951,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                         </div>
 
                         <div className="text-right shrink-0 ml-3">
-                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider ${
                             log.status === 'Aman' ? 'bg-emerald-100 text-emerald-700 font-extrabold' : 'bg-rose-100 text-rose-700 font-extrabold'
                           }`}>
                             {log.status}
@@ -973,8 +973,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <div className="xl:col-span-1 space-y-6">
                 {/* Panic Alerts Stack */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-2 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                  <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest px-2 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                     Alarm Darurat Aktif
                   </h3>
                   {activePanicAlerts.length > 0 ? (
@@ -983,7 +983,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                         key={alert.id}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className={`p-4 rounded-3xl border shadow-lg relative overflow-hidden transition-all ${
+                        className={`p-4 rounded-3xl border shadow-lg relative overflow-hidden transition-colors ${
                           alert.status === 'Active' ? 'bg-rose-50 border-rose-200 shadow-rose-100' : 'bg-amber-50 border-amber-200 shadow-amber-100'
                         }`}
                       >
@@ -1020,16 +1020,14 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                           {alert.status === 'Active' ? (
                             <Button 
                               onClick={() => handleRespondPanic(alert.id)}
-                              className="flex-1 bg-rose-600 hover:bg-rose-700 hover:scale-[1.02] active:scale-95 text-[10px] font-black uppercase py-2.5 rounded-xl transition-all shadow-md shadow-rose-200"
-                            >
-                              🚨 Respon
+                              className="flex-1 bg-rose-600 hover:bg-rose-700 hover:scale-[1.02] active:scale-95 text-[10px] font-semibold uppercase py-2.5 rounded-xl transition-colors shadow-md shadow-rose-200"
+                            >Respon
                             </Button>
                           ) : (
                             <Button 
                               onClick={() => handleResolvePanic(alert.id)}
-                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] active:scale-95 text-[10px] font-black uppercase py-2.5 rounded-xl transition-all shadow-md shadow-emerald-250"
-                            >
-                              ✅ Selesai
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] active:scale-95 text-[10px] font-semibold uppercase py-2.5 rounded-xl transition-colors shadow-md shadow-emerald-250"
+                            >Selesai
                             </Button>
                           )}
                         </div>
@@ -1040,7 +1038,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
                         <ShieldCheck size={20} />
                       </div>
-                      <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest">Seluruh Zona Kondusif</p>
+                      <p className="text-[10px] font-semibold text-emerald-800 uppercase tracking-widest">Seluruh Zona Kondusif</p>
                       <p className="text-[9px] font-bold text-slate-450 mt-1 uppercase">Sistem Sensor Siskamling Aktif</p>
                     </div>
                   )}
@@ -1051,22 +1049,22 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   <div className="flex items-center justify-between border-b border-white/10 pb-3">
                     <div className="flex items-center gap-2">
                       <div className="p-1.5 bg-indigo-600 rounded-lg text-white">
-                        <Activity size={14} className="animate-pulse" />
+                        <Activity size={14} className="" />
                       </div>
                       <div>
-                        <h3 className="text-[10px] font-black uppercase tracking-widest leading-none">Walkie-Talkie</h3>
+                        <h3 className="text-[10px] font-semibold uppercase tracking-widest leading-none">Walkie-Talkie</h3>
                         <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-wider">Radio & GPS Simulator</p>
                       </div>
                     </div>
-                    <span className="px-2 py-0.5 bg-indigo-950/50 rounded-full text-[8px] font-black text-indigo-400 uppercase tracking-widest border border-indigo-900/40">SIMULATOR</span>
+                    <span className="px-2 py-0.5 bg-indigo-950/50 rounded-full text-[8px] font-semibold text-indigo-400 uppercase tracking-widest border border-indigo-900/40">SIMULATOR</span>
                   </div>
 
                   {!activePatrol ? (
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Pilih Petugas Ronda</label>
+                        <label className="block text-[8px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">Pilih Petugas Ronda</label>
                         <select 
-                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                          className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-colors"
                           value={simCheckOfficerName}
                           onChange={(e) => setSimCheckOfficerName(e.target.value)}
                         >
@@ -1095,7 +1093,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
                       <Button 
                         onClick={() => handleStartSimPatrol(simCheckOfficerName || 'Petugas Ronda')}
-                        className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white transition-all shadow-md shadow-indigo-950/30"
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-2xl font-semibold text-[10px] uppercase tracking-widest text-white transition-colors shadow-md shadow-2xs"
                       >
                         Mulai Patroli Mandiri
                       </Button>
@@ -1103,25 +1101,25 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   ) : (
                     <div className="space-y-4">
                       <div className="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
-                        <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-wider text-slate-500">
+                        <div className="flex justify-between items-center text-[8px] font-semibold uppercase tracking-wider text-slate-500">
                           <span className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></span>
+                            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
                             TX ACTIVE
                           </span>
                           <span className="text-indigo-400">STABLE SIGNAL</span>
                         </div>
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-lg bg-indigo-600/10 text-indigo-400 flex items-center justify-center text-xs font-black">
+                          <div className="w-7 h-7 rounded-lg bg-indigo-600/10 text-indigo-400 flex items-center justify-center text-xs font-semibold">
                             {activePatrol.officerName.charAt(0)}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-xs font-black truncate">{activePatrol.officerName}</h4>
+                            <h4 className="text-xs font-semibold truncate">{activePatrol.officerName}</h4>
                             <p className="text-[8px] text-indigo-400 font-bold tracking-wide uppercase">Dinas Ronda Malam</p>
                           </div>
                         </div>
                       </div>
 
-                      <div className="space-y-1.5 text-[10px] font-black text-slate-400">
+                      <div className="space-y-1.5 text-[10px] font-semibold text-slate-400">
                         <p className="text-[8px] tracking-widest uppercase mb-1">Checklist Pos Patroli</p>
                         <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1">
                           {checkpoints.map((cp, idx) => {
@@ -1129,7 +1127,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                             return (
                               <div 
                                 key={cp.id} 
-                                className={`flex items-center justify-between p-2 rounded-xl border transition-all ${
+                                className={`flex items-center justify-between p-2 rounded-xl border transition-colors ${
                                   isVisited 
                                     ? 'bg-indigo-600/10 border-indigo-600/30 text-indigo-300' 
                                     : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:bg-slate-800 hover:border-slate-700'
@@ -1143,14 +1141,14 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                                 </div>
 
                                 {isVisited ? (
-                                  <span className="text-[8px] text-emerald-400 font-black uppercase tracking-widest flex items-center gap-0.5 shrink-0">
+                                  <span className="text-[8px] text-emerald-400 font-semibold uppercase tracking-widest flex items-center gap-0.5 shrink-0">
                                     <Check size={10} /> TERVERIFIKASI
                                   </span>
                                 ) : (
                                   <button 
                                     onClick={() => handleSimVisitCheckpoint(cp)}
                                     type="button"
-                                    className="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[8px] font-black uppercase tracking-wider transition-all scale-95 hover:scale-100 shrink-0"
+                                    className="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[8px] font-semibold uppercase tracking-wider transition-colors scale-95 hover:scale-100 shrink-0"
                                   >
                                     Scan
                                   </button>
@@ -1163,7 +1161,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
                       <Button 
                         onClick={handleFinishSimPatrol}
-                        className="w-full bg-rose-600 hover:bg-rose-700 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white transition-all shadow-md shadow-rose-950/20"
+                        className="w-full bg-rose-600 hover:bg-rose-700 py-3 rounded-2xl font-semibold text-[10px] uppercase tracking-widest text-white transition-colors shadow-md shadow-2xs"
                       >
                         Selesaikan Siskamling
                       </Button>
@@ -1184,7 +1182,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 <div className="relative z-10 flex flex-col justify-between h-full">
                   <div className="flex justify-between items-start">
                     <span className="p-3 bg-indigo-500/20 border border-indigo-400/30 rounded-2xl text-indigo-300 shadow-md">
-                      <Calendar size={20} className="animate-pulse" />
+                      <Calendar size={20} className="" />
                     </span>
                     <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-800/80">
                       LIVE
@@ -1192,27 +1190,27 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   </div>
                   <div className="mt-4">
                     <p className="text-[10px] uppercase font-mono tracking-widest text-indigo-300">Total Matriks Hari</p>
-                    <h4 className="text-xl md:text-2xl font-black mt-1 text-slate-100">7 Hari Aktif</h4>
+                    <h4 className="text-xl md:text-2xl font-semibold mt-1 text-slate-100">7 Hari Aktif</h4>
                   </div>
                 </div>
               </div>
 
               {/* Metric 2 */}
-              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-colors group">
                 <div className="relative z-10 flex flex-col justify-between h-full">
                   <div className="flex justify-between items-start">
                     <span className="p-3 bg-amber-50 text-amber-600 rounded-2xl border border-amber-100">
                       <ArrowLeftRight size={20} />
                     </span>
                     {rondaSwapRequests.filter(r => r.status === 'Menunggu').length > 0 && (
-                      <span className="px-2 py-0.5 bg-amber-500 text-white rounded-full text-[9px] font-black animate-pulse">
+                      <span className="px-2 py-0.5 bg-amber-500 text-white rounded-full text-[9px] font-semibold">
                         PERLU RESPON
                       </span>
                     )}
                   </div>
                   <div className="mt-4">
                     <p className="text-[10px] uppercase font-extrabold tracking-widest text-slate-400">Tukar Jadwal</p>
-                    <h4 className="text-xl md:text-2xl font-black text-slate-900 mt-1">
+                    <h4 className="text-xl md:text-2xl font-semibold text-slate-900 mt-1">
                       {rondaSwapRequests.filter(r => r.status === 'Menunggu').length} Menunggu
                     </h4>
                   </div>
@@ -1220,7 +1218,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               </div>
 
               {/* Metric 3 */}
-              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-colors group">
                 <div className="relative z-10 flex flex-col justify-between h-full">
                   <div className="flex justify-between items-start">
                     <span className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
@@ -1230,7 +1228,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   </div>
                   <div className="mt-4">
                     <p className="text-[10px] uppercase font-extrabold tracking-widest text-slate-400">Ronda Malam Ini</p>
-                    <h4 className="text-xl md:text-2xl font-black text-slate-900 mt-1">
+                    <h4 className="text-xl md:text-2xl font-semibold text-slate-900 mt-1">
                       {ronda.find(r => r.day === today)?.shifts?.reduce((acc, s) => acc + s.members.length, 0) || ronda.find(r => r.day === today)?.members?.length || 0} Personil
                     </h4>
                   </div>
@@ -1238,17 +1236,17 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               </div>
 
               {/* Metric 4 */}
-              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group">
+              <div className="bg-white rounded-[2rem] p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-md transition-colors group">
                 <div className="relative z-10 flex flex-col justify-between h-full">
                   <div className="flex justify-between items-start">
                     <span className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
                       <ShieldCheck size={20} />
                     </span>
-                    <span className="text-[9px] font-black text-indigo-600 uppercase">POIN TERTINGGI</span>
+                    <span className="text-[9px] font-semibold text-indigo-600 uppercase">POIN TERTINGGI</span>
                   </div>
                   <div className="mt-4">
                     <p className="text-[10px] uppercase font-extrabold tracking-widest text-slate-400">Juara Keaktifan</p>
-                    <h4 className="text-base md:text-lg font-black text-indigo-700 mt-1 truncate">
+                    <h4 className="text-base md:text-lg font-semibold text-indigo-700 mt-1 truncate">
                       {(() => {
                         const occupied = houses.filter(h => h.status === 'Occupied');
                         if (occupied.length === 0) return "-";
@@ -1266,7 +1264,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <div className="flex flex-wrap gap-1.5 w-full md:w-auto">
                 <button
                   onClick={() => { setScheduleSubTab('calendar'); setScheduleSearchQuery(''); }}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                     scheduleSubTab === 'calendar'
                       ? 'bg-white text-indigo-700 shadow-md shadow-indigo-100'
                       : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
@@ -1277,7 +1275,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 </button>
                 <button
                   onClick={() => { setScheduleSubTab('swaps'); setScheduleSearchQuery(''); }}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all relative ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors relative ${
                     scheduleSubTab === 'swaps'
                       ? 'bg-white text-indigo-700 shadow-md shadow-indigo-100'
                       : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
@@ -1286,14 +1284,14 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   <ArrowLeftRight size={15} />
                   <span>Tukar Jadwal</span>
                   {rondaSwapRequests.filter(r => r.status === 'Menunggu').length > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white">
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-semibold text-white">
                       {rondaSwapRequests.filter(r => r.status === 'Menunggu').length}
                     </span>
                   )}
                 </button>
                 <button
                   onClick={() => { setScheduleSubTab('leaderboard'); setScheduleSearchQuery(''); }}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors ${
                     scheduleSubTab === 'leaderboard'
                       ? 'bg-white text-indigo-700 shadow-md shadow-indigo-100'
                       : 'text-slate-500 hover:text-slate-800 hover:bg-white/40'
@@ -1313,7 +1311,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     placeholder="Cari kepala keluarga..."
                     value={scheduleSearchQuery}
                     onChange={(e) => setScheduleSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-white/10 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    className="w-full pl-9 pr-4 py-2 bg-white/10 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 transition-colors"
                   />
                 </div>
               )}
@@ -1325,16 +1323,16 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     placeholder="Cari pemohon..."
                     value={scheduleSearchQuery}
                     onChange={(e) => setScheduleSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-white/10 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                    className="w-full pl-9 pr-4 py-2 bg-white/10 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 transition-colors"
                   />
                 </div>
               )}
               {scheduleSubTab === 'calendar' && (
                 <div className="flex gap-2 w-full md:w-auto">
-                  <Button onClick={handleAutoRotate} variant="outline" className="flex-1 md:flex-none border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-[10px] md:text-xs py-1.5 h-auto font-black shadow-sm uppercase tracking-wider">
+                  <Button onClick={handleAutoRotate} variant="outline" className="flex-1 md:flex-none border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-[10px] md:text-xs py-1.5 h-auto font-semibold shadow-sm uppercase tracking-wider">
                     <RefreshCw size={12} className="mr-1" /> Acak Ronda
                   </Button>
-                  <Button onClick={handleSendTomorrowReminder} variant="outline" className="flex-1 md:flex-none border-green-200 text-green-600 hover:bg-green-50 text-[10px] md:text-xs py-1.5 h-auto font-black shadow-sm uppercase tracking-wider">
+                  <Button onClick={handleSendTomorrowReminder} variant="outline" className="flex-1 md:flex-none border-green-200 text-green-600 hover:bg-green-50 text-[10px] md:text-xs py-1.5 h-auto font-semibold shadow-sm uppercase tracking-wider">
                     <Bell size={12} className="mr-1" /> Notif Besok
                   </Button>
                 </div>
@@ -1347,7 +1345,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 {/* Day selector list */}
                 <div className="lg:col-span-1 space-y-3">
                   <div className="flex items-center justify-between px-2">
-                    <p className="text-xs font-black uppercase text-slate-400 tracking-widest">Pilih Hari Patroli</p>
+                    <p className="text-xs font-semibold uppercase text-slate-400 tracking-widest">Pilih Hari Patroli</p>
                     <span className="text-[10px] font-bold text-slate-500">{ronda.length} Hari Terjadwal</span>
                   </div>
                   <div className="space-y-2.5">
@@ -1359,16 +1357,16 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                         <div
                           key={r.id || r.day}
                           onClick={() => setSelectedScheduleDay(r.day)}
-                          className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex items-center justify-between group ${
+                          className={`p-4 rounded-2xl border transition-colors cursor-pointer relative overflow-hidden flex items-center justify-between group ${
                             isSelected
-                              ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/10'
+                              ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-2xs'
                               : isToday
                                 ? 'bg-indigo-50/50 border-indigo-200 text-indigo-900 hover:bg-indigo-50'
                                 : 'bg-white border-slate-100 hover:border-slate-300 hover:bg-slate-50'
                           }`}
                         >
                           <div className="flex items-center gap-3 relative z-10">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-semibold shrink-0 ${
                               isSelected
                                 ? 'bg-white/10 text-white'
                                 : isToday
@@ -1381,7 +1379,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                               <div className="flex items-center gap-1.5">
                                 <h4 className="font-bold text-xs md:text-sm">{r.day}</h4>
                                 {isToday && (
-                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                                 )}
                               </div>
                               <p className={`text-[10px] font-semibold mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
@@ -1392,7 +1390,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
                           <div className="flex items-center gap-2 relative z-10">
                             {isToday && !isSelected && (
-                              <span className="px-1.5 py-0.5 bg-indigo-100 border border-indigo-200 rounded text-[8px] font-black text-indigo-700 uppercase tracking-wider">
+                              <span className="px-1.5 py-0.5 bg-indigo-100 border border-indigo-200 rounded text-[8px] font-semibold text-indigo-700 uppercase tracking-wider">
                                 Hari Ini
                               </span>
                             )}
@@ -1419,8 +1417,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                              <h3 className="text-base md:text-lg font-black text-slate-900">Pembagian Shift: {selectedDayData.day}</h3>
+                              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                              <h3 className="text-base md:text-lg font-semibold text-slate-900">Pembagian Shift: {selectedDayData.day}</h3>
                             </div>
                             <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-1">Siskamling & Patroli Pos Ronda Malam</p>
                           </div>
@@ -1444,17 +1442,15 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                                   });
                                   toast.success(`Seluruh shift hari ${selectedDayData.day} berhasil dikosongkan.`);
                                 }}
-                                className="border-rose-200 text-rose-600 hover:bg-rose-50 text-[10px] md:text-xs font-black uppercase tracking-wider px-3.5 py-2.5 rounded-xl transition-all shadow-sm"
-                              >
-                                🗑️ Kosongkan Semua
+                                className="border-rose-200 text-rose-600 hover:bg-rose-50 text-[10px] md:text-xs font-semibold uppercase tracking-wider px-3.5 py-2.5 rounded-xl transition-colors shadow-sm"
+                              >Kosongkan Semua
                               </Button>
                             )}
 
                             <Button
                               onClick={() => handleEditRonda(selectedDayData)}
-                              className="bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white text-[10px] md:text-xs font-black uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-md shadow-indigo-100"
-                            >
-                              📝 Susun Shift Petugas
+                              className="bg-indigo-600 hover:bg-indigo-700 hover:scale-[1.02] active:scale-95 text-white text-[10px] md:text-xs font-semibold uppercase tracking-wider px-4 py-2.5 rounded-xl transition-colors shadow-md shadow-indigo-100"
+                            >📝 Susun Shift Petugas
                             </Button>
                           </div>
                         </div>
@@ -1470,12 +1466,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                                 
                                 <div className="flex justify-between items-center mb-5 relative z-10">
                                   <div className="flex items-center gap-2">
-                                    <span className="px-3 py-1 bg-indigo-500/20 border border-indigo-400/30 rounded-xl text-[10px] font-black uppercase tracking-widest text-indigo-300 shadow-sm">
+                                    <span className="px-3 py-1 bg-indigo-500/20 border border-indigo-400/30 rounded-xl text-[10px] font-semibold uppercase tracking-widest text-indigo-300 shadow-sm">
                                       Shift {shiftIdx + 1}
                                     </span>
                                     {isShiftNow && (
                                       <span className="flex items-center gap-1 text-[8px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2 py-0.5 rounded-full">
-                                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
+                                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
                                         DIJADWALKAN HARI INI
                                       </span>
                                     )}
@@ -1491,13 +1487,13 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                                     shift.members.map((member, memIdx) => {
                                       const residentHouse = houses.find(h => h.headOfFamily?.toLowerCase() === member.toLowerCase());
                                       return (
-                                        <div key={`${member}-${memIdx}`} className="flex items-center justify-between bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80 hover:border-indigo-500/50 hover:bg-slate-950 transition-all group/item">
+                                        <div key={`${member}-${memIdx}`} className="flex items-center justify-between bg-slate-950/70 p-3 rounded-2xl border border-slate-800/80 hover:border-indigo-500/50 hover:bg-slate-950 transition-colors group/item">
                                           <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-md">
+                                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-semibold shrink-0 shadow-md">
                                               {member.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="min-w-0">
-                                              <p className="text-xs font-black text-slate-100 truncate">{member}</p>
+                                              <p className="text-xs font-semibold text-slate-100 truncate">{member}</p>
                                               <p className="text-[9px] font-mono text-indigo-300 uppercase tracking-widest mt-0.5">
                                                 {residentHouse ? `Blok ${residentHouse.block}-${residentHouse.number}` : 'Warga RT 02'}
                                               </p>
@@ -1527,7 +1523,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                                                 });
                                                 toast.success(`${member} dihapus dari Shift ${shiftIdx + 1}`);
                                               }}
-                                              className="p-1.5 bg-rose-950/80 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800/80 rounded-xl text-[9px] font-black transition-all"
+                                              className="p-1.5 bg-rose-950/80 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-800/80 rounded-xl text-[9px] font-semibold transition-colors"
                                               title={`Hapus ${member} dari Shift ${shiftIdx + 1}`}
                                             >
                                               <X size={13} />
@@ -1570,7 +1566,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             {scheduleSubTab === 'swaps' && (
               <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8 space-y-6">
                 <div>
-                  <h3 className="text-base md:text-lg font-black text-slate-900">Pergantian & Tukar Jadwal</h3>
+                  <h3 className="text-base md:text-lg font-semibold text-slate-900">Pergantian & Tukar Jadwal</h3>
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Persetujuan & riwayat tukar tugas ronda antar warga</p>
                 </div>
 
@@ -1594,21 +1590,21 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     }
 
                     return filteredSwaps.map((request) => (
-                      <div key={request.id} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between hover:bg-white hover:border-slate-200 hover:shadow-xl hover:shadow-slate-100/50 transition-all group">
+                      <div key={request.id} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between hover:bg-white hover:border-slate-200 hover:shadow-xl hover:shadow-2xs transition-colors group">
                         <div>
                           {/* Top row */}
                           <div className="flex justify-between items-start gap-4 mb-4">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-black text-indigo-600">
+                              <div className="w-9 h-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-semibold text-indigo-600">
                                 {request.requesterName.charAt(0)}
                               </div>
                               <div className="min-w-0">
-                                <h4 className="font-black text-slate-800 text-xs md:text-sm truncate">{request.requesterName}</h4>
+                                <h4 className="font-semibold text-slate-800 text-xs md:text-sm truncate">{request.requesterName}</h4>
                                 <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest mt-0.5">Rumah {request.requesterHouseId}</p>
                               </div>
                             </div>
 
-                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border leading-none shrink-0 ${
+                            <span className={`px-2 py-0.5 rounded text-[8px] font-semibold uppercase tracking-widest border leading-none shrink-0 ${
                               request.status === 'Menunggu' ? 'bg-amber-50 text-amber-600 border-amber-100' :
                               request.status === 'Disetujui' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
                               'bg-rose-50 text-rose-600 border-rose-100'
@@ -1620,14 +1616,14 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                           {/* Swap details card */}
                           <div className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 mb-4 shadow-sm">
                             <div className="text-center flex-1 min-w-0">
-                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Semula</span>
+                              <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest block mb-0.5">Semula</span>
                               <span className="text-[11px] font-bold text-slate-700 truncate block">{request.fromDay}</span>
                             </div>
                             <div className="px-2 text-indigo-400 shrink-0">
                               <ArrowLeftRight size={12} />
                             </div>
                             <div className="text-center flex-1 min-w-0">
-                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Menjadi</span>
+                              <span className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest block mb-0.5">Menjadi</span>
                               <span className="text-[11px] font-bold text-slate-700 truncate block">{request.toDay}</span>
                             </div>
                           </div>
@@ -1644,14 +1640,14 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                           <div className="flex gap-2.5 pt-3 border-t border-slate-100">
                             <Button
                               onClick={() => handleUpdateSwapStatus(request.id, 'Disetujui')}
-                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-102 active:scale-98 h-8 rounded-lg text-[9px] font-black uppercase tracking-wider"
+                              className="flex-1 bg-emerald-600 hover:bg-emerald-700 hover:scale-102 active:scale-98 h-8 rounded-lg text-[9px] font-semibold uppercase tracking-wider"
                             >
                               <Check size={11} className="mr-1" /> Setujui
                             </Button>
                             <Button
                               onClick={() => handleUpdateSwapStatus(request.id, 'Ditolak')}
                               variant="outline"
-                              className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50 hover:scale-102 active:scale-98 h-8 rounded-lg text-[9px] font-black uppercase tracking-wider"
+                              className="flex-1 border-rose-200 text-rose-600 hover:bg-rose-50 hover:scale-102 active:scale-98 h-8 rounded-lg text-[9px] font-semibold uppercase tracking-wider"
                             >
                               <X size={11} className="mr-1" /> Tolak
                             </Button>
@@ -1674,12 +1670,11 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/10 pb-6 mb-8 relative z-10">
                     <div>
-                      <h3 className="text-lg md:text-xl font-black text-white tracking-tight flex items-center gap-2">
-                        🏆 Podium Warga Teladan RT 02
+                      <h3 className="text-lg md:text-xl font-semibold text-white tracking-tight flex items-center gap-2">🏆 Podium Warga Teladan RT 02
                       </h3>
                       <p className="text-slate-300 text-[11px] font-bold uppercase tracking-widest mt-1">Apresiasi keaktifan tugas ronda siskamling lingkungan</p>
                     </div>
-                    <span className="px-3 py-1 bg-white/10 rounded-lg text-[10px] font-black uppercase tracking-wider border border-white/10">
+                    <span className="px-3 py-1 bg-white/10 rounded-lg text-[10px] font-semibold uppercase tracking-wider border border-white/10">
                       Update Otomatis
                     </span>
                   </div>
@@ -1696,7 +1691,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                             badge: 'border-yellow-500/30 text-yellow-300 bg-yellow-500/10',
                             medalColor: 'text-yellow-400',
                             placeLabel: '🥇 Juara 1 Utuh',
-                            glow: 'shadow-lg shadow-yellow-600/10'
+                            glow: 'shadow-lg shadow-2xs'
                           },
                           {
                             bg: 'bg-white/5 border-white/10 hover:bg-white/10',
@@ -1723,20 +1718,20 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                           >
                             <div>
                               <div className="flex justify-between items-start mb-4">
-                                <span className={`px-2.5 py-0.5 border rounded-full text-[9px] font-black tracking-wider uppercase ${style.badge}`}>
+                                <span className={`px-2.5 py-0.5 border rounded-full text-[9px] font-semibold tracking-wider uppercase ${style.badge}`}>
                                   {style.placeLabel}
                                 </span>
                                 <ShieldCheck size={28} className={style.medalColor} />
                               </div>
 
-                              <h4 className="text-base md:text-lg font-black truncate">{h.headOfFamily}</h4>
+                              <h4 className="text-base md:text-lg font-semibold truncate">{h.headOfFamily}</h4>
                               <p className="text-xs text-slate-300 mt-1 font-semibold">Blok {h.block}-{h.number}</p>
                             </div>
 
                             <div className="mt-6 flex justify-between items-end border-t border-white/10 pt-4">
                               <div>
-                                <span className="text-3xl font-black">{h.rondaPoints || 0}</span>
-                                <span className="text-[10px] font-black uppercase text-slate-300 tracking-wider ml-1">Poin</span>
+                                <span className="text-3xl font-semibold">{h.rondaPoints || 0}</span>
+                                <span className="text-[10px] font-semibold uppercase text-slate-300 tracking-wider ml-1">Poin</span>
                               </div>
                               <div className="text-right">
                                 <span className="text-[9px] font-extrabold text-slate-300 block uppercase">Terakhir Ronda</span>
@@ -1760,7 +1755,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 space-y-5">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-base font-black text-slate-900 uppercase tracking-widest leading-none">Keaktifan Semua Warga</h3>
+                      <h3 className="text-base font-semibold text-slate-900 uppercase tracking-widest leading-none">Keaktifan Semua Warga</h3>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Laporan keaktifan, total siskamling, dan poin warga aktif</p>
                     </div>
 
@@ -1776,12 +1771,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       <table className="w-full text-left border-collapse min-w-[700px]">
                         <thead>
                           <tr className="border-b border-slate-200 bg-slate-100/40">
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Warga Terdaftar</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest">Nomor Rumah</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Tugas Dilaksanakan</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Point Dedikasi</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Status Keaktifan</th>
-                            <th className="px-6 py-4 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Terakhir Ronda</th>
+                            <th className="px-6 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Warga Terdaftar</th>
+                            <th className="px-6 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Nomor Rumah</th>
+                            <th className="px-6 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-widest text-center">Tugas Dilaksanakan</th>
+                            <th className="px-6 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-widest text-center">Point Dedikasi</th>
+                            <th className="px-6 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-widest text-center">Status Keaktifan</th>
+                            <th className="px-6 py-4 text-[10px] font-semibold text-slate-500 uppercase tracking-widest text-right">Terakhir Ronda</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1821,24 +1816,24 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                               }
 
                               return (
-                                <tr key={h.id} className="border-b border-slate-100 hover:bg-white transition-all group">
+                                <tr key={h.id} className="border-b border-slate-100 hover:bg-white transition-colors group">
                                   <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                      <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-black shrink-0">
+                                      <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-semibold shrink-0">
                                         {h.headOfFamily?.charAt(0) || 'W'}
                                       </div>
                                       <span className="text-xs font-bold text-slate-700">{h.headOfFamily || 'Resident'}</span>
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 text-xs font-bold text-slate-500">Blok {h.block}-{h.number}</td>
-                                  <td className="px-6 py-4 text-xs font-black text-slate-700 text-center">{h.rondaDutyCount || 0} Sesi</td>
+                                  <td className="px-6 py-4 text-xs font-semibold text-slate-700 text-center">{h.rondaDutyCount || 0} Sesi</td>
                                   <td className="px-6 py-4 text-center">
-                                    <span className="px-2.5 py-1 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-lg text-[10px] font-black">
+                                    <span className="px-2.5 py-1 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-lg text-[10px] font-semibold">
                                       {pts} Poin
                                     </span>
                                   </td>
                                   <td className="px-6 py-4 text-center">
-                                    <span className={`px-2.5 py-0.5 border rounded text-[9px] font-black uppercase tracking-wider ${statusColor}`}>
+                                    <span className={`px-2.5 py-0.5 border rounded text-[9px] font-semibold uppercase tracking-wider ${statusColor}`}>
                                       {statusLabel}
                                     </span>
                                   </td>
@@ -1867,10 +1862,10 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-mono uppercase tracking-widest bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                     PATROL AUDIT STREAM
                   </div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-100 tracking-tight">Log Patroli & Audit Keamanan Siskamling</h3>
+                  <h3 className="text-xl md:text-2xl font-semibold text-slate-100 tracking-tight">Log Patroli & Audit Keamanan Siskamling</h3>
                   <p className="text-xs text-slate-400 font-medium mt-1">Rekam jejak digital sesi ronda, pemantauan pos checkpoint, dan insiden darurat warga RT 02</p>
                 </div>
 
@@ -1879,9 +1874,9 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     <button
                       key={f}
                       onClick={() => setLogFilter(f)}
-                      className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-mono font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+                      className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-xs font-mono font-semibold uppercase tracking-wider transition-colors whitespace-nowrap ${
                         logFilter === f 
-                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/50' 
+                          ? 'bg-indigo-600 text-white shadow-md shadow-2xs' 
                           : 'text-slate-400 hover:text-slate-200'
                       }`}
                     >
@@ -1896,7 +1891,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 <input 
                   type="text"
                   placeholder="Cari nama petugas, lokasi pos, atau kata kunci catatan..."
-                  className="w-full pl-12 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-2xl text-xs font-bold text-slate-200 placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500/30 outline-none transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-slate-950/80 border border-slate-800 rounded-2xl text-xs font-bold text-slate-200 placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500/30 outline-none transition-colors"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -1913,17 +1908,17 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     )}
                     {/* Timeline Dot */}
                     <div className={`absolute left-0 top-2.5 w-5 h-5 md:w-6 md:h-6 rounded-full border-4 border-slate-900 shadow-md z-10 transition-transform group-hover:scale-125 ${
-                      log.status === 'Aman' ? 'bg-emerald-400 shadow-emerald-500/50' : 'bg-rose-500 shadow-rose-500/50'
+                      log.status === 'Aman' ? 'bg-emerald-400 shadow-2xs' : 'bg-rose-500 shadow-2xs'
                     }`}></div>
 
-                    <div className="bg-slate-950/60 border border-slate-800/80 rounded-3xl p-5 md:p-6 hover:bg-slate-950 hover:border-slate-700 transition-all shadow-lg">
+                    <div className="bg-slate-950/60 border border-slate-800/80 rounded-3xl p-5 md:p-6 hover:bg-slate-950 hover:border-slate-700 transition-colors shadow-lg">
                       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-black shrink-0 shadow-md">
+                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-semibold shrink-0 shadow-md">
                             {log.officerName.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <h4 className="font-black text-slate-100 text-sm md:text-base tracking-tight">{log.officerName}</h4>
+                            <h4 className="font-semibold text-slate-100 text-sm md:text-base tracking-tight">{log.officerName}</h4>
                             <div className="flex items-center gap-3 text-[10px] font-mono text-slate-400 uppercase tracking-widest mt-1">
                               <span className="flex items-center gap-1.5">
                                 <Clock size={11} className="text-indigo-400" />
@@ -1933,10 +1928,10 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                           </div>
                         </div>
 
-                        <span className={`px-3 py-1 rounded-xl text-[9px] font-mono font-black uppercase tracking-widest border ${
+                        <span className={`px-3 py-1 rounded-xl text-[9px] font-mono font-semibold uppercase tracking-widest border ${
                           log.status === 'Aman' 
                             ? 'bg-emerald-950/80 text-emerald-300 border-emerald-800/80' 
-                            : 'bg-rose-950/80 text-rose-300 border-rose-800/80 animate-pulse'
+                            : 'bg-rose-950/80 text-rose-300 border-rose-800/80 '
                         }`}>
                           {log.status === 'Aman' ? '✓ STATUS AMAN' : '⚠️ INSIDEN CATATAN'}
                         </span>
@@ -1978,8 +1973,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-slate-900 text-white p-5 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Tingkat Kehadiran</span>
-                  <span className="text-2xl font-black text-emerald-400 mt-1 block">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block">Tingkat Kehadiran</span>
+                  <span className="text-2xl font-semibold text-emerald-400 mt-1 block">
                     {(() => {
                       const totalPresent = rondaAttendance.reduce((acc, curr) => acc + (curr.presentMembers?.length || 0), 0);
                       const totalAbsent = rondaAttendance.reduce((acc, curr) => acc + (curr.absentMembers?.length || 0), 0);
@@ -1997,8 +1992,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
               <div className="bg-slate-900 text-white p-5 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Presensi Hari Ini</span>
-                  <span className="text-2xl font-black text-indigo-300 mt-1 block">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block">Presensi Hari Ini</span>
+                  <span className="text-2xl font-semibold text-indigo-300 mt-1 block">
                     {(() => {
                       const [yr, mo, dy] = attendanceDate.split('-').map(Number);
                       const localDate = new Date(yr, mo - 1, dy);
@@ -2017,8 +2012,8 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
               <div className="bg-slate-900 text-white p-5 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Total Poin Siskamling</span>
-                  <span className="text-2xl font-black text-amber-400 mt-1 block">
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block">Total Poin Siskamling</span>
+                  <span className="text-2xl font-semibold text-amber-400 mt-1 block">
                     +10 Poin / Tugas
                   </span>
                   <span className="text-[9px] font-bold text-amber-300 mt-0.5 block">Bonus Keaktifan Warga</span>
@@ -2030,7 +2025,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
 
               <div className="bg-slate-900 text-white p-5 rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Rekapitulasi WA</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block">Rekapitulasi WA</span>
                   <button
                     onClick={() => {
                       const [yr, mo, dy] = attendanceDate.split('-').map(Number);
@@ -2042,7 +2037,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       const text = `*REKAPITULASI PRESENSI SISKAMLING RT 02*\n\nHari/Tgl: ${day}, ${attendanceDate}\n\n✅ *Petugas Hadir (${presentMembers.length}):*\n${presentMembers.map((m, i) => `${i+1}. ${m}`).join('\n') || '- Tidak Ada -'}\n\n❌ *Tidak Hadir / Izin (${absent.length}):*\n${absent.map((m, i) => `${i+1}. ${m}`).join('\n') || '- Tidak Ada -'}\n\n📝 *Catatan:* ${attendanceNotes || '-'}\n\n_Sistem Komando Siskamling Teras RT 02_`;
                       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                     }}
-                    className="mt-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5"
+                    className="mt-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5"
                   >
                     <Share2 size={12} /> Kirim Rekap WA
                   </button>
@@ -2060,14 +2055,14 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-800 pb-6 relative z-10">
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-mono uppercase tracking-widest bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                     PRESENSI SIAGA SISKAMLING
                   </div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-100 tracking-tight">Portal Absensi & Verifikasi Kehadiran Ronda</h3>
+                  <h3 className="text-xl md:text-2xl font-semibold text-slate-100 tracking-tight">Portal Absensi & Verifikasi Kehadiran Ronda</h3>
                   <p className="text-xs text-slate-400 font-medium mt-1">Catat verifikasi kehadiran petugas ronda malam ini untuk menguji skor keaktifan warga secara transparan</p>
                 </div>
                 <div className="p-3.5 bg-indigo-600/30 text-indigo-400 rounded-2xl border border-indigo-500/30 shrink-0">
-                  <UserCheck size={24} className="animate-pulse" />
+                  <UserCheck size={24} className="" />
                 </div>
               </div>
 
@@ -2075,18 +2070,18 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 {/* Inputs Left Side */}
                 <div className="space-y-5">
                   <div className="space-y-2">
-                    <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Pilih Tanggal Dinas</label>
+                    <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Pilih Tanggal Dinas</label>
                     <input 
                       type="date" 
                       value={attendanceDate}
                       onChange={(e) => setAttendanceDate(e.target.value)}
-                      className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3.5 text-xs font-bold text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all font-mono"
+                      className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3.5 text-xs font-bold text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-colors font-mono"
                     />
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">Catatan & Berita Acara</label>
+                      <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">Catatan & Berita Acara</label>
                       <button
                         type="button"
                         onClick={async () => {
@@ -2108,14 +2103,14 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       value={attendanceNotes}
                       onChange={(e) => setAttendanceNotes(e.target.value)}
                       placeholder="Contoh: Petugas A sakit, digantikan oleh Petugas B (Rumah Blok A-12)..."
-                      className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3.5 text-xs font-medium text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all h-28 resize-none"
+                      className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3.5 text-xs font-medium text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-colors h-28 resize-none"
                     />
                   </div>
 
                   {/* Save Attendance Button */}
                   <Button 
                     onClick={handleSaveAttendance}
-                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-semibold uppercase tracking-widest shadow-lg shadow-2xs flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 size={18} /> Simpan & Verifikasi Absensi
                   </Button>
@@ -2124,7 +2119,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                 {/* Checklist Members Right Side */}
                 <div className="lg:col-span-2 space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="block text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest">
+                    <label className="block text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest">
                       Daftar Petugas Terjadwal (Centang yang Hadir)
                     </label>
                     
@@ -2147,7 +2142,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                               setPresentMembers(allMembers);
                             }
                           }}
-                          className="text-[10px] font-mono font-black text-indigo-300 hover:text-white bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800/80 px-3 py-1 rounded-xl transition-all uppercase tracking-wider"
+                          className="text-[10px] font-mono font-semibold text-indigo-300 hover:text-white bg-indigo-950/80 hover:bg-indigo-900 border border-indigo-800/80 px-3 py-1 rounded-xl transition-colors uppercase tracking-wider"
                         >
                           {presentMembers.length === allMembers.length ? "Batal Centang" : "✓ Centang Semua Hadir"}
                         </button>
@@ -2186,29 +2181,29 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                                 setPresentMembers([...presentMembers, member]);
                               }
                             }}
-                            className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all cursor-pointer select-none ${
+                            className={`flex items-center justify-between p-3.5 rounded-2xl border transition-colors cursor-pointer select-none ${
                               isPresent
-                                ? 'bg-emerald-950/60 border-emerald-500/80 text-emerald-200 shadow-md shadow-emerald-950/30'
+                                ? 'bg-emerald-950/60 border-emerald-500/80 text-emerald-200 shadow-md shadow-2xs'
                                 : 'bg-slate-950/60 border-slate-800/80 text-slate-400 hover:border-slate-700 hover:bg-slate-950'
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-all shrink-0 ${
+                              <div className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-colors shrink-0 ${
                                 isPresent
-                                  ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-black'
+                                  ? 'bg-emerald-500 border-emerald-400 text-slate-950 font-semibold'
                                   : 'bg-slate-900 border-slate-700 text-transparent'
                               }`}>
                                 <Check size={14} strokeWidth={4} />
                               </div>
                               <div className="min-w-0">
-                                <p className={`text-xs font-black truncate ${isPresent ? 'text-slate-100' : 'text-slate-300'}`}>{member}</p>
+                                <p className={`text-xs font-semibold truncate ${isPresent ? 'text-slate-100' : 'text-slate-300'}`}>{member}</p>
                                 <p className="text-[9px] font-mono text-slate-400 uppercase tracking-widest mt-0.5">
                                   {resHouse ? `Blok ${resHouse.block}-${resHouse.number}` : 'Rumah Warga'}
                                 </p>
                               </div>
                             </div>
 
-                            <span className={`text-[8px] font-mono font-black uppercase px-2 py-0.5 rounded-md border ${
+                            <span className={`text-[8px] font-mono font-semibold uppercase px-2 py-0.5 rounded-md border ${
                               isPresent 
                                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
                                 : 'bg-slate-900 text-slate-500 border-slate-800'
@@ -2224,7 +2219,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   <div className="mt-6 flex justify-end">
                     <Button 
                       onClick={handleSaveAttendance}
-                      className="bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-950/50 px-8 py-3.5 rounded-2xl font-black uppercase tracking-widest text-xs text-white"
+                      className="bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-2xs px-8 py-3.5 rounded-2xl font-semibold uppercase tracking-widest text-xs text-white"
                     >
                       {rondaAttendance.some(a => a.date === attendanceDate) ? "Perbarui Absensi (+10 Poin)" : "Simpan Absensi (+10 Poin)"}
                     </Button>
@@ -2234,36 +2229,36 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             </div>
 
             <div className="bg-white rounded-[1.5rem] md:rounded-[3rem] border border-slate-100 shadow-sm p-5 md:p-8">
-              <h3 className="text-lg md:text-xl font-black text-slate-900 mb-6 md:mb-8">Riwayat Absensi</h3>
+              <h3 className="text-lg md:text-xl font-semibold text-slate-900 mb-6 md:mb-8">Riwayat Absensi</h3>
               <div className="space-y-4">
                 {rondaAttendance.length > 0 ? rondaAttendance.map((record) => (
-                  <div key={record.id} className="p-4 md:p-6 rounded-[1.5rem] md:rounded-3xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all group">
+                  <div key={record.id} className="p-4 md:p-6 rounded-[1.5rem] md:rounded-3xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-colors group">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex flex-col items-center justify-center shadow-sm">
-                          <p className="text-[8px] font-black text-slate-400 uppercase">{record.day.substring(0, 3)}</p>
-                          <p className="text-sm font-black text-indigo-600">{new Date(record.date).getDate()}</p>
+                          <p className="text-[8px] font-semibold text-slate-400 uppercase">{record.day.substring(0, 3)}</p>
+                          <p className="text-sm font-semibold text-indigo-600">{new Date(record.date).getDate()}</p>
                         </div>
                         <div>
-                          <h4 className="font-black text-slate-900 text-sm md:text-base">{new Date(record.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</h4>
+                          <h4 className="font-semibold text-slate-900 text-sm md:text-base">{new Date(record.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</h4>
                           <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Dicatat oleh: {record.recordedBy}</p>
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-4 w-full md:w-auto">
                         <div className="flex-1 md:flex-none text-center px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100">
-                          <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mb-0.5">Hadir</p>
-                          <p className="text-sm font-black text-emerald-700">{record.presentMembers.length}</p>
+                          <p className="text-[8px] font-semibold text-emerald-600 uppercase tracking-widest mb-0.5">Hadir</p>
+                          <p className="text-sm font-semibold text-emerald-700">{record.presentMembers.length}</p>
                         </div>
                         <div className="flex-1 md:flex-none text-center px-4 py-2 bg-rose-50 rounded-xl border border-rose-100">
-                          <p className="text-[8px] font-black text-rose-600 uppercase tracking-widest mb-0.5">Absen</p>
-                          <p className="text-sm font-black text-rose-700">{record.absentMembers.length}</p>
+                          <p className="text-[8px] font-semibold text-rose-600 uppercase tracking-widest mb-0.5">Absen</p>
+                          <p className="text-sm font-semibold text-rose-700">{record.absentMembers.length}</p>
                         </div>
                       </div>
                     </div>
                     
                     <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Daftar Hadir</p>
+                        <p className="text-[8px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Daftar Hadir</p>
                         <div className="flex flex-wrap gap-1.5">
                           {record.presentMembers.map((m: string, i: number) => (
                             <span key={i} className="px-2 py-0.5 bg-white border border-slate-100 rounded-lg text-[10px] font-bold text-slate-600">{m}</span>
@@ -2272,7 +2267,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       </div>
                       {record.notes && (
                         <div>
-                          <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Catatan</p>
+                          <p className="text-[8px] md:text-[9px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Catatan</p>
                           <p className="text-xs text-slate-500 italic">"{record.notes}"</p>
                         </div>
                       )}
@@ -2315,18 +2310,18 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           <div className="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2rem] border border-slate-800 shadow-xl flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-indigo-600/30 text-indigo-400 rounded-2xl border border-indigo-500/30">
-                <Users size={24} className="animate-pulse" />
+                <Users size={24} className="" />
               </div>
               <div>
                 <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-800/80">
                   HARI: {editingRonda?.day?.toUpperCase()}
                 </span>
-                <h3 className="text-base font-black text-slate-100 tracking-tight mt-1">Konfigurasi Pembagian Shift Siskamling</h3>
+                <h3 className="text-base font-semibold text-slate-100 tracking-tight mt-1">Konfigurasi Pembagian Shift Siskamling</h3>
               </div>
             </div>
             <div className="text-right hidden sm:block">
               <p className="text-[9px] font-mono text-slate-400 uppercase">Total Petugas</p>
-              <p className="text-base font-mono font-black text-indigo-300">
+              <p className="text-base font-mono font-semibold text-indigo-300">
                 {shifts.reduce((acc, s) => acc + s.members.length, 0)} Warga
               </p>
             </div>
@@ -2335,7 +2330,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           {/* Quick Add Resident Chips Selector */}
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-              <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest flex items-center gap-1.5">
+              <span className="text-[10px] font-semibold uppercase text-slate-500 tracking-widest flex items-center gap-1.5">
                 <UserCheck size={14} className="text-indigo-600" /> Pilih Kepala Keluarga & Target Shift:
               </span>
               
@@ -2346,7 +2341,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     key={s.id}
                     type="button"
                     onClick={() => setSelectedTargetShiftId(s.id)}
-                    className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                    className={`px-3 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-colors ${
                       (selectedTargetShiftId || shifts[0]?.id) === s.id
                         ? 'bg-indigo-600 text-white shadow-sm'
                         : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
@@ -2363,7 +2358,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <input 
                 type="text"
                 placeholder="Ketik nama warga untuk memfilter..."
-                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
+                className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500/20 outline-none transition-colors"
                 value={residentSearch}
                 onChange={(e) => setResidentSearch(e.target.value)}
               />
@@ -2389,7 +2384,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       }
                     }}
                     title={isAssigned ? `Klik untuk menghapus dari Shift ${shifts.findIndex(s => s.id === assignedShift.id) + 1}` : `Klik untuk menambahkan ke Shift ${targetShiftIndex}`}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
                       isAssigned 
                         ? 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 shadow-sm active:scale-95' 
                         : 'bg-white text-slate-700 border border-slate-200 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50/50 shadow-sm active:scale-95'
@@ -2403,11 +2398,11 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                     <span>{residentName}</span>
                     {house && <span className="text-[9px] font-normal opacity-70">({house.block}-{house.number})</span>}
                     {isAssigned ? (
-                      <span className="text-[8px] font-black uppercase text-rose-600 bg-white/80 px-1.5 py-0.5 rounded-full ml-1">
+                      <span className="text-[8px] font-semibold uppercase text-rose-600 bg-white/80 px-1.5 py-0.5 rounded-full ml-1">
                         S{shifts.findIndex(s => s.id === assignedShift.id) + 1} (Hapus)
                       </span>
                     ) : (
-                      <span className="text-[8px] font-black uppercase text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded-full ml-1">
+                      <span className="text-[8px] font-semibold uppercase text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded-full ml-1">
                         +S{targetShiftIndex}
                       </span>
                     )}
@@ -2423,11 +2418,11 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <div key={shift.id} className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm relative space-y-4">
                 <div className="flex justify-between items-center border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-black shadow-md shadow-indigo-100">
+                    <span className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs font-semibold shadow-md shadow-indigo-100">
                       S{sIdx + 1}
                     </span>
                     <div>
-                      <h4 className="font-black text-slate-900 uppercase tracking-widest text-xs">Shift {sIdx + 1}</h4>
+                      <h4 className="font-semibold text-slate-900 uppercase tracking-widest text-xs">Shift {sIdx + 1}</h4>
                       <p className="text-[9px] text-slate-400 font-bold uppercase">{shift.members.length} Personil Bertugas</p>
                     </div>
                   </div>
@@ -2437,7 +2432,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       <Clock size={13} className="text-indigo-600" />
                       <input 
                         type="text" 
-                        className="bg-transparent border-none outline-none text-xs font-black text-slate-800 w-28 text-center"
+                        className="bg-transparent border-none outline-none text-xs font-semibold text-slate-800 w-28 text-center"
                         value={shift.time}
                         onChange={(e) => setShifts(prev => prev.map(s => s.id === shift.id ? { ...s, time: e.target.value } : s))}
                       />
@@ -2447,7 +2442,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       <button
                         type="button"
                         onClick={() => setShifts(prev => prev.map(s => s.id === shift.id ? { ...s, members: [] } : s))}
-                        className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center gap-1"
+                        className="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-[9px] font-semibold uppercase tracking-wider transition-colors flex items-center gap-1"
                         title="Kosongkan seluruh personil di shift ini"
                       >
                         <X size={12} /> Kosongkan Shift
@@ -2487,10 +2482,10 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           </div>
 
           <div className="flex gap-4 pt-2">
-            <Button type="button" variant="outline" onClick={() => setIsRondaModalOpen(false)} className="flex-1 py-3.5 rounded-2xl font-black uppercase tracking-widest text-xs">
+            <Button type="button" variant="outline" onClick={() => setIsRondaModalOpen(false)} className="flex-1 py-3.5 rounded-2xl font-semibold uppercase tracking-widest text-xs">
               Batal
             </Button>
-            <Button type="submit" className="flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 font-black uppercase tracking-widest text-xs">
+            <Button type="submit" className="flex-1 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 font-semibold uppercase tracking-widest text-xs">
               Simpan Perubahan Shift
             </Button>
           </div>
@@ -2501,7 +2496,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
           <div>
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-ping" />
+                <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full" />
                 <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-widest">LIVE SISKAMLING PASS MOCKUP</span>
               </div>
               <Shield size={15} className="text-indigo-400" />
@@ -2510,19 +2505,19 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             
             <div className="bg-white text-slate-900 rounded-3xl p-5 border border-slate-800 shadow-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-[8.5px] font-black uppercase tracking-widest rounded-md">
+                <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 text-[8.5px] font-semibold uppercase tracking-widest rounded-md">
                   PAS SIAGA SISKAMLING
                 </span>
                 <span className="text-[9px] font-bold text-slate-400">RT 02 PALU</span>
               </div>
 
               <div className="space-y-1">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jadwal Tugas Hari:</p>
-                <h4 className="font-black text-lg text-indigo-600 uppercase tracking-tight">{editingRonda?.day || 'SENIN'}</h4>
+                <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Jadwal Tugas Hari:</p>
+                <h4 className="font-semibold text-lg text-indigo-600 uppercase tracking-tight">{editingRonda?.day || 'SENIN'}</h4>
               </div>
 
               <div className="space-y-2">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Petugas Terjadwal:</p>
+                <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Petugas Terjadwal:</p>
                 <div className="space-y-1.5 max-h-32 overflow-y-auto no-scrollbar">
                   {shifts.flatMap(s => s.members).map((m, idx) => (
                     <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-xl border border-slate-100 text-xs font-bold text-slate-800">
@@ -2563,11 +2558,11 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
         <form onSubmit={handleSubmitReport} className="space-y-6">
           {selectedReportHouse ? (
             <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 font-black shadow-sm">
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600 font-semibold shadow-sm">
                 {selectedReportHouse.number}
               </div>
               <div>
-                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest leading-none mb-1">Target Laporan</p>
+                <p className="text-[10px] font-semibold text-indigo-400 uppercase tracking-widest leading-none mb-1">Target Laporan</p>
                 <p className="text-sm font-bold text-slate-700">Rumah {selectedReportHouse.block}-{selectedReportHouse.number} ({selectedReportHouse.headOfFamily})</p>
               </div>
             </div>
@@ -2615,7 +2610,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                   key={type}
                   type="button"
                   onClick={() => setReportForm(prev => ({ ...prev, type }))}
-                  className={`px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                  className={`px-3 py-2 rounded-xl text-[10px] font-semibold uppercase tracking-widest border transition-colors ${
                     reportForm.type === type 
                     ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' 
                     : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-200'
@@ -2634,7 +2629,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
               <textarea 
                 value={reportForm.description}
                 onChange={(e) => setReportForm(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all h-32"
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors h-32"
                 placeholder="Jelaskan situasi atau kejadian yang Anda temukan..."
               />
             </div>

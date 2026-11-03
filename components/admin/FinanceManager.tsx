@@ -315,7 +315,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           <button 
             key={tab.id}
             onClick={() => setActiveSubTab(tab.id as any)} 
-            className={`flex items-center gap-2.5 px-6 py-3 rounded-xl transition-all whitespace-nowrap active:scale-95 ${
+            className={`flex items-center gap-2.5 px-6 py-3 rounded-xl transition-colors whitespace-nowrap active:scale-95 ${
               activeSubTab === tab.id 
                 ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/60 font-extrabold' 
                 : 'text-slate-500 hover:text-slate-700 hover:bg-white/50 font-bold'
@@ -350,19 +350,19 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           </div>
           <button 
             onClick={() => generateCashFlowReportPDF(cashFlow, selectedMonth, pdfConfig)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl font-bold text-xs transition-all shadow-2xs"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl font-bold text-xs transition-colors shadow-2xs"
           >
             <Download size={15} /> <span className="hidden sm:inline">Laporan PDF</span><span className="sm:hidden">PDF</span>
           </button>
           <button 
             onClick={() => generateCashFlowExcel(cashFlow, selectedMonth)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl font-bold text-xs transition-all shadow-2xs"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/90 text-slate-800 rounded-2xl font-bold text-xs transition-colors shadow-2xs"
           >
             <Download size={15} /> <span className="hidden sm:inline">Laporan Excel</span><span className="sm:hidden">Excel</span>
           </button>
           <button 
             onClick={() => { resetForm(); setIsModalOpen(true); }} 
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-bold text-xs shadow-md shadow-indigo-500/25 hover:opacity-95 transition-all"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-bold text-xs shadow-md shadow-2xs hover:opacity-95 transition-colors"
           >
             <Plus size={16} /> <span className="hidden sm:inline">Catat Transaksi</span><span className="sm:hidden">Catat</span>
           </button>
@@ -374,7 +374,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
         {/* Total Saldo (Mint/Emerald) */}
         <motion.div 
           variants={itemVariants}
-          className="bg-[#e8faf0] border border-emerald-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] relative overflow-hidden sm:col-span-2 lg:col-span-1"
+          className="bg-[#e8faf0] border border-emerald-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-colors hover:translate-y-[-2px] relative overflow-hidden sm:col-span-2 lg:col-span-1"
         >
           <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#059669] shadow-2xs shrink-0">
             <Wallet size={22} className="stroke-[2.5]" />
@@ -390,7 +390,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
         {/* Total Pemasukan (Lavender/Indigo) */}
         <motion.div 
           variants={itemVariants}
-          className="bg-[#f0f2fe] border border-indigo-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] relative overflow-hidden"
+          className="bg-[#f0f2fe] border border-indigo-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-colors hover:translate-y-[-2px] relative overflow-hidden"
         >
           <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#4f46e5] shadow-2xs shrink-0">
             <ArrowUpRight size={22} className="stroke-[2.5]" />
@@ -406,7 +406,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
         {/* Total Pengeluaran (Peach/Amber) */}
         <motion.div 
           variants={itemVariants}
-          className="bg-[#fff4eb] border border-amber-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-all hover:translate-y-[-2px] relative overflow-hidden"
+          className="bg-[#fff4eb] border border-amber-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-colors hover:translate-y-[-2px] relative overflow-hidden"
         >
           <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs shrink-0">
             <ArrowDownRight size={22} className="stroke-[2.5]" />
@@ -423,7 +423,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
       {/* Charts Section */}
       <motion.div variants={itemVariants} className="bg-white p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2"><TrendingUp size={20} className="text-indigo-600"/> Analitik Arus Kas</h3>
+          <h3 className="text-lg sm:text-xl font-semibold text-slate-900 flex items-center gap-2"><TrendingUp size={20} className="text-indigo-600"/> Analitik Arus Kas</h3>
           <div className="flex gap-3">
              <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Income</span>
              <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><div className="w-2 h-2 rounded-full bg-rose-500"></div> Expense</span>
@@ -455,7 +455,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             <input 
               type="text" 
               placeholder="Cari transaksi..." 
-              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:border-indigo-500 outline-none transition-all"
+              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:border-indigo-500 outline-none transition-colors"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -463,7 +463,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl flex-1 sm:flex-none">
                <Filter size={14} className="text-slate-400"/>
-               <select className="bg-transparent border-none text-[10px] font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" value={filterType} onChange={(e:any) => setFilterType(e.target.value)}>
+               <select className="bg-transparent border-none text-[10px] font-semibold text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" value={filterType} onChange={(e:any) => setFilterType(e.target.value)}>
                  <option value="All">Semua Tipe</option>
                  <option value="Income">Pemasukan</option>
                  <option value="Expense">Pengeluaran</option>
@@ -476,7 +476,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full text-sm text-left min-w-[1000px]">
               <thead>
-                <tr className="bg-slate-50/50 text-slate-400 font-black uppercase text-[10px] tracking-[0.15em] border-b border-slate-100">
+                <tr className="bg-slate-50/50 text-slate-400 font-semibold uppercase text-[10px] tracking-[0.15em] border-b border-slate-100">
                   <th className="px-6 sm:px-8 py-4 sm:py-5">Tanggal</th>
                   <th className="px-6 sm:px-8 py-4 sm:py-5">Keterangan & Pihak</th>
                   <th className="px-6 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">Kategori & Metode</th>
@@ -504,7 +504,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                     </td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5">
                       <div>
-                        <p className="font-black text-slate-800 text-sm sm:text-base line-clamp-1">{cf.description}</p>
+                        <p className="font-semibold text-slate-800 text-sm sm:text-base line-clamp-1">{cf.description}</p>
                         {cf.payerReceiver && (
                           <div className="flex items-center gap-1 mt-1 text-[10px] font-bold text-slate-400">
                             <User size={10} /> {cf.payerReceiver}
@@ -514,7 +514,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                     </td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5 hidden sm:table-cell">
                       <div className="space-y-1.5">
-                        <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200 block w-fit">
+                        <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest border border-slate-200 block w-fit">
                           {cf.category}
                         </span>
                         <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
@@ -522,12 +522,12 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                         </div>
                       </div>
                     </td>
-                    <td className={`px-6 sm:px-8 py-4 sm:py-5 text-right font-mono font-black text-sm sm:text-lg ${
+                    <td className={`px-6 sm:px-8 py-4 sm:py-5 text-right font-mono font-semibold text-sm sm:text-lg ${
                       cf.type === 'Income' ? 'text-emerald-600' : 'text-rose-600'
                     }`}>
                       <div className="flex flex-col items-end">
                         <span>{cf.type === 'Income' ? '+' : '-'} Rp {cf.amount.toLocaleString()}</span>
-                        <div className={`flex items-center gap-1 text-[9px] font-black uppercase tracking-widest mt-1 ${
+                        <div className={`flex items-center gap-1 text-[9px] font-semibold uppercase tracking-widest mt-1 ${
                           cf.type === 'Income' ? 'text-emerald-400' : 'text-rose-400'
                         }`}>
                           {cf.type === 'Income' ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
@@ -549,10 +549,10 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                     </td>
                     <td className="px-6 sm:px-8 py-4 sm:py-5 text-center">
                        <div className="flex justify-center gap-2 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => openEdit(cf)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all">
+                          <button onClick={() => openEdit(cf)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-colors">
                             <Plus size={14} className="rotate-45" />
                           </button>
-                          <button onClick={() => handleDelete(cf.id)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-rose-600 hover:text-white transition-all">
+                          <button onClick={() => handleDelete(cf.id)} className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-rose-600 hover:text-white transition-colors">
                             <Trash2 size={14} />
                           </button>
                        </div>
@@ -566,7 +566,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             <div className="p-6 border-t border-slate-50 bg-slate-50/30 flex justify-center">
               <button
                 onClick={() => setVisibleCount(prev => prev + 15)}
-                className="px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-widest rounded-2xl transition-all shadow-sm hover:shadow flex items-center gap-2 cursor-pointer"
+                className="px-6 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-widest rounded-2xl transition-colors shadow-sm hover:shadow flex items-center gap-2 cursor-pointer"
               >
                 Muat Lebih Banyak
                 <Plus size={14} />
@@ -595,11 +595,11 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           {/* Header Identitas Resmi RT 002 / RW 020 */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-indigo-50 via-slate-50 to-indigo-50/30 border border-indigo-100/80 rounded-2xl">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-semibold text-xs shadow-sm">
                 RT
               </div>
               <div>
-                <p className="text-[11px] font-black text-slate-800 tracking-tight leading-tight">
+                <p className="text-[11px] font-semibold text-slate-800 tracking-tight leading-tight">
                   Buku Kas Umum Kas RT 002 / RW 020
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
@@ -618,7 +618,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             <div className="lg:col-span-7 space-y-4">
               {/* Segmented Toggle: Pemasukan vs Pengeluaran */}
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest mb-1.5 text-slate-400">
+                <label className="block text-[10px] font-semibold uppercase tracking-widest mb-1.5 text-slate-400">
                   Jenis Transaksi Kas *
                 </label>
                 <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/80">
@@ -628,9 +628,9 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                       setType('Income');
                       if (category === 'Operasional RT' || category === 'Perbaikan Fasum & Lampu') setCategory('Iuran Warga');
                     }}
-                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-xs transition-all ${
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-xs transition-colors ${
                       type === 'Income'
-                        ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                        ? 'bg-emerald-600 text-white shadow-md shadow-2xs'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                     }`}
                   >
@@ -643,9 +643,9 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                       setType('Expense');
                       if (category === 'Iuran Warga' || category === 'Setoran Iuran Air (PDAM)') setCategory('Operasional RT');
                     }}
-                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl font-black text-xs transition-all ${
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-xl font-semibold text-xs transition-colors ${
                       type === 'Expense'
-                        ? 'bg-rose-600 text-white shadow-md shadow-rose-600/20'
+                        ? 'bg-rose-600 text-white shadow-md shadow-2xs'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                     }`}
                   >
@@ -658,23 +658,23 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
               {/* Nominal Input & Quick Buttons */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <label className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Nominal Transaksi (Rp) *
                   </label>
                   {amount && parseInt(amount) > 0 && (
-                    <span className="text-[10px] font-black text-indigo-600">
+                    <span className="text-[10px] font-semibold text-indigo-600">
                       Rp {parseInt(amount).toLocaleString('id-ID')}
                     </span>
                   )}
                 </div>
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm text-slate-400">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-sm text-slate-400">
                     Rp
                   </span>
                   <input 
                     type="number" 
                     required
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-base font-black text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-base font-semibold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors" 
                     value={amount} 
                     onChange={e => setAmount(e.target.value)} 
                     placeholder="0" 
@@ -690,7 +690,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                         const currentVal = parseInt(amount) || 0;
                         setAmount((currentVal + val).toString());
                       }}
-                      className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 border border-slate-200/80 rounded-lg text-[10px] font-black transition-all active:scale-95"
+                      className="px-2.5 py-1 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 border border-slate-200/80 rounded-lg text-[10px] font-semibold transition-colors active:scale-95"
                     >
                       +{val >= 1000000 ? `${val / 1000000} Jt` : `${val / 1000}rb`}
                     </button>
@@ -699,7 +699,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                     <button
                       type="button"
                       onClick={() => setAmount('')}
-                      className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 rounded-lg text-[10px] font-black transition-all"
+                      className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 rounded-lg text-[10px] font-semibold transition-colors"
                     >
                       Reset
                     </button>
@@ -709,12 +709,12 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
 
               {/* Keterangan Transaksi */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <label className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Uraian / Keterangan Transaksi *
                 </label>
                 <input 
                   required
-                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors" 
                   value={desc} 
                   onChange={e => setDesc(e.target.value)} 
                   placeholder={type === 'Income' ? "Contoh: Setoran iuran warga Blok B, donasi gotong royong..." : "Contoh: Pembelian lampu jalan, perbaikan pipa fasum..."} 
@@ -723,12 +723,12 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
 
               {/* Kategori & Quick Chips */}
               <div className="space-y-1.5">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <label className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Kategori Kas RT *
                 </label>
                 <input 
                   required
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors" 
                   value={category} 
                   onChange={e => setCategory(e.target.value)} 
                   list="cat-suggestions" 
@@ -756,7 +756,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                       key={cat}
                       type="button"
                       onClick={() => setCategory(cat)}
-                      className={`px-2.5 py-1 rounded-lg text-[9px] font-black transition-all ${
+                      className={`px-2.5 py-1 rounded-lg text-[9px] font-semibold transition-colors ${
                         category === cat 
                           ? 'bg-indigo-600 text-white shadow-xs' 
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -771,13 +771,13 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
               {/* Grid 2 Kolom: Pihak & Metode */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <label className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     {type === 'Income' ? 'Pihak Penyetor / Warga' : 'Pihak Penerima / Toko'}
                   </label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                     <input 
-                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                      className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors" 
                       value={payerReceiver} 
                       onChange={e => setPayerReceiver(e.target.value)} 
                       placeholder={type === 'Income' ? "Nama warga..." : "Toko / Vendor..."} 
@@ -786,11 +786,11 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <label className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Metode Pembayaran
                   </label>
                   <select 
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors cursor-pointer" 
                     value={method} 
                     onChange={e => setMethod(e.target.value as any)}
                   >
@@ -804,24 +804,24 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
               {/* Grid 2 Kolom: Tanggal & No. Referensi */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <label className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     Tanggal Transaksi
                   </label>
                   <input 
                     type="date" 
                     required
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors cursor-pointer" 
                     value={date} 
                     onChange={e => setDate(e.target.value)} 
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <label className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                     No. Referensi / Nota (Opsional)
                   </label>
                   <input 
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors" 
                     value={referenceNumber} 
                     onChange={e => setReferenceNumber(e.target.value)} 
                     placeholder="Contoh: NOTA-0921" 
@@ -831,12 +831,12 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
 
               {/* Upload Bukti Nota/Struk */}
               <div className="space-y-1 pt-1">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <label className="block text-[10px] font-semibold uppercase tracking-widest text-slate-400">
                   Bukti Nota / Kwitansi / Struk (Opsional)
                 </label>
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className={`w-full p-3.5 border-2 border-dashed rounded-2xl flex items-center justify-between gap-3 cursor-pointer transition-all ${
+                  className={`w-full p-3.5 border-2 border-dashed rounded-2xl flex items-center justify-between gap-3 cursor-pointer transition-colors ${
                     evidenceUrl 
                       ? 'border-emerald-300 bg-emerald-50/50' 
                       : 'border-slate-200 bg-slate-50 hover:border-indigo-300 hover:bg-indigo-50/30'
@@ -862,7 +862,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                     <button 
                       type="button" 
                       onClick={(e) => { e.stopPropagation(); setEvidenceUrl(''); }}
-                      className="px-2.5 py-1 bg-white border border-rose-200 rounded-lg text-[10px] font-black text-rose-600 hover:bg-rose-50 transition-all"
+                      className="px-2.5 py-1 bg-white border border-rose-200 rounded-lg text-[10px] font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
                     >
                       Hapus
                     </button>
@@ -874,17 +874,17 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             {/* Kolom Kanan: Live Digital Voucher / Kwitansi Kas RT 002 / RW 020 (5 Kolom) */}
             <div className="lg:col-span-5 space-y-4">
               <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <Receipt size={13} className="text-indigo-600" />
                   Pratinjau Voucher Kas Digital
                 </span>
-                <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60 uppercase">
+                <span className="text-[9px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60 uppercase">
                   Real-Time
                 </span>
               </div>
 
               {/* Kartu Kwitansi Resmi RT 002 / RW 020 */}
-              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-slate-200/50 relative overflow-hidden space-y-4">
+              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-2xs relative overflow-hidden space-y-4">
                 {/* Pita status tipe transaksi */}
                 <div className={`flex items-center justify-between p-2.5 rounded-2xl ${
                   type === 'Income' 
@@ -893,7 +893,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                 }`}>
                   <div className="flex items-center gap-1.5">
                     {type === 'Income' ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
-                    <span className="text-[10px] font-black uppercase tracking-widest">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest">
                       {type === 'Income' ? 'Bukti Penerimaan Kas (BKM)' : 'Bukti Pengeluaran Kas (BKK)'}
                     </span>
                   </div>
@@ -904,7 +904,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
 
                 {/* Kop Mini Resmi */}
                 <div className="text-center pb-3 border-b border-dashed border-slate-200">
-                  <p className="text-[10px] font-black text-slate-800 uppercase tracking-wider">
+                  <p className="text-[10px] font-semibold text-slate-800 uppercase tracking-wider">
                     PENGURUS RUKUN TETANGGA 002 / RW 020
                   </p>
                   <p className="text-[9px] font-bold text-slate-500">
@@ -915,7 +915,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                 {/* Display Nominal */}
                 <div className="text-center py-2 bg-slate-100/70 rounded-2xl border border-slate-200/60">
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Jumlah Transaksi</p>
-                  <p className={`text-2xl font-black tracking-tight ${
+                  <p className={`text-2xl font-semibold tracking-tight ${
                     type === 'Income' ? 'text-emerald-700' : 'text-rose-700'
                   }`}>
                     {type === 'Income' ? '+ ' : '- '}
@@ -961,7 +961,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                     <span className="text-slate-500">Saldo Kas Saat Ini:</span>
                     <span>Rp {balance.toLocaleString('id-ID')}</span>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] font-black">
+                  <div className="flex items-center justify-between text-[11px] font-semibold">
                     <span className="text-indigo-950">Estimasi Saldo Baru:</span>
                     <span className={type === 'Income' ? 'text-emerald-700 font-mono' : 'text-rose-700 font-mono'}>
                       Rp {(type === 'Income' 
@@ -1006,10 +1006,10 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             </Button>
             <Button 
               type="submit" 
-              className={`flex-[2] py-3.5 rounded-2xl text-xs font-black shadow-lg text-white transition-all ${
+              className={`flex-[2] py-3.5 rounded-2xl text-xs font-semibold shadow-lg text-white transition-colors ${
                 type === 'Income' 
-                  ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25' 
-                  : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/25'
+                  ? 'bg-emerald-600 hover:bg-emerald-700 shadow-2xs' 
+                  : 'bg-rose-600 hover:bg-rose-700 shadow-2xs'
               }`} 
               disabled={isUploading}
             >
@@ -1061,14 +1061,14 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
             }
           }} className="space-y-6">
             <div className="p-4 bg-slate-100 rounded-2xl">
-               <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Detail Transaksi</p>
+               <p className="text-[10px] font-semibold text-slate-400 uppercase mb-1">Detail Transaksi</p>
                <p className="font-bold text-slate-800">{editingPayment.headOfFamily} (Blok {editingPayment.block}-{editingPayment.number})</p>
-               <p className="text-[10px] font-black text-indigo-600 mt-1 uppercase tracking-widest">{editingPayment.month}</p>
+               <p className="text-[10px] font-semibold text-indigo-600 mt-1 uppercase tracking-widest">{editingPayment.month}</p>
             </div>
             
             <div className="space-y-4">
                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Jenis</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-2">Jenis</label>
                   <select value={payType} onChange={(e: any) => setPayType(e.target.value)} className="w-full p-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold">
                     <option value="Both">Air & Sampah</option>
                     <option value="Air">Hanya Air</option>
@@ -1076,18 +1076,18 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
                   </select>
                </div>
                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Nominal</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-2">Nominal</label>
                   <input type="number" value={payAmount} onChange={e => setPayAmount(e.target.value)} className="w-full p-4 border border-slate-200 rounded-2xl text-sm font-bold" />
                </div>
                <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Nama Pembayar</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-2">Nama Pembayar</label>
                   <input value={payerName} onChange={e => setPayerName(e.target.value)} className="w-full p-4 border border-slate-200 rounded-2xl text-sm font-bold" />
                </div>
             </div>
 
             <div className="flex gap-3 pt-4">
               <Button type="button" variant="outline" className="flex-1 py-4 rounded-2xl" onClick={() => setIsEditPaymentModalOpen(false)}>Batal</Button>
-              <Button type="submit" className="flex-[2] py-4 rounded-2xl shadow-lg shadow-indigo-600/20 bg-indigo-600 text-white">Simpan</Button>
+              <Button type="submit" className="flex-[2] py-4 rounded-2xl shadow-lg shadow-2xs bg-indigo-600 text-white">Simpan</Button>
             </div>
           </form>
         )}

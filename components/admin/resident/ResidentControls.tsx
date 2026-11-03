@@ -83,7 +83,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
         <div className="flex items-center gap-3">
           {/* Search Input */}
           <div className="relative flex-1 group">
-            <div className="relative flex items-center bg-slate-50/80 border border-slate-200/80 rounded-2xl focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all duration-300 overflow-hidden px-3.5 py-1">
+            <div className="relative flex items-center bg-slate-50/80 border border-slate-200/80 rounded-2xl focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-colors duration-300 overflow-hidden px-3.5 py-1">
               <div className="w-8 h-8 flex items-center justify-center text-slate-400 group-focus-within:text-indigo-600 transition-colors">
                 <Search size={16} strokeWidth={2} />
               </div>
@@ -97,7 +97,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
               {searchTerm && (
                 <button 
                   onClick={() => setSearchTerm('')}
-                  className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all rounded-lg"
+                  className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors rounded-lg"
                 >
                   <X size={13} strokeWidth={2} />
                 </button>
@@ -108,16 +108,16 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           {/* Collapsible Selector Toggle for Mobile Filters */}
           <button
             onClick={() => setShowFiltersMobile(!showFiltersMobile)}
-            className={`lg:hidden flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all active:scale-95 shrink-0 ${
+            className={`lg:hidden flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-colors active:scale-95 shrink-0 ${
               showFiltersMobile || activeFiltersCount > 0
                 ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-extrabold shadow-sm'
                 : 'bg-white border-slate-200 text-slate-600 font-bold hover:bg-slate-50'
             }`}
           >
-            <SlidersHorizontal size={14} className={showFiltersMobile ? 'text-indigo-600 animate-pulse' : 'text-slate-500'} />
+            <SlidersHorizontal size={14} className={showFiltersMobile ? 'text-indigo-600 ' : 'text-slate-500'} />
             <span className="text-xs font-bold hidden sm:inline">Filter</span>
             {activeFiltersCount > 0 && (
-              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[9px] font-black text-white shadow-sm leading-none">
+              <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[9px] font-semibold text-white shadow-sm leading-none">
                 {activeFiltersCount}
               </span>
             )}
@@ -135,7 +135,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
                 <button 
                   key={mode.id}
                   onClick={() => setViewMode(mode.id)} 
-                  className={`snap-center flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all duration-200 whitespace-nowrap active:scale-95 shrink-0 select-none ${
+                  className={`snap-center flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-colors duration-200 whitespace-nowrap active:scale-95 shrink-0 select-none ${
                     isActive 
                       ? 'bg-white text-indigo-600 font-extrabold text-xs shadow-sm ring-1 ring-slate-200/50' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/50 font-bold text-xs'
@@ -144,7 +144,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
                   <Icon size={14} className={isActive ? 'text-indigo-600 stroke-[2.5px]' : 'text-slate-400 stroke-[2px]'} />
                   <span className="text-[11px] font-bold">{mode.label}</span>
                   {mode.badge ? (
-                    <span className={`flex h-4 min-w-4 items-center justify-center rounded-full text-[9px] font-black px-1 ${
+                    <span className={`flex h-4 min-w-4 items-center justify-center rounded-full text-[9px] font-semibold px-1 ${
                       isActive ? 'bg-indigo-600 text-white' : 'bg-rose-500 text-white'
                     }`}>
                       {mode.badge}
@@ -170,12 +170,12 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal size={14} className="text-indigo-650" />
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest">Prameter Filter Lanjutan</h4>
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-widest">Prameter Filter Lanjutan</h4>
                 </div>
                 {activeFiltersCount > 0 && (
                   <button 
                     onClick={handleResetFilters}
-                    className="text-[10px] font-black text-rose-500 hover:text-rose-700 bg-rose-50 border border-rose-100/50 px-2.5 py-1 rounded-xl uppercase tracking-wider transition-colors"
+                    className="text-[10px] font-semibold text-rose-500 hover:text-rose-700 bg-rose-50 border border-rose-100/50 px-2.5 py-1 rounded-xl uppercase tracking-wider transition-colors"
                   >
                     Setel Ulang Filter ({activeFiltersCount})
                   </button>
@@ -204,17 +204,17 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
                     onChange={e => setFilterStatus(e.target.value as any)}
                   >
                     <option value="all">🛡️ Semua Kategori</option>
-                    <option value="paid">✅ Lunas Iuran</option>
-                    <option value="unpaid">❌ Belum Lunas</option>
-                    <option value="occupied">🏠 Rumah Terisi</option>
+                    <option value="paid">Lunas Iuran</option>
+                    <option value="unpaid">Belum Lunas</option>
+                    <option value="occupied">Rumah Terisi</option>
                     <option value="empty">📭 Rumah Kosong</option>
                     <option value="business">🏪 Pelaku Usaha / UMKM Warga</option>
                     <option value="visiting">🧹 Mengunjungi</option>
                     <option value="verified">🛡️ Terverifikasi</option>
                     <option value="unverified">❓ Belum Verifikasi</option>
-                    <option value="arrears">⚠️ Ada Tunggakan</option>
-                    <option value="pbb_taken">📄 PBB Diambil</option>
-                    <option value="pbb_not_taken">📄 PBB Belum Diambil</option>
+                    <option value="arrears">Ada Tunggakan</option>
+                    <option value="pbb_taken">PBB Diambil</option>
+                    <option value="pbb_not_taken">PBB Belum Diambil</option>
                     <option value="bansos">🎁 Penerima Bansos (PKH/BLT)</option>
                     <option value="disability">♿ Kelompok Rentan (Disabilitas/Yatim)</option>
                     <option value="ktp_local">🪪 KTP Setempat (Sesuai Domisili)</option>
@@ -268,17 +268,17 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
       </AnimatePresence>
 
       {/* 3. Dynamic Interactive Info / Badge Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-2xl text-[10px] font-black text-slate-550 uppercase tracking-widest shadow-xs">
+      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-2xl text-[10px] font-semibold text-slate-550 uppercase tracking-widest shadow-xs">
         <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+          <span className="flex h-2 w-2 rounded-full bg-emerald-500 shrink-0"></span>
           <span>
-            Filter Aktif: <span className="text-indigo-600 bg-white border border-slate-100 px-2 py-0.5 rounded-lg shadow-xs overflow-hidden max-w-[150px] inline-block truncate align-bottom font-black">{filterStatus === 'all' ? 'semua warga' : filterStatus}</span>
+            Filter Aktif: <span className="text-indigo-600 bg-white border border-slate-100 px-2 py-0.5 rounded-lg shadow-xs overflow-hidden max-w-[150px] inline-block truncate align-bottom font-semibold">{filterStatus === 'all' ? 'semua warga' : filterStatus}</span>
           </span>
         </div>
         <div className="flex items-center justify-between sm:justify-end gap-3.5 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/55">
           <div className="flex -space-x-1 overflow-hidden">
             {[1, 2, 3].map(i => (
-              <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[7px] font-black text-indigo-600 shadow-xs uppercase">RT</div>
+              <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[7px] font-semibold text-indigo-600 shadow-xs uppercase">RT</div>
             ))}
           </div>
           <span className="text-right">
@@ -295,9 +295,9 @@ const FilterGroup = ({ icon, label, children }: { icon: React.ReactNode, label: 
   <div className="flex flex-col gap-1.5 group w-full">
     <div className="flex items-center gap-1.5 px-1">
        <span className="text-slate-400 group-hover:text-indigo-500 transition-colors duration-250">{icon}</span>
-       <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider group-hover:text-slate-700 transition-colors duration-250">{label}</span>
+       <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider group-hover:text-slate-700 transition-colors duration-250">{label}</span>
     </div>
-    <div className="relative bg-slate-50/75 border border-slate-100/80 rounded-2xl px-3 py-2.5 hover:border-indigo-400/80 focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100/50 transition-all duration-350 flex items-center justify-between">
+    <div className="relative bg-slate-50/75 border border-slate-100/80 rounded-2xl px-3 py-2.5 hover:border-indigo-400/80 focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-4 focus-within:ring-indigo-100/50 transition-colors duration-350 flex items-center justify-between">
       {children}
       <ChevronDown size={13} className="text-slate-400 group-hover:text-slate-650 pointer-events-none absolute right-3 transition-colors duration-200" strokeWidth={2.5} />
     </div>

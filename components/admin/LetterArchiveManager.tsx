@@ -179,7 +179,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
           <input 
             type="text" 
             placeholder="Cari nomor surat, perihal, atau penerima di arsip..."
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -188,7 +188,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
           <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
              <Filter size={14} className="text-slate-400"/>
              <select 
-               className="bg-transparent border-none text-[10px] sm:text-xs font-black text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" 
+               className="bg-transparent border-none text-[10px] sm:text-xs font-semibold text-slate-600 uppercase tracking-widest outline-none cursor-pointer w-full" 
                value={filterType} 
                onChange={(e) => setFilterType(e.target.value)}
              >
@@ -215,23 +215,23 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group"
+              className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-colors overflow-hidden group"
             >
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                  <div className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest ${
                     letter.type === 'Himbauan' ? 'bg-amber-100 text-amber-600' :
                     letter.type === 'Undangan' ? 'bg-indigo-100 text-indigo-600' :
                     'bg-slate-100 text-slate-600'
                   }`}>
                     {letter.type}
                   </div>
-                  <div className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-600">
+                  <div className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest bg-emerald-100 text-emerald-600">
                     TERARSIP
                   </div>
                 </div>
 
-                <h4 className="text-lg font-black text-slate-900 mb-1 line-clamp-1">{letter.subject}</h4>
+                <h4 className="text-lg font-semibold text-slate-900 mb-1 line-clamp-1">{letter.subject}</h4>
                 <p className="text-xs font-bold text-amber-600 mb-4">{letter.letterNumber}</p>
 
                 <div className="space-y-2 mb-6">
@@ -250,27 +250,27 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
                     href={getDocumentPreviewUrl(letter.attachmentUrl || '')} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all text-[10px] font-black uppercase tracking-widest"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors text-[10px] font-semibold uppercase tracking-widest"
                   >
                     <Eye size={14} /> Lihat File
                   </a>
                   <button 
                     onClick={() => handleOpenModal(letter)}
-                    className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-all"
+                    className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-colors"
                     title="Edit Data"
                   >
                     <Edit2 size={16} />
                   </button>
                   <button 
                     onClick={() => handleShareWhatsApp(letter)}
-                    className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-all"
+                    className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-100 transition-colors"
                     title="Bagikan Info"
                   >
                     <Send size={16} />
                   </button>
                   <button 
                     onClick={() => handleDelete(letter.id)}
-                    className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-all"
+                    className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors"
                     title="Hapus"
                   >
                     <Trash2 size={16} />
@@ -298,7 +298,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
           <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <Upload size={40} className="text-slate-200" />
           </div>
-          <h3 className="text-xl font-black text-slate-900 mb-2">Belum Ada Arsip Surat</h3>
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">Belum Ada Arsip Surat</h3>
           <p className="text-slate-500 max-w-xs mx-auto">Gunakan tombol "Upload Surat Luar" untuk mengarsipkan surat fisik atau file eksternal.</p>
         </div>
       )}
@@ -308,9 +308,9 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
         <form onSubmit={handleSave} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Jenis Surat</label>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Jenis Surat</label>
               <select 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
                 value={formData.type}
                 onChange={e => setFormData({...formData, type: e.target.value as any})}
               >
@@ -321,10 +321,10 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
               </select>
             </div>
             <div className="space-y-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tanggal Surat</label>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Tanggal Surat</label>
               <input 
                 type="date"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
                 value={formData.date}
                 onChange={e => setFormData({...formData, date: e.target.value})}
               />
@@ -332,10 +332,10 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nomor Surat</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Nomor Surat</label>
             <input 
               type="text"
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
               value={formData.letterNumber}
               onChange={e => setFormData({...formData, letterNumber: e.target.value})}
               placeholder="Masukkan nomor surat asli..."
@@ -343,10 +343,10 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Perihal / Subjek</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Perihal / Subjek</label>
             <input 
               type="text"
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
               value={formData.subject}
               onChange={e => setFormData({...formData, subject: e.target.value})}
               placeholder="Contoh: Undangan Rapat Warga"
@@ -354,10 +354,10 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Penerima (Yth.)</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Penerima (Yth.)</label>
             <input 
               type="text"
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
               value={formData.recipient}
               onChange={e => setFormData({...formData, recipient: e.target.value})}
               placeholder="Contoh: Seluruh Warga RT 02"
@@ -365,8 +365,8 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
           </div>
 
           <div className="space-y-2">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">File Surat</label>
-            <div className={`relative border-2 border-dashed rounded-2xl p-8 transition-all ${
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">File Surat</label>
+            <div className={`relative border-2 border-dashed rounded-2xl p-8 transition-colors ${
               selectedFile ? 'border-indigo-500 bg-indigo-50/30' : 'border-slate-200 bg-slate-50 hover:border-indigo-300'
             }`}>
               <input 
@@ -383,7 +383,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
                     <button 
                       type="button"
                       onClick={(e) => { e.preventDefault(); setSelectedFile(null); }}
-                      className="text-[10px] font-black text-rose-500 uppercase tracking-widest hover:underline"
+                      className="text-[10px] font-semibold text-rose-500 uppercase tracking-widest hover:underline"
                     >
                       Ganti File
                     </button>
@@ -403,7 +403,7 @@ export const LetterArchiveManager: React.FC<LetterArchiveManagerProps> = ({ pdfC
               <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
                 <FileIcon size={14} className="text-emerald-600" />
                 <span className="text-xs font-bold text-emerald-700 flex-1 truncate">File sudah terunggah</span>
-                <a href={getDocumentPreviewUrl(formData.attachmentUrl)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">Lihat</a>
+                <a href={getDocumentPreviewUrl(formData.attachmentUrl)} target="_blank" rel="noopener noreferrer" className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest hover:underline">Lihat</a>
               </div>
             )}
           </div>

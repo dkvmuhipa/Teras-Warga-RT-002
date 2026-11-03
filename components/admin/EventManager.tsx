@@ -138,16 +138,16 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
         <div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-6 bg-orange-500 rounded-full"></div>
-            <span className="text-[10px] font-black text-orange-600 uppercase tracking-widest">Agenda & Kalender Kegiatan</span>
+            <span className="text-[10px] font-semibold text-orange-600 uppercase tracking-widest">Agenda & Kalender Kegiatan</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">Agenda Acara RT 02</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mt-1">Agenda Acara RT 02</h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Pengelolaan rapat warga, gotong royong, kegiatan sosial, dan presensi partisipasi.</p>
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Button 
             onClick={() => openModal()} 
-            className="w-full md:w-auto px-6 py-3.5 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20 active:scale-[0.98] flex items-center justify-center gap-2"
+            className="w-full md:w-auto px-6 py-3.5 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl text-xs font-semibold uppercase tracking-widest transition-colors shadow-lg shadow-2xs active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <Plus size={18} /> Buat Acara Baru
           </Button>
@@ -157,20 +157,20 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
       {/* Event Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map(event => (
-          <div key={event.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-orange-100/30 transition-all group relative flex flex-col justify-between">
+          <div key={event.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-2xs transition-colors group relative flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between gap-2 mb-4">
-                <span className={`px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest border ${getCategoryBadge(event.category)}`}>
+                <span className={`px-3 py-1 rounded-xl text-[9px] font-semibold uppercase tracking-widest border ${getCategoryBadge(event.category)}`}>
                   {event.category || 'Acara RT'}
                 </span>
 
                 <div className="flex items-center gap-1.5">
-                  <button onClick={() => openModal(event)} className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all" title="Edit Acara"><Edit2 size={16} /></button>
-                  <button onClick={() => handleDelete(event.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all" title="Hapus Acara"><Trash2 size={16} /></button>
+                  <button onClick={() => openModal(event)} className="p-2 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors" title="Edit Acara"><Edit2 size={16} /></button>
+                  <button onClick={() => handleDelete(event.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" title="Hapus Acara"><Trash2 size={16} /></button>
                 </div>
               </div>
 
-              <h3 className="font-black text-xl text-slate-900 leading-snug mb-2 group-hover:text-orange-600 transition-colors line-clamp-2">{event.title}</h3>
+              <h3 className="font-semibold text-xl text-slate-900 leading-snug mb-2 group-hover:text-orange-600 transition-colors line-clamp-2">{event.title}</h3>
               <p className="text-xs text-slate-500 font-medium line-clamp-3 leading-relaxed mb-4">{event.description}</p>
             </div>
             
@@ -223,9 +223,9 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
           {/* Form Side */}
           <form onSubmit={handleSaveEvent} className="lg:col-span-7 space-y-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Nama / Judul Acara RT</label>
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Nama / Judul Acara RT</label>
               <input 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-colors" 
                 value={title} 
                 onChange={e=>setTitle(e.target.value)} 
                 placeholder="Contoh: Rapat Koordinasi Ronda & Gotong Royong..." 
@@ -235,9 +235,9 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Kategori Kegiatan</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kategori Kegiatan</label>
                 <select 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all cursor-pointer" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-colors cursor-pointer" 
                   value={category} 
                   onChange={e=>setCategory(e.target.value as any)}
                 >
@@ -250,9 +250,9 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Penyelenggara / Panitia</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Penyelenggara / Panitia</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-colors" 
                   value={organizer} 
                   onChange={e=>setOrganizer(e.target.value)} 
                   placeholder="Contoh: Pengurus RT 02 / Karang Taruna" 
@@ -262,10 +262,10 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Tanggal Pelaksanaan</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Tanggal Pelaksanaan</label>
                 <input 
                   type="date" 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all cursor-pointer" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-colors cursor-pointer" 
                   value={date} 
                   onChange={e=>setDate(e.target.value)} 
                   required
@@ -273,10 +273,10 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Waktu Acara (WITA)</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Waktu Acara (WITA)</label>
                 <input 
                   type="time" 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all cursor-pointer" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-colors cursor-pointer" 
                   value={time} 
                   onChange={e=>setTime(e.target.value)} 
                 />
@@ -285,9 +285,9 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Lokasi Acara</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Lokasi Acara</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-colors" 
                   value={location} 
                   onChange={e=>setLocation(e.target.value)} 
                   placeholder="Contoh: Gedung Serbaguna RT 02..." 
@@ -295,9 +295,9 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Pakaian / Dresscode</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Pakaian / Dresscode</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-colors" 
                   value={dresscode} 
                   onChange={e=>setDresscode(e.target.value)} 
                   placeholder="Contoh: Bebas Rapi / Baju Kaos Olahraga" 
@@ -307,22 +307,22 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
             
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Deskripsi & Susunan Acara</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Deskripsi & Susunan Acara</label>
                 <button 
                   type="button" 
                   onClick={handleGenerateWithAi} 
-                  className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200/70 text-[11px] font-black py-1.5 px-3 rounded-full transition-all shrink-0 active:scale-95"
+                  className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200/70 text-[11px] font-semibold py-1.5 px-3 rounded-full transition-colors shrink-0 active:scale-95"
                 >
                   {isAiLoading ? (
                     <Sparkles size={13} className="animate-spin text-orange-600" />
                   ) : (
-                    <Sparkles size={13} className="text-orange-600 animate-pulse" />
+                    <Sparkles size={13} className="text-orange-600" />
                   )}
                   <span>{isAiLoading ? 'Menyusun Draft...' : 'Bantu Tulis AI Event'}</span>
                 </button>
               </div>
               <textarea 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all min-h-[120px] resize-none" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-colors min-h-[120px] resize-none" 
                 rows={5} 
                 value={description} 
                 onChange={e=>setDescription(e.target.value)} 
@@ -332,7 +332,7 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
             </div>
             
             <div className="pt-2 border-t border-slate-100">
-              <Button type="submit" className="w-full py-3.5 text-xs font-black uppercase tracking-wider rounded-2xl bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-600/20 flex justify-center items-center gap-2 group/submit">
+              <Button type="submit" className="w-full py-3.5 text-xs font-semibold uppercase tracking-wider rounded-2xl bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-2xs flex justify-center items-center gap-2 group/submit">
                 {editingId ? (
                   <>Simpan Perubahan <CheckCircle2 size={16} className="group-hover/submit:scale-110 transition-transform" /></>
                 ) : (
@@ -347,7 +347,7 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
             <div>
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 bg-orange-400 rounded-full animate-ping" />
+                  <div className="w-2.5 h-2.5 bg-orange-400 rounded-full" />
                   <span className="text-[10px] font-mono text-orange-400 font-bold uppercase tracking-widest">LIVE EVENT PASS MOCKUP</span>
                 </div>
                 <Calendar size={15} className="text-orange-400" />
@@ -356,14 +356,14 @@ export const EventManager: React.FC<EventManagerProps> = ({ events }) => {
               
               <div className="bg-white text-slate-900 rounded-3xl p-5 border border-slate-800 shadow-2xl flex flex-col justify-between space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <span className="px-2.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-100 text-[8.5px] font-black uppercase tracking-widest rounded-md">
+                  <span className="px-2.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-100 text-[8.5px] font-semibold uppercase tracking-widest rounded-md">
                     {category}
                   </span>
                   <span className="text-[9px] font-bold text-slate-400">RT 02 PALU</span>
                 </div>
 
                 <div className="space-y-1.5">
-                  <h4 className="font-black text-base text-slate-900 leading-snug">
+                  <h4 className="font-semibold text-base text-slate-900 leading-snug">
                     {title || '[Judul Acara RT]'}
                   </h4>
                   <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-3">

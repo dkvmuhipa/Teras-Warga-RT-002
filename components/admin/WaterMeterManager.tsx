@@ -709,10 +709,10 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold uppercase tracking-wider text-cyan-100">
-              <Droplets className="w-3.5 h-3.5 animate-pulse" />
+              <Droplets className="w-3.5 h-3.5" />
               Sistem Utilitas Air Bersih RT 002
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
               Pencatatan Meter & Tagihan Air
             </h1>
             <p className="text-cyan-100 text-sm max-w-xl">
@@ -754,7 +754,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
       {/* KPI Metric Cards with Pastel Glassmorphic System */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Rumah Tercatat (Lavender/Indigo) */}
-        <div className="bg-[#f0f2fe] border border-indigo-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-all">
+        <div className="bg-[#f0f2fe] border border-indigo-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-colors">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-extrabold text-[#4f46e5] uppercase tracking-widest">Rumah Tercatat</span>
             <div className="w-10 h-10 rounded-2xl bg-white text-[#4f46e5] flex items-center justify-center shadow-2xs">
@@ -772,7 +772,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         </div>
 
         {/* Total Konsumsi (Sky/Cyan) */}
-        <div className="bg-[#edf7ff] border border-sky-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-all">
+        <div className="bg-[#edf7ff] border border-sky-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-colors">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-extrabold text-[#0284c7] uppercase tracking-widest">Total Konsumsi</span>
             <div className="w-10 h-10 rounded-2xl bg-white text-[#0284c7] flex items-center justify-center shadow-2xs">
@@ -790,7 +790,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         </div>
 
         {/* Total Tagihan Air (Mint/Emerald) */}
-        <div className="bg-[#e8faf0] border border-emerald-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-all">
+        <div className="bg-[#e8faf0] border border-emerald-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-colors">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-extrabold text-[#059669] uppercase tracking-widest">Total Tagihan Air</span>
             <div className="w-10 h-10 rounded-2xl bg-white text-[#059669] flex items-center justify-center shadow-2xs">
@@ -808,7 +808,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
         </div>
 
         {/* Butuh Verifikasi (Peach/Amber) */}
-        <div className="bg-[#fff4eb] border border-amber-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-all">
+        <div className="bg-[#fff4eb] border border-amber-100/80 p-5 rounded-3xl shadow-sm hover:translate-y-[-2px] transition-colors">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-extrabold text-[#ea580c] uppercase tracking-widest">Butuh Verifikasi</span>
             <div className="w-10 h-10 rounded-2xl bg-white text-[#ea580c] flex items-center justify-center shadow-2xs">
@@ -832,7 +832,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           onClick={() => setActiveTab('recap')}
           className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm rounded-xl transition-colors whitespace-nowrap ${
             activeTab === 'recap'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-blue-600 text-white shadow-md shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
@@ -844,7 +844,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           onClick={() => setActiveTab('batch')}
           className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm rounded-xl transition-colors whitespace-nowrap ${
             activeTab === 'batch'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-blue-600 text-white shadow-md shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
@@ -856,14 +856,14 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           onClick={() => setActiveTab('verification')}
           className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm rounded-xl transition-colors whitespace-nowrap relative ${
             activeTab === 'verification'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-blue-600 text-white shadow-md shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
           <Camera className="w-4 h-4" />
           Verifikasi Foto Warga
           {kpi.pendingCount > 0 && (
-            <span className="px-1.5 py-0.5 text-[10px] font-black bg-amber-500 text-white rounded-full">
+            <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-amber-500 text-white rounded-full">
               {kpi.pendingCount}
             </span>
           )}
@@ -873,19 +873,19 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           onClick={() => setActiveTab('installation')}
           className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm rounded-xl transition-colors whitespace-nowrap ${
             activeTab === 'installation'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-blue-600 text-white shadow-md shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
           <AlertCircle className="w-4 h-4 text-amber-400" />
           <span>Pendataan Meteran PDAM</span>
           {pdamStats.notInstalled > 0 && (
-            <span className="px-2 py-0.5 text-[10px] font-black bg-rose-500 text-white rounded-full">
+            <span className="px-2 py-0.5 text-[10px] font-semibold bg-rose-500 text-white rounded-full">
               {pdamStats.notInstalled} Belum Ada
             </span>
           )}
           {pdamStats.lost > 0 && (
-            <span className="px-2 py-0.5 text-[10px] font-black bg-purple-600 text-white rounded-full animate-pulse">
+            <span className="px-2 py-0.5 text-[10px] font-semibold bg-purple-600 text-white rounded-full">
               {pdamStats.lost} Hilang
             </span>
           )}
@@ -895,7 +895,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           onClick={() => setActiveTab('settings')}
           className={`flex items-center gap-2 px-4 py-2.5 font-bold text-sm rounded-xl transition-colors whitespace-nowrap ${
             activeTab === 'settings'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              ? 'bg-blue-600 text-white shadow-md shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
@@ -1031,7 +1031,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                         {/* Total Tagihan */}
                         <td className="py-3.5 px-4 text-right">
                           {reading ? (
-                            <div className="font-black text-slate-900 dark:text-white">
+                            <div className="font-semibold text-slate-900 dark:text-white">
                               Rp {reading.totalAmount.toLocaleString('id-ID')}
                             </div>
                           ) : (
@@ -1150,7 +1150,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                     <button
                       key={b}
                       onClick={() => setBatchBlock(b)}
-                      className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                      className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-colors ${
                         batchBlock === b
                           ? 'bg-blue-600 text-white shadow-md'
                           : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100'
@@ -1265,7 +1265,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
               <Button
                 onClick={handleSaveBatch}
                 disabled={isSavingBatch}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-600/20"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-2xs"
               >
                 <Save className="w-4 h-4" />
                 {isSavingBatch ? 'Menyimpan Data...' : `Simpan Semua Catatan Blok ${batchBlock}`}
@@ -1337,7 +1337,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
 
                     <div className="flex justify-between items-center text-xs border-t border-slate-100 dark:border-slate-800 pt-2">
                       <span className="text-slate-500">Pemakaian: <strong>{r.usage} m³</strong></span>
-                      <span className="font-black text-emerald-600">Rp {r.totalAmount.toLocaleString('id-ID')}</span>
+                      <span className="font-semibold text-emerald-600">Rp {r.totalAmount.toLocaleString('id-ID')}</span>
                     </div>
 
                     {/* Action Buttons */}
@@ -1386,7 +1386,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 <button
                   type="button"
                   onClick={() => setWaterSettings(s => ({ ...s, billingMode: 'pdam' }))}
-                  className={`p-3.5 rounded-xl border text-left transition-all ${
+                  className={`p-3.5 rounded-xl border text-left transition-colors ${
                     waterSettings.billingMode === 'pdam'
                       ? 'border-cyan-500 bg-cyan-50/70 dark:bg-cyan-900/20 text-cyan-800 dark:text-cyan-200 ring-2 ring-cyan-500/20'
                       : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'
@@ -1402,7 +1402,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 <button
                   type="button"
                   onClick={() => setWaterSettings(s => ({ ...s, billingMode: 'metered' }))}
-                  className={`p-3.5 rounded-xl border text-left transition-all ${
+                  className={`p-3.5 rounded-xl border text-left transition-colors ${
                     waterSettings.billingMode === 'metered'
                       ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/20'
                       : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'
@@ -1415,7 +1415,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 <button
                   type="button"
                   onClick={() => setWaterSettings(s => ({ ...s, billingMode: 'flat' }))}
-                  className={`p-3.5 rounded-xl border text-left transition-all ${
+                  className={`p-3.5 rounded-xl border text-left transition-colors ${
                     waterSettings.billingMode === 'flat'
                       ? 'border-blue-500 bg-blue-50/70 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500/20'
                       : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'
@@ -1569,18 +1569,18 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-indigo-950 text-white p-6 rounded-3xl shadow-xl border border-blue-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-blue-500/20 text-cyan-400 border border-blue-500/30 rounded-2xl shrink-0">
-                <Droplets size={28} className="animate-pulse" />
+                <Droplets size={28} className="" />
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-cyan-500 text-slate-950">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-cyan-500 text-slate-950">
                     Utilitas Lingkungan
                   </span>
                   <span className="text-xs text-slate-300 font-bold">
                     PDAM Kota Palu • Huntap Tondo 2
                   </span>
                 </div>
-                <h3 className="text-lg font-black text-white tracking-tight">
+                <h3 className="text-lg font-semibold text-white tracking-tight">
                   Pendataan &amp; Monitoring Instalasi Meteran PDAM
                 </h3>
                 <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
@@ -1593,7 +1593,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
               <button
                 type="button"
                 onClick={() => generatePDAMInstallationReportPDF(houses, 'Belum Terpasang')}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-900/30 transition-all cursor-pointer active:scale-95"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold uppercase tracking-wider rounded-xl shadow-lg shadow-2xs transition-colors cursor-pointer active:scale-95"
                 title="Cetak surat permohonan pemasangan baru unit meteran PDAM"
               >
                 <Download size={14} />
@@ -1604,7 +1604,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 <button
                   type="button"
                   onClick={() => generatePDAMInstallationReportPDF(houses, 'Hilang')}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-purple-900/30 transition-all cursor-pointer active:scale-95 animate-pulse"
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-700 to-pink-700 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-semibold uppercase tracking-wider rounded-xl shadow-lg shadow-2xs transition-colors cursor-pointer active:scale-95"
                   title="Cetak berita acara & surat permohonan penggantian meteran hilang ke PDAM Kota Palu"
                 >
                   <Download size={14} />
@@ -1615,7 +1615,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
               <button
                 type="button"
                 onClick={handleCopyPDAMWhatsApp}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
                 title="Salin daftar rumah belum terpasang dan meteran hilang untuk dikirim ke petugas PDAM via WA"
               >
                 <Send size={14} className="text-cyan-300" />
@@ -1634,7 +1634,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-2xl sm:text-3xl font-black text-rose-600">
+                <div className="text-2xl sm:text-3xl font-semibold text-rose-600">
                   {pdamStats.notInstalled} <span className="text-xs font-semibold text-slate-500">Rumah</span>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1 font-medium">
@@ -1646,12 +1646,11 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
             <Card className="p-4 sm:p-5 border-purple-200/80 bg-gradient-to-br from-purple-50/70 to-white shadow-xs">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-purple-800 uppercase tracking-wider">Meteran Hilang</span>
-                <div className="px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 font-bold text-[10px] flex items-center gap-1">
-                  🚨 Ganti Unit
+                <div className="px-2 py-0.5 rounded-lg bg-purple-100 text-purple-700 font-bold text-[10px] flex items-center gap-1">Ganti Unit
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-2xl sm:text-3xl font-black text-purple-700">
+                <div className="text-2xl sm:text-3xl font-semibold text-purple-700">
                   {pdamStats.lost} <span className="text-xs font-semibold text-slate-500">Unit</span>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1 font-medium">
@@ -1668,7 +1667,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-2xl sm:text-3xl font-black text-amber-600">
+                <div className="text-2xl sm:text-3xl font-semibold text-amber-600">
                   {pdamStats.inProgress} <span className="text-xs font-semibold text-slate-500">Rumah</span>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1 font-medium">
@@ -1685,7 +1684,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-2xl sm:text-3xl font-black text-blue-600">
+                <div className="text-2xl sm:text-3xl font-semibold text-blue-600">
                   {pdamStats.installed} <span className="text-xs font-semibold text-slate-500">({pdamStats.installedPercentage}%)</span>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1 font-medium">
@@ -1702,7 +1701,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 </div>
               </div>
               <div className="mt-2.5">
-                <div className="text-2xl sm:text-3xl font-black text-slate-700">
+                <div className="text-2xl sm:text-3xl font-semibold text-slate-700">
                   {pdamStats.broken} <span className="text-xs font-semibold text-slate-500">Rumah</span>
                 </div>
                 <p className="text-[10px] text-slate-500 mt-1 font-medium">
@@ -1746,7 +1745,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
               >
                 <option value="all">Semua Status Meteran</option>
                 <option value="Belum Terpasang">Belum Terpasang ({pdamStats.notInstalled})</option>
-                <option value="Hilang">🚨 Meteran Hilang / Raib ({pdamStats.lost})</option>
+                <option value="Hilang">Meteran Hilang / Raib ({pdamStats.lost})</option>
                 <option value="Dalam Proses Pengajuan">Dalam Pengajuan ({pdamStats.inProgress})</option>
                 <option value="Terpasang">Sudah Terpasang ({pdamStats.installed})</option>
                 <option value="Bermasalah / Rusak">Bermasalah / Rusak ({pdamStats.broken})</option>
@@ -1759,7 +1758,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                  <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                     <th className="py-3.5 px-4">Rumah</th>
                     <th className="py-3.5 px-4">Kepala Keluarga</th>
                     <th className="py-3.5 px-4">Status Meteran PDAM</th>
@@ -1783,7 +1782,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                             isLost ? 'bg-purple-50/30' : isUninstalled ? 'bg-rose-50/20' : isProgress ? 'bg-amber-50/20' : ''
                           }`}
                         >
-                          <td className="py-3.5 px-4 font-black text-slate-800 whitespace-nowrap">
+                          <td className="py-3.5 px-4 font-semibold text-slate-800 whitespace-nowrap">
                             <span className="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-mono text-[11px] shadow-xs">
                               Blok {house.block}-{house.number}
                             </span>
@@ -1793,10 +1792,10 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                             <div className="text-[10px] text-slate-400 mt-0.5">{house.phone ? `WA: ${house.phone}` : 'No. HP belum tercatat'} • {house.residenceType || house.status}</div>
                           </td>
                           <td className="py-3.5 px-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl font-black text-[10px] uppercase tracking-wide border ${
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl font-semibold text-[10px] uppercase tracking-wide border ${
                               status === 'Terpasang' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                              status === 'Belum Terpasang' ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 animate-pulse' :
-                              status === 'Hilang' ? 'bg-purple-50 text-purple-700 border-purple-300 ring-2 ring-purple-500/10 animate-pulse' :
+                              status === 'Belum Terpasang' ? 'bg-rose-50 text-rose-700 border-rose-300 ring-2 ring-rose-500/10 ' :
+                              status === 'Hilang' ? 'bg-purple-50 text-purple-700 border-purple-300 ring-2 ring-purple-500/10 ' :
                               status === 'Dalam Proses Pengajuan' ? 'bg-amber-50 text-amber-700 border-amber-300' :
                               'bg-slate-100 text-slate-700 border-slate-300'
                             }`}>
@@ -1836,7 +1835,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                                   <button
                                     type="button"
                                     onClick={() => handleQuickPdamStatus(house, 'Dalam Proses Pengajuan')}
-                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-all cursor-pointer"
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors cursor-pointer"
                                     title="Tandai sedang diajukan ke PDAM"
                                   >
                                     Diajukan
@@ -1844,7 +1843,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                                   <button
                                     type="button"
                                     onClick={() => handleQuickPdamStatus(house, 'Hilang')}
-                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-all cursor-pointer"
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-colors cursor-pointer"
                                     title="Tandai meteran hilang/dicuri"
                                   >
                                     Set Hilang
@@ -1855,7 +1854,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                                   <button
                                     type="button"
                                     onClick={() => handleQuickPdamStatus(house, 'Dalam Proses Pengajuan')}
-                                    className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-all cursor-pointer"
+                                    className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors cursor-pointer"
                                     title="Tandai sudah diajukan permohonan ganti ke PDAM"
                                   >
                                     Ajukan Ganti
@@ -1863,7 +1862,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                                   <button
                                     type="button"
                                     onClick={() => handleQuickPdamStatus(house, 'Terpasang')}
-                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-all cursor-pointer"
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors cursor-pointer"
                                     title="Tandai meteran baru sudah dipasang"
                                   >
                                     Ganti Selesai
@@ -1873,7 +1872,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                                 <button
                                   type="button"
                                   onClick={() => handleQuickPdamStatus(house, 'Terpasang')}
-                                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-all cursor-pointer"
+                                  className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors cursor-pointer"
                                   title="Tandai sudah dipasang oleh PDAM"
                                 >
                                   Tandai Terpasang
@@ -1883,7 +1882,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                                   <button
                                     type="button"
                                     onClick={() => handleQuickPdamStatus(house, 'Belum Terpasang')}
-                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-all cursor-pointer"
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 hover:border-rose-200 transition-colors cursor-pointer"
                                     title="Tandai belum terpasang meteran"
                                   >
                                     Belum Pasang
@@ -1891,7 +1890,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                                   <button
                                     type="button"
                                     onClick={() => handleQuickPdamStatus(house, 'Hilang')}
-                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-all cursor-pointer"
+                                    className="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-colors cursor-pointer"
                                     title="Tandai meteran hilang / dicuri"
                                   >
                                     Hilang
@@ -1902,7 +1901,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                               <button
                                 type="button"
                                 onClick={() => handleOpenPdamModal(house)}
-                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all cursor-pointer"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
                                 title="Edit Detail Meteran & Catatan Lapangan"
                               >
                                 <Edit2 size={13} />
@@ -1937,7 +1936,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           <form onSubmit={handleSavePdamModal} className="space-y-4 p-1 text-left">
             <div className="p-3 rounded-2xl bg-blue-50/70 border border-blue-200/80 flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-wider text-blue-600">Hunian Target</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-600">Hunian Target</span>
                 <h4 className="font-bold text-slate-800 text-sm">Blok {editingPdamHouse.block}-{editingPdamHouse.number}</h4>
                 <p className="text-xs text-slate-500">{editingPdamHouse.headOfFamily || 'Hunian Warga'}</p>
               </div>
@@ -1963,7 +1962,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                     key={item.id}
                     type="button"
                     onClick={() => setPdamForm(prev => ({ ...prev, status: item.id as any }))}
-                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    className={`p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
                       pdamForm.status === item.id
                         ? item.id === 'Hilang'
                           ? 'border-purple-600 bg-purple-50/80 text-purple-900 ring-2 ring-purple-500/20 shadow-xs'
@@ -1980,7 +1979,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
 
             {pdamForm.status === 'Hilang' && (
               <div className="p-3 bg-purple-50/90 border border-purple-200 rounded-2xl text-purple-900 text-xs space-y-1">
-                <div className="font-black flex items-center gap-1.5 text-purple-800">
+                <div className="font-semibold flex items-center gap-1.5 text-purple-800">
                   <AlertTriangle size={15} className="text-purple-600 shrink-0" />
                   Peringatan Darurat Pengamanan Pipa:
                 </div>
@@ -2120,7 +2119,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           >
             <form onSubmit={handleSaveSingleReading} className="space-y-5">
               {/* Header Card: House, Resident & Provider Info */}
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-sky-500 p-4.5 text-white shadow-lg shadow-blue-500/15">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-sky-500 p-4.5 text-white shadow-lg shadow-2xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 text-white shadow-inner shrink-0 mt-0.5">
@@ -2137,7 +2136,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                           </span>
                         )}
                       </div>
-                      <h4 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
+                      <h4 className="text-xl font-semibold tracking-tight text-white flex items-center gap-2">
                         Rumah {editingReading.houseId}
                       </h4>
                       <p className="text-xs text-sky-100 mt-0.5">
@@ -2153,8 +2152,8 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
 
                   <div className="text-left sm:text-right shrink-0">
                     <span className="text-[10px] uppercase font-bold text-sky-200 tracking-wider block">Pengelola Resmi Air</span>
-                    <span className="inline-flex items-center gap-1.5 bg-white text-blue-900 text-xs font-black px-3 py-1.5 rounded-xl shadow-sm">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="inline-flex items-center gap-1.5 bg-white text-blue-900 text-xs font-semibold px-3 py-1.5 rounded-xl shadow-sm">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                       {waterSettings.providerName || 'PDAM Kota Palu'}
                     </span>
                     <span className="text-[11px] text-sky-100 block mt-1">
@@ -2198,7 +2197,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                           required
                           value={editingReading.previousReading}
                           onChange={(e) => setEditingReading(r => r ? { ...r, previousReading: parseFloat(e.target.value) || 0 } : null)}
-                          className="w-full pl-3.5 pr-9 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-base font-bold font-mono text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                          className="w-full pl-3.5 pr-9 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-base font-bold font-mono text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-colors"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
                           m³
@@ -2208,12 +2207,12 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                     </div>
 
                     {/* Meter Bulan Ini */}
-                    <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-2xl border-2 border-blue-400/80 dark:border-blue-700/80 shadow-sm shadow-blue-500/5">
+                    <div className="p-3.5 bg-blue-50/60 dark:bg-blue-950/30 rounded-2xl border-2 border-blue-400/80 dark:border-blue-700/80 shadow-sm shadow-2xs">
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-[11px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-300">
+                        <label className="text-[11px] font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-300">
                           Meter Bulan Ini
                         </label>
-                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-600 text-white animate-pulse">
+                        <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-600 text-white">
                           Terkini
                         </span>
                       </div>
@@ -2225,9 +2224,9 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                           required
                           value={editingReading.currentReading}
                           onChange={(e) => setEditingReading(r => r ? { ...r, currentReading: parseFloat(e.target.value) || 0 } : null)}
-                          className="w-full pl-3.5 pr-9 py-2.5 bg-white dark:bg-slate-900 border-2 border-blue-500 dark:border-blue-400 rounded-xl text-base font-black font-mono text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
+                          className="w-full pl-3.5 pr-9 py-2.5 bg-white dark:bg-slate-900 border-2 border-blue-500 dark:border-blue-400 rounded-xl text-base font-semibold font-mono text-blue-700 dark:text-blue-300 focus:ring-2 focus:ring-blue-500 outline-none shadow-inner"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-blue-600 dark:text-blue-400">
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-blue-600 dark:text-blue-400">
                           m³
                         </span>
                       </div>
@@ -2249,7 +2248,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                           key={delta}
                           type="button"
                           onClick={() => setEditingReading(r => r ? { ...r, currentReading: r.previousReading + delta } : null)}
-                          className={`px-2.5 py-1 text-xs font-mono font-bold rounded-lg border transition-all ${
+                          className={`px-2.5 py-1 text-xs font-mono font-bold rounded-lg border transition-colors ${
                             usage === delta
                               ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
                               : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600'
@@ -2303,7 +2302,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                       <button
                         type="button"
                         onClick={() => setEditingReading(r => r ? { ...r, recordedBy: 'Petugas RT', recordedByName: 'Petugas RT Keliling' } : null)}
-                        className={`p-2 rounded-xl border text-xs font-bold text-center transition-all ${
+                        className={`p-2 rounded-xl border text-xs font-bold text-center transition-colors ${
                           editingReading.recordedBy === 'Petugas RT'
                             ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/50 dark:border-blue-500 dark:text-blue-300 ring-1 ring-blue-500'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
@@ -2314,7 +2313,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                       <button
                         type="button"
                         onClick={() => setEditingReading(r => r ? { ...r, recordedBy: 'Warga', recordedByName: targetHouse?.headOfFamily || 'Mandiri Warga' } : null)}
-                        className={`p-2 rounded-xl border text-xs font-bold text-center transition-all ${
+                        className={`p-2 rounded-xl border text-xs font-bold text-center transition-colors ${
                           editingReading.recordedBy === 'Warga'
                             ? 'bg-indigo-50 border-indigo-500 text-indigo-700 dark:bg-indigo-950/50 dark:border-indigo-500 dark:text-indigo-300 ring-1 ring-indigo-500'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
@@ -2334,7 +2333,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                       <button
                         type="button"
                         onClick={() => setEditingReading(r => r ? { ...r, status: 'Terverifikasi' } : null)}
-                        className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                        className={`p-2.5 rounded-xl border text-center transition-colors flex flex-col items-center gap-1 ${
                           editingReading.status === 'Terverifikasi'
                             ? 'bg-emerald-50 border-emerald-500 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-500 dark:text-emerald-300 ring-2 ring-emerald-500/20 font-bold shadow-sm'
                             : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
@@ -2347,7 +2346,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                       <button
                         type="button"
                         onClick={() => setEditingReading(r => r ? { ...r, status: 'Menunggu Verifikasi' } : null)}
-                        className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                        className={`p-2.5 rounded-xl border text-center transition-colors flex flex-col items-center gap-1 ${
                           editingReading.status === 'Menunggu Verifikasi'
                             ? 'bg-amber-50 border-amber-500 text-amber-800 dark:bg-amber-950/40 dark:border-amber-500 dark:text-amber-300 ring-2 ring-amber-500/20 font-bold shadow-sm'
                             : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
@@ -2360,7 +2359,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                       <button
                         type="button"
                         onClick={() => setEditingReading(r => r ? { ...r, status: 'Ditolak' } : null)}
-                        className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center gap-1 ${
+                        className={`p-2.5 rounded-xl border text-center transition-colors flex flex-col items-center gap-1 ${
                           editingReading.status === 'Ditolak'
                             ? 'bg-rose-50 border-rose-500 text-rose-800 dark:bg-rose-950/40 dark:border-rose-500 dark:text-rose-300 ring-2 ring-rose-500/20 font-bold shadow-sm'
                             : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100'
@@ -2403,7 +2402,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                         <div>
                           <span className="text-[11px] font-bold text-slate-400 block">Pemakaian Bersih</span>
                           <div className="flex items-baseline gap-1">
-                            <span className="text-xl font-black font-mono text-white">{usage}</span>
+                            <span className="text-xl font-semibold font-mono text-white">{usage}</span>
                             <span className="text-xs font-bold text-slate-400">m³</span>
                           </div>
                         </div>
@@ -2436,12 +2435,12 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                       </div>
                       <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden flex p-0.5 border border-slate-700/50">
                         <div 
-                          className={`h-full rounded-full transition-all duration-300 ${isWithinQuota ? 'bg-emerald-500' : 'bg-emerald-400'}`}
+                          className={`h-full rounded-full transition-colors duration-300 ${isWithinQuota ? 'bg-emerald-500' : 'bg-emerald-400'}`}
                           style={{ width: `${Math.min(100, (Math.min(usage, quota) / quota) * 100)}%` }}
                         />
                         {previewBill.excessUsage > 0 && (
                           <div 
-                            className="h-full rounded-full bg-amber-500 transition-all duration-300 ml-1"
+                            className="h-full rounded-full bg-amber-500 transition-colors duration-300 ml-1"
                             style={{ width: `${Math.min(100, (previewBill.excessUsage / quota) * 100)}%` }}
                           />
                         )}
@@ -2493,7 +2492,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                     {/* Total Tagihan Box */}
                     <div className="pt-2 border-t border-slate-800 flex items-center justify-between bg-slate-950/60 -mx-4 -mb-4 p-3 px-4 rounded-b-2xl">
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">
                           Total Estimasi Tagihan
                         </span>
                         <span className="text-[10px] text-slate-500">
@@ -2501,7 +2500,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                         </span>
                       </div>
                       <div className="text-right">
-                        <div className="text-2xl font-black font-mono text-emerald-400 tracking-tight">
+                        <div className="text-2xl font-semibold font-mono text-emerald-400 tracking-tight">
                           Rp {previewBill.totalAmount.toLocaleString('id-ID')}
                         </div>
                       </div>
@@ -2601,7 +2600,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                   </Button>
                   <Button 
                     type="submit" 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-2 transition-all"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-2xs flex items-center gap-2 transition-colors"
                   >
                     <Check className="w-4 h-4" />
                     Simpan Catatan
@@ -2665,12 +2664,12 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 <span className="font-bold text-slate-700 dark:text-slate-300 text-sm">{verifyingItem.previousReading} m³</span>
               </div>
               <div className="p-2.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-center">
-                <span className="text-blue-600/80 dark:text-blue-400 block text-[10px] uppercase font-black">Dilaporkan</span>
-                <span className="font-black text-blue-700 dark:text-blue-300 text-sm">{verifyingItem.currentReading} m³</span>
+                <span className="text-blue-600/80 dark:text-blue-400 block text-[10px] uppercase font-semibold">Dilaporkan</span>
+                <span className="font-semibold text-blue-700 dark:text-blue-300 text-sm">{verifyingItem.currentReading} m³</span>
               </div>
               <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-center">
-                <span className="text-emerald-600/80 dark:text-emerald-400 block text-[10px] uppercase font-black">Tagihan PDAM</span>
-                <span className="font-black text-emerald-600 dark:text-emerald-400 text-sm">Rp {verifyingItem.totalAmount.toLocaleString('id-ID')}</span>
+                <span className="text-emerald-600/80 dark:text-emerald-400 block text-[10px] uppercase font-semibold">Tagihan PDAM</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-sm">Rp {verifyingItem.totalAmount.toLocaleString('id-ID')}</span>
               </div>
             </div>
 
@@ -2707,7 +2706,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                 <Button
                   type="button"
                   onClick={() => handleVerifySubmit('Terverifikasi')}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md shadow-2xs flex items-center gap-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   Setujui & Verifikasi

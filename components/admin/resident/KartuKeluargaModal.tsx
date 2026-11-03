@@ -100,7 +100,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
               <ShieldCheck size={14} className="text-[#059669]" />
               ARSIP KARTU KELUARGA RESMI RT 002
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-semibold text-slate-800 tracking-tight">
               Blanko Kartu Keluarga (KK) Digital
             </h2>
             <p className="text-xs text-slate-500 font-medium">
@@ -119,7 +119,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
             </Button>
             <Button
               onClick={handlePrint}
-              className="px-4.5 py-2.5 bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 text-white rounded-2xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95 transition-all"
+              className="px-4.5 py-2.5 bg-gradient-to-r from-indigo-600 via-indigo-700 to-indigo-800 text-white rounded-2xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-2xs active:scale-95 transition-colors"
             >
               <Printer size={14} />
               <span>Cetak Blanko KK</span>
@@ -138,10 +138,10 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
 
           {/* Official KK Header */}
           <div className="text-center space-y-1 mb-6 border-b-2 border-slate-900 pb-4">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-[0.25em] text-slate-900 font-sans uppercase">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-[0.25em] text-slate-900 font-sans uppercase">
               KARTU KELUARGA
             </h1>
-            <p className="text-sm md:text-base font-black tracking-[0.3em] font-mono text-slate-800 uppercase">
+            <p className="text-sm md:text-base font-semibold tracking-[0.3em] font-mono text-slate-800 uppercase">
               No. {house.id?.replace(/[^a-zA-Z0-9]/g, '') || '727103020020001'}
             </p>
           </div>
@@ -152,7 +152,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
               <div className="grid grid-cols-12">
                 <span className="col-span-5 font-bold uppercase text-slate-700">Nama Kepala Keluarga</span>
                 <span className="col-span-1 font-bold">:</span>
-                <span className="col-span-6 font-black uppercase text-slate-950">{house.headOfFamily || '-'}</span>
+                <span className="col-span-6 font-semibold uppercase text-slate-950">{house.headOfFamily || '-'}</span>
               </div>
               <div className="grid grid-cols-12">
                 <span className="col-span-5 font-bold uppercase text-slate-700">Alamat</span>
@@ -199,7 +199,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
           <div className="mb-6 overflow-x-auto">
             <table className="w-full border-collapse border border-slate-900 text-[10px] sm:text-xs font-sans text-center">
               <thead>
-                <tr className="bg-slate-200/80 font-black text-slate-900 border border-slate-900">
+                <tr className="bg-slate-200/80 font-semibold text-slate-900 border border-slate-900">
                   <th className="border border-slate-900 py-1.5 px-2 w-8">No</th>
                   <th className="border border-slate-900 py-1.5 px-3 text-left">Nama Lengkap</th>
                   <th className="border border-slate-900 py-1.5 px-3">NIK</th>
@@ -228,7 +228,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
                 {allMembers.map((m) => (
                   <tr key={m.no} className="border border-slate-900 hover:bg-slate-50/80">
                     <td className="border border-slate-900 py-1.5 px-1 font-bold">{m.no}</td>
-                    <td className="border border-slate-900 py-1.5 px-3 text-left font-black uppercase">{m.name}</td>
+                    <td className="border border-slate-900 py-1.5 px-3 text-left font-semibold uppercase">{m.name}</td>
                     <td className="border border-slate-900 py-1.5 px-2 font-mono font-bold">{m.nik}</td>
                     <td className="border border-slate-900 py-1.5 px-2 font-medium">{m.gender}</td>
                     <td className="border border-slate-900 py-1.5 px-2 font-medium uppercase">{m.birthPlace}</td>
@@ -247,7 +247,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
           <div className="mb-8 overflow-x-auto">
             <table className="w-full border-collapse border border-slate-900 text-[10px] sm:text-xs font-sans text-center">
               <thead>
-                <tr className="bg-slate-200/80 font-black text-slate-900 border border-slate-900">
+                <tr className="bg-slate-200/80 font-semibold text-slate-900 border border-slate-900">
                   <th className="border border-slate-900 py-1.5 px-2 w-8">No</th>
                   <th className="border border-slate-900 py-1.5 px-3">Status Perkawinan</th>
                   <th className="border border-slate-900 py-1.5 px-3">Status Hubungan Dalam Keluarga</th>
@@ -269,7 +269,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
                   <tr key={m.no} className="border border-slate-900 hover:bg-slate-50/80">
                     <td className="border border-slate-900 py-1.5 px-1 font-bold">{m.no}</td>
                     <td className="border border-slate-900 py-1.5 px-3 font-medium">{m.maritalStatus}</td>
-                    <td className="border border-slate-900 py-1.5 px-3 font-black uppercase text-indigo-950">{m.relation}</td>
+                    <td className="border border-slate-900 py-1.5 px-3 font-semibold uppercase text-indigo-950">{m.relation}</td>
                     <td className="border border-slate-900 py-1.5 px-3 font-bold">{m.nationality}</td>
                     <td className="border border-slate-900 py-1.5 px-3 font-medium uppercase">{m.fatherName}</td>
                     <td className="border border-slate-900 py-1.5 px-3 font-medium uppercase">{m.motherName}</td>
@@ -284,7 +284,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
             <div className="text-center space-y-16">
               <p className="font-bold text-slate-700 uppercase">KEPALA KELUARGA,</p>
               <div>
-                <p className="font-black text-slate-950 underline uppercase tracking-wide">{house.headOfFamily || '-'}</p>
+                <p className="font-semibold text-slate-950 underline uppercase tracking-wide">{house.headOfFamily || '-'}</p>
                 <p className="text-[10px] text-slate-400 font-mono">Tanda Tangan / Cap Jempol</p>
               </div>
             </div>
@@ -295,10 +295,10 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
                 <p className="font-bold text-slate-700">
                   Pada Tanggal: {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
-                <p className="font-black text-slate-900 uppercase mt-1">PENGURUS RT 002 / RW 020 KELURAHAN TONDO</p>
+                <p className="font-semibold text-slate-900 uppercase mt-1">PENGURUS RT 002 / RW 020 KELURAHAN TONDO</p>
               </div>
               <div>
-                <p className="font-black text-slate-950 underline uppercase tracking-wide">PENGURUS RT 002</p>
+                <p className="font-semibold text-slate-950 underline uppercase tracking-wide">PENGURUS RT 002</p>
                 <p className="text-[10px] text-slate-500 font-mono">Arsip Kependudukan Digital</p>
               </div>
             </div>

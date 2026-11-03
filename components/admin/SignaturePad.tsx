@@ -166,14 +166,14 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({ onSave, onClear, ini
         <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <button 
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 bg-white text-slate-400 hover:text-indigo-600 rounded-xl shadow-sm border border-slate-100 transition-all"
+            className="p-2 bg-white text-slate-400 hover:text-indigo-600 rounded-xl shadow-sm border border-slate-100 transition-colors"
             title="Upload Gambar"
           >
             <Upload size={18} />
           </button>
           <button 
             onClick={clear}
-            className="p-2 bg-white text-slate-400 hover:text-rose-600 rounded-xl shadow-sm border border-slate-100 transition-all"
+            className="p-2 bg-white text-slate-400 hover:text-rose-600 rounded-xl shadow-sm border border-slate-100 transition-colors"
             title="Hapus"
           >
             <Eraser size={18} />
@@ -181,7 +181,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({ onSave, onClear, ini
         </div>
         
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
-          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+          <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest">
             {isUploaded ? 'Gambar Terupload' : 'Tanda Tangan di Sini atau Upload'}
           </p>
         </div>
@@ -220,7 +220,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({ onSave, onClear, ini
 
       {initialValue && (
         <div className="mt-6 pt-6 border-t border-slate-100">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tanda Tangan Saat Ini:</p>
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-3">Tanda Tangan Saat Ini:</p>
           <div className="bg-white p-4 rounded-2xl border border-slate-100 inline-block">
             <img src={initialValue} alt="Current Signature" className="max-h-20" />
           </div>

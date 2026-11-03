@@ -153,21 +153,21 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
               <div className="relative z-20 p-4 sm:p-5 flex justify-between items-center">
                 <button 
                   onClick={onClose}
-                  className="w-9 h-9 bg-white/90 hover:bg-white text-slate-600 backdrop-blur-md border border-slate-200/60 flex items-center justify-center rounded-2xl shadow-xs transition-all cursor-pointer"
+                  className="w-9 h-9 bg-white/90 hover:bg-white text-slate-600 backdrop-blur-md border border-slate-200/60 flex items-center justify-center rounded-2xl shadow-xs transition-colors cursor-pointer"
                 >
                   <X size={16} />
                 </button>
                 <div className="flex items-center gap-2">
                   <button 
                     onClick={() => setIsKkModalOpen(true)}
-                    className="px-3.5 py-2 bg-[#e8faf0] hover:bg-emerald-100 text-[#059669] border border-emerald-100 rounded-2xl font-bold text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    className="px-3.5 py-2 bg-[#e8faf0] hover:bg-emerald-100 text-[#059669] border border-emerald-100 rounded-2xl font-bold text-xs transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                     title="Lihat & Cetak Blanko Kartu Keluarga (KK)"
                   >
                     <Printer size={13} /> Blanko KK
                   </button>
                   <button 
                     onClick={() => { onClose(); handleOpenEdit(selectedResident); }}
-                    className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/70 rounded-2xl font-bold text-xs transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/70 rounded-2xl font-bold text-xs transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <FileText size={13} /> Edit
                   </button>
@@ -178,7 +178,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
             {/* Profile Brief Card */}
             <div className="px-5 sm:px-6 -mt-10 relative z-30">
               <div className="bg-white/95 backdrop-blur-md rounded-3xl p-4.5 border border-slate-100 shadow-sm flex items-center gap-3.5">
-                <div className="w-14 h-14 bg-[#f0f2fe] border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-xl font-black shrink-0 shadow-xs">
+                <div className="w-14 h-14 bg-[#f0f2fe] border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center text-xl font-semibold shrink-0 shadow-xs">
                   {selectedResident.headOfFamily.charAt(0).toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -194,7 +194,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       {isFullyPaid ? 'Lunas' : 'Tunggak'}
                     </span>
                   </div>
-                  <h2 className="text-base sm:text-lg font-black text-slate-800 tracking-tight truncate">{selectedResident.headOfFamily}</h2>
+                  <h2 className="text-base sm:text-lg font-semibold text-slate-800 tracking-tight truncate">{selectedResident.headOfFamily}</h2>
                   <p className="text-xs text-slate-400 font-semibold flex items-center gap-1 mt-0.5">
                     <MapPin size={11} className="text-slate-400" />
                     Blok {selectedResident.block} - No. {selectedResident.number}
@@ -213,13 +213,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="w-6 h-6 rounded-lg bg-[#f0f2fe] text-indigo-600 flex items-center justify-center">
                     <Shield size={12} />
                   </div>
-                  <span className="text-[10px] font-black text-slate-600 uppercase tracking-wider">Resident ID Card</span>
+                  <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Resident ID Card</span>
                 </div>
                 <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-md">ID: {selectedResident.id.substring(0, 8).toUpperCase()}</span>
               </div>
               <div className="pt-3.5 flex items-center gap-3.5">
-                <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-2xl shadow-xs select-none shrink-0">
-                  🇮🇩
+                <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-2xl shadow-xs select-none shrink-0">🇮🇩
                 </div>
                 <div>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status Kependudukan</p>
@@ -243,23 +242,23 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   onClose();
                   openPayModal(selectedResident);
                 }}
-                className="p-4 bg-white border border-slate-100 hover:border-indigo-200 hover:bg-[#f0f2fe]/20 rounded-3xl shadow-xs transition-all text-center group cursor-pointer"
+                className="p-4 bg-white border border-slate-100 hover:border-indigo-200 hover:bg-[#f0f2fe]/20 rounded-3xl shadow-xs transition-colors text-center group cursor-pointer"
               >
                 <div className="w-11 h-11 bg-[#f0f2fe] text-indigo-600 border border-indigo-100/60 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-xs group-hover:scale-105 transition-transform">
                   <DollarSign size={18} />
                 </div>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Bayar Bulanan</p>
-                <p className="text-xs font-black text-slate-800 tracking-tight mt-0.5">Entri Iuran</p>
+                <p className="text-xs font-semibold text-slate-800 tracking-tight mt-0.5">Entri Iuran</p>
               </button>
               <button 
                 onClick={() => { onClose(); setSelectedHouseForBills(selectedResident); }}
-                className="p-4 bg-white border border-slate-100 hover:border-emerald-200 hover:bg-[#e8faf0]/20 rounded-3xl shadow-xs transition-all text-center group cursor-pointer"
+                className="p-4 bg-white border border-slate-100 hover:border-emerald-200 hover:bg-[#e8faf0]/20 rounded-3xl shadow-xs transition-colors text-center group cursor-pointer"
               >
                 <div className="w-11 h-11 bg-[#e8faf0] text-[#059669] border border-emerald-100/60 rounded-2xl flex items-center justify-center mx-auto mb-2 shadow-xs group-hover:scale-105 transition-transform">
                   <LayoutList size={18} />
                 </div>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Data Pembayaran</p>
-                <p className="text-xs font-black text-slate-800 tracking-tight mt-0.5">Riwayat Bayar</p>
+                <p className="text-xs font-semibold text-slate-800 tracking-tight mt-0.5">Riwayat Bayar</p>
               </button>
             </div>
 
@@ -271,7 +270,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="w-7 h-7 bg-[#f0f2fe] text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
                     <Home size={14} />
                   </div>
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Kontak & Rumah</h4>
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Kontak & Rumah</h4>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -285,7 +284,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800">PBB {selectedResident.pbbYear || new Date().getFullYear()}</span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800">PBB {selectedResident.pbbYear || new Date().getFullYear()}</span>
                           {selectedResident.pbbNop && (
                             <span className="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border border-emerald-200 text-emerald-900 font-bold">{selectedResident.pbbNop}</span>
                           )}
@@ -300,7 +299,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 self-end sm:self-center">
-                      <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border ${
+                      <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg border ${
                         selectedResident.pbbStatus === 'Sudah Diambil'
                           ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
                           : 'bg-amber-50 text-amber-800 border-amber-200'
@@ -332,9 +331,9 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                         <CreditCard size={15} />
                       </div>
                       <div>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Status Kesesuaian KTP</span>
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Status Kesesuaian KTP</span>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-black border ${
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold border ${
                             (selectedResident.ktpStatus === 'Sesuai Domisili' || (!selectedResident.ktpStatus && selectedResident.addressKtp && (selectedResident.addressKtp.toLowerCase().includes('tondo') || selectedResident.addressKtp.toLowerCase().includes('pue lombe'))))
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : 'bg-amber-50 text-amber-700 border-amber-200'
@@ -349,7 +348,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     </div>
                     {selectedResident.addressKtp && (
                       <div className="text-left sm:text-right text-xs text-slate-700 font-semibold max-w-xs pl-10 sm:pl-0">
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Alamat KTP</span>
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest block">Alamat KTP</span>
                         <span className="text-slate-800 font-bold leading-tight">{selectedResident.addressKtp}</span>
                       </div>
                     )}
@@ -392,11 +391,11 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                         <Store size={14} />
                       </div>
                       <div>
-                        <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Usaha / UMKM Warga</h4>
+                        <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Usaha / UMKM Warga</h4>
                         <p className="text-[10px] text-slate-400 font-medium">Potensi ekonomi lokal kavling RT 02</p>
                       </div>
                     </div>
-                    <span className="px-2.5 py-0.5 bg-[#fff4eb] text-[#ea580c] border border-amber-100 rounded-xl text-[9px] font-black uppercase tracking-wider shadow-2xs">
+                    <span className="px-2.5 py-0.5 bg-[#fff4eb] text-[#ea580c] border border-amber-100 rounded-xl text-[9px] font-semibold uppercase tracking-wider shadow-2xs">
                       {selectedResident.businessCategory || 'UMKM Aktif'}
                     </span>
                   </div>
@@ -404,7 +403,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-100 space-y-2 mb-3">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="text-xs font-black text-slate-800">{selectedResident.businessName || 'Usaha Warga'}</p>
+                        <p className="text-xs font-semibold text-slate-800">{selectedResident.businessName || 'Usaha Warga'}</p>
                         <p className="text-[10px] text-slate-500 font-medium mt-0.5 flex items-center gap-1">
                           <MapPin size={11} className="text-slate-400" />
                           {selectedResident.businessLocation || 'Di Rumah / Kavling'}
@@ -430,7 +429,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                         if (phone.startsWith('0')) phone = '62' + phone.substring(1);
                         window.open(`https://api.whatsapp.com/send?phone=${phone}`, '_blank');
                       }}
-                      className="w-full py-2 bg-[#e8faf0] hover:bg-emerald-100 text-[#059669] border border-emerald-100 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                      className="w-full py-2 bg-[#e8faf0] hover:bg-emerald-100 text-[#059669] border border-emerald-100 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                     >
                       <MessageCircle size={13} />
                       <span>Hubungi WhatsApp Usaha ({selectedResident.businessPhone})</span>
@@ -446,7 +445,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <div className="w-7 h-7 bg-[#f0f2fe] text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
                       <Sparkles size={14} />
                     </div>
-                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Smart Tags Warga</h4>
+                    <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Smart Tags Warga</h4>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedResident.tags.map((tag, idx) => (
@@ -464,7 +463,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="w-7 h-7 bg-[#e8faf0] text-[#059669] rounded-xl flex items-center justify-center shrink-0">
                     <Users size={14} />
                   </div>
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Profil Demografi & Silsilah</h4>
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Profil Demografi & Silsilah</h4>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4 mb-5">
@@ -499,11 +498,11 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   {/* Root: Head of Family */}
                   <div className="p-3.5 bg-[#f0f2fe]/60 border border-indigo-100/80 rounded-2xl flex items-center justify-between shadow-xs">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xs font-black shadow-xs">
+                      <div className="w-9 h-9 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xs font-semibold shadow-xs">
                         {selectedResident.headOfFamily.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="text-xs font-black text-slate-800 leading-tight">{selectedResident.headOfFamily}</p>
+                        <p className="text-xs font-semibold text-slate-800 leading-tight">{selectedResident.headOfFamily}</p>
                         <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-wide mt-0.5">Kepala Keluarga (Utama)</p>
                       </div>
                     </div>
@@ -514,14 +513,14 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   {selectedResident.familyMembers && selectedResident.familyMembers.length > 0 ? (
                     <div className="pl-4 border-l-2 border-indigo-100 space-y-2 ml-4">
                       {selectedResident.familyMembers.map((member, idx) => (
-                        <div key={member.name || idx} className="relative flex items-center justify-between p-3 bg-slate-50/80 border border-slate-100 hover:bg-white rounded-2xl transition-all shadow-2xs">
+                        <div key={member.name || idx} className="relative flex items-center justify-between p-3 bg-slate-50/80 border border-slate-100 hover:bg-white rounded-2xl transition-colors shadow-2xs">
                           <div className="absolute -left-4 top-1/2 w-4 h-0.5 bg-indigo-100"></div>
                           <div className="flex items-center gap-2.5">
                              <div className="w-8 h-8 bg-white border border-slate-200/80 rounded-xl flex items-center justify-center text-slate-700 text-xs font-bold shrink-0 shadow-xs">
                                {member.name.charAt(0).toUpperCase()}
                              </div>
                              <div>
-                                <p className="text-xs font-black text-slate-800 leading-tight">{member.name}</p>
+                                <p className="text-xs font-semibold text-slate-800 leading-tight">{member.name}</p>
                                 <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-wide mt-0.5">{member.relation} • {member.job || 'N/A'}</p>
                              </div>
                           </div>
@@ -543,7 +542,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="w-7 h-7 bg-[#fff4eb] text-[#ea580c] rounded-xl flex items-center justify-center shrink-0">
                     <Activity size={14} />
                   </div>
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Riwayat Kepenghunian</h4>
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Riwayat Kepenghunian</h4>
                 </div>
 
                 <div className="relative pl-4 border-l-2 border-amber-100 space-y-4">
@@ -554,7 +553,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       <div className="flex justify-between items-start">
                         <div>
                           <span className="px-2 py-0.5 bg-emerald-600 text-white rounded-full text-[9px] font-bold uppercase tracking-wider shadow-2xs">Penghuni Aktif</span>
-                          <p className="text-xs font-black text-slate-800 mt-1">{selectedResident.headOfFamily}</p>
+                          <p className="text-xs font-semibold text-slate-800 mt-1">{selectedResident.headOfFamily}</p>
                         </div>
                         <span className="text-[9px] font-bold text-slate-400">{selectedResident.joiningDate ? selectedResident.joiningDate.split('T')[0] : 'Aktif'} - Sekarang</span>
                       </div>
@@ -571,7 +570,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                           <div className={`absolute -left-[21px] top-1 w-3.5 h-3.5 rounded-full border-2 border-white ${
                             isTanpaPamit ? 'bg-rose-500 ring-2 ring-rose-100' : 'bg-slate-400'
                           }`}></div>
-                          <div className={`p-3.5 rounded-2xl border transition-all ${
+                          <div className={`p-3.5 rounded-2xl border transition-colors ${
                             isTanpaPamit 
                               ? 'bg-[#fff1f2]/60 border-rose-100' 
                               : 'bg-slate-50 border-slate-100'
@@ -581,7 +580,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   <p className="text-xs font-bold text-slate-800">{history.headOfFamily}</p>
                                   {isTanpaPamit ? (
-                                    <span className="px-2 py-0.5 bg-rose-100 text-rose-700 border border-rose-200 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-0.5">
+                                    <span className="px-2 py-0.5 bg-rose-100 text-rose-700 border border-rose-200 rounded-full text-[9px] font-semibold uppercase tracking-wider flex items-center gap-0.5">
                                       <AlertTriangle size={9} className="text-rose-600" />
                                       Pindah Tanpa Pamit
                                     </span>
@@ -655,7 +654,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <div className="w-7 h-7 bg-[#e8faf0] text-[#059669] rounded-xl flex items-center justify-center shrink-0">
                       <CheckSquare size={14} />
                     </div>
-                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                    <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
                       Profil Sanitasi (5 Pilar STBM)
                     </h4>
                   </div>
@@ -674,12 +673,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">1. Jamban Sehat</p>
-                      <p className="text-xs font-black text-slate-800">Biotank PUPR</p>
+                      <p className="text-xs font-semibold text-slate-800">Biotank PUPR</p>
                     </div>
                     <button
                       onClick={() => handleToggleSTBM('hasHealthyLatrine')}
                       disabled={isSavingSTBM}
-                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shadow-2xs ${
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer shadow-2xs ${
                         stbmRecord?.hasHealthyLatrine ? 'bg-[#e8faf0] text-[#059669] border border-emerald-100' : 'bg-[#fff1f2] text-[#e11d48] border border-rose-100'
                       }`}
                     >
@@ -691,12 +690,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Bebas BABS</p>
-                      <p className="text-xs font-black text-slate-800">Status ODF</p>
+                      <p className="text-xs font-semibold text-slate-800">Status ODF</p>
                     </div>
                     <button
                       onClick={() => handleToggleSTBM('isBABS')}
                       disabled={isSavingSTBM}
-                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shadow-2xs ${
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer shadow-2xs ${
                         stbmRecord?.isBABS ? 'bg-rose-600 text-white' : 'bg-[#e8faf0] text-[#059669] border border-emerald-100'
                       }`}
                     >
@@ -708,12 +707,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">2. Cuci Tangan</p>
-                      <p className="text-xs font-black text-slate-800">Sarana CTPS</p>
+                      <p className="text-xs font-semibold text-slate-800">Sarana CTPS</p>
                     </div>
                     <button
                       onClick={() => handleToggleSTBM('hasCTPS')}
                       disabled={isSavingSTBM}
-                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shadow-2xs ${
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer shadow-2xs ${
                         stbmRecord?.hasCTPS ? 'bg-[#e8faf0] text-[#059669] border border-emerald-100' : 'bg-[#fff1f2] text-[#e11d48] border border-rose-100'
                       }`}
                     >
@@ -725,12 +724,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">3. Air & Makanan</p>
-                      <p className="text-xs font-black text-slate-800">PAMM-RT Aman</p>
+                      <p className="text-xs font-semibold text-slate-800">PAMM-RT Aman</p>
                     </div>
                     <button
                       onClick={() => handleToggleSTBM('safeWaterAndFood')}
                       disabled={isSavingSTBM}
-                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shadow-2xs ${
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer shadow-2xs ${
                         stbmRecord?.safeWaterAndFood ? 'bg-[#e8faf0] text-[#059669] border border-emerald-100' : 'bg-[#fff1f2] text-[#e11d48] border border-rose-100'
                       }`}
                     >
@@ -742,12 +741,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">4. Pilah Sampah</p>
-                      <p className="text-xs font-black text-slate-800">Layanan TPS3R</p>
+                      <p className="text-xs font-semibold text-slate-800">Layanan TPS3R</p>
                     </div>
                     <button
                       onClick={() => handleToggleSTBM('wasteManagement')}
                       disabled={isSavingSTBM}
-                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shadow-2xs ${
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer shadow-2xs ${
                         stbmRecord?.wasteManagement ? 'bg-[#e8faf0] text-[#059669] border border-emerald-100' : 'bg-[#fff1f2] text-[#e11d48] border border-rose-100'
                       }`}
                     >
@@ -759,12 +758,12 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">5. Limbah Cair</p>
-                      <p className="text-xs font-black text-slate-800">Pipa SPALDT</p>
+                      <p className="text-xs font-semibold text-slate-800">Pipa SPALDT</p>
                     </div>
                     <button
                       onClick={() => handleToggleSTBM('liquidWasteManagement')}
                       disabled={isSavingSTBM}
-                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer shadow-2xs ${
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer shadow-2xs ${
                         stbmRecord?.liquidWasteManagement ? 'bg-[#e8faf0] text-[#059669] border border-emerald-100' : 'bg-[#fff1f2] text-[#e11d48] border border-rose-100'
                       }`}
                     >
@@ -785,7 +784,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     {selectedResident.phone && (
                       <button
                         onClick={handleContactWhatsAppSanitasi}
-                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <MessageCircle size={14} />
                         <span>Koordinasi via WhatsApp Warga</span>
@@ -814,7 +813,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="w-7 h-7 bg-[#f0f2fe] text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
                     <Shield size={14} />
                   </div>
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Keamanan & Siskamling</h4>
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Keamanan & Siskamling</h4>
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-3.5 bg-slate-50/80 border border-slate-100 rounded-2xl">
@@ -828,11 +827,11 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       <div className="flex gap-4 border-l border-slate-200/80 pl-4 shrink-0 text-right">
                         <div>
                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Poin</p>
-                          <p className="text-xs font-black text-indigo-600">{selectedResident.rondaPoints || 0} Pts</p>
+                          <p className="text-xs font-semibold text-indigo-600">{selectedResident.rondaPoints || 0} Pts</p>
                         </div>
                         <div>
                           <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Tugas Bulan Ini</p>
-                          <p className="text-xs font-black text-slate-800">{selectedResident.rondaDutyCount || 0} Kali</p>
+                          <p className="text-xs font-semibold text-slate-800">{selectedResident.rondaDutyCount || 0} Kali</p>
                         </div>
                       </div>
                     )}
@@ -853,7 +852,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <div className="w-7 h-7 bg-[#fff1f2] text-rose-600 rounded-xl flex items-center justify-center shrink-0">
                       <Shield size={14} />
                     </div>
-                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Kesejahteraan & Bansos</h4>
+                    <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Kesejahteraan & Bansos</h4>
                   </div>
                   
                   <div className="flex flex-wrap gap-1.5">
@@ -890,7 +889,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
             <div className="pt-2 border-t border-slate-100">
               <button 
                 onClick={() => handleDelete(selectedResident.id)}
-                className="w-full py-3 bg-[#fff1f2] text-rose-600 hover:bg-rose-100 border border-rose-100 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                className="w-full py-3 bg-[#fff1f2] text-rose-600 hover:bg-rose-100 border border-rose-100 rounded-2xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Trash2 size={14} /> Arsipkan / Hapus Data Warga
               </button>
@@ -929,7 +928,7 @@ const BansosBadge = ({ label }: { label: string }) => (
 const VulnerabilityStat = ({ count, label }: { count: number, label: string }) => (
   <div className="p-2.5 bg-slate-50/80 rounded-2xl border border-slate-100 flex items-center justify-between shadow-2xs">
     <span className="text-[9px] font-bold text-slate-600 uppercase tracking-wider">{label}</span>
-    <span className="text-xs font-black text-rose-600">{count}</span>
+    <span className="text-xs font-semibold text-rose-600">{count}</span>
   </div>
 );
 

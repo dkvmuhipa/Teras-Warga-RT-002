@@ -30,49 +30,49 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
     >
       {/* Quick Stats Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-colors">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><Users size={20} /></div>
-            <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Terdaftar</span>
+            <span className="text-[9px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Terdaftar</span>
           </div>
-          <h3 className="text-3xl font-black text-slate-900">{liveStats.totalSoul} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
+          <h3 className="text-3xl font-semibold text-slate-900">{liveStats.totalSoul} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
           <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-emerald-600">
             <TrendingUp size={12} /> <span>Data Warga Real-time</span>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-colors">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-rose-500/5 rounded-full blur-2xl group-hover:bg-rose-500/10 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><Heart size={20} /></div>
-            <span className="text-[9px] font-black text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Rentan</span>
+            <span className="text-[9px] font-semibold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Rentan</span>
           </div>
-          <h3 className="text-3xl font-black text-slate-900">{liveStats.vulnerableTotal} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
+          <h3 className="text-3xl font-semibold text-slate-900">{liveStats.vulnerableTotal} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
           <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-slate-500">
             <Activity size={12} /> <span>Prioritas Bantuan & Layanan</span>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-colors">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><Baby size={20} /></div>
-            <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Kelahiran</span>
+            <span className="text-[9px] font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Kelahiran</span>
           </div>
-          <h3 className="text-3xl font-black text-slate-900">+{latestReport?.birthCount || 0} <span className="text-xs font-bold text-slate-400">Bulan Ini</span></h3>
+          <h3 className="text-3xl font-semibold text-slate-900">+{latestReport?.birthCount || 0} <span className="text-xs font-bold text-slate-400">Bulan Ini</span></h3>
           <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-emerald-600">
             <TrendingUp size={12} /> <span>Pertumbuhan Alami Positif</span>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+        <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-colors">
           <div className="absolute -right-4 -top-4 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors"></div>
           <div className="flex items-center justify-between mb-4">
             <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><ArrowRight size={20} /></div>
-            <span className="text-[9px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Mutasi Keluar</span>
+            <span className="text-[9px] font-semibold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Mutasi Keluar</span>
           </div>
-          <h3 className="text-3xl font-black text-slate-900">-{latestReport?.movedOutCount || 0} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
+          <h3 className="text-3xl font-semibold text-slate-900">-{latestReport?.movedOutCount || 0} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
           <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-amber-600">
             <TrendingDown size={12} /> <span>Pindah Domisili Keluar</span>
           </div>
@@ -83,10 +83,10 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
       <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200/80 shadow-sm space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
           <div>
-            <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-[9px] font-mono font-black uppercase tracking-wider">
+            <span className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-md text-[9px] font-mono font-semibold uppercase tracking-wider">
               KLASIFIKASI DOMISILI WARGA
             </span>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight mt-1">
+            <h3 className="text-lg font-semibold text-slate-900 tracking-tight mt-1">
               Perbandingan Penduduk Tetap vs Penduduk Musiman / Sewa
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -109,10 +109,10 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
             <div>
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
+                  <span className="px-2.5 py-1 bg-indigo-600 text-white rounded-lg text-[9px] font-mono font-semibold uppercase tracking-wider shadow-sm">
                     WARGA TETAP (KTP/KK RT 02)
                   </span>
-                  <h4 className="text-3xl font-black text-indigo-950 mt-3">
+                  <h4 className="text-3xl font-semibold text-indigo-950 mt-3">
                     {liveStats.totalTetap} <span className="text-sm font-bold text-indigo-600">Jiwa</span>
                   </h4>
                   <p className="text-xs text-indigo-800/80 font-medium mt-1">
@@ -128,11 +128,11 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
               <div className="grid grid-cols-2 gap-2 mt-4">
                 <div className="px-3 py-2 bg-white/80 border border-indigo-100/80 rounded-xl">
                   <span className="text-[9px] font-mono font-bold text-indigo-500 uppercase block">Laki-laki</span>
-                  <p className="text-sm font-black text-indigo-950">{liveStats.tetapMale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
+                  <p className="text-sm font-semibold text-indigo-950">{liveStats.tetapMale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
                 </div>
                 <div className="px-3 py-2 bg-white/80 border border-indigo-100/80 rounded-xl">
                   <span className="text-[9px] font-mono font-bold text-rose-500 uppercase block">Perempuan</span>
-                  <p className="text-sm font-black text-indigo-950">{liveStats.tetapFemale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
+                  <p className="text-sm font-semibold text-indigo-950">{liveStats.tetapFemale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
                 </div>
               </div>
             </div>
@@ -144,7 +144,7 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
               </div>
               <div className="w-full bg-indigo-100/70 h-2.5 rounded-full overflow-hidden">
                 <div 
-                  className="bg-indigo-600 h-full rounded-full transition-all duration-500"
+                  className="bg-indigo-600 h-full rounded-full transition-colors duration-500"
                   style={{ width: `${liveStats.totalSoul > 0 ? (liveStats.totalTetap / liveStats.totalSoul) * 100 : 0}%` }}
                 />
               </div>
@@ -156,10 +156,10 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
             <div>
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="px-2.5 py-1 bg-amber-500 text-slate-950 rounded-lg text-[9px] font-mono font-black uppercase tracking-wider shadow-sm">
+                  <span className="px-2.5 py-1 bg-amber-500 text-slate-950 rounded-lg text-[9px] font-mono font-semibold uppercase tracking-wider shadow-sm">
                     PENDUDUK PENDATANG / TIDAK TETAP (SEWA / KOST)
                   </span>
-                  <h4 className="text-3xl font-black text-amber-950 mt-3">
+                  <h4 className="text-3xl font-semibold text-amber-950 mt-3">
                     {liveStats.totalMusiman} <span className="text-sm font-bold text-amber-600">Jiwa</span>
                   </h4>
                   <p className="text-xs text-amber-800/80 font-medium mt-1">
@@ -175,11 +175,11 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
               <div className="grid grid-cols-2 gap-2 mt-4">
                 <div className="px-3 py-2 bg-white/80 border border-amber-100/80 rounded-xl">
                   <span className="text-[9px] font-mono font-bold text-indigo-500 uppercase block">Laki-laki</span>
-                  <p className="text-sm font-black text-amber-950">{liveStats.musimanMale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
+                  <p className="text-sm font-semibold text-amber-950">{liveStats.musimanMale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
                 </div>
                 <div className="px-3 py-2 bg-white/80 border border-amber-100/80 rounded-xl">
                   <span className="text-[9px] font-mono font-bold text-rose-500 uppercase block">Perempuan</span>
-                  <p className="text-sm font-black text-amber-950">{liveStats.musimanFemale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
+                  <p className="text-sm font-semibold text-amber-950">{liveStats.musimanFemale} <span className="text-[10px] text-slate-400 font-normal">Jiwa</span></p>
                 </div>
               </div>
             </div>
@@ -191,7 +191,7 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
               </div>
               <div className="w-full bg-amber-100/70 h-2.5 rounded-full overflow-hidden">
                 <div 
-                  className="bg-amber-500 h-full rounded-full transition-all duration-500"
+                  className="bg-amber-500 h-full rounded-full transition-colors duration-500"
                   style={{ width: `${liveStats.totalSoul > 0 ? (liveStats.totalMusiman / liveStats.totalSoul) * 100 : 0}%` }}
                 />
               </div>
@@ -204,7 +204,7 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
       <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-black text-slate-900 tracking-tight">Tren Pertumbuhan Penduduk</h3>
+            <h3 className="text-lg font-semibold text-slate-900 tracking-tight">Tren Pertumbuhan Penduduk</h3>
             <p className="text-[11px] text-slate-500 font-semibold">Visualisasi pergeseran total jiwa dalam 6 periode terakhir</p>
           </div>
           <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100"><BarChart3 size={18} className="text-slate-400" /></div>
@@ -235,7 +235,7 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
       {/* Live Demographic Metrics Section */}
       <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-100 shadow-sm space-y-6">
         <div>
-          <h3 className="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2">
             <Accessibility size={18} className="text-indigo-600" /> Distribusi Kelompok Usia & Demografi Terdaftar
           </h3>
           <p className="text-xs text-slate-500 font-semibold">Segmentasi data real-time penghuni aktif wilayah RT 02</p>
@@ -244,7 +244,7 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: Age demographics */}
           <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Segmentasi Usia & Pendidikan Warga</h4>
+            <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Segmentasi Usia & Pendidikan Warga</h4>
             {[
               { label: 'Bayi & Balita (0-5 tahun)', count: liveStats.totalBaby + liveStats.totalToddler, colorClass: 'bg-emerald-500', dotClass: 'bg-emerald-500' },
               { label: 'Anak-anak (6-12 tahun)', count: liveStats.totalChild, colorClass: 'bg-blue-500', dotClass: 'bg-blue-500' },
@@ -260,11 +260,11 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
                       <span className={`w-2.5 h-2.5 rounded-full ${item.dotClass}`} />
                       {item.label}
                     </span>
-                    <span className="text-slate-500 font-black">{item.count} <span className="text-[10px] text-slate-400 font-bold">Jiwa ({pct.toFixed(1)}%)</span></span>
+                    <span className="text-slate-500 font-semibold">{item.count} <span className="text-[10px] text-slate-400 font-bold">Jiwa ({pct.toFixed(1)}%)</span></span>
                   </div>
                   <div className="w-full bg-slate-50 h-2.5 rounded-full overflow-hidden border border-slate-150">
                     <div 
-                      className={`${item.colorClass} h-full rounded-full transition-all duration-500`}
+                      className={`${item.colorClass} h-full rounded-full transition-colors duration-500`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -275,7 +275,7 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
 
           {/* Right Column: Key Vulnerabilities & Special Status */}
           <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Status Proteksi Sosial & Jaring Pengaman</h4>
+            <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Status Proteksi Sosial & Jaring Pengaman</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 { label: 'Penyandang Disabilitas', count: liveStats.totalDisability, icon: Accessibility, textClass: 'text-rose-600', bgClass: 'bg-rose-50 border-rose-100', badge: 'Disabilitas' },
@@ -285,16 +285,16 @@ export const PopulationOverviewTab: React.FC<PopulationOverviewTabProps> = ({
               ].map((item, idx) => {
                 const Icon = item.icon;
                 return (
-                  <div key={idx} className={`flex flex-col justify-between p-4 rounded-2xl border ${item.bgClass} transition-all hover:scale-[1.02]`}>
+                  <div key={idx} className={`flex flex-col justify-between p-4 rounded-2xl border ${item.bgClass} transition-colors hover:scale-[1.02]`}>
                     <div className="flex items-center justify-between">
                       <div className={`p-2 bg-white rounded-xl ${item.textClass} shadow-xs`}>
                         <Icon size={16} />
                       </div>
-                      <span className="text-[8px] font-black uppercase tracking-wider text-slate-400">{item.badge}</span>
+                      <span className="text-[8px] font-semibold uppercase tracking-wider text-slate-400">{item.badge}</span>
                     </div>
                     <div className="mt-4">
                       <h5 className="text-[11px] font-bold text-slate-500 leading-snug">{item.label}</h5>
-                      <p className={`text-2xl font-black ${item.textClass} mt-1`}>
+                      <p className={`text-2xl font-semibold ${item.textClass} mt-1`}>
                         {item.count} <span className="text-xs font-bold text-slate-400 ml-0.5">Jiwa</span>
                       </p>
                     </div>

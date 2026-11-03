@@ -142,14 +142,14 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
     >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Struktur Kepengurusan RT 02</h2>
+          <h2 className="text-3xl font-semibold text-slate-900 tracking-tight">Struktur Kepengurusan RT 02</h2>
           <p className="text-slate-500 font-medium mt-1">Kelola data struktur organisasi, pembagian seksi, dan keanggotaan aktif Rukun Tetangga.</p>
         </div>
         <div className="flex items-center gap-2.5 flex-wrap">
           <div className="flex bg-white p-1 border border-slate-200 rounded-2xl shadow-xs">
             <button
               onClick={() => setViewMode('cards')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
                 viewMode === 'cards' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -157,7 +157,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
             </button>
             <button
               onClick={() => setViewMode('tree')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 ${
                 viewMode === 'tree' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -167,12 +167,12 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
 
           <button
             onClick={() => generateOfficialStructurePDF(officials)}
-            className="flex items-center gap-2 px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-colors active:scale-95"
           >
             <Printer size={14} /> Cetak SK / Struktur RT
           </button>
 
-          <Button onClick={() => { resetForms(); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all hover:scale-105 active:scale-95">
+          <Button onClick={() => { resetForms(); setIsModalOpen(true); }} className="shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-colors hover:scale-105 active:scale-95">
             <Plus size={18} className="mr-2"/> Tambah Personil
           </Button>
         </div>
@@ -183,7 +183,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         <div className="bg-gradient-to-br from-indigo-50 to-violet-50 text-indigo-950 p-6 rounded-[2rem] border border-indigo-100/60 shadow-sm flex items-center justify-between">
           <div className="space-y-2">
             <p className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">Total Personil</p>
-            <p className="text-3xl font-black text-indigo-900 leading-none">{officials.length} <span className="text-xs font-semibold text-indigo-500">Anggota</span></p>
+            <p className="text-3xl font-semibold text-indigo-900 leading-none">{officials.length} <span className="text-xs font-semibold text-indigo-500">Anggota</span></p>
             <p className="text-[11px] text-indigo-600 font-medium">Pengurus terdaftar aktif di database RT</p>
           </div>
           <div className="p-4 bg-white/80 rounded-2xl border border-indigo-200/50 text-indigo-600">
@@ -194,7 +194,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-950 p-6 rounded-[2rem] border border-emerald-100/60 shadow-sm flex items-center justify-between">
           <div className="space-y-2">
             <p className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest">Masa Bakti RT</p>
-            <p className="text-xl font-black text-emerald-900 leading-none">Periode Berlangsung</p>
+            <p className="text-xl font-semibold text-emerald-900 leading-none">Periode Berlangsung</p>
             <p className="text-[11px] text-emerald-600 font-medium">Berdasarkan keputusan mufakat warga</p>
           </div>
           <div className="p-4 bg-white/80 rounded-2xl border border-emerald-200/50 text-emerald-600">
@@ -205,7 +205,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         <div className="bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900 p-6 rounded-[2rem] border border-slate-200 shadow-sm flex items-center justify-between">
           <div className="space-y-2">
             <p className="text-[10px] text-slate-500 font-extrabold uppercase tracking-widest">Kelengkapan Jabatan</p>
-            <p className="text-3xl font-black text-slate-800 leading-none">
+            <p className="text-3xl font-semibold text-slate-800 leading-none">
               {officials.some(o => o.role.toLowerCase().includes('ketua')) ? '100%' : '75%'}
             </p>
             <p className="text-[11px] text-slate-500 font-medium">Badan Eksekutif Rukun Tetangga</p>
@@ -219,8 +219,8 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
       {viewMode === 'tree' ? (
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-150 shadow-xs space-y-8">
           <div className="text-center max-w-xl mx-auto">
-            <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase tracking-widest rounded-full">Struktur Bagan Eksekutif</span>
-            <h3 className="text-xl font-black text-slate-900 mt-2">Bagan Hirarki Pengurus RT 02</h3>
+            <span className="px-3 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-semibold uppercase tracking-widest rounded-full">Struktur Bagan Eksekutif</span>
+            <h3 className="text-xl font-semibold text-slate-900 mt-2">Bagan Hirarki Pengurus RT 02</h3>
             <p className="text-xs text-slate-500 font-medium">Susunan kepengurusan mufakat warga periode berlangsung</p>
           </div>
 
@@ -233,8 +233,8 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
                   className="w-16 h-16 rounded-2xl mx-auto object-cover border-2 border-white/40 mb-3"
                   alt={chairman.name}
                 />
-                <h4 className="font-black text-base">{chairman.name}</h4>
-                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mt-0.5">{chairman.role}</p>
+                <h4 className="font-semibold text-base">{chairman.name}</h4>
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-indigo-200 mt-0.5">{chairman.role}</p>
                 <p className="text-[11px] text-indigo-100 font-semibold mt-2 flex items-center justify-center gap-1">
                   <MapPin size={12} /> {getHouseDisplayLabel(chairman.houseId, houses)}
                 </p>
@@ -246,14 +246,14 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
           {/* Org Chart Tier 2: Sekretaris & Bendahara */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {officials.filter(o => !o.role.toLowerCase().includes('ketua') || o.role.toLowerCase().includes('wakil')).map(officer => (
-              <div key={officer.id} className="p-5 bg-slate-50 border border-slate-200 rounded-3xl text-center hover:border-indigo-300 transition-all">
+              <div key={officer.id} className="p-5 bg-slate-50 border border-slate-200 rounded-3xl text-center hover:border-indigo-300 transition-colors">
                 <img 
                   src={officer.photo || `https://ui-avatars.com/api/?name=${officer.name}&background=random&size=128`}
                   className="w-14 h-14 rounded-2xl mx-auto object-cover border border-slate-200 mb-3"
                   alt={officer.name}
                 />
-                <h4 className="font-black text-slate-800 text-sm">{officer.name}</h4>
-                <span className="inline-block px-2.5 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-black uppercase tracking-widest rounded-full mt-1">
+                <h4 className="font-semibold text-slate-800 text-sm">{officer.name}</h4>
+                <span className="inline-block px-2.5 py-0.5 bg-indigo-100 text-indigo-700 text-[9px] font-semibold uppercase tracking-widest rounded-full mt-1">
                   {officer.role}
                 </span>
                 <p className="text-xs text-slate-500 font-semibold mt-2 flex items-center justify-center gap-1">
@@ -275,15 +275,15 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
                   key={o.id} 
                   variants={itemVariants}
                   layout
-                  className="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 relative flex flex-col justify-between"
+                  className="group bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-2xs hover:-translate-y-1 transition-colors duration-300 relative flex flex-col justify-between"
                 >
                   <div>
                     <div className={`h-28 relative ${isChairman ? 'bg-gradient-to-br from-violet-600 to-indigo-600' : 'bg-slate-800'}`}>
                       <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                       <div className="absolute top-4 right-4">
                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <button onClick={() => handleEditOfficial(o)} className="p-2 bg-white/20 hover:bg-white text-white hover:text-indigo-600 rounded-xl backdrop-blur-sm transition-all shadow-sm"><Edit2 size={14}/></button>
-                          <button onClick={() => handleDeleteOfficial(o.id)} className="p-2 bg-white/20 hover:bg-rose-500 text-white rounded-xl backdrop-blur-sm transition-all shadow-sm"><Trash2 size={14}/></button>
+                          <button onClick={() => handleEditOfficial(o)} className="p-2 bg-white/20 hover:bg-white text-white hover:text-indigo-600 rounded-xl backdrop-blur-sm transition-colors shadow-sm"><Edit2 size={14}/></button>
+                          <button onClick={() => handleDeleteOfficial(o.id)} className="p-2 bg-white/20 hover:bg-rose-500 text-white rounded-xl backdrop-blur-sm transition-colors shadow-sm"><Trash2 size={14}/></button>
                         </div>
                       </div>
                     </div>
@@ -299,8 +299,8 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
                     </div>
 
                     <div className="pt-16 pb-4 px-6 text-center mt-2">
-                      <h3 className="font-black text-slate-800 text-lg mb-1 group-hover:text-indigo-600 transition-colors">{o.name}</h3>
-                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 ${isChairman ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
+                      <h3 className="font-semibold text-slate-800 text-lg mb-1 group-hover:text-indigo-600 transition-colors">{o.name}</h3>
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest mb-4 ${isChairman ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' : 'bg-slate-50 text-slate-500 border border-slate-100'}`}>
                         <Briefcase size={10} /> {o.role}
                       </div>
                       
@@ -368,7 +368,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
                 <User size={32} />
               </div>
               <p className="text-slate-400 font-bold">Belum ada data pengurus.</p>
-              <button onClick={() => setIsModalOpen(true)} className="mt-4 text-xs font-black text-indigo-600 uppercase tracking-widest hover:underline">Tambah Sekarang</button>
+              <button onClick={() => setIsModalOpen(true)} className="mt-4 text-xs font-semibold text-indigo-600 uppercase tracking-widest hover:underline">Tambah Sekarang</button>
             </motion.div>
           )}
 
@@ -376,18 +376,18 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
         <form onSubmit={handleSaveOfficial} className="space-y-5">
           <div>
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nama Lengkap</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offName} onChange={e=>setOffName(e.target.value)} placeholder="Nama lengkap..." />
+            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors" value={offName} onChange={e=>setOffName(e.target.value)} placeholder="Nama lengkap..." />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Jabatan</label>
-              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offRole} onChange={e=>setOffRole(e.target.value)} placeholder="Contoh: Ketua RT" />
+              <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors" value={offRole} onChange={e=>setOffRole(e.target.value)} placeholder="Contoh: Ketua RT" />
             </div>
             <div>
               <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Blok Rumah</label>
               <input 
                 list="house-list"
-                className={`w-full p-3 bg-slate-50 border rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all ${
+                className={`w-full p-3 bg-slate-50 border rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors ${
                   offHouse && !houses.some(h => formatHouseId(h.id) === formatHouseId(offHouse)) 
                   ? 'border-rose-300 bg-rose-50' 
                   : 'border-slate-200'
@@ -412,34 +412,34 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
           </div>
           <div>
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Nomor Telepon / WA</label>
-            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offPhone} onChange={e=>setOffPhone(e.target.value)} placeholder="08..." />
+            <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors" value={offPhone} onChange={e=>setOffPhone(e.target.value)} placeholder="08..." />
           </div>
 
           <div>
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Email</label>
-            <input type="email" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offEmail} onChange={e=>setOffEmail(e.target.value)} placeholder="email@example.com"/>
+            <input type="email" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors" value={offEmail} onChange={e=>setOffEmail(e.target.value)} placeholder="email@example.com"/>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Mulai Jabatan</label>
-              <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offTermStart} onChange={e=>setOffTermStart(e.target.value)}/>
+              <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors" value={offTermStart} onChange={e=>setOffTermStart(e.target.value)}/>
             </div>
             <div>
               <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Akhir Jabatan</label>
-              <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offTermEnd} onChange={e=>setOffTermEnd(e.target.value)}/>
+              <input type="date" className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors" value={offTermEnd} onChange={e=>setOffTermEnd(e.target.value)}/>
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-wide">Tugas & Tanggung Jawab</label>
-            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all min-h-[100px]" value={offDuties} onChange={e=>setOffDuties(e.target.value)} placeholder="Tuliskan tugas per baris..."/>
+            <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors min-h-[100px]" value={offDuties} onChange={e=>setOffDuties(e.target.value)} placeholder="Tuliskan tugas per baris..."/>
             <p className="text-[10px] text-slate-400 mt-1 ml-1">Pisahkan setiap tugas dengan baris baru.</p>
           </div>
           
           <div className="flex items-center justify-between p-1 bg-slate-100 rounded-xl">
-            <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
-            <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
+            <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
+            <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
           </div>
 
           {imageType === 'upload' ? (
@@ -462,7 +462,7 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
           ) : (
             <div>
                 <label className="block text-xs font-bold mb-1.5 text-slate-700 uppercase tracking-wide">URL Foto Profil</label>
-                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all" value={offPhoto} onChange={e=>setOffPhoto(e.target.value)} placeholder="https://..."/>
+                <input className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-colors" value={offPhoto} onChange={e=>setOffPhoto(e.target.value)} placeholder="https://..."/>
                 <p className="text-[10px] text-slate-400 mt-1.5 ml-1">*Biarkan kosong untuk menggunakan avatar default.</p>
             </div>
           )}

@@ -189,9 +189,9 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                    if (validateTab('basic') && validateTab('demographics')) setActiveFormTab('family');
                 }
               }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-all cursor-pointer ${
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-colors cursor-pointer ${
                 activeFormTab === tab.id 
-                  ? 'bg-white text-indigo-600 shadow-xs border border-slate-200/60 font-black' 
+                  ? 'bg-white text-indigo-600 shadow-xs border border-slate-200/60 font-semibold' 
                   : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'
               }`}
             >
@@ -233,7 +233,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           <button
                             type="button"
                             onClick={() => setFormData({...formData, isVerified: !formData.isVerified})}
-                            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
                               formData.isVerified 
                                 ? 'bg-emerald-600 text-white shadow-xs' 
                                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'
@@ -246,7 +246,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           <button
                             type="button"
                             onClick={() => setFormData({...formData, isInitialData: !formData.isInitialData})}
-                            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
                               !formData.isInitialData 
                                 ? 'bg-slate-900 text-white shadow-xs' 
                                 : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100'
@@ -265,7 +265,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               pbbStatus: formData.pbbStatus === 'Sudah Diambil' ? 'Belum Diambil' : 'Sudah Diambil',
                               pbbYear: formData.pbbYear || new Date().getFullYear().toString()
                             })}
-                            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
+                            className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold transition-colors ${
                               formData.pbbStatus === 'Sudah Diambil' 
                                 ? 'bg-[#10b981] text-white shadow-xs' 
                                 : 'bg-[#fffbeb] text-[#d97706] border border-[#fde68a] hover:bg-[#fef3c7]'
@@ -299,7 +299,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                key={g.id}
                                type="button"
                                onClick={() => setFormData({...formData, gender: g.id as any})}
-                               className={`py-2 rounded-lg text-xs font-bold border transition-all ${
+                               className={`py-2 rounded-lg text-xs font-bold border transition-colors ${
                                  formData.gender === g.id 
                                    ? 'bg-[#0f172a] text-white border-[#0f172a]' 
                                    : 'bg-[#f8fafc] text-slate-500 border border-slate-200 hover:bg-slate-50'
@@ -359,7 +359,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             return (
                               <div className="mt-1.5 p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2 text-[11px] font-bold text-rose-700 leading-tight">
                                 <AlertCircle size={15} className="text-rose-600 shrink-0 mt-0.5" />
-                                <span>⚠️ NIK ini sudah terdaftar atas nama <strong>{dup.residentName}</strong> ({dup.role}) di Unit {dup.houseId}.</span>
+                                <span>NIK ini sudah terdaftar atas nama <strong>{dup.residentName}</strong> ({dup.role}) di Unit {dup.houseId}.</span>
                               </div>
                             );
                           }
@@ -389,7 +389,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             return (
                               <div className="mt-1.5 p-2.5 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2 text-[11px] font-bold text-amber-800 leading-tight">
                                 <AlertCircle size={15} className="text-amber-600 shrink-0 mt-0.5" />
-                                <span>⚠️ No. KK ini sudah terdaftar pada hunian Blok {dupKk.block}-{dupKk.number} ({dupKk.headOfFamily || 'Warga'}).</span>
+                                <span>No. KK ini sudah terdaftar pada hunian Blok {dupKk.block}-{dupKk.number} ({dupKk.headOfFamily || 'Warga'}).</span>
                               </div>
                             );
                           }
@@ -490,7 +490,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                         });
                                      }
                                    }}
-                                   className={`py-1.5 rounded-lg text-xs font-bold border transition-all text-center ${
+                                   className={`py-1.5 rounded-lg text-xs font-bold border transition-colors text-center ${
                                      formData.status === st.id 
                                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
                                        : 'bg-slate-50 text-slate-500 border border-slate-200/80 hover:bg-white hover:text-slate-800'
@@ -511,7 +511,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                      key={st}
                                      type="button"
                                      onClick={() => setFormData({...formData, residenceType: (st === 'Keluarga' ? 'Rumah Keluarga' : st) as any})}
-                                     className={`py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                     className={`py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                                        formData.residenceType === (st === 'Keluarga' ? 'Rumah Keluarga' : st) 
                                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' 
                                          : 'bg-slate-50 text-slate-500 border border-slate-200/80 hover:bg-white hover:text-slate-800'
@@ -552,7 +552,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                       ownerName: detectedOwner, 
                                       ownerPhone: detectedPhone || formData.ownerPhone || ''
                                     })}
-                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold transition-all shadow-xs cursor-pointer w-fit"
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer w-fit"
                                   >
                                     <span>Gunakan Data RT: {detectedOwner}</span>
                                   </button>
@@ -600,7 +600,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                     addressKtp: (!formData.addressKtp || formData.addressKtp.toLowerCase().includes('tondo') || formData.addressKtp.toLowerCase().includes('pue lombe')) ? localAddr : formData.addressKtp
                                   });
                                 }}
-                                className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                                className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                                   formData.ktpStatus === 'Sesuai Domisili' || (!formData.ktpStatus && formData.addressKtp?.toLowerCase().includes('tondo'))
                                     ? 'bg-emerald-600 text-white shadow-xs'
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -617,7 +617,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                     ktpStatus: 'Luar Wilayah (Belum Mutasi)'
                                   });
                                 }}
-                                className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                                className={`w-full py-2 px-3 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                                   formData.ktpStatus === 'Luar Wilayah (Belum Mutasi)'
                                     ? 'bg-amber-600 text-white shadow-xs'
                                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -646,8 +646,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                   toast.success(`Alamat KTP diset: ${localAddr}`);
                                 }}
                                 className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center justify-center gap-1 transition-colors cursor-pointer self-start sm:self-auto active:scale-95"
-                              >
-                                📍 Set Alamat Huntap Tondo 2 (Jl. Pue Lombe)
+                              >📍 Set Alamat Huntap Tondo 2 (Jl. Pue Lombe)
                               </button>
                             </div>
                             <textarea
@@ -660,7 +659,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                   ? `Contoh: Jl. Pue Lombe, Huntap Tondo 2 Blok ${formData.block || 'C10'}-${formData.number || '01'}`
                                   : 'Tuliskan alamat lengkap asal sesuai yang tertera di KTP fisik warga...'
                               }
-                              className="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all resize-none leading-relaxed"
+                              className="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-colors resize-none leading-relaxed"
                             />
                             {(formData.ktpStatus === 'Sesuai Domisili' || (!formData.ktpStatus && formData.addressKtp?.toLowerCase().includes('tondo'))) && (
                               <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
@@ -768,7 +767,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                           setFormData({ ...formData, tags: [...current, tag] });
                                         }
                                       }}
-                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-all border ${
+                                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition-colors border ${
                                         isSelected 
                                           ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' 
                                           : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-indigo-50 hover:text-indigo-600'
@@ -818,17 +817,17 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Meteran Hunian</label>
                               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2">
                                 {[
-                                  { id: 'Terpasang', label: 'Terpasang', activeClass: 'bg-blue-50 border-blue-500 text-blue-800 ring-1 ring-blue-500/30 font-black' },
-                                  { id: 'Belum Terpasang', label: 'Belum Ada', activeClass: 'bg-rose-50 border-rose-500 text-rose-800 ring-1 ring-rose-500/30 font-black' },
-                                  { id: 'Hilang', label: '🚨 Hilang', activeClass: 'bg-purple-50 border-purple-500 text-purple-800 ring-1 ring-purple-500/30 font-black' },
-                                  { id: 'Dalam Proses Pengajuan', label: 'Pengajuan', activeClass: 'bg-amber-50 border-amber-500 text-amber-800 ring-1 ring-amber-500/30 font-black' },
-                                  { id: 'Bermasalah / Rusak', label: 'Rusak', activeClass: 'bg-slate-100 border-slate-500 text-slate-800 ring-1 ring-slate-500/30 font-black' },
+                                  { id: 'Terpasang', label: 'Terpasang', activeClass: 'bg-blue-50 border-blue-500 text-blue-800 ring-1 ring-blue-500/30 font-semibold' },
+                                  { id: 'Belum Terpasang', label: 'Belum Ada', activeClass: 'bg-rose-50 border-rose-500 text-rose-800 ring-1 ring-rose-500/30 font-semibold' },
+                                  { id: 'Hilang', label: '🚨 Hilang', activeClass: 'bg-purple-50 border-purple-500 text-purple-800 ring-1 ring-purple-500/30 font-semibold' },
+                                  { id: 'Dalam Proses Pengajuan', label: 'Pengajuan', activeClass: 'bg-amber-50 border-amber-500 text-amber-800 ring-1 ring-amber-500/30 font-semibold' },
+                                  { id: 'Bermasalah / Rusak', label: 'Rusak', activeClass: 'bg-slate-100 border-slate-500 text-slate-800 ring-1 ring-slate-500/30 font-semibold' },
                                 ].map((item, idx) => (
                                   <button
                                     key={item.id}
                                     type="button"
                                     onClick={() => setFormData({ ...formData, pdamStatus: item.id as any })}
-                                    className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer truncate ${
+                                    className={`px-2.5 py-2 rounded-xl text-xs font-bold border transition-colors text-center cursor-pointer truncate ${
                                       idx === 4 ? 'col-span-2 sm:col-span-1 lg:col-span-2' : ''
                                     } ${
                                       (formData.pdamStatus || 'Terpasang') === item.id
@@ -844,8 +843,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
                             {formData.pdamStatus === 'Hilang' && (
                               <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl space-y-2">
-                                <span className="text-[11px] font-bold text-purple-800 block">
-                                  ⚠️ Meteran Raib: Pastikan stop kran pipa distribusi telah ditutup/didop agar tidak bocor.
+                                <span className="text-[11px] font-bold text-purple-800 block">Meteran Raib: Pastikan stop kran pipa distribusi telah ditutup/didop agar tidak bocor.
                                 </span>
                                 <FormField 
                                   label="Perkiraan Tanggal Hilang (YYYY-MM-DD)" 
@@ -886,7 +884,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           
                           <div className="flex gap-2 items-stretch">
                              <input 
-                               className="flex-1 min-w-0 py-1.5 px-2 bg-white/5 border border-white/10 rounded-lg text-lg font-bold text-white focus:bg-white/10 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 transition-all outline-none text-center tracking-widest" 
+                               className="flex-1 min-w-0 py-1.5 px-2 bg-white/5 border border-white/10 rounded-lg text-lg font-bold text-white focus:bg-white/10 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 transition-colors outline-none text-center tracking-widest" 
                                value={formData.accessCode ?? ''} 
                                onChange={e => setFormData({...formData, accessCode: e.target.value})} 
                                placeholder="XXXXXX" 
@@ -898,7 +896,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                  setFormData({...formData, accessCode: generated});
                                  toast.success(`PIN Baru Berhasil Dibuat: ${generated}`);
                                }}
-                               className="shrink-0 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs uppercase tracking-wider transition-all whitespace-nowrap flex items-center justify-center gap-1"
+                               className="shrink-0 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-xs uppercase tracking-wider transition-colors whitespace-nowrap flex items-center justify-center gap-1"
                              >
                                Buat PIN
                              </button>
@@ -908,7 +906,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                  href={`https://wa.me/${formData.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Halo Bpk/Ibu ${formData.headOfFamily || 'Warga'}, berikut PIN Aktivasi Akun Teras Warga RT 02 Anda: *${formData.accessCode}*. Silakan gunakan untuk login.`)}`}
                                  target="_blank"
                                  rel="noopener noreferrer"
-                                 className="shrink-0 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1"
+                                 className="shrink-0 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-1"
                                  title="Kirim PIN ke WhatsApp Warga"
                                >
                                  <Send size={13} />
@@ -959,7 +957,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                     ...formData,
                                     pbbProofAtRt: formData.pbbProofAtRt === 'Ada di RT' ? 'Belum Ada' : 'Ada di RT'
                                   })}
-                                  className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition-all ${
+                                  className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition-colors ${
                                     formData.pbbProofAtRt === 'Ada di RT'
                                       ? 'bg-sky-50 text-sky-700 border-sky-200'
                                       : 'bg-slate-50 text-slate-500 border-slate-200'
@@ -978,7 +976,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                     pbbPaymentStatus: formData.pbbPaymentStatus === 'Lunas' ? 'Belum Lunas' : 'Lunas',
                                     pbbPaidDate: formData.pbbPaymentStatus === 'Lunas' ? '' : (formData.pbbPaidDate || new Date().toISOString().split('T')[0])
                                   })}
-                                  className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition-all ${
+                                  className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition-colors ${
                                     formData.pbbPaymentStatus === 'Lunas'
                                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                       : 'bg-rose-50 text-rose-700 border-rose-200'
@@ -1027,22 +1025,20 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                 {/* 1. Live Demographics Summary Cards Header */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div className="bg-[#eef2ff] border border-indigo-150 p-3 rounded-xl flex items-center gap-3">
-                    <div className="w-9 h-9 bg-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
-                      👶 {formData.babyCount || 0}
+                    <div className="w-9 h-9 bg-indigo-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">👶 {formData.babyCount || 0}
                     </div>
                     <div>
                       <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Bayi / Balita</p>
-                      <p className="text-xs font-black text-indigo-950">{(formData.babyCount || 0) + (formData.toddlerCount || 0)} Jiwa</p>
+                      <p className="text-xs font-semibold text-indigo-950">{(formData.babyCount || 0) + (formData.toddlerCount || 0)} Jiwa</p>
                     </div>
                   </div>
 
                   <div className="bg-[#f0fdf4] border border-emerald-150 p-3 rounded-xl flex items-center gap-3">
-                    <div className="w-9 h-9 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
-                      👵 {formData.elderlyCount || 0}
+                    <div className="w-9 h-9 bg-emerald-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">👵 {formData.elderlyCount || 0}
                     </div>
                     <div>
                       <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lansia</p>
-                      <p className="text-xs font-black text-emerald-950">{formData.elderlyCount || 0} Jiwa</p>
+                      <p className="text-xs font-semibold text-emerald-950">{formData.elderlyCount || 0} Jiwa</p>
                     </div>
                   </div>
 
@@ -1052,17 +1048,16 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     </div>
                     <div>
                       <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Disabilitas</p>
-                      <p className="text-xs font-black text-amber-950">{formData.isDisability ? 'Terdata' : 'Nihil'}</p>
+                      <p className="text-xs font-semibold text-amber-950">{formData.isDisability ? 'Terdata' : 'Nihil'}</p>
                     </div>
                   </div>
 
                   <div className="bg-[#fdf2f8] border border-pink-150 p-3 rounded-xl flex items-center gap-3">
-                    <div className="w-9 h-9 bg-pink-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
-                      🎗️
+                    <div className="w-9 h-9 bg-pink-600 text-white rounded-lg flex items-center justify-center font-bold text-xs shrink-0">🎗️
                     </div>
                     <div>
                       <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Bansos</p>
-                      <p className="text-xs font-black text-pink-950">
+                      <p className="text-xs font-semibold text-pink-950">
                         {formData.isPKH || formData.isBLT || formData.isBPNT ? 'Penerima' : 'Non-Bansos'}
                       </p>
                     </div>
@@ -1085,7 +1080,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Pendidikan Terakhir <span className="text-rose-500">*</span></label>
                       <div className="relative">
                         <select 
-                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer"
                           value={formData.education ?? ''} 
                           onChange={e => setFormData({...formData, education: e.target.value})}
                         >
@@ -1101,7 +1096,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Sektor Pekerjaan <span className="text-rose-500">*</span></label>
                       <div className="relative">
                         <select 
-                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer"
                           value={formData.jobCategory ?? ''} 
                           onChange={e => setFormData({...formData, jobCategory: e.target.value})}
                         >
@@ -1143,7 +1138,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Ekonomi</label>
                       <div className="relative">
                         <select 
-                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer" 
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer" 
                           value={formData.economicStatus ?? ''} 
                           onChange={e => {
                             const val = e.target.value;
@@ -1175,7 +1170,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       </label>
                       <div className="relative">
                         <select 
-                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer" 
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer" 
                           value={formData.wasteTier ?? ''} 
                           onChange={e => setFormData({...formData, wasteTier: e.target.value ? (e.target.value as any) : undefined})}
                         >
@@ -1207,7 +1202,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             type="number" 
                             min="0"
                             placeholder="0"
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                             value={formData.twoWheelCount ?? 0}
                             onChange={(e) => {
                               const w2 = parseInt(e.target.value) || 0;
@@ -1229,7 +1224,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             type="number" 
                             min="0"
                             placeholder="0"
-                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                             value={formData.fourWheelCount ?? 0}
                             onChange={(e) => {
                               const w4 = parseInt(e.target.value) || 0;
@@ -1249,7 +1244,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     {formData.economicStatus === 'Pra-Sejahtera' && ((formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) > 3 || (formData.vehicleCount || 0) > 3) && (
                       <div className="md:col-span-12 p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs font-bold text-amber-800">
                         <AlertCircle size={15} className="text-amber-600 shrink-0" />
-                        <span>💡 Catatan Verifikasi: Jumlah kendaraan ({(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) || formData.vehicleCount}) relatif tinggi untuk status Pra-Sejahtera. Mohon periksa kembali.</span>
+                        <span>Catatan Verifikasi: Jumlah kendaraan ({(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) || formData.vehicleCount}) relatif tinggi untuk status Pra-Sejahtera. Mohon periksa kembali.</span>
                       </div>
                     )}
 
@@ -1261,7 +1256,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             <Store size={16} />
                           </div>
                           <div>
-                            <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Pendataan Usaha / UMKM Warga</h4>
+                            <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Pendataan Usaha / UMKM Warga</h4>
                             <p className="text-[10px] text-slate-400 font-medium">Sensus potensi ekonomi mikro & usaha mandiri hunian RT 02</p>
                           </div>
                         </div>
@@ -1277,7 +1272,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               businessLocation: formData.businessLocation || 'Di Rumah / Kavling'
                             })}
                           />
-                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600 relative"></div>
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-colors peer-checked:bg-emerald-600 relative"></div>
                           <span className="text-xs font-bold text-slate-700">
                             {formData.hasBusiness ? 'Memiliki Usaha (Aktif)' : 'Tidak Ada Usaha'}
                           </span>
@@ -1293,7 +1288,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             <input 
                               type="text"
                               placeholder="Contoh: Warung Berkah, Dapur Mama Tondo, Jasa AC..."
-                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                               value={formData.businessName ?? ''}
                               onChange={e => setFormData({...formData, businessName: e.target.value})}
                             />
@@ -1305,13 +1300,13 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             </label>
                             <div className="relative">
                               <select 
-                                className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
+                                className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer"
                                 value={formData.businessCategory ?? 'Kuliner & Minuman'}
                                 onChange={e => setFormData({...formData, businessCategory: e.target.value})}
                               >
                                 <option value="Kuliner & Minuman">🍜 Kuliner & Makanan Minuman</option>
                                 <option value="Warung Sembako & Kelontong">🛒 Warung Sembako & Kios Harian</option>
-                                <option value="Jasa & Servis / Reparasi">🔧 Jasa Keahlian / Servis / Laundry</option>
+                                <option value="Jasa & Servis / Reparasi">Jasa Keahlian / Servis / Laundry</option>
                                 <option value="Pertanian & Hasil Kebun">🌱 Hasil Kebun / Hidroponik / Ternak</option>
                                 <option value="Fashion, Kerajinan & Jahit">👗 Fashion, Jahit & Kerajinan Tangan</option>
                                 <option value="Pulsa & Pembayaran PPOB">📱 Konter Pulsa & Loket Pembayaran</option>
@@ -1327,11 +1322,11 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             </label>
                             <div className="relative">
                               <select 
-                                className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
+                                className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer"
                                 value={formData.businessLocation ?? 'Di Rumah / Kavling'}
                                 onChange={e => setFormData({...formData, businessLocation: e.target.value})}
                               >
-                                <option value="Di Rumah / Kavling">🏠 Di Dalam Rumah / Kavling Huntap</option>
+                                <option value="Di Rumah / Kavling">Di Dalam Rumah / Kavling Huntap</option>
                                 <option value="Kios / Lapak Depan">🏪 Kios / Teras Depan Rumah</option>
                                 <option value="Online / COD">🌐 Online / Medsos / COD</option>
                                 <option value="Keliling / Luar">🛵 Usaha Keliling / Luar Kavling</option>
@@ -1347,7 +1342,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             <input 
                               type="text"
                               placeholder="08xxxxxxxxxx (jika berbeda dari kontak KK)"
-                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                               value={formData.businessPhone ?? ''}
                               onChange={e => setFormData({...formData, businessPhone: e.target.value})}
                             />
@@ -1360,7 +1355,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             <textarea 
                               rows={2}
                               placeholder="Contoh: Menjual aneka gorengan, nasi kuning pagi hari, menerima pesanan snack box..."
-                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors resize-none"
                               value={formData.businessDescription ?? ''}
                               onChange={e => setFormData({...formData, businessDescription: e.target.value})}
                             />
@@ -1385,7 +1380,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Status Perkawinan</label>
                       <div className="relative">
                         <select 
-                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer" 
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer" 
                           value={formData.maritalStatus ?? 'Belum Kawin'} 
                           onChange={e => setFormData({...formData, maritalStatus: e.target.value as any})}
                         >
@@ -1402,7 +1397,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <label className="block text-xs font-semibold text-slate-600 mb-1.5">Golongan Darah</label>
                       <div className="relative">
                         <select 
-                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer" 
+                          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer" 
                           value={formData.bloodType ?? '-'} 
                           onChange={e => setFormData({...formData, bloodType: e.target.value as any})}
                         >
@@ -1514,7 +1509,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       <button 
                         type="button"
                         onClick={() => setFormData({ ...formData, useManualDemographics: !formData.useManualDemographics })}
-                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all border text-[10px] uppercase font-bold tracking-wider ${
+                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors border text-[10px] uppercase font-bold tracking-wider ${
                           formData.useManualDemographics 
                             ? 'bg-amber-50 border-amber-200 text-amber-700 shadow-xs' 
                             : 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-xs'
@@ -1548,7 +1543,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           </div>
                           <input 
                             type="number" 
-                            className={`w-full px-3 py-1.5 border rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-all ${
+                            className={`w-full px-3 py-1.5 border rounded-lg text-sm font-semibold text-slate-800 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-colors ${
                               (item as any).auto && !formData.useManualDemographics 
                                 ? 'bg-slate-50 border-slate-200 cursor-not-allowed opacity-80' 
                                 : 'bg-white border-slate-200'
@@ -1575,7 +1570,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             <input 
                               type="number" 
                               placeholder="0"
-                              className="w-full px-2 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:ring-1 focus:ring-indigo-100 transition-all bg-white text-center"
+                              className="w-full px-2 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:ring-1 focus:ring-indigo-100 transition-colors bg-white text-center"
                               value={formData.disabilityCount || 0}
                               onChange={e => setFormData({...formData, disabilityCount: parseInt(e.target.value) || 0})}
                             />
@@ -1596,7 +1591,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             <input 
                               type="number" 
                               placeholder="0"
-                              className="w-full px-2 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:ring-1 focus:ring-indigo-100 transition-all bg-white text-center"
+                              className="w-full px-2 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 outline-none focus:ring-1 focus:ring-indigo-100 transition-colors bg-white text-center"
                               value={formData.orphanCount || 0}
                               onChange={e => setFormData({...formData, orphanCount: parseInt(e.target.value) || 0})}
                             />
@@ -1623,8 +1618,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                       {/* 1. Bansos Eligibility Calculator Badge */}
                       {formData.economicStatus === 'Pra-Sejahtera' && (
                         <div className="px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-full text-[10px] font-bold flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                          <span>🟢 Layak Memperoleh Subsidi RT & Bansos Pemerintah</span>
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>Layak Memperoleh Subsidi RT & Bansos Pemerintah</span>
                         </div>
                       )}
                     </div>
@@ -1655,7 +1650,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                              <div className="pt-2">
                                <input 
                                  placeholder="Sebutkan nama program bantuan..." 
-                                 className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-100 transition-all outline-none"
+                                 className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-100 transition-colors outline-none"
                                  value={formData.bansosLainName ?? ''}
                                  onChange={e => setFormData({...formData, bansosLainName: e.target.value})}
                                />
@@ -1685,7 +1680,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                     <div>
                       <h3 className="text-sm font-bold text-slate-800">Anggota Keluarga</h3>
                       <p className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                         {/* 4. Live Occupants Summary Badge */}
                         <span className="font-bold text-slate-700">1 Kepala Keluarga + {formData.familyMembers.length} Anggota = {formData.familyMembers.length + 1} Jiwa Penghuni</span>
                       </p>
@@ -1718,7 +1713,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             occupants: newMembers.length + 1
                           });
                         }}
-                        className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg font-bold text-[10px] transition-all"
+                        className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg font-bold text-[10px] transition-colors"
                       >
                         {btn.label}
                       </button>
@@ -1734,7 +1729,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           occupants: newMembers.length + 1
                         });
                       }}
-                      className="w-full sm:w-auto px-4 py-2 bg-[#0f172a] hover:bg-slate-800 text-white rounded-lg font-bold text-xs transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                      className="w-full sm:w-auto px-4 py-2 bg-[#0f172a] hover:bg-slate-800 text-white rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs"
                     >
                       <UserPlus size={13} />
                       <span>Tambah Anggota</span>
@@ -1751,7 +1746,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.98 }}
                         key={member.id || idx} 
-                        className="p-5 bg-white rounded-xl border border-slate-200 space-y-4 relative group hover:border-indigo-400 transition-all overflow-hidden"
+                        className="p-5 bg-white rounded-xl border border-slate-200 space-y-4 relative group hover:border-indigo-400 transition-colors overflow-hidden"
                       >
                         <button 
                           type="button"
@@ -1764,7 +1759,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               occupants: newMembers.length + 1 // Auto update occupants
                             });
                           }}
-                          className="absolute top-4 right-4 p-1.5 text-slate-405 hover:text-rose-505 hover:bg-rose-50 transition-all rounded-lg md:opacity-0 md:group-hover:opacity-100"
+                          className="absolute top-4 right-4 p-1.5 text-slate-405 hover:text-rose-505 hover:bg-rose-50 transition-colors rounded-lg md:opacity-0 md:group-hover:opacity-100"
                         >
                           <X size={14} />
                         </button>
@@ -1793,7 +1788,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               <label className="block text-xs font-semibold text-slate-600 mb-1.5">Hubungan</label>
                               <div className="relative">
                                 <select 
-                                  className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
+                                  className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-500 transition-colors appearance-none pr-8 cursor-pointer"
                                   value={member.relation ?? ''}
                                   onChange={e => {
                                     const newMembers = [...formData.familyMembers];
@@ -1829,7 +1824,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                        newMembers[idx].gender = g as any;
                                        setFormData({...formData, familyMembers: newMembers});
                                      }}
-                                     className={`py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                     className={`py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                                        (member.gender || 'Laki-laki') === g 
                                          ? 'bg-slate-900 text-white border-slate-900' 
                                          : 'bg-[#f8fafc] text-slate-450 border border-slate-200 hover:bg-slate-50'
@@ -1890,7 +1885,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 return (
                                   <div className="mt-1 p-2 bg-rose-50 border border-rose-200 rounded-lg text-[10px] font-bold text-rose-700 flex items-center gap-1.5">
                                     <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                                    <span>⚠️ NIK sama dengan NIK Kepala Keluarga!</span>
+                                    <span>NIK sama dengan NIK Kepala Keluarga!</span>
                                   </div>
                                 );
                               }
@@ -1899,7 +1894,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 return (
                                   <div className="mt-1 p-2 bg-rose-50 border border-rose-200 rounded-lg text-[10px] font-bold text-rose-700 flex items-center gap-1.5">
                                     <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                                    <span>⚠️ NIK ganda dengan Anggota #{formData.familyMembers.indexOf(dupOther) + 1}!</span>
+                                    <span>NIK ganda dengan Anggota #{formData.familyMembers.indexOf(dupOther) + 1}!</span>
                                   </div>
                                 );
                               }
@@ -1908,7 +1903,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 return (
                                   <div className="mt-1 p-2 bg-rose-50 border border-rose-200 rounded-lg text-[10px] font-bold text-rose-700 flex items-center gap-1.5">
                                     <AlertCircle size={13} className="shrink-0 text-rose-600" />
-                                    <span>⚠️ NIK sudah terdaftar di Unit {dup.houseId} ({dup.residentName})!</span>
+                                    <span>NIK sudah terdaftar di Unit {dup.houseId} ({dup.residentName})!</span>
                                   </div>
                                 );
                               }
@@ -1997,7 +1992,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                   if (activeFormTab === 'demographics') setActiveFormTab('basic');
                   if (activeFormTab === 'family') setActiveFormTab('demographics');
                 }}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold tracking-wide transition-all active:scale-95 flex items-center gap-1"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold tracking-wide transition-colors active:scale-95 flex items-center gap-1"
               >
                 <span>←</span>
                 <span>Kembali</span>
@@ -2017,7 +2012,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
               <button 
                 type="button"
                 onClick={handleNext}
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-all flex items-center gap-1.5 shadow-xs"
+                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 shadow-xs"
               >
                 <span>Lanjutkan</span>
                 <ChevronRight size={13} />
@@ -2025,7 +2020,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
             ) : (
               <button 
                 type="submit" 
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-all shadow-xs flex items-center gap-1.5"
+                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-xs flex items-center gap-1.5"
               >
                 <ShieldCheck size={14} />
                 <span>{editingHouseId ? 'Simpan Perubahan' : 'Finalisasi Data'}</span>
@@ -2052,7 +2047,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="w-full px-3 py-2 text-sm font-medium text-slate-800 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-all bg-white hover:border-slate-300 resize-none placeholder:text-slate-400"
+        className="w-full px-3 py-2 text-sm font-medium text-slate-800 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-colors bg-white hover:border-slate-300 resize-none placeholder:text-slate-400"
       />
     ) : type === 'select' && options ? (
       <div className="relative">
@@ -2060,7 +2055,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
           value={value ?? ''}
           onChange={e => onChange(e.target.value)}
           required={required ? true : undefined}
-          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-all appearance-none pr-8 cursor-pointer"
+          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-800 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer"
         >
           <option value="">Pilih...</option>
           {options.map((opt: string) => (
@@ -2078,7 +2073,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
           maxLength={maxLength}
-          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-805 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+          className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-sm font-medium text-slate-805 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-colors placeholder:text-slate-400"
         />
         {type === 'date' && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 bg-transparent flex items-center pr-0.5">
@@ -2091,8 +2086,8 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
 );
 
 const BansosCard = ({ label, checked, onChange }: { label: string, checked: boolean, onChange: (c: boolean) => void }) => (
-  <label className={`flex items-center gap-3 p-3 rounded-lg border transition-all cursor-pointer group relative overflow-hidden ${checked ? 'bg-indigo-50 border-indigo-400 shadow-xs' : 'bg-slate-50/50 border-slate-200 hover:border-indigo-300 hover:bg-white'}`}>
-    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${checked ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-250'}`}>
+  <label className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer group relative overflow-hidden ${checked ? 'bg-indigo-50 border-indigo-400 shadow-xs' : 'bg-slate-50/50 border-slate-200 hover:border-indigo-300 hover:bg-white'}`}>
+    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${checked ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-250'}`}>
       {checked && <CheckCircle size={12} className="text-white fill-none stroke-[2.5]" />}
       <input 
         type="checkbox" 
@@ -2400,23 +2395,22 @@ _Salam Hormat,_
             <div className="flex items-center gap-3.5 sm:gap-4">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#f0f2fe] text-indigo-700 border border-indigo-100/80 rounded-2xl flex flex-col items-center justify-center font-mono shadow-xs shrink-0">
                 <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-wider">KAVLING</span>
-                <span className="text-base sm:text-lg font-black tracking-tight leading-none mt-0.5 text-indigo-800">{payHouse.block}-{payHouse.number}</span>
+                <span className="text-base sm:text-lg font-semibold tracking-tight leading-none mt-0.5 text-indigo-800">{payHouse.block}-{payHouse.number}</span>
               </div>
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="px-2.5 py-0.5 bg-[#f0f2fe] text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-wider border border-indigo-100/80 shadow-2xs">
+                  <span className="px-2.5 py-0.5 bg-[#f0f2fe] text-indigo-700 rounded-xl text-[9px] font-semibold uppercase tracking-wider border border-indigo-100/80 shadow-2xs">
                     {payHouse.residenceType || 'Tetap'}
                   </span>
-                  <span className={`px-2.5 py-0.5 rounded-xl text-[9px] font-black uppercase tracking-wider border shadow-2xs ${
+                  <span className={`px-2.5 py-0.5 rounded-xl text-[9px] font-semibold uppercase tracking-wider border shadow-2xs ${
                     payHouse.status === 'Occupied' ? 'bg-[#e8faf0] text-[#059669] border-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200'
                   }`}>
                     {payHouse.status === 'Occupied' ? 'Dihuni' : 'Kosong'}
                   </span>
-                  <span className="px-2.5 py-0.5 bg-[#e8faf0] text-[#059669] rounded-xl text-[9px] font-black uppercase tracking-wider border border-emerald-100 shadow-2xs">
+                  <span className="px-2.5 py-0.5 bg-[#e8faf0] text-[#059669] rounded-xl text-[9px] font-semibold uppercase tracking-wider border border-emerald-100 shadow-2xs">
                     ♻️ TPS3R: {wasteTier} (Rp {currentWasteFee.toLocaleString('id-ID')})
                   </span>
-                  <span className="px-2.5 py-0.5 bg-[#edf7ff] text-[#0284c7] rounded-xl text-[9px] font-bold uppercase tracking-wider border border-sky-100 shadow-2xs">
-                    💧 PDAM Palu
+                  <span className="px-2.5 py-0.5 bg-[#edf7ff] text-[#0284c7] rounded-xl text-[9px] font-bold uppercase tracking-wider border border-sky-100 shadow-2xs">💧 PDAM Palu
                   </span>
                   {payHouse.pbbStatus && (
                     <span className={`px-2.5 py-0.5 rounded-xl text-[9px] font-bold uppercase tracking-wider border shadow-2xs ${
@@ -2426,7 +2420,7 @@ _Salam Hormat,_
                     </span>
                   )}
                 </div>
-                <h3 className="text-base sm:text-lg font-black text-slate-800 truncate flex items-center gap-1.5 tracking-tight">
+                <h3 className="text-base sm:text-lg font-semibold text-slate-800 truncate flex items-center gap-1.5 tracking-tight">
                   {payHouse.headOfFamily || (payHouse.ownerName ? `Hunian: ${payHouse.ownerName}` : 'Rumah Kosong')}
                   {payHouse.isVerified && <ShieldCheck size={16} className="text-[#059669] shrink-0" />}
                 </h3>
@@ -2467,7 +2461,7 @@ _Salam Hormat,_
                 ? 'bg-[#e8faf0]/70 border-emerald-100 text-emerald-950' 
                 : 'bg-[#fff1f2]/70 border-rose-100 text-rose-950'
             }`}>
-              <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider mb-0.5">
+              <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider mb-0.5">
                 {arrears.length === 0 ? (
                   <>
                     <CheckCircle2 size={13} className="text-[#059669] stroke-[2.5]" />
@@ -2480,7 +2474,7 @@ _Salam Hormat,_
                   </>
                 )}
               </div>
-              <div className="text-base sm:text-xl font-black tracking-tight">
+              <div className="text-base sm:text-xl font-semibold tracking-tight">
                 {arrears.length === 0 ? 'Nihil Tunggakan' : `${arrears.length} Bulan Lampau`}
               </div>
               <p className="text-[10px] opacity-75 font-semibold mt-0.5">
@@ -2501,7 +2495,7 @@ _Salam Hormat,_
             {/* 1. Service Type Selector */}
             <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-800 flex items-center gap-2">
                   <Sparkles size={14} className="text-indigo-600" />
                   1. Pilih Komponen Layanan Iuran
                 </label>
@@ -2547,7 +2541,7 @@ _Salam Hormat,_
                       key={item.id}
                       type="button"
                       onClick={() => handlePayTypeChange(item.id)}
-                      className={`p-3 rounded-xl border text-left transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
+                      className={`p-3 rounded-xl border text-left transition-colors cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                         isSelected 
                           ? 'bg-indigo-50/80 border-indigo-600 ring-2 ring-indigo-500/20 text-slate-900 shadow-sm' 
                           : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60 text-slate-600'
@@ -2561,15 +2555,15 @@ _Salam Hormat,_
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
                           <IconComponent size={13} className={isSelected ? 'text-indigo-600' : 'text-slate-400'} />
-                          <span className="text-xs font-black">{item.title}</span>
+                          <span className="text-xs font-semibold">{item.title}</span>
                         </div>
                         <p className="text-[10px] text-slate-500 leading-tight">{item.subtitle}</p>
                       </div>
                       <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span className="text-[8px] font-black uppercase text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
+                        <span className="text-[8px] font-semibold uppercase text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
                           {item.badge}
                         </span>
-                        <span className="text-xs font-black text-slate-900">Rp {item.fee.toLocaleString('id-ID')}</span>
+                        <span className="text-xs font-semibold text-slate-900">Rp {item.fee.toLocaleString('id-ID')}</span>
                       </div>
                     </button>
                   );
@@ -2580,7 +2574,7 @@ _Salam Hormat,_
               <div className="pt-3 border-t border-slate-100 space-y-2.5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-slate-800 flex items-center gap-1">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-800 flex items-center gap-1">
                       <Trash2 size={12} className="text-emerald-600" />
                       Tarif Retribusi Sampah TPS3R (Aturan Kota Palu)
                     </span>
@@ -2620,23 +2614,23 @@ _Salam Hormat,_
                         key={item.tier}
                         type="button"
                         onClick={() => handleWasteTierChange(item.tier)}
-                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                        className={`p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex flex-col justify-between ${
                           isTierSelected
                             ? 'bg-emerald-50/90 border-emerald-600 ring-2 ring-emerald-500/20 shadow-xs'
                             : 'bg-white border-slate-200 hover:border-emerald-300 hover:bg-slate-50/60'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className={`text-xs font-black ${isTierSelected ? 'text-emerald-950 font-bold' : 'text-slate-800'}`}>
+                          <span className={`text-xs font-semibold ${isTierSelected ? 'text-emerald-950 font-bold' : 'text-slate-800'}`}>
                             {item.title}
                           </span>
-                          <span className={`text-[8px] font-black uppercase px-1.5 py-0.2 rounded ${
+                          <span className={`text-[8px] font-semibold uppercase px-1.5 py-0.2 rounded ${
                             isTierSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'
                           }`}>
                             {item.badge}
                           </span>
                         </div>
-                        <div className="text-xs font-black text-emerald-700 my-1">
+                        <div className="text-xs font-semibold text-emerald-700 my-1">
                           Rp {item.fee.toLocaleString('id-ID')} <span className="text-[9px] font-normal text-slate-500">/ bln</span>
                         </div>
                         <p className="text-[9px] text-slate-400 leading-tight truncate">
@@ -2659,7 +2653,7 @@ _Salam Hormat,_
                     </p>
                   </div>
                 </div>
-                <span className="text-[9px] font-black text-sky-700 bg-white px-2 py-0.5 rounded border border-sky-200 shrink-0">
+                <span className="text-[9px] font-semibold text-sky-700 bg-white px-2 py-0.5 rounded border border-sky-200 shrink-0">
                   PDAM Palu
                 </span>
               </div>
@@ -2669,7 +2663,7 @@ _Salam Hormat,_
             <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-100">
                 <div>
-                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-800 flex items-center gap-2">
                     <Calendar size={14} className="text-indigo-600" />
                     2. Pilih Periode Pembayaran
                   </h4>
@@ -2697,7 +2691,7 @@ _Salam Hormat,_
                     <button
                       type="button"
                       onClick={handleSelectAllArrears}
-                      className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1"
+                      className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1"
                     >
                       <AlertTriangle size={11} /> Semua Tunggakan ({arrears.length} Bln)
                     </button>
@@ -2705,30 +2699,28 @@ _Salam Hormat,_
                   <button
                     type="button"
                     onClick={handleSelectCurrentMonthOnly}
-                    className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer"
-                  >
-                    📍 Bulan Ini ({currentMonthStr.split(' ')[0]})
+                    className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+                  >📍 Bulan Ini ({currentMonthStr.split(' ')[0]})
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSelectPackageMonths(3)}
-                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
                   >
                     ⚡ Paket 3 Bulan
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSelectPackageMonths(6)}
-                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
                   >
                     ⚡ 6 Bulan (Semester)
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSelectPackageMonths(12)}
-                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
-                  >
-                    🌟 1 Tahun (12 Bulan)
+                    className="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
+                  >🌟 1 Tahun (12 Bulan)
                   </button>
                 </div>
               </div>
@@ -2738,8 +2730,8 @@ _Salam Hormat,_
                 <button
                   type="button"
                   onClick={() => setMonthFilterTab('all')}
-                  className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
-                    monthFilterTab === 'all' ? 'bg-white text-slate-900 shadow-xs font-black' : 'text-slate-500 hover:text-slate-800'
+                  className={`flex-1 py-1.5 rounded-lg text-center transition-colors cursor-pointer ${
+                    monthFilterTab === 'all' ? 'bg-white text-slate-900 shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   Semua Periode ({allCandidateMonths.length})
@@ -2747,8 +2739,8 @@ _Salam Hormat,_
                 <button
                   type="button"
                   onClick={() => setMonthFilterTab('arrears')}
-                  className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
-                    monthFilterTab === 'arrears' ? 'bg-white text-rose-700 shadow-xs font-black' : 'text-slate-500 hover:text-slate-800'
+                  className={`flex-1 py-1.5 rounded-lg text-center transition-colors cursor-pointer ${
+                    monthFilterTab === 'arrears' ? 'bg-white text-rose-700 shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   Tunggakan ({arrears.length})
@@ -2756,8 +2748,8 @@ _Salam Hormat,_
                 <button
                   type="button"
                   onClick={() => setMonthFilterTab('forward')}
-                  className={`flex-1 py-1.5 rounded-lg text-center transition-all cursor-pointer ${
-                    monthFilterTab === 'forward' ? 'bg-white text-indigo-700 shadow-xs font-black' : 'text-slate-500 hover:text-slate-800'
+                  className={`flex-1 py-1.5 rounded-lg text-center transition-colors cursor-pointer ${
+                    monthFilterTab === 'forward' ? 'bg-white text-indigo-700 shadow-xs font-semibold' : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
                   Bulan Berjalan &amp; Di Muka ({allCandidateMonths.length - arrears.length})
@@ -2776,9 +2768,9 @@ _Salam Hormat,_
                       key={month}
                       type="button"
                       onClick={() => toggleMonth(month)}
-                      className={`relative p-3 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-1.5 ${
+                      className={`relative p-3 rounded-xl border text-left transition-colors duration-150 cursor-pointer flex flex-col justify-between gap-1.5 ${
                         isSelected 
-                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/20 scale-[1.01]'
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-2xs scale-[1.01]'
                           : isArrear 
                           ? 'bg-rose-50/70 border-rose-200/90 text-rose-950 hover:bg-rose-100/70'
                           : isCurrent 
@@ -2787,7 +2779,7 @@ _Salam Hormat,_
                       }`}
                     >
                       <div className="flex items-start justify-between gap-1">
-                        <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                        <span className={`text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded ${
                           isSelected 
                             ? 'bg-white/20 text-white' 
                             : isArrear 
@@ -2806,7 +2798,7 @@ _Salam Hormat,_
                       </div>
 
                       <div>
-                        <p className={`text-xs font-black truncate leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                        <p className={`text-xs font-semibold truncate leading-tight ${isSelected ? 'text-white' : 'text-slate-900'}`}>
                           {month}
                         </p>
                         <p className={`text-[10px] font-bold mt-0.5 ${isSelected ? 'text-white/80' : 'text-indigo-700'}`}>
@@ -2827,7 +2819,7 @@ _Salam Hormat,_
                 >
                   <span>{showManualAdd ? '▲ Sembunyikan Pemilih Manual' : '▼ Tambah Bulan Spesifik Lainnya'}</span>
                 </button>
-                <span className="text-[10px] font-black text-slate-500">
+                <span className="text-[10px] font-semibold text-slate-500">
                   {targetMonths.length} Bulan Terpilih
                 </span>
               </div>
@@ -2854,7 +2846,7 @@ _Salam Hormat,_
                         toast.success(`Bulan ${manualMonthSelect} ditambahkan ke pilihan.`);
                       }
                     }}
-                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                    className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     + Tambah
                   </button>
@@ -2877,11 +2869,11 @@ _Salam Hormat,_
                     <Receipt size={14} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black uppercase tracking-wider">Ringkasan Tagihan</h4>
+                    <h4 className="text-xs font-semibold uppercase tracking-wider">Ringkasan Tagihan</h4>
                     <p className="text-[9px] text-white/50 font-bold uppercase tracking-widest">Kwitansi Transaksi RT 02</p>
                   </div>
                 </div>
-                <span className="text-[10px] font-black px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded-md border border-indigo-400/30">
+                <span className="text-[10px] font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-300 rounded-md border border-indigo-400/30">
                   {targetMonths.length} Bulan
                 </span>
               </div>
@@ -2912,7 +2904,7 @@ _Salam Hormat,_
 
                 <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs">
                   <span className="text-white/60 font-bold uppercase tracking-wider text-[10px]">Total Tagihan</span>
-                  <span className="text-sm font-black text-emerald-400">
+                  <span className="text-sm font-semibold text-emerald-400">
                     Rp {totalSuggested.toLocaleString('id-ID')}
                   </span>
                 </div>
@@ -2952,7 +2944,7 @@ _Salam Hormat,_
                     required
                     value={payAmount}
                     onChange={(e) => setPayAmount(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-white/10 border border-white/20 rounded-xl text-lg font-black text-white outline-none focus:ring-2 focus:ring-indigo-400 transition-all font-mono"
+                    className="w-full pl-9 pr-3 py-2 bg-white/10 border border-white/20 rounded-xl text-lg font-semibold text-white outline-none focus:ring-2 focus:ring-indigo-400 transition-colors font-mono"
                   />
                 </div>
               </div>
@@ -2973,7 +2965,7 @@ _Salam Hormat,_
                       key={m.id}
                       type="button"
                       onClick={() => setPaymentMethod(m.id)}
-                      className={`p-2 rounded-xl text-[11px] font-bold text-left transition-all border cursor-pointer ${
+                      className={`p-2 rounded-xl text-[11px] font-bold text-left transition-colors border cursor-pointer ${
                         paymentMethod === m.id
                           ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm'
                           : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10'
@@ -3038,21 +3030,21 @@ _Salam Hormat,_
                       <button
                         type="button"
                         onClick={() => setCashGiven(numPayAmount.toString())}
-                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
+                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-colors cursor-pointer whitespace-nowrap"
                       >
                         Pas
                       </button>
                       <button
                         type="button"
                         onClick={() => setCashGiven('50000')}
-                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
+                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-colors cursor-pointer whitespace-nowrap"
                       >
                         50rb
                       </button>
                       <button
                         type="button"
                         onClick={() => setCashGiven('100000')}
-                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap"
+                        className="px-2 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[10px] font-bold transition-colors cursor-pointer whitespace-nowrap"
                       >
                         100rb
                       </button>
@@ -3170,14 +3162,14 @@ _Salam Hormat,_
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95"
+                className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer active:scale-95"
               >
                 Batalkan
               </button>
               <button
                 type="submit"
                 disabled={targetMonths.length === 0}
-                className="flex-[2] py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="flex-[2] py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-md active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <CheckCircle2 size={16} />
                 <span>Konfirmasi Bayar (Rp {numPayAmount.toLocaleString('id-ID')})</span>
@@ -3237,13 +3229,13 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-[#f0f2fe] text-indigo-700 border border-indigo-100/80 rounded-2xl flex flex-col items-center justify-center font-mono shadow-xs shrink-0">
                 <span className="text-[9px] font-bold text-indigo-400 uppercase">Kavling</span>
-                <span className="text-base font-black text-indigo-800 leading-none mt-0.5">{editingPayment.block}-{editingPayment.number}</span>
+                <span className="text-base font-semibold text-indigo-800 leading-none mt-0.5">{editingPayment.block}-{editingPayment.number}</span>
               </div>
               <div className="space-y-0.5">
                 <p className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest">Koreksi Transaksi Kas</p>
-                <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-800">{editingPayment.headOfFamily}</h3>
+                <h3 className="text-base sm:text-lg font-semibold tracking-tight text-slate-800">{editingPayment.headOfFamily}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="px-2.5 py-0.5 bg-[#f0f2fe] text-indigo-700 rounded-xl text-[9px] font-black uppercase tracking-wider border border-indigo-100 shadow-2xs">
+                  <span className="px-2.5 py-0.5 bg-[#f0f2fe] text-indigo-700 rounded-xl text-[9px] font-semibold uppercase tracking-wider border border-indigo-100 shadow-2xs">
                     {editingPayment.month}
                   </span>
                   <span className="text-[9px] text-slate-400 font-mono">
@@ -3255,7 +3247,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
 
             <div className="bg-[#e8faf0]/70 px-4.5 py-3 rounded-2xl border border-emerald-100 self-stretch sm:self-auto text-left sm:text-right shadow-2xs">
               <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nominal Awal Tercatat</p>
-              <div className="text-lg sm:text-xl font-black tracking-tight text-[#059669] font-mono">
+              <div className="text-lg sm:text-xl font-semibold tracking-tight text-[#059669] font-mono">
                 Rp {parseInt(editingPayment.amount || 0).toLocaleString('id-ID')}
               </div>
             </div>
@@ -3267,7 +3259,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
           <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
               <Edit2 size={16} className="text-indigo-600" />
-              <h4 className="text-xs font-black uppercase tracking-wider text-slate-800">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-800">
                 Parameter Revisi Pembayaran
               </h4>
             </div>
@@ -3301,7 +3293,7 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
                   required
                   value={payAmount}
                   onChange={(e) => setPayAmount(e.target.value)}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-900 outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
                 />
               </div>
 
@@ -3377,13 +3369,13 @@ export const EditPaymentModal: React.FC<EditPaymentModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95"
+              className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer active:scale-95"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="flex-[2] py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-[2] py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-md active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <CheckCircle2 size={16} />
               <span>Simpan Perubahan Transaksi</span>

@@ -23,7 +23,7 @@ export const ResidentAnalytics: React.FC<ResidentAnalyticsProps> = ({ houses }) 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
       <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm">
-        <h3 className="text-sm md:text-lg font-black text-slate-800 mb-4 md:mb-6">Status Hunian</h3>
+        <h3 className="text-sm md:text-lg font-semibold text-slate-800 mb-4 md:mb-6">Status Hunian</h3>
         <div className="h-48 sm:h-56 md:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -37,7 +37,7 @@ export const ResidentAnalytics: React.FC<ResidentAnalyticsProps> = ({ houses }) 
         </div>
       </div>
       <div className="bg-white p-4 md:p-6 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-sm">
-        <h3 className="text-sm md:text-lg font-black text-slate-800 mb-4 md:mb-6">Tipe Kepenghunian</h3>
+        <h3 className="text-sm md:text-lg font-semibold text-slate-800 mb-4 md:mb-6">Tipe Kepenghunian</h3>
         <div className="h-48 sm:h-56 md:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={residenceTypeData}>

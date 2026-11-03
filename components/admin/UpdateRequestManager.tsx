@@ -200,7 +200,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800">Manajemen Update Data Warga</h2>
+          <h2 className="text-2xl font-semibold text-slate-800">Manajemen Update Data Warga</h2>
           <p className="text-sm text-slate-500 font-medium">Tinjau, verifikasi diff, dan setujui permohonan pembaruan data profil warga.</p>
         </div>
       </div>
@@ -209,8 +209,8 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase text-amber-600 tracking-wider">Menunggu Persetujuan</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{pendingCount} <span className="text-xs font-semibold text-slate-400">Pengajuan</span></p>
+            <p className="text-[10px] font-semibold uppercase text-amber-600 tracking-wider">Menunggu Persetujuan</p>
+            <p className="text-2xl font-semibold text-slate-900 mt-1">{pendingCount} <span className="text-xs font-semibold text-slate-400">Pengajuan</span></p>
           </div>
           <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
             <Clock size={22} />
@@ -219,8 +219,8 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
 
         <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase text-emerald-600 tracking-wider">Sudah Disetujui</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{approvedCount} <span className="text-xs font-semibold text-slate-400">Pengajuan</span></p>
+            <p className="text-[10px] font-semibold uppercase text-emerald-600 tracking-wider">Sudah Disetujui</p>
+            <p className="text-2xl font-semibold text-slate-900 mt-1">{approvedCount} <span className="text-xs font-semibold text-slate-400">Pengajuan</span></p>
           </div>
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
             <CheckCircle size={22} />
@@ -229,8 +229,8 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
 
         <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-xs flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase text-rose-600 tracking-wider">Ditolak</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{rejectedCount} <span className="text-xs font-semibold text-slate-400">Pengajuan</span></p>
+            <p className="text-[10px] font-semibold uppercase text-rose-600 tracking-wider">Ditolak</p>
+            <p className="text-2xl font-semibold text-slate-900 mt-1">{rejectedCount} <span className="text-xs font-semibold text-slate-400">Pengajuan</span></p>
           </div>
           <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
             <XCircle size={22} />
@@ -245,7 +245,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
           <input 
             type="text"
             placeholder="Cari nama warga atau nomor rumah..."
-            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all shadow-xs"
+            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors shadow-xs"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -260,9 +260,9 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
             <button
               key={item.id}
               onClick={() => setStatusFilter(item.id as any)}
-              className={`px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-2 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 ${
                 statusFilter === item.id 
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' 
+                ? 'bg-indigo-600 text-white shadow-md shadow-2xs' 
                 : 'text-slate-500 hover:text-slate-800'
               }`}
             >
@@ -271,7 +271,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                 <span className={`px-1.5 py-0.5 rounded-full text-[8px] font-extrabold ${
                   statusFilter === item.id 
                     ? 'bg-white/20 text-white' 
-                    : item.id === 'Menunggu' ? 'bg-amber-100 text-amber-700 animate-pulse' : 'bg-slate-100 text-slate-600'
+                    : item.id === 'Menunggu' ? 'bg-amber-100 text-amber-700 ' : 'bg-slate-100 text-slate-600'
                 }`}>
                   {item.count}
                 </span>
@@ -286,7 +286,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
           filteredRequests.map((req) => {
             const house = houses.find(h => h.id === req.houseId);
             return (
-              <Card key={req.id} className="p-6 bg-white border-slate-100 shadow-xs hover:shadow-md transition-all group">
+              <Card key={req.id} className="p-6 bg-white border-slate-100 shadow-xs hover:shadow-md transition-colors group">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                   <div className="flex items-center gap-4">
                     <div className={`p-4 rounded-2xl ${
@@ -298,8 +298,8 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-black text-slate-800">{req.headOfFamily}</h4>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                        <h4 className="font-semibold text-slate-800">{req.headOfFamily}</h4>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[8px] font-semibold uppercase tracking-widest ${
                           req.status === 'Disetujui' ? 'bg-emerald-100 text-emerald-700' :
                           req.status === 'Ditolak' ? 'bg-rose-100 text-rose-700' :
                           'bg-amber-100 text-amber-700 border border-amber-200/60'
@@ -315,7 +315,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
 
                   <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-end">
                     <div className="text-right">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Diajukan Pada</p>
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1">Diajukan Pada</p>
                       <p className="text-xs font-bold text-slate-700">{new Date(req.createdAt).toLocaleDateString('id-ID')}</p>
                     </div>
                     <Button 
@@ -336,7 +336,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
             <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100">
               <CheckCircle size={32} />
             </div>
-            <h4 className="font-black text-slate-900 text-base mb-1">Tidak Ada Permohonan Tertunda</h4>
+            <h4 className="font-semibold text-slate-900 text-base mb-1">Tidak Ada Permohonan Tertunda</h4>
             <p className="text-xs text-slate-400 font-semibold max-w-md mx-auto">
               Semua permohonan pembaruan data profil warga telah diproses. Warga dapat mengajukan pembaruan data kapan saja melalui dasbor warga online.
             </p>
@@ -358,7 +358,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
               {/* Diff Card: Data Lama */}
               <div className="p-4 bg-rose-50/60 border border-rose-200/80 rounded-2xl">
                 <div className="flex items-center justify-between mb-3 border-b border-rose-200/60 pb-2">
-                  <p className="text-[10px] font-black text-rose-700 uppercase tracking-widest flex items-center gap-1">
+                  <p className="text-[10px] font-semibold text-rose-700 uppercase tracking-widest flex items-center gap-1">
                     <Clock size={12} /> Data Saat Ini (Lama)
                   </p>
                   <span className="text-[9px] font-bold text-rose-600 bg-rose-100 px-2 py-0.5 rounded-full">Sistem</span>
@@ -407,7 +407,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
               {/* Diff Card: Data Baru (Diajukan) */}
               <div className="p-4 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl">
                 <div className="flex items-center justify-between mb-3 border-b border-emerald-200/60 pb-2">
-                  <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest flex items-center gap-1">
+                  <p className="text-[10px] font-semibold text-emerald-700 uppercase tracking-widest flex items-center gap-1">
                     <CheckCircle size={12} /> Data Baru (Diajukan Warga)
                   </p>
                   <span className="text-[9px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">Usulan</span>
@@ -437,7 +437,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                           {selectedRequest.businessCategory || 'UMKM'} • {selectedRequest.businessLocation || 'Di Rumah'}
                         </div>
                         {selectedRequest.isUmkmRegistered && (
-                          <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-amber-100 text-amber-800">
+                          <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wider bg-amber-100 text-amber-800">
                             Katalog UMKM
                           </span>
                         )}
@@ -479,7 +479,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
                   href={selectedRequest.documentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700 transition-all"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-xs hover:bg-indigo-700 transition-colors"
                 >
                   <ExternalLink size={14} /> Lihat Berkas
                 </a>
@@ -487,16 +487,16 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
             )}
 
             <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Alasan Pengajuan Warga</p>
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 pl-1">Alasan Pengajuan Warga</p>
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 italic text-sm text-slate-600 font-medium">
                 "{selectedRequest.reason}"
               </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 pl-1">Catatan Admin / Alasan Penolakan</label>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 pl-1">Catatan Admin / Alasan Penolakan</label>
               <textarea 
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all resize-none"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors resize-none"
                 rows={3}
                 placeholder="Berikan catatan atau alasan jika menolak..."
                 value={adminNote}
@@ -527,7 +527,7 @@ export const UpdateRequestManager: React.FC<UpdateRequestManagerProps> = ({ requ
               }`}>
                 {selectedRequest.status === 'Disetujui' ? <CheckCircle size={20} /> : <XCircle size={20} />}
                 <div>
-                  <p className="text-xs font-black uppercase tracking-widest">Permohonan {selectedRequest.status}</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest">Permohonan {selectedRequest.status}</p>
                   {selectedRequest.adminNote && <p className="text-[10px] font-medium mt-0.5">{selectedRequest.adminNote}</p>}
                 </div>
               </div>

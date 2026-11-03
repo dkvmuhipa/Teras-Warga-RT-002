@@ -306,8 +306,8 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-2xl font-black text-slate-800 tracking-tight">Manajemen Info Pemadaman PLN &amp; Air</h3>
-              <span className="px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[9px] font-black uppercase tracking-wider border border-amber-200">
+              <h3 className="text-2xl font-semibold text-slate-800 tracking-tight">Manajemen Info Pemadaman PLN &amp; Air</h3>
+              <span className="px-2.5 py-0.5 bg-amber-50 text-amber-700 rounded-full text-[9px] font-semibold uppercase tracking-wider border border-amber-200">
                 Utilitas Publik
               </span>
             </div>
@@ -318,14 +318,14 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
         <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto relative z-10">
           <Button 
             onClick={() => setIsAiModalOpen(true)}
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-100 font-black text-xs uppercase tracking-wider"
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-indigo-100 font-semibold text-xs uppercase tracking-wider"
           >
             <Sparkles size={15} className="mr-1.5" /> AI Parser Broadcast
           </Button>
 
           <Button 
             onClick={handleOpenAdd}
-            className="bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-100 font-black text-xs uppercase tracking-wider"
+            className="bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-100 font-semibold text-xs uppercase tracking-wider"
           >
             <Plus size={16} className="mr-1.5" /> Tambah Jadwal Lengkap
           </Button>
@@ -338,7 +338,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
           outages.map((outage) => (
             <Card 
               key={outage.id} 
-              className={`p-6 bg-white border-2 rounded-[2.5rem] shadow-sm flex flex-col justify-between transition-all hover:shadow-md ${
+              className={`p-6 bg-white border-2 rounded-[2.5rem] shadow-sm flex flex-col justify-between transition-colors hover:shadow-md ${
                 outage.status === 'Ongoing' ? 'border-amber-400 ring-4 ring-amber-50/50' : 'border-slate-100'
               }`}
             >
@@ -346,7 +346,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
                 {/* Status Badges */}
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
-                    <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 ${
+                    <span className={`px-3 py-1 rounded-xl text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5 ${
                       outage.type === 'PLN' ? 'bg-amber-100 text-amber-800' :
                       outage.type === 'PDAM' ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
                     }`}>
@@ -354,7 +354,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
                     </span>
 
                     {outage.impactSeverity && (
-                      <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest ${
+                      <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-semibold uppercase tracking-widest ${
                         outage.impactSeverity === 'Kritis' ? 'bg-rose-100 text-rose-700' :
                         outage.impactSeverity === 'Sedang' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-700'
                       }`}>
@@ -363,8 +363,8 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
                     )}
                   </div>
 
-                  <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest ${
-                    outage.status === 'Ongoing' ? 'bg-rose-100 text-rose-700 animate-pulse font-black' :
+                  <span className={`px-2.5 py-0.5 rounded-lg text-[9px] font-semibold uppercase tracking-widest ${
+                    outage.status === 'Ongoing' ? 'bg-rose-100 text-rose-700  font-semibold' :
                     outage.status === 'Scheduled' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
                   }`}>
                     {outage.status === 'Ongoing' ? '⚠️ Sedang Padam (Live)' : outage.status === 'Scheduled' ? '🗓️ Terjadwal' : '✓ Normal / Selesai'}
@@ -373,7 +373,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
 
                 {/* Title & Official Ref */}
                 <div>
-                  <h4 className="font-black text-slate-900 text-lg leading-snug">{outage.title}</h4>
+                  <h4 className="font-semibold text-slate-900 text-lg leading-snug">{outage.title}</h4>
                   <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold text-slate-400 mt-1">
                     {outage.officialRefNumber && (
                       <span className="flex items-center gap-1"><FileText size={11} /> No. Surat: {outage.officialRefNumber}</span>
@@ -389,14 +389,14 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
                 <div className="p-4 bg-slate-50 rounded-2xl space-y-2 text-xs border border-slate-100">
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Tanggal &amp; Waktu:</span>
-                    <span className="font-black text-slate-800">
+                    <span className="font-semibold text-slate-800">
                       {outage.date ? `${new Date(outage.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} • ` : ''}
                       {outage.startTime} s.d {outage.endTime}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-bold uppercase tracking-wider text-[9px]">Wilayah Terdampak:</span>
-                    <span className="font-black text-slate-700">{outage.affectedBlocks?.join(', ') || 'Semua Blok'}</span>
+                    <span className="font-semibold text-slate-700">{outage.affectedBlocks?.join(', ') || 'Semua Blok'}</span>
                   </div>
                   {outage.contactCenter && (
                     <div className="flex justify-between border-t border-slate-200/60 pt-1.5 mt-1.5">
@@ -418,7 +418,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
               <div className="pt-4 mt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                 <button
                   onClick={() => handleBroadcastWhatsApp(outage)}
-                  className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm shadow-emerald-500/20 cursor-pointer"
+                  className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 transition-colors shadow-sm shadow-2xs cursor-pointer"
                 >
                   <Share2 size={13} /> Broadcast WA Resmi
                 </button>
@@ -426,14 +426,14 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => handleOpenEdit(outage)}
-                    className="p-2.5 hover:bg-slate-100 text-slate-600 rounded-xl transition-all cursor-pointer"
+                    className="p-2.5 hover:bg-slate-100 text-slate-600 rounded-xl transition-colors cursor-pointer"
                     title="Edit Detail"
                   >
                     <Edit3 size={16} />
                   </button>
                   <button
                     onClick={() => handleDelete(outage.id)}
-                    className="p-2.5 hover:bg-rose-50 text-rose-600 rounded-xl transition-all cursor-pointer"
+                    className="p-2.5 hover:bg-rose-50 text-rose-600 rounded-xl transition-colors cursor-pointer"
                     title="Hapus"
                   >
                     <Trash2 size={16} />
@@ -447,9 +447,9 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
             <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 mx-auto mb-3">
               <CheckCircle2 size={32} />
             </div>
-            <h4 className="font-black text-slate-800 text-base mb-1">Tidak Ada Jadwal Pemadaman Aktif</h4>
+            <h4 className="font-semibold text-slate-800 text-base mb-1">Tidak Ada Jadwal Pemadaman Aktif</h4>
             <p className="text-xs text-slate-400 font-medium max-w-sm mx-auto mb-4">Kondisi pasokan listrik PLN dan air bersih RT 02 dalam status normal.</p>
-            <Button onClick={handleOpenAdd} className="bg-amber-600 text-white font-black text-xs uppercase tracking-wider">
+            <Button onClick={handleOpenAdd} className="bg-amber-600 text-white font-semibold text-xs uppercase tracking-wider">
               <Plus size={14} className="mr-1.5" /> Buat Pemberitahuan Baru
             </Button>
           </div>
@@ -462,7 +462,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
           {/* Quick Presets for Fast Setup */}
           {!editingOutage && (
             <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2">
-              <span className="text-[9.5px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1">
+              <span className="text-[9.5px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-1">
                 ⚡ Pilih Template Siap Pakai:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -471,7 +471,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
                     key={idx}
                     type="button"
                     onClick={() => handleApplyPreset(preset)}
-                    className="px-3 py-1.5 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-xl text-[10px] font-black text-slate-700 transition-all cursor-pointer shadow-2xs"
+                    className="px-3 py-1.5 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-xl text-[10px] font-semibold text-slate-700 transition-colors cursor-pointer shadow-2xs"
                   >
                     {preset.label}
                   </button>
@@ -482,7 +482,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Jenis Layanan</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Jenis Layanan</label>
               <select
                 value={formData.type}
                 onChange={e => setFormData({...formData, type: e.target.value as any})}
@@ -496,7 +496,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Tingkat Dampak</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Tingkat Dampak</label>
               <select
                 value={formData.impactSeverity}
                 onChange={e => setFormData({...formData, impactSeverity: e.target.value as any})}
@@ -509,13 +509,13 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Status Pemadaman</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Status Pemadaman</label>
               <select
                 value={formData.status}
                 onChange={e => setFormData({...formData, status: e.target.value as any})}
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-500"
               >
-                <option value="Ongoing">⚠️ Sedang Padam (Live)</option>
+                <option value="Ongoing">Sedang Padam (Live)</option>
                 <option value="Scheduled">🗓️ Terjadwal (Mendatang)</option>
                 <option value="Resolved">✓ Selesai / Pulih Normal</option>
               </select>
@@ -524,7 +524,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">No. Surat / Edaran Resmi</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">No. Surat / Edaran Resmi</label>
               <input 
                 type="text" 
                 value={formData.officialRefNumber}
@@ -535,7 +535,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Penyulang / Gardu Distribusi</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Penyulang / Gardu Distribusi</label>
               <input 
                 type="text" 
                 value={formData.feederName}
@@ -547,7 +547,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Perihal / Judul Pemadaman</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Perihal / Judul Pemadaman</label>
             <input 
               type="text" 
               required
@@ -560,7 +560,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Tanggal Pelaksanaan</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Tanggal Pelaksanaan</label>
               <input 
                 type="date" 
                 value={formData.date}
@@ -570,7 +570,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Jam Mulai</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Jam Mulai</label>
               <input 
                 type="text" 
                 required
@@ -582,7 +582,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Estimasi Selesai</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Estimasi Selesai</label>
               <input 
                 type="text" 
                 required
@@ -596,7 +596,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Wilayah / Blok Terdampak</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Wilayah / Blok Terdampak</label>
               <input 
                 type="text" 
                 value={formData.affectedBlocks?.join(', ')}
@@ -607,7 +607,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
             </div>
 
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Call Center / Narahubung Resmi</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Call Center / Narahubung Resmi</label>
               <input 
                 type="text" 
                 value={formData.contactCenter}
@@ -619,7 +619,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Rincian Pekerjaan &amp; Alasan Pemadaman</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Rincian Pekerjaan &amp; Alasan Pemadaman</label>
             <textarea 
               rows={3}
               value={formData.description}
@@ -630,7 +630,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Solusi Darurat / Mitigasi Pengurus RT (Opsional)</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Solusi Darurat / Mitigasi Pengurus RT (Opsional)</label>
             <input 
               type="text" 
               value={formData.emergencyNotes}
@@ -640,7 +640,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
             />
           </div>
 
-          <Button type="submit" className="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/20 mt-2">
+          <Button type="submit" className="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold uppercase tracking-wider rounded-xl shadow-lg shadow-2xs mt-2">
             {editingOutage ? 'Simpan Perubahan Data' : 'Terbitkan Pemberitahuan Resmi'}
           </Button>
         </form>
@@ -657,7 +657,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Tempel Teks Pengumuman PLN / WhatsApp</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Tempel Teks Pengumuman PLN / WhatsApp</label>
             <textarea 
               rows={6}
               value={rawNoticeText}
@@ -670,7 +670,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
           <Button 
             onClick={handleAiParse} 
             disabled={isParsingAi}
-            className="w-full py-3.5 bg-indigo-600 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-indigo-600 text-white text-xs font-semibold uppercase tracking-wider rounded-xl shadow-lg shadow-2xs flex items-center justify-center gap-2"
           >
             {isParsingAi ? (
               <>Menganalisis Format Teks...</>

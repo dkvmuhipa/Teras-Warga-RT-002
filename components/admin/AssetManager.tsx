@@ -203,10 +203,10 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Manajemen Aset & Inventaris</h2>
+          <h2 className="text-3xl font-semibold text-slate-900 tracking-tight">Manajemen Aset & Inventaris</h2>
           <p className="text-slate-500 font-medium mt-1">Kelola aset, peminjaman barang warga, dan pencatatan kondisi perlengkapan RT 02.</p>
         </div>
-        <Button onClick={() => { resetInvForm(); setIsInvModalOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all hover:scale-105 active:scale-95">
+        <Button onClick={() => { resetInvForm(); setIsInvModalOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-colors hover:scale-105 active:scale-95">
           <Plus size={16} className="mr-1.5" /> Tambah Aset
         </Button>
       </div>
@@ -216,7 +216,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         <div className="bg-gradient-to-br from-indigo-50 via-white to-indigo-50/30 p-6 rounded-[2rem] border border-indigo-100/60 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-[10px] text-indigo-500 font-extrabold uppercase tracking-widest">Aset Terdaftar</p>
-            <p className="text-3xl font-black text-indigo-950 leading-none">{totalAssets} <span className="text-xs font-bold text-indigo-500">Kategori</span></p>
+            <p className="text-3xl font-semibold text-indigo-950 leading-none">{totalAssets} <span className="text-xs font-bold text-indigo-500">Kategori</span></p>
             <p className="text-[11px] text-indigo-600 font-medium">Jumlah total jenis barang inventaris RT</p>
           </div>
           <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-indigo-600">
@@ -227,7 +227,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 p-6 rounded-[2rem] border border-emerald-100/60 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-[10px] text-emerald-500 font-extrabold uppercase tracking-widest">Kondisi Prima (Baik)</p>
-            <p className="text-3xl font-black text-emerald-950 leading-none">
+            <p className="text-3xl font-semibold text-emerald-950 leading-none">
               {totalAssets > 0 ? Math.round((goodAssets / totalAssets) * 100) : 100}%
             </p>
             <p className="text-[11px] text-emerald-600/90 font-medium">{goodAssets} dari {totalAssets} barang berstatus BAIK</p>
@@ -240,7 +240,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         <div className="bg-gradient-to-br from-amber-50 via-white to-amber-50/30 p-6 rounded-[2rem] border border-amber-100/60 shadow-sm flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-[10px] text-amber-500 font-extrabold uppercase tracking-widest">Sedang Dipinjam</p>
-            <p className="text-3xl font-black text-amber-950 leading-none">{activeBorrows} <span className="text-xs font-bold text-amber-500">Warga</span></p>
+            <p className="text-3xl font-semibold text-amber-950 leading-none">{activeBorrows} <span className="text-xs font-bold text-amber-500">Warga</span></p>
             <p className="text-[11px] text-amber-600 font-medium">Log peminjaman aktif belum dikembalikan</p>
           </div>
           <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-600">
@@ -254,7 +254,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${
+            className={`px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-widest transition-colors border ${
               activeCategory === cat
                 ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100'
                 : 'bg-white text-slate-500 border-slate-100 hover:border-indigo-200'
@@ -269,32 +269,32 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         {inventory
           .filter(item => activeCategory === 'Semua' || item.category === activeCategory)
           .map((item) => (
-          <div key={item.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg transition-all group">
+          <div key={item.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-lg transition-colors group">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
                 <Box size={24} />
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => { setSelectedAsset(item); setIsMaintenanceModalOpen(true); }} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all" title="Riwayat Perawatan">
+                <button onClick={() => { setSelectedAsset(item); setIsMaintenanceModalOpen(true); }} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-colors" title="Riwayat Perawatan">
                   <Wrench size={16} />
                 </button>
-                <button onClick={() => handleEditInventory(item)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all">
+                <button onClick={() => handleEditInventory(item)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={() => handleDeleteInventory(item.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all">
+                <button onClick={() => handleDeleteInventory(item.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors">
                   <Trash2 size={16} />
                 </button>
               </div>
             </div>
             <div className="mb-1">
-              <span className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">{item.category || 'Lainnya'}</span>
+              <span className="text-[10px] font-semibold text-indigo-500 uppercase tracking-widest">{item.category || 'Lainnya'}</span>
             </div>
-            <h4 className="font-black text-slate-800 text-lg">{item.name}</h4>
+            <h4 className="font-semibold text-slate-800 text-lg">{item.name}</h4>
             <div className="flex items-center gap-2 mt-2 text-slate-500 text-sm font-bold">
               <CheckCircle2 size={16} className="text-emerald-500" /> {item.total} Unit Tersedia
             </div>
             <div className="flex items-center justify-between mt-4">
-              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+              <span className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest border ${
                 item.condition === 'Baik' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
                 item.condition === 'Rusak' ? 'bg-rose-50 text-rose-600 border-rose-100' : 
                 'bg-amber-50 text-amber-600 border-amber-100'
@@ -303,7 +303,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
               </span>
               <button 
                 onClick={() => { setSelectedAsset(item); setIsBorrowModalOpen(true); }}
-                className="text-xs font-black text-indigo-600 hover:text-indigo-700 uppercase tracking-widest"
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest"
               >
                 Pinjamkan
               </button>
@@ -318,12 +318,12 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
           <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
             <History size={20} />
           </div>
-          <h3 className="text-lg font-black text-slate-800 uppercase tracking-widest">Riwayat Peminjaman</h3>
+          <h3 className="text-lg font-semibold text-slate-800 uppercase tracking-widest">Riwayat Peminjaman</h3>
         </div>
         <div className="overflow-x-auto custom-scrollbar">
           <table className="w-full text-sm text-left">
             <thead>
-              <tr className="bg-slate-50/50 text-slate-400 font-black uppercase text-[10px] tracking-[0.15em] border-b border-slate-100">
+              <tr className="bg-slate-50/50 text-slate-400 font-semibold uppercase text-[10px] tracking-[0.15em] border-b border-slate-100">
                 <th className="px-8 py-5">Barang</th>
                 <th className="px-8 py-5">Peminjam</th>
                 <th className="px-8 py-5">Tgl Pinjam</th>
@@ -340,7 +340,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                   <td className="px-8 py-5 text-slate-500">{new Date(log.date).toLocaleDateString('id-ID')}</td>
                   <td className="px-8 py-5 text-slate-500">{log.expectedReturnDate ? new Date(log.expectedReturnDate).toLocaleDateString('id-ID') : '-'}</td>
                   <td className="px-8 py-5 text-center">
-                    <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                    <span className={`px-3 py-1 rounded-full text-[8px] font-semibold uppercase tracking-widest border ${
                       log.status === 'Borrowed' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'
                     }`}>
                       {log.status === 'Borrowed' ? 'Dipinjam' : 'Kembali'}
@@ -379,11 +379,11 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
           {/* Header Identitas Resmi RT 002 / RW 020 */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-gradient-to-r from-cyan-50 via-slate-50 to-cyan-50/30 border border-cyan-100/80 rounded-2xl">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
+              <div className="w-8 h-8 rounded-xl bg-cyan-600 text-white flex items-center justify-center font-semibold text-xs shadow-sm">
                 <Box size={16} />
               </div>
               <div>
-                <p className="text-[11px] font-black text-slate-800 tracking-tight leading-tight">
+                <p className="text-[11px] font-semibold text-slate-800 tracking-tight leading-tight">
                   Buku Induk Aset & Fasilitas Inventaris RT 002 / RW 020
                 </p>
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
@@ -391,14 +391,14 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-wider bg-cyan-100/80 text-cyan-700 px-3 py-1 rounded-lg border border-cyan-200">
+            <span className="text-[10px] font-semibold uppercase tracking-wider bg-cyan-100/80 text-cyan-700 px-3 py-1 rounded-lg border border-cyan-200">
               Registrasi Aset Lingkungan
             </span>
           </div>
 
           {/* Quick Preset Barang Umum RT */}
           <div className="space-y-1.5 p-3 bg-slate-50/80 border border-slate-200/80 rounded-2xl">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
               <Sparkles size={12} className="text-cyan-600" />
               Pilihan Cepat Barang Umum RT (1-Klik Isi)
             </p>
@@ -421,7 +421,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                     setInvTotal(preset.qty);
                     setInvCondition('Baik');
                   }}
-                  className="px-2.5 py-1 bg-white hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-300 border border-slate-200 text-slate-700 rounded-lg text-[10px] font-black transition-all active:scale-95"
+                  className="px-2.5 py-1 bg-white hover:bg-cyan-50 hover:text-cyan-700 hover:border-cyan-300 border border-slate-200 text-slate-700 rounded-lg text-[10px] font-semibold transition-colors active:scale-95"
                 >
                   {preset.name}
                 </button>
@@ -433,12 +433,12 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
             {/* Kolom Kiri: Form Input Aset (7 Kolom) */}
             <div className="lg:col-span-7 space-y-4">
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                   Nama Aset / Barang *
                 </label>
                 <input 
                   required
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-all" 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-colors" 
                   value={invName} 
                   onChange={e => setInvName(e.target.value)} 
                   placeholder="Contoh: Tenda Acara 3x3, Kursi Plastik..."
@@ -447,11 +447,11 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     Kategori Aset *
                   </label>
                   <select 
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-all cursor-pointer" 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-colors cursor-pointer" 
                     value={invCategory} 
                     onChange={e => setInvCategory(e.target.value as any)}
                   >
@@ -459,30 +459,30 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     Kondisi Barang *
                   </label>
                   <select 
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-all cursor-pointer" 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-colors cursor-pointer" 
                     value={invCondition} 
                     onChange={e => setInvCondition(e.target.value as any)}
                   >
-                    <option value="Baik">🟢 Baik (Siap Digunakan)</option>
-                    <option value="Perlu Perbaikan">🟡 Perlu Perbaikan / Servis</option>
-                    <option value="Rusak">🔴 Rusak (Tidak Siap Pakai)</option>
+                    <option value="Baik">Baik (Siap Digunakan)</option>
+                    <option value="Perlu Perbaikan">Perlu Perbaikan / Servis</option>
+                    <option value="Rusak">Rusak (Tidak Siap Pakai)</option>
                   </select>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                   Jumlah Total Unit *
                 </label>
                 <input 
                   type="number" 
                   min="1"
                   required
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-all" 
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 outline-none transition-colors" 
                   value={invTotal} 
                   onChange={e => setInvTotal(e.target.value)} 
                   placeholder="Jumlah unit..."
@@ -501,18 +501,18 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
             {/* Kolom Kanan: Live Asset Card Preview (5 Kolom) */}
             <div className="lg:col-span-5 space-y-4">
               <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <Box size={13} className="text-cyan-600" />
                   Pratinjau Kartu Aset RT
                 </span>
-                <span className="text-[9px] font-black text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200/60 uppercase">
+                <span className="text-[9px] font-semibold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded-full border border-cyan-200/60 uppercase">
                   Inventaris
                 </span>
               </div>
 
-              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-slate-200/50 space-y-3.5 relative overflow-hidden">
+              <div className="bg-gradient-to-b from-white to-slate-50 border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-2xs space-y-3.5 relative overflow-hidden">
                 <div className="flex items-center justify-between">
-                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                  <span className={`px-2.5 py-1 rounded-full text-[9px] font-semibold uppercase tracking-wider ${
                     invCondition === 'Baik' 
                       ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
                       : invCondition === 'Perlu Perbaikan'
@@ -526,7 +526,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
 
                 <div>
                   <p className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest">{invCategory}</p>
-                  <h4 className="text-lg font-black text-slate-900 leading-snug">
+                  <h4 className="text-lg font-semibold text-slate-900 leading-snug">
                     {invName || 'Nama Aset Baru'}
                   </h4>
                 </div>
@@ -534,11 +534,11 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-center">
                   <div className="p-2.5 bg-slate-100/70 rounded-xl">
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total Aset</p>
-                    <p className="text-base font-black text-slate-800">{invTotal || '0'} Unit</p>
+                    <p className="text-base font-semibold text-slate-800">{invTotal || '0'} Unit</p>
                   </div>
                   <div className="p-2.5 bg-cyan-50/70 rounded-xl border border-cyan-100">
                     <p className="text-[9px] font-bold text-cyan-600 uppercase tracking-wider">Lokasi Simpan</p>
-                    <p className="text-[11px] font-black text-cyan-900 mt-0.5">Pos Kamling RT 02</p>
+                    <p className="text-[11px] font-semibold text-cyan-900 mt-0.5">Pos Kamling RT 02</p>
                   </div>
                 </div>
 
@@ -554,7 +554,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
             <Button type="button" variant="outline" className="flex-1 py-3 rounded-2xl text-xs font-bold" onClick={() => setIsInvModalOpen(false)}>
               Batal
             </Button>
-            <Button type="submit" className="flex-[2] py-3 rounded-2xl text-xs font-black shadow-lg bg-cyan-600 hover:bg-cyan-700 shadow-cyan-600/25 text-white">
+            <Button type="submit" className="flex-[2] py-3 rounded-2xl text-xs font-semibold shadow-lg bg-cyan-600 hover:bg-cyan-700 shadow-2xs text-white">
               {editingInvId ? 'Simpan Perubahan Aset' : 'Daftarkan Aset ke Inventaris'}
             </Button>
           </div>
@@ -572,11 +572,11 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
           {/* Header Pinjam */}
           <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black text-xs">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-semibold text-xs">
                 <ClipboardList size={16} />
               </div>
               <div>
-                <p className="text-xs font-black text-slate-800 leading-tight">
+                <p className="text-xs font-semibold text-slate-800 leading-tight">
                   Formulir Peminjaman Sarana RT 002 / RW 020
                 </p>
                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
@@ -584,7 +584,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg border border-indigo-200">
+            <span className="text-[10px] font-semibold uppercase tracking-wider bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg border border-indigo-200">
               Wajib Lapor RT
             </span>
           </div>
@@ -593,14 +593,14 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
             {/* Form Input Pinjam (7 Kolom) */}
             <div className="lg:col-span-7 space-y-4">
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                   Nama Warga Peminjam *
                 </label>
                 <div className="relative">
                   <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                   <input 
                     required
-                    className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    className="w-full pl-10 pr-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors" 
                     value={borrowerName} 
                     onChange={e => setBorrowerName(e.target.value)} 
                     placeholder="Nama lengkap warga / Kepala Keluarga..." 
@@ -610,7 +610,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     Jumlah Unit Pinjam *
                   </label>
                   <input 
@@ -618,19 +618,19 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
                     required
                     min="1" 
                     max={selectedAsset?.available || selectedAsset?.total || 1}
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all" 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors" 
                     value={borrowAmount} 
                     onChange={e => setBorrowAmount(e.target.value)} 
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                     Tanggal Mulai Pinjam *
                   </label>
                   <input 
                     type="date" 
                     required
-                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                    className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors cursor-pointer" 
                     value={borrowDate} 
                     onChange={e => setBorrowDate(e.target.value)} 
                   />
@@ -638,12 +638,12 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
                   Estimasi Pengembalian (Opsional)
                 </label>
                 <input 
                   type="date" 
-                  className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                  className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors cursor-pointer" 
                   value={returnDate} 
                   onChange={e => setReturnDate(e.target.value)} 
                 />
@@ -651,7 +651,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
 
               {/* Ketentuan Peminjaman */}
               <div className="p-3 bg-amber-50/70 border border-amber-200/80 rounded-2xl text-[10px] text-amber-900 space-y-1">
-                <p className="font-black flex items-center gap-1 text-amber-800">
+                <p className="font-semibold flex items-center gap-1 text-amber-800">
                   <AlertTriangle size={12} />
                   Tata Tertib Peminjaman Sarana RT 002 / RW 020
                 </p>
@@ -662,18 +662,18 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
             {/* Kolom Kanan: Pratinjau Surat Pinjam (5 Kolom) */}
             <div className="lg:col-span-5 space-y-4">
               <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                   <FileText size={13} className="text-indigo-600" />
                   Pratinjau Bukti Peminjaman
                 </span>
-                <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60 uppercase">
+                <span className="text-[9px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/60 uppercase">
                   Log Peminjaman
                 </span>
               </div>
 
-              <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-slate-200/50 space-y-3 relative text-xs">
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-5 shadow-xl shadow-2xs space-y-3 relative text-xs">
                 <div className="text-center pb-2 border-b border-dashed border-slate-200">
-                  <p className="text-[10px] font-black text-slate-800 uppercase">BUKTI PINJAM SARANA RT 002</p>
+                  <p className="text-[10px] font-semibold text-slate-800 uppercase">BUKTI PINJAM SARANA RT 002</p>
                   <p className="text-[9px] text-slate-400">RW 020 Kelurahan Tondo, Palu</p>
                 </div>
 
@@ -715,7 +715,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
             <Button type="button" variant="outline" className="flex-1 py-3 rounded-2xl text-xs font-bold" onClick={() => setIsBorrowModalOpen(false)}>
               Batal
             </Button>
-            <Button type="submit" className="flex-[2] py-3 rounded-2xl text-xs font-black shadow-lg bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/25 text-white">
+            <Button type="submit" className="flex-[2] py-3 rounded-2xl text-xs font-semibold shadow-lg bg-indigo-600 hover:bg-indigo-700 shadow-2xs text-white">
               Konfirmasi & Catat Peminjaman
             </Button>
           </div>
@@ -726,7 +726,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
         <div className="space-y-6">
           {/* Add Maintenance Form */}
           <form onSubmit={handleAddMaintenance} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-4">
-            <h5 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+            <h5 className="text-xs font-semibold text-slate-800 uppercase tracking-widest flex items-center gap-2">
               <Plus size={14} className="text-indigo-600" /> Tambah Riwayat Baru
             </h5>
             <div>
@@ -774,18 +774,18 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
 
           {/* Maintenance List */}
           <div className="space-y-3">
-            <h5 className="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
+            <h5 className="text-xs font-semibold text-slate-800 uppercase tracking-widest flex items-center gap-2">
               <ClipboardList size={14} className="text-indigo-600" /> Riwayat Sebelumnya
             </h5>
             <div className="max-h-[300px] overflow-y-auto pr-2 space-y-3 custom-scrollbar">
               {selectedAsset?.maintenanceHistory?.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((log) => (
                 <div key={log.id} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
                   <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                    <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
                       {new Date(log.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </span>
                     {log.cost && (
-                      <span className="text-[10px] font-black text-emerald-600 flex items-center gap-1">
+                      <span className="text-[10px] font-semibold text-emerald-600 flex items-center gap-1">
                         <DollarSign size={10} /> {log.cost.toLocaleString('id-ID')}
                       </span>
                     )}

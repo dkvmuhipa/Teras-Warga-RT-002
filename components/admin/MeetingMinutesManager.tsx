@@ -251,11 +251,11 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full text-[10px] font-black uppercase tracking-wider text-orange-700 border border-orange-200/80 shadow-2xs">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full text-[10px] font-semibold uppercase tracking-wider text-orange-700 border border-orange-200/80 shadow-2xs">
               <BookOpen size={12} />
               <span>Arsip Hukum &amp; Kesepakatan Lingkungan</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight font-sans">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight font-sans">
               Buku Notula &amp; Kesepakatan Musyawarah
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 font-medium max-w-2xl leading-relaxed">
@@ -266,7 +266,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
           <div className="flex flex-wrap items-center gap-3">
             <button
               onClick={handleOpenAdd}
-              className="flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-lg shadow-amber-500/20 active:scale-95 transition-all cursor-pointer"
+              className="flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-2xl text-xs font-semibold uppercase tracking-wider shadow-lg shadow-2xs active:scale-95 transition-colors cursor-pointer"
             >
               <Plus size={16} />
               <span>Tulis Notula Baru</span>
@@ -277,20 +277,20 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
         {/* Quick Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-orange-200/70">
           <div className="p-3.5 bg-white/90 rounded-2xl border border-orange-100 shadow-2xs">
-            <span className="text-[10px] font-bold text-slate-500 font-black uppercase tracking-wider block">Total Rapat Tercatat</span>
-            <span className="text-xl font-black text-slate-900 mt-0.5 block">{minutes.length} Sidang</span>
+            <span className="text-[10px] font-bold text-slate-500 font-semibold uppercase tracking-wider block">Total Rapat Tercatat</span>
+            <span className="text-xl font-semibold text-slate-900 mt-0.5 block">{minutes.length} Sidang</span>
           </div>
           <div className="p-3.5 bg-white/90 rounded-2xl border border-orange-100 shadow-2xs">
-            <span className="text-[10px] font-bold text-slate-500 font-black uppercase tracking-wider block">Poin Kesepakatan Sah</span>
-            <span className="text-xl font-black text-amber-400 mt-0.5 block">{totalDecisionsCount} Aturan</span>
+            <span className="text-[10px] font-bold text-slate-500 font-semibold uppercase tracking-wider block">Poin Kesepakatan Sah</span>
+            <span className="text-xl font-semibold text-amber-400 mt-0.5 block">{totalDecisionsCount} Aturan</span>
           </div>
           <div className="p-3.5 bg-white/90 rounded-2xl border border-orange-100 shadow-2xs">
-            <span className="text-[10px] font-bold text-slate-500 font-black uppercase tracking-wider block">Tingkat Partisipasi</span>
-            <span className="text-xl font-black text-emerald-400 mt-0.5 block">Kuorum Sah</span>
+            <span className="text-[10px] font-bold text-slate-500 font-semibold uppercase tracking-wider block">Tingkat Partisipasi</span>
+            <span className="text-xl font-semibold text-emerald-400 mt-0.5 block">Kuorum Sah</span>
           </div>
           <div className="p-3.5 bg-white/90 rounded-2xl border border-orange-100 shadow-2xs">
-            <span className="text-[10px] font-bold text-slate-500 font-black uppercase tracking-wider block">Arsip Berita Acara</span>
-            <span className="text-xl font-black text-sky-400 mt-0.5 block">100% Digital</span>
+            <span className="text-[10px] font-bold text-slate-500 font-semibold uppercase tracking-wider block">Arsip Berita Acara</span>
+            <span className="text-xl font-semibold text-sky-400 mt-0.5 block">100% Digital</span>
           </div>
         </div>
       </div>
@@ -308,7 +308,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
             placeholder="Cari keputusan rapat (misal: portal, tenda, sampah, siskamling, iuran)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-colors"
           />
         </div>
 
@@ -323,7 +323,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
             <button
               key={type.id}
               onClick={() => setFilterType(type.id)}
-              className={`px-3 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
+              className={`px-3 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-colors cursor-pointer shrink-0 ${
                 filterType === type.id
                   ? 'bg-slate-900 text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -341,12 +341,12 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
           filteredMinutes.map((m) => (
             <div
               key={m.id}
-              className="bg-white rounded-[2rem] border border-slate-200/90 shadow-sm p-6 space-y-5 hover:border-slate-300 transition-all group"
+              className="bg-white rounded-[2rem] border border-slate-200/90 shadow-sm p-6 space-y-5 hover:border-slate-300 transition-colors group"
             >
               {/* Header Badges & Actions */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
+                  <span className={`px-3 py-1 rounded-xl text-[10px] font-semibold uppercase tracking-wider ${
                     m.meetingType === 'Musyawarah Warga' ? 'bg-amber-100 text-amber-800' :
                     m.meetingType === 'Rapat Pengurus' ? 'bg-indigo-100 text-indigo-800' :
                     m.meetingType === 'Rapat Darurat Fasum' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
@@ -364,7 +364,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
                     {m.time}
                   </span>
 
-                  <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                  <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-xl text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1">
                     <Users size={12} className="text-emerald-600" />
                     {m.attendeesCount} KK Hadir
                   </span>
@@ -373,7 +373,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
                 <div className="flex items-center gap-1.5 self-end sm:self-center">
                   <button
                     onClick={() => handleShareToWhatsApp(m)}
-                    className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl transition-all cursor-pointer shadow-2xs"
+                    className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl transition-colors cursor-pointer shadow-2xs"
                     title="Bagikan ke Grup WhatsApp RT"
                   >
                     <Share2 size={15} />
@@ -381,7 +381,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
 
                   <button
                     onClick={() => handlePrintA4(m)}
-                    className="p-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl transition-all cursor-pointer shadow-2xs"
+                    className="p-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl transition-colors cursor-pointer shadow-2xs"
                     title="Cetak Berita Acara Notula A4"
                   >
                     <Printer size={15} />
@@ -389,7 +389,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
 
                   <button
                     onClick={() => handleOpenEdit(m)}
-                    className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all cursor-pointer shadow-2xs"
+                    className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors cursor-pointer shadow-2xs"
                     title="Edit Notula"
                   >
                     <Edit3 size={15} />
@@ -397,7 +397,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
 
                   <button
                     onClick={() => handleDelete(m)}
-                    className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition-all cursor-pointer shadow-2xs"
+                    className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition-colors cursor-pointer shadow-2xs"
                     title="Hapus Notula"
                   >
                     <Trash2 size={15} />
@@ -407,7 +407,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
 
               {/* Title & Leaders */}
               <div className="space-y-1.5">
-                <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-snug">
+                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 leading-snug">
                   {m.title}
                 </h3>
                 <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 font-medium">
@@ -425,7 +425,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
               {/* Agenda List */}
               {m.agenda && m.agenda.length > 0 && (
                 <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/70 space-y-1.5">
-                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                     <Bookmark size={12} className="text-amber-500" />
                     Agenda Pembahasan:
                   </p>
@@ -447,7 +447,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
               {/* Decisions Cards (Core Value) */}
               <div className="space-y-2.5 pt-2">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-800 flex items-center gap-2">
                     <CheckSquare size={15} className="text-emerald-600" />
                     Poin Kesepakatan Resmi yang Disahkan ({m.decisions?.length || 0})
                   </h4>
@@ -460,18 +460,18 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
                   {m.decisions && m.decisions.map((dec, idx) => (
                     <div
                       key={dec.id || idx}
-                      className="p-4 bg-gradient-to-br from-white to-slate-50/80 border-2 border-slate-200/90 rounded-2xl shadow-xs space-y-2 hover:border-amber-400 transition-all"
+                      className="p-4 bg-gradient-to-br from-white to-slate-50/80 border-2 border-slate-200/90 rounded-2xl shadow-xs space-y-2 hover:border-amber-400 transition-colors"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[9px] font-black uppercase tracking-wider">
+                        <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-md text-[9px] font-semibold uppercase tracking-wider">
                           {dec.category}
                         </span>
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[9px] font-black">
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[9px] font-semibold">
                           {dec.status || 'Aktif'}
                         </span>
                       </div>
 
-                      <h5 className="font-black text-slate-900 text-xs sm:text-sm leading-snug">
+                      <h5 className="font-semibold text-slate-900 text-xs sm:text-sm leading-snug">
                         {idx + 1}. {dec.title}
                       </h5>
 
@@ -495,14 +495,14 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
             <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-amber-200/60 shadow-xs">
               <BookOpen size={28} />
             </div>
-            <h4 className="font-black text-slate-800 text-base font-serif">Belum Ada Notula Musyawarah Real-Time</h4>
+            <h4 className="font-semibold text-slate-800 text-base font-serif">Belum Ada Notula Musyawarah Real-Time</h4>
             <p className="text-xs text-slate-500 mt-1.5 max-w-md mx-auto leading-relaxed">
               Basis data notula musyawarah saat ini masih kosong. Silakan catat hasil musyawarah atau rapat warga RT 02 untuk dipublikasikan langsung secara transparan kepada warga.
             </p>
             <button
               type="button"
               onClick={handleOpenAdd}
-              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-amber-600/20 active:scale-95 cursor-pointer"
+              className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-md shadow-2xs active:scale-95 cursor-pointer"
             >
               <Plus size={15} />
               <span>Buat Notula Musyawarah Pertama</span>
@@ -511,7 +511,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
         ) : (
           <div className="p-12 text-center bg-white rounded-3xl border border-slate-200">
             <BookOpen size={40} className="text-slate-300 mx-auto mb-3" />
-            <h4 className="font-black text-slate-800 text-base">Belum Ada Notula yang Sesuai</h4>
+            <h4 className="font-semibold text-slate-800 text-base">Belum Ada Notula yang Sesuai</h4>
             <p className="text-xs text-slate-500 mt-1">Coba ubah kata kunci pencarian atau pilih filter jenis rapat lainnya.</p>
           </div>
         )}
@@ -561,7 +561,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
                 onChange={(e: any) => setFormData({ ...formData, status: e.target.value })}
                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-amber-500"
               >
-                <option value="Disahkan">✅ Disahkan (Berlaku Resmi)</option>
+                <option value="Disahkan">Disahkan (Berlaku Resmi)</option>
                 <option value="Draft">📝 Draft (Belum Final)</option>
                 <option value="Diarsipkan">📦 Diarsipkan</option>
               </select>
@@ -643,7 +643,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, agenda: [...formData.agenda, ''] })}
-                className="text-[10px] font-black uppercase tracking-wider text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer"
+                className="text-[10px] font-semibold uppercase tracking-wider text-amber-700 hover:text-amber-800 flex items-center gap-1 cursor-pointer"
               >
                 <Plus size={12} /> Tambah Agenda
               </button>
@@ -693,7 +693,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
           {/* Decisions List Inputs */}
           <div className="space-y-3 pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                 <CheckSquare size={14} className="text-emerald-600" />
                 Poin Keputusan / Kesepakatan Resmi
               </label>
@@ -712,7 +712,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
                     }
                   ]
                 })}
-                className="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-colors"
+                className="px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition-colors"
               >
                 <Plus size={12} /> Tambah Keputusan
               </button>
@@ -721,7 +721,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
             {formData.decisions.map((dec, i) => (
               <div key={dec.id || i} className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-black text-slate-700">Poin #{i + 1}</span>
+                  <span className="text-xs font-semibold text-slate-700">Poin #{i + 1}</span>
                   {formData.decisions.length > 1 && (
                     <button
                       type="button"
@@ -789,13 +789,13 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer"
+              className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold uppercase tracking-wider shadow-md transition-colors cursor-pointer"
             >
               Simpan &amp; Sahkan Notula
             </button>
@@ -816,7 +816,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
             <div id="print-canvas" className="p-8 bg-white border border-slate-300 rounded-2xl shadow-sm text-slate-900 space-y-6 font-serif">
               {/* Kop Surat RT */}
               <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
-                <h2 className="text-base sm:text-lg font-black tracking-wider uppercase">
+                <h2 className="text-base sm:text-lg font-semibold tracking-wider uppercase">
                   RUKUN TETANGGA 002 / RUKUN WARGA 020
                 </h2>
                 <h3 className="text-sm font-bold tracking-wide uppercase">
@@ -829,7 +829,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
 
               {/* Title */}
               <div className="text-center space-y-1">
-                <h4 className="text-sm font-black uppercase underline tracking-wider font-sans">
+                <h4 className="text-sm font-semibold uppercase underline tracking-wider font-sans">
                   BERITA ACARA &amp; NOTULA HASIL MUSYAWARAH WARGA
                 </h4>
                 <p className="text-xs font-bold font-sans text-slate-600">
@@ -865,7 +865,7 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
 
               {/* Agreed Decisions */}
               <div className="space-y-3 font-sans">
-                <h5 className="font-black text-xs uppercase tracking-wider border-b pb-1">
+                <h5 className="font-semibold text-xs uppercase tracking-wider border-b pb-1">
                   POIN-POIN KEPUTUSAN YANG DISEPAKATI BERSAMA:
                 </h5>
                 <ol className="space-y-3 text-xs">
@@ -907,14 +907,14 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
               <button
                 type="button"
                 onClick={() => setIsPrintModalOpen(false)}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Tutup
               </button>
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold uppercase tracking-wider shadow-md transition-colors cursor-pointer"
               >
                 <Printer size={14} />
                 <span>Cetak Lembar A4</span>

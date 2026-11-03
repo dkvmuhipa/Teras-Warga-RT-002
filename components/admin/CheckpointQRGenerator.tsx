@@ -76,7 +76,7 @@ export const CheckpointQRGenerator: React.FC<CheckpointQRGeneratorProps> = ({ on
       <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-black text-slate-900">Cetak QR Code Checkpoint</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">Cetak QR Code Checkpoint</h2>
             <p className="text-sm text-slate-500">Cetak dan tempel kode ini di lokasi titik patroli.</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
@@ -88,7 +88,7 @@ export const CheckpointQRGenerator: React.FC<CheckpointQRGeneratorProps> = ({ on
           <div ref={componentRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {checkpoints.map((cp) => (
               <div key={cp.id} className="bg-white p-8 rounded-3xl border-2 border-slate-900 flex flex-col items-center text-center shadow-sm">
-                <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest mb-6">{cp.name}</h3>
+                <h3 className="text-xl font-semibold text-slate-900 uppercase tracking-widest mb-6">{cp.name}</h3>
                 <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-inner mb-4">
                     <div id={`qr-${cp.id}`}>
                         {cp.qrCode ? (

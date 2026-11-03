@@ -105,7 +105,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
             <ArrowUpDown size={14} className="stroke-[2.5]" />
           </div>
           <div>
-            <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Urutan Data Aktif</h4>
+            <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Urutan Data Aktif</h4>
             <p className="text-[10px] text-slate-500 font-medium tracking-wide">Klik kolom tabel atau pilih opsi cepat ini untuk mengurutkan warga</p>
           </div>
         </div>
@@ -124,9 +124,9 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                 key={field.id}
                 type="button"
                 onClick={() => handleSort(field.id as any)}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 py-1.5 px-3.5 rounded-xl text-[10px] sm:text-[11px] font-black uppercase tracking-wider transition-all border ${
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 py-1.5 px-3.5 rounded-xl text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider transition-colors border ${
                   isCurrent 
-                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-indigo-650 shadow-sm shadow-indigo-100/30' 
+                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-indigo-650 shadow-sm shadow-2xs' 
                     : 'bg-white hover:bg-slate-50 text-slate-550 border-slate-200 hover:border-slate-300'
                 }`}
               >
@@ -181,7 +181,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
         });
 
         return (
-          <div key={block} className="bg-white rounded-[2rem] border border-slate-150 shadow-[0_5px_25px_rgba(235,240,245,0.45)] overflow-hidden transition-all duration-300">
+          <div key={block} className="bg-white rounded-[2rem] border border-slate-150 shadow-[0_5px_25px_rgba(235,240,245,0.45)] overflow-hidden transition-colors duration-300">
             {/* Section Block Header */}
             <div className="bg-slate-50/80 border-b border-slate-150 px-5 sm:px-6 py-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
@@ -191,12 +191,12 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                 <div>
                   <h3 className="font-extrabold text-slate-800 text-sm tracking-tight flex items-center gap-2">
                     <span>Blok Wilayah:</span>
-                    <span className="font-black text-indigo-650 bg-indigo-50/80 px-2.5 py-0.5 rounded-lg border border-indigo-100/40">Blok {block}</span>
+                    <span className="font-semibold text-indigo-650 bg-indigo-50/80 px-2.5 py-0.5 rounded-lg border border-indigo-100/40">Blok {block}</span>
                   </h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Sektor Manajemen Rukun Tetangga 02</p>
                 </div>
               </div>
-              <div className="self-start sm:self-center px-3.5 py-1.5 text-[10px] font-black text-indigo-700 bg-indigo-50 border border-indigo-100/20 rounded-xl uppercase tracking-wider flex items-center gap-1.5 shadow-3xs">
+              <div className="self-start sm:self-center px-3.5 py-1.5 text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100/20 rounded-xl uppercase tracking-wider flex items-center gap-1.5 shadow-3xs">
                 <Building size={11} />
                 <span>{houses.length} Rumah Terdaftar</span>
               </div>
@@ -206,7 +206,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
             <div className="hidden md:block overflow-x-auto custom-scrollbar">
               <table className="w-full text-left border-collapse min-w-full">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/20 text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                  <tr className="border-b border-slate-100 bg-slate-50/20 text-[10px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
                     <th className="px-3 py-3.5 w-10 text-center">
                       <input 
                         type="checkbox" 
@@ -252,15 +252,15 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         {renderSortIcon('status')}
                       </div>
                     </th>
-                    <th className="px-3 py-3.5 w-24 text-center font-black">S. Sampah</th>
-                    <th className="px-3 py-3.5 w-24 text-center font-black">S. Air</th>
-                    <th className="px-3 py-3.5 w-24 text-center group cursor-pointer hover:bg-slate-50/50 transition-colors font-black" onClick={() => handleSort('arrears')}>
+                    <th className="px-3 py-3.5 w-24 text-center font-semibold">S. Sampah</th>
+                    <th className="px-3 py-3.5 w-24 text-center font-semibold">S. Air</th>
+                    <th className="px-3 py-3.5 w-24 text-center group cursor-pointer hover:bg-slate-50/50 transition-colors font-semibold" onClick={() => handleSort('arrears')}>
                       <div className="flex items-center justify-center gap-1">
                         <span>Tunggakan</span>
                         {renderSortIcon('arrears')}
                       </div>
                     </th>
-                    <th className="px-3 py-3.5 w-28 text-right font-black">Aksi Panel</th>
+                    <th className="px-3 py-3.5 w-28 text-right font-semibold">Aksi Panel</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs font-bold text-slate-600">
@@ -273,7 +273,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                     return (
                       <tr 
                         key={house.id} 
-                        className={`transition-all duration-150 group ${
+                        className={`transition-colors duration-150 group ${
                           isSelected 
                             ? 'bg-indigo-50/30 hover:bg-indigo-50/45 border-l-4 border-l-indigo-600' 
                             : 'hover:bg-slate-50/40'
@@ -283,7 +283,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         <td className="px-5 py-4.5 text-center">
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 rounded-lg border-slate-350 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer transition-all"
+                            className="w-4 h-4 rounded-lg border-slate-350 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer transition-colors"
                             checked={isSelected} 
                             onChange={() => handleSelectOne(house.id)} 
                           />
@@ -292,7 +292,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         {/* Citizen Name & Verification Quick-Action */}
                         <td className="px-5 py-4.5">
                           <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 border uppercase shadow-3xs transition-transform group-hover:scale-105 ${
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-semibold text-xs shrink-0 border uppercase shadow-3xs transition-transform group-hover:scale-105 ${
                               house.status === 'Occupied' 
                                 ? 'bg-gradient-to-br from-indigo-50 to-indigo-100/40 text-indigo-600 border-indigo-100' 
                                 : 'bg-slate-50 text-slate-400 border-slate-200'
@@ -362,7 +362,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
 
                         {/* House Number */}
                         <td className="px-5 py-4.5">
-                          <span className="font-mono font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-lg text-xs shadow-3xs">
+                          <span className="font-mono font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-lg text-xs shadow-3xs">
                             No. {house.number}
                           </span>
                         </td>
@@ -389,7 +389,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
 
                         {/* Occupants Account (Jiwa) */}
                         <td className="px-5 py-4.5 text-center">
-                          <div className="inline-flex items-center justify-center gap-1 text-slate-700 font-black bg-slate-50 border border-slate-205 w-11 h-6 rounded-lg shadow-3xs">
+                          <div className="inline-flex items-center justify-center gap-1 text-slate-700 font-semibold bg-slate-50 border border-slate-205 w-11 h-6 rounded-lg shadow-3xs">
                             <Users size={11} className="text-indigo-500 stroke-[2.5]" />
                             <span className="text-[10px]">{house.occupants || 0}</span>
                           </div>
@@ -404,13 +404,13 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                               handleUpdateHouse(house.id, { pbbStatus: newStatus, pbbYear: year });
                               toast.success(`Administrasi SPPT PBB No. ${house.number} diubah ke: ${newStatus}`);
                             }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black border transition-all active:scale-95 shadow-3xs hover:-translate-y-0.5 ${
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-semibold border transition-colors active:scale-95 shadow-3xs hover:-translate-y-0.5 ${
                               house.pbbStatus === 'Sudah Diambil' 
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100/55' 
                                 : 'bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100/55'
                             }`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full ${house.pbbStatus === 'Sudah Diambil' ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full ${house.pbbStatus === 'Sudah Diambil' ? 'bg-emerald-500 ' : 'bg-amber-500'}`} />
                             <span>{house.pbbStatus === 'Sudah Diambil' ? 'Diambil' : 'Belum'}</span>
                           </button>
                           <div className="flex items-center gap-1 mt-1 flex-wrap">
@@ -432,7 +432,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                 handleUpdateHouse(house.id, { residenceType: e.target.value as any });
                                 toast.info(`Status Kepemilikan RT No. ${house.number} diset ke ${e.target.value}`);
                               }}
-                              className="appearance-none w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-extrabold text-[10px] rounded-xl px-2.5 py-1.5 pr-6 border border-slate-200 outline-none cursor-pointer focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-all shadow-3xs"
+                              className="appearance-none w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-extrabold text-[10px] rounded-xl px-2.5 py-1.5 pr-6 border border-slate-200 outline-none cursor-pointer focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-colors shadow-3xs"
                             >
                               <option value="Tetap">🏡 Tetap/Pribadi</option>
                               <option value="Sewa">🔑 Sewa/Kontrak</option>
@@ -444,7 +444,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
 
                         {/* Occupancy Status */}
                         <td className="px-5 py-4.5">
-                          <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black border uppercase tracking-wider shadow-4xs ${
+                          <span className={`px-2.5 py-1 rounded-xl text-[10px] font-semibold border uppercase tracking-wider shadow-4xs ${
                             house.status === 'Occupied' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 
                             house.status === 'Empty' ? 'bg-slate-50 text-slate-505 border-slate-200' : 
                             house.status === 'Business' ? 'bg-purple-50 text-purple-700 border-purple-150' :
@@ -474,12 +474,12 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         <td className="px-5 py-4.5 text-center">
                           <div className="flex justify-center">
                             {arrears.length > 0 ? (
-                              <span className="flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 text-rose-650 text-[10px] font-black rounded-xl animate-pulse shadow-4xs">
+                              <span className="flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 text-rose-650 text-[10px] font-semibold rounded-xl shadow-4xs">
                                 <Coins size={10} />
                                 <span>{arrears.length} Bulan</span>
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 border border-emerald-100/50 text-emerald-605 bg-emerald-50/20 text-[9px] font-black uppercase tracking-widest rounded-lg">Lunas</span>
+                              <span className="px-2 py-0.5 border border-emerald-100/50 text-emerald-605 bg-emerald-50/20 text-[9px] font-semibold uppercase tracking-widest rounded-lg">Lunas</span>
                             )}
                           </div>
                         </td>
@@ -489,28 +489,28 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                           <div className="flex items-center justify-end gap-1.5">
                             <button 
                               onClick={() => generateResidentCardPDF(house)} 
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition-all rounded-lg shadow-3xs"
+                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition-colors rounded-lg shadow-3xs"
                               title="Cetak Kartu Warga Digital RT 02 (PDF)"
                             >
                               <FileText size={14} className="stroke-[2.5] text-emerald-600" />
                             </button>
                             <button 
                               onClick={() => openDetail(house)} 
-                              className="p-1.5 text-slate-400 hover:text-indigo-650 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-150 transition-all rounded-lg shadow-3xs"
+                              className="p-1.5 text-slate-400 hover:text-indigo-650 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-150 transition-colors rounded-lg shadow-3xs"
                               title="Tampilkan Info Profile Detail"
                             >
                               <Eye size={14} className="stroke-[2.5]" />
                             </button>
                             <button 
                               onClick={() => handleOpenEdit(house)} 
-                              className="p-1.5 text-slate-400 hover:text-amber-655 hover:bg-amber-50 border border-slate-100 hover:border-amber-150 transition-all rounded-lg shadow-3xs"
+                              className="p-1.5 text-slate-400 hover:text-amber-655 hover:bg-amber-50 border border-slate-100 hover:border-amber-150 transition-colors rounded-lg shadow-3xs"
                               title="Edit Biodata Rumah"
                             >
                               <Edit2 size={13} className="stroke-[2.5]" />
                             </button>
                             <button 
                               onClick={() => handleDelete(house.id)} 
-                              className="p-1.5 text-slate-400 hover:text-rose-650 hover:bg-rose-50 border border-slate-100 hover:border-rose-150 transition-all rounded-lg shadow-3xs"
+                              className="p-1.5 text-slate-400 hover:text-rose-650 hover:bg-rose-50 border border-slate-100 hover:border-rose-150 transition-colors rounded-lg shadow-3xs"
                               title="Hapus Data Hunian"
                             >
                               <Trash2 size={13} className="stroke-[2.5]" />
@@ -535,7 +535,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                 return (
                   <div 
                     key={house.id} 
-                    className={`p-4 transition-all duration-150 space-y-4 ${
+                    className={`p-4 transition-colors duration-150 space-y-4 ${
                       isSelected ? 'bg-indigo-50/30 border-l-4 border-l-indigo-500' : 'bg-white hover:bg-slate-50/30'
                     }`}
                   >
@@ -553,7 +553,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         
                         {/* Avatar Image Initials / Icon */}
                         <div className="flex items-center gap-2.5 truncate w-full">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 border uppercase shadow-3xs ${
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-semibold text-xs shrink-0 border uppercase shadow-3xs ${
                             house.status === 'Occupied' 
                               ? 'bg-gradient-to-br from-indigo-50 to-indigo-100/35 text-indigo-600 border-indigo-100' 
                               : 'bg-slate-55 text-slate-400 border-slate-200'
@@ -570,7 +570,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                               )}
                             </div>
                             <div className="mt-1 flex items-center gap-2">
-                              <span className="font-mono text-[9px] font-black text-indigo-750 bg-indigo-50/80 border border-indigo-100/20 px-1.5 py-0.5 rounded shadow-3xs leading-none">
+                              <span className="font-mono text-[9px] font-semibold text-indigo-750 bg-indigo-50/80 border border-indigo-100/20 px-1.5 py-0.5 rounded shadow-3xs leading-none">
                                 NO. {house.number}
                               </span>
                               {house.occupants ? (
@@ -584,7 +584,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                       </div>
 
                       {/* Occupancy state tag */}
-                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black border uppercase tracking-wider shrink-0 shadow-3xs ${
+                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-semibold border uppercase tracking-wider shrink-0 shadow-3xs ${
                         house.status === 'Occupied' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 
                         house.status === 'Empty' ? 'bg-slate-50 text-slate-450 border-slate-205' : 
                         house.status === 'Business' ? 'bg-purple-50 text-purple-700 border-purple-150' :
@@ -599,23 +599,23 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                     {/* Card Section 2: Financial statuses & quick parameters */}
                     <div className="grid grid-cols-2 gap-2 bg-slate-50/60 p-3 rounded-xl border border-slate-150 shadow-3xs">
                       <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 pr-1.5 my-0.5">
-                        <span className="flex items-center gap-1 font-black text-slate-400 uppercase tracking-wide"><Coins size={10} /> Iuran Sampah:</span>
+                        <span className="flex items-center gap-1 font-semibold text-slate-400 uppercase tracking-wide"><Coins size={10} /> Iuran Sampah:</span>
                         <PaymentIndicator status={statusSampah} service="Sampah" />
                       </div>
                       <div className="flex items-center justify-between text-[10px] font-bold text-slate-500 pl-2 my-0.5 border-l border-slate-200">
-                        <span className="flex items-center gap-1 font-black text-slate-400 uppercase tracking-wide"><Coins size={10} /> Air Bersih:</span>
+                        <span className="flex items-center gap-1 font-semibold text-slate-400 uppercase tracking-wide"><Coins size={10} /> Air Bersih:</span>
                         <PaymentIndicator status={statusAir} service="Air" />
                       </div>
                       
                       <div className="col-span-2 pt-2 border-t border-dashed border-slate-200/80 flex items-center justify-between text-[10px] font-bold text-slate-550">
                         <span className="font-extrabold uppercase tracking-wide">Tunggakan Iuran:</span>
                         {arrears.length > 0 ? (
-                          <span className="px-2 py-0.5 bg-rose-50 border border-rose-100 text-rose-605 font-extrabold rounded-lg animate-pulse flex items-center gap-1">
+                          <span className="px-2 py-0.5 bg-rose-50 border border-rose-100 text-rose-605 font-extrabold rounded-lg flex items-center gap-1">
                             <Coins size={9} />
                             <span>{arrears.length} Bulan</span>
                           </span>
                         ) : (
-                          <span className="text-emerald-600 font-black uppercase tracking-wider flex items-center gap-1">
+                          <span className="text-emerald-600 font-semibold uppercase tracking-wider flex items-center gap-1">
                             <CheckCircle2 size={11} /> LUNAS
                           </span>
                         )}
@@ -633,7 +633,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                             handleUpdateHouse(house.id, { pbbStatus: newStatus, pbbYear: year });
                             toast.success(`Administrasi SPPT PBB No. ${house.number} diubah ke: ${newStatus}`);
                           }}
-                          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-black border transition-all shadow-3xs ${
+                          className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-semibold border transition-colors shadow-3xs ${
                             house.pbbStatus === 'Sudah Diambil' 
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-100' 
                               : 'bg-amber-50 text-amber-700 border-amber-150'
@@ -651,7 +651,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                               handleUpdateHouse(house.id, { residenceType: e.target.value as any });
                               toast.info(`Status Kepemilikan diset ke ${e.target.value}`);
                             }}
-                            className="w-full appearance-none bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 font-black text-[10px] rounded-xl px-2.5 py-2 pr-6 outline-none cursor-pointer shadow-3xs"
+                            className="w-full appearance-none bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[10px] rounded-xl px-2.5 py-2 pr-6 outline-none cursor-pointer shadow-3xs"
                           >
                             <option value="Tetap">🏡 Pribadi</option>
                             <option value="Sewa">🔑 Sewa</option>
@@ -672,7 +672,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                             toast.info(`Status verifikasi ${house.headOfFamily || 'Rumah'} dibatalkan.`);
                           }
                         }}
-                        className={`w-full py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all flex items-center justify-center gap-1.5 shadow-3xs ${
+                        className={`w-full py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider border transition-colors flex items-center justify-center gap-1.5 shadow-3xs ${
                           house.isVerified 
                             ? 'bg-blue-50/50 text-blue-700 border-blue-200/50 hover:bg-blue-105' 
                             : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
@@ -717,7 +717,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         )}
                         <button 
                           onClick={() => openDetail(house)}
-                          className="px-2.5 py-1.5 bg-indigo-50 text-indigo-650 hover:bg-indigo-110 border border-indigo-100/50 rounded-xl flex items-center justify-center gap-1 text-[10px] font-black shadow-3xs active:scale-[0.93]"
+                          className="px-2.5 py-1.5 bg-indigo-50 text-indigo-650 hover:bg-indigo-110 border border-indigo-100/50 rounded-xl flex items-center justify-center gap-1 text-[10px] font-semibold shadow-3xs active:scale-[0.93]"
                         >
                           <Eye size={12} className="stroke-[2.5]" />
                           <span>Profil</span>
@@ -761,7 +761,7 @@ const PaymentIndicator: React.FC<PaymentIndicatorProps> = ({ status, service }) 
   
   if (service === 'Sampah') {
     return (
-      <div className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-lg border leading-none text-[9.5px] font-black transition-all ${
+      <div className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-lg border leading-none text-[9.5px] font-semibold transition-colors ${
         isPaid 
           ? 'bg-emerald-50/80 text-emerald-700 border-emerald-100 shadow-3xs' 
           : 'bg-rose-50/80 text-rose-650 border-rose-100'
@@ -772,7 +772,7 @@ const PaymentIndicator: React.FC<PaymentIndicatorProps> = ({ status, service }) 
     );
   } else {
     return (
-      <div className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-lg border leading-none text-[9.5px] font-black transition-all ${
+      <div className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-lg border leading-none text-[9.5px] font-semibold transition-colors ${
         isPaid 
           ? 'bg-sky-50/80 text-sky-700 border-sky-100 shadow-3xs' 
           : 'bg-rose-50/80 text-rose-650 border-rose-100'

@@ -74,7 +74,7 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
     <div className="space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
         <div>
-          <h3 className="text-xl font-black text-slate-800">Galeri Kegiatan</h3>
+          <h3 className="text-xl font-semibold text-slate-800">Galeri Kegiatan</h3>
           <p className="text-sm text-slate-500 font-medium">Kelola foto dokumentasi kegiatan warga.</p>
         </div>
         <Button onClick={() => setIsModalOpen(true)} className="bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200">
@@ -98,7 +98,7 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button 
                     onClick={() => handleDelete(item.id)}
-                    className="p-2 bg-white/20 hover:bg-rose-500 text-white rounded-xl backdrop-blur-sm transition-all"
+                    className="p-2 bg-white/20 hover:bg-rose-500 text-white rounded-xl backdrop-blur-sm transition-colors"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -138,8 +138,8 @@ export const GalleryManagement: React.FC<GalleryManagementProps> = ({ gallery })
           </div>
           
           <div className="flex items-center justify-between p-1 bg-slate-100 rounded-xl">
-            <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
-            <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
+            <button type="button" onClick={() => setImageType('upload')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${imageType === 'upload' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Upload File</button>
+            <button type="button" onClick={() => setImageType('link')} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${imageType === 'link' ? 'bg-white shadow text-slate-900' : 'text-slate-500'}`}>Link URL</button>
           </div>
 
           {imageType === 'upload' ? (

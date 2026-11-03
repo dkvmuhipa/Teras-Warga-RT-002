@@ -43,13 +43,13 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
     >
       <form onSubmit={onSubmit} className="space-y-6 max-h-[85vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200">
         {/* Header Info */}
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 p-6 rounded-3xl text-white shadow-lg shadow-emerald-600/20">
+        <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 p-6 rounded-3xl text-white shadow-lg shadow-2xs">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
               <Activity size={24} />
             </div>
             <div>
-              <h3 className="text-lg font-black tracking-tight">Catat Mutasi Penduduk</h3>
+              <h3 className="text-lg font-semibold tracking-tight">Catat Mutasi Penduduk</h3>
               <p className="text-emerald-100 text-xs font-medium opacity-80">Rekam setiap perubahan status warga secara real-time.</p>
             </div>
           </div>
@@ -57,7 +57,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
 
         {/* Jenis Mutasi Section */}
         <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-4">
-          <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest flex items-center gap-2">
             <Filter size={14} /> Jenis Mutasi
           </h4>
           <div className="grid grid-cols-4 gap-3">
@@ -71,7 +71,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                 key={type.id}
                 type="button"
                 onClick={() => setLogFormData({ ...logFormData, type: type.id as any })}
-                className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all flex flex-col items-center gap-1 ${
+                className={`py-3 rounded-2xl text-[10px] font-semibold uppercase tracking-widest border-2 transition-colors flex flex-col items-center gap-1 ${
                   logFormData.type === type.id 
                     ? `bg-${type.color}-600 text-white border-${type.color}-600 shadow-md scale-105` 
                     : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'
@@ -85,7 +85,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
 
         {/* Data Identitas Section */}
         <div className="bg-white p-6 rounded-3xl border border-slate-100 space-y-5 shadow-sm">
-          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
             <User size={14} /> Identitas Utama
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -97,7 +97,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.name} 
                   onChange={e => setLogFormData({ ...logFormData, name: e.target.value })} 
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors" 
                   placeholder="Contoh: Budi Santoso"
                 />
               </div>
@@ -110,7 +110,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.houseId} 
                   onChange={e => setLogFormData({ ...logFormData, houseId: e.target.value.toUpperCase() })} 
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors" 
                   placeholder="C7-02"
                 />
               </div>
@@ -123,7 +123,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.phone} 
                   onChange={e => setLogFormData({ ...logFormData, phone: e.target.value })} 
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors" 
                   placeholder="0812..."
                 />
               </div>
@@ -136,7 +136,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="date" 
                   value={logFormData.date} 
                   onChange={e => setLogFormData({ ...logFormData, date: e.target.value })} 
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" 
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors" 
                 />
               </div>
             </div>
@@ -145,7 +145,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
 
         {/* Dynamic Details Section */}
         <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-5">
-          <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+          <h4 className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest flex items-center gap-2">
             <List size={14} /> Detail Informasi Tambahan
           </h4>
           
@@ -158,7 +158,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                     type="text" 
                     value={logFormData.details.previousAddress} 
                     onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, previousAddress: e.target.value } })} 
-                    className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                   />
                 </div>
                 {logFormData.details.residenceType !== 'Tetap' && (
@@ -169,7 +169,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                         type="text" 
                         value={logFormData.details.ownerName} 
                         onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, ownerName: e.target.value } })} 
-                        className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                        className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                       />
                     </div>
                     <div>
@@ -178,7 +178,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                         type="text" 
                         value={logFormData.details.ownerPhone} 
                         onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, ownerPhone: e.target.value } })} 
-                        className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                        className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                       />
                     </div>
                   </motion.div>
@@ -189,7 +189,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                     type="text" 
                     value={logFormData.details.reasonForMoving} 
                     onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
-                    className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                   />
                 </div>
                 <div>
@@ -209,13 +209,13 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                         } 
                       });
                     }} 
-                    className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                     min="1"
                   />
                 </div>
               {logFormData.details.familyCount > 1 && (
                 <div className="col-span-2 space-y-3 p-4 bg-slate-100/50 rounded-2xl border border-slate-200">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Biodata Anggota Keluarga Lainnya</p>
+                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Biodata Anggota Keluarga Lainnya</p>
                   {logFormData.details.familyMembers.map((member, idx) => (
                     <div key={idx} className="grid grid-cols-2 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                       <input 
@@ -254,7 +254,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   <select 
                     value={logFormData.details.residenceType} 
                     onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, residenceType: e.target.value as any } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors"
                   >
                     <option value="Tetap">Tetap</option>
                     <option value="Rumah Keluarga">Rumah Keluarga / Ikut Saudara</option>
@@ -266,7 +266,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   <select 
                     value={logFormData.details.religion} 
                     onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, religion: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors"
                   >
                     <option value="">Pilih Agama...</option>
                     <option value="Islam">Islam</option>
@@ -286,7 +286,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                     type="text" 
                     value={logFormData.details.kkNumber} 
                     onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, kkNumber: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                   />
                 </div>
                 <div>
@@ -294,7 +294,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   <select 
                     value={logFormData.details.education} 
                     onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, education: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors"
                   >
                     <option value="">Pilih Pendidikan...</option>
                     <option value="SD">SD</option>
@@ -312,7 +312,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   <select 
                     value={logFormData.details.jobCategory} 
                     onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, jobCategory: e.target.value } })} 
-                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors"
                   >
                     <option value="">Pilih Pekerjaan...</option>
                     <option value="PNS">PNS</option>
@@ -342,7 +342,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                           : [...current, v];
                         setLogFormData({ ...logFormData, details: { ...logFormData.details, vulnerability: updated } });
                       }}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border transition-all ${
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase border transition-colors ${
                         (logFormData.details.vulnerability || []).includes(v) 
                           ? 'bg-rose-500 text-white border-rose-500' 
                           : 'bg-slate-50 text-slate-500 border-slate-200'
@@ -364,7 +364,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.details.newAddress} 
                   onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, newAddress: e.target.value } })} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                 />
               </div>
               <div className="col-span-full">
@@ -373,7 +373,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.details.reasonForMoving} 
                   onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, reasonForMoving: e.target.value } })} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                 />
               </div>
               <div className="col-span-2">
@@ -382,7 +382,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="number" 
                   value={logFormData.details.familyCount} 
                   onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, familyCount: parseInt(e.target.value) || 1 } })} 
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                   min="1"
                 />
               </div>
@@ -397,7 +397,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.details.fatherName} 
                   onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, fatherName: e.target.value } })} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                 />
               </div>
               <div>
@@ -406,7 +406,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.details.motherName} 
                   onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, motherName: e.target.value } })} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                 />
               </div>
               <div>
@@ -414,7 +414,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                 <select 
                   value={logFormData.details.gender} 
                   onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, gender: e.target.value as any } })} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                 >
                   <option value="Laki-laki">Laki-laki</option>
                   <option value="Perempuan">Perempuan</option>
@@ -431,7 +431,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.details.causeOfDeath} 
                   onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, causeOfDeath: e.target.value } })} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                 />
               </div>
               <div className="col-span-full">
@@ -440,7 +440,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                   type="text" 
                   value={logFormData.details.placeOfDeath} 
                   onChange={e => setLogFormData({ ...logFormData, details: { ...logFormData.details, placeOfDeath: e.target.value } })} 
-                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-all" 
+                  className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors" 
                 />
               </div>
             </>
@@ -455,7 +455,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
                 type="url" 
                 value={logFormData.documentUrl} 
                 onChange={e => setLogFormData({ ...logFormData, documentUrl: e.target.value })} 
-                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all font-mono" 
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-colors font-mono" 
                 placeholder="https://drive.google.com/... atau link foto dokumen"
               />
             </div>
@@ -467,7 +467,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
               <select 
                 value={logFormData.verificationStatus} 
                 onChange={e => setLogFormData({ ...logFormData, verificationStatus: e.target.value as any })} 
-                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-all"
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 transition-colors"
               >
                 <option value="Approved">✓ Disetujui / Sah (Lengkap)</option>
                 <option value="Pending">⏳ Menunggu Verifikasi Dokumen</option>
@@ -485,7 +485,7 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
               <textarea 
                 value={logFormData.description} 
                 onChange={e => setLogFormData({ ...logFormData, description: e.target.value })} 
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-all min-h-[80px] resize-none" 
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-emerald-500 transition-colors min-h-[80px] resize-none" 
                 placeholder={
                   logFormData.type === 'Newcomer' ? 'Cth: Pindah karena tugas kerja...' : 
                   logFormData.type === 'MovedOut' ? 'Cth: Pindah ke luar kota...' : 
@@ -515,13 +515,13 @@ export const PopulationLogModal: React.FC<PopulationLogModalProps> = ({
           <button 
             type="button"
             onClick={onClose}
-            className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all cursor-pointer"
+            className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-slate-200 transition-colors cursor-pointer"
           >
             Batal
           </button>
           <button 
             type="submit" 
-            className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all active:scale-95 cursor-pointer"
+            className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-emerald-700 shadow-lg shadow-2xs transition-colors active:scale-95 cursor-pointer"
           >
             Simpan Mutasi
           </button>

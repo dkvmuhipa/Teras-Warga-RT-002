@@ -105,11 +105,11 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-wider text-indigo-200 border border-white/15">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-semibold uppercase tracking-wider text-indigo-200 border border-white/15">
               <Building2 size={13} className="text-indigo-300" />
               <span>Dashboard Agregasi Wilayah &amp; Koordinator RW</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight">
               Rukun Warga {stats.activeRw} • Kel. {stats.activeKelurahan}
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl font-medium leading-relaxed">
@@ -120,14 +120,14 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
             <button
               onClick={handleBroadcastCoordination}
-              className="px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl text-xs font-black uppercase tracking-wider text-white flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+              className="px-4 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl text-xs font-semibold uppercase tracking-wider text-white flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-sm"
             >
               <Share2 size={14} />
               <span>Salin Edaran RW</span>
             </button>
             <button
               onClick={() => setShowRegisterModal(true)}
-              className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all active:scale-95"
+              className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-2xs transition-colors active:scale-95"
             >
               <Plus size={15} />
               <span>+ Daftarkan RT Baru</span>
@@ -141,13 +141,13 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
         {/* Card 1: Total RT */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Wilayah</span>
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total Wilayah</span>
             <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl">
               <Building2 size={18} />
             </div>
           </div>
           <div>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{stats.totalTenants} RT</h3>
+            <h3 className="text-2xl sm:text-3xl font-semibold text-slate-900">{stats.totalTenants} RT</h3>
             <p className="text-[11px] text-slate-500 font-medium mt-0.5">Terdaftar dalam platform</p>
           </div>
         </div>
@@ -155,13 +155,13 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
         {/* Card 2: Total Blok */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Blok Kavling</span>
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total Blok Kavling</span>
             <div className="p-2.5 bg-blue-50 text-blue-600 rounded-2xl">
               <Layers size={18} />
             </div>
           </div>
           <div>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{stats.totalBlocks} Blok</h3>
+            <h3 className="text-2xl sm:text-3xl font-semibold text-slate-900">{stats.totalBlocks} Blok</h3>
             <p className="text-[11px] text-slate-500 font-medium mt-0.5">Seluruh lorong/gang terdata</p>
           </div>
         </div>
@@ -169,13 +169,13 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
         {/* Card 3: Estimasi Hunian */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estimasi Kapasitas</span>
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Estimasi Kapasitas</span>
             <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl">
               <Home size={18} />
             </div>
           </div>
           <div>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-900">~{stats.estimatedUnits} Unit</h3>
+            <h3 className="text-2xl sm:text-3xl font-semibold text-slate-900">~{stats.estimatedUnits} Unit</h3>
             <p className="text-[11px] text-slate-500 font-medium mt-0.5">Potensi kavling perumahan</p>
           </div>
         </div>
@@ -183,13 +183,13 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
         {/* Card 4: Status Keamanan & Isolasi */}
         <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Isolasi Data</span>
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Isolasi Data</span>
             <div className="p-2.5 bg-purple-50 text-purple-600 rounded-2xl">
               <ShieldCheck size={18} />
             </div>
           </div>
           <div>
-            <h3 className="text-xl sm:text-2xl font-black text-emerald-600">100% Aman</h3>
+            <h3 className="text-xl sm:text-2xl font-semibold text-emerald-600">100% Aman</h3>
             <p className="text-[11px] text-slate-500 font-medium mt-0.5">Scoped logical partition</p>
           </div>
         </div>
@@ -203,7 +203,7 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
           <select
             value={selectedRwFilter}
             onChange={e => setSelectedRwFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-black text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20"
+            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20"
           >
             <option value="all">Semua RW ({availableTenants.length} RT)</option>
             {availableRws.map(rw => (
@@ -226,7 +226,7 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
       {/* ================= LIST OF RTS (TENANTS GRID) ================= */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
             <span>Daftar Rukun Tetangga di Bawah Naungan Wilayah ({filteredTenants.length})</span>
           </h2>
           <span className="text-[11px] text-slate-400 font-bold">
@@ -240,9 +240,9 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
             return (
               <div 
                 key={tenant.id}
-                className={`bg-white rounded-3xl p-5 border transition-all hover:shadow-lg relative overflow-hidden flex flex-col justify-between ${
+                className={`bg-white rounded-3xl p-5 border transition-colors hover:shadow-lg relative overflow-hidden flex flex-col justify-between ${
                   isCurrent 
-                    ? 'border-indigo-500 ring-2 ring-indigo-500/20 shadow-md shadow-indigo-500/10' 
+                    ? 'border-indigo-500 ring-2 ring-indigo-500/20 shadow-md shadow-2xs' 
                     : 'border-slate-200/80 hover:border-indigo-300'
                 }`}
               >
@@ -256,24 +256,24 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
                   {/* Top Badges */}
                   <div className="flex items-center justify-between">
                     <span 
-                      className="px-2.5 py-0.5 rounded-lg text-xs font-black text-white shadow-2xs"
+                      className="px-2.5 py-0.5 rounded-lg text-xs font-semibold text-white shadow-2xs"
                       style={{ backgroundColor: tenant.themeColor || '#4F46E5' }}
                     >
                       RT {tenant.rt}
                     </span>
                     <div className="flex items-center gap-1.5">
                       {isCurrent && (
-                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1">
                           <CheckCircle2 size={11} />
                           <span>Aktif Terbuka</span>
                         </span>
                       )}
                       {tenant.isPilotDemo ? (
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[10px] font-black uppercase tracking-wider">
+                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[10px] font-semibold uppercase tracking-wider">
                           Pilot Demo
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md text-[10px] font-black uppercase tracking-wider">
+                        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md text-[10px] font-semibold uppercase tracking-wider">
                           Utama
                         </span>
                       )}
@@ -282,7 +282,7 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
 
                   {/* Title & Location */}
                   <div>
-                    <h3 className="text-base font-black text-slate-900 tracking-tight leading-snug">
+                    <h3 className="text-base font-semibold text-slate-900 tracking-tight leading-snug">
                       {tenant.name}
                     </h3>
                     <p className="text-xs text-slate-500 font-medium flex items-center gap-1 mt-1">
@@ -295,11 +295,11 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
                   <div className="p-3 bg-slate-50 border border-slate-200/70 rounded-2xl space-y-1.5 text-xs text-slate-700">
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-bold">Ketua RT:</span>
-                      <span className="font-black text-slate-800 truncate max-w-[170px]">{tenant.chairmanName || '-'}</span>
+                      <span className="font-semibold text-slate-800 truncate max-w-[170px]">{tenant.chairmanName || '-'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-bold">Kavling:</span>
-                      <span className="font-black text-indigo-700">{tenant.blocks.join(', ')} ({tenant.blocks.length} Blok)</span>
+                      <span className="font-semibold text-indigo-700">{tenant.blocks.join(', ')} ({tenant.blocks.length} Blok)</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400 font-bold">Tarif Sampah:</span>
@@ -316,10 +316,10 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
                 <div className="pt-4 border-t border-slate-100 mt-4 flex items-center gap-2">
                   <button
                     onClick={() => handleQuickSwitch(tenant)}
-                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       isCurrent
                         ? 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/20 active:scale-95'
+                        : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-2xs active:scale-95'
                     }`}
                   >
                     <span>{isCurrent ? 'Sedang Dibuka' : 'Beralih ke RT Ini'}</span>

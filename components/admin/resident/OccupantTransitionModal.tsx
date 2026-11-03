@@ -64,7 +64,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
             <AlertTriangle size={18} />
           </div>
           <div>
-            <h4 className="text-xs font-black text-amber-950 uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-amber-950 uppercase tracking-wider">
               Perbedaan Kepala Keluarga Terdeteksi
             </h4>
             <p className="text-[11px] text-amber-800 mt-0.5 leading-relaxed">
@@ -77,7 +77,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Old Occupant */}
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-rose-600">
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-rose-600">
               <UserMinus size={13} />
               <span>Penghuni Sebelumnya (Lama)</span>
             </div>
@@ -94,7 +94,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
 
           {/* New Occupant */}
           <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-700">
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">
               <UserPlus size={13} />
               <span>Penghuni Pengganti (Baru)</span>
             </div>
@@ -112,7 +112,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
 
         {/* Selection Options */}
         <div className="space-y-2">
-          <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
             Pilih Jenis Perubahan:
           </label>
 
@@ -121,7 +121,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
             <button
               type="button"
               onClick={() => setSelectedAction('move_out')}
-              className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+              className={`p-3.5 rounded-2xl border text-left transition-colors cursor-pointer flex items-start gap-3 ${
                 selectedAction === 'move_out'
                   ? 'border-purple-600 bg-purple-50/80 ring-2 ring-purple-500/20 shadow-xs'
                   : 'border-slate-200 bg-white hover:bg-slate-50'
@@ -137,7 +137,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
                   <span className="text-xs font-bold text-slate-800">
                     Warga Lama Pindah Keluar (Pergantian Penghuni)
                   </span>
-                  <span className="px-2 py-0.2 rounded-full text-[9px] font-black bg-purple-200 text-purple-800 uppercase">
+                  <span className="px-2 py-0.2 rounded-full text-[9px] font-semibold bg-purple-200 text-purple-800 uppercase">
                     Rekomendasi
                   </span>
                 </div>
@@ -151,7 +151,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
             <button
               type="button"
               onClick={() => setSelectedAction('typo_fix')}
-              className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+              className={`p-3.5 rounded-2xl border text-left transition-colors cursor-pointer flex items-start gap-3 ${
                 selectedAction === 'typo_fix'
                   ? 'border-blue-600 bg-blue-50/80 ring-2 ring-blue-500/20 shadow-xs'
                   : 'border-slate-200 bg-white hover:bg-slate-50'
@@ -177,7 +177,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
         {/* Move Out Extra Fields */}
         {selectedAction === 'move_out' && (
           <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-3 animate-fadeIn">
-            <div className="flex items-center gap-1.5 text-xs font-black text-purple-900 uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-900 uppercase tracking-wider">
               <ShieldAlert size={14} className="text-purple-600" />
               <span>Detail Kepindahan Penghuni Sebelumnya</span>
             </div>
@@ -191,7 +191,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
                 onChange={(e) => setMoveOutReason(e.target.value as any)}
                 className="w-full p-2.5 bg-white border border-purple-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-purple-500 cursor-pointer"
               >
-                <option value="Pindah Keluar (Tanpa Pamit)">🚨 Pindah Keluar (Tanpa Pamit / Tidak Lapor RT)</option>
+                <option value="Pindah Keluar (Tanpa Pamit)">Pindah Keluar (Tanpa Pamit / Tidak Lapor RT)</option>
                 <option value="Pindah Keluar (Resmi)">Pindah Keluar Resmi (Ada Surat / Lapor Pengurus)</option>
                 <option value="Selesai Kontrak/Sewa">Masa Sewa / Kontrak Habis</option>
                 <option value="Pindah Rumah Lain">Pindah ke Unit Rumah Lain di Tondo</option>

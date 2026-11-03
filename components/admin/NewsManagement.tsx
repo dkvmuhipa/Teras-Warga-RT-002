@@ -190,16 +190,16 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
         <div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-6 bg-emerald-600 rounded-full"></div>
-            <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Kanal Jurnalistik Lingkungan</span>
+            <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest">Kanal Jurnalistik Lingkungan</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">Berita & Artikel RT 02</h2>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mt-1">Berita & Artikel RT 02</h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">Pengelolaan warta jurnalistik, liputan dokumentasi kegiatan warga, dan kabar lingkungan.</p>
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Button 
             onClick={() => { resetForms(); setIsModalOpen(true); }} 
-            className="w-full md:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] flex items-center justify-center gap-2"
+            className="w-full md:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-semibold uppercase tracking-widest transition-colors shadow-lg shadow-2xs active:scale-[0.98] flex items-center justify-center gap-2"
           >
             <Plus size={18} /> Buat Berita Baru
           </Button>
@@ -212,7 +212,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
           <input 
             type="text" 
             placeholder="Cari judul berita, penulis, atau kata kunci artikel..." 
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:bg-white focus:border-emerald-500 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 focus:bg-white focus:border-emerald-500 outline-none transition-colors"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -228,7 +228,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
               key={item.id} 
               variants={itemVariants}
               layout
-              className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-emerald-100/30 transition-all group overflow-hidden flex flex-col justify-between"
+              className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-2xs transition-colors group overflow-hidden flex flex-col justify-between"
             >
               <div>
                 {/* Thumbnail Image Header */}
@@ -247,13 +247,12 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
                     </div>
                   )}
 
-                  <span className="absolute top-4 left-4 px-3 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-xl border border-white/20">
+                  <span className="absolute top-4 left-4 px-3 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[9px] font-semibold uppercase tracking-widest rounded-xl border border-white/20">
                     {item.category || 'Berita'}
                   </span>
 
                   {item.location && (
-                    <span className="absolute bottom-3 left-4 px-2.5 py-0.5 bg-emerald-600/90 backdrop-blur-xs text-white text-[8.5px] font-black rounded-md flex items-center gap-1">
-                      📍 {item.location}
+                    <span className="absolute bottom-3 left-4 px-2.5 py-0.5 bg-emerald-600/90 backdrop-blur-xs text-white text-[8.5px] font-semibold rounded-md flex items-center gap-1">📍 {item.location}
                     </span>
                   )}
                 </div>
@@ -268,7 +267,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
                     <span>✍️ {item.author || 'Humas RT'}</span>
                   </div>
 
-                  <h3 className="text-lg font-black text-slate-900 leading-snug group-hover:text-emerald-600 transition-colors line-clamp-2">
+                  <h3 className="text-lg font-semibold text-slate-900 leading-snug group-hover:text-emerald-600 transition-colors line-clamp-2">
                     {item.title}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium line-clamp-3 leading-relaxed">
@@ -284,7 +283,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
                   <button 
                     type="button"
                     onClick={() => handleEdit(item)} 
-                    className="p-2.5 bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-all"
+                    className="p-2.5 bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl transition-colors"
                     title="Edit Berita"
                   >
                     <Edit2 size={16}/>
@@ -292,7 +291,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
                   <button 
                     type="button"
                     onClick={() => handleDeleteNews(item.id)} 
-                    className="p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl transition-all"
+                    className="p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors"
                     title="Hapus Berita"
                   >
                     <Trash2 size={16}/>
@@ -325,9 +324,9 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
           {/* Form Input Side */}
           <form onSubmit={handleSaveNews} className="lg:col-span-7 space-y-4">
             <div className="space-y-1">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Judul Berita / Liputan</label>
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Judul Berita / Liputan</label>
               <input 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors" 
                 value={title} 
                 onChange={e=>setTitle(e.target.value)} 
                 placeholder="Contoh: Gebyar Kemerdekaan RT 02 Tahun 2026..." 
@@ -337,9 +336,9 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Penulis / Reporter</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Penulis / Reporter</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors" 
                   value={author} 
                   onChange={e=>setAuthor(e.target.value)} 
                   placeholder="Nama Penulis / Humas..." 
@@ -347,9 +346,9 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Lokasi Liputan</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Lokasi Liputan</label>
                 <input 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors" 
                   value={location} 
                   onChange={e=>setLocation(e.target.value)} 
                   placeholder="Contoh: Gedung Serbaguna RT 02..." 
@@ -359,23 +358,23 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Kategori Berita</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Kategori Berita</label>
                 <select 
-                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all cursor-pointer" 
+                  className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors cursor-pointer" 
                   value={category} 
                   onChange={e=>setCategory(e.target.value as any)}
                 >
                   <option value="Kegiatan">🗓️ Kegiatan Warga</option>
-                  <option value="Pengumuman">📢 Pengumuman</option>
-                  <option value="Warga">👤 Info Warga</option>
-                  <option value="Lainnya">📌 Lainnya</option>
+                  <option value="Pengumuman">Pengumuman</option>
+                  <option value="Warga">Info Warga</option>
+                  <option value="Lainnya">Lainnya</option>
                 </select>
               </div>
 
               <div className="space-y-1">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Gaya AI (Tone Preset)</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Gaya AI (Tone Preset)</label>
                 <select 
-                  className="w-full p-3.5 bg-indigo-50/70 border border-indigo-200/70 rounded-2xl text-xs font-bold text-indigo-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all cursor-pointer" 
+                  className="w-full p-3.5 bg-indigo-50/70 border border-indigo-200/70 rounded-2xl text-xs font-bold text-indigo-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors cursor-pointer" 
                   value={aiTone} 
                   onChange={e=>setAiTone(e.target.value as any)}
                 >
@@ -387,9 +386,9 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
             </div>
 
             <div className="space-y-1">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Ringkasan Berita (Excerpt / Sub-Judul)</label>
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Ringkasan Berita (Excerpt / Sub-Judul)</label>
               <input 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors" 
                 value={excerpt} 
                 onChange={e=>setExcerpt(e.target.value)} 
                 placeholder="Ringkasan 1-2 kalimat untuk preview di kartu berita & WhatsApp..." 
@@ -397,8 +396,8 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
             </div>
             
             <div className="space-y-1">
-              <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Sampul / Thumbnail Foto Berita</label>
-              <div className="relative h-36 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-emerald-400 hover:bg-slate-100/80 transition-all group">
+              <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Sampul / Thumbnail Foto Berita</label>
+              <div className="relative h-36 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center overflow-hidden cursor-pointer hover:border-emerald-400 hover:bg-slate-100/80 transition-colors group">
                 {image ? (
                   <>
                     <img src={image} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -423,22 +422,22 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
             
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2 flex-wrap">
-                <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">Isi & Konten Artikel Berita</label>
+                <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Isi & Konten Artikel Berita</label>
                 <button 
                   type="button" 
                   onClick={handleGenerateWithAi} 
-                  className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/70 text-[11px] font-black py-1.5 px-3 rounded-full transition-all shrink-0 active:scale-95"
+                  className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/70 text-[11px] font-semibold py-1.5 px-3 rounded-full transition-colors shrink-0 active:scale-95"
                 >
                   {isAiLoading ? (
                     <Loader2 size={13} className="animate-spin" />
                   ) : (
-                    <Sparkles size={13} className="text-emerald-600 animate-pulse" />
+                    <Sparkles size={13} className="text-emerald-600" />
                   )}
                   <span>{isAiLoading ? 'Menyusun Draft...' : 'Bantu Tulis Jurnalistik AI'}</span>
                 </button>
               </div>
               <textarea 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all min-h-[120px] resize-none" 
+                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors min-h-[120px] resize-none" 
                 rows={5} 
                 value={content} 
                 onChange={e=>setContent(e.target.value)} 
@@ -448,7 +447,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
             </div>
             
             <div className="pt-2 border-t border-slate-100">
-              <Button type="submit" className="w-full py-3.5 text-xs font-black uppercase tracking-wider rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 flex justify-center items-center gap-2 group/submit">
+              <Button type="submit" className="w-full py-3.5 text-xs font-semibold uppercase tracking-wider rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-2xs flex justify-center items-center gap-2 group/submit">
                 {editingId ? (
                   <>Simpan Perubahan <CheckCircle2 size={16} className="group-hover/submit:scale-110 transition-transform" /></>
                 ) : (
@@ -463,7 +462,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
             <div>
               <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
+                  <div className="w-2.5 h-2.5 bg-emerald-400 rounded-full" />
                   <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-widest">LIVE ARTICLE MOCKUP</span>
                 </div>
                 <BookOpen size={15} className="text-emerald-400" />
@@ -480,12 +479,11 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
                       <span className="text-[9px] font-bold text-slate-400 mt-1">Pratinjau Sampul</span>
                     </div>
                   )}
-                  <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[8px] font-black uppercase tracking-widest rounded-lg">
+                  <span className="absolute top-3 left-3 px-2.5 py-0.5 bg-slate-900/80 backdrop-blur-md text-white text-[8px] font-semibold uppercase tracking-widest rounded-lg">
                     {category}
                   </span>
                   {location && (
-                    <span className="absolute bottom-2.5 left-3 px-2 py-0.5 bg-emerald-600 text-white text-[8px] font-bold rounded-md">
-                      📍 {location}
+                    <span className="absolute bottom-2.5 left-3 px-2 py-0.5 bg-emerald-600 text-white text-[8px] font-bold rounded-md">📍 {location}
                     </span>
                   )}
                 </div>
@@ -495,7 +493,7 @@ export const NewsManagement: React.FC<NewsManagementProps> = ({ news }) => {
                     <span>📅 {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     <span>✍️ {author || 'Humas RT'}</span>
                   </div>
-                  <h4 className="font-black text-sm text-slate-900 leading-snug line-clamp-2">
+                  <h4 className="font-semibold text-sm text-slate-900 leading-snug line-clamp-2">
                     {title || '[Judul Berita RT]'}
                   </h4>
                   <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-3">

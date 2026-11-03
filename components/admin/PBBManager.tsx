@@ -395,11 +395,11 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">
           <div>
             <div className="flex items-center gap-2.5 mb-1.5">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-2xs">
                 <Landmark size={20} className="stroke-[2.2]" />
               </div>
               <div>
-                <h1 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                <h1 className="text-xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                   Pendataan SPPT Pajak Bumi & Bangunan (PBB)
                   <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200/60">
                     Tahun {selectedYear}
@@ -421,7 +421,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="bg-transparent font-black text-slate-900 outline-none cursor-pointer"
+                className="bg-transparent font-semibold text-slate-900 outline-none cursor-pointer"
               >
                 {[2026, 2025, 2024, 2023].map(y => (
                   <option key={y} value={y.toString()}>{y}</option>
@@ -432,7 +432,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
             {/* Batch Action Button */}
             <button
               onClick={() => setIsBatchModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors shadow-xs active:scale-95 cursor-pointer"
             >
               <Layers size={13} />
               <span>Aksi Massal</span>
@@ -447,7 +447,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   error: 'Gagal mengunduh Excel PBB'
                 });
               }}
-              className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs shadow-emerald-600/20 active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs shadow-2xs active:scale-95 cursor-pointer"
             >
               <FileSpreadsheet size={13} />
               <span>Export Excel</span>
@@ -456,7 +456,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
             {/* Print PDF Recap */}
             <button
               onClick={() => setIsPrintModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs shadow-indigo-600/20 active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs shadow-2xs active:scale-95 cursor-pointer"
               title="Atur Kolom & Cetak Laporan Rekapitulasi PDF"
             >
               <Printer size={13} />
@@ -472,7 +472,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   error: 'Gagal mencetak PDF'
                 });
               }}
-              className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-all shadow-3xs active:scale-95 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-colors shadow-3xs active:scale-95 cursor-pointer"
               title="Cetak Formulir Tanda Tangan Tanda Terima Pengambilan SPPT"
             >
               <FileText size={13} className="text-slate-500" />
@@ -506,7 +506,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
             {stats.proofAtRt} <span className="text-xs font-normal text-slate-400">/ {stats.total}</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-1 mt-2 overflow-hidden">
-            <div className="bg-sky-600 h-full rounded-full transition-all duration-300" style={{ width: `${stats.pctProof}%` }} />
+            <div className="bg-sky-600 h-full rounded-full transition-colors duration-300" style={{ width: `${stats.pctProof}%` }} />
           </div>
         </div>
 
@@ -520,7 +520,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
             {stats.paid} <span className="text-xs font-normal text-slate-400">/ {stats.total}</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-1 mt-2 overflow-hidden">
-            <div className="bg-emerald-600 h-full rounded-full transition-all duration-300" style={{ width: `${stats.pctPaid}%` }} />
+            <div className="bg-emerald-600 h-full rounded-full transition-colors duration-300" style={{ width: `${stats.pctPaid}%` }} />
           </div>
         </div>
 
@@ -548,7 +548,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
             {stats.taken} <span className="text-xs font-normal text-slate-400">unit</span>
           </div>
           <div className="w-full bg-slate-100 rounded-full h-1 mt-2 overflow-hidden">
-            <div className="bg-slate-700 h-full rounded-full transition-all duration-300" style={{ width: `${stats.pctTaken}%` }} />
+            <div className="bg-slate-700 h-full rounded-full transition-colors duration-300" style={{ width: `${stats.pctTaken}%` }} />
           </div>
         </div>
       </div>
@@ -564,7 +564,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
               placeholder="Cari unit (misal C10-01), nama warga, NOP, atau nama di SPPT..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs font-semibold text-slate-800 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs font-semibold text-slate-800 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors placeholder:text-slate-400"
             />
             {searchQuery && (
               <button 
@@ -854,7 +854,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                       <td className="py-3.5 px-4 text-center">
                         <button
                           onClick={(e) => handleToggleSpptAtRt(house, e)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 cursor-pointer ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors active:scale-95 cursor-pointer ${
                             spptInRt
                               ? 'bg-slate-100 text-slate-800 border-slate-300 hover:bg-slate-200'
                               : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
@@ -869,7 +869,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                       <td className="py-3.5 px-4 text-center">
                         <button
                           onClick={(e) => handleToggleTaken(house, e)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all active:scale-95 cursor-pointer ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-colors active:scale-95 cursor-pointer ${
                             isTaken
                               ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
                               : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
@@ -916,7 +916,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
               </div>
               <div className="text-right">
                 <span className="text-[10px] uppercase font-bold text-slate-400">Unit / Kavling</span>
-                <p className="font-black text-slate-900 text-sm font-mono">{selectedHouse.block}-{selectedHouse.number}</p>
+                <p className="font-semibold text-slate-900 text-sm font-mono">{selectedHouse.block}-{selectedHouse.number}</p>
               </div>
             </div>
 
@@ -954,7 +954,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
 
             {/* Core Status Section: Bukti di RT & Status Bayar */}
             <div className="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 space-y-4">
-              <div className="flex items-center gap-2 text-xs font-black text-emerald-900">
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-900">
                 <ShieldCheck size={16} className="text-emerald-600" />
                 <span>Pencatatan Administrasi &amp; Bukti PBB di RT</span>
               </div>
@@ -1070,7 +1070,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, pbbSpptAtRt: 'Ada di RT' })}
-                    className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                    className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                       formData.pbbSpptAtRt === 'Ada di RT'
                         ? 'bg-slate-900 text-white border-slate-900'
                         : 'bg-slate-50 text-slate-600 border-slate-200'
@@ -1081,7 +1081,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, pbbSpptAtRt: 'Belum Ada' })}
-                    className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                    className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                       formData.pbbSpptAtRt === 'Belum Ada'
                         ? 'bg-slate-900 text-white border-slate-900'
                         : 'bg-slate-50 text-slate-600 border-slate-200'
@@ -1100,7 +1100,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, pbbStatus: 'Sudah Diambil' })}
-                    className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                    className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                       formData.pbbStatus === 'Sudah Diambil'
                         ? 'bg-indigo-600 text-white border-indigo-600'
                         : 'bg-slate-50 text-slate-600 border-slate-200'
@@ -1111,7 +1111,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, pbbStatus: 'Belum Diambil' })}
-                    className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                    className={`py-1.5 px-3 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
                       formData.pbbStatus === 'Belum Diambil'
                         ? 'bg-amber-600 text-white border-amber-600'
                         : 'bg-slate-50 text-slate-600 border-slate-200'
@@ -1163,7 +1163,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
               <button
                 type="submit"
                 disabled={isSaving}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition-all shadow-xs shadow-emerald-600/20 active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold rounded-xl transition-colors shadow-xs shadow-2xs active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 {isSaving ? 'Menyimpan...' : 'Simpan Data PBB'}
               </button>
@@ -1211,7 +1211,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
               ].map(opt => (
                 <label 
                   key={opt.id}
-                  className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                  className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
                     batchAction === opt.id 
                       ? 'bg-emerald-50/70 border-emerald-300 text-emerald-950 font-bold' 
                       : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
@@ -1245,7 +1245,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
               type="button"
               onClick={handleExecuteBatch}
               disabled={isSaving}
-              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition-all shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold rounded-xl transition-colors shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {isSaving ? 'Memproses...' : 'Terapkan Aksi Massal'}
             </button>
@@ -1301,7 +1301,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   });
                   setPrintOrientation('landscape');
                 }}
-                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-all cursor-pointer group"
+                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-colors cursor-pointer group"
               >
                 <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-700">1. Standar Lengkap</p>
                 <p className="text-[10px] text-slate-400 mt-0.5">Semua data operasional PBB (Lanskap)</p>
@@ -1316,7 +1316,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   });
                   setPrintOrientation('landscape');
                 }}
-                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-all cursor-pointer group"
+                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-colors cursor-pointer group"
               >
                 <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-700">2. Lembar Tanda Terima</p>
                 <p className="text-[10px] text-slate-400 mt-0.5">+ Kolom paraf penyerahan warga</p>
@@ -1331,7 +1331,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                   });
                   setPrintOrientation('portrait');
                 }}
-                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-all cursor-pointer group"
+                className="p-2.5 bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/40 rounded-xl text-left transition-colors cursor-pointer group"
               >
                 <p className="text-xs font-bold text-slate-800 group-hover:text-indigo-700">3. Rekap Pelunasan</p>
                 <p className="text-[10px] text-slate-400 mt-0.5">Fokus bukti setor pajak (Potret)</p>
@@ -1362,7 +1362,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                 return (
                   <label 
                     key={col.id} 
-                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-medium cursor-pointer transition-all select-none ${
+                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-medium cursor-pointer transition-colors select-none ${
                       isChecked 
                         ? 'bg-indigo-50/70 border-indigo-200 text-indigo-900 font-bold' 
                         : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
@@ -1397,7 +1397,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                 <button
                   type="button"
                   onClick={() => setPrintOrientation('landscape')}
-                  className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`p-2 rounded-xl border text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                     printOrientation === 'landscape'
                       ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
                       : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -1409,7 +1409,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
                 <button
                   type="button"
                   onClick={() => setPrintOrientation('portrait')}
-                  className={`p-2 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  className={`p-2 rounded-xl border text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer ${
                     printOrientation === 'portrait'
                       ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
                       : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
@@ -1497,7 +1497,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
             <button
               type="button"
               onClick={handleExecutePrint}
-              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-600/20 active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-md shadow-2xs active:scale-95 cursor-pointer"
             >
               <Printer size={14} />
               <span>Cetak &amp; Unduh PDF</span>

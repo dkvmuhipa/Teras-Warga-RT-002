@@ -267,9 +267,9 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
         <div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-6 bg-indigo-600 rounded-full"></div>
-            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Pusat Arsip Digital</span>
+            <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest">Pusat Arsip Digital</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1">Arsip Dokumen RT 02</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mt-1">Arsip Dokumen RT 02</h1>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
             Pengelolaan regulasi resmi, SK kepengurusan, tata tertib lingkungan, formulir administrasi, dan notulensi musyawarah.
           </p>
@@ -280,7 +280,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
             setSelectedFile(null);
             setIsAdding(true);
           }}
-          className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 active:scale-[0.98]"
+          className="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-indigo-600 text-white rounded-2xl text-xs font-semibold uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-lg shadow-2xs active:scale-[0.98]"
         >
           <Plus size={18} /> Unggah Dokumen
         </button>
@@ -293,8 +293,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
             <FileText size={20} />
           </div>
           <div>
-            <p className="text-[9px] font-black text-indigo-600 uppercase tracking-wider">Total Dokumen</p>
-            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">{documents.length} File</h4>
+            <p className="text-[9px] font-semibold text-indigo-600 uppercase tracking-wider">Total Dokumen</p>
+            <h4 className="text-xl font-semibold text-slate-900 leading-none mt-1">{documents.length} File</h4>
           </div>
         </div>
 
@@ -303,8 +303,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
             <FileCode size={20} />
           </div>
           <div>
-            <p className="text-[9px] font-black text-amber-600 uppercase tracking-wider">SK RT & Kebijakan</p>
-            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">{documents.filter(d => d.category === 'SK RT').length} Berkas</h4>
+            <p className="text-[9px] font-semibold text-amber-600 uppercase tracking-wider">SK RT & Kebijakan</p>
+            <h4 className="text-xl font-semibold text-slate-900 leading-none mt-1">{documents.filter(d => d.category === 'SK RT').length} Berkas</h4>
           </div>
         </div>
 
@@ -313,8 +313,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
             <FileSpreadsheet size={20} />
           </div>
           <div>
-            <p className="text-[9px] font-black text-emerald-600 uppercase tracking-wider">Aturan Lingkungan</p>
-            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">{documents.filter(d => d.category === 'Aturan').length} Dokumen</h4>
+            <p className="text-[9px] font-semibold text-emerald-600 uppercase tracking-wider">Aturan Lingkungan</p>
+            <h4 className="text-xl font-semibold text-slate-900 leading-none mt-1">{documents.filter(d => d.category === 'Aturan').length} Dokumen</h4>
           </div>
         </div>
 
@@ -323,8 +323,8 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
             <FileArchive size={20} />
           </div>
           <div>
-            <p className="text-[9px] font-black text-purple-600 uppercase tracking-wider">Formulir & Notulensi</p>
-            <h4 className="text-xl font-black text-slate-900 leading-none mt-1">
+            <p className="text-[9px] font-semibold text-purple-600 uppercase tracking-wider">Formulir & Notulensi</p>
+            <h4 className="text-xl font-semibold text-slate-900 leading-none mt-1">
               {documents.filter(d => d.category === 'Formulir' || d.category === 'Notulensi').length} Berkas
             </h4>
           </div>
@@ -338,7 +338,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
           <input 
             type="text" 
             placeholder="Cari judul dokumen, nomor SK, atau kata kunci..." 
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-all"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 outline-none transition-colors"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -352,7 +352,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                   key={cat}
                   onClick={() => setFilterCategory(cat)}
                   className={`
-                    px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5
+                    px-4 py-2 rounded-xl text-[10px] font-semibold uppercase tracking-widest transition-colors flex items-center gap-1.5
                     ${filterCategory === cat 
                       ? 'bg-white text-indigo-600 shadow-sm border border-indigo-100' 
                       : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'}
@@ -383,29 +383,29 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-indigo-100/40 transition-all group relative flex flex-col justify-between"
+                className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xs hover:shadow-xl hover:shadow-2xs transition-colors group relative flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start gap-4">
                     <div className="p-4 bg-slate-50 rounded-2xl group-hover:bg-indigo-50 transition-colors shrink-0 relative">
                       {badgeInfo.icon}
-                      <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 bg-slate-900 text-white rounded text-[8px] font-black uppercase tracking-wider">
+                      <span className="absolute -bottom-1 -right-1 px-1.5 py-0.5 bg-slate-900 text-white rounded text-[8px] font-semibold uppercase tracking-wider">
                         {doc.fileType || badgeInfo.ext}
                       </span>
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center flex-wrap gap-1.5 mb-1.5">
-                        <span className={`px-2.5 py-0.5 text-[9px] font-black uppercase tracking-widest rounded-md border ${getCategoryTheme(doc.category)}`}>
+                        <span className={`px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-widest rounded-md border ${getCategoryTheme(doc.category)}`}>
                           {doc.category}
                         </span>
 
                         {isInternal ? (
-                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200/60 text-[8px] font-black uppercase tracking-wider rounded-md flex items-center gap-1">
+                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200/60 text-[8px] font-semibold uppercase tracking-wider rounded-md flex items-center gap-1">
                             <Lock size={10} /> Internal
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[8px] font-black uppercase tracking-wider rounded-md flex items-center gap-1">
+                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[8px] font-semibold uppercase tracking-wider rounded-md flex items-center gap-1">
                             <Globe size={10} /> Publik
                           </span>
                         )}
@@ -423,7 +423,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                         </p>
                       )}
 
-                      <h3 className="text-base font-black text-slate-900 mb-1 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
+                      <h3 className="text-base font-semibold text-slate-900 mb-1 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
                         {doc.title}
                       </h3>
 
@@ -450,7 +450,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                     href={getDocumentPreviewUrl(doc.url)} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xs"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-indigo-700 transition-colors shadow-xs"
                   >
                     <Download size={14} /> Lihat Dokumen
                   </a>
@@ -465,7 +465,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
                       window.open(waUrl, '_blank');
                     }}
-                    className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200/60 rounded-xl transition-all"
+                    className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200/60 rounded-xl transition-colors"
                     title="Bagikan ke WhatsApp Warga"
                   >
                     <Share2 size={16} className="text-emerald-600" />
@@ -473,7 +473,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
 
                   <button
                     onClick={() => handleDelete(doc.id)}
-                    className="p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/60 rounded-xl transition-all"
+                    className="p-2.5 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/60 rounded-xl transition-colors"
                     title="Hapus Dokumen"
                   >
                     <Trash2 size={16} />
@@ -490,7 +490,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
               <FolderOpen size={32} />
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-black text-slate-800">Tidak Ada Dokumen Ditemukan</h3>
+              <h3 className="text-base font-semibold text-slate-800">Tidak Ada Dokumen Ditemukan</h3>
               <p className="text-xs text-slate-400 font-medium">
                 {searchQuery ? `Tidak ada dokumen yang cocok dengan kata kunci "${searchQuery}"` : 'Belum ada dokumen yang diunggah dalam kategori ini.'}
               </p>
@@ -530,17 +530,17 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
               {/* Header */}
               <div className="px-6 sm:px-8 pt-6 sm:pt-7 pb-4 border-b border-slate-100 flex items-start justify-between gap-4 bg-gradient-to-b from-slate-50/70 to-white shrink-0">
                 <div className="flex items-start gap-3.5">
-                  <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-2xl shadow-md shadow-indigo-600/25 shrink-0">
+                  <div className="p-3 bg-gradient-to-br from-indigo-500 to-indigo-700 text-white rounded-2xl shadow-md shadow-2xs shrink-0">
                     <FileUp size={22} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">
                         Formulir Arsip Resmi
                       </span>
                       <span className="text-[10px] text-slate-400 font-bold">RT 02</span>
                     </div>
-                    <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                    <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight mt-1">
                       Unggah Dokumen Baru
                     </h2>
                     <p className="text-xs text-slate-500 font-medium mt-0.5 line-clamp-1 sm:line-clamp-none">
@@ -563,7 +563,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                 {/* 1. Judul Dokumen */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                       <FileText size={13} className="text-indigo-600" />
                       Judul Dokumen Resmi <span className="text-rose-500">*</span>
                     </label>
@@ -572,7 +572,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                   <input
                     type="text"
                     required
-                    className="w-full px-4 sm:px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                    className="w-full px-4 sm:px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-colors"
                     placeholder="Misal: Peraturan Bersama Pengelolaan Sampah & Ketertiban Lingkungan 2026"
                     value={newDoc.title}
                     onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
@@ -587,7 +587,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                   {/* Nomor Surat / Berkas */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                         <Hash size={13} className="text-indigo-600" />
                         Nomor Surat / SK Dokumen
                       </label>
@@ -595,7 +595,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                     </div>
                     <input
                       type="text"
-                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all font-mono"
+                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-colors font-mono"
                       placeholder="Misal: 004/SK-RT02/X/2026"
                       value={newDoc.documentNumber || ''}
                       onChange={(e) => setNewDoc({ ...newDoc, documentNumber: e.target.value })}
@@ -604,15 +604,15 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
 
                   {/* Kategori Dokumen */}
                   <div>
-                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2">
                       Kategori Dokumen <span className="text-rose-500">*</span>
                     </label>
                     <select
-                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                      className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-colors cursor-pointer"
                       value={newDoc.category}
                       onChange={(e) => setNewDoc({ ...newDoc, category: e.target.value as any })}
                     >
-                      <option value="SK RT">📋 SK RT (Surat Keputusan)</option>
+                      <option value="SK RT">SK RT (Surat Keputusan)</option>
                       <option value="Aturan">⚖️ Aturan & Tata Tertib</option>
                       <option value="Formulir">📝 Formulir & Blangko Warga</option>
                       <option value="Notulensi">📑 Notulensi Rapat RT</option>
@@ -625,14 +625,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Tingkat Akses */}
                   <div>
-                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2">
                       Tingkat Akses Dokumen
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={() => setNewDoc({ ...newDoc, accessLevel: 'Publik' })}
-                        className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all ${
+                        className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-colors ${
                           newDoc.accessLevel === 'Publik'
                             ? 'bg-emerald-50 border-emerald-300 text-emerald-700 shadow-xs'
                             : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
@@ -645,7 +645,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                       <button
                         type="button"
                         onClick={() => setNewDoc({ ...newDoc, accessLevel: 'Internal' })}
-                        className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-all ${
+                        className={`flex items-center justify-center gap-1.5 py-3 px-3 rounded-2xl border text-xs font-bold transition-colors ${
                           newDoc.accessLevel === 'Internal'
                             ? 'bg-amber-50 border-amber-300 text-amber-700 shadow-xs'
                             : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
@@ -659,13 +659,13 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
 
                   {/* Tanggal Terbit / Penetapan */}
                   <div>
-                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
                       <Calendar size={13} className="text-indigo-600" />
                       Tanggal Penetapan / Berlaku
                     </label>
                     <input
                       type="date"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-colors"
                       value={newDoc.effectiveDate || ''}
                       onChange={(e) => setNewDoc({ ...newDoc, effectiveDate: e.target.value })}
                     />
@@ -675,14 +675,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                 {/* 4. Deskripsi / Keterangan Dokumen */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
                       Ringkasan & Keterangan Dokumen
                     </label>
                     <span className="text-[9px] font-semibold text-slate-400">Opsional</span>
                   </div>
                   <textarea
                     rows={2}
-                    className="w-full px-4 sm:px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all resize-none leading-relaxed"
+                    className="w-full px-4 sm:px-5 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-colors resize-none leading-relaxed"
                     placeholder="Tulis ringkasan singkat isi regulasi, latar belakang keputusan, atau instruksi tindak lanjut bagi warga..."
                     value={newDoc.description || ''}
                     onChange={(e) => setNewDoc({ ...newDoc, description: e.target.value })}
@@ -692,7 +692,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                 {/* 5. Metode Berkas (File vs Link URL) */}
                 <div className="space-y-3 pt-1 border-t border-slate-100">
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                       <Upload size={13} className="text-indigo-600" />
                       Sumber Berkas Dokumen <span className="text-rose-500">*</span>
                     </label>
@@ -703,7 +703,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                     <button 
                       type="button" 
                       onClick={() => setUploadType('file')} 
-                      className={`flex-1 py-2.5 text-[11px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 ${
+                      className={`flex-1 py-2.5 text-[11px] font-semibold rounded-xl transition-colors uppercase tracking-wider flex items-center justify-center gap-2 ${
                         uploadType === 'file' 
                           ? 'bg-white shadow-sm text-indigo-600 border border-indigo-100/60' 
                           : 'text-slate-500 hover:text-slate-800'
@@ -714,7 +714,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                     <button 
                       type="button" 
                       onClick={() => setUploadType('url')} 
-                      className={`flex-1 py-2.5 text-[11px] font-black rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-2 ${
+                      className={`flex-1 py-2.5 text-[11px] font-semibold rounded-xl transition-colors uppercase tracking-wider flex items-center justify-center gap-2 ${
                         uploadType === 'url' 
                           ? 'bg-white shadow-sm text-indigo-600 border border-indigo-100/60' 
                           : 'text-slate-500 hover:text-slate-800'
@@ -738,7 +738,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                       {isCompressing ? (
                         <div className="p-6 bg-indigo-50/60 border-2 border-dashed border-indigo-300 rounded-2xl flex flex-col items-center justify-center text-center gap-2">
                           <RefreshCw size={26} className="text-indigo-600 animate-spin" />
-                          <p className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                          <p className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
                             Menyesuaikan Berkas ke Batas 3 - 5 MB...
                           </p>
                           <p className="text-[10px] text-slate-500 font-medium">
@@ -746,22 +746,22 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                           </p>
                         </div>
                       ) : selectedFile ? (
-                        <div className="p-4 bg-indigo-50/40 border-2 border-indigo-200 rounded-2xl flex items-center justify-between gap-3 transition-all">
+                        <div className="p-4 bg-indigo-50/40 border-2 border-indigo-200 rounded-2xl flex items-center justify-between gap-3 transition-colors">
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="p-3 bg-white rounded-xl shadow-xs text-indigo-600 shrink-0 border border-indigo-100">
                               <FileCheck size={24} />
                             </div>
                             <div className="min-w-0">
                               <div className="flex items-center flex-wrap gap-2">
-                                <span className="text-xs font-black text-slate-900 truncate max-w-[200px] sm:max-w-xs block">
+                                <span className="text-xs font-semibold text-slate-900 truncate max-w-[200px] sm:max-w-xs block">
                                   {selectedFile.name}
                                 </span>
                                 {compressionInfo ? (
-                                  <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-[9px] font-black uppercase rounded-full shrink-0 flex items-center gap-1">
+                                  <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-[9px] font-semibold uppercase rounded-full shrink-0 flex items-center gap-1">
                                     <Sparkles size={10} /> Hemat {Math.round(((compressionInfo.originalSize - compressionInfo.compressedSize) / compressionInfo.originalSize) * 100)}%
                                   </span>
                                 ) : (
-                                  <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase rounded-full shrink-0">
+                                  <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[9px] font-semibold uppercase rounded-full shrink-0">
                                     Siap Unggah
                                   </span>
                                 )}
@@ -782,14 +782,14 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                             <button
                               type="button"
                               onClick={() => fileInputRef.current?.click()}
-                              className="px-3 py-1.5 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all"
+                              className="px-3 py-1.5 bg-white text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-colors"
                             >
                               Ganti
                             </button>
                             <button
                               type="button"
                               onClick={() => { setSelectedFile(null); setCompressionInfo(null); }}
-                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors"
                               title="Hapus berkas terpilih"
                             >
                               <X size={16} />
@@ -803,7 +803,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                           onDrop={handleDrop}
                           onClick={() => fileInputRef.current?.click()}
                           className={`
-                            flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl transition-all cursor-pointer text-center
+                            flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl transition-colors cursor-pointer text-center
                             ${isDragging 
                               ? 'border-indigo-500 bg-indigo-50/50 scale-[0.99]' 
                               : 'border-slate-200 bg-slate-50/60 hover:border-indigo-300 hover:bg-indigo-50/20'}
@@ -812,7 +812,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                           <div className="w-12 h-12 rounded-2xl bg-white shadow-xs border border-slate-100 flex items-center justify-center text-indigo-600 mb-3 group-hover:scale-110 transition-transform">
                             <Upload size={24} />
                           </div>
-                          <p className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                          <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
                             Tarik & Lepas Berkas ke Sini
                           </p>
                           <p className="text-[11px] text-slate-400 font-medium mt-1">
@@ -824,7 +824,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.DOCX</span>
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.XLSX</span>
                             <span className="px-2 py-0.5 bg-white border border-slate-200 text-slate-600 text-[9px] font-bold rounded-md">.ZIP</span>
-                            <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[9px] font-black rounded-md flex items-center gap-1">
+                            <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[9px] font-semibold rounded-md flex items-center gap-1">
                               ⚡ Foto: Auto-Kompres 3-5MB • Dokumen: Maks 10MB
                             </span>
                           </div>
@@ -838,7 +838,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                         <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                         <input
                           type="url"
-                          className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                          className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-colors"
                           placeholder="https://drive.google.com/file/... atau tautan berkas resmi"
                           value={newDoc.url || ''}
                           onChange={(e) => setNewDoc({ ...newDoc, url: e.target.value })}
@@ -873,7 +873,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                   <button
                     type="submit"
                     disabled={isUploading}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-7 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-xl shadow-indigo-600/25 disabled:opacity-50 active:scale-[0.98]"
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-7 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-2xl text-xs font-semibold uppercase tracking-widest hover:from-indigo-700 hover:to-indigo-800 transition-colors shadow-xl shadow-2xs disabled:opacity-50 active:scale-[0.98]"
                   >
                     {isUploading ? (
                       <>

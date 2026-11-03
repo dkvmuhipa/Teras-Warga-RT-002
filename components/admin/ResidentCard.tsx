@@ -70,7 +70,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
     <motion.div 
       layout
       whileHover={{ y: -3 }}
-      className="relative bg-white p-5 md:p-6 rounded-[2rem] border border-slate-200/80 shadow-2xs hover:border-indigo-400/50 hover:shadow-xl hover:shadow-indigo-500/8 transition-all duration-300 group overflow-hidden flex flex-col justify-between select-none"
+      className="relative bg-white p-5 md:p-6 rounded-[2rem] border border-slate-200/80 shadow-2xs hover:border-indigo-400/50 hover:shadow-xl hover:shadow-2xs transition-colors duration-300 group overflow-hidden flex flex-col justify-between select-none"
     >
       {/* Ambient background glow */}
       <div className="absolute -right-6 -top-6 w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/10 transition-colors pointer-events-none" />
@@ -81,11 +81,11 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
           <div className="flex items-center gap-3.5 min-w-0">
             {/* Refined Squircle Avatar */}
             <div className="relative shrink-0">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-base shadow-xs transition-all ${
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-semibold text-base shadow-xs transition-colors ${
                 house.status === 'Occupied' 
-                  ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 text-white shadow-indigo-500/25 ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white' 
+                  ? 'bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 text-white shadow-2xs ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white' 
                   : house.status === 'Visiting'
-                  ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sky-500/20'
+                  ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-2xs'
                   : 'bg-slate-100 text-slate-400 border border-slate-200'
               }`}>
                 {house.headOfFamily && house.headOfFamily !== '-' 
@@ -200,8 +200,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
             )}
 
             {house.twoWheelCount && house.twoWheelCount > 0 ? (
-              <span className="hidden sm:inline-flex items-center gap-1 bg-slate-50 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200/60 text-[9px]">
-                🛵 {house.twoWheelCount}
+              <span className="hidden sm:inline-flex items-center gap-1 bg-slate-50 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200/60 text-[9px]">🛵 {house.twoWheelCount}
               </span>
             ) : null}
           </div>
@@ -209,14 +208,14 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
 
         {/* Info Stats Section: Dual Financial Widget */}
         <div className="grid grid-cols-2 gap-2.5 mb-3 relative z-10">
-          <div className={`p-3 rounded-2xl border transition-all ${
+          <div className={`p-3 rounded-2xl border transition-colors ${
             isDuesPaid 
               ? 'bg-[#e8faf0] border-emerald-100/80 text-[#059669]' 
               : 'bg-[#fff1f2] border-rose-100/80 text-[#e11d48]'
           }`}>
             <p className="text-[9px] font-extrabold uppercase tracking-widest opacity-80 mb-1">Status Iuran</p>
             <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${isDuesPaid ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse' : 'bg-rose-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${isDuesPaid ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] ' : 'bg-rose-500'}`} />
               <p className="text-xs font-extrabold">
                 {isDuesPaid ? 'Lunas' : 'Menunggak'}
               </p>
@@ -235,7 +234,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
           <div className="mb-3 relative z-10">
             <button 
               onClick={(e) => { e.stopPropagation(); onUpdatePBB?.(house); }}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl border transition-all duration-200 ${
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl border transition-colors duration-200 ${
                 house.pbbStatus === 'Sudah Diambil' 
                   ? 'bg-emerald-50/70 text-emerald-700 border-emerald-200/70 hover:bg-emerald-100/80' 
                   : 'bg-amber-50/70 text-amber-800 border-amber-200/70 hover:bg-amber-100/80'
@@ -248,10 +247,10 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400">PBB {house.pbbYear || new Date().getFullYear()}</p>
                     {house.pbbPaymentStatus === 'Lunas' && (
-                      <span className="text-[8px] font-black text-emerald-700 bg-emerald-100/80 px-1 rounded">LUNAS</span>
+                      <span className="text-[8px] font-semibold text-emerald-700 bg-emerald-100/80 px-1 rounded">LUNAS</span>
                     )}
                     {house.pbbProofAtRt === 'Ada di RT' && (
-                      <span className="text-[8px] font-black text-sky-700 bg-sky-100/80 px-1 rounded">BUKTI DI RT</span>
+                      <span className="text-[8px] font-semibold text-sky-700 bg-sky-100/80 px-1 rounded">BUKTI DI RT</span>
                     )}
                   </div>
                   <p className="text-[10px] font-extrabold uppercase leading-none mt-0.5">{house.pbbStatus || 'Belum Diambil'}</p>
@@ -271,7 +270,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
 
         {/* Contact Quick Link Bar */}
         <div className="mb-4 relative z-10">
-          <div className="flex items-center justify-between p-2.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl transition-all hover:bg-slate-100/70">
+          <div className="flex items-center justify-between p-2.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl transition-colors hover:bg-slate-100/70">
             <div className="flex items-center gap-2 min-w-0">
               <Phone size={13} className="text-slate-400 shrink-0" />
               <span className="text-[11px] font-bold text-slate-700 tracking-tight truncate font-mono">
@@ -291,7 +290,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
               {house.phone && (
                 <button 
                   onClick={handleWhatsAppClick} 
-                  className="px-2.5 py-1.5 rounded-xl bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white border border-[#25D366]/30 transition-all flex items-center gap-1 text-[10px] font-extrabold shadow-2xs"
+                  className="px-2.5 py-1.5 rounded-xl bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366] hover:text-white border border-[#25D366]/30 transition-colors flex items-center gap-1 text-[10px] font-extrabold shadow-2xs"
                   title="Hubungi via WhatsApp"
                 >
                   <MessageCircle size={13} className="stroke-[2.5]" />
@@ -307,7 +306,7 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
       <div className="flex items-center gap-2 pt-3.5 border-t border-slate-100/90 relative z-10 mt-auto">
         <button 
           onClick={() => onOpenDetail(house)} 
-          className="flex-1 py-2.5 px-4 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-all active:scale-[0.98] shadow-md shadow-indigo-500/25 flex items-center justify-center gap-1.5"
+          className="flex-1 py-2.5 px-4 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] text-white rounded-2xl font-extrabold text-xs uppercase tracking-wider transition-colors active:scale-[0.98] shadow-md shadow-2xs flex items-center justify-center gap-1.5"
         >
           <span>Detail Warga</span>
           <ArrowRight size={13} className="stroke-[2.5]" />
@@ -332,7 +331,7 @@ const IconButton = ({ icon, onClick, color = 'slate', title }: { icon: any, onCl
   return (
     <button 
       onClick={(e) => { e.stopPropagation(); onClick(); }}
-      className={`p-2.5 rounded-xl border transition-all duration-200 shadow-2xs active:scale-95 ${themes[color]}`}
+      className={`p-2.5 rounded-xl border transition-colors duration-200 shadow-2xs active:scale-95 ${themes[color]}`}
       title={title}
     >
       {React.cloneElement(icon as React.ReactElement, { size: 16, className: 'stroke-[2.4px]' })}
