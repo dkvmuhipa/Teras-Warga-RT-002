@@ -64,6 +64,16 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
   const { currentTenant } = useTenant();
   const [sortField, setSortField] = useState<'number' | 'headOfFamily' | 'occupants' | 'arrears' | 'pbbStatus' | 'residenceType' | 'status'>('number');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [collapsedBlocks, setCollapsedBlocks] = useState<Set<string>>(new Set());
+
+  const toggleBlock = (block: string) => {
+    setCollapsedBlocks(prev => {
+      const next = new Set(prev);
+      if (next.has(block)) next.delete(block);
+      else next.add(block);
+      return next;
+    });
+  };
 
   const handleSort = (field: typeof sortField) => {
     if (sortField === field) {
@@ -96,6 +106,21 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
       ? <ChevronUp size={11} className="text-indigo-600 ml-1 inline-block stroke-[3]" />
       : <ChevronDown size={11} className="text-indigo-600 ml-1 inline-block stroke-[3]" />;
   };
+
+  // Empty State if no houses match filter
+  if (filteredHouses.length === 0) {
+    return (
+      <div className="py-16 px-6 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200 shadow-xs animate-fade-in">
+        <div className="w-16 h-16 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-3.5 shadow-2xs">
+          <Search size={26} strokeWidth={2.2} />
+        </div>
+        <h4 className="text-base font-bold text-slate-800">Tidak Ada Data Warga Ditemukan</h4>
+        <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 leading-relaxed">
+          Tidak ada hunian atau warga yang sesuai dengan kata kunci pencarian atau filter yang sedang aktif.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -184,30 +209,48 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
         return (
           <div key={block} className="bg-white rounded-[2rem] border border-slate-150 shadow-[0_5px_25px_rgba(235,240,245,0.45)] overflow-hidden transition-colors duration-300">
             {/* Section Block Header */}
-            <div className="bg-slate-50/80 border-b border-slate-150 px-5 sm:px-6 py-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+            <div 
+              onClick={() => toggleBlock(block)}
+              className="bg-slate-50/80 hover:bg-slate-50 border-b border-slate-150 px-5 sm:px-6 py-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between cursor-pointer select-none group"
+            >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shadow-2xs">
+                <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform">
                   <MapPin size={16} className="stroke-[2.5]" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-slate-800 text-sm tracking-tight flex items-center gap-2">
                     <span>Blok Wilayah:</span>
-                    <span className="font-semibold text-indigo-650 bg-indigo-50/80 px-2.5 py-0.5 rounded-lg border border-indigo-100/40">Blok {block}</span>
+                    <span className="font-semibold text-indigo-700 bg-indigo-50/80 px-2.5 py-0.5 rounded-lg border border-indigo-100/40">Blok {block}</span>
                   </h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Sektor Manajemen Rukun Tetangga 02</p>
                 </div>
               </div>
-              <div className="self-start sm:self-center px-3.5 py-1.5 text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100/20 rounded-xl uppercase tracking-wider flex items-center gap-1.5 shadow-3xs">
-                <Building size={11} />
-                <span>{houses.length} Rumah Terdaftar</span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-1 text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100/40 rounded-xl uppercase tracking-wider flex items-center gap-1.5 shadow-3xs font-mono tabular-nums">
+                  <Building size={11} />
+                  <span>{houses.length} Rumah</span>
+                </span>
+                <span className="px-2.5 py-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200/80 rounded-xl flex items-center gap-1 shadow-3xs font-mono tabular-nums">
+                  <Home size={11} className="text-emerald-600" />
+                  <span>{houses.filter(h => h.status === 'Occupied').length} Dihuni</span>
+                </span>
+                <button 
+                  type="button" 
+                  className="p-1 hover:bg-slate-200/60 rounded-lg text-slate-500 transition-colors ml-1"
+                  aria-label={collapsedBlocks.has(block) ? 'Buka blok' : 'Tutup blok'}
+                >
+                  {collapsedBlocks.has(block) ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                </button>
               </div>
             </div>
 
+            {!collapsedBlocks.has(block) && (
+              <>
             {/* 1. DESKTOP VIEW - Elegant structured heavy-duty table */}
-            <div className="hidden md:block overflow-x-auto custom-scrollbar">
+            <div className="hidden md:block overflow-x-auto custom-scrollbar max-h-[75vh] relative">
               <table className="w-full text-left border-collapse min-w-full">
-                <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/20 text-[10px] font-semibold text-slate-400 uppercase tracking-widest whitespace-nowrap">
+                <thead className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-md shadow-2xs border-b border-slate-200/80 text-[10px] font-semibold text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                  <tr className="border-b border-slate-200/80 bg-slate-50/95 backdrop-blur-md">
                     <th className="px-3 py-3.5 w-10 text-center">
                       <input 
                         type="checkbox" 
@@ -697,9 +740,9 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                     <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                       <div className="text-[10px] font-mono font-bold text-slate-500 flex items-center gap-1">
                         {isValidWhatsAppNumber(house.phone) ? (
-                          <div className="flex items-center gap-1 text-slate-605">
-                            <Phone size={10} className="text-indigo-500" />
-                            <span>{house.phone}</span>
+                          <div className="flex items-center gap-1.5 text-slate-700">
+                            <Phone size={11} className="text-indigo-500" />
+                            <span className="font-mono tabular-nums">{house.phone}</span>
                           </div>
                         ) : (
                           <span className="italic text-slate-400 font-sans font-medium text-[9px]">- Tidak ada no. HP -</span>
@@ -710,32 +753,35 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         {isValidWhatsAppNumber(house.phone) && onSendWhatsApp && (
                           <button 
                             onClick={() => onSendWhatsApp(house)}
-                            className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-150 rounded-xl flex items-center justify-center shadow-3xs active:scale-[0.93]"
+                            className="min-h-[38px] min-w-[38px] p-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80 rounded-xl flex items-center justify-center shadow-3xs active:scale-95 touch-manipulation cursor-pointer"
                             title="WhatsApp Pemohon"
+                            aria-label="Kirim pesan WhatsApp"
                           >
-                            <MessageCircle size={13} className="stroke-[2.5]" />
+                            <MessageCircle size={15} className="stroke-[2.5]" />
                           </button>
                         )}
                         <button 
                           onClick={() => openDetail(house)}
-                          className="px-2.5 py-1.5 bg-indigo-50 text-indigo-650 hover:bg-indigo-110 border border-indigo-100/50 rounded-xl flex items-center justify-center gap-1 text-[10px] font-semibold shadow-3xs active:scale-[0.93]"
+                          className="min-h-[38px] px-3 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200/70 rounded-xl flex items-center justify-center gap-1 text-xs font-bold shadow-3xs active:scale-95 touch-manipulation cursor-pointer"
                         >
-                          <Eye size={12} className="stroke-[2.5]" />
+                          <Eye size={13} className="stroke-[2.5]" />
                           <span>Profil</span>
                         </button>
                         <button 
                           onClick={() => handleOpenEdit(house)}
-                          className="p-1.5 bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center shadow-xs active:scale-[0.93]"
+                          className="min-h-[38px] min-w-[38px] p-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 rounded-xl flex items-center justify-center shadow-3xs active:scale-95 touch-manipulation cursor-pointer"
                           title="Edit Hunian"
+                          aria-label="Edit data hunian"
                         >
-                          <Edit2 size={12} className="stroke-[2.5]" />
+                          <Edit2 size={13} className="stroke-[2.5]" />
                         </button>
                         <button 
                           onClick={() => handleDelete(house.id)}
-                          className="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-105 rounded-xl flex items-center justify-center shadow-xs active:scale-[0.93]"
+                          className="min-h-[38px] min-w-[38px] p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200/70 rounded-xl flex items-center justify-center shadow-3xs active:scale-95 touch-manipulation cursor-pointer"
                           title="Hapus"
+                          aria-label="Hapus data hunian"
                         >
-                          <Trash2 size={12} className="stroke-[2.5]" />
+                          <Trash2 size={13} className="stroke-[2.5]" />
                         </button>
                       </div>
                     </div>
@@ -744,7 +790,8 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                 );
               })}
             </div>
-
+              </>
+            )}
           </div>
         );
       })}
