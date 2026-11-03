@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Compass, ZoomIn, ZoomOut, RotateCcw, Navigation } from 'lucide-react';
+import { Compass, ZoomIn, ZoomOut, RotateCcw, Navigation, ShieldAlert, Heart, Users } from 'lucide-react';
+import { House } from '../types';
 
 interface BlockZone {
   id: string;
@@ -72,7 +73,14 @@ const BLOCKS: BlockZone[] = [
   { id: 'E9', name: 'Blok E9', rt: 'RW20-RT03', rtLabel: 'RW 20 / RT 03 (128 KK)', color: 'fill-rose-500/35', borderColor: 'stroke-rose-400', x: 915, y: 320, w: 36, h: 145 },
 ];
 
-export const InteractiveHuntapMap: React.FC = () => {
+
+export interface InteractiveHuntapMapProps {
+  houses?: House[];
+  selectedBlockId?: string | null;
+  onSelectBlock?: (blockId: string) => void;
+}
+
+export const InteractiveHuntapMap: React.FC<InteractiveHuntapMapProps> = ({ houses = [], selectedBlockId, onSelectBlock }) => {
   const [selectedFilter, setSelectedFilter] = useState<string>('ALL');
   const [hoveredBlock, setHoveredBlock] = useState<BlockZone | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
@@ -454,7 +462,7 @@ export const InteractiveHuntapMap: React.FC = () => {
 
             {/* Titik Kumpul 2: Gerbang Utama Sisi Barat */}
             <g className="pointer-events-none">
-              <circle cx="125" cy="575" r="22" fill="#3b82f6" fillOpacity="0.3" className="animate-ping" />
+              <circle cx="125" cy="575" r="20" fill="#3b82f6" fillOpacity="0.2" stroke="#3b82f6" strokeWidth="1" strokeDasharray="3 3" />
               <circle cx="125" cy="575" r="12" fill="#3b82f6" stroke="#ffffff" strokeWidth="2.5" />
               <text x="125" y="578.5" fill="#ffffff" fontSize="8" fontWeight="900" textAnchor="middle">TK-2</text>
               <rect x="68" y="594" width="114" height="18" rx="5" fill="rgba(15, 23, 42, 0.95)" stroke="#3b82f6" strokeWidth="1.2" />

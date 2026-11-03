@@ -1,4 +1,4 @@
-import { Announcement, RondaSchedule, Official, House, CashFlow, Report } from "../types";
+import { Announcement, RondaSchedule, Official, House, CashFlow, Report, ClimateDisasterContext, ClimateAdvisoryResult } from "../types";
 
 export const generateAnnouncementDraft = async (topic: string, tone: string = 'Formal'): Promise<string> => {
   try {
@@ -203,4 +203,109 @@ const getClientRitFallbackAnswer = (question: string, systemInstruction: string)
   }
 
   return "Halo! Ada yang bisa saya bantu terkait jadwal pemadaman PLN, kontak tukang/jasa warga, jadwal ronda, kas RT, iuran bulanan, surat pengantar, atau nomor darurat lingkungan RT 02? Silakan tanyakan langsung ya! 😊";
+};
+
+// --- SADAR RT 002: AI CLIMATE & DISASTER RESILIENCE ENGINE ---
+export const getClientDisasterAdvisoryFallback = (ctx: ClimateDisasterContext): ClimateAdvisoryResult => {
+  const dist = ctx.nearestEarthquakeDistanceKm;
+  const mag = ctx.nearestEarthquakeMagnitude ? parseFloat(ctx.nearestEarthquakeMagnitude) : 0;
+  const temp = ctx.weatherTemp ?? 32;
+  const aqi = ctx.weatherAqi ?? 45;
+  const condition = ctx.weatherCondition || 'Cerah';
+  const totalVulnerable = ctx.vulnerableCounts?.total || 0;
+
+  let threatLevel: 'Aman' | 'Waspada' | 'Siaga' = 'Aman';
+  let headline = 'Situasi Lingkungan & Seismik Huntap Tondo 2 Kondusif';
+  let seismicAssessment = '';
+  let climateAssessment = '';
+  const actionTips: string[] = [];
+
+  // 1. Seismic evaluation (Palu-Koro fault & BMKG feed)
+  if (dist !== null && dist !== undefined) {
+    if (dist < 75 && mag >= 4.5) {
+      threatLevel = 'Siaga';
+      headline = `Siaga Seismik: Gempa M ${mag} Berjarak ${dist.toFixed(0)} km Dekat Huntap Tondo 2`;
+      seismicAssessment = `Terdeteksi aktivitas gempa dangkal dekat koridor Sesar Palu-Koro (${dist.toFixed(1)} km). Warga diimbau berada dalam kesiapsiagaan tinggi.`;
+      actionTips.push('Amankan dokumen penting dalam Tas Siaga Bencana dan posisikan dekat pintu keluar.');
+      actionTips.push('Buka kunci pagar depan kavling untuk mempermudah evakuasi cepat ke Lapangan Terbuka.');
+    } else if (dist < 120 && mag >= 3.8) {
+      threatLevel = 'Waspada';
+      headline = `Waspada Seismik: Gempa Regional Teluk Palu M ${mag} (${dist.toFixed(0)} km)`;
+      seismicAssessment = `Aktivitas tektonik berjarak ${dist.toFixed(1)} km terpantau BMKG. Getaran lemah mungkin terasa di struktur Huntap.`;
+      actionTips.push('Periksa struktur dinding dan plafon rumah, pastikan jalur keluar utama tidak terhalang perabot.');
+    } else {
+      seismicAssessment = `Aktivitas gempa BMKG terdekat berjarak ${dist.toFixed(0)} km (M ${mag || '-'}), tidak berdampak signifikan terhadap struktur hunian tetap.`;
+    }
+  } else {
+    seismicAssessment = 'Parameter seismik BMKG normal. Tidak ada gempa dangkal signifikan di sekitar Kota Palu.';
+  }
+
+  // 2. Climate & Weather evaluation
+  const isRain = condition.toLowerCase().includes('hujan') || condition.toLowerCase().includes('rain');
+  if (temp >= 35) {
+    if (threatLevel === 'Aman') threatLevel = 'Waspada';
+    climateAssessment = `Suhu udara sangat terik mencapai ${temp.toFixed(1)}°C dengan radiasi panas tinggi. Waspadai risiko dehidrasi dan potensi percikan api semak belukar kering lereng bukit Tondo.`;
+    actionTips.push('Pastikan lansia dan balita tercukupi asupan cairan serta hindari aktivitas panas terik siang hari.');
+    actionTips.push('Dilarang membakar sampah atau ilalang di lahan kosong sekitar blok kavling Huntap.');
+  } else if (isRain) {
+    climateAssessment = `Kondisi hujan terpantau di Teluk Palu. Kontur lereng perbukitan Tondo berpotensi memicu limpasan air permukaan ke drainase permukiman.`;
+    actionTips.push('Pastikan talang air dan kisi-kisi got depan rumah bebas dari sumbatan sampah pekarangan.');
+  } else {
+    climateAssessment = `Suhu sekitar ${temp.toFixed(1)}°C dengan kualitas udara ${aqi <= 50 ? 'Baik (AQI ' + aqi + ')' : 'Sedang (AQI ' + aqi + ')'}. Kondisi iklim Tondo terpantau bersahabat.`;
+  }
+
+  // 3. Demographic Vulnerability Awareness
+  if (totalVulnerable > 0) {
+    actionTips.push(`Terdapat ${ctx.vulnerableCounts.elderly} lansia, ${ctx.vulnerableCounts.infantsAndToddlers} balita, dan ${ctx.vulnerableCounts.pregnant} ibu hamil di RT 002. Regu siskamling ronda memprioritaskan asistensi ke blok mereka jika sirine berbunyi.`);
+  }
+
+  if (actionTips.length < 3) {
+    actionTips.push('Rute evakuasi mandiri: Ikuti jalan lingkungan poros utama menuju Lapangan Terbuka Huntap Tondo 2.');
+  }
+
+  return {
+    threatLevel,
+    headline,
+    seismicAssessment,
+    climateAssessment,
+    actionTips: actionTips.slice(0, 4),
+    generatedAt: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WITA',
+    isAiGenerated: false
+  };
+};
+
+export const generateDisasterClimateAdvisory = async (
+  context: ClimateDisasterContext
+): Promise<ClimateAdvisoryResult> => {
+  try {
+    const response = await fetch('/api/gemini/disaster-advisory', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ context })
+    });
+
+    if (response.ok) {
+      const json = await response.json();
+      if (json.success && json.data && json.data.headline) {
+        return {
+          threatLevel: json.data.threatLevel || 'Aman',
+          headline: json.data.headline,
+          seismicAssessment: json.data.seismicAssessment || '',
+          climateAssessment: json.data.climateAssessment || '',
+          actionTips: Array.isArray(json.data.actionTips) && json.data.actionTips.length > 0 
+            ? json.data.actionTips 
+            : ['Tetap tenang dan pantau kanal informasi resmi RT 002.'],
+          generatedAt: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WITA',
+          isAiGenerated: true
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[generateDisasterClimateAdvisory] Remote AI call unavailable, using local heuristic advisor.', err);
+  }
+
+  // Fallback to local heuristic engine
+  return getClientDisasterAdvisoryFallback(context);
 };

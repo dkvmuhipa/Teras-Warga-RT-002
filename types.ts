@@ -1653,3 +1653,28 @@ export interface CivicScoreRecord {
   activityScore: number;
 }
 
+
+// --- SADAR RT 002: CLIMATE & DISASTER ADVISORY & MICRO-GIS RESILIENCE ---
+export interface ClimateDisasterContext {
+  weatherTemp?: number;
+  weatherAqi?: number;
+  weatherCondition?: string;
+  nearestEarthquakeDistanceKm?: number | null;
+  nearestEarthquakeMagnitude?: string | null;
+  vulnerableCounts: {
+    elderly: number;
+    infantsAndToddlers: number;
+    pregnant: number;
+    total: number;
+  };
+}
+
+export interface ClimateAdvisoryResult {
+  threatLevel: 'Aman' | 'Waspada' | 'Siaga';
+  headline: string;
+  seismicAssessment: string;
+  climateAssessment: string;
+  actionTips: string[];
+  generatedAt: string;
+  isAiGenerated: boolean;
+}

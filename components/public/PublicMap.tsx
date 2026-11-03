@@ -10,6 +10,6 @@ interface PublicMapProps {
   iuranPayments?: any[];
 }
 
-export const PublicMap: React.FC<PublicMapProps> = () => {
-  return <PublicEarthquake defaultTab="evacuation" />;
+export const PublicMap: React.FC<PublicMapProps> = ({ houses = [] }) => {
+  return <PublicEarthquake defaultTab="evacuation" houses={houses} />;
 };

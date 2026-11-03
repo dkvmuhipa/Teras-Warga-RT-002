@@ -7,7 +7,7 @@ import {
   Users, Baby, User, UserCheck, Heart, TrendingUp, 
   BookOpen, Car, GraduationCap, Briefcase, MapPin, 
   ChevronRight, Info, Sparkles, FileText, AlertTriangle, Activity, DollarSign,
-  Copy, CheckCircle2, Share2, Printer, Layers, ShieldCheck
+  Copy, CheckCircle2, Share2, Printer, Layers, ShieldCheck, ShieldAlert, Phone, Search
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'motion/react';
@@ -58,6 +58,71 @@ export const DemographicAnalytics: React.FC<DemographicAnalyticsProps> = ({
   };
 
   const [selectedBlock, setSelectedBlock] = useState<string>('ALL');
+  // --- SADAR RT 002: ROSTER PRIORITAS EVAKUASI MITIGASI ---
+  const [rosterSearch, setRosterSearch] = useState<string>('');
+  const [rosterCategory, setRosterCategory] = useState<'ALL' | 'ELDERLY' | 'TODDLER' | 'PREGNANT' | 'DISABILITY'>('ALL');
+
+  const vulnerableRoster = useMemo(() => {
+    return houses
+      .filter(h => {
+        const hasElderly = (h.elderlyCount || 0) > 0;
+        const hasToddler = ((h.babyCount || 0) + (h.toddlerCount || 0)) > 0;
+        const hasPregnant = (h.pregnantCount || 0) > 0;
+        const hasDisability = (h.disabilityCount || 0) > 0;
+        
+        const isVulnerable = hasElderly || hasToddler || hasPregnant || hasDisability;
+        if (!isVulnerable) return false;
+
+        if (rosterCategory === 'ELDERLY') return hasElderly;
+        if (rosterCategory === 'TODDLER') return hasToddler;
+        if (rosterCategory === 'PREGNANT') return hasPregnant;
+        if (rosterCategory === 'DISABILITY') return hasDisability;
+
+        return true;
+      })
+      .filter(h => {
+        if (!rosterSearch.trim()) return true;
+        const q = rosterSearch.toLowerCase();
+        return (
+          (h.block || '').toLowerCase().includes(q) ||
+          (h.number || '').toLowerCase().includes(q) ||
+          (h.headOfFamily || '').toLowerCase().includes(q) ||
+          (h.phone || '').toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => {
+        const bComp = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true, sensitivity: 'base' });
+        if (bComp !== 0) return bComp;
+        return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true, sensitivity: 'base' });
+      });
+  }, [houses, rosterCategory, rosterSearch]);
+
+  const handleCopyRoster = () => {
+    if (vulnerableRoster.length === 0) {
+      toast.error('Tidak ada data roster untuk disalin.');
+      return;
+    }
+
+    let text = `*ROSTER PRIORITAS EVAKUASI & MITIGASI RT 002 (SADAR)*\n`;
+    text += `Huntap Tondo 2, Palu • Total Unit: ${vulnerableRoster.length} Rumah\n\n`;
+
+    vulnerableRoster.forEach((h, i) => {
+      const rentanList: string[] = [];
+      if (h.elderlyCount) rentanList.push(`${h.elderlyCount} Lansia`);
+      if ((h.babyCount || 0) + (h.toddlerCount || 0)) rentanList.push(`${(h.babyCount || 0) + (h.toddlerCount || 0)} Balita`);
+      if (h.pregnantCount) rentanList.push(`${h.pregnantCount} Bumil`);
+      if (h.disabilityCount) rentanList.push(`${h.disabilityCount} Disabilitas`);
+
+      text += `${i + 1}. *${h.block} No. ${h.number}* - ${h.headOfFamily || 'Warga'} (${rentanList.join(', ')})\n`;
+      text += `   HP: ${h.phone || '-'} | Rute: Ke Lapangan Utama (TK-1)\n`;
+    });
+
+    text += `\n_Digenerate via Teras Siaga 360 RT 002_`;
+
+    navigator.clipboard.writeText(text);
+    toast.success('Roster prioritas evakuasi disalin ke clipboard!');
+  };
+
 
   // Filter houses by selectedBlock
   const filteredHouses = useMemo(() => {
@@ -1301,6 +1366,186 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 ))}
               </motion.div>
             </div>
+
+                        {/* ======================================================== */}
+            {/* ROSTER PRIORITAS EVAKUASI & MITIGASI (SADAR RT 002)       */}
+            {/* ======================================================== */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200/90 shadow-sm space-y-6"
+            >
+              {/* Section Header */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-150">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100">
+                    <ShieldAlert size={24} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 bg-rose-100 text-rose-800 text-[10px] font-black uppercase rounded-md tracking-wider">
+                        SADAR RT 002
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        Civil Defense &amp; Siskamling
+                      </span>
+                    </div>
+                    <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
+                      Roster Prioritas Evakuasi Warga Rentan
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Direktori rumah dengan lansia, balita, dan ibu hamil untuk asistensi darurat tim pos ronda / linmas
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="flex items-center gap-2.5 self-start lg:self-auto">
+                  <button
+                    onClick={handleCopyRoster}
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+                    title="Salin ke WhatsApp / Linmas"
+                  >
+                    <Copy size={14} /> Salin Roster WhatsApp
+                  </button>
+                </div>
+              </div>
+
+              {/* Filter & Search Bar */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div className="relative max-w-sm w-full">
+                  <input
+                    type="text"
+                    placeholder="Cari kavling atau nama kepala keluarga..."
+                    value={rosterSearch}
+                    onChange={e => setRosterSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                  />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
+
+                {/* Category Filter Pills */}
+                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                  {[
+                    { id: 'ALL', label: 'Semua Rentan' },
+                    { id: 'ELDERLY', label: 'Lansia' },
+                    { id: 'TODDLER', label: 'Balita' },
+                    { id: 'PREGNANT', label: 'Ibu Hamil' },
+                    { id: 'DISABILITY', label: 'Disabilitas' },
+                  ].map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setRosterCategory(cat.id as any)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        rosterCategory === cat.id
+                          ? 'bg-rose-600 text-white shadow-xs'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Data Table with Responsive Scroll bounds */}
+              <div className="overflow-x-auto custom-scrollbar rounded-2xl border border-slate-150">
+                <table className="w-full text-left text-xs min-w-[750px]">
+                  <thead className="bg-slate-50 text-[10px] uppercase font-black tracking-wider text-slate-500 border-b border-slate-200">
+                    <tr>
+                      <th className="px-4 py-3">Kavling &amp; Blok</th>
+                      <th className="px-4 py-3">Kepala Keluarga</th>
+                      <th className="px-4 py-3">Komposisi Rentan</th>
+                      <th className="px-4 py-3">Titik Kumpul &amp; Rute</th>
+                      <th className="px-4 py-3">Kontak / Koordinasi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {vulnerableRoster.length > 0 ? (
+                      vulnerableRoster.map(h => (
+                        <tr key={h.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="px-4 py-3">
+                            <span className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-100 font-mono tabular-nums font-black text-indigo-900 text-xs">
+                              {h.block} - No. {h.number}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 font-bold text-slate-900">
+                            {h.headOfFamily || 'Keluarga Warga'}
+                            <span className="block text-[10px] text-slate-400 font-normal">
+                              Total Penghuni: {h.occupants || 1} Jiwa
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex flex-wrap gap-1">
+                              {(h.elderlyCount || 0) > 0 && (
+                                <span className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                                  {h.elderlyCount} Lansia
+                                </span>
+                              )}
+                              {((h.babyCount || 0) + (h.toddlerCount || 0)) > 0 && (
+                                <span className="px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold">
+                                  {(h.babyCount || 0) + (h.toddlerCount || 0)} Balita
+                                </span>
+                              )}
+                              {(h.pregnantCount || 0) > 0 && (
+                                <span className="px-2 py-0.5 rounded-md bg-pink-50 border border-pink-200 text-pink-800 text-[10px] font-bold">
+                                  {h.pregnantCount} Bumil
+                                </span>
+                              )}
+                              {(h.disabilityCount || 0) > 0 && (
+                                <span className="px-2 py-0.5 rounded-md bg-purple-50 border border-purple-200 text-purple-800 text-[10px] font-bold">
+                                  {h.disabilityCount} Disabilitas
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-slate-700 font-medium">
+                            <span className="font-bold text-indigo-950">
+                              {((h.block || '').toUpperCase().startsWith('A') || (h.block || '').toUpperCase().startsWith('B'))
+                                ? 'TK-2 (Gerbang Barat)'
+                                : 'TK-1 (Lapangan Utama)'}
+                            </span>
+                            <span className="block text-[10px] text-slate-400">
+                              Jarak tempuh ~80-120m
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            {h.phone && h.phone !== '-' ? (
+                              <a
+                                href={`https://wa.me/${h.phone.replace(/[^0-9]/g, '')}?text=Halo%20Bapak/Ibu%20${encodeURIComponent(h.headOfFamily || 'Warga')},%20saya%20petugas%20RT%20002%20mengonfirmasi%20kesiapsiagaan%20mitigasi%20bencana%20keluarga.`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] border border-emerald-200 transition-colors"
+                              >
+                                <Phone size={12} /> WhatsApp
+                              </a>
+                            ) : (
+                              <span className="text-[11px] text-slate-400 italic">No HP Belum Terdata</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-xs text-slate-400 font-medium">
+                          Tidak ditemukan data warga rentan yang sesuai dengan kata kunci pencarian.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Roster Footer Summary */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-500 font-medium pt-1">
+                <span>
+                  Menampilkan <strong className="text-slate-900 font-mono tabular-nums">{vulnerableRoster.length}</strong> unit rumah terdata kelompok rentan di RT 002
+                </span>
+                <span className="text-[11px] text-rose-600 font-bold flex items-center gap-1">
+                  <ShieldCheck size={14} /> Terintegrasi dengan Sistem SADAR Teras Siaga 360
+                </span>
+              </div>
+            </motion.div>
 
             {/* Quick Insights Footer */}
             <div className="bg-slate-900 p-10 rounded-[3.5rem] text-white relative overflow-hidden">

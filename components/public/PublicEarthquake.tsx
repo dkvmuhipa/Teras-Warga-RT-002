@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useEarthquake, EarthquakeInfo } from '../../hooks/useEarthquake';
+import { useWeather } from '../../hooks/useWeather';
+import { generateDisasterClimateAdvisory } from '../../services/geminiService';
+import { House, ClimateAdvisoryResult } from '../../types';
 import { 
   Activity, AlertTriangle, ShieldCheck, MapPin, Radio, Compass, Clock, 
   HelpCircle, Waves, Phone, ChevronRight, Share2, Info, ArrowRight,
@@ -57,11 +60,12 @@ const SURVIVAL_ITEMS = [
   { id: 'selimut', category: 'Sandang', name: 'Selimut darurat / emergency foil blanket', essential: false },
 ];
 
-interface PublicEarthquakeProps {
+export interface PublicEarthquakeProps {
   defaultTab?: 'seismic' | 'evacuation' | 'survival' | 'contacts';
+  houses?: House[];
 }
 
-export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab }) => {
+export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, houses = [] }) => {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const getInitialTab = (): 'seismic' | 'evacuation' | 'survival' | 'contacts' => {
@@ -1253,7 +1257,7 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab }
             </div>
 
             {/* PETA VEKTOR DIGITAL REMAKE INTERAKTIF */}
-            <InteractiveHuntapMap />
+            <InteractiveHuntapMap houses={houses} />
 
             {/* PETA WILAYAH SITE PLAN HUNTAP TONDO 2 (ORIGINAL SCAN) */}
             <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
