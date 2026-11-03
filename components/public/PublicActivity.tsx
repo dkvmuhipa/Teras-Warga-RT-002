@@ -102,7 +102,7 @@ export const PublicActivity: React.FC = () => {
           <Link to="/" className="p-2 -ml-2 text-slate-400 hover:text-indigo-600 transition-colors">
             <ArrowLeft size={24} />
           </Link>
-          <h1 className="text-lg font-black text-slate-800 tracking-tight">Presensi Kegiatan</h1>
+          <h1 className="text-lg font-semibold text-slate-800 tracking-tight">Presensi Kegiatan</h1>
           <div className="w-10" /> {/* Spacer */}
         </div>
       </div>
@@ -114,32 +114,32 @@ export const PublicActivity: React.FC = () => {
             <Users size={160} />
           </div>
           <div className="relative z-10">
-            <h2 className="text-3xl font-black mb-2">Ayo Berpartisipasi!</h2>
+            <h2 className="text-3xl font-semibold mb-2">Ayo Berpartisipasi!</h2>
             <p className="text-indigo-100 font-medium max-w-md">Silakan isi data diri dan scan QR Code yang tersedia di lokasi kegiatan untuk mencatat kehadiran Anda.</p>
           </div>
         </div>
 
         {/* Resident Data Form */}
         <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
-          <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
             <Info size={16} className="text-indigo-500" /> Data Diri Peserta
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Lengkap</label>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nama Lengkap</label>
               <input 
                 type="text" 
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                 placeholder="Masukkan nama Anda"
                 value={residentForm.name}
                 onChange={e => handleFormChange('name', e.target.value)}
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Blok Rumah</label>
+              <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Blok Rumah</label>
               <input 
                 type="text" 
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                 placeholder="Contoh: C10-08"
                 value={residentForm.houseId}
                 onChange={e => handleFormChange('houseId', e.target.value)}
@@ -150,7 +150,7 @@ export const PublicActivity: React.FC = () => {
 
         {/* Activities List */}
         <div className="space-y-4">
-          <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest pl-2">Kegiatan Berlangsung & Akan Datang</h3>
+          <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest pl-2">Kegiatan Berlangsung & Akan Datang</h3>
           
           {activities.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,10 +159,10 @@ export const PublicActivity: React.FC = () => {
                   key={activity.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-md transition-all group"
+                  className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-md transition-colors group"
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
+                    <span className={`px-3 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-widest ${
                       activity.status === 'Ongoing' ? 'bg-emerald-100 text-emerald-600' : 'bg-indigo-100 text-indigo-600'
                     }`}>
                       {activity.status}
@@ -172,10 +172,10 @@ export const PublicActivity: React.FC = () => {
                     </div>
                   </div>
 
-                  <h4 className="text-lg font-black text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{activity.title}</h4>
+                  <h4 className="text-lg font-semibold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{activity.title}</h4>
                   {activity.isMandatory && (
                     <div className="flex items-center gap-1.5 mb-3">
-                      <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest border border-rose-100 flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-600 text-[10px] font-semibold uppercase tracking-widest border border-rose-100 flex items-center gap-1">
                         <AlertTriangle size={10} /> Wajib
                       </span>
                       <span className="text-[10px] font-bold text-slate-400">Kompensasi Absen: Rp {activity.compensationAmount?.toLocaleString()}</span>
@@ -196,7 +196,7 @@ export const PublicActivity: React.FC = () => {
 
                   <Button 
                     onClick={() => { setSelectedActivity(activity); setIsScanModalOpen(true); }}
-                    className={`w-full py-3.5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 ${
+                    className={`w-full py-3.5 rounded-xl shadow-lg transition-colors flex items-center justify-center gap-2 ${
                       activity.status === 'Ongoing' ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-100' : 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-100'
                     }`}
                   >
@@ -231,7 +231,7 @@ export const PublicActivity: React.FC = () => {
               className="w-full h-full"
             />
             <div className="absolute inset-0 border-[40px] border-black/40 pointer-events-none">
-              <div className="w-full h-full border-2 border-indigo-500 rounded-xl animate-pulse" />
+              <div className="w-full h-full border-2 border-indigo-500 rounded-xl" />
             </div>
           </div>
 
@@ -248,7 +248,7 @@ export const PublicActivity: React.FC = () => {
             <CheckCircle size={48} />
           </div>
           <div>
-            <h4 className="text-xl font-black text-slate-800 mb-2">Terima Kasih!</h4>
+            <h4 className="text-xl font-semibold text-slate-800 mb-2">Terima Kasih!</h4>
             <p className="text-sm text-slate-500">Kehadiran Anda di kegiatan <strong>{selectedActivity?.title}</strong> telah tercatat dalam sistem.</p>
           </div>
           <Button onClick={() => setIsSuccessModalOpen(false)} className="w-full bg-emerald-600 hover:bg-emerald-700">Tutup</Button>

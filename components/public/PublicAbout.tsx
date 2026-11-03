@@ -256,7 +256,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <ArrowLeft size={16} strokeWidth={2.5} />
             KEMBALI KE BERANDA
           </button>
-          <span className="text-xs font-black text-rose-600 bg-rose-50/80 px-3.5 py-1.5 rounded-full uppercase tracking-widest font-mono">
+          <span className="text-xs font-semibold text-rose-600 bg-rose-50/80 px-3.5 py-1.5 rounded-full uppercase tracking-widest font-mono">
             PROFIL TERINTEGRASI BERSAMA (RT 02)
           </span>
         </div>
@@ -284,9 +284,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
           <div className="relative z-10 space-y-4">
             <div className="inline-flex p-3.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/80 shadow-2xs">
-              <Heart size={32} className="animate-pulse" />
+              <Heart size={32} className="" />
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl font-semibold text-slate-900 tracking-tight leading-tight">
               Profil Lingkungan &amp; <span className="text-rose-600 italic font-serif">TERAS RT 02</span>
             </h1>
             <p className="text-sm sm:text-base font-medium text-slate-500 max-w-2xl mx-auto leading-relaxed">
@@ -302,17 +302,17 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.05 }}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-all flex flex-col justify-between"
+              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-colors flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Warga Huni</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Warga Huni</span>
                   <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
                     <Home size={18} />
                   </div>
                 </div>
-                <p className="text-3xl sm:text-4xl font-black text-indigo-950 font-mono tracking-tight">{totalKK}</p>
-                <p className="text-xs font-black text-slate-800 mt-2 uppercase tracking-wide">Profil Kelompok KK</p>
+                <p className="text-3xl sm:text-4xl font-semibold text-indigo-950 font-mono tracking-tight">{totalKK}</p>
+                <p className="text-xs font-semibold text-slate-800 mt-2 uppercase tracking-wide">Profil Kelompok KK</p>
               </div>
               <p className="text-[10px] text-indigo-600 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
                 {totalOccupants} Warga Jiwa Terdaftar
@@ -323,17 +323,17 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1 }}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-all flex flex-col justify-between"
+              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-colors flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Potensi UMKM</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Potensi UMKM</span>
                   <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
                     <ShoppingBag size={18} />
                   </div>
                 </div>
-                <p className="text-3xl sm:text-4xl font-black text-emerald-950 font-mono tracking-tight">{totalUMKMCount}</p>
-                <p className="text-xs font-black text-slate-800 mt-2 uppercase tracking-wide">Mitra Niaga Aktif</p>
+                <p className="text-3xl sm:text-4xl font-semibold text-emerald-950 font-mono tracking-tight">{totalUMKMCount}</p>
+                <p className="text-xs font-semibold text-slate-800 mt-2 uppercase tracking-wide">Mitra Niaga Aktif</p>
               </div>
               <p className="text-[10px] text-emerald-600 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
                 Pilar Sektor Kemandirian Finansial
@@ -344,17 +344,17 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.15 }}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-all flex flex-col justify-between"
+              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-colors flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aset Bersama</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Aset Bersama</span>
                   <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl">
                     <Archive size={18} />
                   </div>
                 </div>
-                <p className="text-3xl sm:text-4xl font-black text-rose-950 font-mono tracking-tight">{totalInventoryAssets}</p>
-                <p className="text-xs font-black text-slate-800 mt-2 uppercase tracking-wide">Peralatan RT / Inventaris</p>
+                <p className="text-3xl sm:text-4xl font-semibold text-rose-950 font-mono tracking-tight">{totalInventoryAssets}</p>
+                <p className="text-xs font-semibold text-slate-800 mt-2 uppercase tracking-wide">Peralatan RT / Inventaris</p>
               </div>
               <p className="text-[10px] text-rose-600 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
                 {availableInventoryAssets} Aset Siap Pinjam/Gunakan
@@ -365,19 +365,19 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-all flex flex-col justify-between"
+              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-colors flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Kas Swadaya RT</span>
+                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Kas Swadaya RT</span>
                   <div className="p-2.5 bg-amber-50 text-amber-655 text-amber-600 rounded-xl">
                     <Database size={18} />
                   </div>
                 </div>
-                <p className="text-lg sm:text-2xl font-black text-amber-950 font-mono tracking-tight text-ellipsis overflow-hidden whitespace-nowrap">
+                <p className="text-lg sm:text-2xl font-semibold text-amber-950 font-mono tracking-tight text-ellipsis overflow-hidden whitespace-nowrap">
                   {currentBalance.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}
                 </p>
-                <p className="text-xs font-black text-slate-800 mt-2.5 uppercase tracking-wide">Saldo Kas Bersih</p>
+                <p className="text-xs font-semibold text-slate-800 mt-2.5 uppercase tracking-wide">Saldo Kas Bersih</p>
               </div>
               <p className="text-[10px] text-amber-650 text-amber-700 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
                 Hasil Dari Iuran &amp; Donasi Warga
@@ -391,17 +391,17 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-16 bg-white rounded-[2.5rem] p-8 sm:p-12 border border-slate-200/80 shadow-xl shadow-slate-100/40 relative overflow-hidden"
+          className="mb-16 bg-white rounded-[2.5rem] p-8 sm:p-12 border border-slate-200/80 shadow-xl shadow-2xs relative overflow-hidden"
         >
           {/* Subtle decorative background elements */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/40 rounded-full blur-3xl -mr-20 -mt-20 -z-10" />
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-rose-50/30 rounded-full blur-3xl -ml-20 -mb-20 -z-10" />
 
           <div className="max-w-4xl mx-auto text-center mb-10">
-            <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full font-mono">
+            <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full font-mono">
               SISTEM INFORMASI TERPADU &amp; DIGITALISASI WARGA
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight mt-4 leading-tight">
+            <h2 className="text-2xl sm:text-4xl font-semibold text-slate-900 tracking-tight mt-4 leading-tight">
               Mengenal Portal <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-indigo-600 font-serif italic">TERAS RT 02 Huntap Tondo 2</span> Lebih Dekat
             </h2>
             <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-3 max-w-2xl mx-auto leading-relaxed">
@@ -412,8 +412,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Visual description column */}
             <div className="space-y-6">
-              <h3 className="text-lg sm:text-xl font-black text-slate-800 flex items-center gap-2.5">
-                <HeartHandshake className="text-rose-500 animate-pulse" size={22} />
+              <h3 className="text-lg sm:text-xl font-semibold text-slate-800 flex items-center gap-2.5">
+                <HeartHandshake className="text-rose-500" size={22} />
                 Solusi Kolaboratif dari &amp; Untuk Warga
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed text-justify">
@@ -433,7 +433,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 <div className="h-8 w-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
                   <Smartphone size={16} />
                 </div>
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Aksesibilitas Satu Sentuhan</h4>
+                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Aksesibilitas Satu Sentuhan</h4>
                 <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
                   Warga dapat mengajukan layanan administrasi pengantar secara kilat, memeriksa status bantuan sosial, dan memonitor data kependudukan langsung dari smartphone.
                 </p>
@@ -443,7 +443,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
                   <TrendingUp size={16} />
                 </div>
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Ekonomi Sirkular UMKM</h4>
+                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Ekonomi Sirkular UMKM</h4>
                 <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
                   Mendukung tumbuh kembang warung warga, kuliner rumahan, jasa swadaya, maupun bank sampah terpadu guna mempercepat arus finansial kas keluarga.
                 </p>
@@ -453,7 +453,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 <div className="h-8 w-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
                   <Shield size={16} />
                 </div>
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Mitigasi &amp; Lingkungan Aman</h4>
+                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Mitigasi &amp; Lingkungan Aman</h4>
                 <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
                   Pos siskamling modern berpeta digital rute, sistem proteksi siaga gempa bumi lintasan sesar Palu-Koro, serta deteksi siaga jaminan prioritas golongan rentan.
                 </p>
@@ -463,7 +463,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
                   <Database size={16} />
                 </div>
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">Transparansi Finansial Rill</h4>
+                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Transparansi Finansial Rill</h4>
                 <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
                   Laporan pembukuan donasi, iuran kematian, pembagian kas darurat sosial, hingga pemeliharaan perlengkapan sarana diumumkan terbuka bebas manipulasi.
                 </p>
@@ -483,8 +483,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm lg:col-span-2 flex flex-col justify-between"
           >
             <div>
-              <span className="text-[10px] uppercase font-black tracking-widest text-rose-600 mb-2 block font-mono">LATAR BELAKANG &amp; KELAHIRAN KEMBALI</span>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mb-4 flex items-center gap-2">
+              <span className="text-[10px] uppercase font-semibold tracking-widest text-rose-600 mb-2 block font-mono">LATAR BELAKANG &amp; KELAHIRAN KEMBALI</span>
+              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight mb-4 flex items-center gap-2">
                 <MapPin size={24} className="text-rose-600" />
                 Dari Titik Kebangkitan <span className="font-serif italic text-indigo-600">Menuju Kemandirian Cerdas</span>
               </h2>
@@ -517,39 +517,39 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between"
           >
             <div>
-              <span className="text-[10px] uppercase font-black tracking-widest text-indigo-650 text-indigo-600 mb-2 block font-mono">DASHBOARD INTEGRASI DATABASE FIRESTORE</span>
-              <h2 className="text-lg font-black text-slate-900 tracking-tight mb-1">Struktur Sosial &amp; <span className="font-serif italic text-indigo-605 text-indigo-600">Fisik</span></h2>
+              <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-650 text-indigo-600 mb-2 block font-mono">DASHBOARD INTEGRASI DATABASE FIRESTORE</span>
+              <h2 className="text-lg font-semibold text-slate-900 tracking-tight mb-1">Struktur Sosial &amp; <span className="font-serif italic text-indigo-605 text-indigo-600">Fisik</span></h2>
               <p className="text-[11px] text-slate-400 font-medium mb-4">Statistik komposisi real-time yang tersinkronisasi dari pangkalan data digital RT.</p>
 
               {/* Tabs Navigation */}
-              <div className="flex flex-wrap bg-slate-100 p-1 rounded-xl gap-0.5 mb-5 text-xs font-black">
+              <div className="flex flex-wrap bg-slate-100 p-1 rounded-xl gap-0.5 mb-5 text-xs font-semibold">
                 <button 
                   onClick={() => setActiveGeoTab('hunian')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-all text-[10px] tracking-wide ${activeGeoTab === 'hunian' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'hunian' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
                 >
                   Hunian
                 </button>
                 <button 
                   onClick={() => setActiveGeoTab('ekonomi')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-all text-[10px] tracking-wide ${activeGeoTab === 'ekonomi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'ekonomi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
                 >
                   Ekonomi
                 </button>
                 <button 
                   onClick={() => setActiveGeoTab('kerentanan')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-all text-[10px] tracking-wide ${activeGeoTab === 'kerentanan' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'kerentanan' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
                 >
                   Rentan
                 </button>
                 <button 
                   onClick={() => setActiveGeoTab('demografi')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-all text-[10px] tracking-wide ${activeGeoTab === 'demografi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'demografi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
                 >
                   Piramida
                 </button>
                 <button 
                   onClick={() => setActiveGeoTab('birokrasi')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-all text-[10px] tracking-wide ${activeGeoTab === 'birokrasi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'birokrasi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
                 >
                   Layanan
                 </button>
@@ -561,21 +561,21 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-600">Rasio Jenis Kelamin (Sex Ratio)</span>
-                      <span className="text-xs font-black text-blue-700 font-mono bg-blue-50 px-2 py-0.5 rounded-lg">{demoStats.sexRatio}</span>
+                      <span className="text-xs font-semibold text-blue-700 font-mono bg-blue-50 px-2 py-0.5 rounded-lg">{demoStats.sexRatio}</span>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-600">Komposisi Gender</span>
-                      <span className="text-xs font-black text-slate-800 font-mono">
+                      <span className="text-xs font-semibold text-slate-800 font-mono">
                         {demoStats.males} L &bull; {demoStats.females} P
                       </span>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-600">Usia Produktif (15-59 Thn)</span>
-                      <span className="text-xs font-black text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{demoStats.productive} Jiwa</span>
+                      <span className="text-xs font-semibold text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{demoStats.productive} Jiwa</span>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-600">Rasio Ketergantungan BPS</span>
-                      <span className="text-xs font-black text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{demoStats.depRatio}%</span>
+                      <span className="text-xs font-semibold text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{demoStats.depRatio}%</span>
                     </div>
                     <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
                       *Struktur penduduk didominasi usia produktif (bonus demografi) mendukung sinergi gotong royong dan kemandirian kawasan Huntap 2.
@@ -586,19 +586,19 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-650 text-slate-600">Unit Rumah Berpenghuni</span>
-                      <span className="text-xs font-black text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{occupiedHouses} Rumah</span>
+                      <span className="text-xs font-semibold text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{occupiedHouses} Rumah</span>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-650 text-slate-600">Rumah Pembuka Usaha</span>
-                      <span className="text-xs font-black text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{businessHouses} Unit</span>
+                      <span className="text-xs font-semibold text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{businessHouses} Unit</span>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-650 text-slate-600">Unit Kosong / Cadangan</span>
-                      <span className="text-xs font-black text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{emptyHouses} Unit</span>
+                      <span className="text-xs font-semibold text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{emptyHouses} Unit</span>
                     </div>
                     <div className="flex items-center justify-between pb-1 text-xs">
                       <span className="font-semibold text-slate-600">Rasio Pemanfaatan Lahan</span>
-                      <span className="font-black text-slate-900 font-mono">
+                      <span className="font-semibold text-slate-900 font-mono">
                         {totalKK > 0 ? Math.round((occupiedHouses / totalKK) * 100) : 0}% Terhuni
                       </span>
                     </div>
@@ -609,15 +609,15 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                        <span className="text-xs font-semibold text-slate-600">Kategori Pra-Sejahtera</span>
-                       <span className="text-xs font-black text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{praSejahteraCount} KK</span>
+                       <span className="text-xs font-semibold text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{praSejahteraCount} KK</span>
                      </div>
                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                        <span className="text-xs font-semibold text-slate-600">Kategori Sejahtera &amp; Mampu</span>
-                       <span className="text-xs font-black text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{sejahteraCount} KK</span>
+                       <span className="text-xs font-semibold text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{sejahteraCount} KK</span>
                      </div>
                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                        <span className="text-xs font-semibold text-slate-600">Penerima Manfaat Bansos RT</span>
-                       <span className="text-xs font-black text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{bansosCount} KK</span>
+                       <span className="text-xs font-semibold text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{bansosCount} KK</span>
                      </div>
                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
                        *Kelayakan bansos PKH/BLT dipetakan langsung ke database demi menjamin keseimbangan keadilan distributif.
@@ -629,15 +629,15 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                    <div className="space-y-3">
                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                        <span className="text-xs font-semibold text-slate-600">Balita &amp; Bayi Usia Dini</span>
-                       <span className="text-xs font-black text-pink-700 font-mono bg-pink-50 px-2 py-0.5 rounded-lg">{babyToddlerCount} Anak</span>
+                       <span className="text-xs font-semibold text-pink-700 font-mono bg-pink-50 px-2 py-0.5 rounded-lg">{babyToddlerCount} Anak</span>
                      </div>
                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                        <span className="text-xs font-semibold text-slate-600">Lanjut Usia (Lansia)</span>
-                       <span className="text-xs font-black text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{elderlyCount} Jiwa</span>
+                       <span className="text-xs font-semibold text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{elderlyCount} Jiwa</span>
                      </div>
                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                        <span className="text-xs font-semibold text-slate-600">Ibu Hamil &amp; Menyusui</span>
-                       <span className="text-xs font-black text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{pregnantCount} Jiwa</span>
+                       <span className="text-xs font-semibold text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{pregnantCount} Jiwa</span>
                      </div>
                     <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
                       *Kelompok rentan di atas didaftarkan dalam prioritas evakuasi jalur khusus mitigasi bahaya sesar Palu-Koro.
@@ -649,19 +649,19 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <div className="space-y-3">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-650 text-slate-600">Total Pengaduan Warga</span>
-                      <span className="text-xs font-black text-slate-800 font-mono bg-slate-100 px-2 py-0.5 rounded-lg">{totalReports} Laporan</span>
+                      <span className="text-xs font-semibold text-slate-800 font-mono bg-slate-100 px-2 py-0.5 rounded-lg">{totalReports} Laporan</span>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-650 text-slate-600">Laporan Selesai Ditangani</span>
-                      <span className="text-xs font-black text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{resolvedReports} Kasus</span>
+                      <span className="text-xs font-semibold text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{resolvedReports} Kasus</span>
                     </div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                       <span className="text-xs font-semibold text-slate-650 text-slate-600">Kasus Masih Ditinjau</span>
-                      <span className="text-xs font-black text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{activeReports} Laporan</span>
+                      <span className="text-xs font-semibold text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{activeReports} Laporan</span>
                     </div>
                     <div className="flex items-center justify-between pb-1">
                       <span className="text-xs font-semibold text-slate-650 text-slate-600">Pengajuan Surat Disetujui</span>
-                      <span className="text-xs font-black text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{approvedLetters} dari {totalLetters} Berkas</span>
+                      <span className="text-xs font-semibold text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{approvedLetters} dari {totalLetters} Berkas</span>
                     </div>
                   </div>
                 )}
@@ -670,7 +670,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
             <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2">
               <Database size={14} className="text-indigo-600 flex-shrink-0" />
-              <span className="text-[10px] font-black text-slate-450 text-slate-400 tracking-wider font-mono">
+              <span className="text-[10px] font-semibold text-slate-450 text-slate-400 tracking-wider font-mono">
                 PULSE DATA AKTIF SECARA REAL TIME
               </span>
             </div>
@@ -685,13 +685,13 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                  <span className="text-[10px] uppercase font-black tracking-widest text-amber-600 mb-1 block font-mono">TRANSPARANSI KEUANGAN MUTLAK</span>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight">Laporan Kas &amp; <span className="font-serif italic text-amber-600">Aliran Dana Swadaya</span></h2>
+                  <span className="text-[10px] uppercase font-semibold tracking-widest text-amber-600 mb-1 block font-mono">TRANSPARANSI KEUANGAN MUTLAK</span>
+                  <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Laporan Kas &amp; <span className="font-serif italic text-amber-600">Aliran Dana Swadaya</span></h2>
                   <p className="text-xs text-slate-500 font-semibold">Memastikan setiap rupiah tercatat akurat, berimbang, dan dapat ditinjau oleh seluruh warga secara terbuka.</p>
                 </div>
                 <button 
                   onClick={() => navigate('/info')}
-                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs tracking-wider uppercase rounded-xl transition-all shadow cursor-pointer active:scale-95 flex items-center gap-2"
+                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs tracking-wider uppercase rounded-xl transition-colors shadow cursor-pointer active:scale-95 flex items-center gap-2"
                 >
                   <Database size={14} />
                   Detail Laporan Kas RT
@@ -703,8 +703,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 <div className="lg:col-span-1 space-y-4">
                   <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100/60 flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] uppercase font-black text-emerald-500 tracking-wider font-mono">Total Akumulasi Pemasukan</p>
-                      <p className="text-lg font-black font-mono text-emerald-800 mt-0.5">
+                      <p className="text-[10px] uppercase font-semibold text-emerald-500 tracking-wider font-mono">Total Akumulasi Pemasukan</p>
+                      <p className="text-lg font-semibold font-mono text-emerald-800 mt-0.5">
                         +{totalIncome.toLocaleString('id-ID', { minimumFractionDigits: 0 })}
                       </p>
                     </div>
@@ -715,8 +715,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
                   <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100/60 flex items-center justify-between">
                     <div>
-                      <p className="text-[10px] uppercase font-black text-rose-500 tracking-wider font-mono">Total Akumulasi Pengeluaran</p>
-                      <p className="text-lg font-black font-mono text-rose-800 mt-0.5">
+                      <p className="text-[10px] uppercase font-semibold text-rose-500 tracking-wider font-mono">Total Akumulasi Pengeluaran</p>
+                      <p className="text-lg font-semibold font-mono text-rose-800 mt-0.5">
                         -{totalExpense.toLocaleString('id-ID', { minimumFractionDigits: 0 })}
                       </p>
                     </div>
@@ -734,7 +734,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 <div className="lg:col-span-2">
-                  <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-3 font-mono">REKAPITULASI TRANSAKSI TERBARU DARI DATABASE</p>
+                  <p className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-3 font-mono">REKAPITULASI TRANSAKSI TERBARU DARI DATABASE</p>
                   <div className="space-y-2.5">
                     {cashFlow.slice(-4).reverse().map((flow, idx) => (
                       <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs font-semibold">
@@ -745,13 +745,13 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                             <p className="text-[10px] text-slate-400 mt-0.5 font-mono">{flow.date} • Kategori: {flow.category} • Pencatat: {flow.referenceNumber || 'Pengurus Swadaya'}</p>
                           </div>
                         </div>
-                        <span className={`font-mono font-black text-sm whitespace-nowrap pl-4 ${flow.type === 'Income' ? 'text-emerald-700' : 'text-rose-700'}`}>
+                        <span className={`font-mono font-semibold text-sm whitespace-nowrap pl-4 ${flow.type === 'Income' ? 'text-emerald-700' : 'text-rose-700'}`}>
                           {flow.type === 'Income' ? '+' : '-'} Rp {flow.amount.toLocaleString('id-ID')}
                         </span>
                       </div>
                     ))}
                     {cashFlow.length === 0 && (
-                      <p className="text-center text-xs text-slate-400 py-6 uppercase font-black">Belum ada transaksi terekam.</p>
+                      <p className="text-center text-xs text-slate-400 py-6 uppercase font-semibold">Belum ada transaksi terekam.</p>
                     )}
                   </div>
                 </div>
@@ -764,14 +764,14 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         {totalUMKMCount > 0 && (
           <section className="mb-16">
             <div className="mb-6">
-              <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600 mb-1 block font-mono">PEMBERDAYAAN EKONOMI KREATIF (UMKM)</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Pasar Kreatif <span className="font-serif italic text-emerald-600">RT 02</span></h2>
+              <span className="text-[10px] uppercase font-semibold tracking-widest text-emerald-600 mb-1 block font-mono">PEMBERDAYAAN EKONOMI KREATIF (UMKM)</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Pasar Kreatif <span className="font-serif italic text-emerald-600">RT 02</span></h2>
               <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">Etalase digital unit usaha milik warga Huntap Tondo 2 yang diverifikasi dan aktif.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {umkm.slice(0, 4).map((shop, sidx) => (
-                <div key={sidx} className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-all">
+                <div key={sidx} className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-colors">
                   <div className="relative">
                     {shop.image ? (
                       <SmartImage 
@@ -785,13 +785,13 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                         WARUNG WARGA 02
                       </div>
                     )}
-                    <span className="absolute top-3 right-3 bg-emerald-550 bg-emerald-500 text-white text-[9px] font-black uppercase px-2.5 py-1 rounded-lg tracking-wider font-mono shadow-sm">
+                    <span className="absolute top-3 right-3 bg-emerald-550 bg-emerald-500 text-white text-[9px] font-semibold uppercase px-2.5 py-1 rounded-lg tracking-wider font-mono shadow-sm">
                       {shop.category}
                     </span>
                   </div>
                   <div className="p-5 flex-1 flex flex-col justify-between">
                     <div>
-                      <h3 className="text-sm font-black text-slate-905 text-slate-950 tracking-tight leading-snug line-clamp-1 mb-1">{shop.name}</h3>
+                      <h3 className="text-sm font-semibold text-slate-905 text-slate-950 tracking-tight leading-snug line-clamp-1 mb-1">{shop.name}</h3>
                       <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4 font-semibold">{shop.description}</p>
                     </div>
                     <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-[10px] text-slate-400 font-bold font-mono">
@@ -819,15 +819,15 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         <section className="mb-16">
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <span className="text-[10px] uppercase font-black tracking-widest text-emerald-600 mb-1 block font-mono">STRUKTUR KEBERSAMAAN</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <span className="text-[10px] uppercase font-semibold tracking-widest text-emerald-600 mb-1 block font-mono">STRUKTUR KEBERSAMAAN</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
                 Amanah Kepengurusan <span className="font-serif italic text-emerald-600">RT 02</span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 font-semibold font-serif">Aparatur pengurus pilihan warga yang senantiasa mengutamakan transparansi dan pelayanan santun.</p>
             </div>
             
             {officials.length > 0 && (
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-3.5 py-1.5 rounded-xl font-black uppercase font-mono tracking-widest shadow-sm">
+              <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-3.5 py-1.5 rounded-xl font-semibold uppercase font-mono tracking-widest shadow-sm">
                 {officials.length} Petugas Terdaftar
               </span>
             )}
@@ -840,17 +840,17 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-all"
+                className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-colors"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-black uppercase tracking-wider font-mono">
+                    <span className="text-[10px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider font-mono">
                       {member.role}
                     </span>
-                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
                   </div>
                   
-                  <h3 className="text-lg sm:text-xl font-black text-slate-950 tracking-tight mb-2">
+                  <h3 className="text-lg sm:text-xl font-semibold text-slate-950 tracking-tight mb-2">
                     {member.name}
                   </h3>
                   
@@ -859,7 +859,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   </p>
                   
                   <div className="space-y-2.5 mb-6">
-                    <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1.5 font-mono">PANDUAN TUGAS UTAMA</p>
+                    <p className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-1.5 font-mono">PANDUAN TUGAS UTAMA</p>
                     {member.tasks.map((task, tidx) => (
                       <div key={tidx} className="flex items-start gap-2">
                         <CheckCircle2 size={13} className="text-emerald-500 mt-1 flex-shrink-0" />
@@ -871,8 +871,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
                 {member.phone && (
                   <div className="border-t border-slate-100 pt-4 mt-2">
-                    <p className="text-[10px] text-slate-450 text-slate-400 font-black uppercase tracking-wider font-mono">TELEPON RESPONS</p>
-                    <p className="text-xs font-mono font-black text-slate-750 text-slate-705 text-slate-700 mt-1">{member.phone}</p>
+                    <p className="text-[10px] text-slate-450 text-slate-400 font-semibold uppercase tracking-wider font-mono">TELEPON RESPONS</p>
+                    <p className="text-xs font-mono font-semibold text-slate-750 text-slate-705 text-slate-700 mt-1">{member.phone}</p>
                   </div>
                 )}
               </motion.div>
@@ -882,7 +882,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           {/* ADDITIONAL FIRESTORE OFFICIALS EXPANSION */}
           {officials.length > 0 && (
             <div className="mt-12 pt-8 border-t border-slate-200/80">
-              <h3 className="text-xs font-black text-slate-700 uppercase tracking-widest mb-6 flex items-center gap-2 font-mono">
+              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest mb-6 flex items-center gap-2 font-mono">
                 <Users size={18} className="text-indigo-650 text-indigo-600" />
                 STAF BIDANG PEMBANTU LAINNYA (DIVERIFIKASI DATABASE)
               </h3>
@@ -891,7 +891,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 {officials
                   .filter(o => !['Ketua RT', 'Sekretaris', 'Bendahara'].some(title => o.role.toLowerCase().includes(title.toLowerCase())))
                   .map((off, oidx) => (
-                    <div key={oidx} className="flex items-center gap-3.5 p-4 bg-white rounded-2xl border border-slate-105 border-slate-200/60 shadow-sm hover:border-slate-350 transition-all">
+                    <div key={oidx} className="flex items-center gap-3.5 p-4 bg-white rounded-2xl border border-slate-105 border-slate-200/60 shadow-sm hover:border-slate-350 transition-colors">
                       {off.photo ? (
                         <SmartImage 
                           src={off.photo} 
@@ -905,8 +905,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                         </div>
                       )}
                       <div>
-                        <p className="text-xs font-black text-slate-950 leading-none">{off.name}</p>
-                        <p className="text-[10px] text-indigo-605 text-indigo-600 font-black uppercase tracking-wider mt-1.5">{off.role}</p>
+                        <p className="text-xs font-semibold text-slate-950 leading-none">{off.name}</p>
+                        <p className="text-[10px] text-indigo-605 text-indigo-600 font-semibold uppercase tracking-wider mt-1.5">{off.role}</p>
                         {off.phone && <p className="text-[10px] text-slate-400 font-mono mt-0.5">{off.phone}</p>}
                       </div>
                     </div>
@@ -920,8 +920,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         {donationCampaigns.length > 0 && (
           <section className="mb-16">
             <div className="mb-6">
-              <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-1 block font-mono">MEMBANGUN SOLIDARITAS SOSIAL</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Aksi Solidaritas &amp; <span className="font-serif italic text-indigo-605 text-indigo-600">Donasi Swadaya</span></h2>
+              <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-1 block font-mono">MEMBANGUN SOLIDARITAS SOSIAL</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Aksi Solidaritas &amp; <span className="font-serif italic text-indigo-605 text-indigo-600">Donasi Swadaya</span></h2>
               <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">Program sosial kemanusiaan, takziah musibah, dan pembangunan fasilitas yang sedang berjalan.</p>
             </div>
 
@@ -930,16 +930,16 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 const target = camp.targetAmount || 0;
                 const percent = target > 0 ? Math.min(100, Math.round((camp.currentAmount / target) * 100)) : 0;
                 return (
-                  <div key={cidx} className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+                  <div key={cidx} className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-colors">
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-[9px] bg-indigo-55 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg font-black tracking-wider uppercase font-mono">
+                        <span className="text-[9px] bg-indigo-55 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg font-semibold tracking-wider uppercase font-mono">
                           {camp.type}
                         </span>
-                        <span className={`h-2 w-2 rounded-full ${camp.status === 'Aktif' ? 'bg-emerald-500 animate-ping' : 'bg-slate-400'}`} />
+                        <span className={`h-2 w-2 rounded-full ${camp.status === 'Aktif' ? 'bg-emerald-500 ' : 'bg-slate-400'}`} />
                       </div>
 
-                      <h3 className="text-sm font-black text-slate-950 hover:text-indigo-650 transition-colors mb-1 line-clamp-1">{camp.title}</h3>
+                      <h3 className="text-sm font-semibold text-slate-950 hover:text-indigo-650 transition-colors mb-1 line-clamp-1">{camp.title}</h3>
                       <p className="text-xs text-slate-500 leading-relaxed font-semibold mb-4 line-clamp-2">{camp.description}</p>
                     </div>
 
@@ -962,7 +962,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="mt-4 text-center">
               <button 
                 onClick={() => navigate('/donasi')}
-                className="inline-flex items-center gap-2 text-xs font-black text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-wider cursor-pointer"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-wider cursor-pointer"
               >
                 Akses Portal Donasi Selengkapnya ({donationCampaigns.length} Kampanye)
                 <ArrowUpRight size={16} />
@@ -979,9 +979,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
             
             <div className="relative z-10">
-              <span className="text-[10px] uppercase font-black tracking-widest text-indigo-400 mb-2 block font-mono">DOKUMENTASI SISTEM &amp; PENJELASAN INTEGRASI</span>
-              <h2 className="text-2xl sm:text-4xl font-black text-white hover:text-indigo-200 transition-colors tracking-tight">
-                Mengenal Platform Digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-emerald-300 font-serif italic animate-pulse">TERAS RT 02</span>
+              <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-400 mb-2 block font-mono">DOKUMENTASI SISTEM &amp; PENJELASAN INTEGRASI</span>
+              <h2 className="text-2xl sm:text-4xl font-semibold text-white hover:text-indigo-200 transition-colors tracking-tight">
+                Mengenal Platform Digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-emerald-300 font-serif italic">TERAS RT 02</span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 font-semibold mt-2 max-w-3xl leading-relaxed mb-8">
                 TERAS RT 02 (Sistem Informasi &amp; Transparansi Huntap Tondo 2) adalah platform cerdas satu-pintu (one-stop digital portal) yang menggabungkan basis data rukun tetangga, birokrasi persuratan mandiri, pelaporan insiden darurat, monitoring kebencanaan aktif, dan asisten kependudukan berbasis AI guna melayani warga secara responsif, amanah, dan terintegrasi 24 jam.
@@ -991,12 +991,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
                 {/* Module 1: Surat & Birokrasi */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-indigo-500/50 transition-all flex flex-col justify-between">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-indigo-500/50 transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl w-fit mb-4">
                       <FileText size={20} />
                     </div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">1. Administrasi Surat</h3>
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">1. Administrasi Surat</h3>
                     <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
                       Sistem layanan pengajuan surat pengantar domisili, surat keterangan tidak mampu (SKTM), dsb., secara digital mandiri. Warga dapat memonitor proses persetujuan (approval) admin secara transparan, mempercepat birokrasi, dan menghemat dokumen kertas (paperless).
                     </p>
@@ -1007,12 +1007,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 {/* Module 2: Inventaris RT */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-emerald-500/50 transition-all flex flex-col justify-between">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-emerald-500/50 transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit mb-4">
                       <Archive size={20} />
                     </div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">2. Inventaris Bersama</h3>
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">2. Inventaris Bersama</h3>
                     <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
                       Semua aset fisik RT seperti tenda darurat, kursi lipat, gerobak, sound system, hingga peralatan gotong royong terdata detail dari segi jumlah total, sisa ketersediaan, hingga kondisi fisik ("Baik" / "Rusak"). Membantu warga melakukan booking pinjam alat secara tertib.
                     </p>
@@ -1023,12 +1023,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 {/* Module 3: Lapor & Pengaduan */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-rose-500/50 transition-all flex flex-col justify-between">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-rose-500/50 transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl w-fit mb-4">
                       <AlertTriangle size={20} />
                     </div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">3. Aduan &amp; Investigasi</h3>
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">3. Aduan &amp; Investigasi</h3>
                     <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
                       Warga dapat melayangkan laporan masalah lingkungan seperti jalan rusak, tumpukan sampah, sengketa, hingga lampu jalan padam langsung dari HP. Dilengkapi tingkat urgensi (Rendah/Sedang/Gawat) dan status pengawasan (Diproses, Diselidiki, Selesai).
                     </p>
@@ -1039,12 +1039,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 {/* Module 4: ChatBot AI & Asisten */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-amber-500/50 transition-all flex flex-col justify-between">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-amber-500/50 transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl w-fit mb-4">
                       <Lightbulb size={20} />
                     </div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">4. Smart ChatBot AI</h3>
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">4. Smart ChatBot AI</h3>
                     <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
                       Asisten virtual yang ditenagai oleh kecerdasan buatan Gemini API. Siap memberikan respons instan 24/7 kepada warga mengenai sisa kas RT, nama-nama pengurus, jadwal ronda malam ini, draf pengumuman kegiatan, hingga rujukan langkah mitigasi pertama saat gempa.
                     </p>
@@ -1060,12 +1060,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                 
                 {/* Left Card: Database Mapping & Bansos */}
-                <div className="p-6 bg-white/5 rounded-2xl border border-white/10 flex flex-col sm:flex-row gap-4 items-start hover:border-indigo-500/30 transition-all">
+                <div className="p-6 bg-white/5 rounded-2xl border border-white/10 flex flex-col sm:flex-row gap-4 items-start hover:border-indigo-500/30 transition-colors">
                   <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl flex-shrink-0">
                     <Map size={24} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-wider mb-1">Pemetaan Sosial &amp; Akurasi Bansos</h4>
+                    <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-1">Pemetaan Sosial &amp; Akurasi Bansos</h4>
                     <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
                       Kami merancang visualisasi peta hunian per blok wilayah RT 02 secara akurat. Sistem ini bukan hanya mencatat siapa penghuni rumah, namun menganalisis tingkat ekonomi (Pra-Sejahtera, Sejahtera, Mampu) warga secara objektif. Ini sangat krusial dalam mengambil keputusan penyaluran bantuan sosial (Bansos PKH, BLT, BPNT) agar tepat sasaran tanpa adanya kecemburuan sosial.
                     </p>
@@ -1073,12 +1073,12 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 {/* Right Card: Safeguard & Panic Button */}
-                <div className="p-6 bg-white/5 rounded-2xl border border-white/10 flex flex-col sm:flex-row gap-4 items-start hover:border-rose-500/30 transition-all">
+                <div className="p-6 bg-white/5 rounded-2xl border border-white/10 flex flex-col sm:flex-row gap-4 items-start hover:border-rose-500/30 transition-colors">
                   <div className="p-3 bg-rose-500/10 text-rose-400 rounded-xl flex-shrink-0">
-                    <Smartphone size={24} className="animate-pulse" />
+                    <Smartphone size={24} className="" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-white uppercase tracking-wider mb-1">Panic Button &amp; Mitigasi Sesar Swadaya</h4>
+                    <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-1">Panic Button &amp; Mitigasi Sesar Swadaya</h4>
                     <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
                       Menyadari letak geografis Huntap Tondo II yang berimpitan di atas patahan sesar aktif Palu-Koro, aplikasi ini dilengkapi fitur Panic Button instan. Ketika ditekan oleh warga dalam bahaya (gempa bumi, kebakaran, aksi pencurian, darurat medis), alarm bersuara kencang akan bersinkronisasi langsung ke dashboard petugas ronda dan memicu pengamanan terpadu seketika.
                     </p>
@@ -1095,13 +1095,13 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 <div className="flex gap-3">
                   <button 
                     onClick={() => navigate('/rules')}
-                    className="px-4 py-2 bg-white/5 text-slate-300 hover:bg-white/10 rounded-xl text-xs font-black uppercase transition-all tracking-wider border border-white/10 whitespace-nowrap"
+                    className="px-4 py-2 bg-white/5 text-slate-300 hover:bg-white/10 rounded-xl text-xs font-semibold uppercase transition-colors tracking-wider border border-white/10 whitespace-nowrap"
                   >
                     Aturan &amp; Tata Tertib RT
                   </button>
                   <button 
                     onClick={() => navigate('/services')}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase transition-all tracking-wider whitespace-nowrap shadow-md active:scale-95"
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold uppercase transition-colors tracking-wider whitespace-nowrap shadow-md active:scale-95"
                   >
                     Akses Menu Layanan
                   </button>
@@ -1115,8 +1115,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         {/* PENJELASAN MENDALAM: TANTANGAN RIIL YANG KAMI SELESAIKAN */}
         <section className="mb-16">
           <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-sm">
-            <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-2 block font-mono">LATAR BELAKANG &AMP; URGENSI SOLUSI</span>
-            <h3 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight mb-8 leading-tight">
+            <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-2 block font-mono">LATAR BELAKANG &AMP; URGENSI SOLUSI</span>
+            <h3 className="text-xl sm:text-3xl font-semibold text-slate-900 tracking-tight mb-8 leading-tight">
               Tantangan Riil Kemasyarakatan yang <span className="font-serif italic text-indigo-600">Kami Selesaikan</span>
             </h3>
             
@@ -1126,7 +1126,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <FileText size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">1. Birokrasi Fisik yang Lamban &amp; Berbelit</h4>
+                  <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">1. Birokrasi Fisik yang Lamban &amp; Berbelit</h4>
                   <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
                     Secara konvensional, warga Huntap yang membutuhkan surat pengantar RT harus mencari keberadaan ketua RT secara fisik ke rumahnya, menulis draf manual, dan menunggu berhari-hari karena ketidakcocokan waktu luang. TERAS RT 02 meremajakan birokrasi ini menjadi serba digital: ajukan lewat HP, disetujui dalam hitungan menit, tanpa kertas.
                   </p>
@@ -1138,7 +1138,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <Database size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">2. Krisis Kepercayaan &amp; Ketidakjelasan Kas Swadaya</h4>
+                  <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">2. Krisis Kepercayaan &amp; Ketidakjelasan Kas Swadaya</h4>
                   <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
                     Kecurigaan penyalahgunaan keuangan rukun tetangga sering kali memicu keretakan rukun bertetangga. Dengan modul Transparansi Kas Terpadu, setiap uang masuk dari iuran warga dan pemakaian untuk kepentingan umum (seperti perbaikan gorong-gorong atau sumbangan kedukaan) terarsip akurat di database cloud dan dapat dipantau oleh siapa saja kapan saja.
                   </p>
@@ -1150,7 +1150,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <Map size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">3. Ambiguitas Akurasi Pendistribusian Bantuan Sosial (Bansos)</h4>
+                  <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">3. Ambiguitas Akurasi Pendistribusian Bantuan Sosial (Bansos)</h4>
                   <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
                     Program bantuan darurat pemerintah rawan salah sasaran akibat tumpang tindih status ekonomi keluarga yang tidak tervalidasi secara objektif. Melalui peta hunian digital berdasar status sosial, pengurus memiliki draf peta demografi yang transparan demi memastikan warga kakek-nenek, yatim, atau dhuafa yang layak memperoleh haknya terlebih dahulu.
                   </p>
@@ -1162,7 +1162,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   <BadgeAlert size={18} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">4. Kekosongan Sistem Peringatan Kebencanaan Lokal</h4>
+                  <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">4. Kekosongan Sistem Peringatan Kebencanaan Lokal</h4>
                   <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
                     Berdiri di atas pemukiman pasca-bencana tsunami Palu, ketidaksiapan mitigasi mandiri warga dapat berakibat fatal saat sesar Palu-Koro kembali bergeliat. Aplikasi ini mengintegrasikan rujukan mandiri siaga lindu, titik kaku evakuasi luar ruang, laporan aduan bahaya lingkungan, hingga integrasi kontak respons cepat dalam satu genggaman.
                   </p>
@@ -1182,8 +1182,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         {/* TATA NILAI & KERANGKA STRATEGIS PORTAL TERAS RT 02 */}
         <section className="mb-20" id="core-values-section">
           <div className="mb-12 text-center max-w-2xl mx-auto">
-            <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-1 block font-mono">PONDASI UTAMA &amp; VISI JANGKA PANJANG</span>
-            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+            <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-1 block font-mono">PONDASI UTAMA &amp; VISI JANGKA PANJANG</span>
+            <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight">
               Pondasi &amp; <span className="font-serif italic text-indigo-600">Arah Gerak RT 02</span>
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-2">Struktur tata luhur nilai, cita-cita bersama, sasaran strategis, serta rencana jangka panjang kepengurusan rukun tetangga Huntap Tondo 2.</p>
@@ -1194,70 +1194,70 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="border-t border-slate-100 pt-10" id="section-nilai-utama">
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian A</span>
-                  <span className="text-xs text-slate-400 font-black font-mono">• TATA NILAI UTAMA</span>
+                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian A</span>
+                  <span className="text-xs text-slate-400 font-semibold font-mono">• TATA NILAI UTAMA</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
                   Nilai-Nilai Utama <span className="font-serif italic text-indigo-600">Portal Teras RT 02</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Lima tata nilai luhur dasar kemasyarakatan dan tata kelola pelayanan warga Huntap Tondo 2.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6" id="strategic-content-nilai">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 w-fit mb-4">
                       <Lock size={20} />
                     </div>
-                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Transparansi Mutlak</h4>
+                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Transparansi Mutlak</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Keterbukaan penuh pada seluruh aliran iuran kas rukun tetangga, dokumen kebijakan, serta penyaluran bantuan sosial secara real-time demi rasa saling percaya.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-3 rounded-2xl bg-amber-50 text-amber-600 w-fit mb-4">
                       <Award size={20} />
                     </div>
-                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Integritas Amanah</h4>
+                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Integritas Amanah</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Sikap jujur, adil, dan integritas tinggi pengurus RT dalam menjalankan roda organisasi pelayanan kependudukan warga Huntap dengan pengorganisasian amanah.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600 w-fit mb-4">
                       <HeartHandshake size={20} />
                     </div>
-                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Gotong Royong</h4>
+                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Gotong Royong</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Menjaga tradisi luhur tolong-menolong, solidaritas sosial tinggi, gotong-royong swadaya, serta bahu-membahu dalam menghadapi musibah suka maupun duka.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 w-fit mb-4">
                       <Users size={20} />
                     </div>
-                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Inklusivitas Adil</h4>
+                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Inklusivitas Adil</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Memberikan pelayanan dan perhatian adil merata bagi seluruh keluarga tanpa diskriminasi latar belakang suku, ras, gender, keyakinan, maupun taraf ekonomi keluarga.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
                   <div>
                     <div className="p-3 rounded-2xl bg-rose-50 text-rose-600 w-fit mb-4">
                       <Shield size={20} />
                     </div>
-                    <h4 className="text-sm font-black text-slate-950 uppercase tracking-tight mb-2">Ketangguhan Siaga</h4>
+                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Ketangguhan Siaga</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Kesiapsiagaan penuh, tanggap darurat bencana, pengamanan pencegahan aktif, serta ketahanan mitigasi wilayah mandiri rukun tetangga di atas jalur sesar.
                     </p>
@@ -1270,10 +1270,10 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="border-t border-slate-100 pt-10" id="section-visi-misi">
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian B</span>
-                  <span className="text-xs text-slate-400 font-black font-mono">• VISI &amp; MISI</span>
+                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian B</span>
+                  <span className="text-xs text-slate-400 font-semibold font-mono">• VISI &amp; MISI</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
                   Visi &amp; Misi <span className="font-serif italic text-indigo-600">Rukun Tetangga 02</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Cita-cita luhur dan panduan langkah operasional kepengurusan jangka panjang.</p>
@@ -1286,9 +1286,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                       <div className="p-2 bg-white/10 rounded-xl">
                         <Globe size={18} />
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-indigo-200 font-mono">VISI UTAMA</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-200 font-mono">VISI UTAMA</span>
                     </div>
-                    <h4 className="text-lg sm:text-2xl font-black text-white mb-4 tracking-tight leading-normal">
+                    <h4 className="text-lg sm:text-2xl font-semibold text-white mb-4 tracking-tight leading-normal">
                       "Mewujudkan Harmoni Huntap Tondo 2 Sebagai <span className="font-serif italic text-indigo-200">Pemukiman Digital Mandiri</span> yang Unggul, Transparan, Solider, Akuntabel, dan Siaga Bencana"
                     </h4>
                     <p className="text-xs text-indigo-200/90 font-medium leading-relaxed text-justify">
@@ -1298,14 +1298,14 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
-                  <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-4 block font-mono">MISI STRATEGIS</span>
-                  <h4 className="text-lg font-black text-slate-900 tracking-tight mb-4">Langkah Utama yang <span className="font-serif italic text-indigo-600">Terbimbing Nyata</span></h4>
+                  <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-4 block font-mono">MISI STRATEGIS</span>
+                  <h4 className="text-lg font-semibold text-slate-900 tracking-tight mb-4">Langkah Utama yang <span className="font-serif italic text-indigo-600">Terbimbing Nyata</span></h4>
 
                   <div className="space-y-4">
                     <div className="flex gap-4">
-                      <span className="h-6 w-6 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">PM 1</span>
+                      <span className="h-6 w-6 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-[10px] font-semibold font-mono flex-shrink-0">PM 1</span>
                       <div>
-                        <h5 className="text-xs font-black text-slate-900 uppercase">Pelayanan Birokrasi Cepat</h5>
+                        <h5 className="text-xs font-semibold text-slate-900 uppercase">Pelayanan Birokrasi Cepat</h5>
                         <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
                           Mengotomatisasi surat menyurat satu pintu dan rekapitulasi domisili warga secara mandiri guna menghemat waktu warga.
                         </p>
@@ -1313,9 +1313,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                     </div>
 
                     <div className="flex gap-4">
-                      <span className="h-6 w-6 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">PM 2</span>
+                      <span className="h-6 w-6 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-[10px] font-semibold font-mono flex-shrink-0">PM 2</span>
                       <div>
-                        <h5 className="text-xs font-black text-slate-900 uppercase">Akuntabilitas &amp; Transparansi Kas</h5>
+                        <h5 className="text-xs font-semibold text-slate-900 uppercase">Akuntabilitas &amp; Transparansi Kas</h5>
                         <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
                           Mencatat dan mengumumkan mutasi kas rukun tetangga seketika (real-time) melalui aplikasi demi membangun integritas.
                         </p>
@@ -1323,9 +1323,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                     </div>
 
                     <div className="flex gap-4">
-                      <span className="h-6 w-6 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">PM 3</span>
+                      <span className="h-6 w-6 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-[10px] font-semibold font-mono flex-shrink-0">PM 3</span>
                       <div>
-                        <h5 className="text-xs font-black text-slate-900 uppercase">Pemberdayaan Ekonomi Kreatif Warga</h5>
+                        <h5 className="text-xs font-semibold text-slate-900 uppercase">Pemberdayaan Ekonomi Kreatif Warga</h5>
                         <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
                           Mempromosikan UMKM lokal warga, bank sampah digital ekonomis, serta pasar swadaya sebagai pondasi finansial keluarga huni.
                         </p>
@@ -1333,9 +1333,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                     </div>
 
                     <div className="flex gap-4">
-                      <span className="h-6 w-6 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-[10px] font-black font-mono flex-shrink-0">PM 4</span>
+                      <span className="h-6 w-6 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-[10px] font-semibold font-mono flex-shrink-0">PM 4</span>
                       <div>
-                        <h5 className="text-xs font-black text-slate-900 uppercase">Sinergi Mitigasi Bencana &amp; Keamanan</h5>
+                        <h5 className="text-xs font-semibold text-slate-900 uppercase">Sinergi Mitigasi Bencana &amp; Keamanan</h5>
                         <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
                           Memelihara pemetaan hunian, koordinasi pos ronda malam, pos tanggap darurat gempa, serta asisten AI pintar siaga bencana.
                         </p>
@@ -1350,58 +1350,58 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="border-t border-slate-100 pt-10" id="section-tujuan">
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian C</span>
-                  <span className="text-xs text-slate-400 font-black font-mono">• TARGET CAPAIAN</span>
+                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian C</span>
+                  <span className="text-xs text-slate-400 font-semibold font-mono">• TARGET CAPAIAN</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
                   Tujuan Strategis <span className="font-serif italic text-indigo-600">RT 02</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Garis arah bagi program-program sosial, ketahanan bencana, dan pemberdayaan ekonomi.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="strategic-content-tujuan">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex gap-4">
                   <div className="p-3.5 rounded-2xl bg-indigo-50 text-indigo-600 h-fit">
                     <FileText size={22} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-2">1. Mewujudkan Birokrasi Adaptif &amp; Modern</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-tight mb-2">1. Mewujudkan Birokrasi Adaptif &amp; Modern</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Menyajikan mekanisme administrasi kesuratan rukun tetangga yang ringkas, efektif, terbebas dari kesalahan manual, tumpukan kertas fisik, ataupun pungutan liar.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex gap-4">
                   <div className="p-3.5 rounded-2xl bg-amber-50 text-amber-600 h-fit">
                     <Users size={22} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-2">2. Menumbuhkan Rasa Saling Percaya</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-tight mb-2">2. Menumbuhkan Rasa Saling Percaya</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Membangun ikatan sosial yang sehat dan harmoni melalui keterbukaan pelaporan kas publik tanpa celah manipulasi demi kedamaian lingkungan bersama.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex gap-4">
                   <div className="p-3.5 rounded-2xl bg-emerald-50 text-emerald-600 h-fit">
                     <ShoppingBag size={22} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-2">3. Mengakselerasi Kesejahteraan Finansial</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-tight mb-2">3. Mengakselerasi Kesejahteraan Finansial</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Memicu keaktifan roda pasar swadaya mikro warga Huntap, memperluas jangkauan niaga UMKM, dan mendatangkan nilai ekonomis dari pemilahan bank sampah secara teratur.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex gap-4">
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex gap-4">
                   <div className="p-3.5 rounded-2xl bg-rose-50 text-rose-600 h-fit">
                     <Shield size={22} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight mb-2">4. Meminimalkan Dampak Kebencanaan</h4>
+                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-tight mb-2">4. Meminimalkan Dampak Kebencanaan</h4>
                     <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
                       Meningkatkan kesiapsiagaan darurat lindu secara mandiri, mengarahkan peta titik kumpul secara cepat, koordinasi komunikasi darurat, dan menjaga keselamatan pengamanan warga.
                     </p>
@@ -1414,10 +1414,10 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="border-t border-slate-100 pt-10" id="section-sasaran">
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian D</span>
-                  <span className="text-xs text-slate-400 font-black font-mono">• METRIK INDIKATOR</span>
+                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian D</span>
+                  <span className="text-xs text-slate-400 font-semibold font-mono">• METRIK INDIKATOR</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
                   Sasaran 5 Tahun Kedepan <span className="font-serif italic text-indigo-600">(Strategic Targets)</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Key Performance Indicators (KPI) kebersamaan yang ingin dicapai pengurus RT 02 dalam jangka menengah.</p>
@@ -1425,9 +1425,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6" id="strategic-content-sasaran">
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-black text-indigo-600/20 font-mono tracking-tight">S-1</span>
+                  <span className="text-[36px] font-semibold text-indigo-600/20 font-mono tracking-tight">S-1</span>
                   <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">100% Pelayanan Digital</h4>
+                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">100% Pelayanan Digital</h4>
                     <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
                       Layanan administrasi, rekapitulasi KK, dan usulan korespondensi beralih penuh seutuhnya ke Teras RT 02.
                     </p>
@@ -1435,9 +1435,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-black text-amber-600/20 font-mono tracking-tight">S-2</span>
+                  <span className="text-[36px] font-semibold text-amber-600/20 font-mono tracking-tight">S-2</span>
                   <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">Nol Masalah Rekonsiliasi</h4>
+                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Nol Masalah Rekonsiliasi</h4>
                     <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
                       Sistem penarikan iuran, laporan pengeluaran, dan audit saldo kas tercapai 100% transparan dengan akurasi mutlak.
                     </p>
@@ -1445,9 +1445,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-black text-emerald-600/20 font-mono tracking-tight">S-3</span>
+                  <span className="text-[36px] font-semibold text-emerald-600/20 font-mono tracking-tight">S-3</span>
                   <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">UMKM Naik Kelas</h4>
+                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">UMKM Naik Kelas</h4>
                     <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
                       Minimal 90% pelaku niaga warga Huntap Tondo 2 terdaftar, memiliki lapak digital, dan mendapatkan pembeli konstan.
                     </p>
@@ -1455,9 +1455,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-black text-rose-600/20 font-mono tracking-tight">S-4</span>
+                  <span className="text-[36px] font-semibold text-rose-600/20 font-mono tracking-tight">S-4</span>
                   <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">Desa Siaga Bencana</h4>
+                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Desa Siaga Bencana</h4>
                     <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
                       Mewujudkan percontohan kerukunan rukun tetangga dengan mitigasi lindu berstandar tangguh bencana tingkat nasional.
                     </p>
@@ -1465,9 +1465,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                 </div>
 
                 <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-black text-blue-600/20 font-mono tracking-tight">S-5</span>
+                  <span className="text-[36px] font-semibold text-blue-600/20 font-mono tracking-tight">S-5</span>
                   <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2">Mandiri Finansial</h4>
+                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Mandiri Finansial</h4>
                     <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
                       Terciptanya ketahanan kas mandiri operasional rukun tetangga yang diperoleh secara ekologis via bank sampah terpadu warga.
                     </p>
@@ -1480,10 +1480,10 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="border-t border-slate-100 pt-10" id="section-motto">
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian E</span>
-                  <span className="text-xs text-slate-400 font-black font-mono">• SLOGAN JUANG</span>
+                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian E</span>
+                  <span className="text-xs text-slate-400 font-semibold font-mono">• SLOGAN JUANG</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
                   Motto &amp; Slogan <span className="font-serif italic text-indigo-600">RT 02</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Singkatan luhur dan esensi identitas keguyuban rukun tetangga di Huntap Tondo 2.</p>
@@ -1491,7 +1491,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
               <div className="bg-indigo-950 text-white rounded-3xl p-6 sm:p-10 shadow-lg border border-indigo-900" id="strategic-content-motto">
                 <div className="text-center mb-8">
-                  <span className="text-[10px] text-indigo-400 font-black tracking-widest font-mono uppercase">MOTTO &amp; SLOGAN JUANG KITA</span>
+                  <span className="text-[10px] text-indigo-400 font-semibold tracking-widest font-mono uppercase">MOTTO &amp; SLOGAN JUANG KITA</span>
                   <h3 className="text-2xl sm:text-4xl font-extrabold text-white mt-2 mb-3 tracking-tight font-sans">
                     "TERAS RT 02"
                   </h3>
@@ -1503,40 +1503,40 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mt-8">
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-black text-indigo-400 font-mono">T</span>
-                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">TEKNOLOGI</h4>
+                    <span className="text-xl font-semibold text-indigo-400 font-mono">T</span>
+                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">TEKNOLOGI</h4>
                     <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
                       Inovasi platform digital sebagai tiang penopang utama pelayanan administrasi satu pintu yang efektif.
                     </p>
                   </div>
 
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-black text-amber-400 font-mono">E</span>
-                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">EKRAF</h4>
+                    <span className="text-xl font-semibold text-amber-400 font-mono">E</span>
+                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">EKRAF</h4>
                     <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
                       Ekonomi kreatif mandiri melalui swadaya UMKM dan pemilahan bank sampah digital bernilai tinggi.
                     </p>
                   </div>
 
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-black text-emerald-400 font-mono">R</span>
-                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">RUKUN</h4>
+                    <span className="text-xl font-semibold text-emerald-400 font-mono">R</span>
+                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">RUKUN</h4>
                     <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
                       Interaksi kemasyarakatan yang tulus, damai, pemaaf, saling asih, serta menjunjung tinggi tenggang rasa.
                     </p>
                   </div>
 
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-black text-rose-400 font-mono">A</span>
-                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">AMAN</h4>
+                    <span className="text-xl font-semibold text-rose-400 font-mono">A</span>
+                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">AMAN</h4>
                     <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
                       Keamanan pemukiman yang terjaga, tanggap ronda bersama, serta siaga mitigasi gempa sesar aktif.
                     </p>
                   </div>
 
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-black text-blue-400 font-mono">S</span>
-                    <h4 className="text-xs font-black text-white uppercase mt-1 mb-1 tracking-wider">SINERGI</h4>
+                    <span className="text-xl font-semibold text-blue-400 font-mono">S</span>
+                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">SINERGI</h4>
                     <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
                       Kolaborasi erat nan selaras antara para pengurus, seluruh KK warga huni, akademisi, dan pemerintah.
                     </p>
@@ -1549,21 +1549,21 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             <div className="border-t border-slate-100 pt-10" id="section-rencana">
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-black uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian F</span>
-                  <span className="text-xs text-slate-400 font-black font-mono">• LINIMASA ROADMAP</span>
+                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian F</span>
+                  <span className="text-xs text-slate-400 font-semibold font-mono">• LINIMASA ROADMAP</span>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
                   Rencana Jangka Panjang <span className="font-serif italic text-indigo-600">(10-Year Roadmap)</span>
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Linimasa tiga tahap utama pelaksanaan visi jangka panjang digitalisasi, kemandirian ekonomi, dan ketangguhan lingkungan Huntap Tondo 2 dalam kurun waktu 10 tahun.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6" id="strategic-content-rencana">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-indigo-50 text-indigo-600 text-[9px] font-black font-mono rounded-bl-2xl uppercase">Tahap 1</div>
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-indigo-50 text-indigo-600 text-[9px] font-semibold font-mono rounded-bl-2xl uppercase">Tahap 1</div>
                   <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 mt-2">Fondasi &amp; Digitalisasi</h4>
-                    <div className="text-[10px] text-indigo-600 font-black tracking-widest font-mono mb-3 uppercase">Tahun 1 - 3 (2026 - 2028)</div>
+                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2 mt-2">Fondasi &amp; Digitalisasi</h4>
+                    <div className="text-[10px] text-indigo-600 font-semibold tracking-widest font-mono mb-3 uppercase">Tahun 1 - 3 (2026 - 2028)</div>
                     <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
                       <li>Migrasi data kependudukan terenkripsi dan integrasi penuh blok hunian.</li>
                       <li>Pembiasaan iuran kas terjadwal transparan berbasis web secara periodik.</li>
@@ -1572,11 +1572,11 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-amber-50 text-amber-600 text-[9px] font-black font-mono rounded-bl-2xl uppercase">Tahap 2</div>
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-amber-50 text-amber-600 text-[9px] font-semibold font-mono rounded-bl-2xl uppercase">Tahap 2</div>
                   <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 mt-2">Pemberdayaan &amp; Ekonomi Mandiri</h4>
-                    <div className="text-[10px] text-amber-600 font-black tracking-widest font-mono mb-3 uppercase">Tahun 4 - 6 (2029 - 2031)</div>
+                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2 mt-2">Pemberdayaan &amp; Ekonomi Mandiri</h4>
+                    <div className="text-[10px] text-amber-600 font-semibold tracking-widest font-mono mb-3 uppercase">Tahun 4 - 6 (2029 - 2031)</div>
                     <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
                       <li>Inisiasi Bank Sampah digital terintegrasi iuran kas sosial warga.</li>
                       <li>Inkubasi bisnis swadaya, standarisasi, dan digitalisasi UMKM Huntap.</li>
@@ -1585,11 +1585,11 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                   </div>
                 </div>
 
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-rose-50 text-rose-600 text-[9px] font-black font-mono rounded-bl-2xl uppercase">Tahap 3</div>
+                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-rose-50 text-rose-600 text-[9px] font-semibold font-mono rounded-bl-2xl uppercase">Tahap 3</div>
                   <div>
-                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider mb-2 mt-2">Ketangguhan &amp; Kepemimpinan Regional</h4>
-                    <div className="text-[10px] text-rose-600 font-black tracking-widest font-mono mb-3 uppercase">Tahun 7 - 10 (2032 - 2035)</div>
+                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2 mt-2">Ketangguhan &amp; Kepemimpinan Regional</h4>
+                    <div className="text-[10px] text-rose-600 font-semibold tracking-widest font-mono mb-3 uppercase">Tahun 7 - 10 (2032 - 2035)</div>
                     <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
                       <li>Penyediaan hidran mandiri, jalur evakuasi pintar, dan kelengkapan darurat tangguh.</li>
                       <li>Replikasi model tata kelola Smart RT berskala kota/nasional secara open-source.</li>
@@ -1607,7 +1607,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
               <span className="text-[10px] text-indigo-400 font-extrabold tracking-widest font-mono uppercase block mb-2">POS LAJU SESAR AKTIF MITIGASI</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Pos Siaga &amp; <span className="font-serif italic text-indigo-300">Titik Evakuasi Warga</span></h2>
+              <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">Pos Siaga &amp; <span className="font-serif italic text-indigo-300">Titik Evakuasi Warga</span></h2>
               <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
                 Mengingat Huntap Tondo II berdiri di radius proksimitas pengaruh letupan tektonik Sesar Palu-Koro yang aktif secara berulang, kami membangun kesiapsiagaan darurat terdigitalisasi secara saksama.
               </p>
@@ -1636,7 +1636,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
             </div>
 
             <div className="p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm flex flex-col justify-between h-full">
-              <h4 className="text-xs font-black text-rose-400 tracking-wider uppercase font-mono mb-4">📢 PETUNJUK KESELAMATAN SEBARAN SESAR</h4>
+              <h4 className="text-xs font-semibold text-rose-400 tracking-wider uppercase font-mono mb-4">Petunjuk Keselamatan Sebaran Sesar</h4>
               <ul className="space-y-2.5 text-[11px] text-slate-300 font-medium leading-relaxed list-disc pl-4">
                 <li>Saat lindu terasa, segera beralih menuju kolong meja kokoh atau lindungi kepala Anda dengan bantal/buku tebal.</li>
                 <li>Setelah getaran reda, segera evakuasi keluarga secara beruntun lewat pintu keluar darurat luar rumah menuju area jalan utama yang terbuka.</li>
@@ -1646,9 +1646,9 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               
               <button 
                 onClick={() => navigate('/peta?tab=gempa')}
-                className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs tracking-wider uppercase rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs tracking-wider uppercase rounded-xl transition-colors shadow-md active:scale-95 cursor-pointer"
               >
-                <Activity size={14} className="animate-pulse" />
+                <Activity size={14} className="" />
                 MASUK PANEL MONITOR GEMPA AKTIF (BMKG)
               </button>
             </div>
@@ -1659,8 +1659,8 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
-              <span className="text-[10px] uppercase font-black tracking-widest text-indigo-600 mb-1 block font-mono">KONTAK RESMI &amp; SARANA LAYANAN</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-4">
+              <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-1 block font-mono">KONTAK RESMI &amp; SARANA LAYANAN</span>
+              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mb-4">
                 Sekretariat RT 02 <span className="font-serif italic text-indigo-600">Huntap Tondo 2</span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-semibold mb-6">
@@ -1673,7 +1673,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                     <MapPin size={16} />
                   </div>
                   <div>
-                    <p className="text-xs font-black text-slate-900">Alamat Korespondensi</p>
+                    <p className="text-xs font-semibold text-slate-900">Alamat Korespondensi</p>
                     <p className="text-xs text-slate-505 text-slate-500 mt-1 font-semibold leading-relaxed">
                       Blok B No. 42, Hunian Tetap (Huntap) Tondo II, RT 02 / RW 05, Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu, Sulawesi Tengah.
                     </p>
@@ -1685,7 +1685,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                     <Phone size={16} />
                   </div>
                   <div>
-                    <p className="text-xs font-black text-slate-900">Saluran Telepon Siaga</p>
+                    <p className="text-xs font-semibold text-slate-900">Saluran Telepon Siaga</p>
                     <p className="text-xs text-slate-505 font-mono font-bold text-slate-800 mt-1 hover:text-emerald-700 transition-colors">
                       +62 822-9333-2802 (Hotline Utama Pengaduan)
                     </p>
@@ -1697,7 +1697,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
                     <Calendar size={16} />
                   </div>
                   <div>
-                    <p className="text-xs font-black text-slate-900">Jam Layanan Kantor Sekretariat</p>
+                    <p className="text-xs font-semibold text-slate-900">Jam Layanan Kantor Sekretariat</p>
                     <p className="text-xs text-slate-505 text-slate-500 mt-1 font-semibold">
                       Setiap Hari Kerja (Senin s/d Jumat) Pukul 19.00 - 21.00 WITA.
                     </p>
@@ -1708,7 +1708,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
             <div className="p-6 bg-gradient-to-br from-slate-50 to-indigo-50/20 rounded-3xl border border-slate-100 flex flex-col justify-between h-full">
               <div className="text-center lg:text-left mb-6">
-                <h4 className="text-xs font-black text-slate-950 tracking-tight uppercase">Sistem Tata Kelola TERAS DIgital</h4>
+                <h4 className="text-xs font-semibold text-slate-950 tracking-tight uppercase">Sistem Tata Kelola TERAS DIgital</h4>
                 <p className="text-xs text-slate-500 mt-1.5 leading-relaxed font-semibold">
                   Situs dan platform mandiri ini dikembangkan dalam mewujudkan tata pemukiman cerdas. Apabila Anda menemukan kejanggalan integrasi kependudukan Anda, silakan hubungi admin pengembang langsung.
                 </p>
@@ -1717,7 +1717,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
               <div className="space-y-2.5">
                 <button 
                   onClick={() => navigate('/services?tab=lapor')}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs tracking-wider uppercase rounded-xl transition-all shadow-md active:scale-95 cursor-pointer"
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs tracking-wider uppercase rounded-xl transition-colors shadow-md active:scale-95 cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
                     <Activity size={14} />
@@ -1728,7 +1728,7 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
                 <button 
                   onClick={() => navigate('/services?tab=surat')}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-150 border-indigo-100 font-extrabold text-xs tracking-wider uppercase rounded-xl transition-all shadow-sm active:scale-95 cursor-pointer"
+                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-150 border-indigo-100 font-extrabold text-xs tracking-wider uppercase rounded-xl transition-colors shadow-sm active:scale-95 cursor-pointer"
                 >
                   <span>PENGAJUAN PINJAM ALAT / SURAT RT</span>
                   <ChevronRight size={14} />

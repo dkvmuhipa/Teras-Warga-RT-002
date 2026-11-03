@@ -85,7 +85,7 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 mb-24">
       <div className="mb-8">
-        <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3">
+        <h2 className="text-3xl font-semibold text-slate-800 flex items-center gap-3">
           <Heart className="text-rose-500" size={32} />
           Donasi Sosial & Kas Kematian
         </h2>
@@ -111,7 +111,7 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
                     <div className="p-3 bg-slate-50 rounded-2xl">
                       {getCampaignIcon(campaign.type)}
                     </div>
-                    <span className="text-[10px] font-black px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-widest">
+                    <span className="text-[10px] font-semibold px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full uppercase tracking-widest">
                       {campaign.type}
                     </span>
                   </div>
@@ -130,7 +130,7 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
                       </div>
                       <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-indigo-600 transition-all duration-1000"
+                          className="h-full bg-indigo-600 transition-colors duration-1000"
                           style={{ width: `${campaign.targetAmount ? Math.min(100, (campaign.currentAmount / campaign.targetAmount) * 100) : 100}%` }}
                         ></div>
                       </div>
@@ -138,12 +138,12 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
                     
                     <div className="flex justify-between items-end">
                       <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Donasi</p>
-                        <p className="text-lg font-black text-slate-800">Rp {campaign.currentAmount.toLocaleString()}</p>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total Donasi</p>
+                        <p className="text-lg font-semibold text-slate-800">Rp {campaign.currentAmount.toLocaleString()}</p>
                       </div>
                       {campaign.targetAmount && (
                         <div className="text-right">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Target</p>
+                          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Target</p>
                           <p className="text-sm font-bold text-slate-600 text-slate-400">Rp {campaign.targetAmount.toLocaleString()}</p>
                         </div>
                       )}
@@ -185,15 +185,15 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {completedCampaigns.map((campaign) => (
-                <Card key={campaign.id} className="p-6 opacity-75 grayscale hover:grayscale-0 transition-all">
+                <Card key={campaign.id} className="p-6 opacity-75 grayscale hover:grayscale-0 transition-colors">
                   <div className="flex justify-between items-start mb-4">
                     <h4 className="text-lg font-bold text-slate-800">{campaign.title}</h4>
                     <CheckCircle2 className="text-emerald-500" size={20} />
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Terkumpul</p>
-                      <p className="text-lg font-black text-slate-800">Rp {campaign.currentAmount.toLocaleString()}</p>
+                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total Terkumpul</p>
+                      <p className="text-lg font-semibold text-slate-800">Rp {campaign.currentAmount.toLocaleString()}</p>
                     </div>
                     <Button 
                       onClick={() => {
@@ -224,7 +224,7 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
             <label className="block text-xs font-bold mb-2 text-slate-700 uppercase tracking-widest">Jumlah Donasi (Rp)</label>
             <input 
               type="number"
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-lg font-black text-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-lg font-semibold text-indigo-600 focus:ring-2 focus:ring-indigo-500/20 outline-none"
               placeholder="0"
               value={amount}
               onChange={e => setAmount(Number(e.target.value))}
@@ -277,7 +277,7 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
             donationRecords.map((record) => (
               <div key={record.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-indigo-600 font-black text-sm shadow-sm">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm shadow-sm">
                     {record.isAnonymous ? '?' : record.donorName.charAt(0)}
                   </div>
                   <div>
@@ -291,7 +291,7 @@ export default function PublicDonations({ campaigns, houses }: PublicDonationsPr
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-black text-emerald-600">Rp {record.amount.toLocaleString()}</p>
+                  <p className="text-sm font-semibold text-emerald-600">Rp {record.amount.toLocaleString()}</p>
                   <p className="text-[10px] text-slate-400 font-bold">Rumah {record.houseId}</p>
                 </div>
               </div>

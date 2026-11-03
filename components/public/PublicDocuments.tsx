@@ -40,7 +40,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
       text: 'text-amber-800',
       border: 'border-amber-200',
       accent: 'from-amber-500/10 to-orange-500/5',
-      icon: '📜',
+      icon: 'FileText',
       label: 'Surat Keputusan RT'
     },
     'Aturan': {
@@ -56,7 +56,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
       text: 'text-emerald-800',
       border: 'border-emerald-200',
       accent: 'from-emerald-500/10 to-teal-500/5',
-      icon: '📝',
+      icon: 'FileText',
       label: 'Formulir Administrasi'
     },
     'Notulensi': {
@@ -64,7 +64,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
       text: 'text-purple-800',
       border: 'border-purple-200',
       accent: 'from-purple-500/10 to-pink-500/5',
-      icon: '📋',
+      icon: 'FileText',
       label: 'Notulensi Rapat'
     },
     'Lainnya': {
@@ -72,7 +72,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
       text: 'text-slate-800',
       border: 'border-slate-200',
       accent: 'from-slate-500/10 to-slate-400/5',
-      icon: '📁',
+      icon: 'Folder',
       label: 'Dokumen Lainnya'
     }
   };
@@ -244,7 +244,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
       {/* 1. Executive Government Hero Banner */}
       <motion.div 
         variants={itemVariants}
-        className="relative w-full overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2.5rem] p-6 sm:p-10 md:p-12 shadow-xl shadow-slate-950/20 border border-slate-800/80"
+        className="relative w-full overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-[2.5rem] p-6 sm:p-10 md:p-12 shadow-xl shadow-2xs border border-slate-800/80"
       >
         {/* Ambient Glows */}
         <div className="absolute top-0 right-0 w-[550px] h-[550px] bg-gradient-to-br from-indigo-500/20 to-purple-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
@@ -253,16 +253,16 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
         <div className="relative z-10 max-w-5xl space-y-6">
           {/* Official Badge & RT Indicator */}
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-500/20 backdrop-blur-md rounded-full border border-indigo-400/30 text-indigo-300 text-[11px] font-black uppercase tracking-widest shadow-xs">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-500/20 backdrop-blur-md rounded-full border border-indigo-400/30 text-indigo-300 text-[11px] font-semibold uppercase tracking-widest shadow-xs">
               <Building2 size={13} className="text-indigo-400" /> Repository Resmi RT 02 / RW 020
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 backdrop-blur-md rounded-full border border-emerald-400/30 text-emerald-300 text-[11px] font-black uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Terverifikasi Digital
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/15 backdrop-blur-md rounded-full border border-emerald-400/30 text-emerald-300 text-[11px] font-semibold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" /> Terverifikasi Digital
             </span>
           </div>
           
           <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-[1.15]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight leading-[1.15]">
               Pusat Arsip & <span className="bg-gradient-to-r from-indigo-300 via-indigo-200 to-amber-200 bg-clip-text text-transparent">Dokumen Publik</span>
             </h1>
 
@@ -275,19 +275,19 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
             <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition-colors">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Dokumen</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Total Dokumen</span>
                 <FolderOpen size={16} className="text-indigo-400" />
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-white mt-1">{publicDocs.length}</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-white mt-1">{publicDocs.length}</p>
               <p className="text-[10px] text-slate-400 font-medium mt-0.5">Arsip Publik Tersedia</p>
             </div>
 
             <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition-colors">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-amber-300/80 uppercase tracking-widest">SK & Aturan</span>
+                <span className="text-[10px] font-semibold text-amber-300/80 uppercase tracking-widest">SK & Aturan</span>
                 <ShieldCheck size={16} className="text-amber-400" />
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-amber-300 mt-1">
+              <p className="text-2xl sm:text-3xl font-semibold text-amber-300 mt-1">
                 {(categoryCounts['SK RT'] || 0) + (categoryCounts['Aturan'] || 0)}
               </p>
               <p className="text-[10px] text-slate-400 font-medium mt-0.5">Regulasi Resmi RT</p>
@@ -295,10 +295,10 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
 
             <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition-colors">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-emerald-300/80 uppercase tracking-widest">Formulir Warga</span>
+                <span className="text-[10px] font-semibold text-emerald-300/80 uppercase tracking-widest">Formulir Warga</span>
                 <CheckCircle2 size={16} className="text-emerald-400" />
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-emerald-300 mt-1">
+              <p className="text-2xl sm:text-3xl font-semibold text-emerald-300 mt-1">
                 {categoryCounts['Formulir'] || 0}
               </p>
               <p className="text-[10px] text-slate-400 font-medium mt-0.5">Siap Unduh & Isi</p>
@@ -306,10 +306,10 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
 
             <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/20 transition-colors">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-indigo-300/80 uppercase tracking-widest">Akses Warga</span>
+                <span className="text-[10px] font-semibold text-indigo-300/80 uppercase tracking-widest">Akses Warga</span>
                 <Sparkles size={16} className="text-indigo-400" />
               </div>
-              <p className="text-2xl sm:text-3xl font-black text-indigo-300 mt-1">24 / 7</p>
+              <p className="text-2xl sm:text-3xl font-semibold text-indigo-300 mt-1">24 / 7</p>
               <p className="text-[10px] text-slate-400 font-medium mt-0.5">Terbuka & Transparan</p>
             </div>
           </div>
@@ -326,7 +326,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
             <input 
               type="text" 
               placeholder="Cari nomor SK, judul, atau kata kunci..." 
-              className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200/90 rounded-2xl text-xs font-bold text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-400"
+              className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200/90 rounded-2xl text-xs font-bold text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors placeholder:text-slate-400"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -362,7 +362,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
             <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/70">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors ${
                   viewMode === 'grid' 
                     ? 'bg-white text-indigo-600 shadow-xs' 
                     : 'text-slate-500 hover:text-slate-900'
@@ -374,7 +374,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-colors ${
                   viewMode === 'table' 
                     ? 'bg-white text-indigo-600 shadow-xs' 
                     : 'text-slate-500 hover:text-slate-900'
@@ -400,14 +400,14 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                 key={cat}
                 onClick={() => setFilterCategory(cat)}
                 className={`
-                  px-4 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all whitespace-nowrap shrink-0 flex items-center gap-2
+                  px-4 py-2.5 rounded-2xl text-[11px] font-semibold uppercase tracking-wider transition-colors whitespace-nowrap shrink-0 flex items-center gap-2
                   ${isSelected 
-                    ? 'bg-slate-900 text-white shadow-md shadow-slate-900/15 scale-[1.02]' 
+                    ? 'bg-slate-900 text-white shadow-md shadow-2xs scale-[1.02]' 
                     : 'bg-white border border-slate-200/80 text-slate-600 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 shadow-xs'}
                 `}
               >
-                <span>{cfg ? `${cfg.icon} ${cat}` : '📂 Semua Berkas'}</span>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                <span>{cfg ? `${cfg.icon} ${cat}` : 'Semua Berkas'}</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                   isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
                 }`}>
                   {count}
@@ -454,7 +454,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                     initial="hidden"
                     animate="visible"
                     exit={{ opacity: 0, scale: 0.95 }}
-                    className="group relative bg-white rounded-[2rem] border border-slate-200/80 hover:border-indigo-300 hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-300 p-6 sm:p-7 flex flex-col justify-between overflow-hidden"
+                    className="group relative bg-white rounded-[2rem] border border-slate-200/80 hover:border-indigo-300 hover:shadow-xl hover:shadow-2xs transition-colors duration-300 p-6 sm:p-7 flex flex-col justify-between overflow-hidden"
                   >
                     {/* Top Ambient Highlight */}
                     <div className={`absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl ${theme.accent} rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform duration-500`} />
@@ -468,7 +468,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                             {fileMeta.icon}
                           </div>
                           <div>
-                            <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${fileMeta.badge}`}>
+                            <span className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${fileMeta.badge}`}>
                               {fileMeta.ext}
                             </span>
                             {doc.fileSize && (
@@ -479,7 +479,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                           </div>
                         </div>
 
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border shadow-2xs ${theme.bg} ${theme.text} ${theme.border}`}>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-widest border shadow-2xs ${theme.bg} ${theme.text} ${theme.border}`}>
                           {theme.icon} {doc.category}
                         </span>
                       </div>
@@ -492,7 +492,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                           </div>
                         )}
 
-                        <h3 className="text-base sm:text-lg font-black text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                        <h3 className="text-base sm:text-lg font-semibold text-slate-900 leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
                           {doc.title}
                         </h3>
 
@@ -530,7 +530,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                         {/* WhatsApp Share Button */}
                         <button
                           onClick={() => handleShareWhatsApp(doc)}
-                          className="p-2.5 bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80 hover:border-emerald-200 rounded-xl transition-all"
+                          className="p-2.5 bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 border border-slate-200/80 hover:border-emerald-200 rounded-xl transition-colors"
                           title="Bagikan ke WhatsApp Warga"
                         >
                           <Share2 size={15} />
@@ -539,7 +539,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                         {/* Copy Link Button */}
                         <button
                           onClick={() => handleCopyLink(doc)}
-                          className="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl transition-all"
+                          className="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200/80 rounded-xl transition-colors"
                           title="Salin Tautan Dokumen"
                         >
                           {copiedId === doc.id ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
@@ -548,7 +548,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                         {/* Preview In-Modal / Eye Button */}
                         <button
                           onClick={() => setSelectedPreviewDoc(doc)}
-                          className="p-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-100 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold"
+                          className="p-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-100 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-bold"
                           title="Pratinjau Dokumen"
                         >
                           <Eye size={15} />
@@ -561,7 +561,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                           target="_blank"
                           rel="noreferrer"
                           download
-                          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-indigo-600 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition-all shadow-md shadow-slate-900/10 active:scale-95"
+                          className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-indigo-600 text-white rounded-xl text-[11px] font-semibold uppercase tracking-wider transition-colors shadow-md shadow-2xs active:scale-95"
                         >
                           <Download size={14} /> Unduh
                         </a>
@@ -578,7 +578,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[10px] font-black uppercase tracking-wider text-slate-500">
+                  <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                     <th className="py-4 px-5">Format</th>
                     <th className="py-4 px-5">Judul & Nomor Dokumen</th>
                     <th className="py-4 px-5">Kategori</th>
@@ -616,7 +616,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                               {doc.documentNumber}
                             </span>
                           )}
-                          <p className="font-black text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                          <p className="font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
                             {doc.title}
                           </p>
                           {doc.description && (
@@ -628,7 +628,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
 
                         {/* Category */}
                         <td className="py-4 px-5 whitespace-nowrap">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${theme.bg} ${theme.text} ${theme.border}`}>
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${theme.bg} ${theme.text} ${theme.border}`}>
                             {doc.category}
                           </span>
                         </td>
@@ -648,14 +648,14 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                           <div className="flex items-center justify-end gap-1.5">
                             <button
                               onClick={() => handleShareWhatsApp(doc)}
-                              className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                              className="p-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                               title="Bagikan ke WhatsApp"
                             >
                               <Share2 size={15} />
                             </button>
                             <button
                               onClick={() => setSelectedPreviewDoc(doc)}
-                              className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                              className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
                               title="Pratinjau Dokumen"
                             >
                               <Eye size={15} />
@@ -665,7 +665,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                               target="_blank"
                               rel="noreferrer"
                               download
-                              className="p-2 text-slate-700 hover:text-white hover:bg-slate-900 rounded-lg transition-all"
+                              className="p-2 text-slate-700 hover:text-white hover:bg-slate-900 rounded-lg transition-colors"
                               title="Unduh Dokumen"
                             >
                               <Download size={15} />
@@ -688,14 +688,14 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
               <FileText size={38} className="text-slate-400" />
             </div>
             <div className="space-y-1 max-w-md mx-auto">
-              <h3 className="text-base font-black text-slate-800">Tidak Ada Dokumen Yang Ditemukan</h3>
+              <h3 className="text-base font-semibold text-slate-800">Tidak Ada Dokumen Yang Ditemukan</h3>
               <p className="text-xs text-slate-500 font-medium leading-relaxed">
                 Tidak ada berkas yang sesuai dengan kata kunci pencarian <span className="font-bold text-slate-800">"{searchQuery}"</span> atau kategori yang dipilih.
               </p>
             </div>
             <button 
               onClick={() => { setSearchQuery(''); setFilterCategory('All'); }}
-              className="px-5 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-indigo-100 transition-all cursor-pointer"
+              className="px-5 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-indigo-100 transition-colors cursor-pointer"
             >
               Tampilkan Semua Dokumen
             </button>
@@ -715,7 +715,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
             {/* Metadata Summary Banner */}
             <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
                   {selectedPreviewDoc.category}
                 </span>
                 {selectedPreviewDoc.documentNumber && (
@@ -779,7 +779,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                     href={selectedPreviewDoc.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-wider hover:bg-indigo-700 transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-indigo-700 transition-colors"
                   >
                     Buka Dokumen <ExternalLink size={14} />
                   </a>
@@ -801,7 +801,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setSelectedPreviewDoc(null)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors"
                 >
                   Tutup
                 </button>
@@ -810,7 +810,7 @@ export const PublicDocuments: React.FC<PublicDocumentsProps> = ({ documents }) =
                   download
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-slate-900/10 active:scale-95"
+                  className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-indigo-600 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-md shadow-2xs active:scale-95"
                 >
                   <Download size={14} /> Unduh Berkas
                 </a>

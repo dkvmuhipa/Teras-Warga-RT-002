@@ -347,11 +347,11 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none" />
         
         <div className="relative z-10 max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-black uppercase tracking-widest mb-4 border border-indigo-500/30 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[10px] font-semibold uppercase tracking-widest mb-4 border border-indigo-500/30 backdrop-blur-md">
             <Sparkles size={13} className="text-indigo-400" />
             Pusat Ekonomi Kreatif &amp; Jasa Tetangga
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-tight mb-3">
             {activeMainTab === 'umkm' ? 'Pasar & Kuliner Warga RT 02' : 'Direktori Jasa & Tukang Tetangga'}
           </h1>
           <p className="text-slate-300 text-xs sm:text-sm font-medium leading-relaxed max-w-2xl mb-6">
@@ -365,9 +365,9 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
             <button
               type="button"
               onClick={() => setSearchParams({ tab: 'umkm' })}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer ${
                 activeMainTab === 'umkm'
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-2xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -376,9 +376,9 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
             <button
               type="button"
               onClick={() => setSearchParams({ tab: 'jasa' })}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 cursor-pointer ${
                 activeMainTab === 'jasa'
-                  ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/30'
+                  ? 'bg-amber-600 text-white shadow-lg shadow-2xs'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -398,9 +398,9 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                 key={cat} 
                 onClick={() => activeMainTab === 'umkm' ? setFilterCategory(cat) : setSkillCategoryFilter(cat)}
                 className={`
-                  px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer border
+                  px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap cursor-pointer border
                   ${isSelected 
-                    ? activeMainTab === 'umkm' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/20' 
+                    ? activeMainTab === 'umkm' ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-2xs' : 'bg-amber-600 text-white border-amber-600 shadow-md shadow-2xs' 
                     : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50'}
                 `}
               >
@@ -425,14 +425,14 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           {activeMainTab === 'umkm' ? (
             <Button 
               onClick={() => window.open(`https://wa.me/6285961194621?text=Halo Pengurus RT, saya warga ingin mendaftarkan produk UMKM saya.`, '_blank')}
-              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-wider shrink-0"
+              className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold uppercase tracking-wider shrink-0"
             >
               <Plus size={15} className="mr-1" /> Daftar UMKM
             </Button>
           ) : (
             <Button 
               onClick={() => setIsAddSkillModalOpen(true)}
-              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-black uppercase tracking-wider shrink-0"
+              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold uppercase tracking-wider shrink-0"
             >
               <Plus size={15} className="mr-1" /> Promosi Jasa
             </Button>
@@ -450,19 +450,19 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center relative">
               <ShoppingCart size={18} />
-              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-500 text-[10px] font-black rounded-full flex items-center justify-center border-2 border-slate-900">
+              <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-rose-500 text-[10px] font-semibold rounded-full flex items-center justify-center border-2 border-slate-900">
                 {cartTotalItems}
               </span>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Keranjang Belanja</p>
-              <p className="text-sm font-black text-emerald-400">Rp {cartTotal.toLocaleString('id-ID')}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Keranjang Belanja</p>
+              <p className="text-sm font-semibold text-emerald-400">Rp {cartTotal.toLocaleString('id-ID')}</p>
             </div>
           </div>
 
           <button
             onClick={() => setIsCartModalOpen(true)}
-            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition-all cursor-pointer"
+            className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-2xs transition-colors cursor-pointer"
           >
             Checkout WA <ChevronRight size={15} />
           </button>
@@ -485,7 +485,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   key={u.id}
                   layout
                   variants={itemVariants}
-                  className="group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-300 flex flex-col justify-between overflow-hidden"
+                  className="group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:border-blue-200 hover:shadow-xl hover:shadow-2xs transition-colors duration-300 flex flex-col justify-between overflow-hidden"
                 >
                   <div>
                     {/* Cover Image & Live Badge */}
@@ -494,17 +494,17 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                       
                       {/* Top Bar Badges */}
                       <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                        <span className="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider bg-white/95 text-slate-800 backdrop-blur-md shadow-xs border border-white/40">
+                        <span className="px-3 py-1 rounded-xl text-[9px] font-semibold uppercase tracking-wider bg-white/95 text-slate-800 backdrop-blur-md shadow-xs border border-white/40">
                           {u.category}
                         </span>
 
-                        <span className={`px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider border backdrop-blur-md shadow-xs ${opStatus.color}`}>
+                        <span className={`px-2.5 py-1 rounded-xl text-[9px] font-semibold uppercase tracking-wider border backdrop-blur-md shadow-xs ${opStatus.color}`}>
                           ● {opStatus.label}
                         </span>
                       </div>
 
                       {/* Rating pill bottom-right */}
-                      <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-xl text-[10px] font-black bg-slate-900/80 text-amber-300 backdrop-blur-md flex items-center gap-1">
+                      <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-xl text-[10px] font-semibold bg-slate-900/80 text-amber-300 backdrop-blur-md flex items-center gap-1">
                         <Star size={12} fill="currentColor" /> {storeRating}
                         <span className="text-[8.5px] text-slate-300 font-normal">({uReviews.length || u.reviewsCount || 0})</span>
                       </div>
@@ -513,7 +513,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                     {/* Body Content */}
                     <div className="p-6 space-y-3">
                       <div>
-                        <h3 className="font-black text-lg text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
+                        <h3 className="font-semibold text-lg text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">
                           {u.name}
                         </h3>
                         <p className="text-[11px] font-bold text-slate-400 mt-0.5">
@@ -528,7 +528,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                       {/* Menu Highlights if any */}
                       {u.menuItems && u.menuItems.length > 0 && (
                         <div className="pt-2 border-t border-slate-100 space-y-1.5">
-                          <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Pilihan Menu Terpopuler:</p>
+                          <p className="text-[9px] font-semibold uppercase tracking-widest text-slate-400">Pilihan Menu Terpopuler:</p>
                           <div className="space-y-1">
                             {u.menuItems.slice(0, 2).map((mItem) => (
                               <div key={mItem.id} className="flex items-center justify-between text-xs p-1.5 bg-slate-50 rounded-lg">
@@ -541,7 +541,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                                       setSelectedUMKM(u);
                                       handleAddToCart(mItem, e);
                                     }}
-                                    className="p-1 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md transition-all cursor-pointer"
+                                    className="p-1 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-md transition-colors cursor-pointer"
                                     title="Tambah ke Keranjang"
                                   >
                                     <Plus size={12} />
@@ -562,7 +562,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                         setSelectedUMKM(u);
                         setIsDetailModalOpen(true);
                       }}
-                      className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer"
+                      className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold uppercase tracking-wider rounded-xl cursor-pointer"
                     >
                       Katalog Menu
                     </Button>
@@ -572,7 +572,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                         const waPhone = (u.contact || '6285961194621').replace(/^0/, '62').replace(/\D/g, '');
                         window.open(`https://wa.me/${waPhone}?text=Halo Bpk/Ibu ${u.owner} (${u.name}), saya tetangga di RT 02 ingin bertanya seputar produk Anda.`, '_blank');
                       }}
-                      className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-500/20 transition-all cursor-pointer"
+                      className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold uppercase tracking-wider rounded-xl flex items-center justify-center gap-1.5 shadow-sm shadow-2xs transition-colors cursor-pointer"
                     >
                       <MessageCircle size={14} /> WhatsApp
                     </button>
@@ -586,11 +586,11 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                 key={skill.id}
                 layout
                 variants={itemVariants}
-                className="group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:border-amber-300 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 p-6 flex flex-col justify-between"
+                className="group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:border-amber-300 hover:shadow-xl hover:shadow-2xs transition-colors duration-300 p-6 flex flex-col justify-between"
               >
                 <div className="space-y-3.5">
                   <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-xl text-[9px] font-black uppercase tracking-wider border border-amber-200">
+                    <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-xl text-[9px] font-semibold uppercase tracking-wider border border-amber-200">
                       {skill.category}
                     </span>
                     <span className="text-[10px] font-bold text-slate-400">
@@ -599,7 +599,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   </div>
 
                   <div>
-                    <h3 className="font-black text-lg text-slate-900 group-hover:text-amber-600 transition-colors leading-tight">
+                    <h3 className="font-semibold text-lg text-slate-900 group-hover:text-amber-600 transition-colors leading-tight">
                       {skill.title}
                     </h3>
                     <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
@@ -611,17 +611,17 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   {(skill.hasWarranty || skill.experienceYears || skill.workingHours) && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {skill.hasWarranty && (
-                        <span className="inline-flex items-center gap-1 text-[9.5px] font-black px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
+                        <span className="inline-flex items-center gap-1 text-[9.5px] font-semibold px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
                           <ShieldCheck size={11} className="text-emerald-600" /> Bergaransi
                         </span>
                       )}
                       {skill.experienceYears && (
-                        <span className="inline-flex items-center gap-1 text-[9.5px] font-black px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="inline-flex items-center gap-1 text-[9.5px] font-semibold px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200">
                           <Award size={11} className="text-blue-600" /> {skill.experienceYears}
                         </span>
                       )}
                       {skill.workingHours && (
-                        <span className="inline-flex items-center gap-1 text-[9.5px] font-black px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="inline-flex items-center gap-1 text-[9.5px] font-semibold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200">
                           <Clock size={11} className="text-slate-500" /> {skill.workingHours}
                         </span>
                       )}
@@ -630,9 +630,9 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
 
                   <div className="p-3.5 bg-slate-50 rounded-2xl space-y-1.5 border border-slate-100/80 text-xs">
                     <div className="flex items-center justify-between">
-                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Penyedia Jasa (Warga)</p>
+                      <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Penyedia Jasa (Warga)</p>
                       {skill.serviceArea && (
-                        <span className="text-[9px] font-bold text-slate-400">📍 {skill.serviceArea}</span>
+                        <span className="text-[9px] font-bold text-slate-400">{skill.serviceArea}</span>
                       )}
                     </div>
                     <p className="font-bold text-slate-800 flex items-center gap-1.5">
@@ -641,7 +641,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                     {skill.rateInfo && (
                       <div className="pt-1 border-t border-slate-200/60 flex items-center justify-between">
                         <span className="text-[10px] font-semibold text-slate-500">Estimasi Biaya</span>
-                        <span className="text-xs font-black text-emerald-600">💰 {skill.rateInfo}</span>
+                        <span className="text-xs font-semibold text-emerald-600">{skill.rateInfo}</span>
                       </div>
                     )}
                   </div>
@@ -654,7 +654,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                       const msg = `Halo Bpk/Ibu ${skill.providerName} (Blok ${skill.houseId || 'RT 02'}), saya tetangga di RT 02 ingin menanyakan tentang jasa "${skill.title}". Apakah sedang tersedia?`;
                       window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                     }}
-                    className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-sm shadow-emerald-500/20 cursor-pointer"
+                    className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm shadow-2xs cursor-pointer"
                   >
                     <Phone size={14} /> Hubungi via WhatsApp
                   </button>
@@ -681,14 +681,14 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
               
               <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end text-white">
                 <div>
-                  <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest bg-blue-600 text-white mb-1 inline-block">
+                  <span className="px-2.5 py-0.5 rounded-lg text-[9px] font-semibold uppercase tracking-widest bg-blue-600 text-white mb-1 inline-block">
                     {selectedUMKM.category}
                   </span>
-                  <h2 className="text-2xl font-black text-white">{selectedUMKM.name}</h2>
+                  <h2 className="text-2xl font-semibold text-white">{selectedUMKM.name}</h2>
                   <p className="text-xs text-slate-300 font-medium">Pemilik: {selectedUMKM.owner} • Blok {selectedUMKM.houseId || selectedUMKM.address || 'RT 02'}</p>
                 </div>
 
-                <div className="flex items-center gap-1 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-amber-300 font-black text-sm border border-white/10">
+                <div className="flex items-center gap-1 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-xl text-amber-300 font-semibold text-sm border border-white/10">
                   <Star size={16} fill="currentColor" /> {avgRating}
                 </div>
               </div>
@@ -702,7 +702,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
             {/* Menu Items List & Cart Addition */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                   <ShoppingBag size={14} className="text-blue-600" /> Katalog Menu &amp; Produk
                 </h4>
                 <span className="text-[10px] text-slate-400 font-bold">Pilih item untuk dipesan via WhatsApp</span>
@@ -715,7 +715,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                     return (
                       <div key={mItem.id} className="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-between gap-3">
                         <div>
-                          <h5 className="text-xs font-black text-slate-800">{mItem.name}</h5>
+                          <h5 className="text-xs font-semibold text-slate-800">{mItem.name}</h5>
                           <p className="text-xs font-bold text-blue-600 mt-0.5">Rp {mItem.price.toLocaleString('id-ID')}</p>
                           {mItem.description && <p className="text-[10px] text-slate-400">{mItem.description}</p>}
                         </div>
@@ -725,15 +725,15 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                             <button
                               type="button"
                               onClick={() => handleUpdateQuantity(mItem.id, -1)}
-                              className="w-6 h-6 rounded-lg bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-700 font-black text-xs flex items-center justify-center cursor-pointer"
+                              className="w-6 h-6 rounded-lg bg-slate-100 hover:bg-rose-100 hover:text-rose-600 text-slate-700 font-semibold text-xs flex items-center justify-center cursor-pointer"
                             >
                               -
                             </button>
-                            <span className="text-xs font-black px-1.5">{inCartQty}</span>
+                            <span className="text-xs font-semibold px-1.5">{inCartQty}</span>
                             <button
                               type="button"
                               onClick={() => handleUpdateQuantity(mItem.id, 1)}
-                              className="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center cursor-pointer"
+                              className="w-6 h-6 rounded-lg bg-blue-600 text-white font-semibold text-xs flex items-center justify-center cursor-pointer"
                             >
                               +
                             </button>
@@ -741,7 +741,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                         ) : (
                           <Button
                             onClick={() => handleAddToCart(mItem)}
-                            className="py-1.5 px-3 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs"
+                            className="py-1.5 px-3 bg-blue-600 text-white text-[10px] font-semibold uppercase tracking-wider rounded-xl shadow-xs"
                           >
                             + Tambah
                           </Button>
@@ -762,14 +762,14 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
             <div className="pt-4 border-t border-slate-100 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                     <Star size={14} className="text-amber-500 fill-amber-500" /> Ulasan &amp; Rating Tetangga ({selectedUMKMReviews.length})
                   </h4>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsReviewModalOpen(true)}
-                  className="text-xs font-black text-blue-600 hover:text-blue-700 uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 uppercase tracking-wider flex items-center gap-1 cursor-pointer"
                 >
                   <Plus size={13} /> Beri Ulasan
                 </button>
@@ -805,7 +805,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                     window.open(`https://wa.me/${waPhone}?text=Halo Bpk/Ibu ${selectedUMKM.owner}, saya ingin memesan produk ${selectedUMKM.name}.`, '_blank');
                   }
                 }}
-                className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 cursor-pointer"
+                className="flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 shadow-md shadow-2xs cursor-pointer"
               >
                 {cartTotalItems > 0 ? <ShoppingCart size={16} /> : <MessageCircle size={16} />}
                 {cartTotalItems > 0 ? `Checkout Keranjang (${cartTotalItems} item)` : 'Chat WhatsApp Penjual'}
@@ -825,7 +825,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
         <form onSubmit={handleCheckoutWhatsApp} className="space-y-4 text-left p-1">
           {/* Item List Summary */}
           <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Daftar Belanja:</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Daftar Belanja:</span>
             {cartList.map(c => (
               <div key={c.item.id} className="flex items-center justify-between text-xs py-1 border-b border-slate-200/50 last:border-none">
                 <div>
@@ -844,14 +844,14 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                 </div>
               </div>
             ))}
-            <div className="flex justify-between items-center pt-2 border-t border-slate-200 font-black text-sm">
+            <div className="flex justify-between items-center pt-2 border-t border-slate-200 font-semibold text-sm">
               <span className="text-slate-700">Total Pembayaran:</span>
               <span className="text-emerald-600 text-base">Rp {cartTotal.toLocaleString('id-ID')}</span>
             </div>
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nama Pemesan</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Nama Pemesan</label>
             <input 
               type="text" 
               required
@@ -864,7 +864,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nomor WhatsApp</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Nomor WhatsApp</label>
               <input 
                 type="text" 
                 required
@@ -875,7 +875,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Alamat Antar / Blok</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Alamat Antar / Blok</label>
               <input 
                 type="text" 
                 required
@@ -888,7 +888,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Catatan Khusus (Opsional)</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Catatan Khusus (Opsional)</label>
             <input 
               type="text" 
               value={customerInfo.notes}
@@ -898,7 +898,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
             />
           </div>
 
-          <Button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer">
+          <Button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-2xs flex items-center justify-center gap-2 cursor-pointer">
             <Send size={15} /> Kirim Format Pesanan ke WA Penjual
           </Button>
         </form>
@@ -912,7 +912,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
       >
         <form onSubmit={handleSubmitReview} className="space-y-4 text-left p-1">
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Beri Bintang Kepuasan</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Beri Bintang Kepuasan</label>
             <div className="flex gap-2 text-2xl cursor-pointer">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -929,7 +929,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Nama Anda</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Nama Anda</label>
               <input 
                 type="text" 
                 required
@@ -940,7 +940,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Hunian / Blok</label>
+              <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Hunian / Blok</label>
               <input 
                 type="text" 
                 value={newReviewHouse}
@@ -952,7 +952,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Tulis Ulasan / Rekomendasi Anda</label>
+            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-1">Tulis Ulasan / Rekomendasi Anda</label>
             <textarea 
               rows={3}
               required
@@ -963,7 +963,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
             />
           </div>
 
-          <Button type="submit" className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-indigo-600/20 cursor-pointer">
+          <Button type="submit" className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs uppercase tracking-wider rounded-xl shadow-lg shadow-2xs cursor-pointer">
             Kirim Ulasan Warga
           </Button>
         </form>
@@ -979,11 +979,11 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
         <form onSubmit={handleAddSkillSubmit} className="space-y-6 text-left p-1">
           {/* Header Banner Informatif */}
           <div className="flex items-start gap-3.5 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-indigo-500/10 border border-amber-200/70 shadow-xs">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-amber-500/25 mt-0.5">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-2xs mt-0.5">
               <Sparkles size={18} />
             </div>
             <div>
-              <h4 className="text-xs font-black text-slate-900 tracking-tight">
+              <h4 className="text-xs font-semibold text-slate-900 tracking-tight">
                 Direktori Keahlian &amp; Jasa Komunitas Warga Huntap Tondo 2
               </h4>
               <p className="text-[11px] text-slate-600 font-medium leading-relaxed mt-1">
@@ -995,12 +995,12 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           {/* SEKSI 1: IDENTITAS PENYEDIA & DOMISILI */}
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
-              <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-black">1</span>
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Identitas Penyedia &amp; Lokasi Rumah</h4>
+              <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-semibold">1</span>
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Identitas Penyedia &amp; Lokasi Rumah</h4>
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                 Nama Lengkap / Nama Panggilan <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -1011,20 +1011,20 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   placeholder="Contoh: Bpk. Joko Supriyadi / Mas Rizal"
                   value={skillForm.providerName}
                   onChange={e => setSkillForm({ ...skillForm, providerName: e.target.value })}
-                  className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                  className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                   Blok Kawasan <span className="text-rose-500">*</span>
                 </label>
                 <select
                   value={skillForm.blockName}
                   onChange={e => setSkillForm({ ...skillForm, blockName: e.target.value })}
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors cursor-pointer"
                 >
                   <option value="Blok A">Blok A (RW 19 / RT 01)</option>
                   <option value="Blok B">Blok B (RW 19 / RT 02)</option>
@@ -1036,7 +1036,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
               </div>
 
               <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                   Nomor Rumah (Opsional)
                 </label>
                 <input 
@@ -1044,17 +1044,17 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   placeholder="Contoh: 07 / 12B"
                   value={skillForm.houseNumber}
                   onChange={e => setSkillForm({ ...skillForm, houseNumber: e.target.value })}
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                 Nomor WhatsApp Aktif <span className="text-rose-500">*</span>
               </label>
               <div className="relative flex items-center">
-                <span className="absolute left-3.5 text-xs font-black text-slate-500 flex items-center gap-1">
+                <span className="absolute left-3.5 text-xs font-semibold text-slate-500 flex items-center gap-1">
                   <span>🇮🇩</span> +62
                 </span>
                 <input 
@@ -1066,11 +1066,11 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                     const raw = e.target.value.replace(/\D/g, '');
                     setSkillForm({ ...skillForm, phone: raw });
                   }}
-                  className="w-full pl-18 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                  className="w-full pl-18 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors"
                 />
               </div>
               <p className="text-[10px] text-slate-400 font-medium mt-1 pl-1">
-                💡 Calon pelanggan tetangga akan langsung menghubungi WhatsApp ini saat memesan.
+                Calon pelanggan tetangga akan langsung menghubungi WhatsApp ini saat memesan.
               </p>
             </div>
           </div>
@@ -1078,34 +1078,34 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           {/* SEKSI 2: KATEGORI & SPESIFIKASI LAYANAN */}
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
-              <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-black">2</span>
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Kategori &amp; Nama Keahlian</h4>
+              <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-semibold">2</span>
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Kategori &amp; Nama Keahlian</h4>
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                 Kategori Bidang Keahlian <span className="text-rose-500">*</span>
               </label>
               <select
                 value={skillForm.category}
                 onChange={e => setSkillForm({ ...skillForm, category: e.target.value as any })}
-                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors cursor-pointer"
               >
                 <option value="Pertukangan & Bangunan">🔨 Pertukangan &amp; Bangunan (Renovasi, Cat, Plafon, Keramik)</option>
                 <option value="Elektronik & Kelistrikan">⚡ Elektronik &amp; Kelistrikan (Servis AC, Pompa Air, Kulkas, Lampu)</option>
-                <option value="Pipa & Sanitasi">🚰 Pipa, Ledeng &amp; Sanitasi Air (Saluran Mampet, Tandon, Kran Bocor)</option>
+                <option value="Pipa & Sanitasi">Pipa, Ledeng &amp; Sanitasi Air (Saluran Mampet, Tandon, Kran Bocor)</option>
                 <option value="Pendidikan & Les">📚 Pendidikan &amp; Les Privat (Bimbel SD-SMA, Mengaji, Bahasa Asing)</option>
                 <option value="Katering & Kuliner">🍲 Katering &amp; Pesanan Kuliner (Nasi Kotak, Snack Box, Tumpeng)</option>
                 <option value="Kecantikan & Jahit">✂️ Jahit Pakaian, Vermak &amp; Rias Busana (Jahit Baju, Permak, MUA)</option>
                 <option value="Otomotif & Transportasi">🏍️ Otomotif &amp; Kendaraan (Servis Motor Panggilan, Cuci, Ganti Oli)</option>
-                <option value="IT, Komputer & Cetak">💻 Komputer, IT &amp; Desain (Install Laptop, Servis PC, Desain, Cetak)</option>
+                <option value="IT, Komputer & Cetak">Komputer, IT &amp; Desain (Install Laptop, Servis PC, Desain, Cetak)</option>
                 <option value="Taman & Kebersihan">🌿 Taman &amp; Kebersihan (Potong Rumput, Pangkas Dahan, Kuras Toren)</option>
                 <option value="Lainnya">🛠️ Keahlian &amp; Layanan Khusus Lainnya</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                 Nama Layanan / Judul Promosi <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -1116,13 +1116,13 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   placeholder="Contoh: Servis AC Bergaransi, Cuci AC &amp; Pasang Instalasi Rumah"
                   value={skillForm.title}
                   onChange={e => setSkillForm({ ...skillForm, title: e.target.value })}
-                  className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                  className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                 Deskripsi Lengkap Keahlian &amp; Jangkauan Layanan <span className="text-rose-500">*</span>
               </label>
               <textarea 
@@ -1131,7 +1131,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                 placeholder="Jelaskan secara rinci pengalaman kerja, peralatan yang Anda gunakan, garansi pengerjaan, respon panggilan, dan keunggulan jasa Anda agar tetangga semakin yakin..."
                 value={skillForm.description}
                 onChange={e => setSkillForm({ ...skillForm, description: e.target.value })}
-                className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all resize-none leading-relaxed"
+                className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors resize-none leading-relaxed"
               />
             </div>
           </div>
@@ -1139,13 +1139,13 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           {/* SEKSI 3: PENGALAMAN, WAKTU & JAMINAN */}
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
-              <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-black">3</span>
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Pengalaman, Waktu &amp; Jaminan</h4>
+              <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-semibold">3</span>
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Pengalaman, Waktu &amp; Jaminan</h4>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                   Pengalaman Kerja
                 </label>
                 <div className="relative">
@@ -1153,7 +1153,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   <select
                     value={skillForm.experienceYears}
                     onChange={e => setSkillForm({ ...skillForm, experienceYears: e.target.value })}
-                    className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                    className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors cursor-pointer"
                   >
                     <option value="< 1 Tahun">&lt; 1 Tahun (Pemula / Mandiri)</option>
                     <option value="1 - 3 Tahun">1 - 3 Tahun (Cukup Berpengalaman)</option>
@@ -1164,7 +1164,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
               </div>
 
               <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                   Waktu Siaga Layanan
                 </label>
                 <div className="relative">
@@ -1172,7 +1172,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   <select
                     value={skillForm.workingHours}
                     onChange={e => setSkillForm({ ...skillForm, workingHours: e.target.value })}
-                    className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                    className="w-full pl-10 pr-3.5 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors cursor-pointer"
                   >
                     <option value="Fleksibel (Sesuai Janji)">Fleksibel (Sesuai Janji / Janjian Dulu)</option>
                     <option value="Pagi & Siang (08.00 - 17.00 WITA)">Pagi &amp; Siang (08.00 - 17.00 WITA)</option>
@@ -1186,7 +1186,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
             {/* Interactive Toggle Garansi Pengerjaan */}
             <div 
               onClick={() => setSkillForm({ ...skillForm, hasWarranty: !skillForm.hasWarranty })}
-              className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between ${
+              className={`p-3.5 rounded-2xl border transition-colors cursor-pointer flex items-center justify-between ${
                 skillForm.hasWarranty 
                   ? 'bg-emerald-50/80 border-emerald-300/80 shadow-xs' 
                   : 'bg-white border-slate-200 hover:border-slate-300'
@@ -1199,14 +1199,14 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   <ShieldCheck size={18} />
                 </div>
                 <div>
-                  <p className="text-xs font-black text-slate-800">Menyediakan Garansi / Jaminan Kerapian</p>
+                  <p className="text-xs font-semibold text-slate-800">Menyediakan Garansi / Jaminan Kerapian</p>
                   <p className="text-[10.5px] text-slate-500 font-medium">
                     Servis atau perbaikan ulang jika timbul kendala pasca pengerjaan
                   </p>
                 </div>
               </div>
 
-              <div className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-all ${
+              <div className={`w-6 h-6 rounded-lg flex items-center justify-center border transition-colors ${
                 skillForm.hasWarranty 
                   ? 'bg-emerald-600 border-emerald-600 text-white' 
                   : 'border-slate-300 bg-white'
@@ -1219,19 +1219,19 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
           {/* SEKSI 4: TARIF & PORTOFOLIO */}
           <div className="p-4 sm:p-5 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-200/60">
-              <span className="w-6 h-6 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center text-xs font-black">4</span>
-              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">Skema Tarif &amp; Portofolio (Opsional)</h4>
+              <span className="w-6 h-6 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center text-xs font-semibold">4</span>
+              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Skema Tarif &amp; Portofolio (Opsional)</h4>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                   Tipe Tarif
                 </label>
                 <select
                   value={skillForm.rateType}
                   onChange={e => setSkillForm({ ...skillForm, rateType: e.target.value })}
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all cursor-pointer"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors cursor-pointer"
                 >
                   <option value="Mulai dari">Mulai dari</option>
                   <option value="Tarif Per Jam / Harian">Tarif Per Jam / Harian</option>
@@ -1241,7 +1241,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
               </div>
 
               <div>
-                <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+                <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                   Nominal / Keterangan Biaya
                 </label>
                 <input 
@@ -1249,13 +1249,13 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                   placeholder="Contoh: Rp 65.000 / cuci AC atau Menyesuaikan"
                   value={skillForm.rateInfo}
                   onChange={e => setSkillForm({ ...skillForm, rateInfo: e.target.value })}
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[10.5px] font-black text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-[10.5px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
                 Link Foto Portofolio / Hasil Kerja (Opsional)
               </label>
               <input 
@@ -1263,7 +1263,7 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
                 placeholder="https://... (Link foto pengerjaan, akun Instagram usaha, atau portofolio)"
                 value={skillForm.imageUrl}
                 onChange={e => setSkillForm({ ...skillForm, imageUrl: e.target.value })}
-                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-all"
+                className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 transition-colors"
               />
             </div>
           </div>
@@ -1273,13 +1273,13 @@ export const PublicUMKM: React.FC<PublicUMKMProps> = ({ umkmData }) => {
             <button
               type="button"
               onClick={() => setIsAddSkillModalOpen(false)}
-              className="w-full sm:w-1/3 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xs uppercase tracking-wider rounded-2xl transition-all cursor-pointer"
+              className="w-full sm:w-1/3 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs uppercase tracking-wider rounded-2xl transition-colors cursor-pointer"
             >
               Batalkan
             </button>
             <Button 
               type="submit" 
-              className="w-full sm:w-2/3 py-4 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 hover:from-amber-700 hover:to-orange-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-amber-600/25 flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-98"
+              className="w-full sm:w-2/3 py-4 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 hover:from-amber-700 hover:to-orange-700 text-white font-semibold text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-2xs flex items-center justify-center gap-2 cursor-pointer transition-colors active:scale-98"
             >
               <CheckCircle2 size={16} /> Promosikan Jasa Sekarang
             </Button>

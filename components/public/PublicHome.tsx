@@ -93,7 +93,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
       {/* Live Active Utility Outage Alert Banner */}
       {activeOutage && (
-        <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white rounded-3xl p-4 md:p-5 shadow-lg shadow-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/20">
+        <div className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 text-white rounded-3xl p-4 md:p-5 shadow-lg shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/20">
           <div className="flex items-center gap-3.5 w-full sm:w-auto">
             <div className="p-3 bg-white/20 backdrop-blur-md rounded-2xl shrink-0">
               <Zap size={22} className="text-amber-200" />
@@ -119,7 +119,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
           <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
             <button
               onClick={() => setIsOutageModalOpen(true)}
-              className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-amber-50 text-slate-900 rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+              className="w-full sm:w-auto px-5 py-2.5 bg-white hover:bg-amber-50 text-slate-900 rounded-xl text-xs font-bold transition-colors shadow-md cursor-pointer flex items-center justify-center gap-1.5"
             >
               <span>Detail &amp; Lapor Cepat</span>
               <ArrowRight size={13} />
@@ -147,7 +147,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
 
         <button 
           onClick={() => navigate('/info')}
-          className="shrink-0 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 px-3.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+          className="shrink-0 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 px-3.5 py-1.5 rounded-xl transition-colors cursor-pointer flex items-center gap-1"
         >
           <span>Pusat Info</span>
           <ChevronRight size={13} />
@@ -188,7 +188,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         {/* RT2LAW Card */}
         <div 
           onClick={() => navigate('/rules')}
-          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 md:p-10 text-white border border-slate-800 shadow-xs relative overflow-hidden group flex flex-col justify-between min-h-[260px] sm:min-h-[290px] hover:border-indigo-500/40 transition-all"
+          className="lg:col-span-2 cursor-pointer bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 rounded-3xl p-6 sm:p-8 md:p-10 text-white border border-slate-800 shadow-xs relative overflow-hidden group flex flex-col justify-between min-h-[260px] sm:min-h-[290px] hover:border-indigo-500/40 transition-colors"
         >
           <div className="relative z-10 space-y-4">
             <div className="flex justify-between items-start gap-4">
@@ -233,7 +233,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         {/* Companion Card: Buku Saku Warga Baru */}
         <div 
           onClick={() => navigate('/welcome')}
-          className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs hover:shadow-md transition-all relative overflow-hidden group flex flex-col justify-between min-h-[260px] sm:min-h-[290px]"
+          className="lg:col-span-1 cursor-pointer bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs hover:shadow-md transition-colors relative overflow-hidden group flex flex-col justify-between min-h-[260px] sm:min-h-[290px]"
         >
           <div className="relative z-10 space-y-4">
             <div className="flex items-center gap-3">

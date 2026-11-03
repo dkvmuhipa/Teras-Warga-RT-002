@@ -83,7 +83,7 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
       <motion.button 
         variants={itemVariants}
         onClick={() => navigate('/')}
-        className="mb-8 flex items-center gap-2 text-slate-600 hover:text-slate-900 text-xs font-black uppercase tracking-wider transition-all bg-white hover:bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-200 shadow-xs"
+        className="mb-8 flex items-center gap-2 text-slate-600 hover:text-slate-900 text-xs font-semibold uppercase tracking-wider transition-colors bg-white hover:bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-200 shadow-xs"
       >
         <ArrowLeft size={16} strokeWidth={2.5} /> Kembali ke Beranda
       </motion.button>
@@ -97,7 +97,7 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
         <div className="inline-flex justify-center items-center p-4 bg-teal-50 text-teal-600 rounded-3xl border border-teal-100 mb-4 shadow-xs">
           <BookOpen size={36} strokeWidth={2} />
         </div>
-        <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-3">
+        <h1 className="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tight mb-3">
           Pusat Bantuan & <span className="text-teal-600">FAQ RT 02</span>
         </h1>
         <p className="text-slate-500 font-medium text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
@@ -110,32 +110,32 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
         variants={itemVariants} 
         className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8"
       >
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-start gap-3.5 hover:border-sky-200 transition-all">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-start gap-3.5 hover:border-sky-200 transition-colors">
           <div className="p-2.5 bg-sky-50 text-sky-600 rounded-xl shrink-0 mt-0.5 border border-sky-100">
             <Scale size={18} />
           </div>
           <div>
-            <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider">Regulasi Resmi</h4>
+            <h4 className="font-semibold text-slate-900 text-xs uppercase tracking-wider">Regulasi Resmi</h4>
             <p className="text-[11px] text-slate-500 leading-normal mt-1">Sesuai kesepakatan musyawarah & tata tertib RT 02 Palu.</p>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-start gap-3.5 hover:border-emerald-200 transition-all">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-start gap-3.5 hover:border-emerald-200 transition-colors">
           <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl shrink-0 mt-0.5 border border-emerald-100">
             <ShieldCheck size={18} />
           </div>
           <div>
-            <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider">Layanan Terverifikasi</h4>
+            <h4 className="font-semibold text-slate-900 text-xs uppercase tracking-wider">Layanan Terverifikasi</h4>
             <p className="text-[11px] text-slate-500 leading-normal mt-1">Informasi valid & terverifikasi langsung oleh pengurus RT.</p>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-start gap-3.5 hover:border-rose-200 transition-all">
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-xs flex items-start gap-3.5 hover:border-rose-200 transition-colors">
           <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl shrink-0 mt-0.5 border border-rose-100">
             <PhoneCall size={18} />
           </div>
           <div>
-            <h4 className="font-black text-slate-900 text-xs uppercase tracking-wider">Bantuan 24 Jam</h4>
+            <h4 className="font-semibold text-slate-900 text-xs uppercase tracking-wider">Bantuan 24 Jam</h4>
             <p className="text-[11px] text-slate-500 leading-normal mt-1">Layanan Panic Button & WhatsApp siaga pengurus.</p>
           </div>
         </div>
@@ -150,13 +150,13 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-12 py-4 bg-white border border-slate-200/80 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 rounded-2xl text-sm outline-none transition-all placeholder:text-slate-400 font-bold text-slate-800 shadow-xs"
+            className="w-full pl-12 pr-12 py-4 bg-white border border-slate-200/80 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 rounded-2xl text-sm outline-none transition-colors placeholder:text-slate-400 font-bold text-slate-800 shadow-xs"
             placeholder="Cari kata kunci panduan... (misal: surat pengantar, iuran, ronda, sampah)"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-all"
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
             >
               <X size={16} />
             </button>
@@ -165,14 +165,14 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
 
         {/* Popular Tag Pills Suggestions */}
         <div className="flex items-center gap-2 flex-wrap text-xs font-bold text-slate-400 px-1">
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 flex items-center gap-1">
             <Sparkles size={12} className="text-teal-500" /> Sering Dicari:
           </span>
           {popularTags.map((tag, idx) => (
             <button
               key={idx}
               onClick={() => setSearchTerm(tag)}
-              className="px-3 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 text-slate-600 rounded-xl text-[11px] font-bold border border-slate-200/60 transition-all"
+              className="px-3 py-1 bg-slate-100 hover:bg-teal-50 hover:text-teal-700 hover:border-teal-200 text-slate-600 rounded-xl text-[11px] font-bold border border-slate-200/60 transition-colors"
             >
               #{tag}
             </button>
@@ -191,7 +191,7 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
                   setSelectedCategory(cat.id);
                   setOpenFaqId(null);
                 }}
-                className={`px-4 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider border transition-all flex items-center gap-2 ${
+                className={`px-4 py-2.5 rounded-2xl text-xs font-semibold uppercase tracking-wider border transition-colors flex items-center gap-2 ${
                   isActive
                     ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
                     : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
@@ -207,7 +207,7 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
         </div>
 
         {/* Active Category Description */}
-        <p className="text-xs text-slate-400 font-medium italic transition-all px-1">
+        <p className="text-xs text-slate-400 font-medium italic transition-colors px-1">
           {activeCategoryDesc}
         </p>
       </motion.div>
@@ -240,9 +240,9 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  className={`rounded-3xl border transition-all duration-300 overflow-hidden ${
+                  className={`rounded-3xl border transition-colors duration-300 overflow-hidden ${
                     isOpen 
-                      ? 'bg-teal-50/20 border-teal-200 shadow-md shadow-teal-100/20' 
+                      ? 'bg-teal-50/20 border-teal-200 shadow-md shadow-2xs' 
                       : 'bg-white hover:bg-slate-50/50 border-slate-100 hover:border-slate-200'
                   }`}
                 >
@@ -252,11 +252,11 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
                   >
                     <div className="space-y-2.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`px-2.5 py-0.5 rounded-md text-[8.5px] font-black tracking-wider uppercase border ${badge.color}`}>
+                        <span className={`px-2.5 py-0.5 rounded-md text-[8.5px] font-semibold tracking-wider uppercase border ${badge.color}`}>
                           {badge.label}
                         </span>
                         {f.isPopular && (
-                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-md text-[8.5px] font-black uppercase tracking-wider flex items-center gap-1">
+                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-md text-[8.5px] font-semibold uppercase tracking-wider flex items-center gap-1">
                             <Flame size={10} className="text-amber-500" /> Sering Ditanyakan
                           </span>
                         )}
@@ -266,14 +266,14 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
                           </span>
                         ))}
                       </div>
-                      <h4 className={`font-black text-sm md:text-base leading-snug transition-colors ${
+                      <h4 className={`font-semibold text-sm md:text-base leading-snug transition-colors ${
                         isOpen ? 'text-teal-700' : 'text-slate-900'
                       }`}>
                         {f.question}
                       </h4>
                     </div>
                     
-                    <div className={`p-2 rounded-xl border transition-all shrink-0 mt-1 ${
+                    <div className={`p-2 rounded-xl border transition-colors shrink-0 mt-1 ${
                       isOpen 
                         ? 'bg-teal-50 text-teal-600 border-teal-200' 
                         : 'bg-slate-50 text-slate-400 border-slate-100 hover:text-slate-600'
@@ -298,19 +298,19 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={(e) => { e.stopPropagation(); handleShareWa(f); }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-all"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl transition-colors"
                           >
                             <Share2 size={13} /> Bagi via WA
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleCopyLink(f); }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 rounded-xl transition-colors"
                           >
                             {copiedId === f.id ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
                             {copiedId === f.id ? 'Tersalin' : 'Salin Link'}
                           </button>
                         </div>
-                        <span className="text-[10px] text-slate-400 uppercase font-black tracking-wider">RESMI RT 02</span>
+                        <span className="text-[10px] text-slate-400 uppercase font-semibold tracking-wider">RESMI RT 02</span>
                       </div>
                     </div>
                   </motion.div>
@@ -334,7 +334,7 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
             <span className="bg-teal-500/20 text-teal-300 font-extrabold text-[10px] uppercase tracking-widest px-3 py-1 rounded-full border border-teal-500/30">
               Layanan Informasi Lanjutan
             </span>
-            <h3 className="text-xl md:text-2xl font-black">Masih belum menemukan jawaban?</h3>
+            <h3 className="text-xl md:text-2xl font-semibold">Masih belum menemukan jawaban?</h3>
             <p className="text-slate-300 text-xs md:text-sm leading-relaxed font-semibold">
               Jangan khawatir. Pengurus RT 02 siap sedia membantu Anda. Ajukan pertanyaan atau langsung hubungi Ketua RT maupun seksi humas via WhatsApp.
             </p>
@@ -344,13 +344,13 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
               href="https://wa.me/6285961194621" 
               target="_blank" 
               rel="noreferrer"
-              className="flex items-center justify-center gap-2 bg-[#25d366] hover:bg-[#20ba5a] text-white px-5 py-3.5 rounded-2xl text-xs font-black shadow-lg shadow-black/10 transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 bg-[#25d366] hover:bg-[#20ba5a] text-white px-5 py-3.5 rounded-2xl text-xs font-semibold shadow-lg shadow-black/10 transition-colors active:scale-95"
             >
               <MessageSquare size={16} /> Hubungi Ketua RT
             </a>
             <Link 
               to="/rules"
-              className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-5 py-3.5 rounded-2xl text-xs font-black shadow-lg transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-5 py-3.5 rounded-2xl text-xs font-semibold shadow-lg transition-colors active:scale-95"
             >
               <Scale size={16} /> Lihat Tata Tertib
             </Link>

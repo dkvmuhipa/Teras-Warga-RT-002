@@ -576,25 +576,25 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
           <CheckCircle size={44} className="stroke-[2.5]" />
         </div>
-        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-200">
+        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-semibold uppercase tracking-widest border border-emerald-200">
           Status: Menunggu Verifikasi RT
         </span>
-        <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-3">Pendaftaran Dikirim!</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight mt-3">Pendaftaran Dikirim!</h2>
         <p className="text-slate-500 text-xs md:text-sm leading-relaxed mt-3 mb-6">
           Terima kasih. Berkas pendaftaran warga baru untuk <strong>Blok {formData.block} No. {formData.number}</strong> telah sukses tersimpan di sistem pengurus <strong>{tenant.name || 'RT 002 / RW 020'} Kelurahan {tenant.kelurahan}</strong>. Pengurus RT akan memverifikasi berkas dan menghubungi nomor WhatsApp Anda (<strong>{formData.phone}</strong>).
         </p>
         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 mb-8 text-left text-xs space-y-2">
           <div className="flex justify-between">
             <span className="text-slate-400 font-bold">Kepala Keluarga:</span>
-            <span className="font-black text-slate-800">{formData.headOfFamily}</span>
+            <span className="font-semibold text-slate-800">{formData.headOfFamily}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400 font-bold">Unit Hunian:</span>
-            <span className="font-black text-emerald-700">Blok {formData.block} No. {formData.number}</span>
+            <span className="font-semibold text-emerald-700">Blok {formData.block} No. {formData.number}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400 font-bold">Status Hunian:</span>
-            <span className="font-black text-slate-800">
+            <span className="font-semibold text-slate-800">
               {formData.residenceType === 'Sewa' 
                 ? `Sewa / Kontrak (Pemilik: ${formData.ownerName || 'Tercatat di RT'})` 
                 : formData.residenceType === 'Rumah Keluarga' 
@@ -604,11 +604,11 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400 font-bold">Total Penghuni:</span>
-            <span className="font-black text-slate-800">{formData.occupants} Jiwa</span>
+            <span className="font-semibold text-slate-800">{formData.occupants} Jiwa</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400 font-bold">Inventaris Kendaraan:</span>
-            <span className="font-black text-indigo-700">
+            <span className="font-semibold text-indigo-700">
               {(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) > 0 
                 ? `${formData.twoWheelCount || 0} Motor • ${formData.fourWheelCount || 0} Mobil` 
                 : 'Tidak Ada Kendaraan'}
@@ -622,7 +622,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
               if (onClose) onClose();
               window.location.href = '/welcome';
             }} 
-            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25 transition-all active:scale-95 cursor-pointer"
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg shadow-2xs transition-colors active:scale-95 cursor-pointer"
           >
             <BookOpen size={16} />
             <span>Buka Buku Saku &amp; Panduan Warga Baru</span>
@@ -644,16 +644,16 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
           <button 
             type="button"
             onClick={onClose} 
-            className="p-3 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-all active:scale-95 text-slate-500 hover:text-slate-800 cursor-pointer"
+            className="p-3 hover:bg-slate-100 border border-slate-200 rounded-2xl transition-colors active:scale-95 text-slate-500 hover:text-slate-800 cursor-pointer"
           >
             <ArrowLeft size={18} />
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Portal Warga Baru</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">Portal Warga Baru</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Pendaftaran Warga Baru</h2>
+            <h2 className="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Pendaftaran Warga Baru</h2>
             <p className="text-[10px] md:text-[11px] font-bold text-slate-500 mt-0.5">
               {tenant.name || 'RT 002 / RW 020'} &bull; Kelurahan {tenant.kelurahan}, Kecamatan {tenant.kecamatan}, {tenant.city}
             </p>
@@ -661,7 +661,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
         </div>
 
         <div className="hidden sm:flex flex-col items-end text-right">
-          <span className="px-3 py-1 bg-indigo-50 border border-indigo-200/80 rounded-xl text-[10px] font-black text-indigo-700 uppercase tracking-wider">
+          <span className="px-3 py-1 bg-indigo-50 border border-indigo-200/80 rounded-xl text-[10px] font-semibold text-indigo-700 uppercase tracking-wider">
             Terintegrasi Database
           </span>
           <span className="text-[9px] text-slate-400 font-bold mt-1">Huntap Tondo 2</span>
@@ -669,12 +669,12 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
       </div>
 
       {/* Multi-step Progressive Stepper Header */}
-      <div className="mb-8 p-4 bg-slate-950 rounded-[2rem] text-white shadow-xl shadow-slate-950/15 border border-white/10">
+      <div className="mb-8 p-4 bg-slate-950 rounded-[2rem] text-white shadow-xl shadow-2xs border border-white/10">
         <div className="flex justify-between items-center px-3 mb-2.5">
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-400">
             Langkah {currentStep + 1} dari {STEPS.length}
           </span>
-          <span className="text-xs font-black text-white">
+          <span className="text-xs font-semibold text-white">
             {STEPS[currentStep].label} &bull; <span className="text-slate-400 font-medium">{STEPS[currentStep].desc}</span>
           </span>
         </div>
@@ -696,7 +696,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
               onClick={() => {
                 if (idx < currentStep) setCurrentStep(idx);
               }}
-              className={`text-[9px] md:text-[10px] font-black uppercase tracking-wider transition-colors py-1 rounded-lg ${
+              className={`text-[9px] md:text-[10px] font-semibold uppercase tracking-wider transition-colors py-1 rounded-lg ${
                 currentStep === idx 
                   ? 'text-white bg-white/15' 
                   : idx < currentStep 
@@ -731,7 +731,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       <Home size={18} />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Pilih Lokasi Hunian Rumah</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Pilih Lokasi Hunian Rumah</h3>
                       <p className="text-[11px] text-slate-500 font-medium">Pilih blok dan nomor rumah yang masih kosong/tersedia di {tenant.name || 'RT 002 / RW 020'}</p>
                     </div>
                   </div>
@@ -740,9 +740,9 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   <button
                     type="button"
                     onClick={() => setInputMode(inputMode === 'picker' ? 'manual' : 'picker')}
-                    className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-all cursor-pointer bg-slate-50"
+                    className="text-[10px] font-semibold uppercase tracking-wider px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-colors cursor-pointer bg-slate-50"
                   >
-                    {inputMode === 'picker' ? '✏️ Beralih ke Input Manual' : '🎯 Beralih ke Pilihan Interaktif'}
+                    {inputMode === 'picker' ? 'Beralih ke Input Manual' : 'Beralih ke Pilihan Interaktif'}
                   </button>
                 </div>
 
@@ -752,9 +752,9 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     {/* 1. Pill Selector Blok */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                           <span>1. Pilih Blok Kawasan:</span>
-                          <span className="text-indigo-600 font-black">Blok {selectedBlock}</span>
+                          <span className="text-indigo-600 font-semibold">Blok {selectedBlock}</span>
                         </label>
                         <span className="text-[10px] font-bold text-slate-400">Huntap Tondo 2</span>
                       </div>
@@ -771,14 +771,14 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                                 setSelectedBlock(blockCode);
                                 setFormData(prev => ({ ...prev, block: blockCode, number: '' }));
                               }}
-                              className={`px-4 py-3 rounded-2xl transition-all cursor-pointer flex flex-col items-center justify-center shrink-0 border min-w-[90px] ${
+                              className={`px-4 py-3 rounded-2xl transition-colors cursor-pointer flex flex-col items-center justify-center shrink-0 border min-w-[90px] ${
                                 isSel
-                                  ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-slate-900/20 scale-105'
+                                  ? 'bg-slate-900 text-white border-slate-900 shadow-md shadow-2xs scale-105'
                                   : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-100/60'
                               }`}
                             >
-                              <span className="text-xs font-black">Blok {blockCode}</span>
-                              <span className={`text-[9px] font-black mt-0.5 px-2 py-0.5 rounded-full ${
+                              <span className="text-xs font-semibold">Blok {blockCode}</span>
+                              <span className={`text-[9px] font-semibold mt-0.5 px-2 py-0.5 rounded-full ${
                                 isSel 
                                   ? 'bg-emerald-500 text-white' 
                                   : stats.available > 0 
@@ -797,10 +797,10 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     <div className="space-y-3 pt-2 border-t border-slate-200/60">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div className="flex items-center gap-2">
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                          <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
                             2. Pilih Unit di Blok {selectedBlock}:
                           </label>
-                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[9px] font-black uppercase">
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md text-[9px] font-semibold uppercase">
                             {getBlockStats(selectedBlock).available} Unit Kosong
                           </span>
                         </div>
@@ -811,25 +811,25 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                             <button
                               type="button"
                               onClick={() => setUnitFilter('available')}
-                              className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase transition-all cursor-pointer ${
+                              className={`px-2 py-1 rounded-lg text-[9px] font-semibold uppercase transition-colors cursor-pointer ${
                                 unitFilter === 'available' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                               }`}
                             >
-                              🟢 Kosong ({getBlockStats(selectedBlock).available})
+                              Kosong ({getBlockStats(selectedBlock).available})
                             </button>
                             <button
                               type="button"
                               onClick={() => setUnitFilter('occupied')}
-                              className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase transition-all cursor-pointer ${
+                              className={`px-2 py-1 rounded-lg text-[9px] font-semibold uppercase transition-colors cursor-pointer ${
                                 unitFilter === 'occupied' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                               }`}
                             >
-                              🔒 Terisi ({getBlockStats(selectedBlock).occupied})
+                              Terisi ({getBlockStats(selectedBlock).occupied})
                             </button>
                             <button
                               type="button"
                               onClick={() => setUnitFilter('all')}
-                              className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase transition-all cursor-pointer ${
+                              className={`px-2 py-1 rounded-lg text-[9px] font-semibold uppercase transition-colors cursor-pointer ${
                                 unitFilter === 'all' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                               }`}
                             >
@@ -867,7 +867,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                               key={unit.number}
                               type="button"
                               onClick={() => handleSelectUnit(unit.number, unit.isOccupied, unit.isVisiting, unit.headOfFamily)}
-                              className={`p-3 rounded-xl text-center border transition-all cursor-pointer relative group flex flex-col justify-between min-h-[70px] ${
+                              className={`p-3 rounded-xl text-center border transition-colors cursor-pointer relative group flex flex-col justify-between min-h-[70px] ${
                                 isSelected
                                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-4 ring-emerald-500/20'
                                   : unit.isVisiting
@@ -878,7 +878,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                               }`}
                             >
                               <div className="flex items-center justify-between w-full">
-                                <span className={`text-[8px] font-black uppercase ${
+                                <span className={`text-[8px] font-semibold uppercase ${
                                   isSelected ? 'text-emerald-100' :
                                   unit.isVisiting ? 'text-sky-700' :
                                   unit.isOccupied ? 'text-slate-400' : 'text-emerald-600'
@@ -896,9 +896,9 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                                 )}
                               </div>
 
-                              <span className={`text-base font-black ${
+                              <span className={`text-base font-semibold ${
                                 isSelected ? 'text-white' :
-                                unit.isVisiting ? 'text-sky-950 font-black' :
+                                unit.isVisiting ? 'text-sky-950 font-semibold' :
                                 unit.isOccupied ? 'text-slate-500 line-through' : 'text-slate-900'
                               }`}>
                                 No. {unit.number}
@@ -932,13 +932,13 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         className="p-4 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl flex items-center justify-between flex-wrap gap-3"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shadow-md shadow-emerald-600/20">
+                          <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-semibold shadow-md shadow-2xs">
                             <Home size={20} />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-black text-emerald-900">Unit Hunian Terpilih:</span>
-                              <span className="px-2.5 py-0.5 bg-emerald-600 text-white rounded-lg text-xs font-black uppercase">
+                              <span className="text-xs font-semibold text-emerald-900">Unit Hunian Terpilih:</span>
+                              <span className="px-2.5 py-0.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold uppercase">
                                 Blok {formData.block} No. {formData.number}
                               </span>
                             </div>
@@ -948,7 +948,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           </div>
                         </div>
 
-                        <span className="px-3 py-1 bg-white text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-wider border border-emerald-200 shadow-2xs">
+                        <span className="px-3 py-1 bg-white text-emerald-700 rounded-xl text-[10px] font-semibold uppercase tracking-wider border border-emerald-200 shadow-2xs">
                           ✓ Siap Didaftarkan
                         </span>
                       </motion.div>
@@ -967,7 +967,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Blok Rumah <span className="text-rose-500">*</span></label>
+                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Blok Rumah <span className="text-rose-500">*</span></label>
                         <input 
                           type="text" 
                           placeholder="Contoh: C10" 
@@ -979,7 +979,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nomor Unit <span className="text-rose-500">*</span></label>
+                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Nomor Unit <span className="text-rose-500">*</span></label>
                         <input 
                           type="text" 
                           placeholder="Contoh: 08" 
@@ -996,7 +996,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                 {/* WhatsApp & Kontak */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                     Nomor WhatsApp Aktif <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
@@ -1005,7 +1005,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       required 
                       type="tel" 
                       placeholder="Contoh: 08123456789 atau 628123456789" 
-                      className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/10 outline-none transition-all ${
+                      className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/10 outline-none transition-colors ${
                         validationErrors.phone ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200/80 focus:border-indigo-500'
                       }`}
                       value={formData.phone} 
@@ -1025,7 +1025,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                 {/* Status Hunian Rumah */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                     Status Hunian Rumah <span className="text-rose-500">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1040,14 +1040,14 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           key={t.id}
                           type="button"
                           onClick={() => setFormData({ ...formData, status: t.id as any })}
-                          className={`p-4 text-left border rounded-2xl transition-all cursor-pointer relative overflow-hidden group ${
+                          className={`p-4 text-left border rounded-2xl transition-colors cursor-pointer relative overflow-hidden group ${
                             isSel 
                               ? 'bg-emerald-50/70 border-emerald-500 shadow-sm ring-2 ring-emerald-500/10' 
                               : 'bg-slate-50/50 border-slate-200 hover:bg-slate-100/60'
                           }`}
                         >
                           <div className="flex justify-between items-center mb-1.5">
-                            <span className={`text-xs font-black ${isSel ? 'text-emerald-700' : 'text-slate-700'}`}>{t.label}</span>
+                            <span className={`text-xs font-semibold ${isSel ? 'text-emerald-700' : 'text-slate-700'}`}>{t.label}</span>
                             <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSel ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300'}`}>
                               {isSel && <Check size={10} className="stroke-[3]" />}
                             </div>
@@ -1061,7 +1061,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                 {/* Status Kepenghunian Rumah */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                     Status Kepenghunian Rumah <span className="text-rose-500">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1076,14 +1076,14 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           key={type.id}
                           type="button"
                           onClick={() => setFormData({ ...formData, residenceType: type.id as any })}
-                          className={`p-4 text-left border rounded-2xl transition-all cursor-pointer relative overflow-hidden group ${
+                          className={`p-4 text-left border rounded-2xl transition-colors cursor-pointer relative overflow-hidden group ${
                             isSel 
                               ? 'bg-indigo-50/70 border-indigo-500 shadow-sm ring-2 ring-indigo-500/10' 
                               : 'bg-slate-50/50 border-slate-200 hover:bg-slate-100/60'
                           }`}
                         >
                           <div className="flex justify-between items-center mb-1.5">
-                            <span className={`text-xs font-black ${isSel ? 'text-indigo-700' : 'text-slate-700'}`}>{type.label}</span>
+                            <span className={`text-xs font-semibold ${isSel ? 'text-indigo-700' : 'text-slate-700'}`}>{type.label}</span>
                             <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSel ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300'}`}>
                               {isSel && <Check size={10} className="stroke-[3]" />}
                             </div>
@@ -1115,7 +1115,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                     <div className="space-y-2 pt-2 border-t border-indigo-100">
                       <div className="flex items-center justify-between">
-                        <label className="text-[10px] font-black text-indigo-950 uppercase tracking-widest block ml-1">
+                        <label className="text-[10px] font-semibold text-indigo-950 uppercase tracking-widest block ml-1">
                           Nama Pemilik Rumah Asli {formData.residenceType === 'Sewa' ? '(Induk Semang)' : '(Kerabat)'}
                         </label>
                         {matchedHouse?.ownerName && matchedHouse.ownerName !== '-' && (
@@ -1136,7 +1136,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           <button
                             type="button"
                             onClick={() => setFormData({ ...formData, ownerName: matchedHouse.ownerName || '' })}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-[10px] font-black text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors cursor-pointer"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 text-[10px] font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors cursor-pointer"
                           >
                             Gunakan Data RT
                           </button>
@@ -1157,7 +1157,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                 {/* Jumlah Anggota Keluarga */}
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                     Jumlah Anggota Keluarga yang Tinggal <span className="text-rose-500">*</span>
                   </label>
                   <div className="flex items-center justify-between px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl">
@@ -1169,7 +1169,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       -
                     </button>
                     <div className="text-center">
-                      <span className="font-black text-slate-900 text-sm block">{formData.occupants} Jiwa</span>
+                      <span className="font-semibold text-slate-900 text-sm block">{formData.occupants} Jiwa</span>
                       <span className="text-[10px] text-slate-400 font-medium">Termasuk Kepala Keluarga</span>
                     </div>
                     <button
@@ -1190,7 +1190,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         <Car size={15} />
                       </div>
                       <div>
-                        <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                        <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">
                           Inventaris Kendaraan Penghuni
                         </h4>
                         <p className="text-[10px] text-slate-500 font-medium">
@@ -1198,7 +1198,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         </p>
                       </div>
                     </div>
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-white border border-slate-200 text-slate-700 shadow-2xs">
                       Total: {(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0)} Unit
                     </span>
                   </div>
@@ -1212,11 +1212,11 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                             <Bike size={16} />
                           </div>
                           <div>
-                            <span className="text-xs font-black text-slate-900 block">Sepeda Motor</span>
+                            <span className="text-xs font-semibold text-slate-900 block">Sepeda Motor</span>
                             <span className="text-[9px] text-slate-400 font-medium">Roda 2 (Matic/Sport/Listrik)</span>
                           </div>
                         </div>
-                        <span className="text-xs font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                        <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
                           {formData.twoWheelCount || 0} Unit
                         </span>
                       </div>
@@ -1225,18 +1225,18 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         <button
                           type="button"
                           onClick={() => updateVehicleCount('twoWheel', -1)}
-                          className="flex-1 h-9 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center justify-center font-black text-sm transition-all cursor-pointer active:scale-95"
+                          className="flex-1 h-9 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer active:scale-95"
                           title="Kurangi motor"
                         >
                           -
                         </button>
-                        <span className="w-12 text-center font-black text-slate-800 text-sm">
+                        <span className="w-12 text-center font-semibold text-slate-800 text-sm">
                           {formData.twoWheelCount || 0}
                         </span>
                         <button
                           type="button"
                           onClick={() => updateVehicleCount('twoWheel', 1)}
-                          className="flex-1 h-9 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 border border-amber-200 text-amber-800 rounded-lg flex items-center justify-center font-black text-sm transition-all cursor-pointer active:scale-95"
+                          className="flex-1 h-9 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 border border-amber-200 text-amber-800 rounded-lg flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer active:scale-95"
                           title="Tambah motor"
                         >
                           +
@@ -1252,11 +1252,11 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                             <Car size={16} />
                           </div>
                           <div>
-                            <span className="text-xs font-black text-slate-900 block">Mobil Pribadi</span>
+                            <span className="text-xs font-semibold text-slate-900 block">Mobil Pribadi</span>
                             <span className="text-[9px] text-slate-400 font-medium">Roda 4 (Sedan/SUV/Pickup)</span>
                           </div>
                         </div>
-                        <span className="text-xs font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
+                        <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
                           {formData.fourWheelCount || 0} Unit
                         </span>
                       </div>
@@ -1265,18 +1265,18 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         <button
                           type="button"
                           onClick={() => updateVehicleCount('fourWheel', -1)}
-                          className="flex-1 h-9 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center justify-center font-black text-sm transition-all cursor-pointer active:scale-95"
+                          className="flex-1 h-9 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer active:scale-95"
                           title="Kurangi mobil"
                         >
                           -
                         </button>
-                        <span className="w-12 text-center font-black text-slate-800 text-sm">
+                        <span className="w-12 text-center font-semibold text-slate-800 text-sm">
                           {formData.fourWheelCount || 0}
                         </span>
                         <button
                           type="button"
                           onClick={() => updateVehicleCount('fourWheel', 1)}
-                          className="flex-1 h-9 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border border-blue-200 text-blue-800 rounded-lg flex items-center justify-center font-black text-sm transition-all cursor-pointer active:scale-95"
+                          className="flex-1 h-9 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 border border-blue-200 text-blue-800 rounded-lg flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer active:scale-95"
                           title="Tambah mobil"
                         >
                           +
@@ -1298,7 +1298,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     <User size={18} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Profil Kepala Keluarga / Pemohon</h3>
+                    <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Profil Kepala Keluarga / Pemohon</h3>
                     <p className="text-[11px] text-slate-500 font-medium">Lengkapi identitas diri sesuai dokumen resmi KTP &amp; Kartu Keluarga</p>
                   </div>
                 </div>
@@ -1306,7 +1306,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* Nama Lengkap */}
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Nama Lengkap Kepala Keluarga <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -1315,7 +1315,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         required 
                         type="text" 
                         placeholder="Nama lengkap sesuai KTP" 
-                        className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/10 outline-none transition-all ${
+                        className={`w-full pl-12 pr-4 py-3.5 bg-slate-50 border rounded-2xl text-sm font-bold focus:ring-2 focus:ring-indigo-500/10 outline-none transition-colors ${
                           validationErrors.headOfFamily ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:border-indigo-500'
                         }`}
                         value={formData.headOfFamily} 
@@ -1333,7 +1333,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   {/* NIK */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                         NIK (Nomor Induk Kependudukan) <span className="text-rose-500">*</span>
                       </label>
                       <span className={`text-[9px] font-mono font-bold ${formData.nik.length === 16 ? 'text-emerald-600' : 'text-slate-400'}`}>
@@ -1363,7 +1363,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   {/* Nomor Kartu Keluarga */}
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                         Nomor Kartu Keluarga (KK)
                       </label>
                       <span className={`text-[9px] font-mono font-bold ${formData.kkNumber.length === 16 ? 'text-emerald-600' : 'text-slate-400'}`}>
@@ -1407,7 +1407,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                               addressKtp: (!formData.addressKtp || formData.addressKtp.toLowerCase().includes('tondo') || formData.addressKtp.toLowerCase().includes('pue lombe')) ? localAddr : formData.addressKtp
                             });
                           }}
-                          className={`w-full py-2.5 px-3 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                          className={`w-full py-2.5 px-3 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                             formData.ktpStatus === 'Sesuai Domisili'
                               ? 'bg-emerald-600 text-white shadow-xs'
                               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -1424,7 +1424,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                               ktpStatus: 'Luar Wilayah (Belum Mutasi)'
                             });
                           }}
-                          className={`w-full py-2.5 px-3 text-xs font-extrabold rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center ${
+                          className={`w-full py-2.5 px-3 text-xs font-extrabold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-center ${
                             formData.ktpStatus === 'Luar Wilayah (Belum Mutasi)'
                               ? 'bg-amber-600 text-white shadow-xs'
                               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -1454,7 +1454,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           }}
                           className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100/80 px-2.5 py-1 rounded-lg border border-indigo-100 flex items-center justify-center gap-1 transition-colors cursor-pointer self-start sm:self-auto active:scale-95"
                         >
-                          📍 Set Alamat Huntap Tondo 2 (Jl. Pue Lombe)
+                          Set Alamat Huntap Tondo 2 (Jl. Pue Lombe)
                         </button>
                       </div>
                       <textarea
@@ -1466,7 +1466,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                             ? `Contoh: Jl. Pue Lombe, Huntap Tondo 2 Blok ${formData.block || 'C10'}-${formData.number || '01'}`
                             : 'Tuliskan alamat lengkap asal sesuai yang tertera di KTP fisik Anda...'
                         }
-                        className="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all resize-none leading-relaxed"
+                        className="w-full text-xs font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-colors resize-none leading-relaxed"
                       />
                       {formData.ktpStatus === 'Sesuai Domisili' && (
                         <p className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
@@ -1478,7 +1478,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                   {/* Tempat Lahir & Tanggal Lahir */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Tempat Lahir
                     </label>
                     <input 
@@ -1491,7 +1491,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Tanggal Lahir <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
@@ -1513,7 +1513,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                   {/* Jenis Kelamin */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Jenis Kelamin <span className="text-rose-500">*</span>
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -1522,7 +1522,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           key={item}
                           type="button"
                           onClick={() => setFormData({ ...formData, gender: item as any })}
-                          className={`py-3 text-center font-bold text-xs border rounded-xl transition-all cursor-pointer ${
+                          className={`py-3 text-center font-bold text-xs border rounded-xl transition-colors cursor-pointer ${
                             formData.gender === item
                               ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
                               : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -1536,7 +1536,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                   {/* Golongan Darah */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Golongan Darah
                     </label>
                     <select
@@ -1554,7 +1554,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                   {/* Agama & Status Perkawinan */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Agama <span className="text-rose-500">*</span>
                     </label>
                     <select 
@@ -1572,7 +1572,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Status Perkawinan
                     </label>
                     <select 
@@ -1589,7 +1589,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                   {/* Pendidikan & Pekerjaan */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Pendidikan Terakhir <span className="text-rose-500">*</span>
                     </label>
                     <select 
@@ -1609,7 +1609,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Sektor Pekerjaan <span className="text-rose-500">*</span>
                     </label>
                     <input 
@@ -1623,7 +1623,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                   {/* BPJS Kesehatan */}
                   <div className="space-y-1.5 md:col-span-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                       Status BPJS / JKN Kesehatan
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -1637,7 +1637,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           key={b.id}
                           type="button"
                           onClick={() => setFormData({ ...formData, bpjsStatus: b.id as any })}
-                          className={`py-2.5 px-3 rounded-xl text-xs font-bold border text-center transition-all cursor-pointer ${
+                          className={`py-2.5 px-3 rounded-xl text-xs font-bold border text-center transition-colors cursor-pointer ${
                             formData.bpjsStatus === b.id
                               ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                               : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
@@ -1664,7 +1664,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       <Heart size={18} />
                     </div>
                     <div>
-                      <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Demografi Rentan dalam Keluarga</h3>
+                      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Demografi Rentan dalam Keluarga</h3>
                       <p className="text-[11px] text-slate-500 font-medium">Bantu pendataan program posyandu, lansia, dan pelayanan kesehatan warga</p>
                     </div>
                   </div>
@@ -1680,7 +1680,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         <div className={`p-2 rounded-xl mb-1.5 ${item.color}`}>
                           <item.icon size={16} />
                         </div>
-                        <label className="block text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1.5">{item.label}</label>
+                        <label className="block text-[9px] font-semibold text-slate-600 uppercase tracking-widest mb-1.5">{item.label}</label>
                         <div className="flex items-center gap-2.5">
                           <button
                             type="button"
@@ -1689,7 +1689,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           >
                             -
                           </button>
-                          <span className="font-black text-slate-800 text-sm text-center w-6">{(formData as any)[item.field]}</span>
+                          <span className="font-semibold text-slate-800 text-sm text-center w-6">{(formData as any)[item.field]}</span>
                           <button
                             type="button"
                             onClick={() => incrementValue(item.field as any)}
@@ -1710,12 +1710,12 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       <div className="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100">
                         <Users size={16} />
                       </div>
-                      <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Detail Anggota Keluarga Tambahan</h3>
+                      <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest">Detail Anggota Keluarga Tambahan</h3>
                     </div>
                     <button 
                       type="button" 
                       onClick={addFamilyMember} 
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl font-black text-[10px] uppercase tracking-wider transition-all cursor-pointer active:scale-95 border border-emerald-200"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl font-semibold text-[10px] uppercase tracking-wider transition-colors cursor-pointer active:scale-95 border border-emerald-200"
                     >
                       <Plus size={12} /> Tambah Anggota
                     </button>
@@ -1727,18 +1727,18 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         <button 
                           type="button" 
                           onClick={() => removeFamilyMember(idx)} 
-                          className="absolute top-4 right-4 p-2 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-all cursor-pointer"
+                          className="absolute top-4 right-4 p-2 text-slate-300 hover:text-rose-500 hover:bg-white rounded-lg transition-colors cursor-pointer"
                         >
                           <Trash2 size={14} />
                         </button>
                         
-                        <div className="text-[10px] uppercase tracking-widest font-black text-indigo-600 mb-3 ml-0.5">
+                        <div className="text-[10px] uppercase tracking-widest font-semibold text-indigo-600 mb-3 ml-0.5">
                           Anggota Keluarga #{idx + 1}
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                           <div className="space-y-1">
-                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Nama Anggota <span className="text-rose-500">*</span></label>
+                            <label className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Nama Anggota <span className="text-rose-500">*</span></label>
                             <input 
                               required 
                               type="text" 
@@ -1760,7 +1760,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Hubungan Keluarga <span className="text-rose-500">*</span></label>
+                            <label className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Hubungan Keluarga <span className="text-rose-500">*</span></label>
                             <select 
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none" 
                               value={member.relation} 
@@ -1780,7 +1780,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Jenis Kelamin</label>
+                            <label className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Jenis Kelamin</label>
                             <select 
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none" 
                               value={member.gender} 
@@ -1793,7 +1793,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                           <div className="space-y-1">
                             <div className="flex items-center justify-between">
-                              <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">NIK (16 Digit)</label>
+                              <label className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest ml-1">NIK (16 Digit)</label>
                               {member.nik && (
                                 <span className={`text-[8px] font-mono font-bold ${member.nik.length === 16 ? 'text-emerald-600' : 'text-slate-400'}`}>
                                   {member.nik.length}/16
@@ -1821,7 +1821,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Pekerjaan</label>
+                            <label className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Pekerjaan</label>
                             <input 
                               type="text" 
                               placeholder="Contoh: Pelajar, Swasta"
@@ -1832,7 +1832,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                           </div>
 
                           <div className="space-y-1">
-                            <label className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Tanggal Lahir</label>
+                            <label className="text-[8px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Tanggal Lahir</label>
                             <input 
                               type="date" 
                               className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none" 
@@ -1863,12 +1863,12 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       <ShieldAlert size={16} />
                     </div>
                     <div>
-                      <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest">Kondisi Khusus &amp; Bantuan Sosial</h3>
+                      <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-widest">Kondisi Khusus &amp; Bantuan Sosial</h3>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isPKH ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-colors cursor-pointer ${formData.isPKH ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
                       <input 
                         type="checkbox" 
                         className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
@@ -1881,7 +1881,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isBLT ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-colors cursor-pointer ${formData.isBLT ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
                       <input 
                         type="checkbox" 
                         className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
@@ -1894,7 +1894,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isBPNT ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-colors cursor-pointer ${formData.isBPNT ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
                       <input 
                         type="checkbox" 
                         className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
@@ -1907,7 +1907,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isDisability ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-colors cursor-pointer ${formData.isDisability ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
                       <input 
                         type="checkbox" 
                         className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
@@ -1920,7 +1920,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isOrphan ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-colors cursor-pointer ${formData.isOrphan ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
                       <input 
                         type="checkbox" 
                         className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
@@ -1933,7 +1933,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.isBansosLain ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
+                    <label className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-colors cursor-pointer ${formData.isBansosLain ? 'bg-indigo-50/50 border-indigo-400 shadow-2xs' : 'bg-slate-50/50 border-slate-200/60 hover:bg-white'}`}>
                       <input 
                         type="checkbox" 
                         className="rounded border-slate-200 text-indigo-600 focus:ring-indigo-500/20 w-4 h-4 cursor-pointer"
@@ -1960,7 +1960,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     <FileText size={18} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Unggah Berkas &amp; Konfirmasi Akhir</h3>
+                    <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Unggah Berkas &amp; Konfirmasi Akhir</h3>
                     <p className="text-[11px] text-slate-500 font-medium">Unggah foto KTP dan KK sebagai syarat verifikasi keabsahan kependudukan</p>
                   </div>
                 </div>
@@ -1970,20 +1970,20 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   <button 
                     type="button" 
                     onClick={() => setUploadType('file')} 
-                    className={`flex-1 py-2 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest cursor-pointer ${
+                    className={`flex-1 py-2 text-[10px] font-semibold rounded-xl transition-colors uppercase tracking-widest cursor-pointer ${
                       uploadType === 'file' ? 'bg-white shadow-xs text-indigo-600' : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    📷 Unggah Foto / Scan (Kamera HP)
+                    Unggah Foto / Scan (Kamera HP)
                   </button>
                   <button 
                     type="button" 
                     onClick={() => setUploadType('url')} 
-                    className={`flex-1 py-2 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest cursor-pointer ${
+                    className={`flex-1 py-2 text-[10px] font-semibold rounded-xl transition-colors uppercase tracking-widest cursor-pointer ${
                       uploadType === 'url' ? 'bg-white shadow-xs text-indigo-600' : 'text-slate-500 hover:text-slate-800'
                     }`}
                   >
-                    🔗 Gunakan Tautan / Link URL
+                    Gunakan Tautan / Link URL
                   </button>
                 </div>
 
@@ -1991,11 +1991,11 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {/* KTP Upload */}
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                         Foto KTP Kepala Keluarga <span className="text-rose-500">*</span>
                       </label>
                       <div className={`
-                        relative min-h-[160px] rounded-3xl border-2 border-dashed transition-all flex flex-col items-center justify-center p-5 text-center
+                        relative min-h-[160px] rounded-3xl border-2 border-dashed transition-colors flex flex-col items-center justify-center p-5 text-center
                         ${ktpFile ? 'border-emerald-500 bg-emerald-50/40' : 'border-slate-200 bg-slate-50 hover:border-indigo-400'}
                       `}>
                         <input 
@@ -2016,7 +2016,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         ) : (
                           <>
                             <Camera className="text-slate-400 mb-1" size={30} />
-                            <p className="text-xs font-black text-slate-700 uppercase">Ambil / Unggah Foto KTP</p>
+                            <p className="text-xs font-semibold text-slate-700 uppercase">Ambil / Unggah Foto KTP</p>
                             <p className="text-[9px] text-slate-400 font-medium mt-0.5">Format JPG, PNG, atau WEBP</p>
                           </>
                         )}
@@ -2025,11 +2025,11 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                     {/* KK Upload */}
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">
                         Foto Kartu Keluarga (KK) <span className="text-rose-500">*</span>
                       </label>
                       <div className={`
-                        relative min-h-[160px] rounded-3xl border-2 border-dashed transition-all flex flex-col items-center justify-center p-5 text-center
+                        relative min-h-[160px] rounded-3xl border-2 border-dashed transition-colors flex flex-col items-center justify-center p-5 text-center
                         ${kkFile ? 'border-emerald-500 bg-emerald-50/40' : 'border-slate-200 bg-slate-50 hover:border-indigo-400'}
                       `}>
                         <input 
@@ -2050,7 +2050,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         ) : (
                           <>
                             <Camera className="text-slate-400 mb-1" size={30} />
-                            <p className="text-xs font-black text-slate-700 uppercase">Ambil / Unggah Foto KK</p>
+                            <p className="text-xs font-semibold text-slate-700 uppercase">Ambil / Unggah Foto KK</p>
                             <p className="text-[9px] text-slate-400 font-medium mt-0.5">Gambar jelas dan tulisan terbaca</p>
                           </>
                         )}
@@ -2060,7 +2060,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link URL Foto KTP</label>
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Link URL Foto KTP</label>
                       <input 
                         type="url" 
                         placeholder="https://..." 
@@ -2070,7 +2070,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Link URL Foto KK</label>
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest ml-1">Link URL Foto KK</label>
                       <input 
                         type="url" 
                         placeholder="https://..." 
@@ -2085,7 +2085,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                 {/* Ringkasan Data Sebelum Kirim (Summary Card) */}
                 <div className="p-5 bg-slate-50 border border-slate-200/80 rounded-[2rem] space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700">
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-700">
                       Ringkasan Pendaftaran
                     </span>
                     <span className="text-[9px] font-bold text-slate-400">Pastikan Data Sudah Benar</span>
@@ -2094,22 +2094,22 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                     <div className="p-3 bg-white rounded-xl border border-slate-200/60">
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Alamat Hunian</span>
-                      <span className="font-black text-slate-900 text-sm">Blok {formData.block} No. {formData.number}</span>
+                      <span className="font-semibold text-slate-900 text-sm">Blok {formData.block} No. {formData.number}</span>
                     </div>
 
                     <div className="p-3 bg-white rounded-xl border border-slate-200/60">
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Kepala Keluarga</span>
-                      <span className="font-black text-slate-900 truncate block">{formData.headOfFamily || '-'}</span>
+                      <span className="font-semibold text-slate-900 truncate block">{formData.headOfFamily || '-'}</span>
                     </div>
 
                     <div className="p-3 bg-white rounded-xl border border-slate-200/60">
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">WhatsApp Aktif</span>
-                      <span className="font-black text-slate-900 truncate block">{formData.phone || '-'}</span>
+                      <span className="font-semibold text-slate-900 truncate block">{formData.phone || '-'}</span>
                     </div>
 
                     <div className="p-3 bg-white rounded-xl border border-slate-200/60">
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Hak &amp; Pemilik Hunian</span>
-                      <span className="font-black text-slate-900 truncate block">
+                      <span className="font-semibold text-slate-900 truncate block">
                         {formData.residenceType === 'Sewa' 
                           ? `Sewa (${formData.ownerName || 'Pemilik RT'})` 
                           : formData.residenceType === 'Rumah Keluarga' 
@@ -2120,12 +2120,12 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
 
                     <div className="p-3 bg-white rounded-xl border border-slate-200/60">
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Total Anggota</span>
-                      <span className="font-black text-slate-900">{formData.occupants} Jiwa</span>
+                      <span className="font-semibold text-slate-900">{formData.occupants} Jiwa</span>
                     </div>
 
                     <div className="p-3 bg-white rounded-xl border border-slate-200/60">
                       <span className="text-[9px] font-bold text-slate-400 block uppercase">Kendaraan Terparkir</span>
-                      <span className="font-black text-indigo-700">
+                      <span className="font-semibold text-indigo-700">
                         {(formData.twoWheelCount || 0) + (formData.fourWheelCount || 0) > 0
                           ? `${formData.twoWheelCount || 0} Motor • ${formData.fourWheelCount || 0} Mobil`
                           : 'Tidak Ada'}
@@ -2161,7 +2161,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
               type="button"
               onClick={handleBack}
               disabled={isLoading}
-              className="flex-1 sm:flex-initial px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all cursor-pointer border border-slate-200"
+              className="flex-1 sm:flex-initial px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-semibold text-[10px] uppercase tracking-widest transition-colors cursor-pointer border border-slate-200"
             >
               Kembali
             </button>
@@ -2171,7 +2171,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             <button
               type="button"
               onClick={handleNext}
-              className="flex-1 px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all cursor-pointer shadow-md active:scale-95 flex items-center justify-center gap-2"
+              className="flex-1 px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-semibold text-[10px] uppercase tracking-widest transition-colors cursor-pointer shadow-md active:scale-95 flex items-center justify-center gap-2"
             >
               <span>Lanjut ke Langkah {currentStep + 2}</span>
               <Check size={14} className="stroke-[3]" />
@@ -2180,7 +2180,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             <Button
               type="submit"
               isLoading={isLoading}
-              className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 cursor-pointer"
+              className="flex-1 py-4 text-[10px] font-semibold uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-2xs cursor-pointer"
             >
               <Send size={14} /> Kirim Pendaftaran Warga Baru
             </Button>

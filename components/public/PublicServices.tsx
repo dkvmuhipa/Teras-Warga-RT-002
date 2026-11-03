@@ -926,14 +926,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full shadow-xs"
           >
             <Sparkles size={14} className="text-indigo-600 animate-spin-slow" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-700">Layanan Digital Terpadu RT 02</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-700">Layanan Digital Terpadu RT 02</span>
           </motion.div>
           
           <motion.h1 
             initial={{ y: 15, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
+            className="text-3xl md:text-5xl font-semibold text-slate-900 tracking-tight leading-tight"
           >
             Layanan Warga Mandiri & <br/>
             <span className="text-indigo-600 font-serif italic">
@@ -967,7 +967,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 key={i} 
                 whileHover={{ y: -4, scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                className={`p-4 ${item.bg} border ${item.border} rounded-3xl transition-all hover:shadow-md cursor-pointer group`}
+                className={`p-4 ${item.bg} border ${item.border} rounded-3xl transition-colors hover:shadow-md cursor-pointer group`}
               >
                 <div className={`w-10 h-10 rounded-xl bg-white ${item.iconColor} shadow-2xs flex items-center justify-center mb-2.5 group-hover:scale-110 transition-transform`}>
                   <item.icon size={18} className="stroke-[2.5]" />
@@ -982,7 +982,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
       {/* Animated Floating Tabs Navigation */}
       <div className="sticky top-[64px] md:top-[80px] z-30 flex justify-center mb-8 md:mb-10 px-4 pointer-events-none">
-        <div className="bg-white/95 backdrop-blur-xl p-1.5 rounded-2xl inline-flex shadow-xl shadow-slate-900/5 border border-slate-200/80 overflow-x-auto no-scrollbar max-w-full pointer-events-auto">
+        <div className="bg-white/95 backdrop-blur-xl p-1.5 rounded-2xl inline-flex shadow-xl shadow-2xs border border-slate-200/80 overflow-x-auto no-scrollbar max-w-full pointer-events-auto">
           {[
             { id: 'surat', label: 'Layanan Surat', icon: FileText },
             { id: 'tamu', label: 'Lapor Tamu', icon: ShieldAlert },
@@ -997,7 +997,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`
-                  relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wide transition-all cursor-pointer whitespace-nowrap active:scale-95
+                  relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wide transition-colors cursor-pointer whitespace-nowrap active:scale-95
                   ${isActive 
                     ? 'text-white' 
                     : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'}
@@ -1006,7 +1006,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 {isActive && (
                   <motion.div 
                     layoutId="activeCleanTabIndicator"
-                    className="absolute inset-0 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] rounded-xl shadow-md shadow-indigo-500/25"
+                    className="absolute inset-0 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] rounded-xl shadow-md shadow-2xs"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -1046,8 +1046,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <FileText size={28} strokeWidth={2} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] block mb-0.5">Pelayanan Administrasi Warga</span>
-                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Permohonan Surat Pengantar</h2>
+                  <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-[0.2em] block mb-0.5">Pelayanan Administrasi Warga</span>
+                  <h2 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">Permohonan Surat Pengantar</h2>
                   <p className="text-slate-500 text-xs font-medium mt-0.5">Dapatkan pengantar resmi RT 02 ke Kelurahan Tondo secara instan dan digital.</p>
                 </div>
               </div>
@@ -1060,7 +1060,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 <ShieldAlert size={22} className="animate-bounce" />
               </div>
               <div>
-                <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest">Aturan Pemerintah Kota Palu</p>
+                <p className="text-[10px] font-semibold text-amber-900 uppercase tracking-widest">Aturan Pemerintah Kota Palu</p>
                 <p className="text-[13px] font-medium text-amber-800 mt-1 leading-relaxed">
                   Berdasarkan peraturan daerah, pembayaran <b>Retribusi Sampah</b> wajib dilunasi sebelum mengurus surat administrasi warga. Sistem kami terintegrasi untuk mengecek pelunasan iuran secara otomatis saat data dikirimkan.
                 </p>
@@ -1088,11 +1088,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             color: isActive ? 'rgb(255, 255, 255)' : 'rgb(148, 163, 184)',
                             boxShadow: isActive ? '0 10px 15px -3px rgba(79, 70, 229, 0.3)' : 'none'
                           }}
-                          className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-sm font-black`}
+                          className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-sm font-semibold`}
                         >
                           {isCompleted ? <CheckCircle2 size={22} className="text-white" /> : <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />}
                         </motion.div>
-                        <span className={`absolute -bottom-7 text-[9px] md:text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-colors duration-300 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>
+                        <span className={`absolute -bottom-7 text-[9px] md:text-[10px] font-semibold uppercase tracking-widest whitespace-nowrap transition-colors duration-300 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`}>
                           {s.label}
                         </span>
                       </div>
@@ -1121,9 +1121,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   className="space-y-12"
                 >
                   <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                    <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-black shadow-sm">01</div>
+                    <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-semibold shadow-sm">01</div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-800 tracking-tight">Identitas Diri Pemohon</h3>
+                      <h3 className="text-lg font-semibold text-slate-800 tracking-tight">Identitas Diri Pemohon</h3>
                       <p className="text-xs text-slate-400 font-bold">Pastikan data yang Anda masukkan sesuai dengan KTP & Kartu Keluarga (KK).</p>
                     </div>
                   </div>
@@ -1131,14 +1131,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-7">
                     {/* SECTION A: Identitas Utama */}
                     <div className="md:col-span-2">
-                      <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest block mb-4">A. Informasi Kependudukan Utama</span>
+                      <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest block mb-4">A. Informasi Kependudukan Utama</span>
                     </div>
 
                     <div className="md:col-span-2 group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Lengkap Sesuai KTP</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Lengkap Sesuai KTP</label>
                       <div className="relative">
                         <input 
-                          className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-300" 
+                          className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors placeholder:text-slate-300" 
                           value={applicantName} 
                           onChange={e=>setApplicantName(e.target.value)} 
                           required 
@@ -1150,14 +1150,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                     <div className="group">
                       <div className="flex justify-between items-center mb-2 ml-1">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">NIK (16 Digit)</label>
-                        <span className={`text-[10px] font-black transition-colors ${nik.length === 16 ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">NIK (16 Digit)</label>
+                        <span className={`text-[10px] font-semibold transition-colors ${nik.length === 16 ? 'text-emerald-600' : 'text-slate-400'}`}>
                           {nik.length}/16 Digit
                         </span>
                       </div>
                       <input 
                         maxLength={16}
-                        className={`w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all ${nik.length > 0 && nik.length < 16 ? 'border-amber-300 focus:border-amber-500 focus:ring-amber-500/10' : nik.length === 16 ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/10' : 'border-slate-200'}`} 
+                        className={`w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors ${nik.length > 0 && nik.length < 16 ? 'border-amber-300 focus:border-amber-500 focus:ring-amber-500/10' : nik.length === 16 ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/10' : 'border-slate-200'}`} 
                         value={nik} 
                         onChange={e=>setNik(e.target.value.replace(/\D/g, ''))} 
                         required 
@@ -1166,9 +1166,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Kepala Keluarga (di KK)</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Nama Kepala Keluarga (di KK)</label>
                       <input 
-                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all" 
+                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors" 
                         value={familyHeadName} 
                         onChange={e=>setFamilyHeadName(e.target.value)} 
                         required 
@@ -1178,13 +1178,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                     {/* SECTION B: Biodata Lahir */}
                     <div className="md:col-span-2 mt-4">
-                      <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest block mb-4">B. Tempat & Tanggal Lahir</span>
+                      <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest block mb-4">B. Tempat & Tanggal Lahir</span>
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tempat Lahir</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Tempat Lahir</label>
                       <input 
-                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all" 
+                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors" 
                         value={birthPlace} 
                         onChange={e=>setBirthPlace(e.target.value)} 
                         required
@@ -1193,10 +1193,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tanggal Lahir</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Tanggal Lahir</label>
                       <input 
                         type="date" 
-                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all" 
+                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors" 
                         value={birthDate} 
                         onChange={e=>setBirthDate(e.target.value)} 
                         required
@@ -1205,14 +1205,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                     {/* SECTION C: Detail Personal */}
                     <div className="md:col-span-2 mt-4">
-                      <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest block mb-4">C. Profil Sosial & Kependudukan</span>
+                      <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest block mb-4">C. Profil Sosial & Kependudukan</span>
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jenis Kelamin</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Jenis Kelamin</label>
                       <div className="relative">
                         <select 
-                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer" 
+                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors appearance-none cursor-pointer" 
                           value={gender} 
                           onChange={e=>setGender(e.target.value as any)}
                         >
@@ -1224,10 +1224,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Agama</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Agama</label>
                       <div className="relative">
                         <select 
-                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer" 
+                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors appearance-none cursor-pointer" 
                           value={religion} 
                           onChange={e=>setReligion(e.target.value)}
                         >
@@ -1243,10 +1243,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Status Perkawinan</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Status Perkawinan</label>
                       <div className="relative">
                         <select 
-                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer" 
+                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors appearance-none cursor-pointer" 
                           value={maritalStatus} 
                           onChange={e=>setMaritalStatus(e.target.value as any)}
                         >
@@ -1260,9 +1260,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Kewarganegaraan</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Kewarganegaraan</label>
                       <input 
-                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all" 
+                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors" 
                         value={nationality} 
                         onChange={e=>setNationality(e.target.value)} 
                         required 
@@ -1271,9 +1271,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Pekerjaan</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Pekerjaan</label>
                       <input 
-                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all" 
+                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors" 
                         value={job} 
                         onChange={e=>setJob(e.target.value)} 
                         required
@@ -1282,10 +1282,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Golongan Darah</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Golongan Darah</label>
                       <div className="relative">
                         <select 
-                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer" 
+                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors appearance-none cursor-pointer" 
                           value={bloodType} 
                           onChange={e=>setBloodType(e.target.value as any)}
                         >
@@ -1300,10 +1300,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Pendidikan Terakhir</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Pendidikan Terakhir</label>
                       <div className="relative">
                         <select 
-                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer" 
+                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors appearance-none cursor-pointer" 
                           value={education} 
                           onChange={e=>setEducation(e.target.value)}
                         >
@@ -1321,10 +1321,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Hubungan Keluarga</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Hubungan Keluarga</label>
                       <div className="relative">
                         <select 
-                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer" 
+                          className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors appearance-none cursor-pointer" 
                           value={familyStatus} 
                           onChange={e=>setFamilyStatus(e.target.value as any)}
                         >
@@ -1347,13 +1347,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                     {/* SECTION D: Alamat & Domisili */}
                     <div className="md:col-span-2 mt-4">
-                      <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest block mb-4">D. Alamat & Status Tempat Tinggal</span>
+                      <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest block mb-4">D. Alamat & Status Tempat Tinggal</span>
                     </div>
 
                     <div className="md:col-span-2 group">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Sesuai KTP</label>
+                      <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Sesuai KTP</label>
                       <textarea 
-                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all resize-none h-20 leading-relaxed" 
+                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors resize-none h-20 leading-relaxed" 
                         value={addressKtp} 
                         onChange={e=>setAddressKtp(e.target.value)} 
                         required 
@@ -1363,7 +1363,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                     <div className="md:col-span-2 group">
                       <div className="flex items-center justify-between mb-3 ml-1">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Alamat Domisili Saat Ini</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Alamat Domisili Saat Ini</label>
                         <label className="flex items-center gap-2 cursor-pointer select-none">
                           <input 
                             type="checkbox" 
@@ -1371,12 +1371,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             checked={isSameAddress}
                             onChange={(e) => setIsSameAddress(e.target.checked)}
                           />
-                          <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Sama dengan KTP</span>
+                          <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-widest">Sama dengan KTP</span>
                         </label>
                       </div>
                       {!isSameAddress && (
                         <textarea 
-                          className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all resize-none h-20 leading-relaxed" 
+                          className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors resize-none h-20 leading-relaxed" 
                           value={currentAddress} 
                           onChange={e=>setCurrentAddress(e.target.value)} 
                           required={!isSameAddress}
@@ -1396,7 +1396,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     <button 
                       type="button"
                       onClick={handleNextToStep2}
-                      className="px-8 py-4.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-100/85 hover:shadow-indigo-200 transition-all flex items-center gap-2.5 duration-200"
+                      className="px-8 py-4.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white rounded-2xl text-xs font-semibold uppercase tracking-widest shadow-xl shadow-2xs hover:shadow-indigo-200 transition-colors flex items-center gap-2.5 duration-200"
                     >
                       Lanjut ke Keperluan <ArrowRight size={16} strokeWidth={2.5} />
                     </button>
@@ -1412,9 +1412,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   className="space-y-12"
                 >
                   <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                    <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-black shadow-sm">02</div>
+                    <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-semibold shadow-sm">02</div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-800 tracking-tight">Detail Kontak & Keperluan Surat</h3>
+                      <h3 className="text-lg font-semibold text-slate-800 tracking-tight">Detail Kontak & Keperluan Surat</h3>
                       <p className="text-xs text-slate-400 font-bold">Pilih jenis surat dan isikan alasan keperluan administratif Anda secara jelas.</p>
                     </div>
                   </div>
@@ -1423,10 +1423,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {/* Phone & Email Fields */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                       <div className="group">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">No. HP / WhatsApp (Aktif)</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">No. HP / WhatsApp (Aktif)</label>
                         <div className="relative">
                           <input 
-                            className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all placeholder:text-slate-300" 
+                            className="w-full p-4.5 pr-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors placeholder:text-slate-300" 
                             value={phone} 
                             onChange={e=>setPhone(e.target.value)} 
                             required 
@@ -1436,10 +1436,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         </div>
                       </div>
                       <div className="group">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Email (Opsional)</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Alamat Email (Opsional)</label>
                         <input 
                           type="email" 
-                          className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
+                          className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors placeholder:text-slate-300" 
                           value={email} 
                           onChange={e=>setEmail(e.target.value)} 
                           placeholder="alamat.email@contoh.com"
@@ -1450,10 +1450,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {/* Integrated Letter Type Selector & Estimated Timing Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
                       <div className="md:col-span-2">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Jenis Surat Pengantar</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Jenis Surat Pengantar</label>
                         <div className="relative">
                           <select 
-                            className="w-full p-4.5 pr-12 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all appearance-none cursor-pointer shadow-sm" 
+                            className="w-full p-4.5 pr-12 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-colors appearance-none cursor-pointer shadow-sm" 
                             value={requestType} 
                             onChange={e=>setRequestType(e.target.value)}
                           >
@@ -1468,9 +1468,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <div className="bg-white border border-slate-100 rounded-[1.8rem] p-4 flex flex-col justify-center shadow-sm">
                         <div className="flex items-center gap-1.5 mb-1 text-indigo-600">
                           <Clock size={14} strokeWidth={2.5} />
-                          <span className="text-[9px] font-black uppercase tracking-wider">Durasi Pengurusan</span>
+                          <span className="text-[9px] font-semibold uppercase tracking-wider">Durasi Pengurusan</span>
                         </div>
-                        <span className="text-base font-black text-indigo-600 transition-all">
+                        <span className="text-base font-semibold text-indigo-600 transition-colors">
                           {estimatedTimes[requestType] || '1x24 Jam'}
                         </span>
                         <span className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">Sejak RT menyetujui</span>
@@ -1480,9 +1480,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {/* If Custom chosen */}
                     {requestType === 'Lainnya' && (
                       <div className="group">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Sebutkan Jenis Surat Lainnya <span className="text-red-500">*</span></label>
+                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2 ml-1">Sebutkan Jenis Surat Lainnya <span className="text-red-500">*</span></label>
                         <input 
-                          className="w-full p-4.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" 
+                          className="w-full p-4.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors placeholder:text-slate-300" 
                           value={customRequestType} 
                           onChange={e => setCustomRequestType(e.target.value)} 
                           placeholder="Tuliskan jenis surat pengantar (Contoh: Surat Keterangan Usaha)" 
@@ -1504,7 +1504,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                               <CheckCircle2 size={16} />
                             </div>
                             <div>
-                              <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
                                 Checklist Mandiri Persyaratan Berkas
                               </h4>
                               <p className="text-[10px] text-slate-500 font-medium">
@@ -1518,9 +1518,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             const readyCount = reqs.filter(r => checkedRequirements[`${requestType}-${r}`]).length;
                             const isAllReady = readyCount === reqs.length;
                             return (
-                              <span className={`px-3 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider self-start sm:self-auto flex items-center gap-1.5 shadow-xs transition-all ${
+                              <span className={`px-3 py-1 rounded-xl text-[10px] font-semibold uppercase tracking-wider self-start sm:self-auto flex items-center gap-1.5 shadow-xs transition-colors ${
                                 isAllReady 
-                                  ? 'bg-emerald-500 text-white shadow-emerald-500/20' 
+                                  ? 'bg-emerald-500 text-white shadow-2xs' 
                                   : 'bg-amber-100 text-amber-900 border border-amber-300'
                               }`}>
                                 <span>{readyCount}/{reqs.length} Berkas Siap</span>
@@ -1537,7 +1537,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             return (
                               <label 
                                 key={i} 
-                                className={`flex items-start gap-3 p-3 rounded-xl border transition-all cursor-pointer select-none ${
+                                className={`flex items-start gap-3 p-3 rounded-xl border transition-colors cursor-pointer select-none ${
                                   isChecked 
                                     ? 'bg-emerald-50/90 border-emerald-300 text-slate-900 shadow-xs ring-1 ring-emerald-400/20' 
                                     : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
@@ -1555,7 +1555,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                   className="mt-0.5 h-4 w-4 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0 accent-indigo-600"
                                 />
                                 <div className="space-y-0.5">
-                                  <span className={`text-xs font-bold block ${isChecked ? 'text-emerald-950 font-black' : 'text-slate-800'}`}>
+                                  <span className={`text-xs font-bold block ${isChecked ? 'text-emerald-950 font-semibold' : 'text-slate-800'}`}>
                                     {req}
                                   </span>
                                   <span className="text-[9px] text-slate-400 font-medium block">
@@ -1570,7 +1570,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-indigo-100/60 text-[10px] text-slate-500 font-medium">
                           <span className="flex items-center gap-1.5 text-indigo-700 font-bold">
                             <Clock size={12} className="text-indigo-600" />
-                            <span>Estimasi Verifikasi RT: <strong className="text-slate-900 font-black">{estimatedTimes[requestType] || '1x24 Jam'}</strong></span>
+                            <span>Estimasi Verifikasi RT: <strong className="text-slate-900 font-semibold">{estimatedTimes[requestType] || '1x24 Jam'}</strong></span>
                           </span>
                           <span className="italic text-slate-400 text-[9px]">
                             * Serahkan berkas fisik asli saat verifikasi/pengambilan dokumen cetak di kediaman RT
@@ -1582,19 +1582,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {/* Purpose Text area & Suggester Button */}
                     <div className="group">
                       <div className="flex justify-between items-center mb-2.5 ml-1">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Tujuan / Keperluan Surat</label>
+                        <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Tujuan / Keperluan Surat</label>
                         {dynamicTemplates[requestType] && (
                           <button 
                             type="button"
                             onClick={handleUseTemplate}
-                            className="bg-indigo-50 hover:bg-indigo-100 text-[10px] font-black text-indigo-600 uppercase tracking-widest px-4 py-2 rounded-2xl transition-all flex items-center gap-1.5 shadow-sm active:scale-95 duration-150"
+                            className="bg-indigo-50 hover:bg-indigo-100 text-[10px] font-semibold text-indigo-600 uppercase tracking-widest px-4 py-2 rounded-2xl transition-colors flex items-center gap-1.5 shadow-sm active:scale-95 duration-150"
                           >
-                            <Sparkles size={11} className="animate-pulse" /> Gunakan Draf Otomatis
+                            <Sparkles size={11} className="" /> Gunakan Draf Otomatis
                           </button>
                         )}
                       </div>
                       <textarea 
-                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-all min-h-[120px] resize-none leading-relaxed" 
+                        className="w-full p-4.5 bg-slate-50/50 hover:bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:bg-white focus:border-indigo-500 outline-none transition-colors min-h-[120px] resize-none leading-relaxed" 
                         value={purposeDetail} 
                         onChange={e=>setPurposeDetail(e.target.value)} 
                         required 
@@ -1608,14 +1608,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     <button 
                       type="button"
                       onClick={() => setLetterStep(1)}
-                      className="px-6 py-4 text-slate-400 hover:text-slate-600 font-black uppercase tracking-widest transition-colors text-xs"
+                      className="px-6 py-4 text-slate-400 hover:text-slate-600 font-semibold uppercase tracking-widest transition-colors text-xs"
                     >
                       Sebelumnya
                     </button>
                     <button 
                       type="button"
                       onClick={handleNextToStep3}
-                      className="px-8 py-4.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-100/85 hover:shadow-indigo-200 transition-all flex items-center gap-2.5 duration-200"
+                      className="px-8 py-4.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white rounded-2xl text-xs font-semibold uppercase tracking-widest shadow-xl shadow-2xs hover:shadow-indigo-200 transition-colors flex items-center gap-2.5 duration-200"
                     >
                       Lanjut ke Verifikasi <ArrowRight size={16} strokeWidth={2.5} />
                     </button>
@@ -1631,9 +1631,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   className="space-y-12"
                 >
                   <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                    <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-black shadow-sm">03</div>
+                    <div className="w-10 h-10 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-semibold shadow-sm">03</div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-800 tracking-tight">Verifikasi & Pengiriman</h3>
+                      <h3 className="text-lg font-semibold text-slate-800 tracking-tight">Verifikasi & Pengiriman</h3>
                       <p className="text-xs text-slate-400 font-bold">Lakukan verifikasi keamanan menggunakan PIN Akses Rumah yang sah dari RT.</p>
                     </div>
                   </div>
@@ -1645,16 +1645,16 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         <ShieldCheck size={28} />
                       </div>
                       <div>
-                        <h4 className="text-lg font-black text-indigo-900 tracking-tight">Autentikasi Hak Akses</h4>
-                        <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-100/80 px-2.5 py-1 rounded-full inline-block mt-1">Keamanan Enkripsi</span>
+                        <h4 className="text-lg font-semibold text-indigo-900 tracking-tight">Autentikasi Hak Akses</h4>
+                        <span className="text-[9px] font-semibold text-indigo-600 uppercase tracking-widest bg-indigo-100/80 px-2.5 py-1 rounded-full inline-block mt-1">Keamanan Enkripsi</span>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="group">
-                        <label className="block text-[10px] font-black text-indigo-900/60 uppercase tracking-widest mb-3 text-center">Blok & No. Rumah</label>
+                        <label className="block text-[10px] font-semibold text-indigo-900/60 uppercase tracking-widest mb-3 text-center">Blok & No. Rumah</label>
                         <input 
-                          className="w-full p-5 bg-white border border-indigo-100 rounded-2xl text-lg font-black focus:border-indigo-500 outline-none transition-all text-center uppercase shadow-sm placeholder:text-slate-300" 
+                          className="w-full p-5 bg-white border border-indigo-100 rounded-2xl text-lg font-semibold focus:border-indigo-500 outline-none transition-colors text-center uppercase shadow-sm placeholder:text-slate-300" 
                           placeholder="A-12 atau B3-01" 
                           value={houseId} 
                           onChange={e=>setHouseId(e.target.value)} 
@@ -1662,12 +1662,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         />
                       </div>
                       <div className="group">
-                        <label className="block text-[10px] font-black text-indigo-900/60 uppercase tracking-widest mb-3 text-center">PIN Akses Rumah</label>
+                        <label className="block text-[10px] font-semibold text-indigo-900/60 uppercase tracking-widest mb-3 text-center">PIN Akses Rumah</label>
                         <div className="relative">
                           <input 
                             type={showPin ? "text" : "password"} 
                             placeholder="6 Digit PIN" 
-                            className="w-full p-5 bg-white border border-indigo-100 rounded-2xl text-lg font-black focus:border-indigo-500 outline-none transition-all text-center shadow-sm tracking-[0.4em] placeholder:text-slate-300" 
+                            className="w-full p-5 bg-white border border-indigo-100 rounded-2xl text-lg font-semibold focus:border-indigo-500 outline-none transition-colors text-center shadow-sm tracking-[0.4em] placeholder:text-slate-300" 
                             value={accessCode} 
                             onChange={e=>setAccessCode(e.target.value)} 
                             required
@@ -1700,14 +1700,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     <button 
                       type="button"
                       onClick={() => setLetterStep(2)}
-                      className="px-6 py-4 text-slate-400 hover:text-slate-600 font-black uppercase tracking-widest transition-colors text-xs self-start lg:self-auto"
+                      className="px-6 py-4 text-slate-400 hover:text-slate-600 font-semibold uppercase tracking-widest transition-colors text-xs self-start lg:self-auto"
                     >
                       Sebelumnya
                     </button>
                     
                     <div className="flex flex-col sm:flex-row items-center gap-6 w-full lg:w-auto">
                       <div className="hidden sm:flex flex-col text-right">
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Sistem Validasi Aktif</p>
+                        <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest">Sistem Validasi Aktif</p>
                         <p className="text-[9px] text-slate-400 font-bold mt-0.5">Seksi Kependudukan & Administrasi RT 02</p>
                       </div>
                       
@@ -1716,7 +1716,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         size="lg" 
                         disabled={isSubmittingLetter}
                         onClick={handleSubmitSurat}
-                        className="w-full sm:w-auto px-12 py-5 rounded-2xl text-xs font-black uppercase tracking-widest shadow-2xl shadow-indigo-600/35 hover:shadow-indigo-600/50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        className="w-full sm:w-auto px-12 py-5 rounded-2xl text-xs font-semibold uppercase tracking-widest shadow-2xl shadow-2xs hover:shadow-2xs hover:-translate-y-1 transition-colors duration-300 flex items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                       >
                         {isSubmittingLetter ? (
                           <>
@@ -1742,19 +1742,19 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-white p-8 md:p-14 rounded-[3rem] border border-slate-150 shadow-2xl shadow-rose-150/15"
+            className="bg-white p-8 md:p-14 rounded-[3rem] border border-slate-150 shadow-2xl shadow-2xs"
           >
             {/* Header section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 pb-8 border-b border-slate-100">
               <div className="flex items-center gap-5">
-                <div className="p-4 bg-rose-500 text-white rounded-2xl shadow-lg shadow-rose-500/20">
+                <div className="p-4 bg-rose-500 text-white rounded-2xl shadow-lg shadow-2xs">
                   <AlertTriangle size={32} strokeWidth={2.5} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-rose-50 text-rose-600 rounded-md text-[9px] font-black uppercase tracking-wider">Public Service</span>
+                    <span className="px-2 py-0.5 bg-rose-50 text-rose-600 rounded-md text-[9px] font-semibold uppercase tracking-wider">Public Service</span>
                   </div>
-                  <h2 className="text-2xl font-black text-slate-950 tracking-tight mt-1">Laporan & Pengaduan Warga</h2>
+                  <h2 className="text-2xl font-semibold text-slate-950 tracking-tight mt-1">Laporan & Pengaduan Warga</h2>
                   <p className="text-slate-500 text-xs font-semibold">Saluran aspirasi dan pengaduan insiden lingkungan RT 02 yang aman dan terkawal.</p>
                 </div>
               </div>
@@ -1769,12 +1769,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               ].map((item, idx) => {
                 const Icon = item.icon;
                 return (
-                  <div key={idx} className={`p-5 rounded-2xl border ${item.colorClass} flex gap-4 transition-all hover:scale-[1.01]`}>
+                  <div key={idx} className={`p-5 rounded-2xl border ${item.colorClass} flex gap-4 transition-colors hover:scale-[1.01]`}>
                     <div className="p-2.5 bg-white rounded-xl shadow-xs self-start shrink-0">
                       <Icon size={18} />
                     </div>
                     <div>
-                      <h4 className="text-xs font-black text-slate-800 uppercase tracking-wide mb-1">{item.title}</h4>
+                      <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wide mb-1">{item.title}</h4>
                       <p className="text-[11px] text-slate-500 font-medium leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
@@ -1788,14 +1788,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 {/* Left Side: Report Details (7 Cols) */}
                 <div className="lg:col-span-7 space-y-7">
                   <div className="flex items-center gap-3.5 pb-2.5 border-b border-slate-100">
-                    <div className="w-6.5 h-6.5 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[10px] font-black">1</div>
-                    <h3 className="text-[10.5px] font-black text-slate-850 uppercase tracking-widest">Detail & Kronologi Kejadian</h3>
+                    <div className="w-6.5 h-6.5 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[10px] font-semibold">1</div>
+                    <h3 className="text-[10.5px] font-semibold text-slate-850 uppercase tracking-widest">Detail & Kronologi Kejadian</h3>
                   </div>
                   
                   <div className="space-y-6">
                     {/* Category Selection Option */}
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Kategori Permasalahan / Kejadian <span className="text-rose-500">*</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Kategori Permasalahan / Kejadian <span className="text-rose-500">*</span></label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
                           { id: 'Keamanan', title: 'Keamanan Domestik', desc: 'Sengketa, keributan, kecurigaan', icon: Shield, color: 'text-rose-600', activeBg: 'bg-rose-50/70 border-rose-500 text-rose-950 ring-2 ring-rose-500/10' },
@@ -1812,18 +1812,18 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                               type="button"
                               onClick={() => setReportType(item.id as any)}
                               className={`
-                                p-4.5 rounded-xl border text-left flex gap-3.5 transition-all duration-250 cursor-pointer w-full
+                                p-4.5 rounded-xl border text-left flex gap-3.5 transition-colors duration-250 cursor-pointer w-full
                                 ${isSelected 
                                   ? `${item.activeBg} shadow-sm` 
                                   : 'bg-slate-50 hover:bg-slate-100/75 text-slate-650 border-slate-200/85'
                                 }
                               `}
                             >
-                              <div className={`p-2.5 bg-white rounded-xl shadow-xs self-start shrink-0 ${item.color} ${isSelected ? 'scale-110' : ''} transition-all`}>
+                              <div className={`p-2.5 bg-white rounded-xl shadow-xs self-start shrink-0 ${item.color} ${isSelected ? 'scale-110' : ''} transition-colors`}>
                                 <Icon size={16} />
                               </div>
                               <div>
-                                <p className="text-[11px] font-black uppercase tracking-wider">{item.title}</p>
+                                <p className="text-[11px] font-semibold uppercase tracking-wider">{item.title}</p>
                                 <p className="text-[10px] text-slate-450 font-semibold mt-1 leading-normal">{item.desc}</p>
                               </div>
                             </button>
@@ -1835,13 +1835,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {/* Location Block */}
                     <div className="space-y-2">
                       <div className="flex justify-between items-center ml-1">
-                        <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest">Lokasi Lapangan Kejadian <span className="text-rose-500">*</span></label>
+                        <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest">Lokasi Lapangan Kejadian <span className="text-rose-500">*</span></label>
                         <span className="text-[8.5px] text-slate-500 font-bold uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded">Koordinat Riil</span>
                       </div>
                       <div className="relative">
                         <MapPin size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input 
-                          className="w-full pl-11 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-slate-900 outline-none hover:border-slate-350 focus:ring-4 focus:ring-slate-900/5 transition-all uppercase placeholder:normal-case shadow-xs" 
+                          className="w-full pl-11 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-slate-900 outline-none hover:border-slate-350 focus:ring-4 focus:ring-slate-900/5 transition-colors uppercase placeholder:normal-case shadow-xs" 
                           value={reportHouseId} 
                           onChange={e=>setReportHouseId(e.target.value)} 
                           placeholder="Cth: Blok C7-02 atau Depan Lapangan RT"
@@ -1852,9 +1852,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                     {/* Description Textarea */}
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Deskripsi Kronologis Insiden <span className="text-rose-500">*</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Deskripsi Kronologis Insiden <span className="text-rose-500">*</span></label>
                       <textarea 
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-slate-900 outline-none hover:border-slate-350 focus:ring-4 focus:ring-slate-900/5 transition-all min-h-[148px] resize-none leading-relaxed placeholder:font-medium shadow-xs" 
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-slate-900 outline-none hover:border-slate-350 focus:ring-4 focus:ring-slate-900/5 transition-colors min-h-[148px] resize-none leading-relaxed placeholder:font-medium shadow-xs" 
                         value={reportDesc} 
                         onChange={e=>setReportDesc(e.target.value)} 
                         required 
@@ -1864,7 +1864,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                     {/* Photo Upload Area */}
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Unggah Lampiran Visual / Foto Bukti <span className="text-slate-450 font-medium">(Opsional)</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Unggah Lampiran Visual / Foto Bukti <span className="text-slate-450 font-medium">(Opsional)</span></label>
                       <div className="relative">
                         <input 
                           type="file" 
@@ -1877,13 +1877,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-sm group">
                             <img src={reportPhoto} alt="Preview" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2.5">
-                              <label htmlFor="report-photo" className="px-4 py-2 bg-white text-slate-900 rounded-lg text-[10px] font-black uppercase tracking-wider cursor-pointer shadow-md hover:bg-slate-50 transition-all">
+                              <label htmlFor="report-photo" className="px-4 py-2 bg-white text-slate-900 rounded-lg text-[10px] font-semibold uppercase tracking-wider cursor-pointer shadow-md hover:bg-slate-50 transition-colors">
                                 Ubah Lampiran Foto
                               </label>
                               <button 
                                 type="button"
                                 onClick={() => setReportPhoto(null)}
-                                className="px-4 py-2 bg-rose-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-md hover:bg-rose-700 transition-all flex items-center gap-1.5 cursor-pointer"
+                                className="px-4 py-2 bg-rose-600 text-white rounded-lg text-[10px] font-semibold uppercase tracking-wider shadow-md hover:bg-rose-700 transition-colors flex items-center gap-1.5 cursor-pointer"
                               >
                                 <Trash2 size={12} /> Hapus Lampiran
                               </button>
@@ -1892,12 +1892,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         ) : (
                           <label 
                             htmlFor="report-photo"
-                            className="flex flex-col items-center justify-center w-full p-6 border border-dashed border-slate-250 hover:border-slate-950 rounded-xl bg-slate-50/50 hover:bg-slate-100/40 transition-all cursor-pointer group"
+                            className="flex flex-col items-center justify-center w-full p-6 border border-dashed border-slate-250 hover:border-slate-950 rounded-xl bg-slate-50/50 hover:bg-slate-100/40 transition-colors cursor-pointer group"
                           >
                             <div className="p-2.5 bg-white rounded-lg shadow-sm text-slate-400 mb-2 group-hover:text-slate-900 transition-colors">
                               <Camera size={18} />
                             </div>
-                            <p className="text-[11px] font-black text-slate-750">Pilih atau Seret Foto File Bukti</p>
+                            <p className="text-[11px] font-semibold text-slate-750">Pilih atau Seret Foto File Bukti</p>
                             <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase tracking-widest">JPG, PNG (Format Digital Maksimal 5MB)</p>
                           </label>
                         )}
@@ -1909,17 +1909,17 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 {/* Right Side: Identity of Reporter (5 Cols) */}
                 <div className="lg:col-span-5 space-y-7">
                   <div className="flex items-center gap-3 pb-2.5 border-b border-slate-100">
-                    <div className="w-6.5 h-6.5 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[10px] font-black">2</div>
-                    <h3 className="text-[10.5px] font-black text-slate-850 uppercase tracking-widest">Identitas Akuntabel Pelapor</h3>
+                    <div className="w-6.5 h-6.5 bg-slate-900 text-white rounded-lg flex items-center justify-center text-[10px] font-semibold">2</div>
+                    <h3 className="text-[10.5px] font-semibold text-slate-850 uppercase tracking-widest">Identitas Akuntabel Pelapor</h3>
                   </div>
                   
                   <div className="space-y-5">
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Nama Lengkap Sesuai KTP <span className="text-rose-500">*</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Nama Lengkap Sesuai KTP <span className="text-rose-500">*</span></label>
                       <div className="relative">
                         <User size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input 
-                          className="w-full pl-11 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-slate-900 outline-none hover:border-slate-350 focus:ring-4 focus:ring-slate-900/5 transition-all shadow-xs" 
+                          className="w-full pl-11 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-slate-900 outline-none hover:border-slate-350 focus:ring-4 focus:ring-slate-900/5 transition-colors shadow-xs" 
                           value={reporterName} 
                           onChange={e=>setReporterName(e.target.value)} 
                           required 
@@ -1929,11 +1929,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Nomor WhatsApp Aktif <span className="text-rose-500">*</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Nomor WhatsApp Aktif <span className="text-rose-500">*</span></label>
                       <div className="relative">
                         <Phone size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                         <input 
-                          className="w-full pl-11 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-slate-900 outline-none hover:border-slate-350 focus:ring-4 focus:ring-slate-900/5 transition-all shadow-xs" 
+                          className="w-full pl-11 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-slate-900 outline-none hover:border-slate-350 focus:ring-4 focus:ring-slate-900/5 transition-colors shadow-xs" 
                           value={reporterPhone} 
                           onChange={e=>setReporterPhone(e.target.value)} 
                           required 
@@ -1950,16 +1950,16 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           <Lock size={14} />
                         </div>
                         <div>
-                          <h4 className="text-[11.5px] font-black text-rose-955 uppercase tracking-wide">Validasi Otoritas Rumah</h4>
+                          <h4 className="text-[11.5px] font-semibold text-rose-955 uppercase tracking-wide">Validasi Otoritas Rumah</h4>
                           <p className="text-[9.5px] text-rose-700/70 font-semibold uppercase tracking-wider">Verifikasi Keaslian Laporan</p>
                         </div>
                       </div>
                       
                       <div className="space-y-3 pt-1">
                         <div className="space-y-1.5">
-                          <label className="block text-[9.5px] font-black text-rose-900 uppercase tracking-widest ml-1">Blok Rumah Anda <span className="text-rose-500">*</span></label>
+                          <label className="block text-[9.5px] font-semibold text-rose-900 uppercase tracking-widest ml-1">Blok Rumah Anda <span className="text-rose-500">*</span></label>
                           <input 
-                            className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs font-black focus:border-rose-500 hover:border-slate-300 outline-none transition-all text-center uppercase shadow-xs" 
+                            className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:border-rose-500 hover:border-slate-300 outline-none transition-colors text-center uppercase shadow-xs" 
                             placeholder="Cth: C7-02" 
                             value={reporterHouseId} 
                             onChange={e=>setReporterHouseId(e.target.value)} 
@@ -1968,12 +1968,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         </div>
                         
                         <div className="space-y-1.5">
-                          <label className="block text-[9.5px] font-black text-rose-900 uppercase tracking-widest ml-1">PIN Akses Rumah Anda <span className="text-rose-500">*</span></label>
+                          <label className="block text-[9.5px] font-semibold text-rose-900 uppercase tracking-widest ml-1">PIN Akses Rumah Anda <span className="text-rose-500">*</span></label>
                           <div className="relative">
                             <input 
                               type={showPin ? "text" : "password"} 
                               placeholder="Ketik 6 digit PIN rumah Anda" 
-                              className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs font-black focus:border-rose-500 hover:border-slate-300 outline-none transition-all text-center tracking-widest shadow-xs" 
+                              className="w-full p-3.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:border-rose-500 hover:border-slate-300 outline-none transition-colors text-center tracking-widest shadow-xs" 
                               value={accessCode} 
                               onChange={e=>setAccessCode(e.target.value.replace(/\D/g, ''))} 
                               required
@@ -2005,7 +2005,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   variant="danger" 
                   size="lg" 
                   onClick={handleSubmitLapor}
-                  className="w-full sm:w-auto px-7 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer text-white"
+                  className="w-full sm:w-auto px-7 py-3.5 rounded-xl text-xs font-semibold uppercase tracking-widest shadow-md hover:-translate-y-0.5 transition-colors duration-200 cursor-pointer text-white"
                 >
                   <Send size={13} className="mr-2" /> Kirim Laporan Resmi
                 </Button>
@@ -2020,7 +2020,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="bg-white p-6 md:p-12 rounded-[3.5rem] border border-slate-150 shadow-2xl shadow-slate-150/40"
+            className="bg-white p-6 md:p-12 rounded-[3.5rem] border border-slate-150 shadow-2xl shadow-2xs"
           >
             {/* Header section with step badges and indicators */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 pb-8 border-b border-slate-100">
@@ -2030,10 +2030,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black uppercase tracking-widest border border-emerald-100/50">Kependudukan</span>
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-semibold uppercase tracking-widest border border-emerald-100/50">Kependudukan</span>
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                   </div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight mt-0.5">Laporan Mutasi Warga</h2>
+                  <h2 className="text-2xl font-semibold text-slate-900 tracking-tight mt-0.5">Laporan Mutasi Warga</h2>
                   <p className="text-xs text-slate-500 font-semibold">Prosedur pelaporan penambahan atau pengurangan anggota keluarga RT 02.</p>
                 </div>
               </div>
@@ -2051,7 +2051,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     <div 
                       key={s.step} 
                       className={`
-                        px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all duration-300
+                        px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors duration-300
                         ${isActive 
                           ? 'bg-emerald-600 text-white shadow-xs' 
                           : isCompleted 
@@ -2059,8 +2059,8 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             : 'text-slate-400 hover:text-slate-600'}
                       `}
                     >
-                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${isActive ? 'bg-white text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>{s.step}</span>
-                      <span className="text-[10px] font-black uppercase tracking-wider">{s.title}</span>
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-semibold ${isActive ? 'bg-white text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>{s.step}</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider">{s.title}</span>
                     </div>
                   );
                 })}
@@ -2073,7 +2073,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 <Info size={18} />
               </div>
               <div>
-                <p className="text-[11px] font-black text-indigo-900 uppercase tracking-widest">Panduan Kependudukan RT 02</p>
+                <p className="text-[11px] font-semibold text-indigo-900 uppercase tracking-widest">Panduan Kependudukan RT 02</p>
                 <p className="text-[11px] font-semibold text-slate-500 mt-0.5 leading-relaxed">
                   Gunakan menu <b>Mutasi</b> ini jika hunian Anda sudah aktif dan terdaftar di sistem. Jika Anda penghuni baru pertama kali yang ingin meregistrasikan alamat unit baru, harap gunakan menu <b>Registrasi Penghuni</b> di beranda utama.
                 </p>
@@ -2086,7 +2086,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 <ShieldAlert size={18} />
               </div>
               <div>
-                <p className="text-[11px] font-black text-amber-900 uppercase tracking-widest">Ketentuan Retribusi Kota Palu</p>
+                <p className="text-[11px] font-semibold text-amber-900 uppercase tracking-widest">Ketentuan Retribusi Kota Palu</p>
                 <p className="text-[11px] font-semibold text-slate-500 mt-0.5 leading-relaxed">
                   Sesuai Perda Kota Palu, pemenuhan iuran <b>Retribusi Sampah & Kebersihan</b> wajib dilunasi untuk setiap pengurusan kelengkapan mutasi administrasi. Sistem akan melakukan autocheck tagihan rumah Anda.
                 </p>
@@ -2107,13 +2107,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         <Home size={18} />
                       </div>
                       <div>
-                        <h4 className="text-xs font-black text-indigo-950 uppercase tracking-wider">Warga Baru Menempati Rumah / Kavling?</h4>
+                        <h4 className="text-xs font-semibold text-indigo-950 uppercase tracking-wider">Warga Baru Menempati Rumah / Kavling?</h4>
                         <p className="text-[11px] text-indigo-700/80 font-medium">Jika Anda baru pindah dan ingin mendaftarkan unit rumah pada denah RT 02, silakan gunakan Formulir Registrasi Resmi.</p>
                       </div>
                     </div>
                     <a 
                       href="/register" 
-                      className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 shadow-xs"
+                      className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shrink-0 flex items-center gap-1.5 shadow-xs"
                     >
                       <span>Daftar Rumah Baru</span>
                       <ArrowRight size={13} />
@@ -2121,9 +2121,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   </div>
 
                   <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                    <div className="w-7 h-7 bg-slate-900 text-white rounded-lg flex items-center justify-center text-xs font-black">1</div>
+                    <div className="w-7 h-7 bg-slate-900 text-white rounded-lg flex items-center justify-center text-xs font-semibold">1</div>
                     <div>
-                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Pilih Kategori Mutasi</h3>
+                      <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-widest">Pilih Kategori Mutasi</h3>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pilih tipe kejadian administrasi yang terjadi di rumah Anda</p>
                     </div>
                   </div>
@@ -2146,17 +2146,17 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             setMutationStep(2);
                           }}
                           className={`
-                            p-6 rounded-2xl flex items-start gap-4.5 border transition-all duration-300 text-left cursor-pointer w-full group
+                            p-6 rounded-2xl flex items-start gap-4.5 border transition-colors duration-300 text-left cursor-pointer w-full group
                             ${isSelected 
                               ? `${type.activeBg} text-slate-900 shadow-md` 
                               : 'bg-slate-50/50 text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:border-slate-300'}
                           `}
                         >
-                          <div className={`p-3.5 rounded-xl transition-all shadow-xs shrink-0 ${isSelected ? 'bg-white ' + type.color : 'bg-white border border-slate-200/80 text-slate-400 group-hover:text-emerald-600'}`}>
+                          <div className={`p-3.5 rounded-xl transition-colors shadow-xs shrink-0 ${isSelected ? 'bg-white ' + type.color : 'bg-white border border-slate-200/80 text-slate-400 group-hover:text-emerald-600'}`}>
                             <Icon size={22} />
                           </div>
                           <div>
-                            <span className="text-[11px] font-black uppercase tracking-widest block">{type.label}</span>
+                            <span className="text-[11px] font-semibold uppercase tracking-widest block">{type.label}</span>
                             <p className={`text-[10px] font-medium leading-relaxed mt-1 ${isSelected ? 'text-slate-500' : 'text-slate-400'}`}>{type.desc}</p>
                           </div>
                         </button>
@@ -2173,20 +2173,20 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   className="space-y-6"
                 >
                   <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
-                    <div className="w-7 h-7 bg-slate-900 text-white rounded-lg flex items-center justify-center text-xs font-black">2</div>
+                    <div className="w-7 h-7 bg-slate-900 text-white rounded-lg flex items-center justify-center text-xs font-semibold">2</div>
                     <div>
-                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Informasi Dasar Kependudukan</h3>
+                      <h3 className="text-xs font-semibold text-slate-900 uppercase tracking-widest">Informasi Dasar Kependudukan</h3>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Identifikasi identitas warga siber kependudukan RT 02</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5.5">
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-450 uppercase tracking-widest ml-1">Nama Warga Terkait <span className="text-rose-500">*</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-450 uppercase tracking-widest ml-1">Nama Warga Terkait <span className="text-rose-500">*</span></label>
                       <div className="relative">
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                         <input 
-                          className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                          className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                           value={mutationName} 
                           onChange={e=>setMutationName(e.target.value)} 
                           required 
@@ -2196,11 +2196,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-450 uppercase tracking-widest ml-1">No. HP / WhatsApp <span className="text-rose-500">*</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-450 uppercase tracking-widest ml-1">No. HP / WhatsApp <span className="text-rose-500">*</span></label>
                       <div className="relative">
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                         <input 
-                          className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                          className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                           value={mutationPhone} 
                           onChange={e=>setMutationPhone(e.target.value)} 
                           required 
@@ -2210,12 +2210,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-450 uppercase tracking-widest ml-1">Tanggal Kejadian <span className="text-rose-500">*</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-450 uppercase tracking-widest ml-1">Tanggal Kejadian <span className="text-rose-500">*</span></label>
                       <div className="relative">
                         <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                         <input 
                           type="date"
-                          className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                          className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                           value={mutationDate} 
                           onChange={e=>setMutationDate(e.target.value)} 
                           required 
@@ -2224,11 +2224,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     </div>
 
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-450 uppercase tracking-widest ml-1">Blok & No. Rumah Keluarga <span className="text-rose-500">*</span></label>
+                      <label className="block text-[10.5px] font-semibold text-slate-450 uppercase tracking-widest ml-1">Blok & No. Rumah Keluarga <span className="text-rose-500">*</span></label>
                       <div className="relative">
                         <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
                         <input 
-                          className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all uppercase shadow-xs" 
+                          className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors uppercase shadow-xs" 
                           value={mutationHouseId} 
                           onChange={e=>setMutationHouseId(e.target.value.toUpperCase())} 
                           required 
@@ -2242,7 +2242,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     <button 
                       type="button"
                       onClick={() => setMutationStep(1)}
-                      className="flex-1 py-4.5 bg-slate-100 text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all cursor-pointer border border-slate-200/50"
+                      className="flex-1 py-4.5 bg-slate-100 text-slate-600 rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-slate-200 transition-colors cursor-pointer border border-slate-200/50"
                     >
                       Batal / Kembali
                     </button>
@@ -2255,7 +2255,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         }
                         setMutationStep(3);
                       }}
-                      className="flex-[2] py-4.5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md cursor-pointer"
+                      className="flex-[2] py-4.5 bg-slate-900 text-white rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-md cursor-pointer"
                     >
                       Lanjut ke Detail Mutasi
                     </button>
@@ -2270,9 +2270,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   className="space-y-8"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-lg font-black shadow-lg shadow-slate-200">03</div>
+                    <div className="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-lg font-semibold shadow-lg shadow-slate-200">03</div>
                     <div>
-                      <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">Detail Khusus</h3>
+                      <h3 className="text-lg font-semibold text-slate-900 uppercase tracking-widest">Detail Khusus</h3>
                       <p className="text-xs text-slate-400 font-bold">Lengkapi informasi spesifik mutasi</p>
                     </div>
                   </div>
@@ -2282,11 +2282,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {mutationType === 'Newcomer' && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-2">
-                          <label className="block text-[10.5px] font-black text-slate-450 uppercase tracking-widest ml-1">Alamat Asal Domisili Sebelumnya <span className="text-rose-500">*</span></label>
+                          <label className="block text-[10.5px] font-semibold text-slate-450 uppercase tracking-widest ml-1">Alamat Asal Domisili Sebelumnya <span className="text-rose-500">*</span></label>
                           <div className="relative">
                             <MapPin className="absolute left-4 top-4 text-slate-400" size={15} />
                             <textarea 
-                              className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs min-h-[85px] resize-none" 
+                              className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs min-h-[85px] resize-none" 
                               value={prevAddress} 
                               onChange={e=>setPrevAddress(e.target.value)} 
                               required 
@@ -2297,9 +2297,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5.5">
                           <div className="space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-450 uppercase tracking-widest ml-1">Alasan Kepindahan <span className="text-rose-500">*</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-450 uppercase tracking-widest ml-1">Alasan Kepindahan <span className="text-rose-500">*</span></label>
                             <input 
-                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                               value={moveReason} 
                               onChange={e=>setMoveReason(e.target.value)} 
                               required 
@@ -2307,10 +2307,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Jumlah Anggota Keluarga Baru <span className="text-rose-500">*</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Jumlah Anggota Keluarga Baru <span className="text-rose-500">*</span></label>
                             <input 
                               type="number"
-                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                               value={familyCount} 
                               onChange={e=>{
                                 const count = parseInt(e.target.value) || 1;
@@ -2332,12 +2332,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           <div className="space-y-4 p-5 md:p-8 bg-slate-50 rounded-[2.5rem] border border-slate-200/85">
                             <div className="flex items-center gap-2 mb-2">
                               <Users size={16} className="text-emerald-605" />
-                              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Identitas Pengikut Anggota Keluarga Lainnya</h4>
+                              <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Identitas Pengikut Anggota Keluarga Lainnya</h4>
                             </div>
                             <div className="grid grid-cols-1 gap-4">
                               {familyMembers.map((member, idx) => (
                                 <div key={idx} className="space-y-4 p-5 bg-white rounded-2xl border border-slate-100 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
-                                  <p className="text-[10px] font-black text-emerald-650 uppercase tracking-widest">Anggota Keluarga #{idx + 2}</p>
+                                  <p className="text-[10px] font-semibold text-emerald-650 uppercase tracking-widest">Anggota Keluarga #{idx + 2}</p>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <input 
                                       placeholder="Nama Lengkap Sesuai KTP"
@@ -2381,7 +2381,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5.5">
                           <div className="space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Status Kepemilikan Hunian <span className="text-rose-500">*</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Status Kepemilikan Hunian <span className="text-rose-500">*</span></label>
                             <div className="flex gap-2.5">
                               {['Tetap', 'Sewa', 'Rumah Keluarga'].map((type) => (
                                 <button
@@ -2389,7 +2389,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                   type="button"
                                   onClick={() => setMutationResidenceType(type as any)}
                                   className={`
-                                    flex-1 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all cursor-pointer
+                                    flex-1 py-4 rounded-xl text-[10px] font-semibold uppercase tracking-widest border transition-colors cursor-pointer
                                     ${mutationResidenceType === type 
                                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-500/10' 
                                       : 'bg-slate-50 hover:bg-slate-100 text-slate-500 border-slate-200/85'}
@@ -2402,10 +2402,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           </div>
 
                           <div className="space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Keyakinan / Agama <span className="text-rose-500">*</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Keyakinan / Agama <span className="text-rose-500">*</span></label>
                             <div className="relative">
                               <select 
-                                className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-emerald-500 outline-none transition-all appearance-none cursor-pointer"
+                                className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:bg-white focus:border-emerald-500 outline-none transition-colors appearance-none cursor-pointer"
                                 value={mutationReligion}
                                 onChange={e => setMutationReligion(e.target.value)}
                               >
@@ -2423,7 +2423,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           </div>
 
                           <div className="md:col-span-2 space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Klasifikasi Kerentanan Sosial / Medis <span className="text-slate-450 font-medium">(Bisa Pilih Lebih Dari Satu)</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Klasifikasi Kerentanan Sosial / Medis <span className="text-slate-450 font-medium">(Bisa Pilih Lebih Dari Satu)</span></label>
                             <div className="flex flex-wrap gap-2">
                               {['Ibu Hamil', 'Bayi', 'Balita', 'Lansia', 'Disabilitas', 'Janda/Duda'].map((v) => {
                                 const isSelected = mutationVulnerability.includes(v);
@@ -2439,7 +2439,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                       }
                                     }}
                                     className={`
-                                      px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer
+                                      px-4 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider border transition-colors cursor-pointer
                                       ${isSelected 
                                         ? 'bg-rose-600 text-white border-rose-600 shadow-sm ring-2 ring-rose-500/10' 
                                         : 'bg-slate-50 hover:bg-slate-100 text-slate-500 border-slate-200/85'}
@@ -2458,11 +2458,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     {mutationType === 'MovedOut' && (
                       <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-2">
-                          <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Alamat Tujuan Kepindahan <span className="text-rose-500">*</span></label>
+                          <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Alamat Tujuan Kepindahan <span className="text-rose-500">*</span></label>
                           <div className="relative">
                             <MapPin className="absolute left-4 top-4 text-slate-400" size={15} />
                             <textarea 
-                              className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs min-h-[85px] resize-none" 
+                              className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs min-h-[85px] resize-none" 
                               value={newAddress} 
                               onChange={e=>setNewAddress(e.target.value)} 
                               required 
@@ -2471,9 +2471,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Alasan Pindah Keluar <span className="text-rose-500">*</span></label>
+                          <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Alasan Pindah Keluar <span className="text-rose-500">*</span></label>
                           <input 
-                            className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                            className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                             value={moveReason} 
                             onChange={e=>setMoveReason(e.target.value)} 
                             required 
@@ -2487,9 +2487,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Nama Ayah Kandung <span className="text-rose-500">*</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Nama Ayah Kandung <span className="text-rose-500">*</span></label>
                             <input 
-                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                               value={fatherName} 
                               onChange={e=>setFatherName(e.target.value)} 
                               required 
@@ -2497,9 +2497,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Nama Ibu Kandung <span className="text-rose-500">*</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Nama Ibu Kandung <span className="text-rose-500">*</span></label>
                             <input 
-                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                               value={motherName} 
                               onChange={e=>setMotherName(e.target.value)} 
                               required 
@@ -2508,14 +2508,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Jenis Kelamin Bayi <span className="text-rose-500">*</span></label>
+                          <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Jenis Kelamin Bayi <span className="text-rose-500">*</span></label>
                           <div className="flex gap-4">
                             {['Laki-laki', 'Perempuan'].map((g) => (
                               <button
                                 key={g}
                                 type="button"
                                 onClick={() => setMutationGender(g as any)}
-                                className={`flex-1 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all cursor-pointer ${mutationGender === g ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-500/10' : 'bg-slate-50 hover:bg-slate-100 text-slate-500 border-slate-200'}`}
+                                className={`flex-1 py-4 rounded-xl text-[10px] font-semibold uppercase tracking-widest border transition-colors cursor-pointer ${mutationGender === g ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-500/10' : 'bg-slate-50 hover:bg-slate-100 text-slate-500 border-slate-200'}`}
                               >
                                 {g}
                               </button>
@@ -2529,9 +2529,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Penyebab Wafat <span className="text-rose-500">*</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Penyebab Wafat <span className="text-rose-500">*</span></label>
                             <input 
-                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                               value={deathCause} 
                               onChange={e=>setDeathCause(e.target.value)} 
                               required 
@@ -2539,9 +2539,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">Lokasi Wafat / Berpulang <span className="text-rose-500">*</span></label>
+                            <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">Lokasi Wafat / Berpulang <span className="text-rose-500">*</span></label>
                             <input 
-                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all shadow-xs" 
+                              className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors shadow-xs" 
                               value={deathPlace} 
                               onChange={e=>setDeathPlace(e.target.value)} 
                               required 
@@ -2553,14 +2553,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     )}
 
                     <div className="space-y-2">
-                      <label className="block text-[10.5px] font-black text-slate-455 uppercase tracking-widest ml-1">
+                      <label className="block text-[10.5px] font-semibold text-slate-455 uppercase tracking-widest ml-1">
                         {mutationType === 'Newcomer' ? 'Catatan Tambahan Kedatangan' : 
                          mutationType === 'MovedOut' ? 'Catatan Tambahan Kepindahan' : 
                          mutationType === 'Birth' ? 'Catatan Tambahan Kelahiran' : 
                          'Catatan Tambahan Kedukaan'}
                       </label>
                       <textarea 
-                        className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all min-h-[92px] resize-none shadow-xs" 
+                        className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold focus:bg-white focus:border-emerald-500 hover:border-slate-300 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-colors min-h-[92px] resize-none shadow-xs" 
                         value={mutationDesc} 
                         onChange={e=>setMutationDesc(e.target.value)} 
                         placeholder={
@@ -2578,7 +2578,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           {mutationType === 'Newcomer' ? <Users size={16} /> : <Lock size={16} />}
                         </div>
                         <div>
-                          <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-wider">
+                          <h4 className="text-[12px] font-semibold text-slate-900 uppercase tracking-wider">
                             {mutationType === 'Newcomer' ? 'Otoritas Verifikasi Warga Baru' : 'Otoritas Verifikasi Pelapor'}
                           </h4>
                           <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
@@ -2590,7 +2590,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       </div>
                       
                       <div className="space-y-1.5 pt-1">
-                        <label className="block text-[9px] font-black text-emerald-700 uppercase tracking-widest ml-1">
+                        <label className="block text-[9px] font-semibold text-emerald-700 uppercase tracking-widest ml-1">
                           Kredit PIN Rumah <span className="text-rose-500">*</span>
                         </label>
                         <div className="relative">
@@ -2598,7 +2598,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             type={showPin ? "text" : "password"} 
                             placeholder="Maksimal 6 Digit Angka PIN" 
                             maxLength={6}
-                            className="w-full px-4 py-3.5 bg-white border border-slate-200 rounded-xl text-xs font-black focus:border-emerald-500 outline-none transition-all text-center tracking-widest shadow-xs" 
+                            className="w-full px-4 py-3.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:border-emerald-500 outline-none transition-colors text-center tracking-widest shadow-xs" 
                             value={accessCode} 
                             onChange={e=>setAccessCode(e.target.value.replace(/\D/g, ''))} 
                             required
@@ -2619,14 +2619,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     <button 
                       type="button"
                       onClick={() => setMutationStep(2)}
-                      className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all cursor-pointer border border-slate-200"
+                      className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-xl font-semibold text-xs uppercase tracking-widest hover:bg-slate-200 transition-colors cursor-pointer border border-slate-200"
                     >
                       Kembali ke Langkah 2
                     </button>
                     <Button 
                       type="submit" 
                       onClick={handleSubmitMutasi}
-                      className="flex-[2] py-4 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:-translate-y-0.5 transition-all duration-300 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 cursor-pointer"
+                      className="flex-[2] py-4 rounded-xl text-xs font-semibold uppercase tracking-widest shadow-md hover:-translate-y-0.5 transition-colors duration-300 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Send size={14} /> Kirim Form Mutasi RT 02
                     </Button>
@@ -2652,10 +2652,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <Building size={28} strokeWidth={2} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black text-teal-600 uppercase tracking-[0.2em] block mb-0.5">
+                  <span className="text-[10px] font-semibold text-teal-600 uppercase tracking-[0.2em] block mb-0.5">
                     Tertib Hunian Sewa RT 02
                   </span>
-                  <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+                  <h2 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">
                     Lapor Rumah Sewa &amp; Kontrakan
                   </h2>
                   <p className="text-slate-500 text-xs font-medium mt-0.5">
@@ -2671,7 +2671,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 <ShieldCheck size={20} />
               </div>
               <div className="text-xs space-y-1">
-                <p className="font-black text-teal-900 uppercase tracking-wider text-[11px]">
+                <p className="font-semibold text-teal-900 uppercase tracking-wider text-[11px]">
                   Kewajiban Lapor 1x24 Jam Hunian Sewa
                 </p>
                 <p className="text-teal-800/90 leading-relaxed font-medium">
@@ -2687,7 +2687,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <Info size={18} />
                 </div>
                 <div>
-                  <span className="font-black text-sky-950 uppercase tracking-wider block text-[11px]">
+                  <span className="font-semibold text-sky-950 uppercase tracking-wider block text-[11px]">
                     Keluarga Pengontrak yang Sudah Mengisi &quot;Daftar Warga&quot;?
                   </span>
                   <p className="text-sky-800/90 text-[11px] font-medium mt-0.5 leading-relaxed">
@@ -2697,7 +2697,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               </div>
               <a 
                 href="/register" 
-                className="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-[11px] font-bold shrink-0 transition-all shadow-xs flex items-center gap-1.5"
+                className="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-[11px] font-bold shrink-0 transition-colors shadow-xs flex items-center gap-1.5"
               >
                 <span>Daftar Warga</span>
                 <ArrowRight size={12} />
@@ -2707,14 +2707,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
             <form onSubmit={handleSubmitRental} className="space-y-6">
               {/* Pilihan Peran Pelapor */}
               <div className="space-y-2">
-                <label className="text-xs font-black uppercase tracking-wider text-slate-600 block">
+                <label className="text-xs font-semibold uppercase tracking-wider text-slate-600 block">
                   Saya Melaporkan Sebagai:
                 </label>
                 <div className="grid grid-cols-2 gap-3 max-w-md">
                   <button
                     type="button"
                     onClick={() => setRentalReporterType('Penyewa')}
-                    className={`p-3.5 rounded-2xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    className={`p-3.5 rounded-2xl border text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer ${
                       rentalReporterType === 'Penyewa'
                         ? 'bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02]'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -2727,7 +2727,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                   <button
                     type="button"
                     onClick={() => setRentalReporterType('Pemilik')}
-                    className={`p-3.5 rounded-2xl border text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    className={`p-3.5 rounded-2xl border text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 cursor-pointer ${
                       rentalReporterType === 'Pemilik'
                         ? 'bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02]'
                         : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
@@ -2741,7 +2741,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
               {/* Section 1: Rumah & Pemilik */}
               <div className="p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-800 flex items-center gap-2">
                   <Home size={15} className="text-teal-600" />
                   1. Data Unit Rumah &amp; Pemilik Asli (Induk Semang)
                 </h4>
@@ -2799,7 +2799,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
               {/* Section 2: Data Penyewa */}
               <div className="p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-800 flex items-center gap-2">
                   <Users size={15} className="text-indigo-600" />
                   2. Identitas Penyewa (Penanggung Jawab Hunian)
                 </h4>
@@ -2880,7 +2880,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
               {/* Section 3: Periode Masa Kontrak */}
               <div className="p-6 bg-slate-50/70 border border-slate-200/80 rounded-3xl space-y-4">
-                <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-800 flex items-center gap-2">
                   <Calendar size={15} className="text-amber-600" />
                   3. Periode Kontrak &amp; Catatan
                 </h4>
@@ -2939,7 +2939,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 <Button
                   type="submit"
                   disabled={isSubmittingRental}
-                  className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-semibold uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
                   {isSubmittingRental ? (
                     <>
@@ -3104,7 +3104,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               className="space-y-12"
             >
               {/* Status Tracker Search */}
-              <div id="status-tracker-header" className="bg-white p-8 md:p-12 rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 relative overflow-hidden">
+              <div id="status-tracker-header" className="bg-white p-8 md:p-12 rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-2xs relative overflow-hidden">
                 <div className="absolute -top-12 -right-12 w-64 h-64 bg-slate-50 rounded-full opacity-50 pointer-events-none" />
                 
                 <div className="relative z-10">
@@ -3114,14 +3114,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         <Clock size={28} />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Pusat Lacak Status Layanan</h3>
+                        <h3 className="text-2xl font-semibold text-slate-900 tracking-tight">Pusat Lacak Status Layanan</h3>
                         <p className="text-sm font-medium text-slate-500 mt-1">Lacak status verifikasi surat rujukan, aduan warga, laporan tamu, atau mutasi secara real-time.</p>
                       </div>
                     </div>
                     {localHistory.length > 0 && (
                       <button 
                         onClick={handleClearHistory}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-rose-100 transition-all border border-rose-100/60 cursor-pointer"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-rose-50 text-rose-600 font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-rose-100 transition-colors border border-rose-100/60 cursor-pointer"
                       >
                         <Trash2 size={14} /> Hapus Semua Riwayat
                       </button>
@@ -3137,7 +3137,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         setSearchResult(null);
                         setPhoneSearchResults(null);
                       }}
-                      className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+                      className={`px-6 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
                         searchMode === 'id'
                           ? 'bg-white text-indigo-600 shadow-sm'
                           : 'text-slate-400 hover:text-slate-600'
@@ -3152,14 +3152,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         setSearchResult(null);
                         setPhoneSearchResults(null);
                       }}
-                      className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 ${
+                      className={`px-6 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-2 ${
                         searchMode === 'phone_house'
                           ? 'bg-white text-indigo-600 shadow-sm'
                           : 'text-slate-400 hover:text-slate-600'
                       }`}
                     >
                       No. WhatsApp / Rumah
-                      <span className="bg-emerald-100 text-emerald-700 text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-wider">Lebih Mudah</span>
+                      <span className="bg-emerald-100 text-emerald-700 text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">Lebih Mudah</span>
                     </button>
                   </div>
                   
@@ -3167,7 +3167,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     <div className="flex flex-col md:flex-row gap-4">
                       <div className="flex-1 relative">
                         <input 
-                          className="w-full p-5 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-black focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all pl-14"
+                          className="w-full p-5 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-semibold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-colors pl-14"
                           placeholder="Masukkan ID Unik Lacak (Format: 17xxxxxx atau hash ID)..."
                           value={statusSearchId}
                           onChange={e => setStatusSearchId(e.target.value)}
@@ -3178,7 +3178,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <Button 
                         onClick={() => handleSearchById(statusSearchId)}
                         disabled={isSearchingDb}
-                        className="px-10 py-5 rounded-2xl text-sm font-black bg-indigo-600 hover:bg-indigo-700 text-white uppercase tracking-widest shadow-lg shadow-indigo-200 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        className="px-10 py-5 rounded-2xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white uppercase tracking-widest shadow-lg shadow-indigo-200 active:scale-95 transition-colors flex items-center justify-center gap-2 cursor-pointer"
                       >
                         {isSearchingDb ? (
                           <>
@@ -3196,7 +3196,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 relative">
                           <input 
-                            className="w-full p-5 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-black focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all pl-14"
+                            className="w-full p-5 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-semibold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-colors pl-14"
                             placeholder="Contoh: 08123456789 (WhatsApp)..."
                             value={searchPhone}
                             onChange={e => setSearchPhone(e.target.value)}
@@ -3206,7 +3206,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         </div>
                         <div className="md:w-64 relative">
                           <input 
-                            className="w-full p-5 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-black focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-all pl-14"
+                            className="w-full p-5 bg-slate-50/80 border border-slate-200 rounded-2xl text-sm font-semibold focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 outline-none transition-colors pl-14"
                             placeholder="No. Rumah (Contoh: 04, B12)"
                             value={searchHouseId}
                             onChange={e => setSearchHouseId(e.target.value)}
@@ -3217,7 +3217,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                         <Button 
                           onClick={handleSearchByPhoneOrHouse}
                           disabled={isSearchingDb}
-                          className="px-10 py-5 rounded-2xl text-sm font-black bg-indigo-600 hover:bg-indigo-700 text-white uppercase tracking-widest shadow-lg shadow-indigo-200 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          className="px-10 py-5 rounded-2xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white uppercase tracking-widest shadow-lg shadow-indigo-200 active:scale-95 transition-colors flex items-center justify-center gap-2 cursor-pointer"
                         >
                           {isSearchingDb ? (
                             <>
@@ -3246,10 +3246,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                     >
                       <div className="bg-slate-50/70 p-4 rounded-2xl border border-slate-100/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                         <div>
-                          <p className="text-xs font-black text-slate-700 uppercase tracking-widest">Ditemukan {phoneSearchResults.length} Berkas Layanan:</p>
+                          <p className="text-xs font-semibold text-slate-700 uppercase tracking-widest">Ditemukan {phoneSearchResults.length} Berkas Layanan:</p>
                           <p className="text-[10px] text-slate-400 font-medium mt-0.5">Daftar arsip Anda terdaftar di Pengurus RT 02 yang cocok dengan kriteria pencarian Anda.</p>
                         </div>
-                        <span className="text-[10px] bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full font-black uppercase tracking-wider">Klik Berkas Untuk Status Detail</span>
+                        <span className="text-[10px] bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full font-semibold uppercase tracking-wider">Klik Berkas Untuk Status Detail</span>
                       </div>
                       
                       {phoneSearchResults.length > 0 ? (
@@ -3278,14 +3278,14 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                     }
                                   }, 100);
                                 }}
-                                className="p-5 bg-white border border-slate-100 hover:border-indigo-150 rounded-2.5xl shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                                className="p-5 bg-white border border-slate-100 hover:border-indigo-150 rounded-2.5xl shadow-sm hover:shadow-md transition-colors cursor-pointer flex flex-col justify-between group relative overflow-hidden"
                               >
                                 <div className="relative z-10 space-y-3 w-full">
                                   <div className="flex justify-between items-center w-full">
-                                    <span className="px-2.5 py-1 bg-slate-50 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                    <span className="px-2.5 py-1 bg-slate-50 text-slate-500 rounded-xl text-[10px] font-semibold uppercase tracking-widest">
                                       {item.category === 'Surat' ? '📄 Surat' : item.category === 'Laporan' ? '🚨 Aduan' : item.category === 'Tamu' ? '👥 Tamu' : '🔄 Mutasi'}
                                     </span>
-                                    <span className={`px-2.5 py-1 ${badgeColor} rounded-xl text-[10px] font-black uppercase tracking-widest`}>
+                                    <span className={`px-2.5 py-1 ${badgeColor} rounded-xl text-[10px] font-semibold uppercase tracking-widest`}>
                                       {item.status || 'Terkirim'}
                                     </span>
                                   </div>
@@ -3301,7 +3301,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                                   <div className="pt-3 border-t border-slate-50 flex justify-between items-center text-[10px] text-slate-400">
                                     <span>{new Date(item.date || item.createdAt || Date.now()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
-                                    <span className="font-mono text-[10px] text-indigo-500 font-black group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                                    <span className="font-mono text-[10px] text-indigo-500 font-semibold group-hover:translate-x-1 transition-transform flex items-center gap-1">
                                       Pilih & Lacak <ArrowRight size={12} />
                                     </span>
                                   </div>
@@ -3329,10 +3329,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       className="mt-10 pt-10 border-t border-slate-100"
                     >
                       {searchResult === 'not_found' ? (
-                        <div className="flex flex-col md:flex-row items-center gap-5 text-rose-600 bg-rose-50/60 p-6 md:p-8 rounded-[2rem] border border-rose-100/80 animate-pulse">
+                        <div className="flex flex-col md:flex-row items-center gap-5 text-rose-600 bg-rose-50/60 p-6 md:p-8 rounded-[2rem] border border-rose-100/80">
                           <XCircle size={36} className="text-rose-500 flex-shrink-0" />
                           <div className="text-center md:text-left">
-                            <p className="text-base font-black">ID Layanan Tidak Ditemukan</p>
+                            <p className="text-base font-semibold">ID Layanan Tidak Ditemukan</p>
                             <p className="text-xs text-rose-700/80 mt-1 font-medium">Sistem tidak mendeteksi ID ini di database Surat, Laporan, Tamu, maupun Mutasi RT 02. Harap periksa kembali penulisan huruf atau angka ID Anda.</p>
                           </div>
                         </div>
@@ -3353,10 +3353,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-slate-50">
                                 <div>
                                   <div className="flex items-center gap-2 mb-2">
-                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-black uppercase tracking-widest">{searchResult.category || 'Berkas'}</span>
+                                    <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-semibold uppercase tracking-widest">{searchResult.category || 'Berkas'}</span>
                                     <span className="text-xs font-mono font-bold text-slate-400">ID: {searchResult.id}</span>
                                   </div>
-                                  <h4 className="text-2xl font-black text-slate-900 leading-tight">
+                                  <h4 className="text-2xl font-semibold text-slate-900 leading-tight">
                                     {searchResult.title || searchResult.requestType || `Laporan ${searchResult.type || 'Layanan'}`}
                                   </h4>
                                 </div>
@@ -3366,23 +3366,23 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                   statusColor === 'rose' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-amber-50 text-amber-600 border-amber-100'
                                 }`}>
                                   <div className={`w-2.5 h-2.5 rounded-full ${
-                                    statusColor === 'emerald' ? 'bg-emerald-500 animate-pulse' :
-                                    statusColor === 'indigo' ? 'bg-indigo-500 animate-pulse' :
-                                    statusColor === 'rose' ? 'bg-rose-500' : 'bg-amber-500 animate-pulse'
+                                    statusColor === 'emerald' ? 'bg-emerald-500 ' :
+                                    statusColor === 'indigo' ? 'bg-indigo-500 ' :
+                                    statusColor === 'rose' ? 'bg-rose-500' : 'bg-amber-500 '
                                   }`} />
-                                  <span className="text-xs font-black uppercase tracking-widest">{statusLabel}</span>
+                                  <span className="text-xs font-semibold uppercase tracking-widest">{statusLabel}</span>
                                 </div>
                               </div>
 
                               {/* PARCEL-STYLE INTERACTIVE PROGRESS TRACK TIMELINE */}
                               <div className="py-6 bg-slate-50/50 p-6 rounded-3xl border border-slate-100/60">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Alur Pemprosesan Berkas</p>
+                                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-6">Alur Pemprosesan Berkas</p>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
                                   {/* Line Track on desktop */}
                                   <div className="hidden md:block absolute top-[1.35rem] left-[15%] right-[15%] h-0.5 bg-slate-200 pointer-events-none z-0">
                                     <div 
-                                      className={`h-full transition-all duration-700 ${
+                                      className={`h-full transition-colors duration-700 ${
                                         currentStep === 1 ? 'w-[0%]' :
                                         currentStep === 2 ? 'w-[50%] bg-indigo-500' :
                                         statusColor === 'rose' ? 'w-[100%] bg-rose-500' : 'w-[100%] bg-emerald-500'
@@ -3392,7 +3392,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                                   {/* Step 1: Registrasi */}
                                   <div className="flex md:flex-col items-center md:text-center gap-4 relative z-10">
-                                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-lg shadow-2xs">
                                       <Check size={20} />
                                     </div>
                                     <div>
@@ -3403,12 +3403,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                                   {/* Step 2: Pemeriksaan */}
                                   <div className="flex md:flex-col items-center md:text-center gap-4 relative z-10">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-500 ${
                                       currentStep >= 2 
-                                        ? (statusColor === 'rose' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20')
+                                        ? (statusColor === 'rose' ? 'bg-rose-500 text-white shadow-lg shadow-2xs' : 'bg-indigo-600 text-white shadow-lg shadow-2xs')
                                         : 'bg-white border-2 border-slate-200 text-slate-400'
                                     }`}>
-                                      {currentStep > 2 ? <Check size={20} /> : <FileText size={18} className={currentStep === 2 ? "animate-pulse" : ""} />}
+                                      {currentStep > 2 ? <Check size={20} /> : <FileText size={18} className={currentStep === 2 ? "" : ""} />}
                                     </div>
                                     <div>
                                       <h5 className={`font-extrabold text-sm ${currentStep >= 2 ? 'text-slate-800' : 'text-slate-400'}`}>Verifikasi Pengurus</h5>
@@ -3418,9 +3418,9 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                                   {/* Step 3: Selesai */}
                                   <div className="flex md:flex-col items-center md:text-center gap-4 relative z-10">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-500 ${
                                       currentStep === 3
-                                        ? (statusColor === 'rose' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20')
+                                        ? (statusColor === 'rose' ? 'bg-rose-500 text-white shadow-lg shadow-2xs' : 'bg-emerald-500 text-white shadow-lg shadow-2xs')
                                         : 'bg-white border-2 border-slate-200 text-slate-400'
                                     }`}>
                                       {statusColor === 'rose' ? <XCircle size={20} /> : (currentStep === 3 ? <CheckCircle2 size={20} /> : <ShieldCheck size={20} />)}
@@ -3455,10 +3455,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                       <FileText size={28} />
                                     </div>
                                     <div>
-                                      <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase tracking-widest inline-block mb-1 text-emerald-100">
+                                      <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-semibold uppercase tracking-widest inline-block mb-1 text-emerald-100">
                                         Dokumen Digital Resmi
                                       </span>
-                                      <h4 className="text-lg md:text-xl font-black tracking-tight">Surat Pengantar Telah Siap</h4>
+                                      <h4 className="text-lg md:text-xl font-semibold tracking-tight">Surat Pengantar Telah Siap</h4>
                                       <p className="text-xs text-emerald-100 font-medium">Lengkap dengan Tanda Tangan Digital &amp; Stempel Sah RT 02.</p>
                                     </div>
                                   </div>
@@ -3466,7 +3466,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                      <>
                                        <button 
                                          onClick={() => handleOpenPdfPreview(searchResult)}
-                                         className="flex items-center gap-2 px-6 py-4 bg-slate-800 hover:bg-slate-900 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md active:scale-95 cursor-pointer"
+                                         className="flex items-center gap-2 px-6 py-4 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs uppercase tracking-widest rounded-2xl transition-colors shadow-md active:scale-95 cursor-pointer"
                                        >
                                          <Eye size={16} /> Pratinjau Dokumen
                                        </button>
@@ -3481,7 +3481,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                              toast.error('Gagal mengunduh dokumen.');
                                            }
                                          }}
-                                         className="flex items-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer animate-pulse"
+                                         className="flex items-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-widest rounded-2xl transition-colors shadow-lg shadow-2xs active:scale-95 cursor-pointer"
                                        >
                                          <Download size={16} /> Unduh Surat Resmi (PDF)
                                        </button>
@@ -3493,11 +3493,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                               {/* BENTO GRID DETAILS */}
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                                 <div className="space-y-4">
-                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Informasi Berkas</p>
+                                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Informasi Berkas</p>
                                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100/60 space-y-4">
                                     <div className="flex justify-between pb-3 border-b border-slate-200/50">
                                       <span className="text-xs font-bold text-slate-400">Pemohon / Pelapor</span>
-                                      <span className="text-xs font-black text-slate-800">{searchResult.applicantName || searchResult.reporterName || searchResult.guestName || searchResult.name || 'Warga RT 02'}</span>
+                                      <span className="text-xs font-semibold text-slate-800">{searchResult.applicantName || searchResult.reporterName || searchResult.guestName || searchResult.name || 'Warga RT 02'}</span>
                                     </div>
                                     
                                     {searchResult.nik && (
@@ -3510,7 +3510,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                     {searchResult.houseId && (
                                       <div className="flex justify-between pb-3 border-b border-slate-200/50">
                                         <span className="text-xs font-bold text-slate-400">Nomor Rumah</span>
-                                        <span className="text-xs font-mono font-black text-indigo-600">Rumah {searchResult.houseId}</span>
+                                        <span className="text-xs font-mono font-semibold text-indigo-600">Rumah {searchResult.houseId}</span>
                                       </div>
                                     )}
 
@@ -3524,7 +3524,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                 </div>
 
                                 <div className="space-y-4">
-                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Keterangan / Rincian</p>
+                                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Keterangan / Rincian</p>
                                   <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100/60 h-[calc(100%-2rem)] flex flex-col justify-between">
                                     <div className="space-y-3">
                                       {searchResult.category === 'Surat' && (
@@ -3576,7 +3576,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                           toast.error('Gagal mengunduh dokumen.');
                                         }
                                       }}
-                                      className="flex items-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer animate-pulse"
+                                      className="flex items-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs uppercase tracking-widest rounded-2xl transition-colors shadow-lg shadow-2xs active:scale-95 cursor-pointer"
                                     >
                                       <Download size={16} /> Unduh Surat Resmi (PDF)
                                     </button>
@@ -3594,7 +3594,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                           toast.error('Gagal membuat cetak struk.');
                                         }
                                       }}
-                                      className="flex items-center gap-2 px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-widest rounded-2xl transition-all shadow-md active:scale-95 cursor-pointer"
+                                      className="flex items-center gap-2 px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs uppercase tracking-widest rounded-2xl transition-colors shadow-md active:scale-95 cursor-pointer"
                                     >
                                       <Download size={14} /> Unduh Tanda Terima (PDF)
                                     </button>
@@ -3606,7 +3606,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                       const text = `Halo Pak RT, saya ingin menanyakan status pendaftaran dengan ID: *${searchResult.id}* berkategori *${searchResult.category || 'Berkas'}* atas nama *${searchResult.applicantName || searchResult.reporterName || searchResult.guestName || searchResult.name || 'Warga'}*. Mohon bantuannya untuk diperiksa. Terima kasih.`;
                                       window.open(`https://wa.me/${(pdfConfig.rtPhone || '6285961194621').toString().replace(/^0/, '62').replace(/\D/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
                                     }}
-                                    className="flex items-center gap-2 px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs uppercase tracking-widest rounded-2xl transition-all cursor-pointer border border-slate-200"
+                                    className="flex items-center gap-2 px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs uppercase tracking-widest rounded-2xl transition-colors cursor-pointer border border-slate-200"
                                   >
                                     <MessageCircle size={14} className="text-emerald-500" /> Hubungi Ketua RT
                                   </button>
@@ -3614,7 +3614,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
                                 <button 
                                   onClick={() => setSearchResult(null)}
-                                  className="px-5 py-3 text-xs font-black text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors cursor-pointer"
+                                  className="px-5 py-3 text-xs font-semibold text-slate-400 hover:text-slate-600 uppercase tracking-wider transition-colors cursor-pointer"
                                 >
                                   Tutup Detail
                                 </button>
@@ -3631,11 +3631,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               {/* Informative Bento Feature Cards for Public Usability */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="bg-amber-50/50 p-8 md:p-10 rounded-[3rem] border border-amber-100/80 flex items-start gap-6 shadow-sm">
-                  <div className="p-4 bg-white text-amber-600 rounded-2xl shadow-md shadow-amber-500/5 h-fit">
+                  <div className="p-4 bg-white text-amber-600 rounded-2xl shadow-md shadow-2xs h-fit">
                     <ShieldAlert size={28} />
                   </div>
                   <div>
-                    <h4 className="text-lg font-black text-amber-900 tracking-tight">Otentikasi Aman & Validasi QR</h4>
+                    <h4 className="text-lg font-semibold text-amber-900 tracking-tight">Otentikasi Aman & Validasi QR</h4>
                     <p className="text-sm text-amber-800/80 mt-2 font-medium leading-relaxed">
                       Sistem pelayanan berkas dilengkapi <b>kode autentikasi pengaman</b> eksklusif. Lembaga publik rujukan luar (seperti Kelurahan, Bank, atau KUA) dapat memverifikasi keabsahan dokumen warga dengan mengetik kode ID di portal ini secara langsung.
                     </p>
@@ -3643,11 +3643,11 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                 </div>
 
                 <div className="bg-indigo-50/50 p-8 md:p-10 rounded-[3rem] border border-indigo-100/80 flex items-start gap-6 shadow-sm">
-                  <div className="p-4 bg-white text-indigo-600 rounded-2xl shadow-md shadow-indigo-500/5 h-fit">
+                  <div className="p-4 bg-white text-indigo-600 rounded-2xl shadow-md shadow-2xs h-fit">
                     <History size={28} />
                   </div>
                   <div>
-                    <h4 className="text-lg font-black text-indigo-900 tracking-tight">Pencatatan Seluler Mandiri</h4>
+                    <h4 className="text-lg font-semibold text-indigo-900 tracking-tight">Pencatatan Seluler Mandiri</h4>
                     <p className="text-sm text-indigo-800/80 mt-2 font-medium leading-relaxed">
                       Untuk menjamin privasi kedaulatan data kependudukan luar, seluruh transaksi Anda terekam otomatis di memori lokal seluler Anda. Tidak dipasarkan secara komersial dan dilindungi enkripsi Firestore internal rukun tetangga.
                     </p>
@@ -3656,10 +3656,10 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
               </div>
 
               {/* LOCAL SERVICE HISTORY LIST BLOCK */}
-              <div className="bg-white p-8 md:p-12 rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-slate-200/40 space-y-8">
+              <div className="bg-white p-8 md:p-12 rounded-[3.5rem] border border-slate-100 shadow-2xl shadow-2xs space-y-8">
                 <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 pb-6 border-b border-slate-100">
                   <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Riwayat Log Lokal Anda ({localHistory.length})</h3>
+                    <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Riwayat Log Lokal Anda ({localHistory.length})</h3>
                     <p className="text-xs font-medium text-slate-400 mt-1">Daftar berkas atau pengajuan yang diajukan dari perangkat browser ini.</p>
                   </div>
 
@@ -3668,7 +3668,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       {/* FILTER LOCAL SEARCH PILLS */}
                       <div className="relative flex-1 sm:w-64">
                         <input 
-                          className="w-full py-2.5 pl-10 pr-4 bg-slate-100 border border-slate-200/80 rounded-xl text-xs font-bold outline-none focus:bg-white focus:border-indigo-500 transition-all"
+                          className="w-full py-2.5 pl-10 pr-4 bg-slate-100 border border-slate-200/80 rounded-xl text-xs font-bold outline-none focus:bg-white focus:border-indigo-500 transition-colors"
                           placeholder="Cari riwayat lokal..."
                           value={historySearchTerm}
                           onChange={e => setHistorySearchTerm(e.target.value)}
@@ -3689,7 +3689,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           <button
                             key={tabOpt.id}
                             onClick={() => setHistoryFilter(tabOpt.id as any)}
-                            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all tracking-wider ${
+                            className={`px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase transition-colors tracking-wider ${
                               historyFilter === tabOpt.id 
                                 ? 'bg-white text-indigo-600 shadow-sm' 
                                 : 'text-slate-400 hover:text-slate-600'
@@ -3714,7 +3714,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                           key={idx} 
                           whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.05)" }}
                           onClick={() => handleQuickTrack(item.id)}
-                          className="bg-white p-6 rounded-[2.5rem] border border-slate-100 hover:border-indigo-100 shadow-xl shadow-slate-200/10 cursor-pointer transition-all group relative overflow-hidden flex flex-col justify-between"
+                          className="bg-white p-6 rounded-[2.5rem] border border-slate-100 hover:border-indigo-100 shadow-xl shadow-2xs cursor-pointer transition-colors group relative overflow-hidden flex flex-col justify-between"
                         >
                           {/* Inner rounded glow inside element */}
                           <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-full -mr-12 -mt-12 group-hover:bg-indigo-50/50 transition-colors duration-500" />
@@ -3734,7 +3734,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                                 {item.category === 'Sewa' && <Building size={20}/>}
                               </div>
                               <div className="flex flex-col items-end gap-1.5">
-                                <span className={`px-3.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                                <span className={`px-3.5 py-1 rounded-full text-[9px] font-semibold uppercase tracking-widest ${
                                   isProcessed ? 'bg-emerald-100 text-emerald-600' :
                                   isRejected ? 'bg-rose-100 text-rose-600' :
                                   'bg-amber-100 text-amber-600'
@@ -3746,7 +3746,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             </div>
                             
                             <div>
-                              <h3 className="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight leading-snug">{item.title}</h3>
+                              <h3 className="text-lg font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors tracking-tight leading-snug">{item.title}</h3>
                               <p className="text-[11px] font-bold text-slate-400 mt-2 flex items-center gap-1.5">
                                 <Calendar size={12} />
                                 {new Date(item.date || item.createdAt || Date.now()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
@@ -3758,16 +3758,16 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                             <div className="flex items-center gap-1.5">
                               <div className={`w-2 h-2 rounded-full ${
                                 isProcessed ? 'bg-emerald-500' :
-                                isRejected ? 'bg-rose-500' : 'bg-amber-500 animate-pulse'
+                                isRejected ? 'bg-rose-500' : 'bg-amber-500 '
                               }`} />
-                              <span className="text-[9px] font-black uppercase tracking-wider text-slate-400">Log: {item.category}</span>
+                              <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">Log: {item.category}</span>
                             </div>
                             
                             <div className="flex items-center gap-1">
-                              <span className="text-[9px] font-black uppercase tracking-wider text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity pr-2">Lacak Detail</span>
+                              <span className="text-[9px] font-semibold uppercase tracking-wider text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity pr-2">Lacak Detail</span>
                               <button 
                                 onClick={(e) => handleDeleteHistoryItem(item.id, e)}
-                                className="p-2 text-slate-300 hover:text-rose-500 bg-slate-50 hover:bg-rose-50 rounded-lg transition-all"
+                                className="p-2 text-slate-300 hover:text-rose-500 bg-slate-50 hover:bg-rose-50 rounded-lg transition-colors"
                                 title="Hapus dari daftar lokal"
                               >
                                 <Trash2 size={13} />
@@ -3790,7 +3790,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
                       </>
                     ) : (
                       <>
-                        <h3 className="text-xl font-black text-slate-800 mb-2">Belum Ada Riwayat Pelayanan</h3>
+                        <h3 className="text-xl font-semibold text-slate-800 mb-2">Belum Ada Riwayat Pelayanan</h3>
                         <p className="text-slate-400 font-semibold max-w-sm mx-auto text-xs leading-normal">
                           Saat Anda melakukan pengajuan Surat Pengantar, melaporkan warga yang bermalam, atau mendaftar mutasi rukun tetangga, riwayat lengkap Anda akan tercatat otomatis di panel ini.
                         </p>

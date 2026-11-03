@@ -183,24 +183,24 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full bg-white border border-slate-200/80 rounded-[2.5rem] p-8 sm:p-10 shadow-xl shadow-slate-200/50 text-center"
+          className="max-w-md w-full bg-white border border-slate-200/80 rounded-[2.5rem] p-8 sm:p-10 shadow-xl shadow-2xs text-center"
         >
           <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-5 border border-emerald-100">
             <Package size={32} />
           </div>
 
-          <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100/80 mb-3 inline-block">
+          <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-semibold uppercase tracking-widest border border-emerald-100/80 mb-3 inline-block">
             Bank Sampah RT 02
           </span>
 
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Pilih Nomor Rumah</h2>
+          <h2 className="text-2xl font-semibold text-slate-900 tracking-tight mb-2">Pilih Nomor Rumah</h2>
           <p className="text-slate-500 text-xs sm:text-sm font-medium mb-8 leading-relaxed">
             Silakan pilih nomor rumah Anda untuk melihat saldo tabungan, riwayat setoran, dan katalog harga.
           </p>
 
           <div className="space-y-4">
             <select 
-              className="w-full px-5 py-4 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              className="w-full px-5 py-4 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs sm:text-sm font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
               value={tempHouseId}
               onChange={(e) => {
                 setTempHouseId(e.target.value);
@@ -231,9 +231,9 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                 <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-emerald-100">
                   <Shield size={28} />
                 </div>
-                <h3 className="text-lg font-black text-slate-900">Masukkan PIN Rumah</h3>
+                <h3 className="text-lg font-semibold text-slate-900">Masukkan PIN Rumah</h3>
                 <p className="text-xs text-slate-500 font-medium mt-1">
-                  Otorisasi untuk <span className="font-black text-emerald-600">Blok {houses.find(h => h.id === tempHouseId)?.block}-{houses.find(h => h.id === tempHouseId)?.number}</span>
+                  Otorisasi untuk <span className="font-semibold text-emerald-600">Blok {houses.find(h => h.id === tempHouseId)?.block}-{houses.find(h => h.id === tempHouseId)?.number}</span>
                 </p>
               </div>
 
@@ -245,7 +245,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                   maxLength={6}
                   required
                   autoFocus
-                  className={`w-full px-6 py-4 bg-slate-50 border ${pinError ? 'border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10'} rounded-2xl text-center text-2xl font-black tracking-[0.8em] text-slate-800 outline-none transition-all`}
+                  className={`w-full px-6 py-4 bg-slate-50 border ${pinError ? 'border-rose-500 ring-4 ring-rose-500/10' : 'border-slate-200 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10'} rounded-2xl text-center text-2xl font-semibold tracking-[0.8em] text-slate-800 outline-none transition-colors`}
                   value={pinInput}
                   onChange={e => setPinInput(e.target.value)}
                   placeholder="••••••"
@@ -257,7 +257,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                 )}
               </div>
 
-              <Button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-xs tracking-wider rounded-2xl shadow-lg shadow-emerald-600/20">
+              <Button type="submit" className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold uppercase text-xs tracking-wider rounded-2xl shadow-lg shadow-2xs">
                 Verifikasi & Lanjutkan
               </Button>
             </form>
@@ -296,15 +296,15 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="px-3.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[10px] font-mono font-black uppercase tracking-widest backdrop-blur-md">
-                🌿 BANK SAMPAH DIGITAL RT 02
+              <span className="px-3.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-[10px] font-mono font-semibold uppercase tracking-widest backdrop-blur-md">
+                Bank Sampah RT 02
               </span>
-              <span className="px-3.5 py-1 bg-slate-800/80 text-slate-300 border border-slate-700/60 rounded-full text-[10px] font-mono font-black uppercase tracking-widest">
+              <span className="px-3.5 py-1 bg-slate-800/80 text-slate-300 border border-slate-700/60 rounded-full text-[10px] font-mono font-semibold uppercase tracking-widest">
                 BLOK {getHouseLabel(selectedHouseId)}
               </span>
             </div>
             
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white">
               Tabungan Sampah Warga
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm font-medium max-w-xl leading-relaxed">
@@ -324,11 +324,11 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                 sessionStorage.removeItem('resident_location');
                 toast.info('Sesi hunian Bank Sampah telah dibersihkan.');
               }}
-              className="flex-1 md:flex-none px-5 py-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/80 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 backdrop-blur-md"
+              className="flex-1 md:flex-none px-5 py-3.5 bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700/80 rounded-2xl text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-2 backdrop-blur-md"
             >
               <ArrowLeft size={14} /> Ganti Rumah
             </button>
-            <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 md:flex-none bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black shadow-xl shadow-emerald-500/20 py-3.5 px-6 rounded-2xl uppercase tracking-wider text-xs border border-emerald-400/30">
+            <Button onClick={() => setIsDepositModalOpen(true)} className="flex-1 md:flex-none bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-semibold shadow-xl shadow-2xs py-3.5 px-6 rounded-2xl uppercase tracking-wider text-xs border border-emerald-400/30">
               <Package size={16} className="mr-2 stroke-[2.5]" /> Setorkan Sampah
             </Button>
           </div>
@@ -338,10 +338,10 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
       {/* Banner Operational Schedule Status */}
       <div className="bg-emerald-950 text-white rounded-3xl p-4 sm:p-5 border border-emerald-800/80 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping shrink-0" />
+          <div className="w-3 h-3 rounded-full bg-emerald-400 shrink-0" />
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-black text-emerald-400 uppercase tracking-widest">🟢 JADWAL PENIMBANGAN AKTIF</span>
+              <span className="text-[10px] font-mono font-semibold text-emerald-400 uppercase tracking-widest">Jadwal Penimbangan Aktif</span>
               <span className="px-2 py-0.5 bg-emerald-900 text-emerald-300 rounded text-[9px] font-mono font-bold">POS RONDA RT 02</span>
             </div>
             <p className="text-xs text-slate-300 font-medium mt-0.5">
@@ -366,9 +366,9 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors whitespace-nowrap ${
               activeTab === tab.id 
-              ? 'bg-white text-emerald-700 shadow-md shadow-slate-300/50 border border-slate-200/80' 
+              ? 'bg-white text-emerald-700 shadow-md shadow-2xs border border-slate-200/80' 
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/40'
             }`}
           >
@@ -389,7 +389,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Luxury Glass Balance Card */}
-              <div className="lg:col-span-2 bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-800 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl shadow-emerald-900/20 border border-emerald-400/20 flex flex-col justify-between relative overflow-hidden group">
+              <div className="lg:col-span-2 bg-gradient-to-br from-emerald-600 via-teal-700 to-emerald-800 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl shadow-2xs border border-emerald-400/20 flex flex-col justify-between relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none group-hover:scale-125 transition-transform duration-700" />
 
                 <div className="flex justify-between items-start mb-8 relative z-10">
@@ -398,18 +398,18 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                       <Wallet size={26} />
                     </div>
                     <div>
-                      <span className="text-[10px] font-mono font-black uppercase tracking-widest text-emerald-200 block">TOTAL SALDO AKTIF</span>
+                      <span className="text-[10px] font-mono font-semibold uppercase tracking-widest text-emerald-200 block">TOTAL SALDO AKTIF</span>
                       <p className="text-xs text-white/80 font-medium">Bisa dicarikan atau digunakan iuran</p>
                     </div>
                   </div>
-                  <span className="px-3.5 py-1.5 bg-white/15 backdrop-blur-md border border-white/20 rounded-full text-[9px] font-mono font-black uppercase tracking-widest text-white">
+                  <span className="px-3.5 py-1.5 bg-white/15 backdrop-blur-md border border-white/20 rounded-full text-[9px] font-mono font-semibold uppercase tracking-widest text-white">
                     ✓ TERDEDIKASI
                   </span>
                 </div>
 
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 relative z-10">
                   <div>
-                    <h3 className="text-4xl sm:text-6xl font-black tracking-tight text-white mb-2">
+                    <h3 className="text-4xl sm:text-6xl font-semibold tracking-tight text-white mb-2">
                       Rp {(balance?.totalBalance || 0).toLocaleString()}
                     </h3>
                     <p className="text-xs font-mono text-emerald-100/80">
@@ -422,7 +422,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                       setRedeemAmount(balance?.totalBalance || 0);
                       setIsRedeemModalOpen(true);
                     }}
-                    className="px-6 py-3.5 bg-white text-emerald-900 hover:bg-emerald-50 rounded-2xl text-xs font-black uppercase tracking-wider transition-all shadow-xl flex items-center gap-2 shrink-0 border border-white/40"
+                    className="px-6 py-3.5 bg-white text-emerald-900 hover:bg-emerald-50 rounded-2xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-xl flex items-center gap-2 shrink-0 border border-white/40"
                   >
                     <Send size={15} /> Gunakan Saldo
                   </button>
@@ -433,8 +433,8 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
               <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
                 <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1">TOTAL TERKUMPUL</p>
-                    <p className="text-2xl font-black text-slate-900">{totalWeight.toFixed(1)} <span className="text-xs font-bold text-slate-400">kg</span></p>
+                    <p className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1">TOTAL TERKUMPUL</p>
+                    <p className="text-2xl font-semibold text-slate-900">{totalWeight.toFixed(1)} <span className="text-xs font-bold text-slate-400">kg</span></p>
                     <p className="text-[10px] text-emerald-600 font-bold mt-1">✓ Terverifikasi</p>
                   </div>
                   <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
@@ -444,8 +444,8 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
 
                 <div className="bg-white border border-slate-200/80 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-mono font-black text-slate-400 uppercase tracking-widest mb-1">TOTAL AKTIVITAS</p>
-                    <p className="text-2xl font-black text-slate-900">{deposits.length} <span className="text-xs font-bold text-slate-400">Kali</span></p>
+                    <p className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-widest mb-1">TOTAL AKTIVITAS</p>
+                    <p className="text-2xl font-semibold text-slate-900">{deposits.length} <span className="text-xs font-bold text-slate-400">Kali</span></p>
                     <p className="text-[10px] text-indigo-600 font-bold mt-1">Sesi Penyetoran</p>
                   </div>
                   <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100">
@@ -462,7 +462,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                   <Info size={22} />
                 </div>
                 <div>
-                  <h4 className="font-black text-slate-900 text-lg tracking-tight">Panduan Cepat Pemilahan Sampah</h4>
+                  <h4 className="font-semibold text-slate-900 text-lg tracking-tight">Panduan Cepat Pemilahan Sampah</h4>
                   <p className="text-xs text-slate-500 font-medium">Tips agar nilai timbangan sampah Anda maksimal & mempercepat penimbangan</p>
                 </div>
               </div>
@@ -475,7 +475,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                   { tag: 'BOTOL KACA', tips: 'Pisahkan tutup botol dan pastikan botol utuh tidak pecah.', color: 'border-emerald-200 bg-emerald-100/60 text-emerald-800' }
                 ].map((guide, idx) => (
                   <div key={idx} className={`p-4 rounded-2xl border ${guide.color} space-y-1.5`}>
-                    <span className="text-[9px] font-mono font-black uppercase tracking-widest">{guide.tag}</span>
+                    <span className="text-[9px] font-mono font-semibold uppercase tracking-widest">{guide.tag}</span>
                     <p className="text-xs font-medium leading-relaxed opacity-90">{guide.tips}</p>
                   </div>
                 ))}
@@ -498,7 +498,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                   <Trophy size={24} />
                 </div>
                 <div>
-                  <h4 className="font-black text-slate-900 text-lg">Podium Warga Peduli Lingkungan (Top 5)</h4>
+                  <h4 className="font-semibold text-slate-900 text-lg">Podium Warga Peduli Lingkungan (Top 5)</h4>
                   <p className="text-xs text-slate-500 font-medium">Peringkat warga paling aktif dan paling banyak menyetorkan sampah di RT 02</p>
                 </div>
               </div>
@@ -519,17 +519,17 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                       className="p-4 bg-slate-50/70 rounded-2xl border border-slate-200/70 flex items-center justify-between gap-4"
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-black text-xs shrink-0 ${rankColors[idx]}`}>
+                        <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-semibold text-xs shrink-0 ${rankColors[idx]}`}>
                           #{idx + 1}
                         </div>
                         <div>
-                          <p className="font-black text-slate-900 text-sm">Blok {item.block} • {item.headOfFamily}</p>
+                          <p className="font-semibold text-slate-900 text-sm">Blok {item.block} • {item.headOfFamily}</p>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Hasil: Rp {item.value.toLocaleString()}</p>
                         </div>
                       </div>
 
                       <div className="text-right">
-                        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-black">
+                        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold">
                           {item.weight.toFixed(1)} kg
                         </span>
                       </div>
@@ -558,7 +558,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                 <motion.div 
                   key={deposit.id} 
                   variants={itemVariants}
-                  className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-emerald-300 transition-all"
+                  className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:border-emerald-300 transition-colors"
                 >
                   <div className="flex items-center gap-4">
                     <div className={`p-3.5 rounded-2xl border ${
@@ -570,8 +570,8 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-0.5">
-                        <h4 className="font-black text-slate-900 text-sm">{deposit.type}</h4>
-                        <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
+                        <h4 className="font-semibold text-slate-900 text-sm">{deposit.type}</h4>
+                        <span className={`px-2 py-0.5 rounded-md text-[8px] font-semibold uppercase tracking-widest ${
                           deposit.status === 'Confirmed' 
                             ? 'bg-emerald-100 text-emerald-700' 
                             : 'bg-amber-100 text-amber-700'
@@ -587,7 +587,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                   </div>
 
                   <div className="text-left sm:text-right border-t sm:border-t-0 border-slate-100 pt-2 sm:pt-0 w-full sm:w-auto">
-                    <p className="text-base font-black text-emerald-600 mb-0.5">
+                    <p className="text-base font-semibold text-emerald-600 mb-0.5">
                       + Rp {deposit.totalValue.toLocaleString()}
                     </p>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -601,7 +601,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                 <div className="w-16 h-16 bg-slate-50 text-slate-300 rounded-3xl flex items-center justify-center mx-auto mb-3 border border-slate-100">
                   <History size={32} />
                 </div>
-                <h4 className="text-base font-black text-slate-800 mb-1">Belum Ada Riwayat Setoran</h4>
+                <h4 className="text-base font-semibold text-slate-800 mb-1">Belum Ada Riwayat Setoran</h4>
                 <p className="text-xs text-slate-400 max-w-xs mx-auto">
                   Setorkan sampah anorganik Anda ke petugas Bank Sampah RT 02 untuk mulai mencatat riwayat.
                 </p>
@@ -623,19 +623,19 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
                 <motion.div 
                   key={price.id} 
                   variants={itemVariants}
-                  className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between hover:border-emerald-300 transition-all"
+                  className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between hover:border-emerald-300 transition-colors"
                 >
                   <div className="flex items-center gap-3.5">
                     <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
                       <DollarSign size={20} />
                     </div>
                     <div>
-                      <h4 className="font-black text-slate-900 text-sm">{price.type}</h4>
+                      <h4 className="font-semibold text-slate-900 text-sm">{price.type}</h4>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Satuan: {price.unit}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-black text-slate-900">Rp {price.pricePerUnit.toLocaleString()}</p>
+                    <p className="text-lg font-semibold text-slate-900">Rp {price.pricePerUnit.toLocaleString()}</p>
                     <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Per {price.unit}</p>
                   </div>
                 </motion.div>
@@ -645,7 +645,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
             <div className="p-5 bg-amber-50/60 border border-amber-200/60 rounded-2xl flex items-start gap-3">
               <AlertCircle className="text-amber-500 mt-0.5 shrink-0" size={20} />
               <div>
-                <h4 className="text-xs font-black text-amber-800 uppercase mb-0.5">Syarat Penimbangan Sampah</h4>
+                <h4 className="text-xs font-semibold text-amber-800 uppercase mb-0.5">Syarat Penimbangan Sampah</h4>
                 <p className="text-xs text-amber-700 font-medium leading-relaxed">
                   Harga sampah mengikuti patokan pasar pengepul. Sampah yang disetorkan harus dalam kondisi bersih dan telah terpilah sesuai jenisnya.
                 </p>
@@ -659,9 +659,9 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
       <Modal isOpen={isRedeemModalOpen} onClose={() => setIsRedeemModalOpen(false)} title="Pengajuan Penukaran Saldo">
         <form onSubmit={handleRedeemSubmit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Keperluan Penukaran</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Keperluan Penukaran</label>
             <select 
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
               value={redeemType}
               onChange={e => setRedeemType(e.target.value as any)}
             >
@@ -672,11 +672,11 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nominal (Rp)</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nominal (Rp)</label>
             <input 
               type="number" 
               required
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
               value={redeemAmount || ''}
               onChange={e => setRedeemAmount(parseInt(e.target.value) || 0)}
               placeholder="0"
@@ -684,7 +684,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
             <p className="text-[10px] text-slate-400 font-medium mt-1">Saldo Maksimal: Rp {(balance?.totalBalance || 0).toLocaleString()}</p>
           </div>
 
-          <Button type="submit" className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-600/20 mt-2 flex items-center justify-center gap-2">
+          <Button type="submit" className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold uppercase text-xs tracking-wider rounded-xl shadow-lg shadow-2xs mt-2 flex items-center justify-center gap-2">
             <Send size={14} /> Ajukan via WhatsApp Bendahara
           </Button>
         </form>
@@ -694,10 +694,10 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
       <Modal isOpen={isDepositModalOpen} onClose={() => setIsDepositModalOpen(false)} title="Setorkan Sampah Anorganik">
         <form onSubmit={handleDepositSubmit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pilih Jenis Sampah</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Pilih Jenis Sampah</label>
             <select 
               required
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
               value={depositForm.type}
               onChange={e => setDepositForm({...depositForm, type: e.target.value})}
             >
@@ -709,12 +709,12 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Estimasi Berat (kg)</label>
+            <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Estimasi Berat (kg)</label>
             <input 
               type="number" 
               step="0.1"
               required
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-colors"
               value={depositForm.weight || ''}
               onChange={e => setDepositForm({...depositForm, weight: parseFloat(e.target.value) || 0})}
               placeholder="0.0"
@@ -723,15 +723,15 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
 
           <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
             <div className="flex justify-between items-center mb-1">
-              <span className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">Estimasi Hasil</span>
-              <span className="text-lg font-black text-emerald-700">
+              <span className="text-[9px] font-semibold text-emerald-700 uppercase tracking-widest">Estimasi Hasil</span>
+              <span className="text-lg font-semibold text-emerald-700">
                 Rp {((prices.find(p => p.type === depositForm.type)?.pricePerUnit || 0) * depositForm.weight).toLocaleString()}
               </span>
             </div>
             <p className="text-[10px] text-emerald-600 font-medium italic">* Nilai tepat akan ditentukan saat penimbangan fisik oleh petugas.</p>
           </div>
 
-          <Button type="submit" className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-xs tracking-wider rounded-xl shadow-lg shadow-emerald-600/20 mt-2">
+          <Button type="submit" className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold uppercase text-xs tracking-wider rounded-xl shadow-lg shadow-2xs mt-2">
             Ajukan Setoran Sekarang
           </Button>
         </form>

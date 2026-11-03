@@ -36,7 +36,7 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
       <>
         {parts.map((part, i) =>
           part.toLowerCase() === query.trim().toLowerCase() ? (
-            <mark key={i} className="bg-amber-300 text-slate-950 font-black rounded-xs px-1">
+            <mark key={i} className="bg-amber-300 text-slate-950 font-semibold rounded-xs px-1">
               {part}
             </mark>
           ) : (
@@ -682,7 +682,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
       {/* Back Button */}
       <motion.button 
         onClick={() => navigate('/')}
-        className="mb-6 flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs font-black uppercase tracking-wider transition-all bg-slate-50 hover:bg-slate-100/80 px-4 py-2.5 rounded-xl border border-slate-100 cursor-pointer"
+        className="mb-6 flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs font-semibold uppercase tracking-wider transition-colors bg-slate-50 hover:bg-slate-100/80 px-4 py-2.5 rounded-xl border border-slate-100 cursor-pointer"
       >
         <ArrowLeft size={16} strokeWidth={2.5} /> Kembali ke Beranda
       </motion.button>
@@ -693,7 +693,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
           <button
             type="button"
             onClick={() => setMainTab('rules')}
-            className={`flex-1 min-w-[200px] flex items-center justify-center gap-2.5 py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex-1 min-w-[200px] flex items-center justify-center gap-2.5 py-3 px-5 rounded-2xl text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
               mainTab === 'rules'
                 ? 'bg-white text-slate-900 shadow-md scale-[1.02]'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
@@ -706,7 +706,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
           <button
             type="button"
             onClick={() => setMainTab('minutes')}
-            className={`flex-1 min-w-[200px] flex items-center justify-center gap-2.5 py-3 px-5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex-1 min-w-[200px] flex items-center justify-center gap-2.5 py-3 px-5 rounded-2xl text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer ${
               mainTab === 'minutes'
                 ? 'bg-white text-slate-900 shadow-md scale-[1.02]'
                 : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
@@ -714,9 +714,9 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
           >
             <BookOpen size={16} className={mainTab === 'minutes' ? 'text-indigo-600' : ''} />
             <span>Buku Notula &amp; Kesepakatan</span>
-            <span className={`px-2 py-0.5 text-[10px] font-black rounded-lg transition-colors ${
+            <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-lg transition-colors ${
               isMinutesLoading 
-                ? 'bg-slate-100 text-slate-400 animate-pulse'
+                ? 'bg-slate-100 text-slate-400 '
                 : minutes.length > 0 
                   ? 'bg-amber-100 text-amber-900' 
                   : 'bg-slate-100 text-slate-500'
@@ -728,14 +728,14 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
       </div>
 
       {mainTab === 'rules' ? (
-      <div id="rules" className="bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-slate-100/40">
+      <div id="rules" className="bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-2xs">
         {/* Header section with rich design */}
         <div className="text-center mb-12 relative">
           <div className="absolute inset-0 -top-12 -z-10 bg-gradient-to-b from-emerald-50/20 to-transparent rounded-full blur-3xl w-72 h-72 mx-auto" />
           <div className="inline-flex justify-center items-center p-3.5 bg-emerald-50 text-emerald-600 rounded-3xl border border-emerald-100 mb-4 shadow-sm">
             <Scale size={32} strokeWidth={2} />
           </div>
-          <h2 className="text-3xl md:text-5xl font-black text-slate-800 tracking-tight mb-4">
+          <h2 className="text-3xl md:text-5xl font-semibold text-slate-800 tracking-tight mb-4">
             Peraturan Umum <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-indigo-600 font-serif">TERAS RT 02</span>
           </h2>
           <p className="text-slate-400 font-bold tracking-wider text-xs md:text-sm uppercase mb-4">
@@ -748,10 +748,10 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
           <div className="flex justify-center">
             <button
               onClick={() => generateAllRulesPDF(rules, pdfConfig)}
-              className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer hover:scale-105"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-700 hover:to-indigo-700 text-white font-semibold text-xs uppercase tracking-wider rounded-2xl shadow-lg shadow-2xs transition-colors cursor-pointer hover:scale-105"
             >
               <BookOpen size={18} />
-              <span>🖨️ Cetak Buku Himpunan Seluruh Peraturan RT 02 (13 BAB PDF)</span>
+              <span>Cetak Buku Himpunan Seluruh Peraturan RT 02 (13 BAB PDF)</span>
             </button>
           </div>
         </div>
@@ -765,13 +765,13 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-12 py-4 bg-slate-50 hover:bg-slate-50/80 focus:bg-white border border-slate-200/60 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 rounded-2xl text-sm outline-none transition-all placeholder:text-slate-400 font-bold text-slate-800 shadow-sm"
+              className="w-full pl-12 pr-12 py-4 bg-slate-50 hover:bg-slate-50/80 focus:bg-white border border-slate-200/60 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 rounded-2xl text-sm outline-none transition-colors placeholder:text-slate-400 font-bold text-slate-800 shadow-sm"
               placeholder="Cari kata kunci peraturan... (misal: tamu wajib lapor, jam malam, parkir bising, pilah sampah)"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200/50 transition-all cursor-pointer"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200/50 transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -780,19 +780,19 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
 
           {/* Quick Keyword Suggestion Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 no-scrollbar">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 shrink-0 flex items-center gap-1">
               <Sparkles size={12} className="text-amber-500 shrink-0" />
               <span>Topik Cepat:</span>
             </span>
             {[
-              { label: '🚗 Parkir Kendaraan', query: 'parkir' },
-              { label: '🌙 Jam Malam & Tamu', query: 'tamu' },
-              { label: '🗑️ Pilah Sampah TPS3R', query: 'sampah' },
+              { label: 'Parkir Kendaraan', query: 'parkir' },
+              { label: 'Jam Malam & Tamu', query: 'tamu' },
+              { label: 'Pilah Sampah TPS3R', query: 'sampah' },
               { label: '⚡ Batas Kecepatan 15 km/h', query: 'kecepatan' },
-              { label: '🐾 Hewan Peliharaan', query: 'hewan' },
-              { label: '💰 Iuran Lingkungan', query: 'iuran' },
-              { label: '🔊 Keramaian & Hajatan', query: 'keramaian' },
-              { label: '👮 Ronda Siskamling', query: 'ronda' }
+              { label: 'Hewan Peliharaan', query: 'hewan' },
+              { label: 'Iuran Lingkungan', query: 'iuran' },
+              { label: 'Keramaian & Hajatan', query: 'keramaian' },
+              { label: 'Ronda Siskamling', query: 'ronda' }
             ].map((pill) => {
               const isSelected = searchTerm.toLowerCase() === pill.query.toLowerCase();
               return (
@@ -807,9 +807,9 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                       setSelectedCategory('all');
                     }
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer border select-none ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors cursor-pointer border select-none ${
                     isSelected
-                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm font-black'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm font-semibold'
                       : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200/80 shadow-2xs hover:border-slate-300'
                   }`}
                 >
@@ -832,7 +832,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                     onClick={() => {
                         setSelectedCategory(cat.id);
                     }}
-                    className={`px-4 py-2.5 rounded-2xl text-xs font-black border transition-all flex items-center gap-2 cursor-pointer ${
+                    className={`px-4 py-2.5 rounded-2xl text-xs font-semibold border transition-colors flex items-center gap-2 cursor-pointer ${
                       isActive
                         ? 'bg-slate-900 text-white border-slate-900 shadow-md'
                         : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
@@ -852,13 +852,13 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
               <div className="flex items-center gap-2.5">
                 <button
                   onClick={expandAll}
-                  className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-700 hover:text-emerald-800 rounded-xl text-xs font-bold border border-emerald-100 transition-all cursor-pointer"
+                  className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-700 hover:text-emerald-800 rounded-xl text-xs font-bold border border-emerald-100 transition-colors cursor-pointer"
                 >
                   Buka Semua Pasal
                 </button>
                 <button
                   onClick={collapseAll}
-                  className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-700 rounded-xl text-xs font-bold border border-slate-200/60 transition-all cursor-pointer"
+                  className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-700 rounded-xl text-xs font-bold border border-slate-200/60 transition-colors cursor-pointer"
                 >
                   Tutup Semua
                 </button>
@@ -867,7 +867,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
           </div>
 
           {/* Active Category Description */}
-          <p className="text-xs text-slate-400 font-medium italic transition-all px-1.5">
+          <p className="text-xs text-slate-400 font-medium italic transition-colors px-1.5">
             * {activeCategoryDesc}
           </p>
         </div>        {/* Categories Listing Rows (Custom Table Layout) */}
@@ -884,7 +884,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
           </div>
 
           {/* Table Header Row - Desktop Only */}
-          <div className="hidden md:grid md:grid-cols-12 gap-6 px-8 py-3.5 bg-slate-900 text-slate-200 rounded-2xl text-[10px] md:text-xs font-black tracking-widest uppercase mb-4 shadow bg-[#0d1527] items-center text-left">
+          <div className="hidden md:grid md:grid-cols-12 gap-6 px-8 py-3.5 bg-slate-900 text-slate-200 rounded-2xl text-[10px] md:text-xs font-semibold tracking-widest uppercase mb-4 shadow bg-[#0d1527] items-center text-left">
             <div className="col-span-2 font-serif tracking-[0.15em]">NO. PERATURAN</div>
             <div className="col-span-6 font-serif tracking-[0.15em]">JUDUL</div>
             <div className="col-span-2 text-center font-serif tracking-[0.15em]">KATEGORI</div>
@@ -927,9 +927,9 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                       layout="position"
                       variants={itemVariants}
                       transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                      className={`rounded-3xl border transition-all duration-300 flex flex-col justify-between h-fit group overflow-hidden ${
+                      className={`rounded-3xl border transition-colors duration-300 flex flex-col justify-between h-fit group overflow-hidden ${
                         isOpen 
-                          ? 'bg-white border-indigo-200 shadow-xl shadow-indigo-950/5' 
+                          ? 'bg-white border-indigo-200 shadow-xl shadow-2xs' 
                           : 'bg-slate-50/60 border-slate-100 hover:bg-white hover:border-slate-200 hover:shadow shadow-sm'
                       }`}
                     >
@@ -942,7 +942,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                           
                           {/* No. Peraturan / Kode */}
                           <div className="col-span-1 md:col-span-2 flex md:flex-col items-center md:items-start justify-between md:justify-center border-b md:border-b-0 border-slate-150 pb-2 md:pb-0 mb-1 md:mb-0">
-                            <span className="md:hidden text-[9px] font-black text-slate-450 uppercase font-serif tracking-wider">No. Peraturan</span>
+                            <span className="md:hidden text-[9px] font-semibold text-slate-450 uppercase font-serif tracking-wider">No. Peraturan</span>
                             <div className="text-left font-serif">
                               <p className="text-slate-800 font-extrabold text-sm md:text-base leading-none tracking-tight font-serif">
                                 {shortRegistry}
@@ -956,7 +956,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                           {/* Judul & Detail */}
                           <div className="col-span-1 md:col-span-6 flex flex-col gap-1 items-start text-left">
                             <div className="flex items-center gap-2.5">
-                              <div className={`p-1.5 md:p-2 rounded-xl border transition-all duration-300 shrink-0 ${
+                              <div className={`p-1.5 md:p-2 rounded-xl border transition-colors duration-300 shrink-0 ${
                                 isOpen 
                                   ? 'bg-indigo-50 border-indigo-100 text-indigo-600 scale-105' 
                                   : 'bg-white border-slate-150 text-slate-500 group-hover:scale-105'
@@ -985,7 +985,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
 
                           {/* Kategori Badge */}
                           <div className="col-span-1 md:col-span-2 flex md:justify-center items-center justify-between py-1 md:py-0">
-                            <span className="md:hidden text-[9px] font-black text-slate-450 uppercase font-serif tracking-wider">Kategori</span>
+                            <span className="md:hidden text-[9px] font-semibold text-slate-450 uppercase font-serif tracking-wider">Kategori</span>
                             <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest text-center font-sans">
                               {badge.label}
                             </span>
@@ -993,17 +993,17 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
 
                           {/* Berlaku Sejak & Action */}
                           <div className="col-span-1 md:col-span-2 flex items-center justify-between md:justify-end gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-slate-150">
-                            <span className="md:hidden text-[9px] font-black text-slate-450 uppercase font-serif tracking-wider">Diberlakukan</span>
+                            <span className="md:hidden text-[9px] font-semibold text-slate-450 uppercase font-serif tracking-wider">Diberlakukan</span>
                             <div className="flex items-center gap-3">
                               <div className="text-right font-serif hidden md:block">
                                 <p className="text-slate-700 font-medium text-xs md:text-sm">
                                   1 Februari 2026
                                 </p>
-                                <p className="text-[8px] text-emerald-600 font-black tracking-widest uppercase mt-0.5">
+                                <p className="text-[8px] text-emerald-600 font-semibold tracking-widest uppercase mt-0.5">
                                   SAH & BERLAKU
                                 </p>
                               </div>
-                              <span className={`p-1.5 rounded-xl border transition-all duration-300 ${
+                              <span className={`p-1.5 rounded-xl border transition-colors duration-300 ${
                                 isOpen ? 'bg-indigo-50 border-indigo-200 text-indigo-600 rotate-180' : 'bg-white border-slate-200 text-slate-450'
                               }`}>
                                 <ChevronDown size={14} strokeWidth={2.5} />
@@ -1048,7 +1048,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                         e.stopPropagation();
                                         generateRulesPDF(rule, pdfConfig);
                                       }}
-                                      className="flex items-center gap-1.5 px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer"
+                                      className="flex items-center gap-1.5 px-3.5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors cursor-pointer"
                                     >
                                       <Printer size={14} />
                                       <span>Cetak PDF</span>
@@ -1064,7 +1064,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                           setCopiedStates(prev => ({ ...prev, [rule.title]: false }));
                                         }, 2000);
                                       }}
-                                      className="flex items-center gap-2 px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 shadow-sm transition-all duration-150 focus:outline-none"
+                                      className="flex items-center gap-2 px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 shadow-sm transition-colors duration-150 focus:outline-none"
                                     >
                                       {copiedStates[rule.title] ? (
                                         <>
@@ -1084,7 +1084,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       onClick={(e) => e.stopPropagation()}
-                                      className="flex items-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba59] active:bg-[#1ca34d] text-white font-bold text-xs rounded-xl shadow-sm transition-all duration-150 focus:outline-none"
+                                      className="flex items-center gap-2 px-4 py-2.5 bg-[#25D366] hover:bg-[#20ba59] active:bg-[#1ca34d] text-white font-bold text-xs rounded-xl shadow-sm transition-colors duration-150 focus:outline-none"
                                     >
                                       <svg className="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24">
                                         <path d="M12.004 2c-5.523 0-10 4.477-10 10a9.96 9.96 0 0 0 1.516 5.253L2 22l4.915-1.285A9.957 9.957 0 0 0 12.004 22c5.523 0 10-4.477 10-10s-4.477-10-10-10zm5.666 14.195c-.244.688-1.22 1.254-1.688 1.309-.465.056-.913.256-2.936-.554-2.576-1.03-4.218-3.66-4.346-3.832-.128-.172-1.042-1.39-1.042-2.651s.66-1.879.894-2.128c.234-.25.511-.312.682-.312s.34.004.489.012c.153.008.358-.058.553.414.2.484.682 1.671.741 1.792.059.12.098.261.018.421-.08.159-.12.261-.24.402-.12.14-.251.312-.358.421-.12.12-.244.25-.104.489.14.238.623 1.027 1.336 1.66.918.812 1.691 1.062 1.933 1.183.243.12.386.101.527-.062.141-.164.6-1.004.75-.141s.3.238.64.406c.343.17.683.342.853.421.17.08.283.12.441-.141z"/>
@@ -1108,7 +1108,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                           window.location.href = `mailto:?subject=${subject}&body=${body}`;
                                         }
                                       }}
-                                      className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 shadow-sm transition-all duration-150 focus:outline-none"
+                                      className="flex items-center gap-1.5 px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 shadow-sm transition-colors duration-150 focus:outline-none"
                                     >
                                       <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-2 shrink-0" viewBox="0 0 24 24">
                                         <circle cx="18" cy="5" r="3" />
@@ -1134,7 +1134,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                   <p className="text-[10px] md:text-xs tracking-[0.25em] text-slate-400 uppercase font-bold">
                                     DALAM HAL {rule.category.toUpperCase()} LINGKUNGAN
                                   </p>
-                                  <p className="text-sm md:text-base tracking-[0.15em] text-indigo-950 font-black uppercase">
+                                  <p className="text-sm md:text-base tracking-[0.15em] text-indigo-950 font-semibold uppercase">
                                     RUKUN TETANGGA 02 HUNTAP TONDO 2 KELURAHAN TONDO
                                   </p>
                                   <p className="text-[9px] md:text-xs tracking-[0.1em] text-slate-400 font-bold uppercase">
@@ -1204,7 +1204,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                       <h6 className="font-extrabold text-indigo-950 text-xs md:text-sm uppercase tracking-[0.2em] font-serif">
                                         PASAL 1 — {highlightMatch(rule.title.toUpperCase(), searchTerm)}
                                       </h6>
-                                      <span className="text-[9px] md:text-[10px] font-black text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-150 uppercase tracking-widest leading-none">Salinan Dokumen</span>
+                                      <span className="text-[9px] md:text-[10px] font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-150 uppercase tracking-widest leading-none">Salinan Dokumen</span>
                                     </div>
                                     
                                     <div className="space-y-4">
@@ -1245,7 +1245,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                                         e.stopPropagation();
                                         toggleRule(rule.title);
                                       }}
-                                      className="text-xs md:text-sm font-semibold text-indigo-700 hover:text-indigo-950 transition-all duration-250 focus:outline-none flex items-center justify-center gap-1.5 mx-auto font-serif border-b border-dashed border-indigo-700/40 hover:border-indigo-950 pb-0.5"
+                                      className="text-xs md:text-sm font-semibold text-indigo-700 hover:text-indigo-950 transition-colors duration-250 focus:outline-none flex items-center justify-center gap-1.5 mx-auto font-serif border-b border-dashed border-indigo-700/40 hover:border-indigo-950 pb-0.5"
                                     >
                                       ← Kembali ke daftar peraturan
                                     </button>
@@ -1261,7 +1261,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                       {/* Footer Toggle Accordion Trigger bar */}
                       <div 
                         onClick={() => toggleRule(rule.title)}
-                        className={`px-6 py-2.5 border-t text-[10px] md:text-xs font-black flex items-center justify-between cursor-pointer transition-colors duration-300 ${
+                        className={`px-6 py-2.5 border-t text-[10px] md:text-xs font-semibold flex items-center justify-between cursor-pointer transition-colors duration-300 ${
                           isOpen 
                             ? 'bg-indigo-50/20 border-indigo-105 text-indigo-700 hover:bg-indigo-50' 
                             : 'bg-slate-50/30 border-slate-100/60 text-slate-500 hover:text-indigo-600 hover:bg-white'
@@ -1280,15 +1280,15 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
       </div>
       ) : (
         /* Minutes Tab View */
-        <div id="minutes" className="bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-slate-100/40">
+        <div id="minutes" className="bg-white rounded-[2.5rem] p-6 md:p-10 border border-slate-100 shadow-xl shadow-2xs">
           {/* Header section */}
           <div className="text-center mb-10 relative">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-900 text-[11px] font-black uppercase tracking-widest mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-900 text-[11px] font-semibold uppercase tracking-widest mb-4">
               <BookOpen size={14} className="text-amber-600" />
               <span>Buku Notula Musyawarah RT 02</span>
             </div>
             
-            <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tight font-serif">
+            <h1 className="text-2xl md:text-4xl font-semibold text-slate-900 tracking-tight font-serif">
               Hasil Musyawarah &amp; Kesepakatan Warga
             </h1>
             
@@ -1300,13 +1300,13 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto mt-6">
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-center">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Musyawarah</span>
-                <span className="text-xl font-black text-slate-800 mt-0.5 block">
+                <span className="text-xl font-semibold text-slate-800 mt-0.5 block">
                   {isMinutesLoading ? '...' : `${minutes.length} Sidang`}
                 </span>
               </div>
               <div className="p-3.5 bg-amber-50/50 rounded-2xl border border-amber-100 text-center">
                 <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Aturan Disepakati</span>
-                <span className="text-xl font-black text-amber-900 mt-0.5 block">
+                <span className="text-xl font-semibold text-amber-900 mt-0.5 block">
                   {isMinutesLoading ? '...' : `${totalDecisions} Kesepakatan`}
                 </span>
               </div>
@@ -1318,7 +1318,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                 <span className={`text-[10px] font-bold uppercase tracking-wider block ${
                   minutes.length > 0 ? 'text-emerald-700' : 'text-slate-400'
                 }`}>Status Legitimasi</span>
-                <span className="text-xl font-black mt-0.5 block">
+                <span className="text-xl font-semibold mt-0.5 block">
                   {isMinutesLoading ? '...' : minutes.length > 0 ? (isAllApproved ? 'Kuorum Sah' : 'Sebagian Sah') : 'Belum Ada Sidang'}
                 </span>
               </div>
@@ -1334,7 +1334,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                 placeholder="Cari kata kunci keputusan (misal: portal, siskamling, sampah, tenda, iuran)..."
                 value={minutesSearch}
                 onChange={(e) => setMinutesSearch(e.target.value)}
-                className="w-full pl-11 pr-10 py-3 bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all shadow-inner"
+                className="w-full pl-11 pr-10 py-3 bg-slate-50 hover:bg-slate-100/60 focus:bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-colors shadow-inner"
               />
               {minutesSearch && (
                 <button
@@ -1361,7 +1361,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                 <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-200/60 shadow-xs">
                   <BookOpen size={30} strokeWidth={2.2} />
                 </div>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/70 text-amber-900 text-[10px] font-black uppercase tracking-wider mb-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100/70 text-amber-900 text-[10px] font-semibold uppercase tracking-wider mb-2">
                   Arsip Notula Belum Diterbitkan
                 </span>
                 <h4 className="font-bold text-slate-900 text-base md:text-lg font-serif">Belum Ada Notula Musyawarah Resmi</h4>
@@ -1369,7 +1369,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                   Seluruh risalah rapat warga, berita acara musyawarah mufakat, dan keputusan resmi RT 02 Huntap Tondo 2 akan dipublikasikan secara langsung di sini secara real-time setelah sidang resmi disahkan oleh Pengurus RT.
                 </p>
                 <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-400 font-medium">
-                  <span>💡 Pengurus RT dapat mencatat &amp; mempublikasikan notula baru melalui menu <b>Notula Musyawarah</b> di Dashboard Pengurus.</span>
+                  <span>Pengurus RT dapat mencatat &amp; mempublikasikan notula baru melalui menu <b>Notula Musyawarah</b> di Dashboard Pengurus.</span>
                 </div>
               </div>
             ) : filteredMinutesForPublic.length > 0 ? (
@@ -1378,13 +1378,13 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                   key={m.id}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-md transition-all overflow-hidden"
+                  className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-md transition-colors overflow-hidden"
                 >
                   {/* Top Bar / Meta */}
                   <div className="p-5 md:p-6 pb-4 border-b border-slate-100 bg-gradient-to-r from-slate-50/70 to-white flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div className="space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                        <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider ${
                           m.meetingType === 'Musyawarah Warga' ? 'bg-amber-100 text-amber-900 border border-amber-200' :
                           m.meetingType === 'Rapat Pengurus' ? 'bg-indigo-100 text-indigo-900 border border-indigo-200' :
                           m.meetingType === 'Rapat Darurat Fasum' ? 'bg-rose-100 text-rose-900 border border-rose-200' :
@@ -1393,12 +1393,12 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                           {m.meetingType}
                         </span>
 
-                        <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                        <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1">
                           <Check size={12} strokeWidth={3} /> {m.status || 'Disahkan'}
                         </span>
                       </div>
 
-                      <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight font-serif pt-1">
+                      <h3 className="text-base md:text-lg font-semibold text-slate-900 tracking-tight font-serif pt-1">
                         {m.title}
                       </h3>
                     </div>
@@ -1440,7 +1440,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                     {/* Agenda Tags */}
                     {m.agenda && m.agenda.length > 0 && (
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block">
                           Agenda Yang Dibahas:
                         </span>
                         <div className="flex flex-wrap gap-1.5">
@@ -1456,7 +1456,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                     {/* Summary */}
                     {m.summary && (
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block">
                           Latar Belakang &amp; Ringkasan Musyawarah:
                         </span>
                         <p className="text-xs text-slate-700 leading-relaxed bg-amber-50/30 p-3.5 rounded-2xl border border-amber-100/60 font-sans">
@@ -1468,7 +1468,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                     {/* Decisions Box */}
                     <div className="space-y-2.5 pt-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-serif">
+                        <span className="text-xs font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-1.5 font-serif">
                           <CheckSquare size={15} className="text-emerald-600" />
                           Poin Keputusan yang Disepakati Bersama ({m.decisions?.length || 0}):
                         </span>
@@ -1481,7 +1481,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                             className="p-3.5 bg-slate-50/80 hover:bg-slate-50 border border-slate-200/70 rounded-2xl space-y-1.5 transition-colors"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[9px] font-black uppercase tracking-wider">
+                              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-md text-[9px] font-semibold uppercase tracking-wider">
                                 {dec.category}
                               </span>
                               {dec.effectiveDate && (
@@ -1508,7 +1508,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                       <button
                         type="button"
                         onClick={() => handleShareMinuteWhatsApp(m)}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs active:scale-95 cursor-pointer"
                       >
                         <MessageCircle size={14} />
                         <span>Bagikan ke Grup WA</span>
@@ -1517,7 +1517,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                       <button
                         type="button"
                         onClick={() => setSelectedMinuteForPrint(m)}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors shadow-xs active:scale-95 cursor-pointer"
                       >
                         <Printer size={14} />
                         <span>Lembar Berita Acara A4</span>
@@ -1536,7 +1536,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
                 <button
                   type="button"
                   onClick={() => setMinutesSearch('')}
-                  className="mt-4 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-100 transition-all cursor-pointer"
+                  className="mt-4 px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Tampilkan Semua Notula
                 </button>
@@ -1559,7 +1559,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
             <div id="print-canvas-resident" className="p-6 md:p-8 bg-white border border-slate-300 rounded-2xl shadow-sm text-slate-900 space-y-6 font-serif">
               {/* Kop Surat RT */}
               <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
-                <h2 className="text-base sm:text-lg font-black tracking-wider uppercase">
+                <h2 className="text-base sm:text-lg font-semibold tracking-wider uppercase">
                   RUKUN TETANGGA 002 / RUKUN WARGA 020
                 </h2>
                 <h3 className="text-xs sm:text-sm font-bold tracking-wide uppercase">
@@ -1572,7 +1572,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
 
               {/* Title */}
               <div className="text-center space-y-1">
-                <h4 className="text-sm font-black uppercase underline tracking-wider font-sans">
+                <h4 className="text-sm font-semibold uppercase underline tracking-wider font-sans">
                   BERITA ACARA &amp; SALINAN NOTULA HASIL MUSYAWARAH WARGA
                 </h4>
                 <p className="text-xs font-bold font-sans text-slate-600">
@@ -1608,7 +1608,7 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
 
               {/* Agreed Decisions */}
               <div className="space-y-3 font-sans">
-                <h5 className="font-black text-xs uppercase tracking-wider border-b pb-1">
+                <h5 className="font-semibold text-xs uppercase tracking-wider border-b pb-1">
                   POIN-POIN KEPUTUSAN YANG DISEPAKATI &amp; BERLAKU:
                 </h5>
                 <ol className="space-y-3 text-xs">
@@ -1650,14 +1650,14 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
               <button
                 type="button"
                 onClick={() => setSelectedMinuteForPrint(null)}
-                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Tutup
               </button>
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition-all cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold uppercase tracking-wider shadow-md transition-colors cursor-pointer"
               >
                 <Printer size={14} />
                 <span>Cetak Lembar A4</span>
@@ -1668,17 +1668,17 @@ _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
       )}
 
         {/* Footer info banner */}
-        <div className="mt-12 p-8 bg-gradient-to-br from-indigo-900 via-slate-900 to-[#041410] rounded-[2.5rem] text-center relative overflow-hidden shadow-lg shadow-indigo-950/25">
+        <div className="mt-12 p-8 bg-gradient-to-br from-indigo-900 via-slate-900 to-[#041410] rounded-[2.5rem] text-center relative overflow-hidden shadow-lg shadow-2xs">
           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
           <div className="relative z-10 space-y-6">
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-black text-[10px] uppercase tracking-widest px-3.5 py-1.5 rounded-full">
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold text-[10px] uppercase tracking-widest px-3.5 py-1.5 rounded-full">
               Keluarga Besar RT 02
             </span>
             <p className="text-indigo-100 font-medium max-w-3xl mx-auto leading-relaxed text-sm md:text-base">
               Dengan semangat TERAS RT 02 — Teknologi, Ekraf, Rukun, Aman, Sinergi, mari kita bangun lingkungan Huntap Tondo 2 RT 02 sebagai tempat tinggal yang nyaman, tertib, aman, dan penuh kekeluargaan.
             </p>
             <div className="inline-block text-left bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/20 shadow-md">
-              <p className="text-white font-black text-lg mb-1">Ketua RT 02: Irfan</p>
+              <p className="text-white font-semibold text-lg mb-1">Ketua RT 02: Irfan</p>
               <p className="text-indigo-200 text-sm mb-1">Alamat: Blok C10 No. 08</p>
               <p className="text-indigo-200 text-sm">WhatsApp: +62 859-6119-4621</p>
             </div>
