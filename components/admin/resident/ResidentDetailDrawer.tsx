@@ -13,6 +13,7 @@ import { subscribeToSTBMRecords, saveSTBMRecord } from '../../../services/databa
 import { toast } from 'sonner';
 import { KartuKeluargaModal } from './KartuKeluargaModal';
 import { CivicScoreBadge } from '../../community/CivicScoreBadge';
+import { getWhatsAppLink, isValidWhatsAppNumber } from '../../../services/whatsappService';
 
 interface ResidentDetailDrawerProps {
   isOpen: boolean;
@@ -94,14 +95,14 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
   };
 
   const handleContactWhatsAppSanitasi = () => {
-    if (!selectedResident?.phone) {
-      toast.error('Nomor telepon warga belum terdaftar.');
+    if (!selectedResident) return;
+    const message = `Halo Bapak/Ibu ${selectedResident.headOfFamily} (Kavling Blok ${selectedResident.block} No. ${selectedResident.number}), kami dari Pengurus RT 002 / RW 020 Huntap Tondo 2 ingin berkoordinasi terkait pemeliharaan sanitasi lingkungan: "${stbmRecord?.problemType || 'Pemeriksaan sarana sanitasi'}". Kapan waktu luang yang tepat untuk kami tinjau bersama kader kesehatan? Terima kasih.`;
+    const link = getWhatsAppLink(selectedResident.phone, message);
+    if (!link) {
+      toast.error('Nomor WhatsApp warga belum terdaftar atau tidak valid.');
       return;
     }
-    const cleanPhone = selectedResident.phone.replace(/[^0-9]/g, '');
-    const phoneWithCountry = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
-    const message = `Halo Bapak/Ibu ${selectedResident.headOfFamily} (Kavling Blok ${selectedResident.block} No. ${selectedResident.number}), kami dari Pengurus RT 002 / RW 020 Huntap Tondo 2 ingin berkoordinasi terkait pemeliharaan sanitasi lingkungan: "${stbmRecord?.problemType || 'Pemeriksaan sarana sanitasi'}". Kapan waktu luang yang tepat untuk kami tinjau bersama kader kesehatan? Terima kasih.`;
-    window.open(`https://api.whatsapp.com/send?phone=${phoneWithCountry}&text=${encodeURIComponent(message)}`, '_blank');
+    window.open(link, '_blank');
   };
 
   if (!isOpen || !selectedResident) return null;
@@ -218,7 +219,8 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded-md">ID: {selectedResident.id.substring(0, 8).toUpperCase()}</span>
               </div>
               <div className="pt-3.5 flex items-center gap-3.5">
-                <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center text-2xl shadow-xs select-none shrink-0">🇮🇩
+                <div className="w-12 h-12 bg-indigo-50 border border-indigo-100/80 rounded-2xl flex items-center justify-center text-indigo-600 shadow-xs select-none shrink-0">
+                  <ShieldCheck size={24} className="text-indigo-600" />
                 </div>
                 <div>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status Kependudukan</p>
@@ -274,7 +276,29 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <DetailItem icon={<Phone size={13} />} label="Nomor WA / Telp" value={selectedResident.phone || 'N/A'} isUrgent={!!selectedResident.phone} />
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-400 shrink-0"><Phone size={13} /></span>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nomor WA / Telp</p>
+                    </div>
+                    {isValidWhatsAppNumber(selectedResident.phone) ? (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm font-extrabold text-indigo-600 font-mono tracking-tight">{selectedResident.phone}</span>
+                        <a
+                          href={getWhatsAppLink(selectedResident.phone, `Halo Bapak/Ibu ${selectedResident.headOfFamily} (Blok ${selectedResident.block}-${selectedResident.number}), salam dari Pengurus RT 002 Huntap Tondo 2.`) || '#'}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 rounded-lg text-[10px] font-bold transition-colors inline-flex items-center gap-1 shadow-2xs"
+                          title="Kirim pesan WhatsApp"
+                        >
+                          <MessageCircle size={11} className="stroke-[2.5]" />
+                          <span>Chat WA</span>
+                        </a>
+                      </div>
+                    ) : (
+                      <p className="text-xs font-semibold text-slate-400 italic">Belum ada no. HP</p>
+                    )}
+                  </div>
                   <DetailItem icon={<MapPin size={13} />} label="Alamat Blok / No" value={`Blok ${selectedResident.block} No. ${selectedResident.number}`} />
                   <DetailItem icon={<Home size={13} />} label="Status Hunian" value={selectedResident.residenceType || 'Tetap'} />
                   <div className="col-span-2 p-3 bg-emerald-50/40 rounded-2xl border border-emerald-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
@@ -310,7 +334,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   </div>
                   <div className="col-span-2">
                     <DetailItem 
-                      icon={<Droplets size={13} className={selectedResident.pdamStatus === 'Hilang' ? 'text-purple-600' : 'text-blue-500'} />} 
+                      icon={selectedResident.pdamStatus === 'Hilang' ? <AlertTriangle size={13} className="text-rose-600" /> : <Droplets size={13} className="text-blue-500" />} 
                       label="Meteran PDAM Palu" 
                       value={
                         selectedResident.pdamStatus === 'Hilang'
@@ -338,7 +362,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                               : 'bg-amber-50 text-amber-700 border-amber-200'
                           }`}>
-                            <span>{(selectedResident.ktpStatus === 'Sesuai Domisili' || (!selectedResident.ktpStatus && selectedResident.addressKtp && (selectedResident.addressKtp.toLowerCase().includes('tondo') || selectedResident.addressKtp.toLowerCase().includes('pue lombe')))) ? '✅' : '🪪'}</span>
+                            {(selectedResident.ktpStatus === 'Sesuai Domisili' || (!selectedResident.ktpStatus && selectedResident.addressKtp && (selectedResident.addressKtp.toLowerCase().includes('tondo') || selectedResident.addressKtp.toLowerCase().includes('pue lombe')))) ? <Check size={12} className="text-emerald-600" /> : <FileText size={12} className="text-amber-600" />}
                             <span>
                               {selectedResident.ktpStatus || (selectedResident.addressKtp && (selectedResident.addressKtp.toLowerCase().includes('tondo') || selectedResident.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai Domisili' : (selectedResident.addressKtp ? 'Luar Wilayah (Belum Mutasi)' : 'Sesuai Domisili'))}
                             </span>
@@ -422,18 +446,16 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     )}
                   </div>
 
-                  {selectedResident.businessPhone && (
-                    <button
-                      onClick={() => {
-                        let phone = (selectedResident.businessPhone || '').replace(/[^0-9]/g, '');
-                        if (phone.startsWith('0')) phone = '62' + phone.substring(1);
-                        window.open(`https://api.whatsapp.com/send?phone=${phone}`, '_blank');
-                      }}
+                  {isValidWhatsAppNumber(selectedResident.businessPhone) && (
+                    <a
+                      href={getWhatsAppLink(selectedResident.businessPhone, `Halo Bapak/Ibu ${selectedResident.headOfFamily}, saya pengurus RT 02 ingin berkoordinasi seputar UMKM ${selectedResident.businessName || ''}.`) || '#'}
+                      target="_blank"
+                      rel="noreferrer"
                       className="w-full py-2 bg-[#e8faf0] hover:bg-emerald-100 text-[#059669] border border-emerald-100 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                     >
                       <MessageCircle size={13} />
                       <span>Hubungi WhatsApp Usaha ({selectedResident.businessPhone})</span>
-                    </button>
+                    </a>
                   )}
                 </section>
               )}
@@ -699,7 +721,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                         stbmRecord?.isBABS ? 'bg-rose-600 text-white' : 'bg-[#e8faf0] text-[#059669] border border-emerald-100'
                       }`}
                     >
-                      {stbmRecord?.isBABS ? 'BABS ⚠️' : 'Bebas ✓'}
+                      {stbmRecord?.isBABS ? 'BABS (Perlu Edukasi)' : 'Bebas ODF'}
                     </button>
                   </div>
 
@@ -781,7 +803,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                         <span>Kendala Sanitasi: {stbmRecord.problemType || 'Perlu perbaikan'}</span>
                       </div>
                     </div>
-                    {selectedResident.phone && (
+                    {isValidWhatsAppNumber(selectedResident.phone) ? (
                       <button
                         onClick={handleContactWhatsAppSanitasi}
                         className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
@@ -789,6 +811,10 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                         <MessageCircle size={14} />
                         <span>Koordinasi via WhatsApp Warga</span>
                       </button>
+                    ) : (
+                      <div className="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-center text-[11px] text-amber-800 font-medium">
+                        Nomor kontak warga belum terdaftar untuk koordinasi via WhatsApp.
+                      </div>
                     )}
                   </div>
                 ) : (

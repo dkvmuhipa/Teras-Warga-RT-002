@@ -11,6 +11,7 @@ import { Button } from '../ui/Button';
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { getWhatsAppLink, isValidWhatsAppNumber } from '../../services/whatsappService';
 
 interface RWAggregationDashboardProps {
   houses?: House[];
@@ -326,9 +327,9 @@ export const RWAggregationDashboard: React.FC<RWAggregationDashboardProps> = ({
                     <ArrowRight size={13} />
                   </button>
 
-                  {tenant.chairmanPhone && (
+                  {isValidWhatsAppNumber(tenant.chairmanPhone) && (
                     <a
-                      href={`https://wa.me/${tenant.chairmanPhone.replace(/[^0-9]/g, '')}`}
+                      href={getWhatsAppLink(tenant.chairmanPhone, `Halo Ketua RT ${tenant.rt} / RW ${tenant.rw}, salam dari portal Teras Warga.`) || '#'}
                       target="_blank"
                       rel="noreferrer"
                       title="Hubungi Ketua RT via WhatsApp"

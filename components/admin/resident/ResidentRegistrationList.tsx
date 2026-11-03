@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { ResidentRegistration, PaymentStatus, House, OccupantHistoryItem } from '../../../types';
 import { toast } from 'sonner';
+import { getWhatsAppLink, isValidWhatsAppNumber } from '../../../services/whatsappService';
 import { useConfirm } from '../../../context/ConfirmContext';
 import { formatHouseId, handleFirestoreError, OperationType, logAction, setDocumentInCollection } from '../../../services/databaseService';
 import { sendWhatsAppViaGateway } from '../../../services/whatsappService';

@@ -7,6 +7,7 @@ import { Modal } from '../ui/Modal';
 import { addOfficialToDb, updateOfficialInDb, deleteOfficialFromDb, uploadImageToStorage, formatHouseId, getHouseDisplayLabel, handleFirestoreError, OperationType, isFirebaseConfigured } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { getWhatsAppLink, isValidWhatsAppNumber } from '../../services/whatsappService';
 import { useConfirm } from '../../context/ConfirmContext';
 
 interface OfficialManagementProps {
@@ -312,12 +313,12 @@ export const OfficialManagement: React.FC<OfficialManagementProps> = ({ official
                             </div>
                             <span className="font-medium truncate">{o.phone || '-'}</span>
                           </div>
-                          {o.phone && o.phone !== '-' && (
+                          {isValidWhatsAppNumber(o.phone) && (
                             <a
-                              href={`https://wa.me/${o.phone.replace(/[^0-9]/g, '')}`}
+                              href={getWhatsAppLink(o.phone, `Halo Bpk/Ibu ${o.name}, salam dari pengurus RT 02.`) || '#'}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                              className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors inline-flex items-center justify-center"
                               title="Kirim WhatsApp Direct"
                             >
                               <MessageCircle size={14} />

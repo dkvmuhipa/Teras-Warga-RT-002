@@ -15,6 +15,7 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
+import { getWhatsAppLink } from '../../services/whatsappService';
 import { 
   subscribeToWaterMeterReadings, 
   addWaterMeterReading, 
@@ -650,7 +651,12 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     text += `Terima kasih atas kerja samanya menjaga kelancaran pasokan air bersih lingkungan kita.\n\n`;
     text += `_Pengurus RT 002 / RW 020 Kelurahan Tondo_`;
 
-    window.open(`https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`, '_blank');
+    const link = getWhatsAppLink(house.phone, text);
+    if (!link) {
+      toast.error(`Nomor WhatsApp untuk rumah ${house.block}-${house.number} tidak valid atau belum terdaftar.`);
+      return;
+    }
+    window.open(link, '_blank', 'noopener,noreferrer');
   };
 
   // Export CSV Recap

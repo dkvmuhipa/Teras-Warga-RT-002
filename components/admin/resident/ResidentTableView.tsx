@@ -32,6 +32,7 @@ import { useFinancial } from '../../../context/FinancialContext';
 import { generateResidentCardPDF } from '../../../services/pdfService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { isValidWhatsAppNumber } from '../../../services/whatsappService';
 import { useTenant } from '../../../context/TenantContext';
 
 interface ResidentTableViewProps {
@@ -369,7 +370,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
 
                         {/* Telephone / WhatsApp contact */}
                         <td className="px-5 py-4.5">
-                          {house.phone && house.phone !== '-' ? (
+                          {isValidWhatsAppNumber(house.phone) ? (
                             <div className="flex items-center gap-1.5">
                               <span className="text-slate-700 font-bold tracking-wide">{house.phone}</span>
                               {onSendWhatsApp && (
@@ -695,7 +696,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                     {/* Card Section 4: Contact & Operations Panel */}
                     <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                       <div className="text-[10px] font-mono font-bold text-slate-500 flex items-center gap-1">
-                        {house.phone && house.phone !== '-' ? (
+                        {isValidWhatsAppNumber(house.phone) ? (
                           <div className="flex items-center gap-1 text-slate-605">
                             <Phone size={10} className="text-indigo-500" />
                             <span>{house.phone}</span>
@@ -706,7 +707,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                       </div>
 
                       <div className="flex items-center gap-1.5">
-                        {house.phone && house.phone !== '-' && onSendWhatsApp && (
+                        {isValidWhatsAppNumber(house.phone) && onSendWhatsApp && (
                           <button 
                             onClick={() => onSendWhatsApp(house)}
                             className="p-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-150 rounded-xl flex items-center justify-center shadow-3xs active:scale-[0.93]"

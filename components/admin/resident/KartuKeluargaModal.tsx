@@ -4,6 +4,7 @@ import { Modal } from '../../ui/Modal';
 import { Button } from '../../ui/Button';
 import { Printer, Share2, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { getWhatsAppLink } from '../../../services/whatsappService';
 
 interface KartuKeluargaModalProps {
   isOpen: boolean;
@@ -70,15 +71,13 @@ Alamat: Blok ${house.block}-${house.number}, RT 002 / RW 020, Huntap 2 Tondo, Ko
 Total Anggota: ${allMembers.length} Jiwa.
 Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
 
-    const encoded = encodeURIComponent(text);
-    if (house.phone) {
-      const cleanPhone = house.phone.replace(/[^0-9]/g, '');
-      const waNumber = cleanPhone.startsWith('0') ? '62' + cleanPhone.slice(1) : cleanPhone;
-      window.open(`https://wa.me/${waNumber}?text=${encoded}`, '_blank');
+    const waLink = getWhatsAppLink(house.phone, text);
+    if (waLink) {
+      window.open(waLink, '_blank', 'noopener,noreferrer');
     } else {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text);
-        toast.success("Salinan Data KK Disalin ke Clipboard!");
+        toast.success("Salinan Data KK Disalin ke Clipboard! (Nomor HP warga belum terdaftar)");
       } else {
         toast.info("Data KK Siap dibagikan");
       }

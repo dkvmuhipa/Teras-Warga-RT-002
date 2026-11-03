@@ -26,6 +26,7 @@ import {
 } from '../../../constants';
 
 import { toast } from 'sonner';
+import { getWhatsAppLink, isValidWhatsAppNumber } from '../../../services/whatsappService';
 
 interface AddEditResidentModalProps {
   role: Role;
@@ -901,18 +902,18 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                Buat PIN
                              </button>
 
-                             {formData.accessCode && formData.phone && (
-                               <a
-                                 href={`https://wa.me/${formData.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Halo Bpk/Ibu ${formData.headOfFamily || 'Warga'}, berikut PIN Aktivasi Akun Teras Warga RT 02 Anda: *${formData.accessCode}*. Silakan gunakan untuk login.`)}`}
-                                 target="_blank"
-                                 rel="noopener noreferrer"
-                                 className="shrink-0 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-1"
-                                 title="Kirim PIN ke WhatsApp Warga"
-                               >
-                                 <Send size={13} />
-                                 <span>WA</span>
-                               </a>
-                             )}
+                             {formData.accessCode && isValidWhatsAppNumber(formData.phone) && (
+                                <a
+                                  href={getWhatsAppLink(formData.phone, `Halo Bpk/Ibu ${formData.headOfFamily || 'Warga'}, berikut PIN Aktivasi Akun Teras Warga RT 02 Anda: *${formData.accessCode}*. Silakan gunakan untuk login.`) || '#'}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="shrink-0 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs transition-colors flex items-center justify-center gap-1 shadow-2xs"
+                                  title="Kirim PIN ke WhatsApp Warga"
+                                >
+                                  <Send size={13} />
+                                  <span>WA</span>
+                                </a>
+                              )}
                            </div>
                        </div>
 

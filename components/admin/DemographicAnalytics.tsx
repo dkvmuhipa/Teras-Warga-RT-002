@@ -10,6 +10,7 @@ import {
   Copy, CheckCircle2, Share2, Printer, Layers, ShieldCheck, ShieldAlert, Phone, Search
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { getWhatsAppLink, isValidWhatsAppNumber } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 import { House, CashFlow, Report, PdfConfig } from '../../types';
 import { generateDemographicAnalyticsReportPDF } from '../../services/pdfService';
@@ -1521,9 +1522,9 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            {h.phone && h.phone !== '-' ? (
+                            {isValidWhatsAppNumber(h.phone) ? (
                               <a
-                                href={`https://wa.me/${h.phone.replace(/[^0-9]/g, '')}?text=Halo%20Bapak/Ibu%20${encodeURIComponent(h.headOfFamily || 'Warga')},%20saya%20petugas%20RT%20002%20mengonfirmasi%20kesiapsiagaan%20mitigasi%20bencana%20keluarga.`}
+                                href={getWhatsAppLink(h.phone, `Halo Bapak/Ibu ${h.headOfFamily || 'Warga'}, saya petugas RT 002 mengonfirmasi kesiapsiagaan mitigasi bencana keluarga.`) || '#'}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[34px] rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] border border-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98] touch-manipulation"

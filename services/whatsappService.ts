@@ -1,16 +1,66 @@
 import { RondaSchedule } from '../types';
 
-export const sendWhatsAppMessage = (phone: string, message: string) => {
-  let formattedPhone = phone.replace(/[^0-9]/g, '');
-  
-  // Handle Indonesian numbers starting with '0'
-  if (formattedPhone.startsWith('0')) {
-    formattedPhone = '62' + formattedPhone.substring(1);
+/**
+ * Normalizes an Indonesian or international phone number for WhatsApp URLs.
+ * Strips all non-digit characters, converts '0' or '8' prefixes to international country code '62',
+ * and validates that the string is at least 8 digits and not empty/placeholder ('-', '0', 'N/A').
+ * Returns clean normalized digits (e.g. '6281234567890') or null if invalid.
+ */
+export const formatWhatsAppNumber = (phone?: string | null): string | null => {
+  if (!phone) return null;
+  const trimmed = phone.trim();
+  if (!trimmed || trimmed === '-' || trimmed === '0' || trimmed.toLowerCase() === 'n/a') return null;
+
+  let clean = trimmed.replace(/\D/g, '');
+  if (clean.length < 8) return null;
+
+  if (clean.startsWith('0')) {
+    clean = '62' + clean.slice(1);
+  } else if (clean.startsWith('8')) {
+    clean = '62' + clean;
   }
-  
-  const encodedMessage = encodeURIComponent(message);
-  const url = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
-  window.open(url, '_blank');
+
+  return clean;
+};
+
+/**
+ * Check whether a phone string contains a valid, contactable WhatsApp number.
+ */
+export const isValidWhatsAppNumber = (phone?: string | null): boolean => {
+  return formatWhatsAppNumber(phone) !== null;
+};
+
+/**
+ * Generates an official WhatsApp click-to-chat URL (https://wa.me/...).
+ * Returns null if the phone number is invalid or missing.
+ */
+export const getWhatsAppLink = (phone?: string | null, message?: string): string | null => {
+  const formatted = formatWhatsAppNumber(phone);
+  if (!formatted) return null;
+  const param = message ? `?text=${encodeURIComponent(message)}` : '';
+  return `https://wa.me/${formatted}${param}`;
+};
+
+/**
+ * Opens a WhatsApp click-to-chat window in a new tab if valid.
+ * Returns true if successful, false if phone number is invalid.
+ */
+export const openWhatsApp = (phone?: string | null, message?: string): boolean => {
+  const url = getWhatsAppLink(phone, message);
+  if (url && typeof window !== 'undefined') {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return true;
+  }
+  return false;
+};
+
+export const sendWhatsAppMessage = (phone: string, message: string) => {
+  const url = getWhatsAppLink(phone, message);
+  if (url && typeof window !== 'undefined') {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  } else {
+    console.warn('sendWhatsAppMessage: Invalid or uncontactable phone number provided:', phone);
+  }
 };
 
 /**

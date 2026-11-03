@@ -17,6 +17,7 @@ import {
 import { generateAnnouncementDraft } from '../../services/geminiService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { getWhatsAppLink, isValidWhatsAppNumber } from '../../services/whatsappService';
 import { useConfirm } from '../../context/ConfirmContext';
 
 interface UmkmManagementProps {
@@ -332,14 +333,18 @@ export const UmkmManagement: React.FC<UmkmManagementProps> = ({ umkm }) => {
                         <Clock size={12} /> {u.operatingHours || '08:00 - 21:00'}
                       </div>
 
-                      <a 
-                        href={`https://wa.me/${u.contact.replace(/[^0-9]/g, '')}`} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-[11px] font-semibold transition-colors"
-                      >
-                        <MessageCircle size={14} /> Hubungi WhatsApp
-                      </a>
+                      {isValidWhatsAppNumber(u.contact) ? (
+                        <a 
+                          href={getWhatsAppLink(u.contact, `Halo Bpk/Ibu ${u.owner} (${u.name}), saya tertarik dengan produk UMKM Anda di Teras Warga RT 02.`) || '#'} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-xl text-[11px] font-semibold transition-colors"
+                        >
+                          <MessageCircle size={14} /> Hubungi WhatsApp
+                        </a>
+                      ) : (
+                        <span className="text-[11px] text-slate-400 italic">Kontak Belum Ada</span>
+                      )}
                     </div>
                   </motion.div>
                 ))

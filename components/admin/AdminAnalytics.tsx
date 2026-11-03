@@ -15,6 +15,7 @@ import { DemographicAnalytics } from './DemographicAnalytics';
 import { motion, AnimatePresence } from 'motion/react';
 import { useFinancial } from '../../context/FinancialContext';
 import { toast } from 'sonner';
+import { getWhatsAppLink, isValidWhatsAppNumber } from '../../services/whatsappService';
 import { generateDemographicAnalyticsReportPDF } from '../../services/pdfService';
 
 interface AdminAnalyticsProps {
@@ -226,21 +227,15 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
   const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
 
   const sendWhatsAppReminder = (familyHead: string, number: string, arrearsCount: number, phoneStr: string) => {
-    const formattedPhone = phoneStr.replace(/\D/g, '');
-    const phoneNo = formattedPhone.startsWith('0') 
-      ? '62' + formattedPhone.slice(1) 
-      : formattedPhone.startsWith('8') 
-        ? '62' + formattedPhone 
-        : formattedPhone;
+    const message = `Halo Bapak/Ibu ${familyHead} dari Rumah No. ${number}. Kami dari Pengurus RT 02 ingin menginformasikan perihal iuran bulanan yang saat ini mempunyai catatan tertunda sebanyak ${arrearsCount} bulan. Mohon berkenan meluangkan waktu untuk melakukan pembayaran melalui aplikasi atau menemui bendahara RT. Terima kasih atas pengertiannya yang baik.`;
+    const url = getWhatsAppLink(phoneStr, message);
 
-    if (!phoneNo) {
-      alert('Nomor telepon tidak valid atau kosong.');
+    if (!url) {
+      toast.error('Nomor telepon warga tidak valid atau belum terdaftar.');
       return;
     }
 
-    const message = `Halo Bapak/Ibu ${familyHead} dari Rumah No. ${number}. Kami dari Pengurus RT 02 ingin menginformasikan perihal iuran bulanan yang saat ini mempunyai catatan tertunda sebanyak ${arrearsCount} bulan. Mohon berkenan meluangkan waktu untuk melakukan pembayaran melalui aplikasi atau menemui bendahara RT. Terima kasih atas pengertiannya yang baik.`;
-    const url = `https://wa.me/${phoneNo}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -715,7 +710,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
                                 <td className="p-4 text-center"><span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-semibold text-[10px]">{h.arrearsCount} Bulan</span></td>
                                 <td className="p-4 text-slate-500 italic max-w-xs truncate">{h.arrearsDetails}</td>
                                 <td className="p-4 text-right">
-                                  {h.phone && h.phone !== '-' ? (
+                                  {isValidWhatsAppNumber(h.phone) ? (
                                     <button
                                       onClick={() => sendWhatsAppReminder(h.familyHead, h.number, h.arrearsCount, h.phone)}
                                       className="px-3.5 py-1.5 bg-indigo-50 hover:bg-emerald-50 hover:text-emerald-700 text-indigo-600 font-semibold text-[10px] rounded-lg transition-colors flex items-center justify-center gap-1.5 ml-auto"
