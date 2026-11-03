@@ -9,7 +9,7 @@ import {
   HelpCircle, Waves, Phone, ChevronRight, Share2, Info, ArrowRight,
   ShieldAlert, Sparkles, BookOpen, HeartHandshake, Eye, Navigation,
   Backpack, Flame, Droplets, CheckSquare, Heart, Shield, Check,
-  AlertCircle, FileCheck, ExternalLink, RefreshCw
+  AlertCircle, FileCheck, ExternalLink, RefreshCw, Thermometer, Wind
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { InteractiveHuntapMap } from '../InteractiveHuntapMap';
@@ -122,6 +122,96 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
   const survivalProgress = Math.round(
     (Object.values(checkedSurvivalItems).filter(Boolean).length / SURVIVAL_ITEMS.length) * 100
   );
+
+  // --- SADAR RT 002: AI CLIMATE & DISASTER ADVISOR ENGINE ---
+  const { weather } = useWeather();
+  const [advisory, setAdvisory] = useState<ClimateAdvisoryResult | null>(null);
+  const [advisoryLoading, setAdvisoryLoading] = useState(false);
+  const [selectedHouseId, setSelectedHouseId] = useState<string>('');
+
+  // Jarak terdekat gempa BMKG ke Huntap Tondo 2
+  const nearestQuakeInfo: { distanceKm: number | null; magnitude: string | null } = React.useMemo(() => {
+    let minD: number | null = null;
+    let minM: string | null = null;
+
+    const list = [
+      ...(data?.latest ? [data.latest] : []),
+      ...(data?.felt || []),
+      ...(data?.recentM5 || [])
+    ];
+
+    list.forEach(q => {
+      const coords = parseCoordinates(q.Coordinates);
+      if (coords) {
+        const d = getDistanceInKm(TONDO_LAT, TONDO_LON, coords.lat, coords.lon);
+        if (minD === null || d < minD) {
+          minD = d;
+          minM = q.Magnitude;
+        }
+      }
+    });
+
+    return { distanceKm: minD, magnitude: minM };
+  }, [data]);
+
+  // Statistik agregat warga rentan RT 002
+  const vulnerableStats = React.useMemo(() => {
+    let elderly = 0;
+    let infantsAndToddlers = 0;
+    let pregnant = 0;
+
+    (houses || []).forEach(h => {
+      elderly += (h.elderlyCount || 0);
+      infantsAndToddlers += (h.babyCount || 0) + (h.toddlerCount || 0);
+      pregnant += (h.pregnantCount || 0);
+    });
+
+    return {
+      elderly,
+      infantsAndToddlers,
+      pregnant,
+      total: elderly + infantsAndToddlers + pregnant
+    };
+  }, [houses]);
+
+  // Muat AI / Heuristic Advisory SADAR
+  const handleRefreshAdvisory = React.useCallback(async () => {
+    setAdvisoryLoading(true);
+    try {
+      const res = await generateDisasterClimateAdvisory({
+        weatherTemp: weather?.temp,
+        weatherAqi: weather?.aqi,
+        weatherCondition: weather?.condition,
+        nearestEarthquakeDistanceKm: nearestQuakeInfo.distanceKm,
+        nearestEarthquakeMagnitude: nearestQuakeInfo.magnitude,
+        vulnerableCounts: vulnerableStats
+      });
+      setAdvisory(res);
+    } catch (err) {
+      console.error('Error generating advisory:', err);
+    } finally {
+      setAdvisoryLoading(false);
+    }
+  }, [weather, nearestQuakeInfo, vulnerableStats]);
+
+  React.useEffect(() => {
+    handleRefreshAdvisory();
+  }, [handleRefreshAdvisory]);
+
+  // Pengurutan kavling rumah secara natural (C5, C7, s/d C12)
+  const sortedHouses = React.useMemo(() => {
+    return [...(houses || [])].sort((a, b) => {
+      const bComp = (a.block || '').localeCompare(b.block || '', undefined, { numeric: true, sensitivity: 'base' });
+      if (bComp !== 0) return bComp;
+      return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true, sensitivity: 'base' });
+    });
+  }, [houses]);
+
+  const selectedHouse = React.useMemo(() => {
+    if (!houses || houses.length === 0) return null;
+    return houses.find(h => h.id === selectedHouseId) || sortedHouses[0] || null;
+  }, [houses, sortedHouses, selectedHouseId]);
+
 
   // Helper check if earthquake is in Sulawesi region
   const isSulawesi = (rule: EarthquakeInfo) => {
@@ -249,12 +339,18 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
         </div>
 
         {/* 4 Main Disaster Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-8 border-b border-slate-200/80">
+        <div 
+          role="tablist"
+          aria-label="Kategori Informasi Kebencanaan Huntap Tondo 2"
+          className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-8 border-b border-slate-200/80"
+        >
           <button
+            role="tab"
+            aria-selected={mainDisasterTab === 'evacuation'}
             onClick={() => setMainDisasterTab('evacuation')}
-            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`min-h-[44px] px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer focus-visible:ring-2 focus-visible:ring-indigo-500 active:scale-[0.98] ${
               mainDisasterTab === 'evacuation'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 scale-102'
+                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
                 : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
             }`}
           >
@@ -263,10 +359,12 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
           </button>
 
           <button
+            role="tab"
+            aria-selected={mainDisasterTab === 'seismic'}
             onClick={() => setMainDisasterTab('seismic')}
-            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`min-h-[44px] px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer focus-visible:ring-2 focus-visible:ring-slate-900 active:scale-[0.98] ${
               mainDisasterTab === 'seismic'
-                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 scale-102'
+                ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20'
                 : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
             }`}
           >
@@ -275,10 +373,12 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
           </button>
 
           <button
+            role="tab"
+            aria-selected={mainDisasterTab === 'survival'}
             onClick={() => setMainDisasterTab('survival')}
-            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`min-h-[44px] px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500 active:scale-[0.98] ${
               mainDisasterTab === 'survival'
-                ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20 scale-102'
+                ? 'bg-amber-600 text-white shadow-lg shadow-amber-600/20'
                 : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
             }`}
           >
@@ -287,10 +387,12 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
           </button>
 
           <button
+            role="tab"
+            aria-selected={mainDisasterTab === 'contacts'}
             onClick={() => setMainDisasterTab('contacts')}
-            className={`px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${
+            className={`min-h-[44px] px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer focus-visible:ring-2 focus-visible:ring-rose-500 active:scale-[0.98] ${
               mainDisasterTab === 'contacts'
-                ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20 scale-102'
+                ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/20'
                 : 'bg-white text-slate-600 hover:bg-slate-100/80 border border-slate-200/70'
             }`}
           >
@@ -1225,9 +1327,347 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
         </div>
         )}
 
-        {/* TAB 2: PETA TITIK KUMPUL & EVAKUASI HUNTAP TONDO 2 */}
+        {/* TAB 2: PETA TITIK KUMPUL & EVAKUASI HUNTAP TONDO 2 (SADAR RT 002) */}
         {mainDisasterTab === 'evacuation' && (
           <div className="space-y-8 animate-fadeIn">
+
+            {/* ======================================================== */}
+            {/* 1. SADAR RT 002: AI CLIMATE & DISASTER RESILIENCE CARD    */}
+            {/* ======================================================== */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/90 shadow-sm space-y-6 relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-3 bg-gradient-to-tr from-amber-500 to-orange-500 text-white rounded-2xl shadow-md shadow-amber-500/20">
+                    <Sparkles size={24} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-900 text-[10px] font-black uppercase rounded-md tracking-wider">
+                        SADAR RT 002
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        AI &amp; Micro-GIS Resilience
+                      </span>
+                    </div>
+                    <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
+                      Smart Analysis for Disaster, Climate &amp; Evacuation
+                    </h2>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Pemantauan risiko iklim &amp; seismik terpadu kawasan Huntap Tondo 2 berbasis AI adaptif
+                    </p>
+                  </div>
+                </div>
+
+                {/* Threat Level Badge & Refresh */}
+                <div className="flex items-center gap-2.5 self-start sm:self-auto">
+                  {advisory?.threatLevel === 'Siaga' ? (
+                    <div className="px-3.5 py-1.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 flex items-center gap-2 shadow-xs">
+                      <ShieldAlert size={16} className="text-rose-600" />
+                      <div className="text-left">
+                        <p className="text-[9px] font-black uppercase tracking-wider leading-none">Status Wilayah</p>
+                        <p className="text-xs font-black">SIAGA BENCANA</p>
+                      </div>
+                    </div>
+                  ) : advisory?.threatLevel === 'Waspada' ? (
+                    <div className="px-3.5 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center gap-2 shadow-xs">
+                      <AlertTriangle size={16} className="text-amber-600" />
+                      <div className="text-left">
+                        <p className="text-[9px] font-black uppercase tracking-wider leading-none">Status Wilayah</p>
+                        <p className="text-xs font-black">WASPADA IKLIM/SEISMIK</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="px-3.5 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center gap-2 shadow-xs">
+                      <ShieldCheck size={16} className="text-emerald-600" />
+                      <div className="text-left">
+                        <p className="text-[9px] font-black uppercase tracking-wider leading-none">Status Wilayah</p>
+                        <p className="text-xs font-black">KONDISI AMAN</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleRefreshAdvisory}
+                    disabled={advisoryLoading}
+                    className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-amber-500 active:scale-[0.97]"
+                    title="Perbarui Analisis AI"
+                    aria-label="Perbarui Analisis SADAR AI"
+                  >
+                    <RefreshCw size={16} className={advisoryLoading ? 'animate-spin text-amber-600' : ''} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Live Environmental Sensor Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                    <Activity size={14} className="text-rose-500" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">Sesar Palu-Koro</span>
+                  </div>
+                  <p className="text-base md:text-lg font-black text-slate-900 font-mono tabular-nums">
+                    {typeof nearestQuakeInfo.distanceKm === 'number' ? `${nearestQuakeInfo.distanceKm.toFixed(0)} km` : 'Aman / Terjauh'}
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-medium truncate">
+                    {nearestQuakeInfo.magnitude ? `Mag ${nearestQuakeInfo.magnitude} BMKG` : 'Tidak ada guncangan'}
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                    <Thermometer size={14} className="text-amber-500" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">Suhu Teluk Palu</span>
+                  </div>
+                  <p className="text-base md:text-lg font-black text-slate-900 font-mono tabular-nums">
+                    {weather?.temp ?? 31}°C
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-medium truncate">
+                    Terasa {weather?.apparentTemp ?? 33}°C • {weather?.condition || 'Cerah'}
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                    <Wind size={14} className="text-sky-500" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">Kualitas Udara</span>
+                  </div>
+                  <p className="text-base md:text-lg font-black text-slate-900 font-mono tabular-nums">
+                    AQI {weather?.aqi ?? 35}
+                  </p>
+                  <p className="text-[10px] text-emerald-600 font-black truncate">
+                    {weather?.aqiLabel ?? 'Kategori Baik'}
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                    <Heart size={14} className="text-rose-500" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">Prioritas Evakuasi</span>
+                  </div>
+                  <p className="text-base md:text-lg font-black text-slate-900 font-mono tabular-nums">
+                    {vulnerableStats.total} Jiwa Rentan
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-medium truncate">
+                    {vulnerableStats.elderly} Lansia • {vulnerableStats.infantsAndToddlers} Balita • {vulnerableStats.pregnant} Bumil
+                  </p>
+                </div>
+              </div>
+
+              {/* AI Synthesized Assessment & Headline */}
+              {advisory && (
+                <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-0.5">
+                      <p className="text-[11px] font-black text-amber-900 uppercase tracking-wider">
+                        Hasil Analisis Sintesis SADAR:
+                      </p>
+                      <h3 className="text-base font-black text-slate-900">
+                        {advisory.headline}
+                      </h3>
+                    </div>
+                    <span className="px-2 py-0.5 rounded bg-white/80 border border-amber-200 text-amber-900 text-[10px] font-black font-mono shrink-0">
+                      {advisory.isAiGenerated ? 'Gemini AI 2.5' : 'Heuristic Engine'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                    <div className="p-3 rounded-xl bg-white/80 border border-amber-100 space-y-1">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Activity size={12} className="text-rose-500" /> Parameter Seismik Palu-Koro
+                      </p>
+                      <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                        {advisory.seismicAssessment}
+                      </p>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-white/80 border border-amber-100 space-y-1">
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <Thermometer size={12} className="text-amber-500" /> Parameter Cuaca &amp; Panas
+                      </p>
+                      <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                        {advisory.climateAssessment}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Tips */}
+                  {advisory.actionTips && advisory.actionTips.length > 0 && (
+                    <div className="pt-2 border-t border-amber-200/60 space-y-1.5">
+                      <p className="text-[10px] font-black text-amber-950 uppercase tracking-wider">
+                        Rekomendasi Aksi Cepat Warga &amp; Relawan:
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {advisory.actionTips.map((tip, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-xs text-slate-800 font-medium">
+                            <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-700 font-black text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                              ✓
+                            </span>
+                            <span>{tip}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-1 text-[10px] text-slate-400 font-medium">
+                    <span>Diperbarui pada: {advisory.generatedAt}</span>
+                    <span>Huntap Tondo 2, Palu Timur</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ======================================================== */}
+            {/* 2. SIMULATOR RUTE EVAKUASI MANDIRI PER KAVLING            */}
+            {/* ======================================================== */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/90 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-150">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-blue-50 text-blue-600 rounded-2xl border border-blue-100">
+                    <Navigation size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                      Simulator Rute Evakuasi Mandiri Per Kavling
+                    </h3>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Pilih nomor rumah Anda untuk simulasi waktu tempuh dan rute aman menuju titik kumpul
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Selector & Detail Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Left: House Dropdown Picker */}
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="house-evacuation-select" className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2">
+                      Pilih Kavling Rumah Anda:
+                    </label>
+                    <select
+                      id="house-evacuation-select"
+                      aria-label="Pilih nomor kavling rumah untuk simulasi rute"
+                      value={selectedHouseId}
+                      onChange={e => setSelectedHouseId(e.target.value)}
+                      className="w-full min-h-[44px] px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all cursor-pointer"
+                    >
+                      <option value="">-- Pilih Nomor Kavling / Kepala Keluarga --</option>
+                      {sortedHouses.map(h => (
+                        <option key={h.id} value={h.id}>
+                          {h.block} No. {h.number} — {h.headOfFamily || 'Kavling Warga'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedHouse ? (
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Unit Terpilih</span>
+                        <span className="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 font-black text-[10px]">
+                          {selectedHouse.block} - No. {selectedHouse.number}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-500">Kepala Keluarga:</p>
+                        <p className="text-sm font-black text-slate-900">{selectedHouse.headOfFamily || 'Warga RT 002'}</p>
+                      </div>
+
+                      {/* Vulnerability status in this house */}
+                      {((selectedHouse.elderlyCount || 0) > 0 || (selectedHouse.babyCount || 0) > 0 || (selectedHouse.toddlerCount || 0) > 0 || (selectedHouse.pregnantCount || 0) > 0) ? (
+                        <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200/80 space-y-1">
+                          <p className="text-[10px] font-black text-amber-900 uppercase tracking-wider flex items-center gap-1">
+                            <ShieldAlert size={12} className="text-amber-600" /> Butuh Bantuan Evakuasi Prioritas:
+                          </p>
+                          <div className="flex flex-wrap gap-1 text-[10px] font-bold text-amber-800">
+                            {(selectedHouse.elderlyCount || 0) > 0 && <span>• {selectedHouse.elderlyCount} Lansia</span>}
+                            {((selectedHouse.babyCount || 0) + (selectedHouse.toddlerCount || 0)) > 0 && (
+                              <span>• {(selectedHouse.babyCount || 0) + (selectedHouse.toddlerCount || 0)} Balita</span>
+                            )}
+                            {(selectedHouse.pregnantCount || 0) > 0 && <span>• {selectedHouse.pregnantCount} Bumil</span>}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-[10px] font-bold text-emerald-800 flex items-center gap-1.5">
+                          <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
+                          <span>Anggota keluarga mandiri. Mohon bantu tengok lansia/tetangga sebelah.</span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-400 font-medium">
+                      Pilih salah satu nomor kavling untuk kalkulasi rute personal.
+                    </div>
+                  )}
+
+                  {/* WhatsApp Emergency Hotline */}
+                  <a
+                    href={`https://wa.me/6285961194621?text=Halo%20Pengurus%20RT%2002,%20saya%20warga%20${encodeURIComponent(selectedHouse ? `Kavling ${selectedHouse.block} No. ${selectedHouse.number} (${selectedHouse.headOfFamily})` : 'Huntap Tondo 2')}%20mengonfirmasi%20situasi%20bencana%20dan%20membutuhkan%20koordinasi%20evakuasi.`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full min-h-[44px] py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all cursor-pointer active:scale-[0.98]"
+                  >
+                    <Phone size={15} /> WhatsApp Pos Siaga RT 02
+                  </a>
+                </div>
+
+                {/* Right: Calculated Evacuation Route & Instructions */}
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 space-y-1">
+                      <p className="text-[10px] font-black text-indigo-700 uppercase tracking-wider">
+                        Titik Kumpul Terdekat:
+                      </p>
+                      <p className="text-base font-black text-indigo-950">
+                        {((selectedHouse?.block || '').toUpperCase().startsWith('A') || (selectedHouse?.block || '').toUpperCase().startsWith('B'))
+                          ? 'TK-2 (Gerbang Utama Sisi Barat)'
+                          : 'TK-1 (Lapangan Terbuka Utama Huntap Tondo 2)'}
+                      </p>
+                      <p className="text-xs text-indigo-800 font-medium">
+                        Area lapang terbuka, bebas dari tiang listrik dan kanopi.
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-100 space-y-1">
+                      <p className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">
+                        Estimasi Jarak &amp; Waktu Tempuh:
+                      </p>
+                      <p className="text-base font-black text-emerald-950 font-mono tabular-nums">
+                        ~80 - 130 Meter (1.5 - 2.5 Menit)
+                      </p>
+                      <p className="text-xs text-emerald-800 font-medium">
+                        Jalan kaki langkah tenang sambil mendampingi anggota keluarga.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Navigation Steps */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                    <p className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                      <Navigation size={14} className="text-indigo-600" />
+                      Instruksi Jalur Aman Evakuasi Menuju Lapangan:
+                    </p>
+                    <ol className="space-y-2 text-xs text-slate-700 font-medium list-decimal list-inside leading-relaxed">
+                      <li>
+                        <strong>Keluar Rumah:</strong> Pastikan guncangan gempa sudah reda, jangan langsung panik berlari saat tanah masih berguncang.
+                      </li>
+                      <li>
+                        <strong>Arahkan ke Jalan Poros:</strong> Langkahkan kaki menuju jalan lingkungan beton poros tengah Huntap Tondo 2. Hindari berjalan mepet di bawah tebing talud atau dinding belakang kavling.
+                      </li>
+                      <li>
+                        <strong>Bawa Perlengkapan Esensial:</strong> Ambil Tas Siaga Bencana (dokumen penting, air mineral, obat rutin lansia).
+                      </li>
+                      <li>
+                        <strong>Lapor ke Petugas Posko:</strong> Setibanya di Lapangan Utama (TK-1), laporkan kelengkapan anggota keluarga kepada linmas/pengurus RT.
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+
+              </div>
+            </div>
             {/* Assembly Point Hero Alert */}
             <div className="bg-gradient-to-r from-indigo-900 to-slate-900 text-white rounded-3xl p-6 md:p-8 border border-indigo-700/50 shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />

@@ -175,7 +175,7 @@ export const InteractiveHuntapMap: React.FC<InteractiveHuntapMapProps> = ({ hous
 
           {searchedBlock && (
             <div className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-black text-amber-800 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
               <span>Ditemukan: <strong>{searchedBlock.name}</strong> • {searchedBlock.rtLabel}</span>
             </div>
           )}

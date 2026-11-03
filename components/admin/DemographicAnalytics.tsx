@@ -1403,8 +1403,9 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 <div className="flex items-center gap-2.5 self-start lg:self-auto">
                   <button
                     onClick={handleCopyRoster}
-                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+                    className="min-h-[40px] px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-indigo-500"
                     title="Salin ke WhatsApp / Linmas"
+                    aria-label="Salin roster evakuasi warga rentan ke WhatsApp"
                   >
                     <Copy size={14} /> Salin Roster WhatsApp
                   </button>
@@ -1419,9 +1420,19 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                     placeholder="Cari kavling atau nama kepala keluarga..."
                     value={rosterSearch}
                     onChange={e => setRosterSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all"
+                    aria-label="Cari nomor kavling atau nama kepala keluarga"
+                    className="w-full min-h-[40px] pl-9 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all"
                   />
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  {rosterSearch && (
+                    <button
+                      onClick={() => setRosterSearch('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-lg text-xs font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-200/80 transition-colors cursor-pointer"
+                      aria-label="Hapus kata kunci pencarian roster"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
 
                 {/* Category Filter Pills */}
@@ -1436,7 +1447,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                     <button
                       key={cat.id}
                       onClick={() => setRosterCategory(cat.id as any)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                      className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-rose-500 ${
                         rosterCategory === cat.id
                           ? 'bg-rose-600 text-white shadow-xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
@@ -1515,7 +1526,8 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                                 href={`https://wa.me/${h.phone.replace(/[^0-9]/g, '')}?text=Halo%20Bapak/Ibu%20${encodeURIComponent(h.headOfFamily || 'Warga')},%20saya%20petugas%20RT%20002%20mengonfirmasi%20kesiapsiagaan%20mitigasi%20bencana%20keluarga.`}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] border border-emerald-200 transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[34px] rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-[11px] border border-emerald-200 transition-all hover:scale-[1.02] active:scale-[0.98] touch-manipulation"
+                                aria-label={`Kirim WhatsApp ke ${h.headOfFamily || 'warga'}`}
                               >
                                 <Phone size={12} /> WhatsApp
                               </a>
