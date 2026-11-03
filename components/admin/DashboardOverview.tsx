@@ -235,60 +235,32 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         variants={itemVariants} 
         className="relative overflow-hidden bg-white rounded-3xl md:rounded-[2.5rem] p-5 sm:p-7 md:p-8 shadow-sm border border-slate-100"
       >
-        {/* Soft Organic Curved Violet Wave on Right Side */}
-        <div className="absolute right-0 top-0 bottom-0 w-2/5 sm:w-1/2 pointer-events-none overflow-hidden select-none">
-          <svg className="absolute right-0 top-0 h-full w-full" viewBox="0 0 300 400" preserveAspectRatio="none" fill="none">
-            <path d="M120,0 C180,80 200,160 130,260 C80,340 160,380 300,400 L300,0 Z" fill="#6366f1" fillOpacity="0.14" />
-            <path d="M180,0 C230,70 240,150 180,240 C130,330 200,370 300,400 L300,0 Z" fill="#818cf8" fillOpacity="0.1" />
-          </svg>
-        </div>
+        {/* Quiet Background Texture */}
+        <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
         
         <div className="relative z-10 flex flex-col justify-between">
           <div className="space-y-3 max-w-2xl">
-            {/* Top Stacked Badges */}
-            <div className="flex flex-col items-start gap-1.5">
-              <span className="bg-[#4f46e5] text-white text-xs font-semibold uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-xs">
-                Pusat Kendali Eksekutif
-              </span>
-              <span className="bg-[#dcfce7] text-[#15803d] text-xs font-extrabold px-3 py-1 rounded-full inline-flex items-center gap-1.5 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                Operasional 100% Aktif
-              </span>
-            </div>
-
-            {/* Personalized Time-Aware Greeting with Waving Hand */}
-            {(() => {
-              const hr = new Date().getHours();
-              let greet = 'Selamat Hari';
-              if (hr >= 5 && hr < 11) greet = 'Selamat Pagi';
-              else if (hr >= 11 && hr < 15) greet = 'Selamat Siang';
-              else if (hr >= 15 && hr < 19) greet = 'Selamat Sore';
-              else if (hr >= 19 || hr < 5) greet = 'Selamat Malam';
-              
-              return (
-                <div className="flex items-start justify-between gap-3 pt-1">
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
-                      <span className="block text-slate-900">{greet},</span>
-                      <span className="block text-[#4f46e5]">Pengurus {RT_NAME}!</span>
-                    </h2>
-                  </div>
-                  
-                  {/* Waving Hand Graphic with Vibration Waves matching reference */}
-                  <div className="relative shrink-0 select-none pointer-events-none mt-1 mr-1 sm:mr-3">
-                    <svg className="absolute -left-3 top-2 w-4 h-7 text-[#4f46e5]" viewBox="0 0 16 28" fill="none">
-                      <path d="M12 4 C6 9 6 19 12 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                      <path d="M7 8 C3 11 3 17 7 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    <span className="text-5xl sm:text-6xl inline-block transform rotate-[-6deg] filter drop-shadow-xs">👋
-                    </span>
-                    <svg className="absolute -right-2 top-0 w-4 h-7 text-[#4f46e5]" viewBox="0 0 16 28" fill="none">
-                      <path d="M4 4 C10 9 10 19 4 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
-                    </svg>
-                  </div>
+            {/* Executive Context Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
+              <div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-wider">
+                    Pusat Kendali RT
+                  </span>
+                  <span className="text-xs text-slate-400 font-medium">
+                    Huntap Tondo 2 • Periode Berjalan
+                  </span>
                 </div>
-              );
-            })()}
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                  Dasbor Eksekutif {RT_NAME}
+                </h2>
+              </div>
+              
+              <div className="flex items-center gap-2.5 self-start sm:self-auto px-3.5 py-2 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                <span className="text-xs font-bold text-slate-700">Sistem Operasional Aktif</span>
+              </div>
+            </div>
 
             <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed max-w-xl">
               Pusat orkestrasi administrasi kependudukan, tata kelola kas terdesentralisasi, evaluasi sanitasi 5 pilar STBM, serta pengawasan keamanan lingkungan warga.
@@ -299,13 +271,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <button 
                 onClick={handleGenerateSummary} 
                 disabled={isAiLoading}
-                className="w-full py-3.5 px-5 bg-gradient-to-r from-[#6366f1] via-[#5452f6] to-[#7c3aed] hover:from-[#4f46e5] hover:to-[#6d28d9] text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-md shadow-2xs relative flex items-center justify-center gap-2 transition-colors active:scale-[0.99] cursor-pointer"
+                className="w-full py-3.5 px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-sm relative flex items-center justify-center gap-2 transition-colors active:scale-[0.99] cursor-pointer disabled:opacity-50"
+                aria-label="Buat ringkasan AI eksekutif"
               >
-                <Sparkles size={16} className="text-white shrink-0" /> 
+                <Sparkles size={16} className="text-indigo-200 shrink-0" /> 
                 <span className="tracking-normal font-bold">
                   {isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}
                 </span>
-                <ArrowRight size={15} className="absolute right-4 sm:right-5 text-white shrink-0" />
+                <ArrowRight size={15} className="absolute right-4 sm:right-5 text-white/80 shrink-0" />
               </button>
               
               <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
@@ -859,7 +832,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Visual Progress Bar */}
             <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden mt-2">
               <div 
-                className="bg-gradient-to-r from-sky-500 to-indigo-600 h-full rounded-full transition-colors duration-500" 
+                className="bg-indigo-600 h-full rounded-full transition-colors duration-300" 
                 style={{ width: `${Math.min(wastePaymentPercentage, 100)}%` }} 
               />
             </div>

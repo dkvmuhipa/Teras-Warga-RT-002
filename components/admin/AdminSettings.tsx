@@ -578,7 +578,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
                         <span className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wider ${
                           index === 0 ? 'bg-amber-500 text-white' : index === 1 ? 'bg-slate-300 text-slate-800' : index === 2 ? 'bg-amber-700 text-white' : 'bg-slate-200 text-slate-700'
                         }`}>
-                          {index === 0 ? '🥇 Juara 1 (Emas)' : index === 1 ? '🥈 Juara 2 (Perak)' : index === 2 ? '🥉 Juara 3 (Perunggu)' : `Peringkat ${rankItem.rank}`}
+                          {index === 0 ? 'Juara 1 (Emas)' : index === 1 ? 'Juara 2 (Perak)' : index === 2 ? 'Juara 3 (Perunggu)' : `Peringkat ${rankItem.rank}`}
                         </span>
                         <span className="text-[10px] font-bold text-slate-400">Rank #{rankItem.rank}</span>
                       </div>
@@ -645,7 +645,7 @@ export const AdminSettings: React.FC<AdminSettingsProps> = ({
           </div>
 
           <div className="lg:col-span-5">
-            <div className="bg-gradient-to-br from-amber-500/20 via-amber-600/10 to-slate-900 rounded-[2.5rem] p-6 text-white border border-amber-500/30 shadow-xl space-y-4">
+            <div className="bg-slate-900 rounded-3xl p-6 text-white border border-slate-800 shadow-sm space-y-4">
               <div className="flex items-center gap-3 border-b border-amber-500/20 pb-3">
                 <ShieldCheck className="text-amber-400" size={24} />
                 <div>

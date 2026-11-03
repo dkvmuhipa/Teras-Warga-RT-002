@@ -304,8 +304,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
       </div>
 
       {/* Executive AI Analytical Insight Banner */}
-      <div className="bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-indigo-800/40 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="bg-slate-900 text-white p-6 md:p-8 rounded-3xl border border-slate-800 shadow-sm relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1.5">
             <div className="flex items-center gap-2 text-amber-300 font-semibold text-xs uppercase tracking-wider">
@@ -908,8 +907,7 @@ export const AdminAnalytics: React.FC<AdminAnalyticsProps> = ({
             </div>
 
             {/* High visual summary card with dark/slate cosmic style */}
-            <div className="bg-slate-900 p-8 rounded-[3rem] text-white flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-full translate-x-1/3 -translate-y-1/3"></div>
+            <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 text-white flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden">
               
               <div className="space-y-2 relative z-10">
                 <h3 className="text-xl font-semibold tracking-tight flex items-center gap-2">

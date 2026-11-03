@@ -504,7 +504,7 @@ export const AnnualLPJManager: React.FC<AnnualLPJManagerProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setIsPdfModalOpen(true)}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-semibold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-2xs transition-transform active:scale-95 cursor-pointer"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-2xs transition-transform active:scale-95 cursor-pointer"
                       title="Download Dokumen Bundle PDF LPJ Resmi"
                     >
                       <Download size={15} /> Unduh Bundle PDF

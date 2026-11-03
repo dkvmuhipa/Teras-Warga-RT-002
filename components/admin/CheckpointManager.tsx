@@ -129,7 +129,7 @@ export const CheckpointManager: React.FC<CheckpointManagerProps> = ({ houses }) 
                     <div key={cp.id} className="bg-slate-900 text-white rounded-[2rem] p-6 border border-slate-800 shadow-xl hover:border-indigo-500/50 transition-colors relative overflow-hidden group">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-semibold shadow-md">
+                                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xs font-semibold shadow-md">
                                     P{idx + 1}
                                 </div>
                                 <div>
