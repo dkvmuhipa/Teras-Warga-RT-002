@@ -2612,7 +2612,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
               {/* Filter Tabs inside preview */}
               <div className="flex items-center justify-between gap-4 mb-4 shrink-0">
-                <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1">
+                <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1 overflow-x-auto no-scrollbar max-w-full">
                   {(['all', 'add', 'update', 'invalid'] as const).map((tab) => {
                     const label = tab === 'all' ? 'Semua' : tab === 'add' ? 'Akan Ditambah' : tab === 'update' ? 'Akan Diperbarui' : 'Format Salah';
                     const count = tab === 'all' ? excelPreviewData.length : tab === 'add' ? previewStats.add : tab === 'update' ? previewStats.update : previewStats.invalid;
@@ -2636,7 +2636,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
               {/* Scrollable table of preview data */}
               <div className="flex-1 overflow-auto border border-slate-100 rounded-2xl bg-slate-50/35">
-                <table className="w-full text-left border-collapse font-sans">
+                <table className="w-full text-left border-collapse font-sans min-w-[650px]">
                   <thead>
                     <tr className="bg-slate-100/80 sticky top-0 border-b border-slate-200">
                       <th className="px-5 py-3 text-[10px] font-semibold text-slate-400 uppercase tracking-widest w-24">Blok</th>

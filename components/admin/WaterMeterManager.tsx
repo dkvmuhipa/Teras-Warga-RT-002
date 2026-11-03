@@ -965,7 +965,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           {/* Table of Houses & Readings */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-sm min-w-[750px]">
                 <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-bold border-b border-slate-200 dark:border-slate-800">
                   <tr>
                     <th className="py-3.5 px-4">Rumah / Warga</th>
@@ -1167,7 +1167,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           {/* Batch Table Form */}
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-sm min-w-[650px]">
                 <thead className="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs uppercase font-bold border-b border-slate-200 dark:border-slate-800">
                   <tr>
                     <th className="py-3 px-4">Rumah & Nama</th>
@@ -1756,7 +1756,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
           {/* Interactive Table */}
           <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full text-left border-collapse text-xs min-w-[700px]">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                     <th className="py-3.5 px-4">Rumah</th>
@@ -2658,7 +2658,7 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
             </div>
 
             {/* Metric Comparison Cards */}
-            <div className="grid grid-cols-3 gap-2 font-mono">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono">
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 text-center">
                 <span className="text-slate-400 block text-[10px] uppercase font-bold">Meter Lalu</span>
                 <span className="font-bold text-slate-700 dark:text-slate-300 text-sm">{verifyingItem.previousReading} m³</span>

@@ -321,7 +321,7 @@ export const AssetManager: React.FC<AssetManagerProps> = ({ inventory, inventory
           <h3 className="text-lg font-semibold text-slate-800 uppercase tracking-widest">Riwayat Peminjaman</h3>
         </div>
         <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-sm text-left min-w-[700px]">
             <thead>
               <tr className="bg-slate-50/50 text-slate-400 font-semibold uppercase text-[10px] tracking-[0.15em] border-b border-slate-100">
                 <th className="px-8 py-5">Barang</th>

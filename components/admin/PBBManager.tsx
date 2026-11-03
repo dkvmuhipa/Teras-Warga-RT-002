@@ -668,7 +668,7 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
       {/* Main Data Table */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[850px]">
             <thead>
               <tr className="bg-slate-900 text-white text-xs font-semibold">
                 <th className="py-3 px-4 text-center w-12 font-medium text-slate-400">No</th>

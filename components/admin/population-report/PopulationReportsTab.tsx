@@ -231,7 +231,7 @@ export const PopulationReportsTab: React.FC<PopulationReportsTabProps> = ({
         
         {viewMode === 'table' ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[800px]">
               <thead className="bg-slate-50/50 text-slate-500 font-bold border-b border-slate-100">
                 <tr>
                   <th className="p-5 text-left text-xs uppercase tracking-widest text-slate-400">Periode Bulan</th>

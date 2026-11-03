@@ -271,7 +271,7 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[650px]">
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="text-left py-4 px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Nama Tamu</th>

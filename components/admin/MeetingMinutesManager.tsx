@@ -839,25 +839,25 @@ _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020
 
               {/* Detail Meeting Info */}
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans space-y-1.5">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2">
                   <span className="text-slate-500">Agenda / Rapat:</span>
                   <span className="col-span-2 font-bold">{selectedMinute.title}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2">
                   <span className="text-slate-500">Hari, Tanggal &amp; Jam:</span>
                   <span className="col-span-2 font-bold">
                     {new Date(selectedMinute.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • {selectedMinute.time}
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2">
                   <span className="text-slate-500">Tempat Pelaksanaan:</span>
                   <span className="col-span-2 font-bold">{selectedMinute.location}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2">
                   <span className="text-slate-500">Pimpinan &amp; Notulis:</span>
                   <span className="col-span-2 font-bold">{selectedMinute.leader} / {selectedMinute.notetaker}</span>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2">
                   <span className="text-slate-500">Kehadiran:</span>
                   <span className="col-span-2 font-bold">{selectedMinute.attendeesCount} Kepala Keluarga (Kuorum Sah)</span>
                 </div>

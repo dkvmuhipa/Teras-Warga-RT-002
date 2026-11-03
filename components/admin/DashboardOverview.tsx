@@ -930,7 +930,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 my-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 my-4">
                   <div className="bg-indigo-50/70 border border-indigo-100 p-3 rounded-2xl text-center">
                     <p className="text-xs font-extrabold text-indigo-600 uppercase">Ibu Hamil</p>
                     <p className="text-xl md:text-2xl font-semibold text-indigo-900 mt-0.5">

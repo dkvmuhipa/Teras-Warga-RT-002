@@ -775,7 +775,7 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse min-w-[850px]">
               <thead>
                 <tr className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
                   <th className="py-3 px-3">Blok Kavling</th>
@@ -867,7 +867,7 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
 
           {/* Table Container with Sticky Column Capability */}
           <div className="overflow-x-auto max-h-[620px] relative">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left text-xs border-collapse min-w-[1200px]">
               <thead className="sticky top-0 z-30 bg-[#C6E0B4] text-slate-950 font-bold border-b border-slate-300 shadow-xs">
                 <tr>
                   {/* Sticky Column 1: No. */}

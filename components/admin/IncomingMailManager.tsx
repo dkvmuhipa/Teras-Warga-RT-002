@@ -253,7 +253,7 @@ export const IncomingMailManager: React.FC<IncomingMailManagerProps> = ({ incomi
       {/* Incoming Mail List Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-[10px] font-semibold uppercase text-slate-400 tracking-wider">
                 <th className="p-4">No. Agenda & Surat</th>

@@ -438,7 +438,7 @@ export const PopulationLogsTab: React.FC<PopulationLogsTabProps> = ({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[900px]">
               <thead className="bg-slate-50/50 text-slate-500 font-bold border-b border-slate-100">
                 <tr>
                   <th className="p-4 text-center w-10">

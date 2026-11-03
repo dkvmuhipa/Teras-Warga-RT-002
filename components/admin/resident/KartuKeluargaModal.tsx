@@ -197,7 +197,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
 
           {/* TABEL 1: DATA ANGGOTA KELUARGA */}
           <div className="mb-6 overflow-x-auto">
-            <table className="w-full border-collapse border border-slate-900 text-[10px] sm:text-xs font-sans text-center">
+            <table className="w-full border-collapse border border-slate-900 text-[10px] sm:text-xs font-sans text-center min-w-[800px]">
               <thead>
                 <tr className="bg-slate-200/80 font-semibold text-slate-900 border border-slate-900">
                   <th className="border border-slate-900 py-1.5 px-2 w-8">No</th>
@@ -245,7 +245,7 @@ Terverifikasi resmi pada Database Digital Teras Warga RT 002.`;
 
           {/* TABEL 2: STATUS HUBUNGAN & SILSILAH */}
           <div className="mb-8 overflow-x-auto">
-            <table className="w-full border-collapse border border-slate-900 text-[10px] sm:text-xs font-sans text-center">
+            <table className="w-full border-collapse border border-slate-900 text-[10px] sm:text-xs font-sans text-center min-w-[650px]">
               <thead>
                 <tr className="bg-slate-200/80 font-semibold text-slate-900 border border-slate-900">
                   <th className="border border-slate-900 py-1.5 px-2 w-8">No</th>

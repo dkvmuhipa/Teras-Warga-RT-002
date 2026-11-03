@@ -1328,7 +1328,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="w-full text-left text-xs border-collapse min-w-[850px]">
                 <thead>
                   <tr className="bg-slate-50 text-slate-700 text-[10px] font-semibold uppercase tracking-wider border-b border-slate-200">
                     <th className="p-3 text-center">No</th>
@@ -1986,7 +1986,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
             {/* Table of Rentals */}
             <div className="overflow-x-auto font-sans">
-              <table className="w-full text-left text-xs border border-slate-300 border-collapse">
+              <table className="w-full text-left text-xs border border-slate-300 border-collapse min-w-[900px]">
                 <thead>
                   <tr className="bg-slate-100 text-slate-800 text-[10px] font-semibold uppercase tracking-wider">
                     <th className="p-2 border border-slate-300 text-center">No</th>
