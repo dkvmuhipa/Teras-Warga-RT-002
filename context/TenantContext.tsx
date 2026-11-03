@@ -116,6 +116,20 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
           const matched = remoteList.find(t => t.id === prev.id);
           return matched ? { ...prev, ...matched } : prev;
         });
+
+        // Self-heal check: if the main tenant in Firestore is missing crucial metadata like name or rt, sync full default config
+        const mainRemote = remoteList.find(t => t.id === DEFAULT_TENANT_ID);
+        if (mainRemote && (!mainRemote.name || !mainRemote.rt || !mainRemote.chairmanName)) {
+          console.info("[TenantContext] Main tenant tondo-rw20-rt02 in Firestore is missing metadata, auto-healing with initial config...");
+          updateTenantInDb(DEFAULT_TENANT_ID, INITIAL_TENANTS[0]).catch(err => {
+            console.warn("[TenantContext] Auto-heal updateTenantInDb notice:", err);
+          });
+        }
+      } else {
+        // If Firestore tenants collection is empty, seed with initial tenant
+        updateTenantInDb(DEFAULT_TENANT_ID, INITIAL_TENANTS[0]).catch(err => {
+          console.warn("[TenantContext] Seed initial tenant:", err);
+        });
       }
     });
     return () => unsub();

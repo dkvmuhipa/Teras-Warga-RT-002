@@ -52,6 +52,7 @@ import { auth } from '../../services/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { getWhatsAppLink } from '../../services/whatsappService';
 
 interface SuperAdminPortalProps {
   role?: Role | null;

@@ -71,6 +71,16 @@ export const DEFAULT_TENANT_MODULES = {
 
 const REGISTERED_TENANTS_KEY = 'registered_tenants';
 
+export const mergeTenantData = (base: Tenant, patch: Partial<Tenant>): Tenant => {
+  const merged: Tenant = { ...base };
+  for (const [key, val] of Object.entries(patch)) {
+    if (val !== undefined && val !== null && val !== '') {
+      (merged as any)[key] = val;
+    }
+  }
+  return merged;
+};
+
 const loadStoredTenants = (): Tenant[] => {
   if (typeof window === 'undefined') return [];
   try {
@@ -81,10 +91,13 @@ const loadStoredTenants = (): Tenant[] => {
     const raw = localStorage.getItem(REGISTERED_TENANTS_KEY);
     if (!raw) return [];
     const list: Tenant[] = JSON.parse(raw);
-    const cleaned = list.filter(t => t.id !== 'tondo-rw20-rt01' && !t.isPilotDemo);
-    if (cleaned.length !== list.length) {
-      localStorage.setItem(REGISTERED_TENANTS_KEY, JSON.stringify(cleaned));
-    }
+    const cleaned = list
+      .filter(t => t.id !== 'tondo-rw20-rt01' && !t.isPilotDemo)
+      .map(t => {
+        const base = INITIAL_TENANTS.find(it => it.id === t.id);
+        return base ? mergeTenantData(base, t) : t;
+      });
+    localStorage.setItem(REGISTERED_TENANTS_KEY, JSON.stringify(cleaned));
     return cleaned;
   } catch (e) {
     console.warn('Failed to load stored tenants:', e);
@@ -97,14 +110,22 @@ let inMemoryTenants: Tenant[] = loadStoredTenants();
 export const getAllTenants = (): Tenant[] => {
   const mergedMap = new Map<string, Tenant>();
   INITIAL_TENANTS.forEach(t => mergedMap.set(t.id, t));
-  inMemoryTenants.forEach(t => mergedMap.set(t.id, t));
+  inMemoryTenants.forEach(t => {
+    const existing = mergedMap.get(t.id);
+    if (existing) {
+      mergedMap.set(t.id, mergeTenantData(existing, t));
+    } else {
+      mergedMap.set(t.id, t);
+    }
+  });
   return Array.from(mergedMap.values());
 };
 
 export const registerTenantInMemory = (newTenant: Tenant): void => {
   const existingIdx = inMemoryTenants.findIndex(t => t.id === newTenant.id);
   if (existingIdx >= 0) {
-    inMemoryTenants[existingIdx] = newTenant;
+    const base = INITIAL_TENANTS.find(it => it.id === newTenant.id) || inMemoryTenants[existingIdx];
+    inMemoryTenants[existingIdx] = mergeTenantData(base, newTenant);
   } else {
     inMemoryTenants.push(newTenant);
   }
@@ -117,13 +138,12 @@ export const registerTenantInMemory = (newTenant: Tenant): void => {
 
 export const updateTenantInMemory = (tenantId: string, updates: Partial<Tenant>): void => {
   const existingIdx = inMemoryTenants.findIndex(t => t.id === tenantId);
+  const fromInitial = INITIAL_TENANTS.find(t => t.id === tenantId);
   if (existingIdx >= 0) {
-    inMemoryTenants[existingIdx] = { ...inMemoryTenants[existingIdx], ...updates };
-  } else {
-    const fromInitial = INITIAL_TENANTS.find(t => t.id === tenantId);
-    if (fromInitial) {
-      inMemoryTenants.push({ ...fromInitial, ...updates });
-    }
+    const base = fromInitial ? mergeTenantData(fromInitial, inMemoryTenants[existingIdx]) : inMemoryTenants[existingIdx];
+    inMemoryTenants[existingIdx] = mergeTenantData(base, updates);
+  } else if (fromInitial) {
+    inMemoryTenants.push(mergeTenantData(fromInitial, updates));
   }
   try {
     localStorage.setItem(REGISTERED_TENANTS_KEY, JSON.stringify(inMemoryTenants));
@@ -144,10 +164,15 @@ export const deleteTenantInMemory = (tenantId: string): void => {
 export const syncTenantsFromRemote = (remoteTenants: Tenant[]): void => {
   if (!remoteTenants || remoteTenants.length === 0) return;
   const mergedMap = new Map<string, Tenant>();
-  inMemoryTenants.forEach(t => mergedMap.set(t.id, t));
+  INITIAL_TENANTS.forEach(t => mergedMap.set(t.id, t));
+  inMemoryTenants.forEach(t => {
+    const existing = mergedMap.get(t.id);
+    mergedMap.set(t.id, existing ? mergeTenantData(existing, t) : t);
+  });
   remoteTenants.forEach(t => {
     if (t.id !== 'tondo-rw20-rt01' && !t.isPilotDemo) {
-      mergedMap.set(t.id, t);
+      const existing = mergedMap.get(t.id);
+      mergedMap.set(t.id, existing ? mergeTenantData(existing, t) : t);
     }
   });
   inMemoryTenants = Array.from(mergedMap.values());
@@ -160,7 +185,11 @@ export const getTenantById = (id?: string | null): Tenant => {
   if (!id) return INITIAL_TENANTS[0];
   const all = getAllTenants();
   const found = all.find(t => t.id === id);
-  return found || INITIAL_TENANTS[0];
+  if (found) {
+    const base = INITIAL_TENANTS.find(it => it.id === found.id);
+    return base ? mergeTenantData(base, found) : found;
+  }
+  return INITIAL_TENANTS[0];
 };
 
 export const getTenantBySlug = (slug?: string | null): Tenant | undefined => {
