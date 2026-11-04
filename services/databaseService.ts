@@ -42,7 +42,7 @@ import {
   WaterMeterReading, WaterUtilitySettings, STBMRecord, 
   Tenant, House, CashFlow, Official, HelpdeskTicket, 
   FleetTenantMetrics, FleetAggregates, TenantFeeConfig,
-  Report, SystemBroadcast, PlatformAuditEvent, LetterTemplate 
+  Report, SystemBroadcast, PlatformAuditEvent, LetterTemplate, SocialAidItem, SocialAidRecipient 
 } from "../types";
 import { toast } from "sonner";
 import { DEFAULT_TENANT_ID, matchesTenant, updateTenantInMemory } from "./tenantService";
@@ -5143,3 +5143,118 @@ export const deployGlobalLetterTemplates = async (templates: LetterTemplate[]): 
 };
 
 
+
+// --- SOCIAL AID & LOGISTICS DISTRIBUTION SERVICES (BANTUAN SOSIAL & SEMBAKO) ---
+export const SOCIAL_AID_COL = "social_aid";
+
+export const subscribeToSocialAid = (callback: (data: SocialAidItem[]) => void) => {
+  if (!isFirebaseConfigured || !db) {
+    callback([]);
+    return () => {};
+  }
+  try {
+    const q = query(collection(db, SOCIAL_AID_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({ ...docSnap.data(), id: docSnap.id } as SocialAidItem));
+      const filtered = filterByActiveTenant(data).sort((a, b) => new Date(b.distributionDate || b.createdAt).getTime() - new Date(a.distributionDate || a.createdAt).getTime());
+      callback(filtered);
+    }, (error) => {
+      if (error?.code !== 'permission-denied') {
+        console.warn("Firestore social aid subscription fallback:", error);
+      }
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) {}
+    };
+  } catch (err) {
+    console.warn("Firestore social aid setup error:", err);
+    callback([]);
+    return () => {};
+  }
+};
+
+export const addSocialAidToDb = async (data: Partial<SocialAidItem>): Promise<string> => {
+  if (!isFirebaseConfigured || !db) return Date.now().toString();
+  try {
+    const payload = {
+      ...data,
+      tenantId: activeTenantScope,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    const clean = deepSanitize(payload);
+    const docRef = await addDoc(collection(db, SOCIAL_AID_COL), clean);
+    logAction('Bantuan Sosial', `Menambahkan program bantuan sosial: ${data.title}`);
+    return docRef.id;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.CREATE, SOCIAL_AID_COL);
+    throw error;
+  }
+};
+
+export const updateSocialAidInDb = async (id: string, updates: Partial<SocialAidItem>): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const payload = {
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    const clean = deepSanitize(payload);
+    await updateDoc(doc(db, SOCIAL_AID_COL, id), clean);
+    logAction('Bantuan Sosial', `Memperbarui program bantuan sosial: ${updates.title || id}`);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${SOCIAL_AID_COL}/${id}`);
+    throw error;
+  }
+};
+
+export const deleteSocialAidFromDb = async (id: string): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    await deleteDoc(doc(db, SOCIAL_AID_COL, id));
+    logAction('Bantuan Sosial', `Menghapus program bantuan sosial ID: ${id}`);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${SOCIAL_AID_COL}/${id}`);
+    throw error;
+  }
+};
+
+export const toggleRecipientReceiptStatus = async (
+  aidId: string, 
+  houseId: string, 
+  isReceived: boolean, 
+  receivedBy?: string
+): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const docRef = doc(db, SOCIAL_AID_COL, aidId);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) return;
+    const currentData = snap.data() as SocialAidItem;
+    const updatedRecipients = (currentData.recipients || []).map(r => {
+      if (r.houseId === houseId) {
+        return {
+          ...r,
+          status: (isReceived ? 'Diterima' : 'Menunggu') as any,
+          receivedAt: isReceived ? new Date().toISOString() : undefined,
+          receivedBy: isReceived ? (receivedBy || r.headOfFamily) : undefined
+        };
+      }
+      return r;
+    });
+    
+    // Auto complete status if all recipients have received
+    const allReceived = updatedRecipients.length > 0 && updatedRecipients.every(r => r.status === 'Diterima');
+    const newStatus = allReceived ? 'Selesai' : currentData.status === 'Draft' ? 'Berjalan' : currentData.status;
+
+    await updateDoc(docRef, deepSanitize({
+      recipients: updatedRecipients,
+      status: newStatus,
+      updatedAt: new Date().toISOString()
+    }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${SOCIAL_AID_COL}/${aidId}/recipients`);
+    throw error;
+  }
+};

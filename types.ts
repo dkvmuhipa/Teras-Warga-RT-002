@@ -1678,3 +1678,37 @@ export interface ClimateAdvisoryResult {
   generatedAt: string;
   isAiGenerated: boolean;
 }
+
+
+// --- SOCIAL AID & LOGISTICS DISTRIBUTION (BANTUAN SOSIAL & SEMBAKO RT 02) ---
+export interface SocialAidRecipient {
+  houseId: string; // e.g. "C10-08"
+  headOfFamily: string; // e.g. "Ahmad Fauzi"
+  block: string;
+  number: number;
+  phone?: string;
+  isPraSejahtera?: boolean;
+  isPKH?: boolean;
+  isBLT?: boolean;
+  isBPNT?: boolean;
+  status: 'Menunggu' | 'Diterima';
+  receivedAt?: string; // ISO timestamp
+  receivedBy?: string; // Nama pengambil
+  notes?: string;
+}
+
+export interface SocialAidItem {
+  id: string;
+  tenantId?: string;
+  title: string; // e.g. "Beras CPP Cadangan Pangan Pemerintah Tahap II"
+  category: 'Beras' | 'Sembako' | 'BLT / Uang Tunai' | 'Nutrisi Balita & Lansia' | 'Kesehatan & Sanitasi' | 'Lainnya';
+  source: string; // e.g. "Kelurahan Tondo / Bapanas", "Kemensos RI", "Baznas Kota Palu"
+  totalQuota: number;
+  unit: string; // e.g. "Karung 10kg", "Paket Dus", "Amplop / KK"
+  distributionDate: string; // YYYY-MM-DD
+  status: 'Draft' | 'Berjalan' | 'Selesai';
+  notes?: string;
+  recipients: SocialAidRecipient[];
+  createdAt: string;
+  updatedAt?: string;
+}

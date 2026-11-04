@@ -5,7 +5,7 @@ import {
   Clock, CheckCircle2, MessageSquare, User, Megaphone, Sparkles, Trash2,
   Shield, Package, Bell, LayoutGrid, UserPlus, ShoppingCart, CheckSquare,
   ShieldCheck, Sun, Wind, Droplets, Compass, Waves, Recycle, Share2, Check,
-  CreditCard, ChevronDown, ChevronUp
+  CreditCard, ChevronDown, ChevronUp, Gift
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Cell
@@ -532,6 +532,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   { label: 'Lapor RT', icon: AlertTriangle, tab: 'reports-warga', color: 'bg-rose-50 text-rose-700 border-rose-100', badge: newReports > 0 ? `${newReports} Baru` : undefined },
                   { label: 'Agenda Warga', icon: Calendar, tab: 'activities', color: 'bg-amber-50 text-amber-700 border-amber-100' },
                   { label: 'Aset & Logistik', icon: Package, tab: 'assets', color: 'bg-purple-50 text-purple-700 border-purple-100' },
+                  { label: 'Penyaluran Bantuan', icon: Gift, tab: 'bansos', color: 'bg-amber-50 text-amber-700 border-amber-100', badge: 'Bansos' },
                 ].map((item, idx) => {
                   const Icon = item.icon;
                   return (

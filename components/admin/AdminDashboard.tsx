@@ -44,12 +44,13 @@ const RentalManager = React.lazy(() => import('./RentalManager').then(m => ({ de
 const STBMManager = React.lazy(() => import('./STBMManager').then(m => ({ default: m.STBMManager })));
 const PBBManager = React.lazy(() => import('./PBBManager').then(m => ({ default: m.PBBManager })));
 const RWAggregationDashboard = React.lazy(() => import('./RWAggregationDashboard').then(m => ({ default: m.RWAggregationDashboard })));
+const SocialAidManager = React.lazy(() => import('./SocialAidManager').then(m => ({ default: m.SocialAidManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Bell, Search, User, Menu, LogOut, Shield, Plus, Edit2, Trash2, Calendar, ShieldCheck, AlertTriangle,
   LayoutDashboard, BarChart3, Users, Activity, ShieldAlert, DollarSign, FileText, Megaphone, Box, Briefcase, Settings, LayoutGrid, BookOpen, Building, CheckSquare, Clock, Sparkles, Command, Sun, CloudRain, Wind, ArrowRight, CornerDownLeft,
-  FileClock, Award, Droplets, Building2, HelpCircle, Landmark
+  FileClock, Award, Droplets, Building2, HelpCircle, Landmark, Gift
 } from 'lucide-react';
 import { CHECKPOINTS, RT_NAME, Logo } from '../../constants';
 import { toast } from 'sonner';
@@ -183,6 +184,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     { id: 'pbb', icon: Landmark, label: 'Pendataan SPPT PBB', desc: 'Monitoring bukti PBB di RT & verifikasi pelunasan', color: 'bg-emerald-50 text-emerald-700 border-emerald-100/60 hover:bg-emerald-100/50' },
     { id: 'mutations', icon: FileClock, label: 'Mutasi & Laporan Penduduk', desc: 'Arsip laporan bulanan, mutasi warga, & format kelurahan', color: 'bg-indigo-50 text-indigo-700 border-indigo-100/60 hover:bg-indigo-100/50' },
     { id: 'rentals', icon: Building, label: 'Rumah Sewa & Kontrakan', desc: 'Buku registrasi & monitoring hunian sewa RT', color: 'bg-teal-50 text-teal-700 border-teal-100/60 hover:bg-teal-100/50' },
+    { id: 'bansos', icon: Gift, label: 'Penyaluran Bantuan', desc: 'Distribusi bansos, sembako & serah terima warga', color: 'bg-amber-50 text-amber-700 border-amber-100/60 hover:bg-amber-100/50' },
     { id: 'health', icon: Activity, label: 'Posyandu Digital', desc: 'Pemantauan kesehatan & lansia', color: 'bg-teal-50 text-teal-600 border-teal-100/60 hover:bg-teal-100/50' },
     { id: 'stbm', icon: CheckSquare, label: '5 Pilar STBM', desc: 'Pendataan sanitasi total berbasis masyarakat RT', color: 'bg-emerald-50 text-emerald-700 border-emerald-100/60 hover:bg-emerald-100/50' },
     { id: 'finance', icon: DollarSign, label: 'Kas & Keuangan', desc: 'Pengelolaan keuangan & iuran warga', color: 'bg-indigo-50 text-indigo-600 border-indigo-100/60 hover:bg-indigo-100/50' },
@@ -210,13 +212,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const isSecretary = role === Role.SECRETARY || roleStr.includes('sekretaris');
     
     if (isTreasurer) {
-      const allowed = ['overview', 'analytics', 'finance', 'pbb', 'water-meter', 'reports-lpj', 'settings', 'notifications'];
+      const allowed = ['overview', 'analytics', 'finance', 'pbb', 'water-meter', 'reports-lpj', 'bansos', 'settings', 'notifications'];
       return allowed.includes(item.id);
     }
     
     if (isSecretary) {
       const allowed = [
-        'overview', 'analytics', 'residents', 'pbb', 'mutations', 'rentals',
+        'overview', 'analytics', 'residents', 'pbb', 'mutations', 'rentals', 'bansos',
         'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'reports-warga', 'documents', 'activities', 
         'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
       ];
@@ -470,6 +472,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <DocumentManager documents={documents} />;
       case 'rentals':
         return <RentalManager houses={houses} />;
+      case 'bansos':
+        return <SocialAidManager houses={houses} pdfConfig={pdfConfig} />;
       case 'pbb':
         return <PBBManager houses={houses} pdfConfig={pdfConfig} />;
       case 'stbm':

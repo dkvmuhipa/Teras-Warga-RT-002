@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import QRCode from "qrcode";
 import { toast } from "sonner";
-import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official, MonthlyActivityReport, AnnualLPJReport } from "../types";
+import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationReport, OfficialLetter, CashFlow, PopulationChangeLog, Official, MonthlyActivityReport, AnnualLPJReport, SocialAidItem, SocialAidRecipient } from "../types";
 import { DEFAULT_PDF_CONFIG } from "../constants";
 import { getActivePdfConfig } from "./tenantService";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
@@ -5917,3 +5917,187 @@ export const generatePDAMInstallationReportPDF = async (
 };
 
 
+
+/**
+ * Generates an official Handover Certificate & Recipient Signature Sheet for Social Aid Distribution
+ */
+export const generateSocialAidHandoverPDF = async (aid: SocialAidItem, customConfig?: PdfConfig): Promise<void> => {
+  const config = customConfig || getActivePdfConfig();
+  const doc = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4",
+    compress: true
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const margin = 15;
+  let y = 14;
+
+  // Header / Kop Surat
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.text(config.kopLine1 || "RUKUN TETANGGA 002 / RUKUN WARGA 020", pageWidth / 2, y, { align: "center" });
+  y += 5.5;
+
+  doc.setFontSize(11);
+  doc.text(config.kopLine2 || "KELURAHAN TONDO, KECAMATAN MANTIKULORE", pageWidth / 2, y, { align: "center" });
+  y += 4.5;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(71, 85, 105);
+  doc.text(config.kopLine3 || "Huntap Tondo 2, Kota Palu, Sulawesi Tengah 94119", pageWidth / 2, y, { align: "center" });
+  y += 4;
+
+  // Horizontal dividing line
+  doc.setDrawColor(30, 41, 59);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, pageWidth - margin, y);
+  doc.setLineWidth(0.2);
+  doc.line(margin, y + 1, pageWidth - margin, y + 1);
+  y += 7;
+
+  // Document Title
+  doc.setTextColor(15, 23, 42);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.text("BERITA ACARA SERAH TERIMA & DAFTAR PENERIMA BANTUAN SOSIAL", pageWidth / 2, y, { align: "center" });
+  y += 4.5;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(100, 116, 139);
+  const yearStr = new Date(aid.distributionDate || Date.now()).getFullYear();
+  doc.text(`Nomor: BA-BANSOS / 02 / RW-20 / ${yearStr}`, pageWidth / 2, y, { align: "center" });
+  y += 6;
+
+  // Summary Card / Metadata Table
+  const totalReceived = (aid.recipients || []).filter(r => r.status === 'Diterima').length;
+  const totalTarget = (aid.recipients || []).length;
+  const formattedDate = aid.distributionDate 
+    ? new Date(aid.distributionDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : '-';
+
+  autoTable(doc, {
+    startY: y,
+    theme: 'plain',
+    styles: { fontSize: 8.5, cellPadding: 2, textColor: [30, 41, 59] },
+    columnStyles: {
+      0: { fontStyle: 'bold', cellWidth: 42 },
+      1: { cellWidth: 4 },
+      2: { cellWidth: 50 },
+      3: { fontStyle: 'bold', cellWidth: 38 },
+      4: { cellWidth: 4 },
+      5: { cellWidth: 42 },
+    },
+    body: [
+      ['Nama Program', ':', aid.title || '-', 'Tanggal Pembagian', ':', formattedDate],
+      ['Kategori Bantuan', ':', aid.category || '-', 'Sumber Bantuan', ':', aid.source || '-'],
+      ['Total Kuota', ':', `${aid.totalQuota || totalTarget} ${aid.unit || 'Paket'}`, 'Status Penyaluran', ':', `${totalReceived} dari ${totalTarget} KK Diterima`]
+    ],
+    margin: { left: margin, right: margin }
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 4;
+
+  // Recipient Attendance & Signature Sheet Table
+  const sortedRecipients = [...(aid.recipients || [])].sort((a, b) => {
+    const parseCode = (str: string) => {
+      const match = str.match(/([a-zA-Z]+)(\d+)/);
+      if (match) return { letter: match[1], num: parseInt(match[2], 10) };
+      return { letter: str, num: 0 };
+    };
+    const blockA = parseCode(a.block || '');
+    const blockB = parseCode(b.block || '');
+    if (blockA.letter !== blockB.letter) return blockA.letter.localeCompare(blockB.letter);
+    if (blockA.num !== blockB.num) return blockA.num - blockB.num;
+    return (a.number || 0) - (b.number || 0);
+  });
+
+  const tableBody = sortedRecipients.map((r, idx) => {
+    const tag = r.isPKH ? 'PKH' : r.isBLT ? 'BLT' : r.isBPNT ? 'BPNT' : r.isPraSejahtera ? 'Pra-Sejahtera' : 'Warga RT';
+    const statusText = r.status === 'Diterima' ? 'LUNAS TERIMA' : 'Menunggu';
+    const dateText = r.receivedAt ? new Date(r.receivedAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' }) : '';
+    const receiverText = r.receivedBy ? `${r.receivedBy} (${dateText})` : (idx % 2 === 1 ? `${idx + 1}. ................` : `${idx + 1}. ................`);
+    return [
+      (idx + 1).toString(),
+      `Blok ${r.block}-${String(r.number).padStart(2, '0')}`,
+      r.headOfFamily || '-',
+      tag,
+      statusText,
+      receiverText
+    ];
+  });
+
+  autoTable(doc, {
+    startY: y,
+    head: [['No', 'Kavling', 'Nama Kepala Keluarga', 'Kategori', 'Status', 'Tanda Tangan / Penerima']],
+    body: tableBody,
+    theme: 'grid',
+    styles: { 
+      fontSize: 7.5, 
+      cellPadding: 2, 
+      valign: 'middle',
+      lineColor: [226, 232, 240],
+      lineWidth: 0.15
+    },
+    headStyles: { 
+      fillColor: [30, 41, 59], 
+      textColor: [255, 255, 255], 
+      fontStyle: 'bold', 
+      halign: 'center' 
+    },
+    columnStyles: {
+      0: { cellWidth: 8, halign: 'center' },
+      1: { cellWidth: 26, fontStyle: 'bold', halign: 'center' },
+      2: { cellWidth: 55, fontStyle: 'bold' },
+      3: { cellWidth: 25, halign: 'center' },
+      4: { cellWidth: 26, halign: 'center' },
+      5: { cellWidth: 40 }
+    },
+    margin: { left: margin, right: margin }
+  });
+
+  y = (doc as any).lastAutoTable.finalY + 8;
+  if (y > pageHeight - 45) {
+    doc.addPage();
+    y = 20;
+  }
+
+  // Signatures section
+  const sigColWidth = 70;
+  const sigLeftX = margin + 5;
+  const sigRightX = pageWidth - margin - sigColWidth + 5;
+
+  doc.setFontSize(8.5);
+  doc.setTextColor(30, 41, 59);
+  doc.setFont("helvetica", "normal");
+  doc.text("Petugas Penyalur Bantuan,", sigLeftX, y);
+  doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, sigRightX, y);
+  y += 4;
+  doc.text(`Mengetahui, Ketua ${config.rtName || 'RT 002 / RW 020'}`, sigRightX, y);
+
+  y += 18;
+  doc.setFont("helvetica", "bold");
+  doc.text("PENGURUS / SEKSI SOSIAL RT 02", sigLeftX, y);
+  doc.text(config.rtLeader || config.rtChairman || "IRFAN ARIANTO", sigRightX, y);
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text("Teras Warga RT 002", sigLeftX, y + 4);
+  doc.text("Ketua RT 002 / RW 020 Tondo", sigRightX, y + 4);
+
+  // Footer note
+  doc.setFontSize(6.5);
+  doc.setFont("helvetica", "italic");
+  doc.setTextColor(148, 163, 184);
+  doc.text(`Dokumen Berita Acara resmi diterbitkan secara digital melalui Sistem Informasi Teras Warga RT 02 pada ${new Date().toLocaleString('id-ID')}`, margin, pageHeight - 6);
+
+  const cleanTitle = (aid.title || 'Bansos').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 30);
+  const filename = `Berita_Acara_Bansos_${cleanTitle}_RT02.pdf`;
+  doc.save(filename);
+  toast.success('Berita Acara Penyaluran Bantuan Sosial berhasil diunduh!');
+};
