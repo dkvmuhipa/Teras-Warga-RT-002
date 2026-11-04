@@ -5,7 +5,7 @@ import {
   GraduationCap, Briefcase, Car, Bike, Baby, Heart, Accessibility, Smile, 
   FileText, Camera, ShieldCheck, MapPin, Calendar, Check, AlertCircle, Info,
   ShieldAlert, Search, Sparkles, Building, Lock, CheckSquare, Eye, ExternalLink,
-  Shield, CheckCheck, HelpCircle, X, Clock, BookOpen, ArrowRight
+  Shield, CheckCheck, HelpCircle, X, Clock, BookOpen, ArrowRight, BadgeCheck, RefreshCw
 } from 'lucide-react';
 import { Button } from './ui/Button';
 import { 
@@ -291,7 +291,8 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
       ...prev,
       block: selectedBlock,
       number: unitNumber,
-      ownerName: (prev.residenceType !== 'Tetap' && detectedOwner) ? detectedOwner : prev.ownerName
+      headOfFamily: (prev.residenceType === 'Tetap' && detectedOwner && (!prev.headOfFamily || prev.headOfFamily.trim() === '')) ? detectedOwner : prev.headOfFamily,
+      ownerName: (prev.residenceType === 'Tetap' && detectedOwner) ? detectedOwner : (prev.residenceType !== 'Tetap' && detectedOwner ? detectedOwner : prev.ownerName)
     }));
 
     if (validationErrors.block || validationErrors.number) {
@@ -1075,7 +1076,20 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                         <button
                           key={type.id}
                           type="button"
-                          onClick={() => setFormData({ ...formData, residenceType: type.id as any })}
+                          onClick={() => {
+                            const isTetap = (type.id === 'Tetap');
+                            const skOwner = matchedHouse?.ownerName && matchedHouse.ownerName !== '-' ? matchedHouse.ownerName : '';
+                            const newHead = (isTetap && skOwner && (!formData.headOfFamily || formData.headOfFamily.trim() === '')) ? skOwner : formData.headOfFamily;
+                            setFormData({ 
+                              ...formData, 
+                              residenceType: type.id as any,
+                              headOfFamily: newHead,
+                              ownerName: isTetap ? (skOwner || newHead || '') : formData.ownerName
+                            });
+                            if (isTetap && skOwner && (!formData.headOfFamily || formData.headOfFamily.trim() === '')) {
+                              toast.info(`Status Tetap: Nama Kepala Keluarga diisi sesuai SK (${skOwner})`);
+                            }
+                          }}
                           className={`p-4 text-left border rounded-2xl transition-colors cursor-pointer relative overflow-hidden group ${
                             isSel 
                               ? 'bg-indigo-50/70 border-indigo-500 shadow-sm ring-2 ring-indigo-500/10' 
@@ -1094,6 +1108,45 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
                     })}
                   </div>
                 </div>
+
+                {/* Info SK untuk Status Tetap */}
+                {formData.residenceType === 'Tetap' && matchedHouse?.ownerName && matchedHouse.ownerName !== '-' && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="p-4 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl space-y-2.5"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-start gap-2">
+                        <BadgeCheck size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="text-emerald-950 block font-bold text-xs">Unit Terdaftar SK Hunian Tetap</strong>
+                          <span className="text-emerald-800/85 text-[11px]">
+                            Berdasarkan data SK RT, penerima sah unit ini adalah: <strong className="underline">{matchedHouse.ownerName}</strong>.
+                          </span>
+                        </div>
+                      </div>
+                      {formData.headOfFamily !== matchedHouse.ownerName && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              headOfFamily: matchedHouse.ownerName || '',
+                              ownerName: matchedHouse.ownerName || ''
+                            });
+                            toast.success(`Kepala Keluarga diisi sesuai SK: ${matchedHouse.ownerName}`);
+                          }}
+                          className="px-2.5 py-1 text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors cursor-pointer shrink-0 shadow-xs flex items-center gap-1 w-fit"
+                        >
+                          <RefreshCw size={10} className="stroke-[2.5]" />
+                          <span>Gunakan Nama di SK</span>
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* Info & Input Pemilik untuk Status Sewa / Rumah Keluarga */}
                 {(formData.residenceType === 'Sewa' || formData.residenceType === 'Rumah Keluarga') && (

@@ -53,6 +53,33 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
   setActiveFormTab,
   houses = []
 }) => {
+  // Matching house from DB for the selected block & number or editingHouseId
+  const matchedHouse = useMemo(() => {
+    if (editingHouseId) {
+      const byId = houses.find(h => h.id === editingHouseId);
+      if (byId) return byId;
+    }
+    if (!formData.block || !formData.number) return null;
+    return houses.find(h => 
+      (h.block || '').trim().toUpperCase() === (formData.block || '').trim().toUpperCase() &&
+      ((h.number || '').trim().padStart(2, '0') === (formData.number || '').trim().padStart(2, '0') ||
+       (h.number || '').trim() === (formData.number || '').trim() ||
+       parseInt(h.number || '0', 10) === parseInt(formData.number || '0', 10))
+    );
+  }, [houses, editingHouseId, formData.block, formData.number]);
+
+  // Detected SK Owner Name from database (SK Hunian Tetap Tondo 2)
+  const detectedSkOwner = useMemo(() => {
+    if (!matchedHouse) return '';
+    if (matchedHouse.ownerName && matchedHouse.ownerName.trim() !== '' && matchedHouse.ownerName.trim() !== '-') {
+      return matchedHouse.ownerName.trim();
+    }
+    if (matchedHouse.residenceType === 'Tetap' && matchedHouse.headOfFamily && matchedHouse.headOfFamily.trim() !== '' && !matchedHouse.headOfFamily.toLowerCase().startsWith('rumah kosong')) {
+      return matchedHouse.headOfFamily.trim();
+    }
+    return '';
+  }, [matchedHouse]);
+
   const validateTab = (tab: 'basic' | 'demographics' | 'family') => {
     const isAdmin = role === Role.ADMIN;
 
@@ -281,13 +308,60 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 relative z-10">
                       <div className="md:col-span-8">
-                        <FormField 
-                          label="Nama Lengkap Kepala Keluarga / Penghuni" 
-                          required 
-                          placeholder="Nama lengkap..."
-                          value={formData.headOfFamily} 
-                          onChange={(v: any) => setFormData({...formData, headOfFamily: v})} 
-                        />
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-xs font-semibold text-slate-600">
+                              Nama Lengkap Kepala Keluarga / Penghuni <span className="text-rose-500">*</span>
+                            </label>
+                            {formData.residenceType === 'Tetap' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                <BadgeCheck size={11} className="text-emerald-600" /> Sesuai Nama di SK
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="relative">
+                            <input
+                              type="text"
+                              required
+                              placeholder="Nama lengkap..."
+                              value={formData.headOfFamily ?? ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (formData.residenceType === 'Tetap') {
+                                  setFormData({ ...formData, headOfFamily: val, ownerName: val });
+                                } else {
+                                  setFormData({ ...formData, headOfFamily: val });
+                                }
+                              }}
+                              className="w-full px-3 py-2 text-sm font-medium text-slate-800 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-colors bg-white hover:border-slate-300 placeholder:text-slate-400"
+                            />
+                            {formData.residenceType === 'Tetap' && detectedSkOwner && formData.headOfFamily !== detectedSkOwner && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({
+                                    ...formData,
+                                    headOfFamily: detectedSkOwner,
+                                    ownerName: detectedSkOwner
+                                  });
+                                  toast.success(`Kepala Keluarga diisi sesuai Nama di SK: ${detectedSkOwner}`);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 px-2 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-100/90 hover:bg-emerald-200 border border-emerald-300 rounded-md transition-colors cursor-pointer shadow-xs flex items-center gap-1"
+                                title="Klik untuk menyelaraskan nama dengan SK Hunian Tetap"
+                              >
+                                <RefreshCw size={10} className="stroke-[2.5]" />
+                                <span>Gunakan SK: {detectedSkOwner}</span>
+                              </button>
+                            )}
+                          </div>
+                          {formData.residenceType === 'Tetap' && (
+                            <p className="text-[10px] text-slate-500 font-medium flex items-center gap-1">
+                              <Info size={11} className="text-slate-400 shrink-0" />
+                              <span>Untuk status <strong>Tetap</strong>, Kepala Keluarga otomatis disinkronkan dengan pemilik SK Hunian Tetap.</span>
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="md:col-span-4">
                         <label className="block text-xs font-semibold text-slate-600 mb-1.5">Gender <span className="text-rose-500">*</span></label>
@@ -443,14 +517,54 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           required 
                           placeholder="A/B..."
                           value={formData.block} 
-                          onChange={(v: any) => setFormData({...formData, block: v})} 
+                          onChange={(v: any) => {
+                            const nextBlock = v;
+                            const nextForm = { ...formData, block: nextBlock };
+                            if (nextForm.residenceType === 'Tetap' && nextBlock && nextForm.number) {
+                              const match = houses.find(h => 
+                                (h.block || '').trim().toUpperCase() === nextBlock.trim().toUpperCase() &&
+                                ((h.number || '').trim().padStart(2, '0') === (nextForm.number || '').trim().padStart(2, '0') ||
+                                 (h.number || '').trim() === (nextForm.number || '').trim() ||
+                                 parseInt(h.number || '0', 10) === parseInt(nextForm.number || '0', 10))
+                              );
+                              const sk = match?.ownerName && match.ownerName.trim() !== '' && match.ownerName !== '-' 
+                                ? match.ownerName 
+                                : (match?.residenceType === 'Tetap' ? match.headOfFamily : '');
+                              if (sk && (!nextForm.headOfFamily || nextForm.headOfFamily === 'Rumah Kosong' || nextForm.headOfFamily.trim() === '')) {
+                                nextForm.headOfFamily = sk;
+                                nextForm.ownerName = sk;
+                                toast.info(`Otomatis mengisi Kepala Keluarga dari SK Unit: ${sk}`);
+                              }
+                            }
+                            setFormData(nextForm);
+                          }} 
                         />
                         <FormField 
                           label="Nomor Rumah" 
                           required 
                           placeholder="00"
                           value={formData.number} 
-                          onChange={(v: any) => setFormData({...formData, number: v})} 
+                          onChange={(v: any) => {
+                            const nextNum = v;
+                            const nextForm = { ...formData, number: nextNum };
+                            if (nextForm.residenceType === 'Tetap' && nextForm.block && nextNum) {
+                              const match = houses.find(h => 
+                                (h.block || '').trim().toUpperCase() === (nextForm.block || '').trim().toUpperCase() &&
+                                ((h.number || '').trim().padStart(2, '0') === nextNum.trim().padStart(2, '0') ||
+                                 (h.number || '').trim() === nextNum.trim() ||
+                                 parseInt(h.number || '0', 10) === parseInt(nextNum.trim() || '0', 10))
+                              );
+                              const sk = match?.ownerName && match.ownerName.trim() !== '' && match.ownerName !== '-' 
+                                ? match.ownerName 
+                                : (match?.residenceType === 'Tetap' ? match.headOfFamily : '');
+                              if (sk && (!nextForm.headOfFamily || nextForm.headOfFamily === 'Rumah Kosong' || nextForm.headOfFamily.trim() === '')) {
+                                nextForm.headOfFamily = sk;
+                                nextForm.ownerName = sk;
+                                toast.info(`Otomatis mengisi Kepala Keluarga dari SK Unit: ${sk}`);
+                              }
+                            }
+                            setFormData(nextForm);
+                          }} 
                         />
 
                         {/* Real-Time Duplicate House Detector */}
@@ -511,7 +625,38 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                    <button
                                      key={st}
                                      type="button"
-                                     onClick={() => setFormData({...formData, residenceType: (st === 'Keluarga' ? 'Rumah Keluarga' : st) as any})}
+                                     onClick={() => {
+                                       const isTetap = (st === 'Tetap');
+                                       const targetResidenceType = (st === 'Keluarga' ? 'Rumah Keluarga' : st) as any;
+
+                                       if (isTetap) {
+                                         // Otomatis isi Kepala Keluarga sesuai nama di SK
+                                         const skName = detectedSkOwner || formData.ownerName || formData.headOfFamily;
+                                         const shouldUpdateHead = skName && (
+                                           !formData.headOfFamily || 
+                                           formData.headOfFamily === 'Rumah Kosong' || 
+                                           formData.headOfFamily.trim() === '' ||
+                                           (detectedSkOwner && detectedSkOwner.trim() !== '')
+                                         );
+
+                                         const newHead = shouldUpdateHead ? skName : formData.headOfFamily;
+                                         setFormData({
+                                           ...formData,
+                                           residenceType: 'Tetap',
+                                           headOfFamily: newHead,
+                                           ownerName: newHead || skName || ''
+                                         });
+
+                                         if (skName && skName !== formData.headOfFamily) {
+                                           toast.info(`Status Tetap: Nama Kepala Keluarga diisi sesuai SK (${skName})`);
+                                         }
+                                       } else {
+                                         setFormData({
+                                           ...formData,
+                                           residenceType: targetResidenceType
+                                         });
+                                       }
+                                     }}
                                      className={`py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                                        formData.residenceType === (st === 'Keluarga' ? 'Rumah Keluarga' : st) 
                                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' 
@@ -526,16 +671,68 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                           )}
                         </div>
 
+                        {/* --- KONDISI 1: STATUS TETAP (PEMILIK SESUAI SK) --- */}
+                        {formData.residenceType === 'Tetap' && (
+                          <div className="col-span-2 p-3.5 bg-emerald-50/80 border border-emerald-200/90 rounded-xl space-y-2.5">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-950">
+                                <BadgeCheck size={16} className="text-emerald-600 shrink-0" />
+                                <span>Informasi Pemilik SK Hunian Tetap</span>
+                              </div>
+                              {detectedSkOwner && formData.headOfFamily !== detectedSkOwner && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData({
+                                      ...formData,
+                                      headOfFamily: detectedSkOwner,
+                                      ownerName: detectedSkOwner
+                                    });
+                                    toast.success(`Kepala Keluarga diselaraskan dengan Nama di SK: ${detectedSkOwner}`);
+                                  }}
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold transition-colors shadow-xs cursor-pointer w-fit"
+                                >
+                                  <RefreshCw size={11} className="stroke-[2.5]" />
+                                  <span>Samakan dengan SK: {detectedSkOwner}</span>
+                                </button>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-emerald-800/90 leading-relaxed">
+                              Sesuai ketentuan Hunian Tetap Tondo 2, status <strong>Tetap</strong> menandakan penghuni adalah pemilik sah unit sesuai SK Penetapan. Nama Kepala Keluarga otomatis diselaraskan dengan Nama di SK.
+                              {detectedSkOwner && (
+                                <span className="block mt-1 font-semibold text-[10px] text-emerald-700">
+                                  🏛️ Terdata di SK RT: <span className="font-bold underline">{detectedSkOwner}</span>
+                                </span>
+                              )}
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
+                              <FormField 
+                                label="Nama di SK (Pemilik Sah)" 
+                                placeholder="Nama pemilik sah di SK..."
+                                value={formData.ownerName || formData.headOfFamily || ''} 
+                                onChange={(v: any) => setFormData({
+                                  ...formData, 
+                                  ownerName: v, 
+                                  headOfFamily: v // Sync both when Tetap
+                                })} 
+                              />
+                              <FormField 
+                                label="No. HP / WhatsApp Pemilik" 
+                                placeholder="08xxxxxxxxxx"
+                                value={formData.ownerPhone || formData.phone || ''} 
+                                onChange={(v: any) => setFormData({
+                                  ...formData, 
+                                  ownerPhone: v,
+                                  phone: formData.phone || v
+                                })} 
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* --- KONDISI 2: STATUS SEWA / RUMAH KELUARGA --- */}
                         {formData.residenceType !== 'Tetap' && (() => {
-                          const matchedHouse = houses?.find(h => 
-                            (h.block || '').trim().toUpperCase() === (formData.block || '').trim().toUpperCase() &&
-                            ((h.number || '').trim().padStart(2, '0') === (formData.number || '').trim().padStart(2, '0') ||
-                             (h.number || '').trim() === (formData.number || '').trim() ||
-                             parseInt(h.number || '0', 10) === parseInt(formData.number || '0', 10))
-                          );
-                          const detectedOwner = matchedHouse?.ownerName && matchedHouse.ownerName.trim() !== '' && matchedHouse.ownerName.trim() !== '-'
-                            ? matchedHouse.ownerName
-                            : (matchedHouse?.residenceType === 'Tetap' ? matchedHouse.headOfFamily : null);
+                          const detectedOwner = detectedSkOwner || matchedHouse?.ownerName || (matchedHouse?.residenceType === 'Tetap' ? matchedHouse.headOfFamily : null);
                           const detectedPhone = matchedHouse?.ownerPhone || (matchedHouse?.residenceType === 'Tetap' ? matchedHouse.phone : null);
 
                           return (

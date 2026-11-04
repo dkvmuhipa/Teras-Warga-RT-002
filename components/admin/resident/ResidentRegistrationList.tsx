@@ -991,12 +991,25 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                     </span>
                                   );
                                 }
+                                const matchesSk = houseDbOwner ? (reg.headOfFamily.trim().toLowerCase() === houseDbOwner.trim().toLowerCase()) : true;
                                 return (
-                                  <div className="mt-0.5">
+                                  <div className="mt-0.5 space-y-1">
                                     <span className="block text-xs font-semibold text-slate-900">
                                       {reg.headOfFamily}
                                     </span>
-                                    <span className="text-[9px] text-teal-700 font-bold block mt-0.5">Hak Milik Pribadi</span>
+                                    {houseDbOwner ? (
+                                      matchesSk ? (
+                                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                          <CheckCheck size={11} /> Sesuai SK ({houseDbOwner})
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200" title={`Nama di SK terdata: ${houseDbOwner}`}>
+                                          <AlertCircle size={11} /> SK: {houseDbOwner}
+                                        </span>
+                                      )
+                                    ) : (
+                                      <span className="text-[9px] text-teal-700 font-bold block">Hak Milik Pribadi (SK)</span>
+                                    )}
                                   </div>
                                 );
                               })()}

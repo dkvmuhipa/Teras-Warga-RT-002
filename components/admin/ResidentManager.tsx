@@ -1489,6 +1489,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         ...formData,
         id: houseId,
         location: oldHouse?.location || { x: 0, y: 0 },
+        // Ketika status penghuni adalah Tetap, pastikan nama pemilik (ownerName) sinkron dengan Kepala Keluarga (nama di SK)
+        ownerName: formData.residenceType === 'Tetap'
+          ? (formData.headOfFamily || formData.ownerName || oldHouse?.ownerName || '')
+          : (formData.ownerName || oldHouse?.ownerName || ''),
         joiningDate: formData.joiningDate 
           ? formData.joiningDate.split('T')[0] 
           : (oldHouse?.joiningDate ? oldHouse.joiningDate.split('T')[0] : (oldHouse?.createdAt ? oldHouse.createdAt.split('T')[0] : new Date().toISOString().split('T')[0])),
