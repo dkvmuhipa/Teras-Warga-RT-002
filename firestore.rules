@@ -448,6 +448,16 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // Social Aid & Logistics Distribution (Bansos, Sembako Murah, & Bantuan Warga)
+    match /social_aid/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isAuthenticated();
+    }
+    match /socialAid/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || isAuthenticated();
+    }
+
     // Default Deny Catch-all
     match /{document=**} {
       allow read, write: if false;

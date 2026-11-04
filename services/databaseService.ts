@@ -5258,3 +5258,50 @@ export const toggleRecipientReceiptStatus = async (
     throw error;
   }
 };
+
+export const updateRecipientPaymentAndReceipt = async (
+  aidId: string,
+  houseId: string,
+  updates: {
+    status?: 'Menunggu' | 'Diterima';
+    receivedBy?: string;
+    paymentStatus?: 'Lunas' | 'Belum Bayar' | 'Gratis';
+    paidAmount?: number;
+    paymentMethod?: 'Tunai' | 'QRIS' | 'Kas RT';
+  }
+): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const docRef = doc(db, SOCIAL_AID_COL, aidId);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) return;
+    const currentData = snap.data() as SocialAidItem;
+    const updatedRecipients = (currentData.recipients || []).map(r => {
+      if (r.houseId === houseId) {
+        const nextStatus = updates.status !== undefined ? updates.status : r.status;
+        const nextPaymentStatus = updates.paymentStatus !== undefined ? updates.paymentStatus : r.paymentStatus;
+        return {
+          ...r,
+          ...updates,
+          status: nextStatus,
+          paymentStatus: nextPaymentStatus,
+          receivedAt: nextStatus === 'Diterima' ? (r.receivedAt || new Date().toISOString()) : undefined,
+          paidAt: nextPaymentStatus === 'Lunas' ? (r.paidAt || new Date().toISOString()) : undefined
+        };
+      }
+      return r;
+    });
+
+    const allReceived = updatedRecipients.length > 0 && updatedRecipients.every(r => r.status === 'Diterima');
+    const newStatus = allReceived ? 'Selesai' : currentData.status === 'Draft' ? 'Berjalan' : currentData.status;
+
+    await updateDoc(docRef, deepSanitize({
+      recipients: updatedRecipients,
+      status: newStatus,
+      updatedAt: new Date().toISOString()
+    }));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, `${SOCIAL_AID_COL}/${aidId}/recipients`);
+    throw error;
+  }
+};

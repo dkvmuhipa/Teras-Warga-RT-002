@@ -1694,6 +1694,11 @@ export interface SocialAidRecipient {
   status: 'Menunggu' | 'Diterima';
   receivedAt?: string; // ISO timestamp
   receivedBy?: string; // Nama pengambil
+  // Program Sembako Murah / Tebus Murah Berbayar
+  paymentStatus?: 'Lunas' | 'Belum Bayar' | 'Gratis';
+  paidAmount?: number;
+  paymentMethod?: 'Tunai' | 'QRIS' | 'Kas RT';
+  paidAt?: string;
   notes?: string;
 }
 
@@ -1703,6 +1708,10 @@ export interface SocialAidItem {
   title: string; // e.g. "Beras CPP Cadangan Pangan Pemerintah Tahap II"
   category: 'Beras' | 'Sembako' | 'BLT / Uang Tunai' | 'Nutrisi Balita & Lansia' | 'Kesehatan & Sanitasi' | 'Lainnya';
   source: string; // e.g. "Kelurahan Tondo / Bapanas", "Kemensos RI", "Baznas Kota Palu"
+  // Jenis Program: Gratis (Bansos Murni) atau Tebus Murah (Sembako Subsidi Berbayar)
+  programType?: 'gratis' | 'tebus_murah';
+  packagePrice?: number; // Biaya tebus per paket bagi warga (misal Rp 25.000 / Rp 50.000)
+  marketPrice?: number; // Estimasi nilai paket di pasaran (misal Rp 120.000)
   totalQuota: number;
   unit: string; // e.g. "Karung 10kg", "Paket Dus", "Amplop / KK"
   distributionDate: string; // YYYY-MM-DD
