@@ -370,7 +370,9 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                     >
                       {group.items.map(item => {
                         const isMainDashboard = item.id === 'overview';
-                        const isActive = isMainDashboard ? activeTab === 'overview' : activeTab === item.id;
+                        const isActive = isMainDashboard
+                          ? activeTab === 'overview'
+                          : activeTab === item.id || (item.id === 'residents' && activeTab === 'guests');
                         const pendingCount = getItemPendingCount(item.id);
                         
                         return (

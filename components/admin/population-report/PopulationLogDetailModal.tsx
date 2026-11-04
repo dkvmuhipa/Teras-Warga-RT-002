@@ -40,7 +40,7 @@ export const PopulationLogDetailModal: React.FC<PopulationLogDetailModalProps> =
             initial={{ opacity: 0, scale: 0.95, y: 10 }} 
             animate={{ opacity: 1, scale: 1, y: 0 }} 
             exit={{ opacity: 0, scale: 0.95, y: 10 }} 
-            className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 sm:p-8 z-10 space-y-6 max-h-[90vh] overflow-y-auto"
+            className="relative bg-white w-full max-w-5xl mx-auto rounded-3xl shadow-xs border border-slate-200/80 p-6 sm:p-8 z-10 space-y-6 min-h-[85vh] overflow-y-auto"
           >
             <div className="flex justify-between items-start border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">

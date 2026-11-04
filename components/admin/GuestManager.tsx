@@ -330,8 +330,8 @@ export const GuestManager: React.FC<GuestManagerProps> = ({ guestReports, pdfCon
 
       {/* Detail Modal */}
       {selectedGuest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 z-[150] bg-[#F8FAFC] overflow-y-auto p-4 sm:p-8 animate-fade-in">
+          <div className="bg-white w-full max-w-5xl mx-auto rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col">
             <div className="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">

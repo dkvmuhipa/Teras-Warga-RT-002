@@ -146,6 +146,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   }, [navigate]);
   const [contentSubTab, setContentSubTab] = useState<'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>('announcements');
+  const [financeSubTab, setFinanceSubTab] = useState<'cashflow' | 'wastebank' | 'iuran'>('cashflow');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
@@ -287,7 +288,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             updateRequests={updateRequests}
             onTabChange={(tab, subTab) => {
               setActiveTab(tab);
-              if (subTab) {
+              if (tab === 'finance') {
+                setFinanceSubTab((subTab as any) || 'cashflow');
+              } else if (subTab) {
                 setContentSubTab(subTab as any);
               }
             }} 
@@ -347,7 +350,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             pdfConfig={pdfConfig} 
             houses={houses} 
             iuranPayments={iuranPayments} 
-            initialSubTab={activeTab === 'waste-bank' ? 'wastebank' : 'cashflow'}
+            initialSubTab={activeTab === 'waste-bank' ? 'wastebank' : financeSubTab}
           />
         );
       case 'water-meter':
@@ -392,6 +395,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             houses={houses}
             pdfConfig={pdfConfig} 
             setPdfConfig={setPdfConfig} 
+            incomingMails={incomingMails}
             initialTab="reports"
             onDeleteReport={async (id) => {
               const isConfirmed = await confirm({
@@ -534,7 +538,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             updateRequests={updateRequests}
             onTabChange={(tab, subTab) => {
               setActiveTab(tab);
-              if (subTab) {
+              if (tab === 'finance') {
+                setFinanceSubTab((subTab as any) || 'cashflow');
+              } else if (subTab) {
                 setContentSubTab(subTab as any);
               }
             }} 

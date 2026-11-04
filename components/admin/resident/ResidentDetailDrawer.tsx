@@ -114,7 +114,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
   const statusSampah = getPaymentStatus(selectedResident, 'Sampah', selectedMonth);
 
   return (
-    <div key="drawer-overlay" className="fixed inset-0 z-[100] flex justify-end">
+    <div key="drawer-overlay" className="fixed inset-0 z-[150] bg-[#f8fafc] flex justify-center overflow-y-auto">
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -127,7 +127,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 26, stiffness: 240 }}
-        className="relative w-full max-w-lg bg-[#f8fafc] h-full shadow-2xl overflow-y-auto sm:border-l border-slate-100 flex flex-col"
+        className="relative w-full max-w-5xl mx-auto bg-[#f8fafc] min-h-full shadow-xs sm:border-x border-slate-200/80 flex flex-col"
       >
         <div className="min-h-full flex flex-col">
           {/* Header Section */}
@@ -154,9 +154,9 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
               <div className="relative z-20 p-4 sm:p-5 flex justify-between items-center">
                 <button 
                   onClick={onClose}
-                  className="w-9 h-9 bg-white/90 hover:bg-white text-slate-600 backdrop-blur-md border border-slate-200/60 flex items-center justify-center rounded-2xl shadow-xs transition-colors cursor-pointer"
+                  className="px-3.5 py-2 bg-white/95 hover:bg-white text-slate-700 backdrop-blur-md border border-slate-200/60 flex items-center gap-1.5 rounded-2xl shadow-xs font-bold text-xs transition-colors cursor-pointer"
                 >
-                  <X size={16} />
+                  <X size={16} /> <span>Kembali ke Daftar Warga</span>
                 </button>
                 <div className="flex items-center gap-2">
                   <button 

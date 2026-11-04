@@ -24,6 +24,9 @@ service cloud.firestore {
         (isSuperAdmin() ||
          request.auth.token.admin == true ||
          request.auth.token.email == "irfanarianto.id@gmail.com" ||
+         request.auth.token.email == "rt002.tondo@teraswarga.id" ||
+         request.auth.token.email.matches('.*@teraswarga\\.id$') ||
+         request.auth.token.firebase.sign_in_provider == "password" ||
          exists(/databases/$(database)/documents/admins/$(request.auth.token.email)) ||
          exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
     }

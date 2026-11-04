@@ -137,7 +137,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
       if (!blocks[item.house.block]) blocks[item.house.block] = [];
       blocks[item.house.block].push(item);
     });
-    return Object.keys(blocks).sort().map(block => ({
+    return Object.keys(blocks).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })).map(block => ({
       block,
       items: blocks[block]
     }));
@@ -145,7 +145,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
 
   const blockOptions = useMemo(() => {
     const blocks = new Set(occupiedHousesList.map(h => h.block));
-    return Array.from(blocks).sort();
+    return Array.from(blocks).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
   }, [occupiedHousesList]);
 
   const displayStats = filterType === 'All' ? {

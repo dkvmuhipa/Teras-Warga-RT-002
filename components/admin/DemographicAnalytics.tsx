@@ -660,7 +660,7 @@ Catatan: Data sinkron otomatis dari Aplikasi Portal Teras Warga RT 002.`;
                 className="bg-transparent text-xs font-semibold text-slate-700 outline-none pr-2 cursor-pointer"
               >
                 <option value="ALL">Semua Blok</option>
-                {Array.from(new Set(houses.map(h => h.block || h.number?.charAt(0)).filter(Boolean))).sort().map(b => (
+                {Array.from(new Set(houses.map(h => h.block || h.number?.charAt(0)).filter(Boolean))).sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })).map(b => (
                   <option key={b} value={b}>Blok {b}</option>
                 ))}
               </select>

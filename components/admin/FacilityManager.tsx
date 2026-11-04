@@ -61,7 +61,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const [presentMembers, setPresentMembers] = useState<string[]>([]);
   const [attendanceNotes, setAttendanceNotes] = useState('');
   const [isQRModalOpen, setIsQRModalOpen] = useState(false);
-  const availableBlocks = Array.from(new Set(houses.map(h => h.block))).sort();
+  const availableBlocks = Array.from(new Set(houses.map(h => h.block).filter(Boolean))).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
   const [editingRonda, setEditingRonda] = useState<RondaSchedule | null>(null);
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');

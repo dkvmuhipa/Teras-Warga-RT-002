@@ -51,7 +51,7 @@ export const BillDetailModal: React.FC<BillDetailModalProps> = ({ house, bills, 
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-        className="bg-white rounded-[2.5rem] w-full max-w-2xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col border border-white/20"
+        className="bg-white rounded-3xl w-full max-w-5xl mx-auto min-h-[85vh] max-h-[92vh] overflow-hidden shadow-xs flex flex-col border border-slate-200/80"
       >
         <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white">
           <div>
