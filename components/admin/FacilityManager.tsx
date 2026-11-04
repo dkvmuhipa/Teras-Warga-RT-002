@@ -25,7 +25,7 @@ import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
 import { MapPointManager } from './MapPointManager';
 import { QrCode, Info, Share2, Printer, Wand2, ChevronDown } from 'lucide-react';
-import { sendWhatsAppMessage, formatRondaScheduleForWhatsApp } from '../../services/whatsappService';
+import { sendWhatsAppMessage, formatRondaScheduleForWhatsApp, openWhatsAppShare } from '../../services/whatsappService';
 import { generateRondaSchedulePDF } from '../../services/pdfService';
 import { toast } from 'sonner';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -285,8 +285,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const handleShareToWhatsApp = () => {
     const message = formatRondaScheduleForWhatsApp(ronda);
     // Open WhatsApp with the message
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+    openWhatsAppShare(message);
   };
 
   const handleDownloadCSV = () => {
@@ -2035,7 +2034,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
                       const absent = (schedule?.members || []).filter(m => !presentMembers.includes(m));
                       
                       const text = `*REKAPITULASI PRESENSI SISKAMLING RT 02*\n\nHari/Tgl: ${day}, ${attendanceDate}\n\n✅ *Petugas Hadir (${presentMembers.length}):*\n${presentMembers.map((m, i) => `${i+1}. ${m}`).join('\n') || '- Tidak Ada -'}\n\n❌ *Tidak Hadir / Izin (${absent.length}):*\n${absent.map((m, i) => `${i+1}. ${m}`).join('\n') || '- Tidak Ada -'}\n\n📝 *Catatan:* ${attendanceNotes || '-'}\n\n_Sistem Komando Siskamling Teras RT 02_`;
-                      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                      openWhatsAppShare(text);
                     }}
                     className="mt-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5"
                   >

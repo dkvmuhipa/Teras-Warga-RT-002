@@ -3,6 +3,7 @@ import { FAQItem } from '../../types';
 import { Plus, Edit2, Trash2, HelpCircle, Save, X, Download, Search, Sparkles, CheckCircle2, ChevronDown, ChevronUp, Share2, MessageCircle, BookOpen, Tag } from 'lucide-react';
 import { addFAQToDb, updateFAQInDb, deleteFAQFromDb, handleFirestoreError, OperationType } from '../../services/databaseService';
 import { generateAnnouncementDraft } from '../../services/geminiService';
+import { openWhatsAppShare } from '../../services/whatsappService';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
@@ -166,7 +167,7 @@ export const FAQManagement: React.FC<FAQManagementProps> = ({ faqItems }) => {
 
   const handleShareWa = (item: FAQItem) => {
     const text = `*PANDUAN INFORMASI RT 02 PALU*\n\n❓ *Q:* ${item.question}\n\n💡 *A:* ${item.answer}\n\n_Pusat Layanan Warga Teras RT 02_`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    openWhatsAppShare(text);
   };
 
   const getCategoryBadge = (cat?: string) => {

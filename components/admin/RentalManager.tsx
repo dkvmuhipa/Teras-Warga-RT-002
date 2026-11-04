@@ -18,6 +18,7 @@ import {
 import { generateHouses, RT_NAME } from '../../constants';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
+import { openWhatsApp } from '../../services/whatsappService';
 
 export const getNormalizedHouseId = (h: Partial<House>): string => {
   if (h.block && h.number) {
@@ -668,10 +669,7 @@ export const RentalManager: React.FC<RentalManagerProps> = ({ houses = [] }) => 
       return;
     }
 
-    let targetPhone = phone.replace(/[^0-9]/g, '');
-    if (targetPhone.startsWith('0')) {
-      targetPhone = '62' + targetPhone.substring(1);
-    }
+
 
     let message = '';
     const formattedEnd = (r.endDate && r.endDate !== '-' && r.endDate !== '2099-12-31' && !isNaN(new Date(r.endDate).getTime()))
@@ -718,8 +716,11 @@ _Pengurus RT 002 Huntap Tondo 2_`;
       }
     }
 
-    const encoded = encodeURIComponent(message);
-    window.open(`https://api.whatsapp.com/send?phone=${targetPhone}&text=${encoded}`, '_blank');
+    const success = openWhatsApp(phone, message);
+    if (!success) {
+      toast.error(`Nomor WhatsApp ${waRecipientType === 'owner' ? 'Pemilik' : 'Penyewa'} tidak valid.`);
+      return;
+    }
     setIsWaModalOpen(false);
   };
 

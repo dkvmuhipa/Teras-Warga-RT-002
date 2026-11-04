@@ -42,6 +42,25 @@ export const getWhatsAppLink = (phone?: string | null, message?: string): string
 };
 
 /**
+ * Generates an official WhatsApp share intent URL (https://wa.me/?text=...).
+ * Works universally across web and mobile WhatsApp clients for broadcasting to contacts or groups.
+ */
+export const getWhatsAppShareLink = (message: string): string => {
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+};
+
+/**
+ * Opens a WhatsApp broadcast/share dialog to any contact/group chosen by the user.
+ */
+export const openWhatsAppShare = (message: string): boolean => {
+  if (typeof window !== 'undefined') {
+    window.open(getWhatsAppShareLink(message), '_blank', 'noopener,noreferrer');
+    return true;
+  }
+  return false;
+};
+
+/**
  * Opens a WhatsApp click-to-chat window in a new tab if valid.
  * Returns true if successful, false if phone number is invalid.
  */

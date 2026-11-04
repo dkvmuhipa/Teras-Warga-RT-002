@@ -10,6 +10,7 @@ import { Document } from '../../types';
 import { addDocumentToDb, deleteDocumentFromDb, uploadImageToStorage, compressFileIfPossible, handleFirestoreError, OperationType, getDocumentPreviewUrl } from '../../services/databaseService';
 import { toast } from 'sonner';
 import { useConfirm } from '../../context/ConfirmContext';
+import { openWhatsAppShare } from '../../services/whatsappService';
 
 interface DocumentManagerProps {
   documents: Document[];
@@ -462,8 +463,7 @@ export const DocumentManager: React.FC<DocumentManagerProps> = ({ documents }) =
                       const numberText = doc.documentNumber ? `\n*No. Berkas:* ${doc.documentNumber}` : '';
                       const descText = doc.description ? `\n*Keterangan:* ${doc.description}` : '';
                       const shareText = `*ARSIP DOKUMEN RESMI RT 02* 📑\n\n*Judul:* ${doc.title}${numberText}\n*Kategori:* ${doc.category}\n*Tanggal Terbit:* ${new Date(doc.uploadDate).toLocaleDateString('id-ID')}${descText}\n\nSilakan unduh atau telaah dokumen resmi melalui tautan berkas:\n${doc.url}\n\n_Hormat kami,\nPengurus RT 02 Palu_`;
-                      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-                      window.open(waUrl, '_blank');
+                      openWhatsAppShare(shareText);
                     }}
                     className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200/60 rounded-xl transition-colors"
                     title="Bagikan ke WhatsApp Warga"

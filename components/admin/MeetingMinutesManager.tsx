@@ -13,6 +13,7 @@ import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { toast } from 'sonner';
 import { useConfirm } from '../../context/ConfirmContext';
+import { openWhatsAppShare } from '../../services/whatsappService';
 import { 
   subscribeToCollection, 
   addToCollection, 
@@ -233,8 +234,7 @@ ${m.summary}
 _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020 Huntap Tondo 2._
 📲 Cek arsip lengkap di portal: https://teraswarga02.web.app/rules?tab=minutes`;
 
-    const encoded = encodeURIComponent(message);
-    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+    openWhatsAppShare(message);
   };
 
   const handlePrintA4 = (m: MeetingMinute) => {

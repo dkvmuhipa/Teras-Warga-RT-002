@@ -17,6 +17,7 @@ import {
 } from '../../services/databaseService';
 import { motion, AnimatePresence } from 'motion/react';
 import { useConfirm } from '../../context/ConfirmContext';
+import { openWhatsAppShare } from '../../services/whatsappService';
 
 interface CommunityWorkManagerProps {
   houses: House[];
@@ -193,7 +194,7 @@ export const CommunityWorkManager: React.FC<CommunityWorkManagerProps> = ({ hous
     if (!activeWork) return;
     const formattedDate = new Date(activeWork.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const text = `📢 *UNDANGAN GOTONG ROYONG / KERJA BAKTI RT 002*\n\nKepada Yth. Seluruh Warga RT 002\n\n📌 *Agenda:* ${activeWork.title}\n📅 *Tanggal:* ${formattedDate}\n⏰ *Waktu:* Pkl ${activeWork.startTime} - ${activeWork.endTime} WITA\n📍 *Titik Kumpul:* ${activeWork.assemblyPoint}\n🛠️ *Peralatan:* ${activeWork.toolsNeeded?.join(', ') || 'Cangkul, Sapu, Sabit'}\n\nMohon kehadiran dan partisipasi aktif seluruh warga. Terima kasih! 🙏`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    openWhatsAppShare(text);
   };
 
   const copyAttendanceRecap = () => {

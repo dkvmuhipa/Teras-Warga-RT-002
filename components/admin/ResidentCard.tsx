@@ -9,6 +9,7 @@ import {
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTenant } from '../../context/TenantContext';
+import { openWhatsApp } from '../../services/whatsappService';
 
 interface ResidentCardProps {
   house: House;
@@ -65,12 +66,11 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
     if (onSendWhatsApp) {
       onSendWhatsApp(house);
     } else {
-      let cleaned = digits;
-      if (cleaned.startsWith('0')) {
-        cleaned = '62' + cleaned.slice(1);
+      const message = `Halo Bapak/Ibu ${house.headOfFamily || 'Warga'}, kami dari ${rtDisplayName} ingin berkoordinasi mengenai administrasi warga.`;
+      const success = openWhatsApp(house.phone, message);
+      if (!success) {
+        toast.error('Nomor WhatsApp warga tidak valid atau belum terdaftar.');
       }
-      const text = encodeURIComponent(`Halo Bapak/Ibu ${house.headOfFamily || 'Warga'}, kami dari ${rtDisplayName} ingin berkoordinasi mengenai administrasi warga.`);
-      window.open(`https://wa.me/${cleaned}?text=${text}`, '_blank');
     }
   };
 

@@ -15,7 +15,7 @@ import {
   updateDocumentInCollection, 
   deleteDocumentFromCollection 
 } from '../../services/databaseService';
-import { formatUtilityOutageForWhatsApp } from '../../services/whatsappService';
+import { formatUtilityOutageForWhatsApp, openWhatsAppShare } from '../../services/whatsappService';
 import { useConfirm } from '../../context/ConfirmContext';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -293,7 +293,7 @@ export const UtilityOutageManager: React.FC<UtilityOutageManagerProps> = ({ hous
       outage.contactCenter,
       outage.date
     );
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(waText)}`, '_blank');
+    openWhatsAppShare(waText);
   };
 
   return (

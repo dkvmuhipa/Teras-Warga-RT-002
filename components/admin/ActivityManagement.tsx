@@ -16,6 +16,7 @@ import {
   OperationType
 } from '../../services/databaseService';
 import { generateEventAttendanceReportPDF } from '../../services/pdfService';
+import { openWhatsAppShare } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
@@ -364,7 +365,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                 <button 
                   onClick={() => {
                     const text = `*UNDANGAN KEGIATAN TERAS RT 02*\n\n📌 *Agenda:* ${activity.title}\n📅 *Waktu:* ${new Date(activity.date).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}\n📍 *Lokasi:* ${activity.location}\n📂 *Jenis:* ${activity.type}${activity.isMandatory ? ' *(WAJIB HADIR)*' : ''}\n\n📝 *Deskripsi:*\n${activity.description}\n\n_Mohon kehadiran seluruh bapak/ibu warga RT 02 tepat waktu. Terima kasih!_`;
-                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                    openWhatsAppShare(text);
                   }}
                   className="px-3 py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl font-bold transition-colors flex items-center justify-center"
                   title="Sebar Undangan via WhatsApp"
@@ -632,7 +633,7 @@ export const ActivityManagement: React.FC<ActivityManagementProps> = ({ houses }
                 onClick={() => {
                   if (!selectedActivity) return;
                   const text = `*REKAPITULASI PRESENSI KEGIATAN RT 02*\n\n📌 *Agenda:* ${selectedActivity.title}\n📅 *Waktu:* ${new Date(selectedActivity.date).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}\n📍 *Lokasi:* ${selectedActivity.location}\n👥 *Total Hadir:* ${attendance.length} Warga\n\n✅ *Daftar Hadir:*\n${attendance.map((a, i) => `${i+1}. ${a.residentName} (Blok ${a.houseId})`).join('\n') || '- Belum Ada -'}\n\n_Pusat Data Presensi Teras RT 02_`;
-                  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                  openWhatsAppShare(text);
                 }}
                 size="sm"
                 className="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-semibold uppercase tracking-wider py-2"

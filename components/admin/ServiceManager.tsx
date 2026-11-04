@@ -3,7 +3,7 @@ import { FileText, AlertTriangle, CheckCircle2, XCircle, Clock, Search, Filter, 
 import { LetterRequest, Report, PdfConfig, OfficialLetter, House } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { updateLetterStatus, updateReportStatus, deleteLetterFromDb, updateLetterInDb, deepSanitize, safeJsonStringify, archiveOldLetters, archiveOldReports, logAction, updatePdfConfig, handleFirestoreError, OperationType, addReportToDb, subscribeToOfficialLetters, saveSTBMRecord } from '../../services/databaseService';
-import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups } from '../../services/whatsappService';
+import { sendWhatsAppMessage, formatLetterStatusForWhatsApp, getWhatsAppGroups, openWhatsApp } from '../../services/whatsappService';
 import { analyzeReports } from '../../services/geminiService';
 import { generateSuratPengantar, generateIncidentReportPDF } from '../../services/pdfService';
 import { Modal } from '../ui/Modal';
@@ -3542,9 +3542,11 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      const cleaned = reporterPhone.replace(/\D/g, '').replace(/^0/, '62');
                       const text = `Halo Bapak/Ibu ${selectedReport.reporterName},\n\nLaporan aspirasi/pengaduan Anda mengenai "${selectedReport.description.slice(0, 50)}..." telah ditindaklanjuti oleh Pengurus RT 002 / RW 020 Kelurahan Tondo dengan status terkini: *${selectedReport.status}*.\n\nTerima kasih atas kepedulian Anda menjaga lingkungan kita bersama.`;
-                      window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(text)}`, '_blank');
+                      const success = openWhatsApp(reporterPhone, text);
+                      if (!success) {
+                        toast.error('Nomor WhatsApp pelapor tidak valid atau belum terdaftar.');
+                      }
                     }}
                     className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold transition-colors"
                   >

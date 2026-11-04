@@ -1314,6 +1314,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                     <tbody className="divide-y divide-slate-100 font-medium">
                       {filteredTenants.map((t) => {
                         const isMain = t.id === 'tondo-rw20-rt02';
+                        const displayName = t.name || (isMain ? 'RT 002 / RW 020 Huntap Tondo 2' : t.id);
+                        const displayRt = t.rt || (isMain ? '02' : 'RT');
+                        const displayRw = t.rw || (isMain ? '020' : '-');
+                        const displayKel = t.kelurahan || (isMain ? 'Tondo' : '-');
+                        const displayChairman = t.chairmanName || (isMain ? 'Irfan Arianto' : 'Belum ditunjuk');
+                        const displayPhone = t.chairmanPhone || (isMain ? '085961194621' : null);
                         const activeModules = getActiveModulesList(t);
                         const status = t.status || 'active';
 
@@ -1325,30 +1331,30 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                                   className="w-8 h-8 rounded-xl flex items-center justify-center font-semibold text-xs text-white shrink-0 shadow-xs"
                                   style={{ backgroundColor: t.themeColor || '#4f46e5' }}
                                 >
-                                  {t.rt}
+                                  {displayRt}
                                 </div>
                                 <div>
-                                  <p className="text-slate-900 font-bold leading-tight">{t.name}</p>
+                                  <p className="text-slate-900 font-bold leading-tight">{displayName}</p>
                                   <p className="text-[10px] text-slate-400 font-mono mt-0.5">{t.id}</p>
                                 </div>
                               </div>
                             </td>
 
                             <td className="py-3.5 px-4 text-slate-600">
-                              RW {t.rw} • Kel. {t.kelurahan}
+                              RW {displayRw} • Kel. {displayKel}
                             </td>
 
                             <td className="py-3.5 px-4">
-                              <p className="text-slate-800 font-bold leading-tight">{t.chairmanName || 'Belum ditunjuk'}</p>
-                              {t.chairmanPhone ? (
+                              <p className="text-slate-800 font-bold leading-tight">{displayChairman}</p>
+                              {displayPhone && getWhatsAppLink(displayPhone) ? (
                                 <a 
-                                  href={`https://wa.me/${t.chairmanPhone.replace(/\D/g, '')}`} 
+                                  href={getWhatsAppLink(displayPhone)!} 
                                   target="_blank" 
                                   rel="noreferrer" 
                                   className="inline-flex items-center gap-1 text-[11px] text-emerald-600 hover:text-emerald-700 font-mono mt-0.5 font-bold"
                                 >
                                   <Phone size={10} />
-                                  <span>{t.chairmanPhone}</span>
+                                  <span>{displayPhone}</span>
                                 </a>
                               ) : (
                                 <span className="text-[11px] text-slate-400 font-mono">-</span>
@@ -1451,6 +1457,12 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredTenants.map((t) => {
                   const isMain = t.id === 'tondo-rw20-rt02';
+                  const displayName = t.name || (isMain ? 'RT 002 / RW 020 Huntap Tondo 2' : t.id);
+                  const displayRt = t.rt || (isMain ? '02' : 'RT');
+                  const displayRw = t.rw || (isMain ? '020' : '-');
+                  const displayKel = t.kelurahan || (isMain ? 'Tondo' : '-');
+                  const displayChairman = t.chairmanName || (isMain ? 'Irfan Arianto' : 'Belum ditunjuk');
+                  const displayPhone = t.chairmanPhone || (isMain ? '085961194621' : null);
                   const activeModules = getActiveModulesList(t);
                   const status = t.status || 'active';
 
@@ -1467,11 +1479,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                               className="w-10 h-10 rounded-2xl flex items-center justify-center font-semibold text-sm text-white shrink-0 shadow-xs"
                               style={{ backgroundColor: t.themeColor || '#4f46e5' }}
                             >
-                              {t.rt}
+                              {displayRt}
                             </div>
                             <div>
-                              <h3 className="text-sm font-semibold text-slate-900 leading-tight">{t.name}</h3>
-                              <p className="text-[10px] text-slate-500 font-mono mt-0.5">RW {t.rw} • Kel. {t.kelurahan}</p>
+                              <h3 className="text-sm font-semibold text-slate-900 leading-tight">{displayName}</h3>
+                              <p className="text-[10px] text-slate-500 font-mono mt-0.5">RW {displayRw} • Kel. {displayKel}</p>
                             </div>
                           </div>
                           

@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { ResidentRegistration, PaymentStatus, House, OccupantHistoryItem } from '../../../types';
 import { toast } from 'sonner';
-import { getWhatsAppLink, isValidWhatsAppNumber } from '../../../services/whatsappService';
+import { getWhatsAppLink, isValidWhatsAppNumber, openWhatsApp } from '../../../services/whatsappService';
 import { useConfirm } from '../../../context/ConfirmContext';
 import { formatHouseId, handleFirestoreError, OperationType, logAction, setDocumentInCollection } from '../../../services/databaseService';
 import { sendWhatsAppViaGateway } from '../../../services/whatsappService';
@@ -423,9 +423,10 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                     onClick={(e) => {
                       e.stopPropagation();
                       const cleanApplicant = (lightboxImage.applicantName || '').trim();
-                      const cleanPhone = (lightboxImage.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
-                      const text = encodeURIComponent(`Halo Bapak/Ibu *${cleanApplicant}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nTerkait pendaftaran warga baru Anda di sistem Teras Warga RT 002, foto berkas identitas (KTP/KK) Anda belum terunggah dengan jelas di sistem.\n\nMohon bantuannya untuk mengirimkan foto asli fisik KTP & KK via chat WhatsApp ini untuk keperluan validasi kependudukan. Terima kasih atas kerja samanya! 🙏`);
-                      window.open(`https://wa.me/${cleanPhone}?text=${text}`, '_blank');
+                      const text = `Halo Bapak/Ibu *${cleanApplicant}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nTerkait pendaftaran warga baru Anda di sistem Teras Warga RT 002, foto berkas identitas (KTP/KK) Anda belum terunggah dengan jelas di sistem.\n\nMohon bantuannya untuk mengirimkan foto asli fisik KTP & KK via chat WhatsApp ini untuk keperluan validasi kependudukan. Terima kasih atas kerja samanya! 🙏`;
+                      if (!openWhatsApp(lightboxImage.phone, text)) {
+                        toast.error('Nomor WhatsApp pemohon tidak valid.');
+                      }
                     }}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow transition-colors active:scale-95"
                   >
@@ -747,14 +748,15 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                         onClick={(e) => {
                           e.stopPropagation();
                           const cleanName = (reg.headOfFamily || '').trim();
-                          const cleanPhone = (reg.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
-                          const greeting = encodeURIComponent(
+                          const greeting = (
                             `Halo Bapak/Ibu *${cleanName}*,\n\n` +
                             `Salam hormat dari Pengurus RT 002 Huntap Tondo 2.\n` +
                             `Terkait permohonan pendaftaran warga baru Anda di Kavling *Blok ${reg.block}-${reg.number}*, kami dari pengurus RT ingin mengonfirmasi dan memverifikasi kelengkapan berkas pendaftaran Anda.\n\n` +
                             `Apakah ada waktu untuk kami konfirmasi singkat? Terima kasih atas kerja samanya. 🙏`
                           );
-                          window.open(`https://wa.me/${cleanPhone}?text=${greeting}`, '_blank');
+                          if (!openWhatsApp(reg.phone, greeting)) {
+                            toast.error('Nomor WhatsApp pemohon tidak valid.');
+                          }
                         }}
                         className="p-2 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-emerald-600 rounded-xl transition-colors active:scale-95 shadow-2xs"
                         title="Hubungi via WhatsApp"
@@ -1259,9 +1261,10 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                       <button
                                         onClick={() => {
                                           const cleanName = (reg.headOfFamily || '').trim();
-                                          const cleanPhone = (reg.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
-                                          const msg = encodeURIComponent(`Halo Bapak/Ibu *${cleanName}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nMohon kirimkan foto asli fisik KTP Anda melalui chat WhatsApp ini untuk keperluan verifikasi pendaftaran warga di Blok *${reg.block}-${reg.number}*.\n\nTerima kasih atas kerja samanya! 🙏`);
-                                          window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+                                          const msg = `Halo Bapak/Ibu *${cleanName}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nMohon kirimkan foto asli fisik KTP Anda melalui chat WhatsApp ini untuk keperluan verifikasi pendaftaran warga di Blok *${reg.block}-${reg.number}*.\n\nTerima kasih atas kerja samanya! 🙏`;
+                                          if (!openWhatsApp(reg.phone, msg)) {
+                                            toast.error('Nomor WhatsApp pemohon tidak valid.');
+                                          }
                                         }}
                                         className="text-[10px] font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 transition-colors flex items-center gap-1"
                                       >
@@ -1350,9 +1353,10 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                       <button
                                         onClick={() => {
                                           const cleanName = (reg.headOfFamily || '').trim();
-                                          const cleanPhone = (reg.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
-                                          const msg = encodeURIComponent(`Halo Bapak/Ibu *${cleanName}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nMohon kirimkan foto asli fisik Kartu Keluarga (KK) Anda melalui chat WhatsApp ini untuk keperluan verifikasi pendaftaran warga di Blok *${reg.block}-${reg.number}*.\n\nTerima kasih atas kerja samanya! 🙏`);
-                                          window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank');
+                                          const msg = `Halo Bapak/Ibu *${cleanName}*,\n\nSalam hormat dari Pengurus RT 002 Huntap Tondo 2.\nMohon kirimkan foto asli fisik Kartu Keluarga (KK) Anda melalui chat WhatsApp ini untuk keperluan verifikasi pendaftaran warga di Blok *${reg.block}-${reg.number}*.\n\nTerima kasih atas kerja samanya! 🙏`;
+                                          if (!openWhatsApp(reg.phone, msg)) {
+                                            toast.error('Nomor WhatsApp pemohon tidak valid.');
+                                          }
                                         }}
                                         className="text-[10px] font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-lg border border-emerald-300 transition-colors flex items-center gap-1"
                                       >
@@ -1384,14 +1388,15 @@ export const ResidentRegistrationList: React.FC<ResidentRegistrationListProps> =
                                 type="button"
                                 onClick={() => {
                                   const cleanName = (reg.headOfFamily || '').trim();
-                                  const cleanPhone = (reg.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '62');
-                                  const greeting = encodeURIComponent(
+                                  const greeting = (
                                     `Halo Bapak/Ibu *${cleanName}*,\n\n` +
                                     `Salam hormat dari Pengurus RT 002 Huntap Tondo 2.\n` +
                                     `Sehubungan dengan permohonan pendaftaran warga baru Anda di Kavling *Blok ${reg.block}-${reg.number}*, kami ingin mengonfirmasi kelengkapan data kependudukan sebelum berkas disetujui dan diterbitkan secara resmi ke database RT.\n\n` +
                                     `Mohon konfirmasinya ya Bapak/Ibu. Terima kasih atas kerja samanya! 🙏`
                                   );
-                                  window.open(`https://wa.me/${cleanPhone}?text=${greeting}`, '_blank');
+                                  if (!openWhatsApp(reg.phone, greeting)) {
+                                    toast.error('Nomor WhatsApp pemohon tidak valid.');
+                                  }
                                 }}
                                 className="px-4 py-2.5 border border-emerald-300 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                               >

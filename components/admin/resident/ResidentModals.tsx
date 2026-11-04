@@ -26,7 +26,7 @@ import {
 } from '../../../constants';
 
 import { toast } from 'sonner';
-import { getWhatsAppLink, isValidWhatsAppNumber } from '../../../services/whatsappService';
+import { getWhatsAppLink, isValidWhatsAppNumber, openWhatsApp } from '../../../services/whatsappService';
 
 interface AddEditResidentModalProps {
   role: Role;
@@ -2350,7 +2350,7 @@ _Tarif retribusi sampah TPS3R mengacu pada aturan resmi Kota Palu untuk unit pen
 _Salam Hormat,_
 *Pengurus RT 002 / RW 020 Huntap Tondo 2*`;
 
-    window.open(`https://api.whatsapp.com/send?phone=${targetPhone}&text=${encodeURIComponent(message)}`, '_blank');
+    openWhatsApp(targetPhone, message);
   };
 
   const onFormSubmit = (e: React.FormEvent) => {
@@ -2437,9 +2437,9 @@ _Salam Hormat,_
                       <button
                         type="button"
                         onClick={() => {
-                          let p = (payHouse.phone || '').replace(/[^0-9]/g, '');
-                          if (p.startsWith('0')) p = '62' + p.substring(1);
-                          window.open(`https://api.whatsapp.com/send?phone=${p}`, '_blank');
+                          if (!openWhatsApp(payHouse.phone)) {
+                            toast.error('Nomor WhatsApp warga tidak valid');
+                          }
                         }}
                         className="text-[10px] text-emerald-600 hover:text-emerald-700 font-bold ml-1 inline-flex items-center gap-0.5 underline cursor-pointer"
                       >

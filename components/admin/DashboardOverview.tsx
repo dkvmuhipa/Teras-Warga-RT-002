@@ -197,8 +197,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   ].sort((a, b) => b.time.getTime() - a.time.getTime()).slice(0, 4);
 
   const formatTimeAgo = (date: Date) => {
+    if (!date || isNaN(date.getTime())) return '-';
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const diffInSeconds = Math.max(0, Math.floor((now.getTime() - date.getTime()) / 1000));
     
     if (diffInSeconds < 60) return 'Baru saja';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} menit lalu`;
@@ -334,7 +335,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Baru
                 </span>
               </div>
-              <div className="text-xl font-extrabold font-mono text-slate-900">
+              <div className="text-xl font-extrabold font-mono tabular-nums text-slate-900">
                 {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Pengantar
               </div>
               <p className="text-xs text-slate-600">
@@ -358,7 +359,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length} Calon
                 </span>
               </div>
-              <div className="text-xl font-extrabold font-mono text-slate-900">
+              <div className="text-xl font-extrabold font-mono tabular-nums text-slate-900">
                 {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length} Keluarga
               </div>
               <p className="text-xs text-slate-600">
@@ -382,7 +383,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   {newReports} Aduan · {activeGuests} Tamu
                 </span>
               </div>
-              <div className="text-xl font-extrabold font-mono text-slate-900">
+              <div className="text-xl font-extrabold font-mono tabular-nums text-slate-900">
                 {newReports + activeGuests} Laporan
               </div>
               <p className="text-xs text-slate-600">
@@ -742,11 +743,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </div>
             <div className="space-y-1">
               <div className="flex items-baseline gap-1 md:gap-2">
-                <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{totalResidents}</h3>
+                <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">{totalResidents}</h3>
                 <span className="text-xs md:text-xs font-extrabold text-slate-400 uppercase">Jiwa</span>
               </div>
               <div className="flex items-baseline gap-1 md:gap-2">
-                <h3 className="text-sm md:text-base font-extrabold text-[#4f46e5] font-mono">{occupiedHouses}</h3>
+                <h3 className="text-sm md:text-base font-extrabold text-[#4f46e5] font-mono tabular-nums">{occupiedHouses}</h3>
                 <span className="text-xs md:text-xs font-bold text-slate-400">KK Terdaftar</span>
               </div>
             </div>
@@ -767,7 +768,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <span className="hidden xs:block text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Saldo Kas</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">Rp{(balance / 1000000).toFixed(1)}jt</h3>
+              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">Rp{(balance / 1000000).toFixed(1)}jt</h3>
             </div>
             <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
               <span className="text-emerald-600 font-extrabold flex items-center gap-0.5"><TrendingUp size={12} /> +{(income / 1000000).toFixed(1)}jt</span>
@@ -786,7 +787,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <span className="hidden xs:block text-xs font-extrabold text-rose-700 bg-rose-50 border border-rose-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Aduan</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{newReports}</h3>
+              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">{newReports}</h3>
               <span className="text-xs md:text-xs font-extrabold text-rose-600 uppercase">Perlu Tindakan</span>
             </div>
             <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-500">
@@ -806,7 +807,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <span className="hidden xs:block text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Log Tamu</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{activeGuests}</h3>
+              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">{activeGuests}</h3>
               <span className="text-xs md:text-xs font-extrabold text-amber-600 uppercase">Tamu Aktif</span>
             </div>
             <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
@@ -826,7 +827,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <span className="hidden xs:block text-xs font-extrabold text-sky-700 bg-sky-50 border border-sky-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Retribusi</span>
             </div>
             <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono">{wastePaymentPercentage}%</h3>
+              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">{wastePaymentPercentage}%</h3>
               <span className="text-xs md:text-xs font-extrabold text-sky-600 uppercase">Tercapai</span>
             </div>
             {/* Visual Progress Bar */}
@@ -1093,7 +1094,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               {recentActivity.map((activity, i) => {
                 const IconComponent = activity.icon;
                 return (
-                  <div key={`${activity.type}-${activity.time.getTime()}-${i}`} className="flex items-center gap-3 p-3 bg-slate-50/70 hover:bg-slate-100/60 border border-slate-100 rounded-2xl transition-colors group cursor-pointer">
+                  <div 
+                    key={`${activity.type}-${activity.time.getTime()}-${i}`} 
+                    onClick={() => {
+                      if (activity.category === 'surat') onTabChange('services');
+                      else if (activity.category === 'keuangan') onTabChange('finance');
+                      else if (activity.category === 'aduan') onTabChange('reports-warga');
+                      else if (activity.category === 'warga') onTabChange('residents');
+                      else if (activity.category === 'tamu') onTabChange('reports-warga');
+                      else if (activity.category === 'info') onTabChange('content', 'announcements');
+                      else onTabChange('audit');
+                    }}
+                    className="flex items-center gap-3 p-3 bg-slate-50/70 hover:bg-slate-100/60 border border-slate-100 rounded-2xl transition-colors group cursor-pointer hover:border-indigo-200"
+                  >
                     <div className={`p-2.5 rounded-xl text-white shrink-0 shadow-2xs ${
                       activity.color === 'emerald' ? 'bg-emerald-500' :
                       activity.color === 'rose' ? 'bg-rose-500' :

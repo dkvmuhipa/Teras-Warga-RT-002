@@ -11,6 +11,7 @@ import { useConfirm } from '../../../context/ConfirmContext';
 import { handleFirestoreError, OperationType, addIuranPaymentToDb } from '../../../services/databaseService';
 import { generateIuranReportExcel, generateIuranBatchTemplateExcel, parseIuranBatchExcel } from '../../../services/excelService';
 import { getHouseWasteFee, getHouseWasteTier } from '../../../constants';
+import { openWhatsAppShare } from '../../../services/whatsappService';
 
 interface ResidentIuranManagerProps {
   houses: House[];
@@ -651,7 +652,7 @@ export const ResidentIuranManager: React.FC<ResidentIuranManagerProps> = ({
                   const footer = `\n\nTotal Piutang: Rp ${arrearsData.reduce((acc, curr) => acc + curr.totalAmount, 0).toLocaleString()}\n\nMohon kesediaannya untuk menyelesaikan iuran demi kelancaran operasional lingkungan kita bersama. Terima kasih. 🙏`;
                   const fullText = header + list + footer;
 
-                  window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+                  openWhatsAppShare(fullText);
                 }}
                 className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-colors shadow-lg shadow-2xs active:scale-95"
               >

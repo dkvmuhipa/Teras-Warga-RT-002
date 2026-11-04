@@ -17,7 +17,7 @@ import {
   deleteIuranPaymentFromDb, updateIuranPaymentInDb, addIuranPaymentToDb
 } from '../../services/databaseService';
 import { toast } from 'sonner';
-import { getWhatsAppLink } from '../../services/whatsappService';
+import { getWhatsAppLink, openWhatsApp } from '../../services/whatsappService';
 import { generateCashFlowReportPDF, generateIuranReceiptPDF } from '../../services/pdfService';
 import { generateCashFlowExcel } from '../../services/excelService';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -1126,12 +1126,9 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           setIsEditPaymentModalOpen={setIsEditPaymentModalOpen}
           openPayModal={handleOpenPayModal}
           onSendWhatsApp={(house, msg) => {
-            const phone = house.phone || '';
-            if (phone) {
-              const cleanedPhone = phone.replace(/\D/g, '').replace(/^0/, '62');
-              window.open(`https://wa.me/${cleanedPhone}?text=${encodeURIComponent(msg || '')}`, '_blank');
-            } else {
-              toast.error('Nomor WhatsApp tidak tersedia');
+            const success = openWhatsApp(house.phone, msg || '');
+            if (!success) {
+              toast.error('Nomor WhatsApp warga tidak valid atau belum terdaftar');
             }
           }}
         />
