@@ -4,7 +4,7 @@ import {
   Megaphone, ShoppingBag, Settings, LogOut, 
   Menu, X, Shield, Vote, Briefcase, Calendar, BarChart3, Box,
   ChevronLeft, ChevronRight, Search, Bell, MapPin as MapIcon, ShieldAlert, AlertTriangle,
-  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen, Building, CheckSquare, Building2, Landmark
+  PieChart, Activity, FileEdit, MessageSquare, FileClock, Inbox, Car, Award, Droplets, BookOpen, Building, CheckSquare, Building2, Landmark, Gift
 } from 'lucide-react';
 import { Logo } from '../../constants';
 import { Role } from '../../types';
@@ -53,14 +53,19 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { currentTenant } = useTenant();
 
-  // Persistent expanded groups state
+  // Persistent expanded groups state (Default all groups expanded)
+  const defaultExpandedGroups = ["Pusat Kendali", "Kependudukan", "Layanan & Pelaporan", "Operasional & Keuangan", "Sistem"];
   const [expandedGroups, setExpandedGroups] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('rt02_admin_expanded_groups');
-      return saved ? JSON.parse(saved) : ["Pusat kendali", "Kependudukan", "Layanan & keuangan", "Operasional & media", "Sistem"];
+      const saved = localStorage.getItem('rt02_admin_expanded_groups_v2');
+      if (saved) return JSON.parse(saved);
+      // Clean legacy key if present
+      localStorage.removeItem('rt02_admin_expanded_groups');
+      return defaultExpandedGroups;
     } catch {
-      return ["Pusat Kendali", "Kependudukan", "Layanan & Keuangan", "Operasional & Media", "Sistem"];
+      return defaultExpandedGroups;
     }
   });
 
@@ -69,7 +74,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     setExpandedGroups(prev => {
       const next = prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title];
       try {
-        localStorage.setItem('rt02_admin_expanded_groups', JSON.stringify(next));
+        localStorage.setItem('rt02_admin_expanded_groups_v2', JSON.stringify(next));
       } catch (e) {}
       return next;
     });
@@ -104,7 +109,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
 
   const navGroups = [
     { 
-      title: "Pusat kendali", 
+      title: "Pusat Kendali", 
       items: [
         { id: 'overview', icon: LayoutDashboard, label: 'Dashboard Utama' },
         { id: 'analytics', icon: BarChart3, label: 'Analitik & Demografi' },
@@ -117,6 +122,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
         { id: 'pbb', icon: Landmark, label: 'Pendataan SPPT PBB' },
         { id: 'mutations', icon: FileClock, label: 'Mutasi & Laporan Penduduk' },
         { id: 'rentals', icon: Building, label: 'Rumah Sewa & Kontrakan' },
+        { id: 'bansos', icon: Gift, label: 'Penyaluran Bantuan' },
         { id: 'health', icon: Activity, label: 'Posyandu Digital' },
         { id: 'stbm', icon: CheckSquare, label: '5 Pilar STBM' },
         { id: 'officials', icon: Briefcase, label: 'Pengurus RT' },
@@ -155,9 +161,18 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     }
   ];
 
-  // Filter navGroups based on role and search term
+  // Filter navGroups based on tenant modules, role, and search term
   const filteredNavGroups = navGroups.map(group => {
     const matchedItems = group.items.filter(item => {
+      // Tenant module switch validation
+      if (currentTenant?.modules) {
+        if (item.id === 'water-meter' && currentTenant.modules.waterMeter === false) return false;
+        if (item.id === 'assets' && currentTenant.modules.assetRental === false) return false;
+        if (item.id === 'services' && currentTenant.modules.letters === false) return false;
+        if (item.id === 'panic-logs' && currentTenant.modules.panicButton === false) return false;
+        if (item.id === 'stbm' && currentTenant.modules.stbmSanitation === false) return false;
+      }
+
       // Role validation
       let isAllowed = false;
       const roleStr = String(role || '').toLowerCase();
@@ -165,11 +180,11 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       const isSecretary = role === Role.SECRETARY || roleStr.includes('sekretaris');
 
       if (isTreasurer) {
-        isAllowed = ['overview', 'analytics', 'rw-recap', 'finance', 'pbb', 'water-meter', 'reports-lpj', 'lpj-tahunan', 'settings', 'notifications'].includes(item.id);
+        isAllowed = ['overview', 'analytics', 'finance', 'pbb', 'water-meter', 'reports-lpj', 'bansos', 'settings', 'notifications'].includes(item.id);
       } else if (isSecretary) {
         isAllowed = [
-          'overview', 'analytics', 'rw-recap', 'residents', 'pbb', 'mutations', 'rentals',
-          'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'laporan-kegiatan', 'lpj-tahunan', 'reports-warga', 'documents', 'activities', 
+          'overview', 'analytics', 'residents', 'pbb', 'mutations', 'rentals', 'bansos',
+          'health', 'stbm', 'officials', 'services', 'meeting-minutes', 'reports-lpj', 'reports-warga', 'documents', 'activities', 
           'assets', 'content', 'water-meter', 'audit', 'notifications', 'settings'
         ].includes(item.id);
       } else {
@@ -204,7 +219,6 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     return { short: 'RT', full: 'Pengurus RT', bg: 'bg-slate-50 border-slate-200 text-slate-700' };
   };
 
-  const { currentTenant } = useTenant();
   const roleInfo = getRoleBadge();
 
   // Highlight matches in searched text
@@ -388,7 +402,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                               
                               {/* Clean status dot for collapsed mode */}
                               {isCollapsed && pendingCount > 0 && (
-                                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                                <span className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ring-2 ring-white ${item.id === 'reports-warga' || item.id === 'facilities' ? 'bg-rose-500' : 'bg-amber-500'}`} />
                               )}
                             </div>
 
@@ -400,8 +414,10 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                             {!isCollapsed && pendingCount > 0 && (
                               <span className={`
                                 ml-auto text-[11px] font-mono tabular-nums font-medium px-1.5 py-0.5 rounded-md border
-                                ${item.id === 'guests' || item.id === 'facilities'
+                                ${item.id === 'reports-warga' || item.id === 'facilities'
                                   ? 'bg-rose-50 text-rose-700 border-rose-200/80' 
+                                  : item.id === 'residents' || item.id === 'services'
+                                  ? 'bg-amber-50 text-amber-700 border-amber-200/80'
                                   : 'bg-slate-100 text-slate-700 border-slate-200/80'
                                 }
                               `}>

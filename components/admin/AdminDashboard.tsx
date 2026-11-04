@@ -207,6 +207,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   ];
 
   const allowedItems = navItemsList.filter(item => {
+    // Tenant module switch validation
+    if (currentTenant?.modules) {
+      if (item.id === 'water-meter' && currentTenant.modules.waterMeter === false) return false;
+      if (item.id === 'assets' && currentTenant.modules.assetRental === false) return false;
+      if (item.id === 'services' && currentTenant.modules.letters === false) return false;
+      if (item.id === 'panic-logs' && currentTenant.modules.panicButton === false) return false;
+      if (item.id === 'stbm' && currentTenant.modules.stbmSanitation === false) return false;
+    }
+
     const roleStr = String(role || '').toLowerCase();
     const isTreasurer = role === Role.TREASURER || roleStr.includes('bendahara');
     const isSecretary = role === Role.SECRETARY || roleStr.includes('sekretaris');
