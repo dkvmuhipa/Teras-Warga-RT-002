@@ -52,21 +52,31 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
       return (a.number || '').localeCompare(b.number || '', undefined, { numeric: true });
     });
 
+  // Group houses by Block for clean scanning and optimal UX
+  const groupedHouses = sortedHouses.reduce((acc, h) => {
+    const blockKey = h.block || 'Lainnya';
+    if (!acc[blockKey]) acc[blockKey] = [];
+    acc[blockKey].push(h);
+    return acc;
+  }, {} as Record<string, House[]>);
+
+  const selectedHouse = houses.find(h => h.id === tempHouseId);
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 md:py-16">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl p-6 md:p-12 relative overflow-hidden">
         {/* Atmospheric Background glow */}
-        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-indigo-100/40 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-[-20%] right-[-20%] w-[50%] h-[50%] bg-emerald-50/30 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-indigo-100/40 blur-[120px] rounded-full pointer-events-none" aria-hidden="true" />
+        <div className="absolute bottom-[-20%] right-[-20%] w-[50%] h-[50%] bg-emerald-50/30 blur-[100px] rounded-full pointer-events-none" aria-hidden="true" />
         
         {/* Left illustration/info column */}
         <div className="md:col-span-7 space-y-6 md:pr-6 relative z-10 text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 shadow-sm">
-            <Shield size={14} className="" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 shadow-xs">
+            <Shield size={14} />
             <span className="text-[10px] font-semibold uppercase tracking-widest">Warga Hub Portal Mandiri</span>
           </div>
           
-          <h2 className="text-3xl md:text-5xl font-semibold text-slate-900 tracking-tight leading-tight">
+          <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
             Akses Portal Mandiri <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-800">Warga RT 02</span>
           </h2>
@@ -101,23 +111,41 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             <User size={32} />
           </div>
           
-          <h3 className="text-xl font-semibold text-slate-800 mb-1 text-left">Pilih Rumah Anda</h3>
-          <p className="text-xs text-slate-400 font-semibold mb-6 text-left">Silakan tentukan identitas hunian aktif Anda di bawah ini:</p>
+          <h3 className="text-xl font-bold text-slate-800 mb-1 text-left">Pilih Rumah Anda</h3>
+          <p className="text-xs text-slate-500 font-medium mb-6 text-left">
+            Silakan tentukan identitas hunian aktif Anda di bawah ini:
+          </p>
 
           <div className="space-y-4">
-            <select 
-              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors shadow-sm cursor-pointer hover:border-indigo-200"
-              value={tempHouseId}
-              onChange={(e) => {
-                setTempHouseId(e.target.value);
-                if (e.target.value) setIsPinModalOpen(true);
-              }}
-            >
-              <option value="">Pilih Hunian Kelurahan...</option>
-              {sortedHouses.map(h => (
-                <option key={h.id} value={h.id}>Blok {h.block}-{h.number} ({h.headOfFamily})</option>
-              ))}
-            </select>
+            <div>
+              <label 
+                htmlFor="resident-house-select" 
+                className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 text-left"
+              >
+                Daftar Hunian RT 02
+              </label>
+              <select 
+                id="resident-house-select"
+                aria-label="Pilih Hunian Anda"
+                className="w-full px-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-800 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition-colors shadow-xs cursor-pointer hover:border-indigo-200"
+                value={tempHouseId}
+                onChange={(e) => {
+                  setTempHouseId(e.target.value);
+                  if (e.target.value) setIsPinModalOpen(true);
+                }}
+              >
+                <option value="">-- Pilih Hunian Kelurahan / Blok RT 02 --</option>
+                {Object.entries(groupedHouses).map(([block, bHouses]) => (
+                  <optgroup key={block} label={`Blok ${block}`}>
+                    {bHouses.map(h => (
+                      <option key={h.id} value={h.id}>
+                        Blok {h.block}-{h.number} ({h.headOfFamily})
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
             
             <div className="flex items-center gap-1.5 pl-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-left">
               <Info size={12} className="text-slate-400 shrink-0" />
@@ -127,23 +155,31 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
         </div>
       </div>
 
-      <Modal isOpen={isPinModalOpen} onClose={() => {
-        setIsPinModalOpen(false);
-        setTempHouseId('');
-        setPinInput('');
-      }} title="Verifikasi PIN Akses">
-        <form onSubmit={handlePinSubmit} className="space-y-6 p-2">
+      {/* PIN Verification Modal */}
+      <Modal 
+        isOpen={isPinModalOpen} 
+        onClose={() => {
+          setIsPinModalOpen(false);
+          setTempHouseId('');
+          setPinInput('');
+        }} 
+        title="Verifikasi PIN Akses"
+      >
+        <form onSubmit={handlePinSubmit} className="space-y-6 p-2" aria-label="Form Verifikasi PIN Warga">
           <div className="text-center">
             <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Shield size={32} />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800">Masukkan PIN Rumah</h3>
+            <h3 className="text-lg font-bold text-slate-800">Masukkan PIN Rumah</h3>
             <p className="text-xs text-slate-500 font-medium mt-1">
-              Akses masuk aman untuk warga <span className="font-bold text-indigo-600">Blok {houses.find(h => h.id === tempHouseId)?.block}-{houses.find(h => h.id === tempHouseId)?.number}</span>
+              Akses masuk aman untuk warga{' '}
+              <span className="font-bold text-indigo-600 font-mono">
+                Blok {selectedHouse?.block}-{selectedHouse?.number}
+              </span>
             </p>
           </div>
 
-          {/* Hidden Input for Keyboard Typing */}
+          {/* Hidden Input for Physical Keyboard / Autofill */}
           <input 
             type="password"
             inputMode="numeric"
@@ -153,6 +189,7 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             autoFocus
             className="sr-only"
             id="pin-hidden-input"
+            aria-label="Input PIN Warga 6 Digit"
             value={pinInput}
             onChange={e => setPinInput(e.target.value.replace(/\D/g, ''))}
           />
@@ -160,6 +197,8 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
           {/* Premium PIN Slot Visual Indicators */}
           <div 
             onClick={() => document.getElementById('pin-hidden-input')?.focus()}
+            role="group"
+            aria-label="Digit kode PIN hunian"
             className="flex justify-center gap-3 my-4 cursor-pointer"
             title="Klik untuk mengetik"
           >
@@ -168,11 +207,12 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
               return (
                 <div 
                   key={idx} 
-                  className={`w-11 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-semibold transition-colors ${
+                  aria-hidden="true"
+                  className={`w-11 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-bold font-mono tabular-nums transition-all ${
                     pinError 
-                      ? 'border-rose-500 bg-rose-50 text-rose-600 ' 
+                      ? 'border-rose-500 bg-rose-50 text-rose-600' 
                       : hasValue 
-                        ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 shadow-md shadow-indigo-100/50 scale-105' 
+                        ? 'border-indigo-600 bg-indigo-50/60 text-indigo-700 shadow-md shadow-indigo-100/50 scale-105' 
                         : 'border-slate-200 bg-white text-slate-300'
                   }`}
                 >
@@ -186,7 +226,8 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             <button 
               type="button" 
               onClick={() => setShowPin(!showPin)}
-              className="text-xs font-semibold text-slate-400 hover:text-slate-600 uppercase tracking-widest flex items-center gap-1 cursor-pointer transition-colors"
+              aria-label={showPin ? "Sembunyikan PIN" : "Tampilkan PIN"}
+              className="text-xs font-semibold text-slate-500 hover:text-slate-700 uppercase tracking-widest flex items-center gap-1.5 cursor-pointer transition-colors"
             >
               {showPin ? <EyeOff size={14} /> : <Eye size={14} />}
               <span>{showPin ? "Sembunyikan PIN" : "Tampilkan PIN"}</span>
@@ -194,14 +235,23 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             <button
               type="button"
               onClick={() => setPinInput('')}
+              aria-label="Hapus semua digit PIN"
               className="text-xs font-semibold text-rose-500 hover:text-rose-700 uppercase tracking-widest cursor-pointer transition-colors"
             >
               Hapus Semua
             </button>
           </div>
 
+          {/* Non-bouncy, Accessible Error Feedback */}
           {pinError && (
-            <p className="text-xs text-rose-500 font-bold text-center animate-bounce">PIN Salah! Periksa sandi unik hunian Anda kembali.</p>
+            <div 
+              role="alert" 
+              aria-live="assertive" 
+              className="flex items-center justify-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-600"
+            >
+              <AlertTriangle size={15} className="shrink-0" />
+              <span>PIN Salah! Periksa sandi unik hunian Anda kembali.</span>
+            </div>
           )}
 
           {/* Interactive Tactile Keypad */}
@@ -210,42 +260,40 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
               <button
                 key={num}
                 type="button"
+                aria-label={`Angka ${num}`}
                 onClick={() => {
                   if (pinInput.length < 6) setPinInput(prev => prev + num);
                 }}
-                className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-semibold text-slate-800 rounded-2xl flex items-center justify-center transition-colors cursor-pointer border border-slate-100 hover:border-slate-200"
+                className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-bold font-mono tabular-nums text-slate-800 rounded-2xl flex items-center justify-center transition-colors cursor-pointer border border-slate-100 hover:border-slate-200"
               >
                 {num}
               </button>
             ))}
+            {/* Clean empty spacer */}
+            <div aria-hidden="true" className="w-16 h-16" />
+            
             <button
               type="button"
-              className="w-16 h-16 text-[10px] font-semibold text-slate-400 uppercase tracking-widest rounded-2xl flex items-center justify-center"
-              disabled
-            >
-              {/* Blank Spacer */}
-            </button>
-            <button
-              type="button"
+              aria-label="Angka 0"
               onClick={() => {
                 if (pinInput.length < 6) setPinInput(prev => prev + '0');
               }}
-              className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-semibold text-slate-800 rounded-2xl flex items-center justify-center transition-colors cursor-pointer border border-slate-100 hover:border-slate-200"
+              className="w-16 h-16 bg-slate-50 hover:bg-slate-100 active:scale-95 text-lg font-bold font-mono tabular-nums text-slate-800 rounded-2xl flex items-center justify-center transition-colors cursor-pointer border border-slate-100 hover:border-slate-200"
             >
               0
             </button>
             <button
               type="button"
+              aria-label="Hapus satu angka digit"
               onClick={() => setPinInput(prev => prev.slice(0, -1))}
               className="w-16 h-16 bg-slate-50 hover:bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center transition-colors cursor-pointer border border-slate-100 hover:border-slate-200 hover:text-rose-500 hover:bg-rose-50"
-              title="Hapus satu angka"
             >
               <ArrowLeft size={18} />
             </button>
           </div>
 
           {/* Remember Session Option */}
-          <label className="flex items-start gap-2.5 p-3 bg-slate-50 border border-slate-200/80 rounded-2xl cursor-pointer select-none text-left hover:bg-slate-100/60 transition-colors">
+          <label className="flex items-start gap-2.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl cursor-pointer select-none text-left hover:bg-slate-100/70 transition-colors">
             <input 
               type="checkbox" 
               checked={rememberSession}
@@ -260,8 +308,12 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
             </span>
           </label>
 
-          <Button type="submit" className="w-full py-4.5 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 cursor-pointer font-semibold text-xs uppercase tracking-widest">
-            Verifikasi & Masuk <ChevronRight size={16} />
+          <Button 
+            type="submit" 
+            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-100 flex items-center justify-center gap-2 cursor-pointer font-bold text-xs uppercase tracking-widest text-white rounded-2xl"
+          >
+            <span>Verifikasi & Masuk</span>
+            <ChevronRight size={16} />
           </Button>
         </form>
       </Modal>

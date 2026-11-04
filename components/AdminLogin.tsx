@@ -1,9 +1,21 @@
-import React, { useState } from 'react';
-import { Shield, Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/services/firebaseConfig';
-import { motion } from 'motion/react';
-import { Logo } from '../constants';
+import React, { useState, useEffect } from 'react';
+import { 
+  Shield, 
+  Lock, 
+  Mail, 
+  Loader2, 
+  ArrowRight, 
+  Eye, 
+  EyeOff, 
+  ArrowLeft, 
+  ShieldAlert, 
+  HelpCircle, 
+  CheckCircle2,
+  Info
+} from 'lucide-react';
+import { loginAdmin } from '../services/databaseService';
+import { isFirebaseConfigured } from '../services/firebaseConfig';
+import { ADMIN_EMAIL, ADMIN_TITLE, Logo } from '../constants';
 
 interface AdminLoginProps {
   onLogin: () => void;
@@ -13,130 +25,288 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<{ message: string; type: 'error' | 'warning' } | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
+
+  // Auto-dismiss transient warnings after 8s
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 8000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFirebaseConfigured) {
+      setError({ 
+        message: 'Sistem Autentikasi (Firebase) belum terkonfigurasi pada peramban ini.', 
+        type: 'error' 
+      });
+      return;
+    }
+
     setLoading(true);
-    setError('');
+    setError(null);
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await loginAdmin(email, password);
       onLogin();
-    } catch (err) {
-      setError('Akses ditolak. Email atau password tidak valid.');
+    } catch (err: any) {
+      if (
+        err?.code === 'auth/invalid-credential' || 
+        err?.code === 'auth/wrong-password' || 
+        err?.code === 'auth/user-not-found'
+      ) {
+        setError({
+          message: `Kombinasi Email atau Password salah. Pastikan akun ${ADMIN_TITLE} telah didaftarkan di Firebase Authentication.`,
+          type: 'error'
+        });
+      } else if (err?.code === 'auth/too-many-requests') {
+        setError({
+          message: 'Terlalu banyak percobaan gagal. Akses dibatasi sementara demi keamanan. Silakan tunggu 1-2 menit.',
+          type: 'warning'
+        });
+      } else if (err?.code === 'auth/network-request-failed') {
+        setError({
+          message: 'Gagal menghubungi server otentikasi. Periksa koneksi internet Anda.',
+          type: 'error'
+        });
+      } else {
+        setError({
+          message: err?.message || 'Akses ditolak. Silakan periksa kredensial Anda.',
+          type: 'error'
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 font-sans relative overflow-hidden p-4 sm:p-6 lg:p-8">
-      {/* Background Effects */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff04_1px,transparent_1px)] [background-size:24px_24px]" />
-        
-        <motion.div 
-          animate={{ scale: [1, 1.2, 1], x: [0, 50, 0], y: [0, -30, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[10%] left-[20%] w-[350px] h-[350px] bg-indigo-600/10 blur-[120px] rounded-full" 
-        />
-        <motion.div 
-          animate={{ scale: [1.2, 1, 1.2], x: [0, -40, 0], y: [0, 40, 0] }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[10%] right-[20%] w-[400px] h-[400px] bg-emerald-500/5 blur-[130px] rounded-full" 
-        />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#F8FAFC] px-4 py-8 font-sans relative overflow-hidden selection:bg-indigo-600 selection:text-white">
+      {/* Ambient Backdrop Highlights */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-100/40 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-100/40 rounded-full blur-[120px]" />
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-[420px] relative z-10"
-      >
-        <div className="bg-slate-900/60 backdrop-blur-2xl p-8 sm:p-10 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-slate-700/50">
-          
-          <div className="flex flex-col items-center text-center mb-10">
-            <motion.div 
-              initial={{ rotate: -10, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              transition={{ delay: 0.2, type: 'spring' }}
-              className="mb-6 p-4 bg-slate-800/50 rounded-3xl shadow-inner border border-slate-700/50 flex items-center justify-center shrink-0"
-            >
-               <Shield className="w-10 h-10 text-indigo-400" strokeWidth={1.5} />
-            </motion.div>
-            <h1 className="text-3xl font-black text-white tracking-tight leading-tight mb-2">Admin Portal</h1>
-            <p className="text-slate-400 text-sm font-medium px-2">Area terbatas khusus pengurus. Silakan verifikasi identitas Anda.</p>
+      <div className="w-full max-w-[440px] relative z-10">
+        {/* Brand Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex p-4 sm:p-5 bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 mb-5 transition-transform duration-300 hover:scale-105">
+            <Logo showText={true} imageSize="h-10 sm:h-12" />
           </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+            Portal Administrasi
+          </h1>
+          <p className="text-slate-500 text-xs sm:text-sm font-medium">
+            Pengurus RT & Super Admin Platform
+          </p>
+          
+          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-white/70 backdrop-blur-md rounded-full border border-slate-200/80 shadow-xs">
+            <span 
+              className={`w-2 h-2 rounded-full ${isFirebaseConfigured ? 'bg-emerald-500' : 'bg-rose-500'}`} 
+              aria-hidden="true"
+            />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+              {isFirebaseConfigured ? 'Sistem Siap & Online' : 'Sistem Terputus'}
+            </span>
+          </div>
+        </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            {error && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-rose-500/10 text-rose-400 p-4 rounded-2xl text-xs font-bold text-center border border-rose-500/20 flex items-center justify-center gap-2 mb-2"
+        {/* Main Card */}
+        <div className="bg-white/90 backdrop-blur-xl p-7 sm:p-9 rounded-[2.5rem] shadow-[0_24px_50px_-12px_rgba(15,23,42,0.08)] border border-white/80 relative overflow-hidden">
+          <form 
+            onSubmit={handleLogin} 
+            className="space-y-5"
+            aria-label="Form Masuk Pengurus RT"
+            noValidate={false}
+          >
+            {/* Email Field */}
+            <div>
+              <label 
+                htmlFor="admin-email" 
+                className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 ml-1"
               >
-                <Shield size={14} className="shrink-0" />
-                <span>{error}</span>
-              </motion.div>
-            )}
-
-            <div className="space-y-4">
-              <div className="relative group/input">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-500 group-focus-within/input:text-indigo-400 transition-colors" />
+                Alamat Email Resmi
+              </label>
+              <div className="relative group">
+                <div 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors pointer-events-none"
+                  aria-hidden="true"
+                >
+                  <Mail size={18} />
                 </div>
-                <input
-                  type="email"
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-700/50 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                  placeholder="Email Pengurus"
+                <input 
+                  id="admin-email"
+                  name="email"
+                  type="email" 
+                  autoComplete="username email"
+                  required
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-600 transition-all text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal" 
+                  placeholder={ADMIN_EMAIL || "pengurus@teraswarga.id"} 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="relative group/input">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-slate-500 group-focus-within/input:text-indigo-400 transition-colors" />
-                </div>
-                <input
-                  type="password"
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-950/50 border border-slate-700/50 rounded-2xl text-sm font-medium text-white placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                  placeholder="Kata Sandi Keamanan"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
                 />
               </div>
             </div>
 
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            {/* Password Field */}
+            <div>
+              <div className="flex items-center justify-between mb-2 ml-1">
+                <label 
+                  htmlFor="admin-password" 
+                  className="block text-xs font-bold text-slate-700 uppercase tracking-wider"
+                >
+                  Kunci Akses (Password)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowHelp(true)}
+                  className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                >
+                  Bantuan Akun?
+                </button>
+              </div>
+              <div className="relative group">
+                <div 
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors pointer-events-none"
+                  aria-hidden="true"
+                >
+                  <Lock size={18} />
+                </div>
+                <input 
+                  id="admin-password"
+                  name="password"
+                  type={showPassword ? "text" : "password"} 
+                  autoComplete="current-password"
+                  required
+                  className="w-full pl-11 pr-12 py-3.5 bg-slate-50/70 border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-600 transition-all text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal font-mono" 
+                  placeholder="••••••••" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1.5 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Error Message Display */}
+            {error && (
+              <div 
+                role="alert" 
+                aria-live="assertive"
+                className={`flex items-start gap-3 p-4 rounded-2xl border ${
+                  error.type === 'error' 
+                    ? 'bg-rose-50 border-rose-200 text-rose-700' 
+                    : 'bg-amber-50 border-amber-200 text-amber-800'
+                }`}
+              >
+                {error.type === 'error' ? (
+                  <ShieldAlert size={18} className="shrink-0 mt-0.5" />
+                ) : (
+                  <Info size={18} className="shrink-0 mt-0.5" />
+                )}
+                <div className="flex-1">
+                  <p className="text-xs font-semibold leading-relaxed">{error.message}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Submit Action */}
+            <button 
               type="submit" 
-              disabled={loading}
-              className="w-full relative flex items-center justify-center gap-2 py-4 mt-6 bg-gradient-to-r from-indigo-500 hover:from-indigo-400 to-indigo-600 hover:to-indigo-500 text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-indigo-500/25 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed group/btn overflow-hidden"
+              disabled={loading} 
+              aria-busy={loading}
+              className="w-full h-13 mt-2 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold rounded-2xl transition-all shadow-lg shadow-slate-900/15 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed group text-sm"
             >
               {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Mengautentikasi...</span>
+                </>
               ) : (
                 <>
-                  <span>Otorisasi Masuk</span>
-                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                  <span>Buka Dashboard Pengurus</span>
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </>
               )}
-            </motion.button>
+            </button>
           </form>
-          
-          <div className="mt-8 pt-6 border-t border-slate-800/80 text-center flex flex-col items-center">
-            <Logo showText={true} imageSize="h-6 opacity-30 grayscale mb-3 filter grayscale hover:grayscale-0 transition-all duration-300" />
-            <p className="text-[9px] text-slate-600 font-bold uppercase tracking-[0.2em] mt-1">
-              Sistem Akses Residensial Terpadu
+
+          {/* Help Overlay Modal */}
+          {showHelp && (
+            <div 
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="help-title"
+              className="absolute inset-0 bg-slate-900/95 backdrop-blur-md p-7 sm:p-8 flex flex-col justify-between text-white z-20"
+            >
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl">
+                    <HelpCircle size={22} />
+                  </div>
+                  <div>
+                    <h4 id="help-title" className="text-base font-bold text-white">Panduan Akses Pengurus</h4>
+                    <p className="text-xs text-slate-400">Keamanan Akses Terpadu RT</p>
+                  </div>
+                </div>
+
+                <ul className="text-xs space-y-2.5 text-slate-300 font-medium">
+                  <li className="flex gap-2">
+                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-1.5 shrink-0" />
+                    <span>Akun pengurus dikelola terpusat dan tidak melalui form registrasi umum.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-1.5 shrink-0" />
+                    <span>Hanya email resmi pengurus yang terdaftar di Firebase Auth yang diizinkan masuk.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-1.5 shrink-0" />
+                    <span>Bagi pengurus sah ({ADMIN_TITLE}) yang belum memiliki akun, silakan hubungi Ketua RT atau Super Admin Platform.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button 
+                type="button"
+                onClick={() => setShowHelp(false)}
+                className="w-full py-3 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-xl transition-colors text-xs uppercase tracking-wider cursor-pointer"
+              >
+                Tutup & Kembali
+              </button>
+            </div>
+          )}
+
+          {/* Card Footer Security Indicator */}
+          <div className="mt-7 pt-5 border-t border-slate-100 flex items-center justify-center gap-2">
+            <CheckCircle2 size={14} className="text-emerald-500" />
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Sesi Terenkripsi & Dilindungi Firebase Auth
             </p>
           </div>
-
         </div>
-      </motion.div>
+
+        {/* Escape Navigation Link */}
+        <div className="mt-6 text-center">
+          <a 
+            href="#/" 
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            <ArrowLeft size={16} /> 
+            <span>Kembali ke Portal Warga</span>
+          </a>
+        </div>
+      </div>
     </div>
   );
 };
