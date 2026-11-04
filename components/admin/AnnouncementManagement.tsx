@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle, Sparkles, Send, AlertTriangle, CheckCircle2, Loader2, HeartHandshake } from 'lucide-react';
+import { Plus, Trash2, Copy, Megaphone, Calendar, AlertCircle, Info, CalendarDays, Edit2, MessageCircle, Sparkles, Send, AlertTriangle, CheckCircle2, Loader2, HeartHandshake } from 'lucide-react';
 import { Announcement, House, PdfConfig } from '../../types';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
@@ -49,6 +49,21 @@ export const AnnouncementManagement: React.FC<AnnouncementManagementProps> = ({ 
     setSelectedAnnForBroadcast(ann);
     setIsBroadcastModalOpen(true);
   };
+
+  const broadcastPreviewMessage = selectedAnnForBroadcast 
+    ? (selectedAnnForBroadcast.type === 'Lelayu'
+        ? formatLelayuForWhatsApp({
+            deceasedName: selectedAnnForBroadcast.deceasedName || selectedAnnForBroadcast.title,
+            deceasedAge: selectedAnnForBroadcast.deceasedAge,
+            deceasedHouseId: selectedAnnForBroadcast.deceasedHouseId,
+            funeralTime: selectedAnnForBroadcast.funeralTime,
+            funeralLocation: selectedAnnForBroadcast.funeralLocation,
+            tazkiahSchedule: selectedAnnForBroadcast.tazkiahSchedule,
+            bankAccount: selectedAnnForBroadcast.bankAccount,
+            content: selectedAnnForBroadcast.content
+          })
+        : formatAnnouncementForWhatsApp(selectedAnnForBroadcast.title, selectedAnnForBroadcast.content))
+    : '';
 
   const executeBroadcast = async () => {
     if (!selectedAnnForBroadcast) return;

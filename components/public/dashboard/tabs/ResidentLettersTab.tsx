@@ -17,6 +17,8 @@ import { House, LetterRequest } from '../../../../types';
 import { Card } from '../../../ui/Card';
 import { Button } from '../../../ui/Button';
 import { generateSuratPengantar } from '../../../../services/pdfService';
+import { openWhatsApp } from '../../../../services/whatsappService';
+import { RT_NAME } from '../../../../constants';
 
 interface ResidentLettersTabProps {
   letters: LetterRequest[];
@@ -91,14 +93,14 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                 {
                   title: 'Verifikasi Administrasi',
                   description: isPending 
-                    ? 'Ketua RT sedang meninjau kelengkapan berkas dan NIK Pemohon.' 
-                    : 'Berkas dan keaslian NIK warga telah dikonfirmasi oleh Ketua RT.',
+                    ? `Ketua ${RT_NAME} sedang meninjau kelengkapan berkas dan NIK Pemohon.` 
+                    : `Berkas dan keaslian NIK warga telah dikonfirmasi oleh Ketua ${RT_NAME}.`,
                   status: isPending ? 'active' : 'completed',
                 },
                 {
                   title: 'Penomoran & Tanda Tangan',
                   description: isApproved 
-                    ? `Ketua RT telah menandatangani surat dengan No: ${letter.letterNumber || '-'}.` 
+                    ? `Ketua ${RT_NAME} telah menandatangani surat dengan No: ${letter.letterNumber || '-'}.` 
                     : isRejected 
                     ? 'Proses penomoran dibatalkan karena pengajuan ditolak.' 
                     : 'Sedang menunggu antrean penomoran surat resmi.',
@@ -109,7 +111,7 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                   description: isApproved 
                     ? 'Surat pengantar selesai diproses dan siap untuk diunduh / dicetak.' 
                     : isRejected 
-                    ? `Maaf, permohonan ditolak. Alasan: ${letter.estimatedTime || 'Dokumen kurang lengkap atau tidak sesuai.'}`
+                    ? `Maaf, permohonan ditolak. Alasan: ${letter.estimatedTime || 'Dokumen kurang lengkap atau tidak sesuai.'}` 
                     : 'Surat akan otomatis terbit setelah disetujui.',
                   status: isApproved ? 'completed' : isRejected ? 'failed' : 'pending',
                 }
@@ -180,7 +182,7 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                             titleColor = 'text-slate-800 font-extrabold';
                             iconElement = <Check size={10} className="stroke-[3]" />;
                           } else if (step.status === 'active') {
-                            iconBg = 'bg-indigo-600 text-white ';
+                            iconBg = 'bg-indigo-600 text-white';
                             titleColor = 'text-indigo-700 font-extrabold';
                             iconElement = <Clock size={10} className="stroke-[3]" />;
                           } else if (step.status === 'failed') {
@@ -220,16 +222,16 @@ export const ResidentLettersTab: React.FC<ResidentLettersTabProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          const msg = `Halo Ketua RT 002, saya ingin menanyakan status permohonan surat pengantar:
+                          const msg = `Halo Ketua ${RT_NAME}, saya ingin menanyakan status permohonan surat pengantar:
 • Jenis Surat: ${letter.type}
 • Pemohon: ${letter.applicantName || currentHouse?.headOfFamily || 'Warga'} (Blok ${currentHouse?.block}-${currentHouse?.number})
 • Tanggal Pengajuan: ${formattedDate}
 Mohon bantuan informasi tindak lanjutnya. Terima kasih!`;
-                          window.open(`https://wa.me/6285961194621?text=${encodeURIComponent(msg)}`, '_blank');
+                          openWhatsApp('6285961194621', msg);
                         }}
                         className="w-full py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs rounded-xl flex items-center justify-center gap-2 border border-indigo-200 transition-colors cursor-pointer"
                       >
-                        <Phone size={14} /> Tanya Ketua RT via WhatsApp
+                        <Phone size={14} /> Tanya Ketua {RT_NAME} via WhatsApp
                       </button>
                     </div>
                   )}

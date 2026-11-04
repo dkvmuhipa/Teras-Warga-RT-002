@@ -100,22 +100,26 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
 
   // Chart Data Preparation (Monthly)
   const chartData = React.useMemo(() => {
-    const data: Record<string, { name: string; Income: number; Expense: number }> = {};
+    const data: Record<string, { keyDate: number; name: string; Income: number; Expense: number }> = {};
     
     cashFlow.forEach(cf => {
       const date = new Date(cf.date);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      if (isNaN(date.getTime())) return;
+      const year = date.getFullYear();
+      const month = date.getMonth();
+      const key = `${year}-${String(month + 1).padStart(2, '0')}`;
       const name = date.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' });
       
-      if (!data[key]) data[key] = { name, Income: 0, Expense: 0 };
+      if (!data[key]) {
+        data[key] = { keyDate: year * 100 + month, name, Income: 0, Expense: 0 };
+      }
       if (cf.type === 'Income') data[key].Income += cf.amount;
       else data[key].Expense += cf.amount;
     });
 
-    return Object.values(data).sort((a, b) => {
-       // Simple sort logic or rely on input order if sorted
-       return 0; 
-    }).slice(-6); // Last 6 months
+    return Object.values(data)
+      .sort((a, b) => a.keyDate - b.keyDate)
+      .slice(-6); // Last 6 months strictly chronological
   }, [cashFlow]);
 
   // Filtered Data
@@ -382,7 +386,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           </div>
           <div className="relative z-10 min-w-0">
             <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#059669] mb-1">Total Saldo Kas</p>
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#065f46] tracking-tight truncate">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#065f46] tracking-tight truncate font-mono tabular-nums">
               Rp {balance.toLocaleString()}
             </h3>
           </div>
@@ -398,7 +402,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           </div>
           <div className="relative z-10 min-w-0">
             <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#4f46e5] mb-1">Total Pemasukan</p>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate font-mono tabular-nums">
               Rp {totalIncome.toLocaleString()}
             </h3>
           </div>
@@ -414,7 +418,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
           </div>
           <div className="relative z-10 min-w-0">
             <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#ea580c] mb-1">Total Pengeluaran</p>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate font-mono tabular-nums">
               Rp {totalExpense.toLocaleString()}
             </h3>
           </div>

@@ -55,9 +55,9 @@ export const PWAStatusHandler: React.FC = () => {
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -40 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-slate-950 font-bold px-4 py-2 text-xs flex items-center justify-center gap-2 shadow-md backdrop-blur-md"
+            className="fixed top-0 left-0 right-0 z-[120] bg-amber-500 text-slate-950 font-bold px-4 py-2 text-xs flex items-center justify-center gap-2 shadow-md backdrop-blur-md"
           >
-            <WifiOff size={15} className="animate-pulse" />
+            <WifiOff size={15} />
             <span>Mode Offline: Anda tidak terhubung ke internet. Data tersimpan di memori cache HP.</span>
           </motion.div>
         )}
@@ -70,7 +70,7 @@ export const PWAStatusHandler: React.FC = () => {
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -40 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-emerald-600 text-white font-bold px-4 py-2 text-xs flex items-center justify-center gap-2 shadow-md backdrop-blur-md"
+            className="fixed top-0 left-0 right-0 z-[120] bg-emerald-600 text-white font-bold px-4 py-2 text-xs flex items-center justify-center gap-2 shadow-md backdrop-blur-md"
           >
             <Wifi size={15} />
             <span>Koneksi Kembali Online: Data tersinkronisasi otomatis dengan server RT 02.</span>
@@ -85,7 +85,7 @@ export const PWAStatusHandler: React.FC = () => {
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
-            className="fixed bottom-24 md:bottom-6 left-4 right-4 md:left-6 md:right-auto md:max-w-sm z-50"
+            className="fixed bottom-24 md:bottom-6 left-4 right-4 md:left-6 md:right-auto md:max-w-sm z-[120]"
           >
             <div className="bg-slate-900/95 backdrop-blur-xl border border-indigo-500/40 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
