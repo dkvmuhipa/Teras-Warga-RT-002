@@ -10,11 +10,13 @@ import {
   Eye, 
   EyeOff, 
   ArrowLeft, 
-  ChevronRight 
+  ChevronRight,
+  MessageSquare
 } from 'lucide-react';
 import { House } from '../../../types';
 import { Modal } from '../../ui/Modal';
 import { Button } from '../../ui/Button';
+import { getWhatsAppLink } from '../../../services/whatsappService';
 
 interface ResidentLoginGateProps {
   houses: House[];
@@ -61,6 +63,11 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
   }, {} as Record<string, House[]>);
 
   const selectedHouse = houses.find(h => h.id === tempHouseId);
+  const houseLabel = selectedHouse ? `Blok ${selectedHouse.block}-${selectedHouse.number} (${selectedHouse.headOfFamily})` : 'RT 02';
+  const waPinHelpLink = getWhatsAppLink(
+    '6285961194621',
+    `Halo Pengurus RT 02, saya warga ${houseLabel} ingin menanyakan atau meminta bantuan kode PIN akses hunian kami.`
+  );
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 md:py-16">
@@ -147,9 +154,9 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
               </select>
             </div>
             
-            <div className="flex items-center gap-1.5 pl-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-left">
-              <Info size={12} className="text-slate-400 shrink-0" />
-              <span>Gunakan PIN 6-digit rahasia rumah Anda</span>
+            <div className="flex items-start gap-2 pl-1 text-[11px] text-slate-500 font-medium text-left leading-relaxed">
+              <Info size={14} className="text-indigo-500 shrink-0 mt-0.5" />
+              <span>Gunakan kode PIN 6-digit rahasia hunian Anda. Jika lupa atau belum menerima PIN, silakan hubungi Pengurus RT.</span>
             </div>
           </div>
         </div>
@@ -165,14 +172,14 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
         }} 
         title="Verifikasi PIN Akses"
       >
-        <form onSubmit={handlePinSubmit} className="space-y-6 p-2" aria-label="Form Verifikasi PIN Warga">
+        <form onSubmit={handlePinSubmit} className="space-y-5 p-2" aria-label="Form Verifikasi PIN Warga">
           <div className="text-center">
             <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <Shield size={32} />
             </div>
             <h3 className="text-lg font-bold text-slate-800">Masukkan PIN Rumah</h3>
             <p className="text-xs text-slate-500 font-medium mt-1">
-              Akses masuk aman untuk warga{' '}
+              Verifikasi keamanan untuk akses data hunian{' '}
               <span className="font-bold text-indigo-600 font-mono">
                 Blok {selectedHouse?.block}-{selectedHouse?.number}
               </span>
@@ -195,31 +202,36 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
           />
 
           {/* Premium PIN Slot Visual Indicators */}
-          <div 
-            onClick={() => document.getElementById('pin-hidden-input')?.focus()}
-            role="group"
-            aria-label="Digit kode PIN hunian"
-            className="flex justify-center gap-3 my-4 cursor-pointer"
-            title="Klik untuk mengetik"
-          >
-            {[0, 1, 2, 3, 4, 5].map((idx) => {
-              const hasValue = pinInput.length > idx;
-              return (
-                <div 
-                  key={idx} 
-                  aria-hidden="true"
-                  className={`w-11 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-bold font-mono tabular-nums transition-all ${
-                    pinError 
-                      ? 'border-rose-500 bg-rose-50 text-rose-600' 
-                      : hasValue 
-                        ? 'border-indigo-600 bg-indigo-50/60 text-indigo-700 shadow-md shadow-indigo-100/50 scale-105' 
-                        : 'border-slate-200 bg-white text-slate-300'
-                  }`}
-                >
-                  {hasValue ? (showPin ? pinInput[idx] : '•') : ''}
-                </div>
-              );
-            })}
+          <div>
+            <p className="text-[11px] text-slate-400 text-center mb-2">
+              Sentuh kotak di bawah untuk mengetik atau gunakan tombol angka
+            </p>
+            <div 
+              onClick={() => document.getElementById('pin-hidden-input')?.focus()}
+              role="group"
+              aria-label="Digit kode PIN hunian"
+              className="flex justify-center gap-3 my-2 cursor-pointer"
+              title="Klik untuk mengetik"
+            >
+              {[0, 1, 2, 3, 4, 5].map((idx) => {
+                const hasValue = pinInput.length > idx;
+                return (
+                  <div 
+                    key={idx} 
+                    aria-hidden="true"
+                    className={`w-11 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-bold font-mono tabular-nums transition-all ${
+                      pinError 
+                        ? 'border-rose-500 bg-rose-50 text-rose-600' 
+                        : hasValue 
+                          ? 'border-indigo-600 bg-indigo-50/60 text-indigo-700 shadow-md shadow-indigo-100/50 scale-105' 
+                          : 'border-slate-200 bg-white text-slate-300'
+                    }`}
+                  >
+                    {hasValue ? (showPin ? pinInput[idx] : '•') : ''}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div className="flex justify-between items-center px-4">
@@ -250,12 +262,34 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
               className="flex items-center justify-center gap-2 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-600"
             >
               <AlertTriangle size={15} className="shrink-0" />
-              <span>PIN Salah! Periksa sandi unik hunian Anda kembali.</span>
+              <span>PIN Salah! Periksa 6 digit sandi hunian Anda kembali.</span>
             </div>
           )}
 
+          {/* Helpful PIN Guidance Card & WhatsApp Help Link */}
+          <div className="bg-indigo-50/70 border border-indigo-100/90 rounded-2xl p-3 text-left flex items-start gap-2.5">
+            <Info size={16} className="text-indigo-600 shrink-0 mt-0.5" />
+            <div className="text-[11px] text-slate-600 leading-relaxed flex-1">
+              <span className="font-bold text-slate-800">Petunjuk PIN Hunian:</span>
+              <p className="mt-0.5 text-slate-500">
+                Gunakan 6 digit sandi unik rumah Anda (tercantum pada E-ID / berkas digital KK).
+              </p>
+              {waPinHelpLink && (
+                <a
+                  href={waPinHelpLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-bold mt-1.5 transition-colors"
+                >
+                  <MessageSquare size={13} />
+                  <span>Lupa PIN? Tanya ke Pengurus RT via WhatsApp</span>
+                </a>
+              )}
+            </div>
+          </div>
+
           {/* Interactive Tactile Keypad */}
-          <div className="grid grid-cols-3 gap-3 max-w-[280px] mx-auto pt-2">
+          <div className="grid grid-cols-3 gap-3 max-w-[280px] mx-auto pt-1">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
               <button
                 key={num}
