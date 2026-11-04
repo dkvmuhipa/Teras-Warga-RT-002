@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Gift, HeartHandshake, Package, Calendar, Users, CheckCircle2, 
+  Gift, Package, Calendar, Users, CheckCircle2, 
   Clock, Search, Plus, Filter, Download, Printer, ArrowLeft,
   Share2, Eye, Edit2, Trash2, X, RefreshCw, AlertTriangle, 
   Building2, CheckSquare, ChevronRight, Phone, ArrowRight, UserCheck, 
-  Info, Sparkles, Check, Send, AlertCircle, DollarSign, ShoppingBag,
-  CreditCard, Tag, ArrowUpRight
+  Info, Sparkles, Check, Send, AlertCircle, ShoppingBag
 } from 'lucide-react';
 import { SocialAidItem, SocialAidRecipient, House, PdfConfig } from '../../types';
 import { 
@@ -13,7 +12,7 @@ import {
   addSocialAidToDb, 
   updateSocialAidInDb, 
   deleteSocialAidFromDb,
-  updateRecipientPaymentAndReceipt 
+  toggleRecipientReceiptStatus 
 } from '../../services/databaseService';
 import { generateSocialAidHandoverPDF } from '../../services/pdfService';
 import { openWhatsApp } from '../../services/whatsappService';
@@ -27,11 +26,11 @@ interface SocialAidManagerProps {
 }
 
 const CATEGORIES = [
-  'Beras', 
-  'Sembako', 
-  'BLT / Uang Tunai', 
-  'Nutrisi Balita & Lansia', 
-  'Kesehatan & Sanitasi', 
+  'Sembako Murah Pemda',
+  'Beras Pangan Bulog',
+  'BLT / Bantuan Tunai',
+  'Nutrisi Balita & Lansia',
+  'Bantuan CSR & Donatur',
   'Lainnya'
 ] as const;
 
@@ -45,20 +44,17 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
   const [editingAidId, setEditingAidId] = useState<string | null>(null);
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed' | 'gratis' | 'tebus_murah'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed' | 'sembako' | 'beras'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [recipientFilter, setRecipientFilter] = useState<'all' | 'pending' | 'received' | 'unpaid' | 'paid'>('all');
+  const [recipientFilter, setRecipientFilter] = useState<'all' | 'pending' | 'received'>('all');
   const [recipientSearchQuery, setRecipientSearchQuery] = useState('');
 
   // Form State for Create / Edit Program
-  const [formProgramType, setFormProgramType] = useState<'gratis' | 'tebus_murah'>('gratis');
-  const [formPackagePrice, setFormPackagePrice] = useState<number>(35000);
-  const [formMarketPrice, setFormMarketPrice] = useState<number>(85000);
   const [formTitle, setFormTitle] = useState('');
-  const [formCategory, setFormCategory] = useState<typeof CATEGORIES[number]>('Beras');
-  const [formSource, setFormSource] = useState('Kelurahan Tondo / Bapanas');
+  const [formCategory, setFormCategory] = useState<typeof CATEGORIES[number]>('Sembako Murah Pemda');
+  const [formSource, setFormSource] = useState('Dinas Perdagangan Kota Palu / Kelurahan Tondo');
   const [formTotalQuota, setFormTotalQuota] = useState(25);
-  const [formUnit, setFormUnit] = useState('Karung 10kg');
+  const [formUnit, setFormUnit] = useState('Paket Sembako');
   const [formDistributionDate, setFormDistributionDate] = useState(new Date().toISOString().slice(0, 10));
   const [formNotes, setFormNotes] = useState('');
   const [selectedHouseIds, setSelectedHouseIds] = useState<string[]>([]);
@@ -108,21 +104,13 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
     }, 0);
     const pendingHandover = Math.max(0, totalQuotaAll - totalDistributedAll);
     const completionRate = totalQuotaAll > 0 ? Math.round((totalDistributedAll / totalQuotaAll) * 100) : 0;
-    
-    // Total subsidized revenue from Sembako Murah
-    const totalTebusRevenue = aidPrograms.reduce((acc, a) => {
-      if (a.programType !== 'tebus_murah' || !a.packagePrice) return acc;
-      const paidRecipients = (a.recipients || []).filter(r => r.paymentStatus === 'Lunas');
-      return acc + (paidRecipients.length * a.packagePrice);
-    }, 0);
 
     return {
       totalPrograms,
       totalQuotaAll,
       totalDistributedAll,
       pendingHandover,
-      completionRate,
-      totalTebusRevenue
+      completionRate
     };
   }, [aidPrograms]);
 
@@ -138,8 +126,8 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
       let matchStatus = true;
       if (statusFilter === 'active') matchStatus = !isCompleted;
       else if (statusFilter === 'completed') matchStatus = isCompleted;
-      else if (statusFilter === 'gratis') matchStatus = (a.programType || 'gratis') === 'gratis';
-      else if (statusFilter === 'tebus_murah') matchStatus = a.programType === 'tebus_murah';
+      else if (statusFilter === 'sembako') matchStatus = a.category.toLowerCase().includes('sembako');
+      else if (statusFilter === 'beras') matchStatus = a.category.toLowerCase().includes('beras');
 
       return matchSearch && matchStatus;
     });
@@ -148,14 +136,11 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
   // Handlers for Views
   const handleOpenCreateForm = () => {
     setEditingAidId(null);
-    setFormProgramType('gratis');
-    setFormPackagePrice(35000);
-    setFormMarketPrice(85000);
     setFormTitle('');
-    setFormCategory('Beras');
-    setFormSource('Kelurahan Tondo / Bapanas');
+    setFormCategory('Sembako Murah Pemda');
+    setFormSource('Dinas Perdagangan Kota Palu / Kelurahan Tondo');
     setFormTotalQuota(25);
-    setFormUnit('Karung 10kg');
+    setFormUnit('Paket Sembako');
     setFormDistributionDate(new Date().toISOString().slice(0, 10));
     setFormNotes('');
     
@@ -170,9 +155,6 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
   const handleOpenEditForm = (aid: SocialAidItem, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setEditingAidId(aid.id);
-    setFormProgramType(aid.programType || 'gratis');
-    setFormPackagePrice(aid.packagePrice || 35000);
-    setFormMarketPrice(aid.marketPrice || 85000);
     setFormTitle(aid.title);
     setFormCategory(aid.category as any);
     setFormSource(aid.source);
@@ -232,10 +214,6 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
           status: existing?.status || 'Menunggu',
           receivedAt: existing?.receivedAt,
           receivedBy: existing?.receivedBy,
-          paymentStatus: existing?.paymentStatus || (formProgramType === 'tebus_murah' ? 'Belum Bayar' : 'Gratis'),
-          paidAmount: existing?.paidAmount || (formProgramType === 'tebus_murah' ? formPackagePrice : 0),
-          paymentMethod: existing?.paymentMethod || 'Tunai',
-          paidAt: existing?.paidAt,
           notes: existing?.notes
         };
       });
@@ -244,11 +222,8 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
         title: formTitle.trim(),
         category: formCategory,
         source: formSource.trim(),
-        programType: formProgramType,
-        packagePrice: formProgramType === 'tebus_murah' ? Number(formPackagePrice) || 0 : 0,
-        marketPrice: formProgramType === 'tebus_murah' ? Number(formMarketPrice) || 0 : 0,
         totalQuota: formTotalQuota || recipients.length,
-        unit: formUnit.trim() || 'Paket',
+        unit: formUnit.trim() || 'Paket Sembako',
         distributionDate: formDistributionDate,
         notes: formNotes.trim(),
         recipients,
@@ -262,7 +237,7 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
         setViewMode('detail');
       } else {
         const newId = await addSocialAidToDb(payload);
-        toast.success('Program bantuan sosial berhasil diterbitkan!');
+        toast.success('Program bantuan / sembako murah berhasil diterbitkan!');
         setSelectedAidId(newId);
         setViewMode('detail');
       }
@@ -277,7 +252,7 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
     e?.stopPropagation();
     const isConfirmed = await confirm({
       title: 'Hapus Program Bantuan',
-      message: `Apakah Anda yakin ingin menghapus arsip agenda bantuan "${aid.title}"? Seluruh daftar tanda terima penerima akan ikut terhapus.`,
+      message: `Apakah Anda yakin ingin menghapus agenda "${aid.title}"? Seluruh daftar tanda terima penerima akan ikut terhapus.`,
       confirmLabel: 'Hapus Agenda',
       isDanger: true
     });
@@ -300,30 +275,17 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
   const handleToggleHandover = async (recipient: SocialAidRecipient, isReceived: boolean, customName?: string) => {
     if (!currentAid) return;
     try {
-      await updateRecipientPaymentAndReceipt(currentAid.id, recipient.houseId, {
-        status: isReceived ? 'Diterima' : 'Menunggu',
-        receivedBy: isReceived ? (customName?.trim() || recipient.headOfFamily) : undefined,
-      });
+      await toggleRecipientReceiptStatus(
+        currentAid.id,
+        recipient.houseId,
+        isReceived,
+        customName?.trim() || recipient.headOfFamily
+      );
       setInlineHandoverHouseId(null);
       setInlineHandoverName('');
-      toast.success(isReceived ? `Tanda terima ${recipient.headOfFamily} tercatat!` : `Status ${recipient.headOfFamily} dikembalikan ke Menunggu.`);
+      toast.success(isReceived ? `Tanda terima ${recipient.headOfFamily} berhasil dicatat!` : `Status ${recipient.headOfFamily} dikembalikan ke Menunggu.`);
     } catch (err: any) {
       toast.error('Gagal memperbarui status: ' + err.message);
-    }
-  };
-
-  // Update Payment Status for Sembako Murah
-  const handleUpdatePaymentStatus = async (recipient: SocialAidRecipient, newPaymentStatus: 'Lunas' | 'Belum Bayar' | 'Gratis', method?: 'Tunai' | 'QRIS') => {
-    if (!currentAid) return;
-    try {
-      await updateRecipientPaymentAndReceipt(currentAid.id, recipient.houseId, {
-        paymentStatus: newPaymentStatus,
-        paymentMethod: method || recipient.paymentMethod || 'Tunai',
-        paidAmount: newPaymentStatus === 'Lunas' ? (currentAid.packagePrice || 0) : 0
-      });
-      toast.success(`Pembayaran ${recipient.headOfFamily} diperbarui: ${newPaymentStatus}`);
-    } catch (err: any) {
-      toast.error('Gagal memperbarui status bayar: ' + err.message);
     }
   };
 
@@ -336,16 +298,11 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
       ? new Date(currentAid.distributionDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })
       : 'hari ini';
 
-    const isTebusMurah = currentAid.programType === 'tebus_murah';
-    const priceInfo = isTebusMurah 
-      ? `\n*Biaya Tebus Subsidi:* Rp ${(currentAid.packagePrice || 0).toLocaleString('id-ID')} / ${currentAid.unit || 'paket'}\n*Status Bayar:* ${r.paymentStatus === 'Lunas' ? 'Sudah Lunas' : 'Menunggu Pembayaran di Posko'}\n`
-      : '\n*Biaya:* GRATIS (Bantuan Penuh)\n';
-
     const message = `Halo Bapak/Ibu *${r.headOfFamily}* (${cleanHouse}), salam hangat dari Pengurus RT 002 / RW 020 Huntap Tondo 2.
 
 Menginformasikan bahwa program *${currentAid.title}* (*${currentAid.unit}*) dari *${currentAid.source}* telah siap disalurkan dan dapat diambil di Posko / Rumah Ketua RT 002 (${dateFormatted}).
-${priceInfo}
-Mohon membawa KTP / Kartu Keluarga fisik saat pengambilan. Jika diwakilkan oleh anggota keluarga lain, mohon konfirmasi terlebih dahulu ke pengurus RT.
+
+Mohon membawa KTP / Kartu Keluarga fisik saat pengambilan di posko RT. Jika berhalangan hadir dan diwakilkan oleh anggota keluarga lain dalam 1 KK, mohon konfirmasi terlebih dahulu ke pengurus RT.
 
 Terima kasih atas kerja samanya.
 _Pengurus RT 002 Huntap Tondo 2_`;
@@ -362,14 +319,11 @@ _Pengurus RT 002 Huntap Tondo 2_`;
       toast.error('Tidak ada data penerima untuk diekspor');
       return;
     }
-    const isTebus = currentAid.programType === 'tebus_murah';
-    const headers = isTebus 
-      ? ['No', 'Blok-Nomor', 'Nama Kepala Keluarga', 'Nomor WA', 'Kategori', 'Status Terima', 'Tanggal Serah', 'Nama Pengambil', 'Status Bayar', 'Metode Bayar', 'Nominal Bayar']
-      : ['No', 'Blok-Nomor', 'Nama Kepala Keluarga', 'Nomor WA', 'Kategori', 'Status Terima', 'Tanggal Serah', 'Nama Pengambil'];
+    const headers = ['No', 'Blok-Nomor', 'Nama Kepala Keluarga', 'Nomor WA', 'Kategori', 'Status Terima', 'Tanggal Serah', 'Nama Pengambil'];
 
     const rows = currentAid.recipients.map((r, idx) => {
       const tag = r.isPKH ? 'PKH' : r.isBLT ? 'BLT' : r.isBPNT ? 'BPNT' : r.isPraSejahtera ? 'Pra-Sejahtera' : 'Umum';
-      const baseRow = [
+      return [
         idx + 1,
         `"${r.block}-${String(r.number).padStart(2, '0')}"`,
         `"${r.headOfFamily.replace(/"/g, '""')}"`,
@@ -379,15 +333,6 @@ _Pengurus RT 002 Huntap Tondo 2_`;
         `"${r.receivedAt ? new Date(r.receivedAt).toLocaleDateString('id-ID') : '-'}"`,
         `"${(r.receivedBy || '-').replace(/"/g, '""')}"`
       ];
-
-      if (isTebus) {
-        baseRow.push(
-          `"${r.paymentStatus || 'Belum Bayar'}"`,
-          `"${r.paymentMethod || '-'}"`,
-          `"${r.paidAmount || 0}"`
-        );
-      }
-      return baseRow;
     });
 
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
@@ -413,8 +358,6 @@ _Pengurus RT 002 Huntap Tondo 2_`;
       let matchFilter = true;
       if (recipientFilter === 'pending') matchFilter = r.status === 'Menunggu';
       else if (recipientFilter === 'received') matchFilter = r.status === 'Diterima';
-      else if (recipientFilter === 'unpaid') matchFilter = r.paymentStatus === 'Belum Bayar';
-      else if (recipientFilter === 'paid') matchFilter = r.paymentStatus === 'Lunas' || r.paymentStatus === 'Gratis';
 
       return matchSearch && matchFilter;
     });
@@ -422,16 +365,13 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
   // Calculation for current aid in detail view
   const currentAidStats = useMemo(() => {
-    if (!currentAid || !currentAid.recipients) return { total: 0, received: 0, pct: 0, paid: 0, unpaid: 0, waived: 0, totalRevenue: 0 };
+    if (!currentAid || !currentAid.recipients) return { total: 0, received: 0, pending: 0, pct: 0 };
     const total = currentAid.recipients.length;
     const received = currentAid.recipients.filter(r => r.status === 'Diterima').length;
+    const pending = Math.max(0, total - received);
     const pct = total > 0 ? Math.round((received / total) * 100) : 0;
-    const paid = currentAid.recipients.filter(r => r.paymentStatus === 'Lunas').length;
-    const waived = currentAid.recipients.filter(r => r.paymentStatus === 'Gratis').length;
-    const unpaid = currentAid.recipients.filter(r => !r.paymentStatus || r.paymentStatus === 'Belum Bayar').length;
-    const totalRevenue = paid * (currentAid.packagePrice || 0);
 
-    return { total, received, pct, paid, unpaid, waived, totalRevenue };
+    return { total, received, pending, pct };
   }, [currentAid]);
 
   // =========================================================================
@@ -457,134 +397,18 @@ _Pengurus RT 002 Huntap Tondo 2_`;
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-8">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-7">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              {editingAidId ? 'Edit Agenda Penyaluran Bantuan' : 'Buat Agenda Penyaluran Bantuan Baru'}
+              {editingAidId ? 'Edit Agenda Penyaluran Bantuan' : 'Buat Agenda Bantuan / Sembako Murah'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Daftarkan program bantuan beras Bulog, santunan sembako, atau pasar sembako murah bersubsidi untuk warga RT 002.
+              Pencatatan program sembako murah pemerintah setempat, beras Bulog, atau bantuan donatur untuk warga RT 002.
             </p>
           </div>
 
-          <form onSubmit={handleSaveProgram} className="space-y-7">
-            {/* 1. SELEKTOR JENIS PROGRAM (GRATIS vs TEBUS MURAH) */}
-            <div className="space-y-2.5">
-              <label className="block text-xs font-black uppercase tracking-wider text-slate-700">
-                Jenis Program Bantuan <span className="text-rose-500">*</span>
-              </label>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <label 
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-colors flex items-start gap-3.5 ${
-                    formProgramType === 'gratis' 
-                      ? 'border-amber-500 bg-amber-50/50 shadow-2xs' 
-                      : 'border-slate-200 hover:border-slate-300 bg-white'
-                  }`}
-                >
-                  <input 
-                    type="radio" 
-                    name="programType" 
-                    value="gratis" 
-                    checked={formProgramType === 'gratis'}
-                    onChange={() => setFormProgramType('gratis')}
-                    className="mt-1 text-amber-600 focus:ring-amber-500"
-                  />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Gift size={16} className="text-amber-600" />
-                      <strong className="text-xs sm:text-sm text-slate-900 font-extrabold">Bansos Cuma-Cuma (Gratis)</strong>
-                    </div>
-                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                      Bantuan pangan 100% gratis tanpa biaya tebus (misal: Beras CPP Bulog, BLT Kemensos, santunan dhuafa Baznas).
-                    </p>
-                  </div>
-                </label>
-
-                <label 
-                  className={`p-4 rounded-2xl border-2 cursor-pointer transition-colors flex items-start gap-3.5 ${
-                    formProgramType === 'tebus_murah' 
-                      ? 'border-emerald-500 bg-emerald-50/50 shadow-2xs' 
-                      : 'border-slate-200 hover:border-slate-300 bg-white'
-                  }`}
-                >
-                  <input 
-                    type="radio" 
-                    name="programType" 
-                    value="tebus_murah" 
-                    checked={formProgramType === 'tebus_murah'}
-                    onChange={() => setFormProgramType('tebus_murah')}
-                    className="mt-1 text-emerald-600 focus:ring-emerald-500"
-                  />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <ShoppingBag size={16} className="text-emerald-600" />
-                      <strong className="text-xs sm:text-sm text-slate-900 font-extrabold">Sembako Murah (Tebus Murah)</strong>
-                    </div>
-                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
-                      Paket sembako bersubsidi di mana warga menebus dengan harga terjangkau. Dilengkapi pencatatan kas &amp; status pelunasan.
-                    </p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {/* JIKA TEBUS MURAH: INPUT BIAYA TEBUS & HARGA PASAR */}
-            {formProgramType === 'tebus_murah' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
-                <div className="flex items-center gap-2 text-emerald-900 font-bold text-xs uppercase tracking-wider">
-                  <DollarSign size={15} className="text-emerald-700" />
-                  <span>Pengaturan Harga Tebus Sembako Bersubsidi</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Biaya Tebus per Paket (Rp) <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
-                      <input 
-                        type="number"
-                        min="0"
-                        step="1000"
-                        required
-                        value={formPackagePrice}
-                        onChange={e => setFormPackagePrice(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                        className="w-full pl-10 pr-3.5 py-2.5 text-xs font-bold font-mono border border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500 bg-white"
-                        placeholder="Contoh: 35000"
-                      />
-                    </div>
-                    <span className="text-[10px] text-slate-500 mt-1 block">Biaya yang dibayarkan warga saat mengambil paket.</span>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Estimasi Nilai Pasar Normal (Rp) <span className="text-slate-400 font-normal">(Opsional)</span>
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">Rp</span>
-                      <input 
-                        type="number"
-                        min="0"
-                        step="1000"
-                        value={formMarketPrice}
-                        onChange={e => setFormMarketPrice(Math.max(0, parseInt(e.target.value, 10) || 0))}
-                        className="w-full pl-10 pr-3.5 py-2.5 text-xs font-mono border border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500 bg-white"
-                        placeholder="Contoh: 85000"
-                      />
-                    </div>
-                    {formMarketPrice > formPackagePrice && (
-                      <span className="text-[10px] text-emerald-700 font-semibold mt-1 block">
-                        Warga menghemat Rp {(formMarketPrice - formPackagePrice).toLocaleString('id-ID')} ({Math.round(((formMarketPrice - formPackagePrice) / formMarketPrice) * 100)}% subsidi)!
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 2. INFORMASI DETAIL PROGRAM */}
+          <form onSubmit={handleSaveProgram} className="space-y-6">
+            {/* 1. INFORMASI PROGRAM */}
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -593,7 +417,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 <input
                   type="text"
                   required
-                  placeholder={formProgramType === 'tebus_murah' ? 'Contoh: Tebus Murah Minyak & Gula Pasir Menjelang Ramadhan' : 'Contoh: Beras CPP Cadangan Pangan Pemerintah Tahap II (10kg)'}
+                  placeholder="Contoh: Operasi Pasar Sembako Murah Dinas Perdagangan Kota Palu"
                   value={formTitle}
                   onChange={e => setFormTitle(e.target.value)}
                   className="w-full px-4 py-2.5 text-xs sm:text-sm font-medium border border-slate-300 rounded-xl focus:outline-none focus:border-amber-500"
@@ -602,7 +426,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Kategori Bantuan</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Kategori Program</label>
                   <select
                     value={formCategory}
                     onChange={e => setFormCategory(e.target.value as any)}
@@ -615,10 +439,10 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Sumber / Instansi Pemberi</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Instansi / Lembaga Penyelenggara</label>
                   <input
                     type="text"
-                    placeholder="Contoh: Kelurahan Tondo / Bapanas / Kas RT 02"
+                    placeholder="Contoh: Dinas Perindag Kota Palu / Kelurahan Tondo"
                     value={formSource}
                     onChange={e => setFormSource(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:border-amber-500"
@@ -639,10 +463,10 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Satuan Paket</label>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Satuan Komoditas</label>
                   <input
                     type="text"
-                    placeholder="Karung 10kg / Paket Dus / Liter"
+                    placeholder="Paket Sembako / Karung 10kg / Kupon"
                     value={formUnit}
                     onChange={e => setFormUnit(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:border-amber-500"
@@ -661,7 +485,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               </div>
             </div>
 
-            {/* 3. PEMILIHAN KELUARGA PENERIMA MANFAAT (FULL WIDTH CHECKBOX GRID) */}
+            {/* 2. PEMILIHAN KELUARGA PENERIMA MANFAAT (FULL WIDTH CHECKBOX GRID) */}
             <div className="space-y-3 pt-4 border-t border-slate-100">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
@@ -669,7 +493,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                     Pilih Warga Penerima Manfaat ({selectedHouseIds.length} KK Terpilih)
                   </label>
                   <p className="text-[11px] text-slate-400">
-                    Centang KK yang berhak mendapatkan kuota paket bantuan / tebus murah tahap ini.
+                    Centang KK yang berhak mendapatkan alokasi paket bantuan tahap ini.
                   </p>
                 </div>
 
@@ -768,12 +592,12 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               </div>
             </div>
 
-            {/* 4. CATATAN TAMBAHAN */}
+            {/* 3. CATATAN TAMBAHAN */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">Catatan Tambahan &amp; Syarat Pengambilan</label>
               <textarea
                 rows={3}
-                placeholder="Contoh: Wajib bawa KTP asli, lokasi pembagian di Pos Ronda Blok C10 pukul 09.00 WITA. Bagi yang berhalangan hadir dapat diwakilkan anggota keluarga dalam 1 KK..."
+                placeholder="Contoh: Wajib bawa KTP asli & Kartu Keluarga. Lokasi pembagian di Pos Ronda Blok C10 pukul 09.00 WITA. Kupon telah dibagikan oleh staf kelurahan..."
                 value={formNotes}
                 onChange={e => setFormNotes(e.target.value)}
                 className="w-full px-4 py-2.5 text-xs border border-slate-300 rounded-xl focus:outline-none focus:border-amber-500"
@@ -807,11 +631,9 @@ _Pengurus RT 002 Huntap Tondo 2_`;
   // VIEW MODE: DETAIL (FULL VIEW - PROGRAM DETAIL & RECIPIENTS CHECKLIST)
   // =========================================================================
   if (viewMode === 'detail' && currentAid) {
-    const isTebus = currentAid.programType === 'tebus_murah';
-
     return (
       <div className="space-y-6 text-left w-full pb-16">
-        {/* Navigation & Header */}
+        {/* Navigation & Action Top Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <button
             onClick={handleBackToList}
@@ -863,15 +685,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-slate-100 pb-6">
             <div className="space-y-2 max-w-3xl">
               <div className="flex flex-wrap items-center gap-2">
-                <span className={`px-2.5 py-1 text-xs font-black uppercase rounded-lg border ${
-                  isTebus 
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                    : 'bg-amber-50 text-amber-700 border-amber-200'
-                }`}>
-                  {isTebus ? 'Sembako Murah (Tebus Subsidi)' : 'Bansos Cuma-Cuma (Gratis)'}
-                </span>
-
-                <span className="px-2.5 py-1 text-xs font-bold bg-slate-100 text-slate-700 rounded-lg">
+                <span className="px-2.5 py-1 text-xs font-extrabold uppercase rounded-lg border bg-amber-50 text-amber-700 border-amber-200">
                   {currentAid.category}
                 </span>
 
@@ -891,12 +705,12 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-slate-500 font-medium pt-1">
                 <span className="flex items-center gap-1">
                   <Building2 size={13} className="text-slate-400" />
-                  <span>Sumber: <strong className="text-slate-800">{currentAid.source}</strong></span>
+                  <span>Penyelenggara / Sumber: <strong className="text-slate-800">{currentAid.source}</strong></span>
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
                   <Calendar size={13} className="text-slate-400" />
-                  <span>Tanggal Penyaluran: <strong className="text-slate-800">{currentAid.distributionDate ? new Date(currentAid.distributionDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</strong></span>
+                  <span>Tanggal Pembagian: <strong className="text-slate-800">{currentAid.distributionDate ? new Date(currentAid.distributionDate).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</strong></span>
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
@@ -906,15 +720,15 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               </div>
 
               {currentAid.notes && (
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 mt-2">
-                  <strong className="text-slate-800">Catatan Khusus:</strong> {currentAid.notes}
+                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 mt-2">
+                  <strong className="text-slate-800">Catatan / Ketentuan Khusus:</strong> {currentAid.notes}
                 </div>
               )}
             </div>
 
             {/* Quick Progress Dial */}
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 shrink-0 text-center min-w-[180px]">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Progres Serah Terima</span>
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 shrink-0 text-center min-w-[200px]">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Progres Penyaluran Warga</span>
               <div className="text-3xl font-black font-mono tabular-nums text-indigo-600 mt-1">
                 {currentAidStats.received} <span className="text-sm font-semibold text-slate-400">/ {currentAidStats.total} KK</span>
               </div>
@@ -924,47 +738,11 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   style={{ width: `${currentAidStats.pct}%` }} 
                 />
               </div>
+              <p className="text-[11px] text-slate-500 mt-1.5 font-medium">
+                {currentAidStats.pending} paket menunggu diambil
+              </p>
             </div>
           </div>
-
-          {/* Sembako Murah Financial Summary Banner (If applicable) */}
-          {isTebus && (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Biaya Tebus per Paket</span>
-                <div className="text-lg sm:text-xl font-black font-mono text-emerald-900 mt-0.5">
-                  Rp {(currentAid.packagePrice || 0).toLocaleString('id-ID')}
-                </div>
-                {currentAid.marketPrice ? (
-                  <span className="text-[10px] text-emerald-700">Pasaran: Rp {currentAid.marketPrice.toLocaleString('id-ID')}</span>
-                ) : null}
-              </div>
-
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Total Kas Terkumpul</span>
-                <div className="text-lg sm:text-xl font-black font-mono text-emerald-900 mt-0.5">
-                  Rp {currentAidStats.totalRevenue.toLocaleString('id-ID')}
-                </div>
-                <span className="text-[10px] text-emerald-700">{currentAidStats.paid} KK telah membayar</span>
-              </div>
-
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Belum Lunas Bayar</span>
-                <div className="text-lg sm:text-xl font-black font-mono text-rose-600 mt-0.5">
-                  {currentAidStats.unpaid} KK
-                </div>
-                <span className="text-[10px] text-slate-500">Menunggu pembayaran</span>
-              </div>
-
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Gratis Khusus Dhuafa</span>
-                <div className="text-lg sm:text-xl font-black font-mono text-indigo-700 mt-0.5">
-                  {currentAidStats.waived} KK
-                </div>
-                <span className="text-[10px] text-slate-500">Bebas biaya tebus</span>
-              </div>
-            </div>
-          )}
 
           {/* Recipient Checklist Workspace (Full Width Table) */}
           <div className="space-y-4">
@@ -972,13 +750,13 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               <div className="flex items-center gap-2">
                 <UserCheck size={18} className="text-emerald-600" />
                 <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
-                  Daftar Warga Penerima ({currentAid.recipients?.length || 0} KK)
+                  Daftar Warga Penerima Bantuan ({currentAid.recipients?.length || 0} KK)
                 </h3>
               </div>
 
               {/* Filters for Recipients inside this program */}
               <div className="flex flex-wrap items-center gap-2">
-                <div className="relative min-w-[220px]">
+                <div className="relative min-w-[240px]">
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
                     type="text"
@@ -992,38 +770,22 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
                   <button
                     onClick={() => setRecipientFilter('all')}
-                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${recipientFilter === 'all' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500'}`}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${recipientFilter === 'all' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500'}`}
                   >
-                    Semua
+                    Semua ({currentAidStats.total})
                   </button>
                   <button
                     onClick={() => setRecipientFilter('pending')}
-                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${recipientFilter === 'pending' ? 'bg-white text-amber-800 shadow-2xs' : 'text-slate-500'}`}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${recipientFilter === 'pending' ? 'bg-white text-amber-800 shadow-2xs' : 'text-slate-500'}`}
                   >
-                    Belum Ambil
+                    Belum Diambil ({currentAidStats.pending})
                   </button>
                   <button
                     onClick={() => setRecipientFilter('received')}
-                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${recipientFilter === 'received' ? 'bg-white text-emerald-800 shadow-2xs' : 'text-slate-500'}`}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${recipientFilter === 'received' ? 'bg-white text-emerald-800 shadow-2xs' : 'text-slate-500'}`}
                   >
-                    Sudah Diterima
+                    Sudah Diterima ({currentAidStats.received})
                   </button>
-                  {isTebus && (
-                    <>
-                      <button
-                        onClick={() => setRecipientFilter('unpaid')}
-                        className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${recipientFilter === 'unpaid' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-500'}`}
-                      >
-                        Belum Bayar
-                      </button>
-                      <button
-                        onClick={() => setRecipientFilter('paid')}
-                        className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${recipientFilter === 'paid' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-500'}`}
-                      >
-                        Lunas Bayar
-                      </button>
-                    </>
-                  )}
                 </div>
               </div>
             </div>
@@ -1037,10 +799,9 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                       <th className="py-3 px-3.5 w-12 text-center">No</th>
                       <th className="py-3 px-3.5 w-28">Kavling</th>
                       <th className="py-3 px-3.5">Kepala Keluarga</th>
-                      <th className="py-3 px-3.5 w-32">Kategori</th>
-                      {isTebus && <th className="py-3 px-3.5 w-44">Status Bayar</th>}
-                      <th className="py-3 px-3.5 w-52">Serah Terima</th>
-                      <th className="py-3 px-3.5 w-36 text-center">Aksi WA &amp; Status</th>
+                      <th className="py-3 px-3.5 w-36">Kategori Warga</th>
+                      <th className="py-3 px-3.5 w-60">Status Serah Terima</th>
+                      <th className="py-3 px-3.5 w-40 text-center">Aksi &amp; WhatsApp</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -1079,29 +840,6 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                             </span>
                           </td>
 
-                          {/* Kolom Status Bayar khusus Sembako Murah */}
-                          {isTebus && (
-                            <td className="py-3 px-3.5">
-                              <div className="flex items-center gap-1.5">
-                                <select
-                                  value={r.paymentStatus || 'Belum Bayar'}
-                                  onChange={(e) => handleUpdatePaymentStatus(r, e.target.value as any)}
-                                  className={`px-2 py-1 text-[11px] font-bold rounded-lg border cursor-pointer ${
-                                    r.paymentStatus === 'Lunas'
-                                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                                      : r.paymentStatus === 'Gratis'
-                                      ? 'bg-indigo-50 text-indigo-800 border-indigo-300'
-                                      : 'bg-rose-50 text-rose-800 border-rose-300'
-                                  }`}
-                                >
-                                  <option value="Belum Bayar">❌ Belum Bayar</option>
-                                  <option value="Lunas">✅ Lunas (Tunai)</option>
-                                  <option value="Gratis">🎁 Gratis (Dhuafa)</option>
-                                </select>
-                              </div>
-                            </td>
-                          )}
-
                           {/* Kolom Status Serah Terima */}
                           <td className="py-3 px-3.5">
                             {isInlineEditing ? (
@@ -1111,19 +849,19 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                                   placeholder="Nama pengambil..."
                                   value={inlineHandoverName}
                                   onChange={e => setInlineHandoverName(e.target.value)}
-                                  className="px-2 py-1 text-xs border border-emerald-400 rounded-lg focus:outline-none bg-white w-32"
+                                  className="px-2.5 py-1 text-xs border border-emerald-400 rounded-lg focus:outline-none bg-white w-36 font-medium"
                                   autoFocus
                                 />
                                 <button
                                   onClick={() => handleToggleHandover(r, true, inlineHandoverName)}
-                                  className="p-1 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 cursor-pointer"
+                                  className="p-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 cursor-pointer shadow-2xs"
                                   title="Simpan Serah Terima"
                                 >
-                                  <Check size={14} />
+                                  <Check size={14} className="stroke-[3]" />
                                 </button>
                                 <button
                                   onClick={() => setInlineHandoverHouseId(null)}
-                                  className="p-1 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 cursor-pointer"
+                                  className="p-1.5 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 cursor-pointer"
                                   title="Batal"
                                 >
                                   <X size={14} />
@@ -1133,13 +871,13 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                               <div>
                                 <span className="inline-flex items-center gap-1 text-emerald-700 font-extrabold text-xs">
                                   <Check size={13} className="stroke-[3]" />
-                                  <span>Diterima</span>
+                                  <span>Telah Diterima</span>
                                 </span>
-                                <p className="text-[10px] text-slate-500 truncate max-w-[170px]" title={r.receivedBy || r.headOfFamily}>
-                                  Oleh: <strong className="text-slate-800">{r.receivedBy || r.headOfFamily}</strong>
+                                <p className="text-[11px] text-slate-600 truncate max-w-[200px]" title={r.receivedBy || r.headOfFamily}>
+                                  Oleh: <strong className="text-slate-900">{r.receivedBy || r.headOfFamily}</strong>
                                 </p>
                                 {r.receivedAt && (
-                                  <p className="text-[9px] text-slate-400 font-mono">
+                                  <p className="text-[10px] text-slate-400 font-mono">
                                     {new Date(r.receivedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WITA
                                   </p>
                                 )}
@@ -1147,7 +885,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                             ) : (
                               <span className="inline-flex items-center gap-1 text-amber-600 font-medium text-xs">
                                 <Clock size={12} />
-                                <span>Belum Diambil</span>
+                                <span>Belum Diambil di Posko</span>
                               </span>
                             )}
                           </td>
@@ -1159,7 +897,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                                 <button
                                   onClick={(e) => handleSendPickupReminder(r, e)}
                                   className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl transition-colors cursor-pointer"
-                                  title="Kirim Panggilan Pengambilan via WhatsApp"
+                                  title="Kirim Pemberitahuan Pengambilan via WhatsApp"
                                 >
                                   <Phone size={13} />
                                 </button>
@@ -1169,7 +907,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                                 <button
                                   onClick={() => handleToggleHandover(r, false)}
                                   className="px-2.5 py-1 text-[11px] font-bold bg-slate-100 hover:bg-rose-50 hover:text-rose-700 text-slate-600 border border-slate-200 rounded-xl transition-colors cursor-pointer"
-                                  title="Kembalikan ke status Menunggu"
+                                  title="Kembalikan ke status Belum Diambil"
                                 >
                                   Batal
                                 </button>
@@ -1182,7 +920,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                                   className="px-3 py-1 text-[11px] font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl shadow-2xs transition-colors cursor-pointer flex items-center gap-1"
                                 >
                                   <CheckSquare size={13} />
-                                  <span>Tandai</span>
+                                  <span>Tandai Terima</span>
                                 </button>
                               )}
                             </div>
@@ -1193,8 +931,8 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
                     {filteredRecipients.length === 0 && (
                       <tr>
-                        <td colSpan={isTebus ? 7 : 6} className="py-8 text-center text-slate-400 text-xs">
-                          Tidak ada warga penerima yang cocok dengan filter.
+                        <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
+                          Tidak ada warga penerima yang cocok dengan filter pencarian.
                         </td>
                       </tr>
                     )}
@@ -1209,7 +947,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
   }
 
   // =========================================================================
-  // VIEW MODE: LIST (FULL VIEW - DIRECTORY OF ALL AID PROGRAMS)
+  // VIEW MODE: LIST (FULL VIEW - DIRECTORY OF ALL AID & SEMBAKO PROGRAMS)
   // =========================================================================
   return (
     <div className="space-y-6 text-left w-full pb-16">
@@ -1223,10 +961,10 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               <span>Logistik &amp; Penyaluran Sembako RT 02</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-              Penyaluran Bantuan &amp; Sembako Warga
+              Penyaluran Bantuan &amp; Sembako Murah Warga
             </h2>
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Manajemen komprehensif program bantuan sosial cuma-cuma (Beras Bulog, BLT, PKH) dan pasar sembako murah bersubsidi warga. Dilengkapi bukti tanda terima digital &amp; berita acara resmi RT 02.
+              Manajemen logistik bantuan pangan beras Bulog, operasi sembako murah pemerintah setempat (Disperindag/Kelurahan), BLT, dan santunan warga. Dilengkapi bukti serah terima digital &amp; berita acara resmi RT 02.
             </p>
           </div>
 
@@ -1279,15 +1017,13 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
         <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-2xs">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Kas Tebus Murah</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <DollarSign size={16} />
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Menunggu Diambil</span>
+            <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+              <Clock size={16} />
             </div>
           </div>
-          <div className="text-xl sm:text-2xl font-extrabold font-mono tabular-nums text-emerald-700">
-            Rp {metrics.totalTebusRevenue.toLocaleString('id-ID')}
-          </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">Dana masuk subsidi sembako</p>
+          <div className="text-2xl sm:text-3xl font-extrabold font-mono tabular-nums text-rose-600">{metrics.pendingHandover}</div>
+          <p className="text-[11px] text-slate-500 mt-0.5">Sisa paket di posko RT 02</p>
         </div>
       </div>
 
@@ -1315,16 +1051,16 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               Selesai 100%
             </button>
             <button
-              onClick={() => setStatusFilter('gratis')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer shrink-0 ${statusFilter === 'gratis' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-slate-500 hover:text-slate-800'}`}
+              onClick={() => setStatusFilter('sembako')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer shrink-0 ${statusFilter === 'sembako' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-500 hover:text-slate-800'}`}
             >
-              Bansos Gratis
+              Sembako Murah Pemda
             </button>
             <button
-              onClick={() => setStatusFilter('tebus_murah')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer shrink-0 ${statusFilter === 'tebus_murah' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-500 hover:text-slate-800'}`}
+              onClick={() => setStatusFilter('beras')}
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors cursor-pointer shrink-0 ${statusFilter === 'beras' ? 'bg-white text-indigo-700 shadow-2xs' : 'text-slate-500 hover:text-slate-800'}`}
             >
-              Sembako Murah
+              Beras Bulog
             </button>
           </div>
 
@@ -1333,7 +1069,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Cari program bantuan / sumber..."
+              placeholder="Cari agenda bantuan / sumber..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 bg-white"
@@ -1349,7 +1085,6 @@ _Pengurus RT 002 Huntap Tondo 2_`;
           const receivedCount = (aid.recipients || []).filter(r => r.status === 'Diterima').length;
           const progressPct = totalRecipients > 0 ? Math.round((receivedCount / totalRecipients) * 100) : 0;
           const isDone = receivedCount === totalRecipients && totalRecipients > 0;
-          const isTebus = aid.programType === 'tebus_murah';
 
           return (
             <div
@@ -1360,15 +1095,15 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 {/* Header Tag & Menu */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md border ${
-                      isTebus 
-                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                        : 'bg-amber-50 text-amber-800 border-amber-200'
-                    }`}>
-                      {isTebus ? 'Sembako Murah' : 'Bansos Gratis'}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
                       {aid.category}
+                    </span>
+                    <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
+                      isDone 
+                        ? 'bg-emerald-100 text-emerald-800' 
+                        : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {isDone ? 'Selesai 100%' : `${progressPct}% Tersalurkan`}
                     </span>
                   </div>
 
@@ -1401,22 +1136,16 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   </p>
                 </div>
 
-                {/* Subsidized Price Tag (if Tebus Murah) */}
-                {isTebus && (
-                  <div className="p-2.5 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] text-emerald-800 font-bold uppercase">Harga Tebus Subsidi:</span>
-                      <div className="text-sm font-black font-mono text-emerald-900">
-                        Rp {(aid.packagePrice || 0).toLocaleString('id-ID')} <span className="text-[10px] font-normal text-slate-500">/ {aid.unit || 'paket'}</span>
-                      </div>
-                    </div>
-                    {aid.marketPrice && aid.marketPrice > (aid.packagePrice || 0) && (
-                      <span className="text-[10px] font-extrabold bg-emerald-200/60 text-emerald-900 px-2 py-0.5 rounded-md">
-                        Hemat {Math.round(((aid.marketPrice - (aid.packagePrice || 0)) / aid.marketPrice) * 100)}%
-                      </span>
-                    )}
-                  </div>
-                )}
+                {/* Meta details */}
+                <div className="flex items-center justify-between text-[11px] text-slate-500 font-medium pt-1 border-t border-slate-50">
+                  <span className="flex items-center gap-1">
+                    <Calendar size={12} className="text-slate-400" />
+                    <span>{aid.distributionDate ? new Date(aid.distributionDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}</span>
+                  </span>
+                  <span className="font-bold text-slate-700">
+                    {aid.totalQuota} {aid.unit}
+                  </span>
+                </div>
 
                 {/* Progress Bar */}
                 <div className="space-y-1 pt-1">
@@ -1457,7 +1186,7 @@ _Pengurus RT 002 Huntap Tondo 2_`;
             <div>
               <h4 className="text-base font-extrabold text-slate-800">Belum Ada Program Bantuan Tercatat</h4>
               <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-                Mulai catat program bantuan pangan gratis (Beras Bulog/BLT) atau pasar sembako murah bersubsidi warga dengan mengklik tombol di atas.
+                Mulai catat program sembako murah pemerintah setempat, beras Bulog, atau bantuan warga dengan mengklik tombol di atas.
               </p>
             </div>
             <button

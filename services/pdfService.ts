@@ -5994,16 +5994,7 @@ export const generateSocialAidHandoverPDF = async (aid: SocialAidItem, customCon
     },
     body: [
       ['Nama Program', ':', aid.title || '-', 'Tanggal Pembagian', ':', formattedDate],
-      [
-        aid.programType === 'tebus_murah' ? 'Jenis Program' : 'Kategori Bantuan',
-        ':',
-        aid.programType === 'tebus_murah' 
-          ? `Tebus Murah (Rp ${(aid.packagePrice || 0).toLocaleString('id-ID')})`
-          : (aid.category || '-'),
-        'Sumber Bantuan',
-        ':',
-        aid.source || '-'
-      ],
+      ['Kategori Bantuan', ':', aid.category || '-', 'Sumber Bantuan', ':', aid.source || '-'],
       ['Total Kuota', ':', `${aid.totalQuota || totalTarget} ${aid.unit || 'Paket'}`, 'Status Penyaluran', ':', `${totalReceived} dari ${totalTarget} KK Diterima`]
     ],
     margin: { left: margin, right: margin }
@@ -6027,9 +6018,7 @@ export const generateSocialAidHandoverPDF = async (aid: SocialAidItem, customCon
 
   const tableBody = sortedRecipients.map((r, idx) => {
     const tag = r.isPKH ? 'PKH' : r.isBLT ? 'BLT' : r.isBPNT ? 'BPNT' : r.isPraSejahtera ? 'Pra-Sejahtera' : 'Warga RT';
-    const statusText = aid.programType === 'tebus_murah'
-      ? `${r.status === 'Diterima' ? 'Diterima' : 'Menunggu'} [${r.paymentStatus === 'Lunas' ? 'Lunas' : r.paymentStatus === 'Gratis' ? 'Gratis' : 'Belum Bayar'}]`
-      : (r.status === 'Diterima' ? 'LUNAS TERIMA' : 'Menunggu');
+    const statusText = r.status === 'Diterima' ? 'LUNAS TERIMA' : 'Menunggu Ambil';
     const dateText = r.receivedAt ? new Date(r.receivedAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit' }) : '';
     const receiverText = r.receivedBy ? `${r.receivedBy} (${dateText})` : (idx % 2 === 1 ? `${idx + 1}. ................` : `${idx + 1}. ................`);
     return [

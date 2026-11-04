@@ -1694,26 +1694,17 @@ export interface SocialAidRecipient {
   status: 'Menunggu' | 'Diterima';
   receivedAt?: string; // ISO timestamp
   receivedBy?: string; // Nama pengambil
-  // Program Sembako Murah / Tebus Murah Berbayar
-  paymentStatus?: 'Lunas' | 'Belum Bayar' | 'Gratis';
-  paidAmount?: number;
-  paymentMethod?: 'Tunai' | 'QRIS' | 'Kas RT';
-  paidAt?: string;
   notes?: string;
 }
 
 export interface SocialAidItem {
   id: string;
   tenantId?: string;
-  title: string; // e.g. "Beras CPP Cadangan Pangan Pemerintah Tahap II"
-  category: 'Beras' | 'Sembako' | 'BLT / Uang Tunai' | 'Nutrisi Balita & Lansia' | 'Kesehatan & Sanitasi' | 'Lainnya';
-  source: string; // e.g. "Kelurahan Tondo / Bapanas", "Kemensos RI", "Baznas Kota Palu"
-  // Jenis Program: Gratis (Bansos Murni) atau Tebus Murah (Sembako Subsidi Berbayar)
-  programType?: 'gratis' | 'tebus_murah';
-  packagePrice?: number; // Biaya tebus per paket bagi warga (misal Rp 25.000 / Rp 50.000)
-  marketPrice?: number; // Estimasi nilai paket di pasaran (misal Rp 120.000)
+  title: string; // e.g. "Sembako Murah Dinas Perdagangan Kota Palu"
+  category: 'Sembako Murah' | 'Beras Bulog' | 'BLT / Tunai' | 'Nutrisi Balita & Lansia' | 'Kesehatan & Sanitasi' | 'Lainnya';
+  source: string; // e.g. "Dinas Perindag Kota Palu", "Kelurahan Tondo / Bulog", "Kemensos RI"
   totalQuota: number;
-  unit: string; // e.g. "Karung 10kg", "Paket Dus", "Amplop / KK"
+  unit: string; // e.g. "Paket Dus", "Karung 10kg", "Kupon Sembako"
   distributionDate: string; // YYYY-MM-DD
   status: 'Draft' | 'Berjalan' | 'Selesai';
   notes?: string;
