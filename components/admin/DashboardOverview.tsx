@@ -239,65 +239,137 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         {/* Quiet Background Texture */}
         <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
         
-        <div className="relative z-10 flex flex-col justify-between">
-          <div className="space-y-3 max-w-2xl">
-            {/* Executive Context Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-              <div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-wider">
-                    Pusat Kendali RT
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">
-                    Huntap Tondo 2 • Periode Berjalan
-                  </span>
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
-                  Dasbor Eksekutif {RT_NAME}
-                </h2>
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          {/* Left Column: Context, Heading, Description & Action Buttons */}
+          <div className="lg:col-span-7 xl:col-span-8 space-y-4">
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-wider">
+                  Pusat Kendali RT
+                </span>
+                <span className="text-xs text-slate-400 font-medium">
+                  Huntap Tondo 2 • Periode Berjalan
+                </span>
               </div>
-              
-              <div className="flex items-center gap-2.5 self-start sm:self-auto px-3.5 py-2 rounded-2xl bg-slate-50 border border-slate-200/80">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                <span className="text-xs font-bold text-slate-700">Sistem Operasional Aktif</span>
-              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                Dasbor Eksekutif {RT_NAME}
+              </h2>
+              <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed max-w-2xl">
+                Pusat orkestrasi administrasi kependudukan, tata kelola kas terdesentralisasi, evaluasi sanitasi 5 pilar STBM, serta pengawasan keamanan lingkungan warga.
+              </p>
             </div>
 
-            <p className="text-slate-500 font-medium text-xs sm:text-sm leading-relaxed max-w-xl">
-              Pusat orkestrasi administrasi kependudukan, tata kelola kas terdesentralisasi, evaluasi sanitasi 5 pilar STBM, serta pengawasan keamanan lingkungan warga.
-            </p>
+            {/* Action Buttons - Clean Inline Hierarchy */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-1">
+              <button 
+                onClick={() => onTabChange('residents')} 
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-xs hover:shadow-md active:scale-95 cursor-pointer"
+              >
+                <Plus size={15} className="stroke-[2.5px]" />
+                <span>Tambah Warga</span>
+              </button>
 
-            {/* Action CTA Buttons */}
-            <div className="pt-2 space-y-2.5">
               <button 
                 onClick={handleGenerateSummary} 
                 disabled={isAiLoading}
-                className="w-full py-3.5 px-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-sm relative flex items-center justify-center gap-2 transition-colors active:scale-[0.99] cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs hover:shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                 aria-label="Buat ringkasan AI eksekutif"
               >
-                <Sparkles size={16} className="text-indigo-200 shrink-0" /> 
-                <span className="tracking-normal font-bold">
+                <Sparkles size={14} className="text-indigo-200 shrink-0" /> 
+                <span>
                   {isAiLoading ? 'Menganalisis Data...' : 'Ringkasan AI Eksekutif'}
                 </span>
-                <ArrowRight size={15} className="absolute right-4 sm:right-5 text-white/80 shrink-0" />
               </button>
-              
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                <button 
-                  onClick={handleExportData} 
-                  className="flex items-center justify-center gap-2 py-3 px-3 bg-white hover:bg-slate-50 border border-slate-200/90 rounded-2xl text-xs font-bold text-slate-800 transition-colors shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer"
-                >
-                  <Download size={14} className="text-slate-600" />
-                  <span>Ekspor Ringkasan</span>
-                </button>
-                
-                <button 
-                  onClick={() => onTabChange('residents')} 
-                  className="flex items-center justify-center gap-2 py-3 px-3 bg-[#dcfce7] hover:bg-[#cbfada] border border-emerald-200/80 text-[#15803d] rounded-2xl text-xs font-bold transition-colors shadow-2xs hover:shadow-xs active:scale-[0.98] cursor-pointer"
-                >
-                  <Plus size={15} className="text-[#15803d] stroke-[2.5px]" />
-                  <span>Tambah Warga</span>
-                </button>
+
+              <button 
+                onClick={handleExportData} 
+                className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200/90 rounded-xl text-xs font-bold text-slate-700 transition-all shadow-2xs hover:shadow-xs active:scale-95 cursor-pointer"
+              >
+                <Download size={14} className="text-slate-500" />
+                <span>Ekspor Ringkasan</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Right Column: Executive Quick Snapshot Widget */}
+          <div className="lg:col-span-5 xl:col-span-4 bg-slate-50/90 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-3 shadow-2xs">
+            <div className="flex items-center justify-between gap-2 border-b border-slate-200/70 pb-2.5">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/40" />
+                <span className="text-xs font-bold text-slate-800">Sistem Operasional Aktif</span>
+              </div>
+              <span className="text-[10px] font-mono text-slate-400 font-semibold uppercase tracking-wider">
+                Live Status
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              {/* Stat 1: Warga */}
+              <div 
+                onClick={() => onTabChange('residents')}
+                className="p-2.5 bg-white rounded-xl border border-slate-200/70 hover:border-indigo-300 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center justify-between text-slate-400 mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Warga RT</span>
+                  <Users size={12} className="text-indigo-600" />
+                </div>
+                <div className="text-base font-black font-mono tabular-nums text-slate-900">
+                  {totalResidents} <span className="text-[10px] font-sans font-bold text-slate-500">Jiwa</span>
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
+                  {occupiedHouses} KK Dihuni
+                </p>
+              </div>
+
+              {/* Stat 2: Kas RT */}
+              <div 
+                onClick={() => onTabChange('finance')}
+                className="p-2.5 bg-white rounded-xl border border-slate-200/70 hover:border-emerald-300 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center justify-between text-slate-400 mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Saldo Kas</span>
+                  <DollarSign size={12} className="text-emerald-600" />
+                </div>
+                <div className="text-sm font-black font-mono tabular-nums text-slate-900 truncate" title={`Rp ${balance.toLocaleString('id-ID')}`}>
+                  Rp {balance >= 1000000 ? `${(balance / 1000000).toFixed(1)} jt` : balance.toLocaleString('id-ID')}
+                </div>
+                <p className="text-[10px] text-emerald-600 font-bold truncate mt-0.5">
+                  Arus Kas Sehat
+                </p>
+              </div>
+
+              {/* Stat 3: Iuran */}
+              <div 
+                onClick={() => onTabChange('finance', 'iuran')}
+                className="p-2.5 bg-white rounded-xl border border-slate-200/70 hover:border-blue-300 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center justify-between text-slate-400 mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Iuran RT</span>
+                  <CheckCircle2 size={12} className="text-blue-600" />
+                </div>
+                <div className="text-base font-black font-mono tabular-nums text-slate-900">
+                  {wastePaymentPercentage}%
+                </div>
+                <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">
+                  {paidWasteCount} dari {totalOccupiedHouses} KK
+                </p>
+              </div>
+
+              {/* Stat 4: Antrean Tugas */}
+              <div 
+                onClick={() => onTabChange('services')}
+                className="p-2.5 bg-white rounded-xl border border-slate-200/70 hover:border-amber-300 transition-colors cursor-pointer group"
+              >
+                <div className="flex items-center justify-between text-slate-400 mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tindak Lanjut</span>
+                  <AlertTriangle size={12} className="text-amber-500" />
+                </div>
+                <div className="text-base font-black font-mono tabular-nums text-slate-900">
+                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length + residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + newReports} <span className="text-[10px] font-sans font-bold text-slate-500">Item</span>
+                </div>
+                <p className="text-[10px] text-amber-600 font-bold truncate mt-0.5">
+                  {newReports} Aduan · {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Surat
+                </p>
               </div>
             </div>
           </div>
