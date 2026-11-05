@@ -19,6 +19,85 @@ import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaCha
 // Destructure React Router DOM components
 const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams, Navigate } = ReactRouterDOM;
 
+const ROUTE_SEO_META: Record<string, { title: string; description: string; noindex?: boolean }> = {
+  '/': {
+    title: 'TERAS Warga RT 002 RW 020 Huntap Tondo 2 Palu — Layanan Mandiri & Transparansi Digital',
+    description: 'Portal Resmi Rukun Tetangga 002 / RW 020 Hunian Tetap (Huntap) Tondo 2, Kelurahan Tondo, Kota Palu. Layanan surat pengantar mandiri, transparansi kas, siskamling, bank sampah, dan mitigasi bencana.'
+  },
+  '/info': {
+    title: 'Pusat Informasi, Transparansi Kas & Siskamling — TERAS Warga RT 002 Palu',
+    description: 'Pengumuman resmi pengurus, laporan transparansi kas masuk/keluar real-time, jadwal ronda malam siskamling, dan agenda warga RT 002 RW 020 Huntap Tondo 2.'
+  },
+  '/services': {
+    title: 'Layanan Administrasi Surat & Pengaduan Mandiri — TERAS Warga RT 002 Palu',
+    description: 'Ajukan surat pengantar RT secara online, lapor keluhan/kerusakan fasilitas lingkungan, lapor tamu menginap 1x24 jam, dan lapor mutasi warga RT 002 Huntap Tondo 2.'
+  },
+  '/about': {
+    title: 'Profil Resmi & Struktur Pengurus RT 002 RW 020 Huntap Tondo 2 Palu',
+    description: 'Mengenal nilai TERAS (Teknologi, Ekraf, Rukun, Aman, Sinergi), statistik demografi Blok C5-C12, struktur pengurus, dan lokasi Sekretariat RT 002 RW 020 Huntap Tondo 2.'
+  },
+  '/peta': {
+    title: 'Peta Kavling Interaktif, Jalur Evakuasi & Monitor Gempa BMKG — RT 002 Huntap Tondo 2',
+    description: 'Peta geospasial kavling Blok C5-C12, simulasi rute evakuasi mandiri, pemantauan gempa bumi Sesar Palu-Koro via BMKG, dan daftar tas siaga bencana RT 002.'
+  },
+  '/rules': {
+    title: 'Peraturan Lingkungan & Arsip Notula Musyawarah — RT 002 Huntap Tondo 2',
+    description: 'Pedoman tata tertib warga, penghuni kontrakan, keamanan parkir, kebersihan lingkungan, serta arsip hasil kesepakatan musyawarah RT 002 RW 020.'
+  },
+  '/umkm': {
+    title: 'Pasar Kreatif UMKM & Direktori Jasa Keahlian Warga — RT 002 Huntap Tondo 2',
+    description: 'Dukung ekonomi lokal warga Huntap Tondo 2. Katalog kuliner, warung kelontong, kerajinan, serta direktori tukang dan keahlian warga RT 002.'
+  },
+  '/sampah': {
+    title: 'Bank Sampah Digital & Tabungan Lingkungan — RT 002 Huntap Tondo 2',
+    description: 'Ubah sampah anorganik terpilah menjadi saldo tabungan dan pembayar iuran bulanan di Bank Sampah Digital RT 002 RW 020 Huntap Tondo 2.'
+  },
+  '/kesehatan': {
+    title: 'Posyandu Digital & Pemantauan 5 Pilar STBM — RT 002 Huntap Tondo 2',
+    description: 'Layanan kesehatan masyarakat, grafik tumbuh kembang balita, pemantauan lansia/ibu hamil, serta sanitasi total berbasis masyarakat (STBM) RT 002.'
+  },
+  '/donasi': {
+    title: 'Donasi Sosial & Kas Solidaritas Warga — RT 002 Huntap Tondo 2',
+    description: 'Wadah gotong royong, santunan duka, dan penggalangan dana sosial kemanusiaan warga RT 002 RW 020 Huntap Tondo 2.'
+  },
+  '/dokumen': {
+    title: 'Arsip Dokumen Publik, SK & Formulir Resmi — RT 002 Huntap Tondo 2',
+    description: 'Unduh dokumen publik, Surat Keputusan (SK) RT, aturan lingkungan, formulir administrasi, dan notulensi rapat RT 002.'
+  },
+  '/kegiatan': {
+    title: 'Agenda & Presensi QR Kegiatan Warga — RT 002 Huntap Tondo 2',
+    description: 'Jadwal kerja bakti, rapat warga, dan sistem presensi QR Code digital kegiatan kemasyarakatan RT 002 RW 020.'
+  },
+  '/welcome': {
+    title: 'Buku Saku & Panduan Warga Baru — RT 002 RW 020 Huntap Tondo 2',
+    description: 'Panduan lengkap lapor diri 1x24 jam, alur layanan, jadwal kebersihan, dan kontak penting bagi warga atau penghuni baru di RT 002 Huntap Tondo 2.'
+  },
+  '/faq': {
+    title: 'Pusat Bantuan & Tanya Jawab (FAQ) — TERAS Warga RT 002 Palu',
+    description: 'Jawaban resmi atas pertanyaan seputar pengurusan surat pengantar, pembayaran iuran kas, giliran ronda, dan layanan RT 002.'
+  },
+  '/resident': {
+    title: 'Portal Warga & Kartu E-ID Digital — TERAS Warga RT 002',
+    description: 'Dasbor pribadi warga untuk cek iuran bulanan, lapor meteran air PDAM, unduh surat pengantar, dan pembaruan data KK mandiri.',
+    noindex: true
+  },
+  '/admin': {
+    title: 'Dasbor Eksekutif Pengurus RT 002 — TERAS Warga',
+    description: 'Panel kendali administrasi kependudukan, keuangan, dan layanan pengurus RT 002.',
+    noindex: true
+  },
+  '/master': {
+    title: 'Master Panel RW — TERAS Warga',
+    description: 'Panel agregasi dan monitoring tingkat RW.',
+    noindex: true
+  },
+  '/superadmin': {
+    title: 'Super Admin Portal — TERAS Warga',
+    description: 'Panel manajemen multi-tenant dan konfigurasi sistem.',
+    noindex: true
+  }
+};
+
 const ScrollToTop = () => {
   const { pathname, hash } = useLocation();
 
@@ -32,6 +111,28 @@ const ScrollToTop = () => {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
+
+    // Dynamic SEO Title, Meta Description & Robots update per route
+    const cleanPath = pathname === '' ? '/' : pathname;
+    const matchedKey = Object.keys(ROUTE_SEO_META).find(k => k !== '/' && cleanPath.startsWith(k)) || '/';
+    const seo = ROUTE_SEO_META[matchedKey] || ROUTE_SEO_META['/'];
+
+    document.title = seo.title;
+
+    const setMeta = (selector: string, content: string) => {
+      const el = document.querySelector(selector);
+      if (el) el.setAttribute('content', content);
+    };
+
+    setMeta('meta[name="description"]', seo.description);
+    setMeta('meta[property="og:title"]', seo.title);
+    setMeta('meta[property="og:description"]', seo.description);
+    setMeta('meta[name="twitter:title"]', seo.title);
+    setMeta('meta[name="twitter:description"]', seo.description);
+    setMeta(
+      'meta[name="robots"]',
+      seo.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1'
+    );
   }, [pathname, hash]);
 
   return null;

@@ -73,7 +73,7 @@ _Pembaruan Terkini: ${weather.lastUpdated || 'Hari ini'}_
 ☁️ *Kondisi*: ${weather.condition}${alertNote}
 
 📍 _Stasiun Pantau: Huntap Tondo 2, Palu Timur_
-📲 _Cek portal warga resmi:_ https://teraswarga02.web.app`;
+📲 _Cek portal warga resmi:_ ${window.location.origin}`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');

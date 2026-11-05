@@ -633,7 +633,7 @@ ${m.summary}
 
 ───────────────────────
 _Disahkan dan berlaku bagi seluruh warga RT 002 Huntap Tondo 2._
-📲 Akses notula lengkap di: https://teraswarga02.web.app/rules?tab=minutes`;
+📲 Akses notula lengkap di: ${window.location.origin}/#/rules?tab=minutes`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');

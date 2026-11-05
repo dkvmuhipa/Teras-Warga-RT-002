@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'prompt',
         injectRegister: 'script',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg', 'firebase-messaging-sw.js'],
+        includeAssets: ['logo-rt.svg', 'peta-wilayah-huntap-tondo-2.png', 'robots.txt', 'sitemap.xml', 'firebase-messaging-sw.js'],
         workbox: {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
@@ -90,21 +90,21 @@ export default defineConfig(({ mode }) => {
               name: 'Layanan Surat RT',
               short_name: 'Surat RT',
               description: 'Pengajuan & Unduh Surat Pengantar RT',
-              url: '/layanan',
+              url: '/#/services',
               icons: [{ src: 'logo-rt.svg', sizes: '192x192' }]
             },
             {
               name: 'Bank Sampah Digital',
               short_name: 'Bank Sampah',
               description: 'Cek saldo tabungan & setoran sampah anorganik',
-              url: '/bank-sampah',
+              url: '/#/sampah',
               icons: [{ src: 'logo-rt.svg', sizes: '192x192' }]
             },
             {
               name: 'Jadwal Siskamling / Ronda',
               short_name: 'Ronda',
               description: 'Cek jadwal giliran ronda & presensi pos checkpoint',
-              url: '/siskamling',
+              url: '/#/info',
               icons: [{ src: 'logo-rt.svg', sizes: '192x192' }]
             }
           ]

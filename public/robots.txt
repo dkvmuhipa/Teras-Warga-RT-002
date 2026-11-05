@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /#/admin
+Disallow: /#/master
+Disallow: /#/superadmin
+
+Sitemap: https://terasrt02.vercel.app/sitemap.xml

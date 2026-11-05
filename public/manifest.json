@@ -1,7 +1,7 @@
 {
-  "short_name": "Teras RT02",
-  "name": "Teras RT 02 - Layanan Warga Terpadu",
-  "description": "Sistem Informasi Digital TERAS RT 02. Mengusung Teknologi, Ekraf, Rukun, Aman, dan Sinergi.",
+  "short_name": "TERAS RT 02",
+  "name": "TERAS Warga RT 002 RW 020 — Huntap Tondo 2 Palu",
+  "description": "Portal Resmi Layanan Warga Mandiri, Transparansi Kas, Siskamling, Bank Sampah & Mitigasi Bencana RT 002 RW 020 Huntap Tondo 2 Kota Palu.",
   "icons": [
     {
       "src": "/logo-rt.svg",
@@ -12,7 +12,7 @@
   ],
   "start_url": "/",
   "background_color": "#ffffff",
-  "theme_color": "#4f46e5",
+  "theme_color": "#0f172a",
   "display": "standalone",
   "orientation": "portrait"
 }

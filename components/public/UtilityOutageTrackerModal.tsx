@@ -65,7 +65,7 @@ export const UtilityOutageTrackerModal: React.FC<UtilityOutageTrackerModalProps>
 ℹ️ *Keterangan*: ${outage.description}
 ${outage.emergencyNotes ? `🚨 *Catatan Khusus*: ${outage.emergencyNotes}\n` : ''}
 📞 *Kontak Resmi*: ${outage.contactCenter || 'PLN 123 / PDAM Palu'}
-📲 _Cek informasi lengkap di Portal Warga:_ https://teraswarga02.web.app`;
+📲 _Cek informasi lengkap di Portal Warga:_ ${window.location.origin}`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');

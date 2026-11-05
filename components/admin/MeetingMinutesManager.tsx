@@ -232,7 +232,7 @@ ${m.summary}
 
 ───────────────────────
 _Dokumen resmi ini telah disahkan dan berlaku bagi seluruh warga RT 002 / RW 020 Huntap Tondo 2._
-📲 Cek arsip lengkap di portal: https://teraswarga02.web.app/rules?tab=minutes`;
+📲 Cek arsip lengkap di portal: ${window.location.origin}/#/rules?tab=minutes`;
 
     openWhatsAppShare(message);
   };
