@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { App } from "./App";
 import { ConfirmProvider } from "./context/ConfirmContext";
 import { TenantProvider } from "./context/TenantContext";
+import { GlobalErrorBoundary } from "./components/ui/GlobalErrorBoundary";
 import "./index.css";
 
 // Register PWA Service Worker (Only in Production mode to prevent Vite HMR dev conflicts)
@@ -34,10 +35,12 @@ const container = document.getElementById("root");
 const root = createRoot(container!);
 root.render(
   <React.StrictMode>
-    <ConfirmProvider>
-      <TenantProvider>
-        <App />
-      </TenantProvider>
-    </ConfirmProvider>
+    <GlobalErrorBoundary>
+      <ConfirmProvider>
+        <TenantProvider>
+          <App />
+        </TenantProvider>
+      </ConfirmProvider>
+    </GlobalErrorBoundary>
   </React.StrictMode>
 );

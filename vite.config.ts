@@ -1,18 +1,28 @@
-
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
-// Fix: Import process from node:process to ensure the TypeScript compiler recognizes Node.js process methods like cwd()
 import process from 'node:process';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Fix: Explicitly using the imported process object to get the current working directory
   const cwd = process.cwd();
   const env = loadEnv(mode, cwd, '');
-  
+
+  // Filter environment variables exposed to the client bundle to prevent leaking OS/CI secrets
+  const safeClientEnv = Object.fromEntries(
+    Object.entries(env).filter(
+      ([key]) =>
+        key.startsWith('VITE_') ||
+        key === 'API_KEY' ||
+        key === 'GEMINI_API_KEY' ||
+        key === 'GOOGLE_MAPS_PLATFORM_KEY'
+    )
+  );
+  const resolvedApiKey = env.GEMINI_API_KEY || env.API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY || '';
+  const resolvedMapsKey = env.GOOGLE_MAPS_PLATFORM_KEY || process.env.GOOGLE_MAPS_PLATFORM_KEY || '';
+
   return {
     plugins: [
       react(),
@@ -20,11 +30,74 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'prompt',
         injectRegister: 'script',
-        includeAssets: ['logo-rt.svg', 'peta-wilayah-huntap-tondo-2.png', 'robots.txt', 'sitemap.xml', 'firebase-messaging-sw.js'],
+        includeAssets: ['logo-rt.svg', 'robots.txt', 'sitemap.xml', 'firebase-messaging-sw.js'],
         workbox: {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+          globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
+          globIgnores: [
+            '**/excel-*.js',
+            '**/excelService-*.js',
+            '**/pdf-*.js',
+            '**/pdfService-*.js',
+            '**/charts-*.js',
+            '**/Admin*.js',
+            '**/SuperAdmin*.js',
+            '**/MasterDashboard-*.js',
+            '**/RWAggregationDashboard-*.js',
+            '**/ResidentManager-*.js',
+            '**/ResidentModals-*.js',
+            '**/ServiceManager-*.js',
+            '**/ContentManager-*.js',
+            '**/FacilityManager-*.js',
+            '**/FinanceManager-*.js',
+            '**/ReportManager-*.js',
+            '**/RentalManager-*.js',
+            '**/WaterMeterManager-*.js',
+            '**/DemographicAnalytics-*.js',
+            '**/DashboardOverview-*.js',
+            '**/STBMManager-*.js',
+            '**/PBBManager-*.js',
+            '**/SocialAidManager-*.js',
+            '**/MeetingMinutesManager-*.js',
+            '**/CommunityWorkManager-*.js',
+            '**/DocumentManager-*.js',
+            '**/GuestManager-*.js',
+            '**/AssetManager-*.js',
+            '**/ActivityManagement-*.js',
+            '**/IncomingMailManager-*.js',
+            '**/AuditLogManager-*.js',
+            '**/PanicAlertLogs-*.js',
+            '**/TenantRegistrationModal-*.js'
+          ],
           runtimeCaching: [
+            {
+              urlPattern: /\/assets\/.*\.(?:js|css)$/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'teras-lazy-chunks-cache',
+                expiration: {
+                  maxEntries: 80,
+                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /\.(?:png|jpg|jpeg|webp|gif)$/i,
+              handler: 'StaleWhileRevalidate',
+              options: {
+                cacheName: 'teras-images-cache',
+                expiration: {
+                  maxEntries: 60,
+                  maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
               handler: 'CacheFirst',
@@ -119,11 +192,18 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      'process.env.API_KEY': JSON.stringify(env.API_KEY || process.env.API_KEY || ''),
-      'process.env.GOOGLE_MAPS_PLATFORM_KEY': JSON.stringify(env.GOOGLE_MAPS_PLATFORM_KEY || process.env.GOOGLE_MAPS_PLATFORM_KEY || ''),
+      'process.env.API_KEY': JSON.stringify(resolvedApiKey),
+      'process.env.GEMINI_API_KEY': JSON.stringify(resolvedApiKey),
+      'process.env.GOOGLE_MAPS_PLATFORM_KEY': JSON.stringify(resolvedMapsKey),
       'process.env.NODE_ENV': JSON.stringify(mode),
-      // Provide a stringified version of the entire env object to prevent ReferenceErrors
-      'process.env': JSON.stringify(env)
+      // Only expose safe whitelisted client variables
+      'process.env': JSON.stringify({
+        ...safeClientEnv,
+        API_KEY: resolvedApiKey,
+        GEMINI_API_KEY: resolvedApiKey,
+        GOOGLE_MAPS_PLATFORM_KEY: resolvedMapsKey,
+        NODE_ENV: mode
+      })
     },
     build: {
       outDir: 'dist',
@@ -161,6 +241,5 @@ export default defineConfig(({ mode }) => {
         }
       }
     }
-
   };
 });

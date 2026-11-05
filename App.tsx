@@ -86,10 +86,13 @@ const ROUTE_SEO_META: Record<string, { title: string; description: string; noind
   }
 };
 
-const ScrollToTop = () => {
+const ScrollToTop: React.FC<{ onPathChange?: (path: string) => void }> = ({ onPathChange }) => {
   const { pathname, hash } = useLocation();
 
   useEffect(() => {
+    const cleanPath = pathname === '' ? '/' : pathname;
+    onPathChange?.(cleanPath);
+
     if (!hash) {
       window.scrollTo(0, 0);
     } else {
@@ -101,7 +104,6 @@ const ScrollToTop = () => {
     }
 
     // Dynamic SEO Title, Meta Description & Robots update per route
-    const cleanPath = pathname === '' ? '/' : pathname;
     const matchedKey = Object.keys(ROUTE_SEO_META).find(k => k !== '/' && cleanPath.startsWith(k)) || '/';
     const seo = ROUTE_SEO_META[matchedKey] || ROUTE_SEO_META['/'];
 
@@ -127,39 +129,40 @@ const ScrollToTop = () => {
 };
 
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { lazyWithRetry } from './components/ui/GlobalErrorBoundary';
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS, isSuperAdminEmail } from '@/constants';
 import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, RondaCheckLog, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
 import { AdminRouteWrapper } from './components/AdminComponents';
-const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
-const MasterDashboard = React.lazy(() => import('./components/master/MasterDashboard').then(m => ({ default: m.MasterDashboard })));
-const SuperAdminPortal = React.lazy(() => import('./components/superadmin/SuperAdminPortal').then(m => ({ default: m.SuperAdminPortal })));
+const AdminDashboard = lazyWithRetry(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const MasterDashboard = lazyWithRetry(() => import('./components/master/MasterDashboard').then(m => ({ default: m.MasterDashboard })));
+const SuperAdminPortal = lazyWithRetry(() => import('./components/superadmin/SuperAdminPortal').then(m => ({ default: m.SuperAdminPortal })));
 import { FinancialProvider } from './context/FinancialContext';
 import { useConfirm } from './context/ConfirmContext';
 import { useTenant } from './context/TenantContext';
 import { getPdfConfigForTenant } from './services/tenantService';
-const ResidentRegistrationForm = React.lazy(() => import('./components/ResidentRegistrationForm').then(m => ({ default: m.ResidentRegistrationForm })));
-const ChatBot = React.lazy(() => import('./components/ChatBot').then(m => ({ default: m.ChatBot })));
+const ResidentRegistrationForm = lazyWithRetry(() => import('./components/ResidentRegistrationForm').then(m => ({ default: m.ResidentRegistrationForm })));
+const ChatBot = lazyWithRetry(() => import('./components/ChatBot').then(m => ({ default: m.ChatBot })));
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { PWAStatusHandler } from './components/PWAStatusHandler';
 import { SystemBroadcastBanner } from './components/common/SystemBroadcastBanner';
 import { PublicHeader } from './components/PublicHeader';
 import { PublicHome } from './components/public/PublicHome';
-const PublicServices = React.lazy(() => import('./components/public/PublicServices').then(m => ({ default: m.PublicServices })));
-const PublicVerification = React.lazy(() => import('./components/public/PublicVerification').then(m => ({ default: m.PublicVerification })));
-const PublicLetterDownload = React.lazy(() => import('./components/public/PublicLetterDownload').then(m => ({ default: m.PublicLetterDownload })));
-const PublicUMKM = React.lazy(() => import('./components/public/PublicUMKM').then(m => ({ default: m.PublicUMKM })));
-const PublicInfo = React.lazy(() => import('./components/public/PublicInfo').then(m => ({ default: m.PublicInfo })));
-const PublicMap = React.lazy(() => import('./components/public/PublicMap').then(m => ({ default: m.PublicMap })));
-const PublicResidentDashboard = React.lazy(() => import('./components/public/PublicResidentDashboard').then(m => ({ default: m.PublicResidentDashboard })));
-const PublicDocuments = React.lazy(() => import('./components/public/PublicDocuments').then(m => ({ default: m.PublicDocuments })));
-const PublicActivity = React.lazy(() => import('./components/public/PublicActivity').then(m => ({ default: m.PublicActivity })));
-const PublicWasteBank = React.lazy(() => import('./components/public/PublicWasteBank').then(m => ({ default: m.PublicWasteBank })));
-const PublicHealth = React.lazy(() => import('./components/public/PublicHealth').then(m => ({ default: m.PublicHealth })));
-const PublicDonations = React.lazy(() => import('./components/public/PublicDonations'));
-const PublicFAQ = React.lazy(() => import('./components/public/PublicFAQ').then(m => ({ default: m.PublicFAQ })));
-const PublicRules = React.lazy(() => import('./components/public/PublicRules').then(m => ({ default: m.PublicRules })));
-const PublicAbout = React.lazy(() => import('./components/public/PublicAbout').then(m => ({ default: m.PublicAbout })));
-const PublicWelcomeKit = React.lazy(() => import('./components/public/PublicWelcomeKit').then(m => ({ default: m.PublicWelcomeKit })));
+const PublicServices = lazyWithRetry(() => import('./components/public/PublicServices').then(m => ({ default: m.PublicServices })));
+const PublicVerification = lazyWithRetry(() => import('./components/public/PublicVerification').then(m => ({ default: m.PublicVerification })));
+const PublicLetterDownload = lazyWithRetry(() => import('./components/public/PublicLetterDownload').then(m => ({ default: m.PublicLetterDownload })));
+const PublicUMKM = lazyWithRetry(() => import('./components/public/PublicUMKM').then(m => ({ default: m.PublicUMKM })));
+const PublicInfo = lazyWithRetry(() => import('./components/public/PublicInfo').then(m => ({ default: m.PublicInfo })));
+const PublicMap = lazyWithRetry(() => import('./components/public/PublicMap').then(m => ({ default: m.PublicMap })));
+const PublicResidentDashboard = lazyWithRetry(() => import('./components/public/PublicResidentDashboard').then(m => ({ default: m.PublicResidentDashboard })));
+const PublicDocuments = lazyWithRetry(() => import('./components/public/PublicDocuments').then(m => ({ default: m.PublicDocuments })));
+const PublicActivity = lazyWithRetry(() => import('./components/public/PublicActivity').then(m => ({ default: m.PublicActivity })));
+const PublicWasteBank = lazyWithRetry(() => import('./components/public/PublicWasteBank').then(m => ({ default: m.PublicWasteBank })));
+const PublicHealth = lazyWithRetry(() => import('./components/public/PublicHealth').then(m => ({ default: m.PublicHealth })));
+const PublicDonations = lazyWithRetry(() => import('./components/public/PublicDonations'));
+const PublicFAQ = lazyWithRetry(() => import('./components/public/PublicFAQ').then(m => ({ default: m.PublicFAQ })));
+const PublicRules = lazyWithRetry(() => import('./components/public/PublicRules').then(m => ({ default: m.PublicRules })));
+const PublicAbout = lazyWithRetry(() => import('./components/public/PublicAbout').then(m => ({ default: m.PublicAbout })));
+const PublicWelcomeKit = lazyWithRetry(() => import('./components/public/PublicWelcomeKit').then(m => ({ default: m.PublicWelcomeKit })));
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
 import { PushNotificationManager } from './components/PushNotificationManager';
@@ -413,8 +416,20 @@ export const App = () => {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminRole, setAdminRole] = useState<Role | null>(null);
+  const [activeHash, setActiveHash] = useState<string>(() =>
+    typeof window !== 'undefined' ? (window.location.hash.replace(/^#/, '').split('?')[0] || '/') : '/'
+  );
 
-  // Public Subscriptions
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleHashChange = () => {
+      setActiveHash(window.location.hash.replace(/^#/, '').split('?')[0] || '/');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  // Core Public Subscriptions (Needed on Home '/' and Global Header)
   useEffect(() => {
     const unsubHouses = subscribeToCollection('houses', (data) => {
       if (Array.isArray(data)) {
@@ -446,21 +461,11 @@ export const App = () => {
       }
     });
     const unsubAnnouncements = subscribeToCollection('announcements', (data) => setAnnouncements(data));
-    const unsubNews = subscribeToNews((data) => setNews(data));
     const unsubOfficials = subscribeToCollection('officials', (data) => setOfficials(data));
     const unsubReports = subscribeToCollection('reports', (data) => setReports(data));
+    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
     const unsubRonda = subscribeToCollection('ronda', (data) => setRonda(data));
-    const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data));
-    const unsubUmkm = subscribeToCollection('umkm', (data) => setUmkm(data));
-    const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
-    const unsubIuranPayments = subscribeToCollection('iuranPayments', (data) => setIuranPayments(data));
-    const unsubGuestReports = subscribeToGuestReports((data) => setGuestReports(data));
-    const unsubInventoryLogs = subscribeToCollection('inventoryLogs', (data) => setInventoryLogs(data));
     const unsubMapPoints = subscribeToMapPoints((data) => setMapPoints(data));
-    const unsubDocuments = subscribeToDocuments((data) => setDocuments(data));
-    const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
-    const unsubRondaAttendance = getRondaAttendance((data) => setRondaAttendance(data));
-    const unsubSwapRequests = subscribeToRondaSwapRequests((data) => setRondaSwapRequests(data));
     const unsubGallery = subscribeToGallery((data) => setGallery(data));
     const unsubActivePatrol = subscribeToActivePatrols((data) => {
         if (data.length > 0) setActivePatrol(data[0]);
@@ -473,13 +478,6 @@ export const App = () => {
             setActiveNotification(unread[0]);
         }
     });
-    const unsubFAQ = subscribeToFAQ((data) => setFaqItems(data));
-    const unsubEvents = subscribeToEvents((data) => setEvents(data));
-    const unsubWasteDeposits = subscribeToWasteDeposits((data) => setWasteDeposits(data));
-    const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
-    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
-    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
-    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
     const unsubPdfConfig = subscribeToPdfConfig((data) => {
         if (data) {
             setPdfConfigState(data);
@@ -488,13 +486,42 @@ export const App = () => {
     });
 
     return () => {
-      unsubHouses(); unsubAnnouncements(); unsubNews(); unsubOfficials(); 
-      unsubReports(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
-      unsubUmkm(); unsubPopulationReports(); unsubIuranPayments(); unsubGuestReports(); unsubInventoryLogs(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
-      unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubPdfConfig(); unsubWasteDeposits();
-      unsubCash(); unsubLetters(); unsubBills();
+      unsubHouses(); unsubAnnouncements(); unsubOfficials(); 
+      unsubReports(); unsubLetters(); unsubRonda(); unsubMapPoints();
+      unsubGallery(); unsubActivePatrol(); unsubNotifs(); unsubPdfConfig();
     };
   }, [tenantId]);
+
+  // On-Demand Secondary Route Subscriptions (Subscribed only when leaving '/' or in Admin mode)
+  const needsExtendedData = isAdmin || (activeHash !== '/' && activeHash !== '');
+  useEffect(() => {
+    if (!needsExtendedData) return;
+
+    const unsubNews = subscribeToNews((data) => setNews(data));
+    const unsubInventory = subscribeToCollection('inventory', (data) => setInventory(data));
+    const unsubUmkm = subscribeToCollection('umkm', (data) => setUmkm(data));
+    const unsubPopulationReports = subscribeToCollection('populationReports', (data) => setPopulationReports(data));
+    const unsubIuranPayments = subscribeToCollection('iuranPayments', (data) => setIuranPayments(data));
+    const unsubGuestReports = subscribeToGuestReports((data) => setGuestReports(data));
+    const unsubInventoryLogs = subscribeToCollection('inventoryLogs', (data) => setInventoryLogs(data));
+    const unsubDocuments = subscribeToDocuments((data) => setDocuments(data));
+    const unsubRondaLogs = subscribeToRondaLogs((data) => setRondaLogs(data));
+    const unsubRondaAttendance = getRondaAttendance((data) => setRondaAttendance(data));
+    const unsubSwapRequests = subscribeToRondaSwapRequests((data) => setRondaSwapRequests(data));
+    const unsubFAQ = subscribeToFAQ((data) => setFaqItems(data));
+    const unsubEvents = subscribeToEvents((data) => setEvents(data));
+    const unsubWasteDeposits = subscribeToWasteDeposits((data) => setWasteDeposits(data));
+    const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
+    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
+    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
+
+    return () => {
+      unsubNews(); unsubInventory(); unsubUmkm(); unsubPopulationReports();
+      unsubIuranPayments(); unsubGuestReports(); unsubInventoryLogs(); unsubDocuments();
+      unsubRondaLogs(); unsubRondaAttendance(); unsubSwapRequests(); unsubFAQ();
+      unsubEvents(); unsubWasteDeposits(); unsubDonations(); unsubCash(); unsubBills();
+    };
+  }, [tenantId, needsExtendedData]);
 
   // Admin-Only/Restricted Subscriptions
   useEffect(() => {
@@ -621,7 +648,7 @@ export const App = () => {
 
 return (
     <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <ScrollToTop />
+        <ScrollToTop onPathChange={setActiveHash} />
         <Toaster position="top-right" richColors />
 
         {/* Real-time System Broadcast Banner from Super Admin Fleet Command */}
