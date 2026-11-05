@@ -1,9 +1,9 @@
 import { Home, Wrench, Bell, FileText, UserCheck } from 'lucide-react';
-import { motion } from 'motion/react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface MobileBottomNavProps {
-  currentTab: string;
-  onTabChange: (tab: string) => void;
+  currentTab?: string;
+  onTabChange?: (tab: string) => void;
   onOpenPanicModal?: () => void;
   isAdmin: boolean;
 }
@@ -14,12 +14,24 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onOpenPanicModal,
   isAdmin
 }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const resolvedTab =
+    location.pathname.startsWith('/services') || location.pathname.startsWith('/layanan')
+      ? 'services'
+      : location.pathname.startsWith('/rules')
+      ? 'rules'
+      : location.pathname.startsWith('/resident') || location.pathname.startsWith('/admin')
+      ? 'admin'
+      : currentTab || 'info';
+
   const navItems = [
-    { id: 'info', label: 'Beranda', icon: Home },
-    { id: 'services', label: 'Layanan', icon: Wrench },
+    { id: 'info', label: 'Beranda', icon: Home, path: '/' },
+    { id: 'services', label: 'Layanan', icon: Wrench, path: '/services' },
     { id: 'panic', label: 'Darurat', icon: Bell, isAction: true },
-    { id: 'rules', label: 'Peraturan', icon: FileText },
-    { id: 'admin', label: isAdmin ? 'Admin' : 'Login', icon: UserCheck },
+    { id: 'rules', label: 'Peraturan', icon: FileText, path: '/rules' },
+    { id: 'admin', label: isAdmin ? 'Admin' : 'Warga', icon: UserCheck, path: isAdmin ? '/admin' : '/resident' },
   ];
 
   const triggerHaptic = () => {
@@ -38,7 +50,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       <div className="flex items-center justify-around py-1.5 px-2 relative max-w-md mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentTab === item.id;
+          const isActive = resolvedTab === item.id;
 
           if (item.isAction) {
             return (
@@ -66,7 +78,11 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               key={item.id}
               onClick={() => {
                 triggerHaptic();
-                onTabChange(item.id);
+                if (item.path) {
+                  navigate(item.path);
+                } else {
+                  onTabChange?.(item.id);
+                }
               }}
               aria-label={`Buka halaman ${item.label}`}
               aria-current={isActive ? 'page' : undefined}

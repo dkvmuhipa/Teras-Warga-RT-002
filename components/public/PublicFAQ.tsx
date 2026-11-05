@@ -55,7 +55,7 @@ export const PublicFAQ: React.FC<PublicFAQProps> = ({ faqItems }) => {
   };
 
   const handleCopyLink = (item: FAQItem) => {
-    const linkText = `${window.location.origin}/faq?id=${item.id}`;
+    const linkText = `${window.location.origin}/#/faq?id=${item.id}`;
     navigator.clipboard.writeText(linkText);
     setCopiedId(item.id);
     toast.success('Link panduan berhasil disalin!');

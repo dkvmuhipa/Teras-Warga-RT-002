@@ -185,7 +185,7 @@ Mohon dapat dibantu koordinasi dengan pihak terkait. Terima kasih.`;
             <Zap size={15} />
             <span>Jadwal & Status Resmi</span>
             {ongoingCount > 0 && (
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
             )}
           </button>
 

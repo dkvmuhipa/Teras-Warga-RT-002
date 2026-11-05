@@ -192,7 +192,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
           <div className="relative flex items-center justify-center">
             <MessageSquare size={24} fill="currentColor" />
             <span className="absolute -top-1.5 -right-1.5 flex h-3.5 w-3.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border border-white"></span>
             </span>
           </div>

@@ -621,7 +621,7 @@ export const ResidentRegistrationForm: React.FC<ResidentRegistrationFormProps> =
             type="button"
             onClick={() => {
               if (onClose) onClose();
-              window.location.href = '/welcome';
+              window.location.hash = '#/welcome';
             }} 
             className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-semibold tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg shadow-2xs transition-colors active:scale-95 cursor-pointer"
           >

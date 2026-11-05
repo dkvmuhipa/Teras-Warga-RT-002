@@ -453,7 +453,7 @@ export const InteractiveHuntapMap: React.FC<InteractiveHuntapMapProps> = ({ hous
 
             {/* Titik Kumpul 1: Area Jalan Utama Poros (Pulsing di tengah Jalan Utama) */}
             <g className="pointer-events-none">
-              <circle cx="560" cy="297.5" r="24" fill="#10b981" fillOpacity="0.3" className="animate-ping" />
+              <circle cx="560" cy="297.5" r="24" fill="#10b981" fillOpacity="0.3" className="animate-pulse" />
               <circle cx="560" cy="297.5" r="13" fill="#10b981" stroke="#ffffff" strokeWidth="2.5" />
               <text x="560" y="301" fill="#ffffff" fontSize="8" fontWeight="900" textAnchor="middle">TK-1</text>
               <rect x="495" y="318" width="130" height="18" rx="5" fill="rgba(15, 23, 42, 0.95)" stroke="#10b981" strokeWidth="1.2" />

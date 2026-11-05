@@ -111,7 +111,8 @@ service cloud.firestore {
 
     // CashFlow
     match /cashFlow/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // Officials
@@ -187,7 +188,8 @@ service cloud.firestore {
 
     // Bills
     match /bills/{id} {
-      allow read, write: if isAdmin();
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     // News
@@ -216,7 +218,8 @@ service cloud.firestore {
 
     // Population Logs
     match /populationLogs/{id} {
-      allow read, write: if isAdmin();
+      allow read, create: if true;
+      allow update, delete: if isAdmin();
     }
 
     // Iuran Payments
@@ -279,7 +282,7 @@ service cloud.firestore {
 
     // Health Records
     match /healthRecords/{id} {
-      allow read: if isAdmin();
+      allow read: if true;
       allow write: if isAdmin();
     }
 

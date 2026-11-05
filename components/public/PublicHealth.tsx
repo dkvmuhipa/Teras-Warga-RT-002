@@ -38,13 +38,9 @@ export const PublicHealth: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!isAdmin) {
-      setRecords([]);
-      return;
-    }
     const unsubscribe = subscribeToHealthRecords(setRecords);
     return () => unsubscribe();
-  }, [isAdmin]);
+  }, []);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();

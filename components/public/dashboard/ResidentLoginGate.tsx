@@ -171,6 +171,7 @@ export const ResidentLoginGate: React.FC<ResidentLoginGateProps> = ({
           setPinInput('');
         }} 
         title="Verifikasi PIN Akses"
+        variant="popup"
       >
         <form onSubmit={handlePinSubmit} className="space-y-5 p-2" aria-label="Form Verifikasi PIN Warga">
           <div className="text-center">

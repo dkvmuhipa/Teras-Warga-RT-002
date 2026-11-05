@@ -216,7 +216,7 @@ const HouseDetailModal: React.FC<HouseDetailModalProps> = ({
                             {/* Live Pulsing Status Badge */}
                             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-black/40 backdrop-blur-md border border-white/15 text-white shadow-sm">
                                 <span className="relative flex h-2 w-2">
-                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                                    <span className={`animate-pulse absolute inline-flex h-full w-full rounded-full opacity-75 ${
                                         !isHouseTrulyOccupied(house) ? 'bg-slate-400' :
                                         house.status === 'Business' ? 'bg-purple-400' :
                                         house.status === 'Visiting' ? 'bg-sky-400' : 'bg-emerald-400'
@@ -1092,7 +1092,7 @@ const HouseCard: React.FC<HouseCardProps> = ({
             >
                 {activePanicAlert && (
                     <span className="absolute -top-2 -right-2 flex h-4 w-4 z-40">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                      <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-4 w-4 bg-rose-600 text-[8px] font-black text-white items-center justify-center">🚨</span>
                     </span>
                 )}
@@ -2178,7 +2178,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                            point.label.toLowerCase().includes('masjid') ? (
                                                <div className="relative">
                                                    <MapIcon size={14} className="text-emerald-200" />
-                                                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+                                                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
                                                </div>
                                            ) : <MapIcon size={14} />
                                        ) :
@@ -2213,13 +2213,13 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                   className="absolute z-50 flex flex-col items-center -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                               >
                                   <div className="relative">
-                                      <div className="absolute inset-0 bg-indigo-500 rounded-full animate-ping opacity-35 scale-150"></div>
+                                      <div className="absolute inset-0 bg-indigo-500 rounded-full animate-pulse opacity-35 scale-150"></div>
                                       <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 text-white p-3 md:p-4 rounded-full shadow-2xl shadow-indigo-400 ring-4 ring-white relative z-10">
                                           <Navigation size={24} fill="currentColor" className="animate-pulse" />
                                       </div>
                                   </div>
                                   <div className="mt-2 bg-slate-900 text-white px-3.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl border-2 border-indigo-400 whitespace-nowrap flex items-center gap-1.5">
-                                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                                       Petugas: {activePatrol.officerName}
                                   </div>
                               </motion.div>
@@ -2236,7 +2236,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                                   style={{ left: `${alert.locationCoords?.x || 50}%`, top: `${alert.locationCoords?.y || 50}%` }}
                               >
                                   <div className="relative">
-                                      <div className="absolute inset-0 bg-rose-500 rounded-full animate-ping opacity-50 scale-200"></div>
+                                      <div className="absolute inset-0 bg-rose-500 rounded-full animate-pulse opacity-50 scale-200"></div>
                                       <div className="bg-rose-600 text-white p-4 md:p-5 rounded-full shadow-2xl shadow-rose-400 ring-4 ring-white relative z-10">
                                           <Bell size={32} className="animate-shake" />
                                        </div>
@@ -2287,7 +2287,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${activeCctv.cctvStatus === 'Offline' ? 'bg-rose-600' : activeCctv.cctvStatus === 'Maintenance' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400 animate-ping'}`} />
+                    <span className={`w-2 h-2 rounded-full ${activeCctv.cctvStatus === 'Offline' ? 'bg-rose-600' : activeCctv.cctvStatus === 'Maintenance' ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400 animate-pulse'}`} />
                     <span className="text-[10px] font-black uppercase tracking-[0.25em] text-rose-400">
                       {activeCctv.cctvStatus ? `SURVEILLANCE CAM • ${activeCctv.cctvStatus.toUpperCase()}` : 'SURVEILLANCE CAM LIVE'}
                     </span>
@@ -2339,7 +2339,7 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
 
               {/* Overlay Status Badge */}
               <div className="absolute top-4 left-4 flex items-center gap-2 bg-rose-600/90 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[10px] font-black text-white uppercase tracking-widest border border-rose-400/40 shadow-md">
-                <span className="w-2 h-2 bg-white rounded-full animate-ping" />
+                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                 LIVE STREAMING &bull; {activeCctv.cctvResolution || '1080P FULL HD'}
               </div>
             </div>

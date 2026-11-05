@@ -225,7 +225,7 @@ export const PublicWasteBank: React.FC<PublicWasteBankProps> = ({ houseId, house
             setIsPinModalOpen(false);
             setTempHouseId('');
             setPinInput('');
-          }} title="Verifikasi PIN Akses">
+          }} title="Verifikasi PIN Akses" variant="popup">
             <form onSubmit={handlePinSubmit} className="space-y-6">
               <div className="text-center">
                 <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-3 border border-emerald-100">

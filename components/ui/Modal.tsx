@@ -40,7 +40,7 @@ export const Modal: React.FC<ModalProps> = ({
     window.location.pathname.startsWith('/admin')
   );
 
-  const useFullPage = variant === 'full' || (variant === 'auto' && isAdminRoute);
+  const useFullPage = variant !== 'popup';
 
   return (
     <AnimatePresence>
@@ -71,7 +71,7 @@ export const Modal: React.FC<ModalProps> = ({
                   <div className="h-5 w-px bg-slate-200 hidden sm:block shrink-0" />
                   <div className="min-w-0">
                     <span className="block text-[10px] font-bold uppercase tracking-widest text-indigo-600">
-                      Lembar Kerja Penuh • Admin RT 02
+                      {isAdminRoute ? 'Lembar Kerja Penuh • Admin RT 02' : 'Tampilan Penuh • Portal Warga RT 02'}
                     </span>
                     <h3 className="text-sm sm:text-lg font-extrabold text-slate-900 tracking-tight truncate">
                       {title || 'Rincian Data & Formulir'}

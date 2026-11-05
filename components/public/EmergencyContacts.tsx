@@ -26,7 +26,7 @@ export const EmergencyContacts: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-400 animate-ping" />
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-400 animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-[0.25em] text-rose-300">POINT OF INTEREST UTAMA</span>
               </div>
               <h3 className="text-xl md:text-2xl font-black text-white tracking-tight mt-0.5">Kontak Siaga Bencana &amp; Darurat</h3>

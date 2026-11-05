@@ -372,7 +372,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                 <div className="relative z-10 max-w-4xl mx-auto space-y-6">
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-black tracking-widest uppercase shadow-xs">
                         <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
                         <ShieldCheck size={14} className="text-indigo-600" /> Transparansi &amp; Digitalisasi RT 02
@@ -667,7 +667,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-ping" />
+                                        <span className="w-2.5 h-2.5 rounded-full bg-teal-400 animate-pulse" />
                                         <span className="text-[10px] font-black uppercase tracking-[0.25em] text-teal-300">POINT OF INTEREST EKOLOGI</span>
                                     </div>
                                     <h2 className="text-xl md:text-2xl font-black tracking-tight text-white mt-0.5">Bank Sampah Digital</h2>
@@ -874,7 +874,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                             <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400">POINT OF INTEREST AKUNTABILITAS</span>
                         </div>
                         <h2 className="text-3xl md:text-5xl font-black text-white flex items-center gap-3 tracking-tight">
@@ -1373,7 +1373,7 @@ export const PublicInfo: React.FC<PublicInfoProps> = ({
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="flex items-center gap-2 text-xs font-black text-emerald-600 uppercase tracking-widest">
                                         <span className="relative flex h-2 w-2">
-                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                          <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                           <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                         </span>
                                         Patroli Aktif

@@ -600,7 +600,7 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
                               {/* Center Point of Huntap Tondo 2 */}
                               <div className="absolute z-10 flex flex-col items-center justify-center">
                                 <span className="h-3.5 w-3.5 rounded-full bg-indigo-500 border border-slate-900 shadow flex items-center justify-center cursor-pointer">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                                  <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                                 </span>
                                 <span className="text-[8px] bg-indigo-605 text-white font-extrabold px-1.5 py-0.5 rounded shadow mt-1 whitespace-nowrap uppercase tracking-widest font-mono">
                                   HUNTAP 2
@@ -641,7 +641,7 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
                                   }}
                                 >
                                   <span className="h-4 w-4 bg-rose-600 rounded-full border border-white flex items-center justify-center relative cursor-help">
-                                    <span className="absolute -inset-2 bg-rose-500/40 rounded-full animate-ping pointer-events-none" />
+                                    <span className="absolute -inset-2 bg-rose-500/40 rounded-full animate-pulse pointer-events-none" />
                                   </span>
                                   <span className="text-[8px] bg-rose-650 text-white font-extrabold px-1.5 py-0.5 rounded shadow-sm mt-1 whitespace-nowrap tracking-wide font-mono uppercase">
                                     EPISENTER M {latestGempa.Magnitude}

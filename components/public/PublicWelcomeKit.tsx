@@ -37,7 +37,7 @@ export const PublicWelcomeKit: React.FC = () => {
   };
 
   const handleShareWhatsApp = () => {
-    const text = `Halo tetangga baru! Selamat datang di lingkungan RT 02 / RW 020 Huntap Tondo 2, Palu. Silakan akses Buku Panduan & Welcome Kit Warga Baru melalui tautan resmi ini: ${window.location.origin}/welcome`;
+    const text = `Halo tetangga baru! Selamat datang di lingkungan RT 02 / RW 020 Huntap Tondo 2, Palu. Silakan akses Buku Panduan & Welcome Kit Warga Baru melalui tautan resmi ini: ${window.location.origin}/#/welcome`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 

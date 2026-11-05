@@ -220,7 +220,7 @@ export const PublicLetterDownload: React.FC<PublicLetterDownloadProps> = ({ pdfC
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
                 : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
             }`}>
-              <span className={`w-2 h-2 rounded-full ${isApproved ? 'bg-emerald-400 animate-ping' : 'bg-amber-400'}`} />
+              <span className={`w-2 h-2 rounded-full ${isApproved ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
               {isApproved ? 'TERVERIFIKASI & SAH' : 'DALAM PROSES'}
             </div>
           </div>

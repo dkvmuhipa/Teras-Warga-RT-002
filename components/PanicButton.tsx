@@ -483,7 +483,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
               }}
               className="bg-rose-600 text-white border-2 border-rose-400 py-1.5 px-3 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg flex items-center gap-2 cursor-pointer invite-siren-animation"
             >
-              <span className="w-2 h-2 bg-white rounded-full animate-ping"></span>
+              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
               {activeAlerts.filter(a => a.status === 'Active').length} ALARM WARGA AKTIF!
             </motion.div>
           )}
@@ -655,7 +655,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
                 <div className="flex items-center justify-between px-4 py-2.5 bg-slate-950/60 rounded-xl border border-slate-800/60 text-xs text-slate-400">
                   <div className="flex items-center gap-2">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
                     <span className="text-[10px] font-bold text-slate-300">
@@ -805,8 +805,8 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
 
             {/* Simulated flashing response bar on top/bottom edges of screen to capture attention */}
             <div className="absolute top-0 inset-x-0 h-4 bg-gradient-to-r from-red-600 via-blue-600 to-red-600 animate-pulse flex border-b border-white/10 overflow-hidden">
-              <div className="w-1/2 bg-red-600 animate-ping"></div>
-              <div className="w-1/2 bg-blue-600 animate-ping" style={{ animationDelay: '0.3s' }}></div>
+              <div className="w-1/2 bg-red-600 animate-pulse"></div>
+              <div className="w-1/2 bg-blue-600 animate-pulse" style={{ animationDelay: '0.3s' }}></div>
             </div>
 
             <motion.div 
@@ -824,7 +824,7 @@ export function PanicButton({ houses = [] }: { houses?: House[] }) {
                   </div>
                   <h2 className="text-2xl font-black tracking-tight uppercase">ALARM AKTIF TERPANCAR!</h2>
                   <div className="mt-1 flex items-center gap-2 px-3 py-1 bg-black/35 rounded-full text-[9px] font-black uppercase tracking-widest text-red-300">
-                    <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-ping"></span>
+                    <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></span>
                     Darurat Sipil Real-Time
                   </div>
                 </div>

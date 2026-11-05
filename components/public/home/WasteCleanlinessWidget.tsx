@@ -53,7 +53,7 @@ export const WasteCleanlinessWidget: React.FC<WasteCleanlinessWidgetProps> = ({
 
         <div className="relative z-10 pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
           <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Armada Aktif Pagi Ini
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Armada Aktif Pagi Ini
           </span>
           <span className="text-[10px] text-slate-400 font-bold">Bank Sampah &amp; TPS3R</span>
         </div>

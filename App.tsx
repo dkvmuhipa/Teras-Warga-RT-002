@@ -397,6 +397,9 @@ export const App = () => {
     const unsubEvents = subscribeToEvents((data) => setEvents(data));
     const unsubWasteDeposits = subscribeToWasteDeposits((data) => setWasteDeposits(data));
     const unsubDonations = subscribeToDonationCampaigns((data) => setDonationCampaigns(data));
+    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
+    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
+    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
     const unsubPdfConfig = subscribeToPdfConfig((data) => {
         if (data) {
             setPdfConfigState(data);
@@ -409,15 +412,13 @@ export const App = () => {
       unsubReports(); unsubRonda(); unsubInventory(); unsubRondaAttendance();
       unsubUmkm(); unsubPopulationReports(); unsubIuranPayments(); unsubGuestReports(); unsubInventoryLogs(); unsubMapPoints(); unsubDocuments(); unsubRondaLogs(); unsubSwapRequests(); unsubNotifs();
       unsubGallery(); unsubActivePatrol(); unsubFAQ(); unsubEvents(); unsubDonations(); unsubPdfConfig(); unsubWasteDeposits();
+      unsubCash(); unsubLetters(); unsubBills();
     };
   }, [tenantId]);
 
   // Admin-Only/Restricted Subscriptions
   useEffect(() => {
     if (!isAdmin) {
-      setCashFlow([]);
-      setLetters([]);
-      setBills([]);
       setResidentRegistrations([]);
       setPopulationLogs([]);
       setUpdateRequests([]);
@@ -425,18 +426,12 @@ export const App = () => {
       return;
     }
 
-    const unsubCash = subscribeToCollection('cashFlow', (data) => setCashFlow(data));
-    const unsubLetters = subscribeToCollection('letters', (data) => setLetters(data));
-    const unsubBills = subscribeToCollection('bills', (data) => setBills(data));
     const unsubResidentRegistrations = subscribeToResidentRegistrations((data) => setResidentRegistrations(data));
     const unsubPopulationLogs = subscribeToPopulationLogs((data) => setPopulationLogs(data));
     const unsubUpdateRequests = subscribeToUpdateRequests(setUpdateRequests);
     const unsubIncomingMails = subscribeToIncomingMails(setIncomingMails);
 
     return () => {
-      unsubCash();
-      unsubLetters();
-      unsubBills();
       unsubResidentRegistrations();
       unsubPopulationLogs();
       unsubUpdateRequests();

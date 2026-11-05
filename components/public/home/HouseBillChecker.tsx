@@ -113,7 +113,7 @@ export const HouseBillChecker: React.FC<HouseBillCheckerProps> = ({
           </div>
 
           <Button 
-            onClick={() => navigate('/services?tab=iuran')}
+            onClick={() => navigate('/resident')}
             variant="secondary" 
             className="w-full py-4 rounded-2xl text-[10px] font-black tracking-widest uppercase shadow-lg cursor-pointer hover:bg-white transition-all"
           >

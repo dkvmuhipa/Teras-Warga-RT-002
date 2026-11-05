@@ -137,7 +137,7 @@ _Pembaruan Terkini: ${weather.lastUpdated || 'Hari ini'}_
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-slate-400 text-xs font-bold uppercase tracking-wider">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>Sensor Real-Time Huntap</span>
               </div>
               <div className="flex items-baseline gap-3">

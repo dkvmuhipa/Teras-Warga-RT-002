@@ -241,12 +241,31 @@ export const ResidentUpdateDataTab: React.FC<ResidentUpdateDataTabProps> = ({
                   <select 
                     className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-colors"
                     value={updateForm.residenceType}
-                    onChange={e => setUpdateForm({...updateForm, residenceType: e.target.value as any})}
+                    onChange={e => {
+                      const nextType = e.target.value as any;
+                      const skOwner = currentHouse?.ownerName && currentHouse.ownerName !== '-' ? currentHouse.ownerName : (updateForm.ownerName && updateForm.ownerName !== '-' ? updateForm.ownerName : '');
+                      if (nextType === 'Tetap' && skOwner) {
+                        setUpdateForm({
+                          ...updateForm,
+                          residenceType: nextType,
+                          headOfFamily: skOwner,
+                          ownerName: skOwner
+                        });
+                        toast.info(`Status Tetap: Kepala Keluarga disesuaikan dengan nama SK (${skOwner})`);
+                      } else {
+                        setUpdateForm({ ...updateForm, residenceType: nextType });
+                      }
+                    }}
                   >
-                    <option value="Tetap">Tetap</option>
-                    <option value="Sewa">Sewa</option>
+                    <option value="Tetap">Tetap (Sesuai SK)</option>
+                    <option value="Sewa">Sewa / Kontrak</option>
                     <option value="Rumah Keluarga">Rumah Keluarga</option>
                   </select>
+                  {updateForm.residenceType === 'Tetap' && currentHouse?.ownerName && currentHouse.ownerName !== '-' && (
+                    <p className="text-[10px] font-bold text-emerald-700 mt-1.5 pl-1">
+                      ✓ Nama Pemilik SK: {currentHouse.ownerName}
+                    </p>
+                  )}
                 </div>
 
                 {/* Status Kesesuaian KTP & Alamat Sesuai KTP */}

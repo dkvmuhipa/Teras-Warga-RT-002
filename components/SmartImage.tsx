@@ -93,7 +93,7 @@ export const SmartImage: React.FC<SmartImageProps> = ({
         {isLoading && (
           <div className="absolute inset-0 bg-slate-100/80 animate-pulse flex flex-col items-center justify-center">
             <div className="relative flex items-center justify-center">
-              <div className="w-10 h-10 border-2 border-indigo-100 rounded-full animate-ping absolute opacity-75"></div>
+              <div className="w-10 h-10 border-2 border-indigo-100 rounded-full animate-pulse absolute opacity-75"></div>
               <FallbackIcon size={20} className="text-indigo-400 animate-pulse relative z-10" />
             </div>
             <span className="text-[8px] font-black text-indigo-400/80 uppercase tracking-widest mt-3.5">Memuat Media...</span>
