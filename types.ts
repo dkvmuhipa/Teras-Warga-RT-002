@@ -1476,6 +1476,9 @@ export interface WaterMeterReading {
   adminNotes?: string;
   verifiedAt?: string;
   verifiedBy?: string;
+  paymentStatus?: 'Belum Lunas' | 'Lunas';
+  paidAt?: string;
+  paidAmount?: number;
 }
 
 export interface WaterUtilitySettings {

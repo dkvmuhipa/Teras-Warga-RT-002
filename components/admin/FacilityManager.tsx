@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw, ShieldCheck, Eye, Navigation } from 'lucide-react';
+import { Shield, Users, CheckCircle2, AlertTriangle, Calendar, UserCheck, Megaphone, Clock, MapPin, Activity, Search, Filter, Download, ChevronRight, Plus, Trash2, ArrowLeftRight, Check, X, Bell, RefreshCw, ShieldCheck, Eye, Navigation, ShieldAlert } from 'lucide-react';
 import { RondaSchedule, RondaCheckLog, House, RondaSwapRequest, PatrolSession, Checkpoint, Report, Official, MapPoint, PanicAlert, RondaAttendance } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Modal } from '../ui/Modal';
@@ -24,6 +24,7 @@ import {
 import { CheckpointQRGenerator } from './CheckpointQRGenerator';
 import { CheckpointManager } from './CheckpointManager';
 import { MapPointManager } from './MapPointManager';
+import { PanicAlertLogs } from './PanicAlertLogs';
 import { QrCode, Info, Share2, Printer, Wand2, ChevronDown } from 'lucide-react';
 import { sendWhatsAppMessage, formatRondaScheduleForWhatsApp, openWhatsAppShare } from '../../services/whatsappService';
 import { generateRondaSchedulePDF } from '../../services/pdfService';
@@ -41,9 +42,13 @@ interface FacilityManagerProps {
   mapPoints: MapPoint[];
   activePanicAlerts: PanicAlert[];
   rondaAttendance: RondaAttendance[];
+  initialTab?: 'schedule' | 'logs' | 'checkpoints' | 'monitoring' | 'attendance' | 'sos-logs';
 }
 
-export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLogs, rondaSwapRequests, houses, activePatrol, reports, officials, mapPoints, activePanicAlerts, rondaAttendance }) => {
+export const FacilityManager: React.FC<FacilityManagerProps> = ({ 
+  ronda, rondaLogs, rondaSwapRequests, houses, activePatrol, reports, officials, mapPoints, activePanicAlerts, rondaAttendance,
+  initialTab = 'monitoring'
+}) => {
   const confirm = useConfirm();
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [isRondaModalOpen, setIsRondaModalOpen] = useState(false);
@@ -66,7 +71,13 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
   const [rondaMembersInput, setRondaMembersInput] = useState('');
   const [logFilter, setLogFilter] = useState<'All' | 'Aman' | 'Insiden'>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'checkpoints' | 'monitoring' | 'attendance'>('monitoring');
+  const [activeTab, setActiveTab] = useState<'schedule' | 'logs' | 'checkpoints' | 'monitoring' | 'attendance' | 'sos-logs'>(initialTab);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [scheduleSubTab, setScheduleSubTab] = useState<'calendar' | 'swaps' | 'leaderboard'>('calendar');
   const [scheduleSearchQuery, setScheduleSearchQuery] = useState('');
   const [selectedScheduleDay, setSelectedScheduleDay] = useState<string>('');
@@ -671,6 +682,7 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
       <div className="flex items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-2xl border border-slate-200/80 w-full overflow-x-auto no-scrollbar shadow-inner">
         {[
           { id: 'monitoring', label: 'Pusat Kontrol Siskamling', icon: Eye, count: activePanicAlerts.length },
+          { id: 'sos-logs', label: 'Log Riwayat SOS', icon: ShieldAlert, count: activePanicAlerts.length },
           { id: 'schedule', label: 'Jadwal & Keaktifan', icon: Calendar, count: rondaSwapRequests.filter(r => r.status === 'Menunggu').length },
           { id: 'logs', label: 'Log Patroli', icon: Activity },
           { id: 'attendance', label: 'Absensi Ronda', icon: UserCheck },
@@ -2292,6 +2304,12 @@ export const FacilityManager: React.FC<FacilityManagerProps> = ({ ronda, rondaLo
             <motion.div variants={itemVariants}>
               <MapPointManager mapPoints={mapPoints} houses={houses} />
             </motion.div>
+          </div>
+        )}
+
+        {activeTab === 'sos-logs' && (
+          <div className="lg:col-span-3 space-y-4">
+            <PanicAlertLogs houses={houses} />
           </div>
         )}
       </div>

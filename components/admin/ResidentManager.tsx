@@ -30,7 +30,7 @@ import {
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon, ChevronDown, Settings, MoreVertical, FileClock, FileEdit,
-  ShieldAlert, Briefcase
+  ShieldAlert, Briefcase, ArrowLeft
 } from 'lucide-react';
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role, OccupantHistoryItem } from '../../types';
 import { OccupantTransitionModal } from './resident/OccupantTransitionModal';
@@ -118,6 +118,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       }
     }
   }, [initialViewMode]);
+  const isStandaloneSubModule = ['mutations', 'health', 'officials', 'requests', 'guests'].includes(viewMode);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
@@ -1712,7 +1713,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       className="space-y-6 relative"
     >
       {/* Header & Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+      {!isStandaloneSubModule && (
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
         <motion.div variants={itemVariants} className="w-full md:w-auto">
           <h2 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
             Data Warga
@@ -2005,37 +2007,71 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           />
         </motion.div>
       </div>
+      )}
 
-      {/* Stats Cards */}
-      <ResidentStats 
-        totalResidents={totalResidents}
-        occupiedHouses={occupiedHouses}
-        emptyHouses={emptyHouses}
-        verifiedCount={verifiedCount}
-        ktpLocalCount={ktpLocalCount}
-        ktpExternalCount={ktpExternalCount}
-        onFilterKtp={(filterType) => setFilterStatus(filterType)}
-        itemVariants={itemVariants}
-      />
-      
-      {/* Controls */}
-      <ResidentControls 
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        selectedMonth={selectedMonth}
-        setSelectedMonth={setSelectedMonth}
-        filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
-        filterResidenceType={filterResidenceType}
-        setFilterResidenceType={setFilterResidenceType}
-        filterBlock={filterBlock}
-        setFilterBlock={setFilterBlock}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        residentRegistrations={residentRegistrations}
-      />
+      {isStandaloneSubModule ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 shadow-3xs mb-4">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 text-xs font-bold transition-colors cursor-pointer"
+            >
+              <ArrowLeft size={14} />
+              <span>Kembali ke Data Warga</span>
+            </button>
+            <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 block">
+                Sub-Modul Mandiri
+              </span>
+              <h4 className="text-xs sm:text-sm font-extrabold text-slate-800">
+                {viewMode === 'mutations' ? 'Buku Mutasi & Rekapitulasi Kependudukan Bulanan' :
+                 viewMode === 'health' ? 'Data Kesehatan, Balita, & Warga Rentan' :
+                 viewMode === 'officials' ? 'Struktur Kepengurusan & Akun Akses RT 02' :
+                 viewMode === 'requests' ? 'Daftar Pengajuan Perubahan Data Mandiri' : 'Log Wajib Lapor Tamu 1×24 Jam'}
+              </h4>
+            </div>
+          </div>
+
+          <span className="text-[11px] font-medium text-slate-400 hidden sm:inline">
+            Huntap Tondo 2 • RT 02 / RW 20
+          </span>
+        </div>
+      ) : (
+        <>
+          {/* Stats Cards */}
+          <ResidentStats 
+            totalResidents={totalResidents}
+            occupiedHouses={occupiedHouses}
+            emptyHouses={emptyHouses}
+            verifiedCount={verifiedCount}
+            ktpLocalCount={ktpLocalCount}
+            ktpExternalCount={ktpExternalCount}
+            onFilterKtp={(filterType) => setFilterStatus(filterType)}
+            itemVariants={itemVariants}
+          />
+          
+          {/* Controls */}
+          <ResidentControls 
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            filterResidenceType={filterResidenceType}
+            setFilterResidenceType={setFilterResidenceType}
+            filterBlock={filterBlock}
+            setFilterBlock={setFilterBlock}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            residentRegistrations={residentRegistrations}
+          />
+        </>
+      )}
 
       <AnimatePresence>
         {isPayModalOpen && payHouse && (

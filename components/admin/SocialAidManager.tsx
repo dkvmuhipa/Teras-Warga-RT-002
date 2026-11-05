@@ -15,6 +15,7 @@ import {
   toggleRecipientReceiptStatus 
 } from '../../services/databaseService';
 import { generateSocialAidHandoverPDF } from '../../services/pdfService';
+import { calculateAge } from '../../src/utils/dateUtils';
 import { openWhatsApp } from '../../services/whatsappService';
 import { toast } from 'sonner';
 import { useConfirm } from '../../context/ConfirmContext';
@@ -59,6 +60,24 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
   const [formNotes, setFormNotes] = useState('');
   const [selectedHouseIds, setSelectedHouseIds] = useState<string[]>([]);
   const [blockFilter, setBlockFilter] = useState('all');
+  const [recipientCategoryFilter, setRecipientCategoryFilter] = useState<'all' | 'priority' | 'unreceived' | 'pkh'>('all');
+
+  const getHouseAidProfile = (house: House) => {
+    const members = house.familyMembers || [];
+    const hasElderly = members.some(m => {
+      const age = calculateAge(m.birthDate);
+      return age >= 60 || m.familyRelation === 'Orang Tua' || m.familyRelation === 'Mertua';
+    });
+    const hasToddler = members.some(m => {
+      const age = calculateAge(m.birthDate);
+      return (age > 0 && age <= 5) || m.familyRelation === 'Balita';
+    });
+    const aidReceivedCount = aidPrograms.filter(prog => 
+      prog.recipients?.some(r => r.houseId === house.id && r.status === 'Diterima')
+    ).length;
+    const isGovAid = Boolean(house.isPKH || house.isBLT || house.isBPNT || house.economicStatus === 'Pra-Sejahtera' || house.isBansosLain);
+    return { hasElderly, hasToddler, aidReceivedCount, isGovAid };
+  };
 
   // Inline recipient handover input state
   const [inlineHandoverHouseId, setInlineHandoverHouseId] = useState<string | null>(null);
@@ -502,22 +521,36 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                   <button
                     type="button"
                     onClick={() => {
-                      const vuln = sortedHouses
-                        .filter(h => h.isPKH || h.isBLT || h.isBPNT || h.economicStatus === 'Pra-Sejahtera' || h.isBansosLain)
-                        .map(h => h.id);
-                      setSelectedHouseIds(vuln);
-                      toast.info(`${vuln.length} KK Prasejahtera & Penerima Bansos otomatis dicentang.`);
+                      const eligible = sortedHouses.filter(h => {
+                        if (blockFilter !== 'all' && h.block !== blockFilter) return false;
+                        if (recipientCategoryFilter === 'priority') {
+                          const { hasElderly, hasToddler } = getHouseAidProfile(h);
+                          return hasElderly || hasToddler;
+                        }
+                        if (recipientCategoryFilter === 'unreceived') {
+                          return getHouseAidProfile(h).aidReceivedCount === 0;
+                        }
+                        if (recipientCategoryFilter === 'pkh') {
+                          return getHouseAidProfile(h).isGovAid;
+                        }
+                        return true;
+                      });
+                      setSelectedHouseIds(Array.from(new Set([...selectedHouseIds, ...eligible.map(h => h.id)])));
+                      toast.info(`${eligible.length} KK hasil filter otomatis ditambahkan ke penerima.`);
                     }}
                     className="px-3 py-1.5 text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl transition-colors cursor-pointer"
                   >
-                    Pilih Pra-Sejahtera / PKH ({sortedHouses.filter(h => h.isPKH || h.isBLT || h.isBPNT || h.economicStatus === 'Pra-Sejahtera' || h.isBansosLain).length} KK)
+                    + Pilih Semua Tampil
                   </button>
                   <button
                     type="button"
-                    onClick={() => setSelectedHouseIds(sortedHouses.map(h => h.id))}
+                    onClick={() => {
+                      setSelectedHouseIds(sortedHouses.map(h => h.id));
+                      toast.info(`Seluruh ${sortedHouses.length} KK warga aktif dicentang.`);
+                    }}
                     className="px-3 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors cursor-pointer"
                   >
-                    Pilih Semua ({sortedHouses.length} KK)
+                    Pilih Seluruh RT ({sortedHouses.length} KK)
                   </button>
                   <button
                     type="button"
@@ -529,9 +562,70 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 </div>
               </div>
 
+              {/* Smart Priority Filters */}
+              <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-100/70 rounded-2xl border border-slate-200/80">
+                <span className="text-[10px] font-bold uppercase text-slate-500 mr-1 ml-1">Prioritas:</span>
+                <button
+                  type="button"
+                  onClick={() => setRecipientCategoryFilter('all')}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    recipientCategoryFilter === 'all'
+                      ? 'bg-white text-indigo-700 shadow-2xs border border-slate-200'
+                      : 'text-slate-600 hover:bg-white/60'
+                  }`}
+                >
+                  Semua ({sortedHouses.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRecipientCategoryFilter('priority')}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    recipientCategoryFilter === 'priority'
+                      ? 'bg-purple-600 text-white shadow-2xs'
+                      : 'text-purple-700 hover:bg-purple-100/70'
+                  }`}
+                >
+                  <span>👴 Lansia &amp; 👶 Balita</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-purple-100 text-purple-800">
+                    {sortedHouses.filter(h => {
+                      const { hasElderly, hasToddler } = getHouseAidProfile(h);
+                      return hasElderly || hasToddler;
+                    }).length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRecipientCategoryFilter('unreceived')}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    recipientCategoryFilter === 'unreceived'
+                      ? 'bg-emerald-600 text-white shadow-2xs'
+                      : 'text-emerald-700 hover:bg-emerald-100/70'
+                  }`}
+                >
+                  <span>🟢 Belum Pernah Bantuan</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-emerald-100 text-emerald-800">
+                    {sortedHouses.filter(h => getHouseAidProfile(h).aidReceivedCount === 0).length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRecipientCategoryFilter('pkh')}
+                  className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    recipientCategoryFilter === 'pkh'
+                      ? 'bg-amber-600 text-white shadow-2xs'
+                      : 'text-amber-700 hover:bg-amber-100/70'
+                  }`}
+                >
+                  <span>🏛️ Pra-Sejahtera / PKH</span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-100 text-amber-800">
+                    {sortedHouses.filter(h => getHouseAidProfile(h).isGovAid).length}
+                  </span>
+                </button>
+              </div>
+
               {/* Filter per Blok */}
               <div className="flex items-center gap-1.5 overflow-x-auto py-1 custom-scrollbar">
-                <span className="text-[10px] font-bold uppercase text-slate-400 shrink-0 mr-1">Filter Blok:</span>
+                <span className="text-[10px] font-bold uppercase text-slate-400 shrink-0 mr-1">Blok:</span>
                 {['all', 'C5', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12'].map(blk => (
                   <button
                     key={blk}
@@ -551,17 +645,30 @@ _Pengurus RT 002 Huntap Tondo 2_`;
               {/* Household Checkbox Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto border border-slate-200 rounded-2xl p-3 bg-slate-50/50">
                 {sortedHouses
-                  .filter(h => blockFilter === 'all' || h.block === blockFilter)
+                  .filter(h => {
+                    if (blockFilter !== 'all' && h.block !== blockFilter) return false;
+                    if (recipientCategoryFilter === 'priority') {
+                      const { hasElderly, hasToddler } = getHouseAidProfile(h);
+                      return hasElderly || hasToddler;
+                    }
+                    if (recipientCategoryFilter === 'unreceived') {
+                      return getHouseAidProfile(h).aidReceivedCount === 0;
+                    }
+                    if (recipientCategoryFilter === 'pkh') {
+                      return getHouseAidProfile(h).isGovAid;
+                    }
+                    return true;
+                  })
                   .map(house => {
                     const isChecked = selectedHouseIds.includes(house.id);
-                    const tag = house.isPKH ? 'PKH' : house.isBLT ? 'BLT' : house.isBPNT ? 'BPNT' : house.economicStatus === 'Pra-Sejahtera' ? 'Pra-Sejahtera' : null;
+                    const { hasElderly, hasToddler, aidReceivedCount, isGovAid } = getHouseAidProfile(house);
 
                     return (
                       <label
                         key={house.id}
-                        className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition-colors ${
+                        className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition-colors ${
                           isChecked 
-                            ? 'bg-amber-50/80 border-amber-300 text-slate-900 font-bold shadow-2xs' 
+                            ? 'bg-amber-50/90 border-amber-300 text-slate-900 font-bold shadow-2xs' 
                             : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                       >
@@ -575,17 +682,41 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                               setSelectedHouseIds(prev => prev.filter(id => id !== house.id));
                             }
                           }}
-                          className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 w-4 h-4"
+                          className="rounded border-slate-300 text-amber-600 focus:ring-amber-500 w-4 h-4 mt-0.5"
                         />
-                        <span className="font-mono font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded text-[11px] shrink-0">
-                          {house.block}-{String(house.number).padStart(2, '0')}
-                        </span>
-                        <span className="truncate flex-1 font-medium">{house.headOfFamily}</span>
-                        {tag && (
-                          <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 shrink-0">
-                            {tag}
-                          </span>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className="font-mono font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded text-[11px] shrink-0">
+                              {house.block}-{String(house.number).padStart(2, '0')}
+                            </span>
+                            <span className="truncate font-semibold text-slate-800">{house.headOfFamily}</span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-1 text-[9px] font-medium mt-1">
+                            {hasElderly && (
+                              <span className="px-1.5 py-0.2 rounded bg-purple-100 text-purple-800 font-bold">
+                                👴 Lansia
+                              </span>
+                            )}
+                            {hasToddler && (
+                              <span className="px-1.5 py-0.2 rounded bg-pink-100 text-pink-800 font-bold">
+                                👶 Balita
+                              </span>
+                            )}
+                            {isGovAid && (
+                              <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold">
+                                PKH/BLT
+                              </span>
+                            )}
+                            <span className={`px-1.5 py-0.2 rounded font-mono font-bold ${
+                              aidReceivedCount === 0 
+                                ? 'bg-emerald-100 text-emerald-800' 
+                                : 'bg-slate-100 text-slate-600'
+                            }`}>
+                              {aidReceivedCount === 0 ? '🟢 0x Bantuan' : `${aidReceivedCount}x Bantuan`}
+                            </span>
+                          </div>
+                        </div>
                       </label>
                     );
                   })}

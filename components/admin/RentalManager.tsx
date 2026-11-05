@@ -74,13 +74,16 @@ export const syncRentalWithHouse = async (rental: Partial<RentalContract>, isVac
     const mobil = rental.fourWheelCount !== undefined ? rental.fourWheelCount : (targetHouse?.fourWheelCount || 0);
     const totalVehicles = (motor + mobil > 0) ? (motor + mobil) : (rental.vehicleCount !== undefined ? rental.vehicleCount : (targetHouse?.vehicleCount || 0));
 
+    const resolvedOwnerName = rental.ownerName || targetHouse?.ownerName || '';
+    const resolvedOwnerPhone = rental.ownerPhone || targetHouse?.ownerPhone || '';
+
     const houseUpdates: Partial<House> = {
-      residenceType: isRumahKeluarga ? 'Rumah Keluarga' : 'Sewa',
-      ownerName: rental.ownerName || '',
-      ownerPhone: rental.ownerPhone || '',
+      residenceType: isVacant || rental.status === 'Kosong' ? 'Rumah Kosong' : isRumahKeluarga ? 'Rumah Keluarga' : 'Sewa',
+      ownerName: resolvedOwnerName,
+      ownerPhone: resolvedOwnerPhone,
       status: isVacant || rental.status === 'Kosong' ? 'Empty' : 'Occupied',
-      headOfFamily: isVacant || rental.status === 'Kosong' ? '-' : (rental.tenantName || '-'),
-      phone: isVacant || rental.status === 'Kosong' ? '' : (rental.tenantPhone || ''),
+      headOfFamily: isVacant || rental.status === 'Kosong' ? (resolvedOwnerName || '-') : (rental.tenantName || '-'),
+      phone: isVacant || rental.status === 'Kosong' ? resolvedOwnerPhone : (rental.tenantPhone || ''),
       occupants: isVacant || rental.status === 'Kosong' ? 0 : (Number(rental.occupantsCount) || 1),
       twoWheelCount: motor,
       fourWheelCount: mobil,
@@ -1241,6 +1244,20 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                           >
                             <Phone size={12} />
                             <span>WA Pemilik</span>
+                          </button>
+
+                          <button
+                            onClick={async () => {
+                              const isVacant = calculateEffectiveStatus(r) === 'Kosong' || r.status === 'Kosong';
+                              const linkedH = effectiveHouses.find(h => getNormalizedHouseId(h) === r.houseId?.toUpperCase() || h.id === r.houseId);
+                              await syncRentalWithHouse(r, isVacant, linkedH);
+                              toast.success(`Data rumah ${r.houseId} berhasil disinkronkan ke daftar warga!`);
+                            }}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
+                            title="Sinkronkan status kontrak ini ke Data Warga RT"
+                          >
+                            <RefreshCw size={12} />
+                            <span>Sinkron Warga</span>
                           </button>
                         </div>
 

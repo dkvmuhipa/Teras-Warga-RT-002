@@ -45,6 +45,7 @@ const STBMManager = React.lazy(() => import('./STBMManager').then(m => ({ defaul
 const PBBManager = React.lazy(() => import('./PBBManager').then(m => ({ default: m.PBBManager })));
 const RWAggregationDashboard = React.lazy(() => import('./RWAggregationDashboard').then(m => ({ default: m.RWAggregationDashboard })));
 const SocialAidManager = React.lazy(() => import('./SocialAidManager').then(m => ({ default: m.SocialAidManager })));
+const GuestManager = React.lazy(() => import('./GuestManager').then(m => ({ default: m.GuestManager })));
 
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -147,6 +148,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   }, [navigate]);
   const [contentSubTab, setContentSubTab] = useState<'announcements' | 'news' | 'umkm' | 'gallery' | 'events' | 'faq' | 'outages'>('announcements');
   const [financeSubTab, setFinanceSubTab] = useState<'cashflow' | 'wastebank' | 'iuran'>('cashflow');
+  const [reportsWargaSubTab, setReportsWargaSubTab] = useState<'reports' | 'guests'>('reports');
+  const [activitySubTab, setActivitySubTab] = useState<'activities' | 'community-work'>('activities');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activePanicAlerts, setActivePanicAlerts] = useState<PanicAlert[]>([]);
   const [isSpotlightOpen, setIsSpotlightOpen] = useState(false);
@@ -290,6 +293,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               setActiveTab(tab);
               if (tab === 'finance') {
                 setFinanceSubTab((subTab as any) || 'cashflow');
+              } else if (tab === 'reports-warga' || tab === 'guests') {
+                if (tab === 'guests' || subTab === 'guests') setReportsWargaSubTab('guests');
+                else setReportsWargaSubTab('reports');
+              } else if (tab === 'activities' || tab === 'kerja-bakti') {
+                if (tab === 'kerja-bakti' || subTab === 'community-work') setActivitySubTab('community-work');
+                else setActivitySubTab('activities');
               } else if (subTab) {
                 setContentSubTab(subTab as any);
               }
@@ -318,7 +327,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       case 'residents':
       case 'mutations':
       case 'health':
-      case 'guests':
       case 'officials':
         return (
           <ResidentManager 
@@ -388,36 +396,107 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           />
         );
       case 'reports-warga':
-        return (
-          <ServiceManager 
-            letters={letters} 
-            reports={reports} 
-            houses={houses}
-            pdfConfig={pdfConfig} 
-            setPdfConfig={setPdfConfig} 
-            incomingMails={incomingMails}
-            initialTab="reports"
-            onDeleteReport={async (id) => {
-              const isConfirmed = await confirm({
-                title: 'Hapus Laporan',
-                message: 'Apakah Anda yakin ingin menghapus laporan warga ini?',
-                confirmLabel: 'Hapus',
-                isDanger: true
-              });
+      case 'guests':
+        const pendingReportsCount = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
+        const pendingGuestsCount = guestReports.filter(g => g.status === 'Active' || g.status === 'Pending').length;
+        const currentReportsTab = activeTab === 'guests' ? 'guests' : reportsWargaSubTab;
 
-              if (isConfirmed) {
-                try {
-                  await deleteReportFromDb(id);
-                  toast.success('Laporan berhasil dihapus.');
-                } catch (error) {
-                  handleFirestoreError(error, OperationType.DELETE, `reports/${id}`);
-                }
-              }
-            }}
-          />
+        return (
+          <div className="space-y-4">
+            {/* Integrated Sub-Navigation Bar for Reports & Guests */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-slate-200/80 shadow-3xs">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => setReportsWargaSubTab('reports')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    currentReportsTab === 'reports'
+                      ? 'bg-rose-50 text-rose-700 border border-rose-200 shadow-3xs'
+                      : 'text-slate-600 hover:bg-slate-50 border border-transparent'
+                  }`}
+                >
+                  <AlertTriangle size={15} className={currentReportsTab === 'reports' ? 'text-rose-600' : 'text-slate-400'} />
+                  <span>Aspirasi & Aduan Warga</span>
+                  {pendingReportsCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-600 text-white">
+                      {pendingReportsCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setReportsWargaSubTab('guests')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    currentReportsTab === 'guests'
+                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-3xs'
+                      : 'text-slate-600 hover:bg-slate-50 border border-transparent'
+                  }`}
+                >
+                  <Users size={15} className={currentReportsTab === 'guests' ? 'text-indigo-600' : 'text-slate-400'} />
+                  <span>Log Wajib Lapor Tamu 1×24 Jam</span>
+                  {pendingGuestsCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-600 text-white">
+                      {pendingGuestsCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+
+              <span className="text-[11px] font-medium text-slate-400 hidden sm:inline-block px-2">
+                Pusat Aduan & Ketertiban Lingkungan RT 02
+              </span>
+            </div>
+
+            {currentReportsTab === 'guests' ? (
+              <GuestManager guestReports={guestReports} pdfConfig={pdfConfig} />
+            ) : (
+              <ServiceManager 
+                letters={letters} 
+                reports={reports} 
+                houses={houses}
+                pdfConfig={pdfConfig} 
+                setPdfConfig={setPdfConfig} 
+                incomingMails={incomingMails}
+                initialTab="reports"
+                onDeleteReport={async (id) => {
+                  const isConfirmed = await confirm({
+                    title: 'Hapus Laporan',
+                    message: 'Apakah Anda yakin ingin menghapus laporan warga ini?',
+                    confirmLabel: 'Hapus',
+                    isDanger: true
+                  });
+
+                  if (isConfirmed) {
+                    try {
+                      await deleteReportFromDb(id);
+                      toast.success('Laporan berhasil dihapus.');
+                    } catch (error) {
+                      handleFirestoreError(error, OperationType.DELETE, `reports/${id}`);
+                    }
+                  }
+                }}
+              />
+            )}
+          </div>
         );
       case 'facilities':
-        return <FacilityManager ronda={ronda} rondaLogs={rondaLogs} rondaAttendance={rondaAttendance} rondaSwapRequests={rondaSwapRequests} houses={houses} activePatrol={activePatrol} reports={reports} officials={officials} mapPoints={mapPoints} activePanicAlerts={activePanicAlerts} />;
+      case 'panic-logs':
+        return (
+          <FacilityManager 
+            ronda={ronda} 
+            rondaLogs={rondaLogs} 
+            rondaAttendance={rondaAttendance} 
+            rondaSwapRequests={rondaSwapRequests} 
+            houses={houses} 
+            activePatrol={activePatrol} 
+            reports={reports} 
+            officials={officials} 
+            mapPoints={mapPoints} 
+            activePanicAlerts={activePanicAlerts}
+            initialTab={activeTab === 'panic-logs' ? 'sos-logs' : 'monitoring'}
+          />
+        );
       case 'reports-lpj':
       case 'laporan-kegiatan':
       case 'lpj-tahunan':
@@ -434,10 +513,53 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             initialSubTab={activeTab === 'lpj-tahunan' ? 'annual' : 'monthly'}
           />
         );
+      case 'activities':
       case 'kerja-bakti':
-        return <CommunityWorkManager houses={houses} />;
-      case 'panic-logs':
-        return <PanicAlertLogs houses={houses} />;
+        const currentActivityTab = activeTab === 'kerja-bakti' ? 'community-work' : activitySubTab;
+        return (
+          <div className="space-y-4">
+            {/* Integrated Sub-Navigation Bar for Activities & Community Work */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-slate-200/80 shadow-3xs">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                <button
+                  type="button"
+                  onClick={() => setActivitySubTab('activities')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    currentActivityTab === 'activities'
+                      ? 'bg-amber-50 text-amber-800 border border-amber-200 shadow-3xs'
+                      : 'text-slate-600 hover:bg-slate-50 border border-transparent'
+                  }`}
+                >
+                  <Calendar size={15} className={currentActivityTab === 'activities' ? 'text-amber-600' : 'text-slate-400'} />
+                  <span>Agenda Pertemuan & Presensi</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActivitySubTab('community-work')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    currentActivityTab === 'community-work'
+                      ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-3xs'
+                      : 'text-slate-600 hover:bg-slate-50 border border-transparent'
+                  }`}
+                >
+                  <Briefcase size={15} className={currentActivityTab === 'community-work' ? 'text-emerald-600' : 'text-slate-400'} />
+                  <span>Kerja Bakti & Gotong Royong</span>
+                </button>
+              </div>
+
+              <span className="text-[11px] font-medium text-slate-400 hidden sm:inline-block px-2">
+                Pusat Agenda & Gotong Royong RT 02
+              </span>
+            </div>
+
+            {currentActivityTab === 'community-work' ? (
+              <CommunityWorkManager houses={houses} />
+            ) : (
+              <ActivityManagement houses={houses} />
+            )}
+          </div>
+        );
       case 'assets':
         return <AssetManager inventory={inventory} inventoryLogs={inventoryLogs} />;
       case 'audit':
@@ -493,8 +615,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         return <STBMManager houses={houses} />;
       case 'meeting-minutes':
         return <MeetingMinutesManager />;
-      case 'activities':
-        return <ActivityManagement houses={houses} />;
       case 'settings':
         return (
           <AdminSettings 
@@ -540,6 +660,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               setActiveTab(tab);
               if (tab === 'finance') {
                 setFinanceSubTab((subTab as any) || 'cashflow');
+              } else if (tab === 'reports-warga' || tab === 'guests') {
+                if (tab === 'guests' || subTab === 'guests') setReportsWargaSubTab('guests');
+                else setReportsWargaSubTab('reports');
+              } else if (tab === 'activities' || tab === 'kerja-bakti') {
+                if (tab === 'kerja-bakti' || subTab === 'community-work') setActivitySubTab('community-work');
+                else setActivitySubTab('activities');
               } else if (subTab) {
                 setContentSubTab(subTab as any);
               }

@@ -8,7 +8,7 @@ import {
   Sliders, Calendar, Check, AlertCircle, ArrowUpDown, 
   TrendingUp, DollarSign, Home, User, Edit2, Trash2,
   ShieldCheck, Sparkles, FileText, ArrowRight,
-  Phone, Users, ExternalLink, X
+  Phone, Users, ExternalLink, X, CreditCard
 } from 'lucide-react';
 import { House, WaterMeterReading, WaterUtilitySettings } from '../../types';
 import { Card } from '../ui/Card';
@@ -25,7 +25,9 @@ import {
   verifyWaterMeterReading,
   subscribeToSettings,
   updateSettings,
-  calculateWaterUtilityBill
+  calculateWaterUtilityBill,
+  addIuranPaymentToDb,
+  addTransactionToDb
 } from '../../services/databaseService';
 import { useConfirm } from '../../context/ConfirmContext';
 import { motion, AnimatePresence } from 'motion/react';
@@ -394,6 +396,59 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
     const date = new Date(parseInt(y), parseInt(m) - 1, 1);
     return date.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
   }, [selectedPeriod]);
+
+  // Mark Water Bill as Paid & Sync with RT Cash & Iuran
+  const handleMarkWaterPayment = async (reading: WaterMeterReading, house?: House | null) => {
+    const isConfirmed = await confirm({
+      title: 'Konfirmasi Pelunasan Air',
+      message: `Tandai tagihan air rumah ${reading.houseId} periode ${reading.period} sebesar Rp${(reading.totalAmount || 0).toLocaleString('id-ID')} sebagai LUNAS dan catat otomatis ke Kas & Iuran RT?`,
+      confirmLabel: 'Ya, Tandai Lunas & Catat Kas',
+      isDanger: false
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // 1. Update reading status
+      await updateWaterMeterReading(reading.id, {
+        paymentStatus: 'Lunas',
+        paidAt: today,
+        paidAmount: reading.totalAmount
+      });
+
+      // 2. Add to iuranPayments
+      await addIuranPaymentToDb({
+        houseId: reading.houseId,
+        amount: reading.totalAmount,
+        date: today,
+        month: formattedPeriodName,
+        type: 'Air',
+        payerName: house?.headOfFamily || reading.residentName || 'Warga',
+        status: 'Paid',
+        notes: `Pelunasan Meteran Air ${reading.period} (${reading.usage} m³)`
+      });
+
+      // 3. Add to cashFlow
+      await addTransactionToDb({
+        date: today,
+        description: `Penerimaan Iuran Air ${reading.houseId} (${reading.period} - ${reading.usage} m³)`,
+        amount: reading.totalAmount,
+        type: 'Income',
+        category: 'Iuran Air',
+        referenceNumber: `MTR-${reading.houseId.replace(/[^a-zA-Z0-9]/g, '')}-${reading.period}`
+      });
+
+      // Update local state
+      setReadings(prev => prev.map(r => r.id === reading.id ? { ...r, paymentStatus: 'Lunas', paidAt: today, paidAmount: reading.totalAmount } : r));
+
+      toast.success(`Pembayaran air rumah ${reading.houseId} berhasil dilunasi & dicatat ke Kas RT!`);
+    } catch (err: any) {
+      console.error('Failed to sync water payment:', err);
+      toast.error('Gagal mencatat pelunasan air: ' + (err.message || 'Error'));
+    }
+  };
 
   // Save Settings
   const handleSaveSettings = async () => {
@@ -1108,6 +1163,27 @@ export const WaterMeterManager: React.FC<WaterMeterManagerProps> = ({ houses = [
                             >
                               <Send className="w-3.5 h-3.5" />
                             </Button>
+
+                            {/* Mark as Paid & Sync to CashFlow */}
+                            {reading && (
+                              reading.paymentStatus === 'Lunas' ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold" title="Lunas & Dicatat ke Kas RT">
+                                  <CreditCard className="w-3 h-3 text-emerald-600" />
+                                  <span>Lunas</span>
+                                </span>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleMarkWaterPayment(reading, house)}
+                                  className="h-8 px-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] font-bold flex items-center gap-1"
+                                  title="Tandai Lunas & Catat Otomatis ke Kas/Iuran RT"
+                                >
+                                  <CreditCard className="w-3 h-3" />
+                                  <span className="hidden sm:inline">Bayar</span>
+                                </Button>
+                              )
+                            )}
 
                             {/* Delete Button (if recorded) */}
                             {reading && (
