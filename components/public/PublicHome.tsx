@@ -153,22 +153,15 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         </button>
       </div>
 
-      {/* Greeting Header */}
-      <div ref={contentRef} className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-center sm:text-left border-b border-slate-200/60 pb-5">
+      {/* Layanan Warga Mandiri Header */}
+      <div ref={contentRef} className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-center sm:text-left border-b border-slate-200/60 pb-3">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-1 block">
-            {currentTenant.name}
+          <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-0.5 block">
+            {currentTenant.name} &bull; Akses Cepat
           </span>
-          <h2 className="text-2xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-            {getGreeting()}, <span className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-600 bg-clip-text text-transparent">Warga!</span>
+          <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+            Layanan Warga <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">Mandiri</span>
           </h2>
-          <p className="text-slate-500 font-medium text-xs sm:text-sm mt-1">
-            Selamat datang di pusat layanan mandiri dan transparansi digital lingkungan {currentTenant.name}.
-          </p>
-        </div>
-        <div className="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-600 shrink-0 shadow-2xs">
-          <Calendar size={13} className="text-indigo-600" />
-          <span>{today}, {fullDate}</span>
         </div>
       </div>
 

@@ -127,6 +127,7 @@ export const PublicEarthquake: React.FC<PublicEarthquakeProps> = ({ defaultTab, 
   const { weather } = useWeather();
   const [advisory, setAdvisory] = useState<ClimateAdvisoryResult | null>(null);
   const [advisoryLoading, setAdvisoryLoading] = useState(false);
+  const [isAdvisoryExpanded, setIsAdvisoryExpanded] = useState(false);
   const [selectedHouseId, setSelectedHouseId] = useState<string>('');
 
   // Jarak terdekat gempa BMKG ke Huntap Tondo 2

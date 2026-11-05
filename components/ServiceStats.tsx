@@ -20,9 +20,10 @@ interface ServiceStatsProps {
 
 export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, letters }) => {
   const totalResidents = houses.filter(h => h.status === 'Occupied').reduce((acc, h) => acc + Math.max(h.occupants || 1, 1 + (h.familyMembers?.length || 0)), 0);
-  const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const resolvedReports = reports.filter(r => r.status === 'Selesai').length;
   const processedLetters = letters.filter(l => l.status !== 'Ditolak' && l.status !== 'Rejected').length;
+  const totalTasks = letters.length + reports.length;
+  const completionRate = totalTasks > 0 ? Math.round(((processedLetters + resolvedReports) / totalTasks) * 100) : 100;
   
   const stats = [
     { 
@@ -50,12 +51,12 @@ export const ServiceStats: React.FC<ServiceStatsProps> = ({ houses, reports, let
       description: 'Jiwa terdaftar di RT 02'
     },
     { 
-      label: 'Rumah Terisi', 
-      value: occupiedHouses, 
-      icon: Home, 
+      label: 'Tuntas Layanan', 
+      value: `${completionRate}%`, 
+      icon: TrendingUp, 
       color: 'text-amber-600', 
       bg: 'bg-amber-50',
-      description: 'Kavling yang sudah dihuni'
+      description: 'Penyelesaian berkas & aduan'
     }
   ];
 

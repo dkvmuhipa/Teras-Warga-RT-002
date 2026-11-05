@@ -110,6 +110,7 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
   setActiveTab
 }) => {
   const [internalShowPin, setInternalShowPin] = React.useState(false);
+  const [isProfileExpanded, setIsProfileExpanded] = React.useState(false);
   const activeShowPin = showPin !== undefined ? showPin : internalShowPin;
   const toggleShowPin = () => {
     if (setShowPin) {
@@ -730,146 +731,16 @@ export const ResidentEidTab: React.FC<ResidentEidTabProps> = ({
             </Card>
           )}
 
-          <Card className="bg-indigo-50 border-indigo-100 shadow-sm p-5 text-left">
+          <Card className="bg-indigo-50/70 border-indigo-100 shadow-2xs p-5 text-left rounded-3xl">
             <h4 className="font-semibold text-indigo-900 text-sm mb-2 flex items-center gap-1.5">
               <QrCode size={16} /> Manfaat E-ID Aktif
             </h4>
             <p className="text-[11px] text-indigo-700 font-medium leading-relaxed mb-4">
-              Gunakan Barcode di samping saat verifikasi kehadiran rapat RT, pengambilan kupon bantuan, kerja bakti, maupun saat pembayaran retribusi iuran tunai.
+              Gunakan barcode atau cetak kartu E-ID fisik untuk verifikasi kehadiran rapat RT, pengambilan kupon bantuan, kerja bakti, maupun retribusi iuran tunai.
             </p>
-            <div className="space-y-3">
-              <Button 
-                onClick={() => {
-                  try {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 1012;
-                    canvas.height = 638;
-                    const ctx = canvas.getContext('2d');
-                    if (!ctx) throw new Error('Canvas context not available');
-
-                    ctx.beginPath();
-                    if (ctx.roundRect) ctx.roundRect(0, 0, 1012, 638, 48);
-                    else ctx.rect(0, 0, 1012, 638);
-                    ctx.clip();
-
-                    const gradient = ctx.createLinearGradient(0, 0, 1012, 638);
-                    gradient.addColorStop(0, '#4f46e5');
-                    gradient.addColorStop(0.5, '#312e81');
-                    gradient.addColorStop(1, '#0f172a');
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(0, 0, 1012, 638);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-                    ctx.beginPath();
-                    ctx.arc(1012, 0, 380, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = 'rgba(99, 102, 241, 0.15)';
-                    ctx.beginPath();
-                    ctx.arc(0, 638, 300, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = '900 36px system-ui, -apple-system, sans-serif';
-                    ctx.textAlign = 'left';
-                    ctx.fillText('KARTU WARGA DIGITAL', 80, 150);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                    ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('RUKUN TETANGGA 02 / RW 05', 80, 185);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-                    ctx.beginPath();
-                    if (ctx.roundRect) ctx.roundRect(80, 70, 140, 34, 17);
-                    else ctx.rect(80, 70, 140, 34);
-                    ctx.fill();
-
-                    ctx.fillStyle = '#10b981';
-                    ctx.beginPath();
-                    ctx.arc(102, 87, 5, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = '900 11px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('E-ID AKTIF', 115, 91);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-                    ctx.font = '900 12px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('NAMA KEPALA KELUARGA / PENGHUNI', 80, 290);
-
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = '900 38px system-ui, -apple-system, sans-serif';
-                    ctx.fillText((currentHouse?.headOfFamily || 'Anggota RT 02').toUpperCase(), 80, 345);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-                    ctx.font = '900 12px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('NOMOR HUNIAN AKTIF', 80, 435);
-
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = '900 28px system-ui, -apple-system, sans-serif';
-                    ctx.fillText(`BLOK ${currentHouse?.block}-${currentHouse?.number}`, 80, 480);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-                    ctx.font = '900 12px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('REKENING IURAN RT', 380, 435);
-
-                    ctx.fillStyle = isAllPaid ? 'rgba(16, 185, 129, 0.2)' : 'rgba(245, 158, 11, 0.2)';
-                    ctx.beginPath();
-                    if (ctx.roundRect) ctx.roundRect(380, 452, 175, 36, 10);
-                    else ctx.rect(380, 452, 175, 36);
-                    ctx.fill();
-
-                    ctx.fillStyle = isAllPaid ? '#34d399' : '#fbbf24';
-                    ctx.font = '900 12px system-ui, -apple-system, sans-serif';
-                    ctx.fillText(isAllPaid ? '✔ LUNAS AKTIF' : '⚠ TAGIHAN BARU', 396, 474);
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
-                    ctx.font = '800 11px system-ui, -apple-system, sans-serif';
-                    ctx.fillText('TERAS WARGA RT02 • DIKELOLA SECARA MANDIRI & TRANSPARAN', 80, 565);
-
-                    ctx.fillStyle = '#ffffff';
-                    ctx.beginPath();
-                    if (ctx.roundRect) ctx.roundRect(660, 140, 272, 318, 32);
-                    else ctx.rect(660, 140, 272, 318);
-                    ctx.fill();
-
-                    const qrCanvas = document.getElementById('resident-qrcode-canvas') as HTMLCanvasElement;
-                    if (qrCanvas) {
-                      ctx.drawImage(qrCanvas, 696, 172, 200, 200);
-                    }
-
-                    ctx.fillStyle = '#475569';
-                    ctx.font = '900 12px system-ui, -apple-system, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('PINDAI VERIFIKASI', 796, 405);
-                    ctx.font = 'bold 9px system-ui, -apple-system, sans-serif';
-                    ctx.fillStyle = '#94a3b8';
-                    ctx.fillText('PEMERINTAH KOTA KELURAHAN', 796, 423);
-
-                    const dataUrl = canvas.toDataURL('image/png');
-                    const link = document.createElement('a');
-                    link.download = `E-ID_RT02_Blok_${currentHouse?.block || 'RT'}_${currentHouse?.number || '02'}.png`;
-                    link.href = dataUrl;
-                    link.click();
-                    
-                    toast.success('Kartu E-ID Berhasil Diunduh!', {
-                      description: 'Kartu E-ID Warga Digital Anda telah disimpan ke galeri perangkat Anda.'
-                    });
-                  } catch (err) {
-                    console.error('Error generating card image:', err);
-                    toast.error('Gagal Mengunduh Kartu', {
-                      description: 'Terjadi kegagalan render identitas digital lokal.'
-                    });
-                  }
-                }}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-[10px] font-semibold uppercase tracking-widest h-11 cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <Download size={14} /> Unduh & Simpan Kartu E-ID
-              </Button>
-              <div className="pt-2 border-t border-indigo-200/50 text-left">
-                <p className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mb-2">Notifikasi Pemberitahuan</p>
-                <NotificationToggle userId={selectedHouseId} />
-              </div>
+            <div className="pt-2 border-t border-indigo-200/50 text-left">
+              <p className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mb-2">Notifikasi Pemberitahuan Warga</p>
+              <NotificationToggle userId={selectedHouseId} />
             </div>
           </Card>
         </div>

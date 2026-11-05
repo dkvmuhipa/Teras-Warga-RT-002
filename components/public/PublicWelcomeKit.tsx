@@ -92,7 +92,7 @@ export const PublicWelcomeKit: React.FC = () => {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       const steps = [
-        'A. LAPOR DIRI: Mengisi data sensus digital via website https://teras-rt02.web.app/register.',
+        'A. LAPOR DIRI: Mengisi data sensus digital via website https://teras-warga.web.app/#/services?tab=mutasi.',
         'B. GABUNG GRUP WA: Menghubungi Ketua RT (+62 859-6119-4621) untuk masuk grup resmi pengumuman.',
         'C. DATA PENGHUNI KONTRAK: Bagi warga penyewa, laporkan identitas pemilik rumah dan nomor kontak aktif.',
         'D. SIMPAN KONTAK PENTING: Catat nomor darurat pos satpam, ambulans, serta ketua lingkungan.'

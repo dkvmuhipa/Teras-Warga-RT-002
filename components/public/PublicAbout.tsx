@@ -5,70 +5,44 @@ import {
   Home, 
   MapPin, 
   Heart, 
-  Cpu, 
   Activity, 
   Award, 
   Phone, 
   ArrowLeft, 
   ChevronRight, 
-  Smartphone, 
-  Briefcase, 
-  Star, 
-  Flame, 
-  CheckCircle2, 
   Calendar,
-  Lock,
   Globe,
-  Database,
-  TrendingUp,
-  ArrowUpRight,
-  TrendingDown,
-  ShoppingBag,
-  Clock,
-  Archive,
   FileText,
-  HeartHandshake,
-  AlertTriangle,
-  Lightbulb,
-  Map,
-  BadgeAlert,
+  Clock,
+  Sparkles,
+  ShoppingBag,
   Info
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
-import { SmartImage } from '../SmartImage';
-import { Official, House, UMKM, RondaSchedule, CashFlow, Report, LetterRequest, InventoryItem, AppEvent, DonationCampaign } from '../../types';
+import { Official, House, UMKM, CashFlow, Report, LetterRequest } from '../../types';
 
 interface PublicAboutProps {
   officials?: Official[];
   houses?: House[];
   umkm?: UMKM[];
-  ronda?: RondaSchedule[];
   cashFlow?: CashFlow[];
   reports?: Report[];
   letters?: LetterRequest[];
-  inventory?: InventoryItem[];
-  events?: AppEvent[];
-  donationCampaigns?: DonationCampaign[];
 }
 
 export const PublicAbout: React.FC<PublicAboutProps> = ({ 
   officials = [], 
   houses = [], 
   umkm = [], 
-  ronda = [], 
   cashFlow = [],
   reports = [],
-  letters = [],
-  inventory = [],
-  events = [],
-  donationCampaigns = []
+  letters = []
 }) => {
   const navigate = useNavigate();
-  const [activeGeoTab, setActiveGeoTab] = useState<'hunian' | 'ekonomi' | 'kerentanan' | 'demografi' | 'birokrasi'>('hunian');
+  const [activeGeoTab, setActiveGeoTab] = useState<'hunian' | 'demografi' | 'kerentanan' | 'layanan'>('hunian');
 
-  // Calculating Real Dynamic Statistics
-  const totalKK = houses.length;
+  // Demographics calculation
   const totalOccupants = houses.reduce((sum, h) => {
     if (h.status !== 'Occupied') return sum;
     const familyMembersCount = h.familyMembers ? h.familyMembers.length : 0;
@@ -76,7 +50,6 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
     return sum + Math.max(baseOccupants, 1 + familyMembersCount);
   }, 0);
 
-  // Demographics calculation for PublicAbout
   const demoStats = useMemo(() => {
     let males = 0;
     let females = 0;
@@ -86,7 +59,6 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
     houses.forEach(h => {
       if (h.status === 'Occupied') {
-        // HoF
         if (h.gender === 'Perempuan') females++;
         else males++;
 
@@ -96,7 +68,6 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
         else if (age >= 60) senior++;
         else productive++;
 
-        // Family members
         if (h.familyMembers && Array.isArray(h.familyMembers)) {
           h.familyMembers.forEach(m => {
             if (!m) return;
@@ -118,47 +89,21 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
 
     return { males, females, productive, young, senior, sexRatio, depRatio };
   }, [houses]);
+
   const occupiedHouses = houses.filter(h => h.status === 'Occupied').length;
   const emptyHouses = houses.filter(h => h.status === 'Empty').length;
   const businessHouses = houses.filter(h => h.status === 'Business').length;
 
-  const totalUMKMCount = umkm.length;
-  const totalRondaGroups = ronda.length;
-
-  // Real Cash Flow Accounting
-  const totalIncome = cashFlow
-    .filter(c => c.type === 'Income')
-    .reduce((sum, c) => sum + (c.amount || 0), 0);
-    
-  const totalExpense = cashFlow
-    .filter(c => c.type === 'Expense')
-    .reduce((sum, c) => sum + (c.amount || 0), 0);
-    
-  const currentBalance = totalIncome - totalExpense;
-
-  // Real Demographic Metrics
-  const praSejahteraCount = houses.filter(h => h.economicStatus === 'Pra-Sejahtera').length;
-  const sejahteraCount = houses.filter(h => h.economicStatus === 'Sejahtera' || h.economicStatus === 'Mampu').length;
-  const bansosCount = houses.filter(h => h.isPKH || h.isBLT || h.isBPNT).length;
-  
   // Vulnerable groups
   const babyToddlerCount = houses.reduce((sum, h) => sum + (h.babyCount || 0) + (h.toddlerCount || 0), 0);
   const elderlyCount = houses.reduce((sum, h) => sum + (h.elderlyCount || 0), 0);
   const pregnantCount = houses.reduce((sum, h) => sum + (h.pregnantCount || 0), 0);
 
   // Bureaucracy & Reports Analytics
-  const totalReports = reports.length;
   const resolvedReports = reports.filter(r => r.status === 'Selesai').length;
-  const activeReports = reports.filter(r => r.status === 'Baru' || r.status === 'Diproses').length;
-  const totalLetters = letters.length;
-  const approvedLetters = letters.filter(l => l.status === 'Disetujui' || l.status === 'Approved').length;
+  const processedLetters = letters.filter(l => l.status !== 'Ditolak' && l.status !== 'Rejected').length;
 
-  // Inventory Metrics
-  const totalInventoryAssets = inventory.reduce((sum, item) => sum + (item.total || 0), 0);
-  const availableInventoryAssets = inventory.reduce((sum, item) => sum + (item.available || 0), 0);
-  const goodAssetsCount = inventory.filter(i => i.condition === 'Baik').length;
-
-  // Dynamic Core Officials matching database data if available
+  // Dynamic Core Officials
   const matchOfficialByRole = (roleKeyword: string, fallbackName: string, fallbackPhrase: string, fallbackTasks: string[]) => {
     const matched = officials.find(o => o.role.toLowerCase().includes(roleKeyword.toLowerCase()));
     if (matched) {
@@ -181,1556 +126,532 @@ export const PublicAbout: React.FC<PublicAboutProps> = ({
     };
   };
 
-  const dynamicKetua = matchOfficialByRole('ketua', 'Irfan', '"Memimpin dengan ketulusan hati, ketegasan prinsip, dan literasi teknologi menuju pemukiman yang mandiri."', [
-    'Penanggung jawab utama seluruh urusan kemasyarakatan',
-    'Pengambil kebijakan strategis & mediasi warga',
-    'Sinergi program eksternal Kelurahan & Kota Palu'
-  ]);
-
-  const dynamicSekretaris = matchOfficialByRole('sekretaris', 'Faisal, S.Kom', '"Digitalisasi pelayanan surat-menyurat RT demi menghemat waktu dan tenaga seluruh warga Huntap."', [
-    'Pengelolaan administrasi kependudukan & berkas digital',
-    'Penyusunan arsip & administrasi persuratan resmi',
-    'Notulensi musyawarah & pengumuman warga'
-  ]);
-
-  const dynamicBendahara = matchOfficialByRole('bendahara', 'Hj. Rosdiana', '"Setiap rupiah kas dikelola dengan amanah, tercatat transparan, dan dikembalikan untuk kemakmuran warga."', [
-    'Pencatatan iuran wajib bulanan & laporan kas masuk-keluar',
-    'Penyusunan anggaran kegiatan warga & bantuan sosial',
-    'Publikasi keuangan berkala di papan informasi digital'
-  ]);
-
-  const coreStructure = [dynamicKetua, dynamicSekretaris, dynamicBendahara];
+  const coreStructure = [
+    matchOfficialByRole(
+      'ketua',
+      'Ketua RT 02',
+      'Memimpin pengayoman warga dengan keterbukaan, santun, dan responsif bagi kemajuan lingkungan bersama.',
+      [
+        'Penanggung jawab umum tata kelola dan perlindungan warga',
+        'Penandatanganan berkas & verifikasi surat pengantar',
+        'Penggerak musyawarah gotong royong dan kesiapsiagaan darurat'
+      ]
+    ),
+    matchOfficialByRole(
+      'sekretaris',
+      'Sekretaris RT',
+      'Ketertiban administrasi dan arsip adalah kunci terwujudnya pelayanan warga yang adil dan terdokumentasi.',
+      [
+        'Pengelolaan pangkalan data digital kependudukan KK warga',
+        'Notulensi rapat musyawarah & arsip regulasi resmi RT',
+        'Verifikasi pengajuan mutasi dan perubahan data mandiri'
+      ]
+    ),
+    matchOfficialByRole(
+      'bendahara',
+      'Bendahara RT',
+      'Setiap rupiah iuran warga adalah amanah swadaya yang wajib dipertanggungjawabkan secara terbuka.',
+      [
+        'Pencatatan pembukuan kas masuk & keluar terintegrasi',
+        'Rekonsiliasi iuran kebersihan, air, dan kas sosial',
+        'Penyusunan laporan transparansi keuangan periodik warga'
+      ]
+    )
+  ];
 
   const terasValues = [
     {
       letter: 'T',
       title: 'Teknologi',
-      desc: 'Digitalisasi sistem layanan persuratan, arsip warga aman di cloud, panic button siskamling, monitoring seismik aktif, serta asisten warga ChatBot AI terintegrasi 24 jam.',
-      color: 'from-blue-500 to-indigo-600',
-      icon: <Cpu className="text-white" size={24} />,
-      bgSoft: 'bg-blue-50 text-blue-700'
+      desc: 'Digitalisasi administrasi persuratan satu pintu, absensi kegiatan, dan tata kelola berbasis web.',
+      color: 'from-indigo-500 to-blue-600',
+      bgLight: 'bg-indigo-50 text-indigo-700 border-indigo-100'
     },
     {
       letter: 'E',
-      title: 'Ekonomi Kreatif',
-      desc: 'Pemberdayaan potensi UMKM mandiri, bank sampah digital bernilai ekonomis, promosi pasar warga, serta pelatihan digital marketing guna menggalakkan kemandirian finansial keluarga.',
-      color: 'from-emerald-500 to-teal-600',
-      icon: <Briefcase className="text-white" size={24} />,
-      bgSoft: 'bg-emerald-50 text-emerald-700'
+      title: 'Ekraf & Mandiri',
+      desc: 'Pemberdayaan UMKM lokal warga dan pemilahan bank sampah digital bernilai ekonomis.',
+      color: 'from-amber-500 to-orange-600',
+      bgLight: 'bg-amber-50 text-amber-700 border-amber-100'
     },
     {
       letter: 'R',
-      title: 'Rukun',
-      desc: 'Membina silaturahmi erat tanpa sekat, merangkul keberagaman latar belakang, mengedepankan gotong royong warga, musyawarah kekeluargaan, serta transparansi kas swadaya.',
-      color: 'from-amber-500 to-orange-600',
-      icon: <Users className="text-white" size={24} />,
-      bgSoft: 'bg-amber-50 text-amber-700'
+      title: 'Rukun & Harmonis',
+      desc: 'Kebersamaan guyub, saling asih, peduli tetangga, dan penyelesaian musyawarah mufakat.',
+      color: 'from-emerald-500 to-teal-600',
+      bgLight: 'bg-emerald-50 text-emerald-700 border-emerald-100'
     },
     {
       letter: 'A',
-      title: 'Aman',
-      desc: 'Kewaspadaan lingkungan prima dengan jadwal ronda malam terstruktur, tombol alarm darurat gawat darurat, mitigasi aktif risiko gempa bumi, serta pengawasan kepekaan sosial.',
+      title: 'Aman & Tangguh',
+      desc: 'Sistem ronda siskamling aktif, penerangan jalan, serta mitigasi gempa sesar Palu-Koro.',
       color: 'from-rose-500 to-red-600',
-      icon: <Shield className="text-white" size={24} />,
-      bgSoft: 'bg-rose-50 text-rose-700'
+      bgLight: 'bg-rose-50 text-rose-700 border-rose-100'
     },
     {
       letter: 'S',
-      title: 'Sinergi',
-      desc: 'Membangun jembatan sinergitas kolaboratif antara warga, pengurus RT, institusi Kelurahan Tondo, pihak kepolisian (Bhabinkamtibmas), puskesmas, serta stakeholder terkait.',
-      color: 'from-purple-500 to-indigo-600',
-      icon: <Activity className="text-white" size={24} />,
-      bgSoft: 'bg-purple-50 text-purple-700'
+      title: 'Sinergi Warga',
+      desc: 'Kolaborasi selaras antara pengurus, warga, kelurahan, dan pemangku kepentingan.',
+      color: 'from-blue-500 to-indigo-600',
+      bgLight: 'bg-blue-50 text-blue-700 border-blue-100'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 pb-24">
-      {/* Upper Navigation Bar */}
-      <div className="bg-white border-b border-slate-100 sticky top-0 z-20 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50/50 py-6 sm:py-10 px-4 font-sans text-slate-800">
+      <div className="max-w-6xl mx-auto space-y-10 sm:space-y-12">
+
+        {/* Navigation & Header */}
+        <div>
           <button 
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-extrabold text-xs tracking-wider uppercase cursor-pointer transition-colors"
+            onClick={() => navigate('/')} 
+            className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 text-xs font-bold uppercase tracking-wider mb-6 bg-white hover:bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200 shadow-2xs transition-colors cursor-pointer"
           >
-            <ArrowLeft size={16} strokeWidth={2.5} />
-            KEMBALI KE BERANDA
+            <ArrowLeft size={16} />
+            <span>Kembali ke Beranda</span>
           </button>
-          <span className="text-xs font-semibold text-rose-600 bg-rose-50/80 px-3.5 py-1.5 rounded-full uppercase tracking-widest font-mono">
-            PROFIL TERINTEGRASI BERSAMA (RT 02)
-          </span>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
-        {/* HERO HEADER */}
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }} 
-          animate={{ opacity: 1, y: 0 }}
-          className="relative text-center mb-14 bg-white rounded-[2.5rem] p-8 sm:p-14 border border-slate-200/80 shadow-md overflow-hidden group"
-        >
-          {/* Subtle Ambient Light Glow Orbs */}
-          <motion.div 
-            animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/70 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" 
-          />
-          <motion.div 
-            animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-0 left-0 w-80 h-80 bg-rose-50/60 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none" 
-          />
+          {/* Hero Profil RT */}
+          <div className="relative rounded-[2.5rem] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-7 sm:p-10 md:p-12 shadow-xl overflow-hidden border border-slate-800">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="relative z-10 space-y-4">
-            <div className="inline-flex p-3.5 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100/80 shadow-2xs">
-              <Heart size={32} className="" />
+            <div className="relative z-10 max-w-3xl space-y-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-bold border border-white/20 text-indigo-200">
+                <Shield size={14} className="text-emerald-400" />
+                <span>PROFIL RESMI • HUNTAP TONDO 2</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
+                Rukun Tetangga 002 <span className="bg-gradient-to-r from-amber-300 via-orange-300 to-amber-200 bg-clip-text text-transparent">RW 020</span>
+              </h1>
+
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+                Kawasan Hunian Tetap (Huntap) Tondo 2, Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu. Komunitas tangguh pasca-bencana yang bertransformasi menjadi pemukiman mandiri, transparan, dan terdigitalisasi melalui ekosistem <strong>TERAS Warga</strong>.
+              </p>
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                <div className="px-3.5 py-2 rounded-2xl bg-white/10 border border-white/15 text-xs font-semibold flex items-center gap-2">
+                  <Home size={15} className="text-amber-400" />
+                  <span>Blok C5 s/d C12</span>
+                </div>
+                <div className="px-3.5 py-2 rounded-2xl bg-white/10 border border-white/15 text-xs font-semibold flex items-center gap-2">
+                  <Users size={15} className="text-emerald-400" />
+                  <span>{houses.length} Kavling Terdaftar ({totalOccupants} Jiwa)</span>
+                </div>
+                <div className="px-3.5 py-2 rounded-2xl bg-white/10 border border-white/15 text-xs font-semibold flex items-center gap-2">
+                  <Award size={15} className="text-sky-400" />
+                  <span>RT Tanggap &amp; Cerdas Bencana</span>
+                </div>
+              </div>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-semibold text-slate-900 tracking-tight leading-tight">
-              Profil Lingkungan &amp; <span className="text-rose-600 italic font-serif">TERAS RT 02</span>
-            </h1>
-            <p className="text-sm sm:text-base font-medium text-slate-500 max-w-2xl mx-auto leading-relaxed">
-              Menyajikan transparansi rekapitulasi data kependudukan riil, komitmen kepengurusan, etalase swadaya ekonomi, hingga asuransi keselamatan warga Huntap Tondo 2 secara real-time.
+          </div>
+        </div>
+
+        {/* 1. NILAI UTAMA: FILOSOFI TERAS */}
+        <section className="space-y-4">
+          <div className="text-center sm:text-left">
+            <span className="text-[10px] font-mono font-bold uppercase text-indigo-600 tracking-widest block mb-1">
+              FONDASI KEGUYUBAN KITA
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Nilai &amp; Filosofi <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">"TERAS"</span>
+            </h2>
+            <p className="text-xs text-slate-500 font-medium mt-1 max-w-2xl">
+              Lima pilar nilai luhur yang menjadi pedoman pengurus dan seluruh warga dalam membangun kerukunan serta kemajuan lingkungan.
             </p>
           </div>
-        </motion.div>
 
-        {/* INTEGRATED CORE STATS TICKER */}
-        <section className="mb-12">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.05 }}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-colors flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Warga Huni</span>
-                  <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
-                    <Home size={18} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+            {terasValues.map((val, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ y: -3 }}
+                className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${val.color} text-white font-mono font-black text-lg flex items-center justify-center shadow-md mb-3`}>
+                    {val.letter}
                   </div>
+                  <h3 className="font-extrabold text-slate-900 text-sm tracking-tight mb-1.5">{val.title}</h3>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">{val.desc}</p>
                 </div>
-                <p className="text-3xl sm:text-4xl font-semibold text-indigo-950 font-mono tracking-tight">{totalKK}</p>
-                <p className="text-xs font-semibold text-slate-800 mt-2 uppercase tracking-wide">Profil Kelompok KK</p>
-              </div>
-              <p className="text-[10px] text-indigo-600 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
-                {totalOccupants} Warga Jiwa Terdaftar
-              </p>
-            </motion.div>
-
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-colors flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Potensi UMKM</span>
-                  <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <ShoppingBag size={18} />
-                  </div>
-                </div>
-                <p className="text-3xl sm:text-4xl font-semibold text-emerald-950 font-mono tracking-tight">{totalUMKMCount}</p>
-                <p className="text-xs font-semibold text-slate-800 mt-2 uppercase tracking-wide">Mitra Niaga Aktif</p>
-              </div>
-              <p className="text-[10px] text-emerald-600 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
-                Pilar Sektor Kemandirian Finansial
-              </p>
-            </motion.div>
-
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.15 }}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-colors flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Aset Bersama</span>
-                  <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl">
-                    <Archive size={18} />
-                  </div>
-                </div>
-                <p className="text-3xl sm:text-4xl font-semibold text-rose-950 font-mono tracking-tight">{totalInventoryAssets}</p>
-                <p className="text-xs font-semibold text-slate-800 mt-2 uppercase tracking-wide">Peralatan RT / Inventaris</p>
-              </div>
-              <p className="text-[10px] text-rose-600 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
-                {availableInventoryAssets} Aset Siap Pinjam/Gunakan
-              </p>
-            </motion.div>
-
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-slate-350 transition-colors flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Kas Swadaya RT</span>
-                  <div className="p-2.5 bg-amber-50 text-amber-655 text-amber-600 rounded-xl">
-                    <Database size={18} />
-                  </div>
-                </div>
-                <p className="text-lg sm:text-2xl font-semibold text-amber-950 font-mono tracking-tight text-ellipsis overflow-hidden whitespace-nowrap">
-                  {currentBalance.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 })}
-                </p>
-                <p className="text-xs font-semibold text-slate-800 mt-2.5 uppercase tracking-wide">Saldo Kas Bersih</p>
-              </div>
-              <p className="text-[10px] text-amber-650 text-amber-700 font-extrabold mt-3 border-t border-slate-100 pt-2 font-mono">
-                Hasil Dari Iuran &amp; Donasi Warga
-              </p>
-            </motion.div>
+              </motion.div>
+            ))}
           </div>
         </section>
 
-        {/* PLATFORM OVERVIEW SECTION */}
-        <motion.section 
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-16 bg-white rounded-[2.5rem] p-8 sm:p-12 border border-slate-200/80 shadow-xl shadow-2xs relative overflow-hidden"
-        >
-          {/* Subtle decorative background elements */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-50/40 rounded-full blur-3xl -mr-20 -mt-20 -z-10" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-rose-50/30 rounded-full blur-3xl -ml-20 -mb-20 -z-10" />
-
-          <div className="max-w-4xl mx-auto text-center mb-10">
-            <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 bg-indigo-50 px-3.5 py-1.5 rounded-full font-mono">
-              SISTEM INFORMASI TERPADU &amp; DIGITALISASI WARGA
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-semibold text-slate-900 tracking-tight mt-4 leading-tight">
-              Mengenal Portal <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-indigo-600 font-serif italic">TERAS RT 02 Huntap Tondo 2</span> Lebih Dekat
-            </h2>
-            <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-3 max-w-2xl mx-auto leading-relaxed">
-              Sebuah gagasan inovatif kemitraan warga yang melampaui sekadar sarana hunian biasa. Portal ini dirancang khusus untuk menyatukan seluruh elemen kehidupan kemasyarakatan di kawasan Hunian Tetap Tondo 2, Palu, Sulawesi Tengah.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            {/* Visual description column */}
-            <div className="space-y-6">
-              <h3 className="text-lg sm:text-xl font-semibold text-slate-800 flex items-center gap-2.5">
-                <HeartHandshake className="text-rose-500" size={22} />
-                Solusi Kolaboratif dari &amp; Untuk Warga
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed text-justify">
-                TERAS RT 02 Huntap Tondo 2 lahir dari kesadaran bersama akan pentingnya integrasi pasca-bencana. Sebagai pemukiman yang dibangun untuk penyintas bencana dahsyat 2018 di Kota Palu, kami memerlukan jembatan komunikasi modern yang tidak dibatasi oleh sekat-sekat fisik atau misinformasi konvensional. 
-              </p>
-              <p className="text-xs sm:text-sm text-slate-600 font-semibold leading-relaxed text-justify">
-                Platform ini merayakan nilai gotong-royong dengan cara menyatukan pangkalan data kependudukan fungsional, kemudahan pelayanan surat digital satu pintu, pemantauan saldo iuran kas RT riil-time, serta promosi swadaya UMKM lokal yang terus berputar aktif. Kami meyakini, melalui digitalisasi terstruktur yang akuntabel dan berorientasi sosial, ketahanan wilayah kita akan tumbuh harmonis, bersolidaritas penuh, kokoh menghadapi mara bahaya, serta mandiri secara finansial.
-              </p>
-              <div className="border-l-4 border-rose-500 pl-4 py-1.5 italic text-xs font-bold text-slate-500 leading-normal">
-                "Kami tidak sekadar berupaya membangun tempat tinggal fisik, melainkan menganyam peradaban masa depan yang memberdayakan kebersamaan warga secara setara, tangkas, transparan, dan siaga kebencanaan."
-              </div>
-            </div>
-
-            {/* Structured feature bento cards column */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-indigo-200 transition-colors">
-                <div className="h-8 w-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
-                  <Smartphone size={16} />
-                </div>
-                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Aksesibilitas Satu Sentuhan</h4>
-                <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                  Warga dapat mengajukan layanan administrasi pengantar secara kilat, memeriksa status bantuan sosial, dan memonitor data kependudukan langsung dari smartphone.
-                </p>
-              </div>
-
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-emerald-200 transition-colors">
-                <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
-                  <TrendingUp size={16} />
-                </div>
-                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Ekonomi Sirkular UMKM</h4>
-                <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                  Mendukung tumbuh kembang warung warga, kuliner rumahan, jasa swadaya, maupun bank sampah terpadu guna mempercepat arus finansial kas keluarga.
-                </p>
-              </div>
-
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-rose-200 transition-colors">
-                <div className="h-8 w-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-3">
-                  <Shield size={16} />
-                </div>
-                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Mitigasi &amp; Lingkungan Aman</h4>
-                <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                  Pos siskamling modern berpeta digital rute, sistem proteksi siaga gempa bumi lintasan sesar Palu-Koro, serta deteksi siaga jaminan prioritas golongan rentan.
-                </p>
-              </div>
-
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:border-amber-200 transition-colors">
-                <div className="h-8 w-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
-                  <Database size={16} />
-                </div>
-                <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider">Transparansi Finansial Rill</h4>
-                <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                  Laporan pembukuan donasi, iuran kematian, pembagian kas darurat sosial, hingga pemeliharaan perlengkapan sarana diumumkan terbuka bebas manipulasi.
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* TWO COLUMN GRID: HISTORY STORY & DETAILED DEMOGRAPHIC ENGINE */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
-          
-          {/* SEJARAH DETAILED TEXT */}
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }} 
-            whileInView={{ opacity: 1, y: 0 }} 
-            viewport={{ once: true }}
-            className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm lg:col-span-2 flex flex-col justify-between"
-          >
+        {/* 2. DEMOGRAFI & STRUKTUR SOSIAL REAL-TIME */}
+        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-2xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
-              <span className="text-[10px] uppercase font-semibold tracking-widest text-rose-600 mb-2 block font-mono">LATAR BELAKANG &amp; KELAHIRAN KEMBALI</span>
-              <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight mb-4 flex items-center gap-2">
-                <MapPin size={24} className="text-rose-600" />
-                Dari Titik Kebangkitan <span className="font-serif italic text-indigo-600">Menuju Kemandirian Cerdas</span>
-              </h2>
-              <div className="space-y-4 text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed text-justify">
-                <p>
-                  Lingkungan <strong>Hunian Tetap (Huntap) Tondo 2</strong> berdiri megah sebagai simbol ketangguhan (resiliensi) dan anugerah bagi segenap keluarga yang terdampak bencana tsunami dahsyat, gempa tektonik merusak, dan fenomena likuefaksi pada <strong>28 September 2018</strong> silam di wilayah Palu, Donggala, Sigi, dan sekitarnya. Ribuan warga bertahan menguatkan fondasi asa, bermigrasi menuju kompleks pemukiman aman yang dibangun melalui sinergi kementerian RI bersama lembaga kemanusiaan mancanegara.
-                </p>
-                <p>
-                  <strong>Rukun Tetangga (RT) 02</strong> dibentuk sebagai wadah administratif yang berfokus membentuk kearifan bermasyarakat yang rukun, aman, dan inovatif. Secara administratif terletak di Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu, kami meyakini bahwa sekadar berpindah ke tempat tinggal huni yang kokoh saja tidaklah cukup. Kami membutuhkan integrasi erat antarwarga, pemahaman mitigasi risiko bencana, serta tata perekonomian lokal yang terus tumbuh.
-                </p>
-                <p>
-                  Untuk mewujudkannya, pengurus mencetuskan blueprint **TERAS RT 02**. Prinsip ini adalah komitmen harian dalam memberikan pelayanan optimal kependudukan digital, menjaga stabilitas lingkungan malam, transparansi kas swadaya mutlak, dan mempererat silaturahmi tanpa membedakan status sosial.
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-rose-50/60 rounded-2xl p-4 border border-rose-100/70 flex items-center gap-3 mt-6">
-              <Award size={20} className="text-rose-500 flex-shrink-0" />
-              <p className="text-[11px] font-extrabold text-slate-700">
-                Peringkat Utama <strong>Rukun Tetangga Tanggap &amp; Cerdas Bencana Tingkat Kelurahan Tondo</strong>, Sulawesi Tengah.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* DYNAMIC DATABASE INTEGRATED PROFILING TABS */}
-          <motion.div 
-            initial={{ opacity: 0, y: 15 }} 
-            whileInView={{ opacity: 1, y: 0 }} 
-            viewport={{ once: true }}
-            className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between"
-          >
-            <div>
-              <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-650 text-indigo-600 mb-2 block font-mono">DASHBOARD INTEGRASI DATABASE FIRESTORE</span>
-              <h2 className="text-lg font-semibold text-slate-900 tracking-tight mb-1">Struktur Sosial &amp; <span className="font-serif italic text-indigo-605 text-indigo-600">Fisik</span></h2>
-              <p className="text-[11px] text-slate-400 font-medium mb-4">Statistik komposisi real-time yang tersinkronisasi dari pangkalan data digital RT.</p>
-
-              {/* Tabs Navigation */}
-              <div className="flex flex-wrap bg-slate-100 p-1 rounded-xl gap-0.5 mb-5 text-xs font-semibold">
-                <button 
-                  onClick={() => setActiveGeoTab('hunian')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'hunian' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
-                >
-                  Hunian
-                </button>
-                <button 
-                  onClick={() => setActiveGeoTab('ekonomi')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'ekonomi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
-                >
-                  Ekonomi
-                </button>
-                <button 
-                  onClick={() => setActiveGeoTab('kerentanan')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'kerentanan' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
-                >
-                  Rentan
-                </button>
-                <button 
-                  onClick={() => setActiveGeoTab('demografi')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'demografi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
-                >
-                  Piramida
-                </button>
-                <button 
-                  onClick={() => setActiveGeoTab('birokrasi')}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-center cursor-pointer uppercase transition-colors text-[10px] tracking-wide ${activeGeoTab === 'birokrasi' ? 'bg-indigo-600 text-white shadow' : 'text-slate-650 text-slate-600 hover:text-slate-900'}`}
-                >
-                  Layanan
-                </button>
-              </div>
-
-              {/* Tab Content Display */}
-              <div className="space-y-4">
-                {activeGeoTab === 'demografi' && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Rasio Jenis Kelamin (Sex Ratio)</span>
-                      <span className="text-xs font-semibold text-blue-700 font-mono bg-blue-50 px-2 py-0.5 rounded-lg">{demoStats.sexRatio}</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Komposisi Gender</span>
-                      <span className="text-xs font-semibold text-slate-800 font-mono">
-                        {demoStats.males} L &bull; {demoStats.females} P
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Usia Produktif (15-59 Thn)</span>
-                      <span className="text-xs font-semibold text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{demoStats.productive} Jiwa</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-600">Rasio Ketergantungan BPS</span>
-                      <span className="text-xs font-semibold text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{demoStats.depRatio}%</span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
-                      *Struktur penduduk didominasi usia produktif (bonus demografi) mendukung sinergi gotong royong dan kemandirian kawasan Huntap 2.
-                    </p>
-                  </div>
-                )}
-                {activeGeoTab === 'hunian' && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-650 text-slate-600">Unit Rumah Berpenghuni</span>
-                      <span className="text-xs font-semibold text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{occupiedHouses} Rumah</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-650 text-slate-600">Rumah Pembuka Usaha</span>
-                      <span className="text-xs font-semibold text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{businessHouses} Unit</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-650 text-slate-600">Unit Kosong / Cadangan</span>
-                      <span className="text-xs font-semibold text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{emptyHouses} Unit</span>
-                    </div>
-                    <div className="flex items-center justify-between pb-1 text-xs">
-                      <span className="font-semibold text-slate-600">Rasio Pemanfaatan Lahan</span>
-                      <span className="font-semibold text-slate-900 font-mono">
-                        {totalKK > 0 ? Math.round((occupiedHouses / totalKK) * 100) : 0}% Terhuni
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                 {activeGeoTab === 'ekonomi' && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                       <span className="text-xs font-semibold text-slate-600">Kategori Pra-Sejahtera</span>
-                       <span className="text-xs font-semibold text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{praSejahteraCount} KK</span>
-                     </div>
-                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                       <span className="text-xs font-semibold text-slate-600">Kategori Sejahtera &amp; Mampu</span>
-                       <span className="text-xs font-semibold text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{sejahteraCount} KK</span>
-                     </div>
-                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                       <span className="text-xs font-semibold text-slate-600">Penerima Manfaat Bansos RT</span>
-                       <span className="text-xs font-semibold text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{bansosCount} KK</span>
-                     </div>
-                     <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
-                       *Kelayakan bansos PKH/BLT dipetakan langsung ke database demi menjamin keseimbangan keadilan distributif.
-                     </p>
-                   </div>
-                 )}
- 
-                 {activeGeoTab === 'kerentanan' && (
-                   <div className="space-y-3">
-                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                       <span className="text-xs font-semibold text-slate-600">Balita &amp; Bayi Usia Dini</span>
-                       <span className="text-xs font-semibold text-pink-700 font-mono bg-pink-50 px-2 py-0.5 rounded-lg">{babyToddlerCount} Anak</span>
-                     </div>
-                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                       <span className="text-xs font-semibold text-slate-600">Lanjut Usia (Lansia)</span>
-                       <span className="text-xs font-semibold text-amber-700 font-mono bg-amber-50 px-2 py-0.5 rounded-lg">{elderlyCount} Jiwa</span>
-                     </div>
-                     <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                       <span className="text-xs font-semibold text-slate-600">Ibu Hamil &amp; Menyusui</span>
-                       <span className="text-xs font-semibold text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{pregnantCount} Jiwa</span>
-                     </div>
-                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
-                      *Kelompok rentan di atas didaftarkan dalam prioritas evakuasi jalur khusus mitigasi bahaya sesar Palu-Koro.
-                    </p>
-                  </div>
-                )}
-
-                {activeGeoTab === 'birokrasi' && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-650 text-slate-600">Total Pengaduan Warga</span>
-                      <span className="text-xs font-semibold text-slate-800 font-mono bg-slate-100 px-2 py-0.5 rounded-lg">{totalReports} Laporan</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-650 text-slate-600">Laporan Selesai Ditangani</span>
-                      <span className="text-xs font-semibold text-emerald-700 font-mono bg-emerald-50 px-2 py-0.5 rounded-lg">{resolvedReports} Kasus</span>
-                    </div>
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                      <span className="text-xs font-semibold text-slate-650 text-slate-600">Kasus Masih Ditinjau</span>
-                      <span className="text-xs font-semibold text-rose-700 font-mono bg-rose-50 px-2 py-0.5 rounded-lg">{activeReports} Laporan</span>
-                    </div>
-                    <div className="flex items-center justify-between pb-1">
-                      <span className="text-xs font-semibold text-slate-650 text-slate-600">Pengajuan Surat Disetujui</span>
-                      <span className="text-xs font-semibold text-indigo-700 font-mono bg-indigo-50 px-2 py-0.5 rounded-lg">{approvedLetters} dari {totalLetters} Berkas</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center gap-2">
-              <Database size={14} className="text-indigo-600 flex-shrink-0" />
-              <span className="text-[10px] font-semibold text-slate-450 text-slate-400 tracking-wider font-mono">
-                PULSE DATA AKTIF SECARA REAL TIME
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-indigo-600 mb-1 block">
+                INTEGRASI DATABASE KEPENDUDUKAN
               </span>
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Struktur Sosial &amp; Demografi Wilayah
+              </h2>
             </div>
-          </motion.div>
-        </div>
 
-
-
-        {/* FINANCIAL TRANSPARENCY: MINI CASHFLOW & TRANS DETAILED REKAP */}
-        {cashFlow.length > 0 && (
-          <section className="mb-16">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div>
-                  <span className="text-[10px] uppercase font-semibold tracking-widest text-amber-600 mb-1 block font-mono">TRANSPARANSI KEUANGAN MUTLAK</span>
-                  <h2 className="text-2xl font-semibold text-slate-900 tracking-tight">Laporan Kas &amp; <span className="font-serif italic text-amber-600">Aliran Dana Swadaya</span></h2>
-                  <p className="text-xs text-slate-500 font-semibold">Memastikan setiap rupiah tercatat akurat, berimbang, dan dapat ditinjau oleh seluruh warga secara terbuka.</p>
-                </div>
-                <button 
-                  onClick={() => navigate('/info')}
-                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs tracking-wider uppercase rounded-xl transition-colors shadow cursor-pointer active:scale-95 flex items-center gap-2"
+            {/* Navigation Tabs */}
+            <div className="flex bg-slate-100 p-1 rounded-2xl gap-1 text-xs font-bold">
+              {[
+                { id: 'hunian', label: 'Hunian' },
+                { id: 'demografi', label: 'Demografi' },
+                { id: 'kerentanan', label: 'Warga Rentan' },
+                { id: 'layanan', label: 'Layanan' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveGeoTab(tab.id as any)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                    activeGeoTab === tab.id ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
                 >
-                  <Database size={14} />
-                  Detail Laporan Kas RT
+                  {tab.label}
                 </button>
-              </div>
-
-              {/* Grid with transaction list */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1 space-y-4">
-                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100/60 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] uppercase font-semibold text-emerald-500 tracking-wider font-mono">Total Akumulasi Pemasukan</p>
-                      <p className="text-lg font-semibold font-mono text-emerald-800 mt-0.5">
-                        +{totalIncome.toLocaleString('id-ID', { minimumFractionDigits: 0 })}
-                      </p>
-                    </div>
-                    <div className="p-2.5 bg-emerald-500 text-white rounded-xl shadow-sm">
-                      <TrendingUp size={20} />
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-rose-50 rounded-2xl border border-rose-100/60 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] uppercase font-semibold text-rose-500 tracking-wider font-mono">Total Akumulasi Pengeluaran</p>
-                      <p className="text-lg font-semibold font-mono text-rose-800 mt-0.5">
-                        -{totalExpense.toLocaleString('id-ID', { minimumFractionDigits: 0 })}
-                      </p>
-                    </div>
-                    <div className="p-2.5 bg-rose-500 text-white rounded-xl shadow-sm">
-                      <TrendingDown size={20} />
-                    </div>
-                  </div>
-
-                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
-                    <Info size={16} className="text-indigo-600 flex-shrink-0" />
-                    <p className="text-[10px] font-bold text-slate-500 leading-normal">
-                      Kas dipergunakan untuk operasional kebersihan swadaya, sarana air bersih, lampu jalan, takziah duka warga, hingga pemeliharaan pos ronda RT.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-2">
-                  <p className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-3 font-mono">REKAPITULASI TRANSAKSI TERBARU DARI DATABASE</p>
-                  <div className="space-y-2.5">
-                    {cashFlow.slice(-4).reverse().map((flow, idx) => (
-                      <div key={idx} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs font-semibold">
-                        <div className="flex items-center gap-3.5">
-                          <span className={`h-3 w-3 rounded-full flex-shrink-0 shadow-sm ${flow.type === 'Income' ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                          <div>
-                            <p className="text-slate-900 font-extrabold line-clamp-1">{flow.description}</p>
-                            <p className="text-[10px] text-slate-400 mt-0.5 font-mono">{flow.date} • Kategori: {flow.category} • Pencatat: {flow.referenceNumber || 'Pengurus Swadaya'}</p>
-                          </div>
-                        </div>
-                        <span className={`font-mono font-semibold text-sm whitespace-nowrap pl-4 ${flow.type === 'Income' ? 'text-emerald-700' : 'text-rose-700'}`}>
-                          {flow.type === 'Income' ? '+' : '-'} Rp {flow.amount.toLocaleString('id-ID')}
-                        </span>
-                      </div>
-                    ))}
-                    {cashFlow.length === 0 && (
-                      <p className="text-center text-xs text-slate-400 py-6 uppercase font-semibold">Belum ada transaksi terekam.</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* INTEGRATED UMKM SECTOR SHOWCASE */}
-        {totalUMKMCount > 0 && (
-          <section className="mb-16">
-            <div className="mb-6">
-              <span className="text-[10px] uppercase font-semibold tracking-widest text-emerald-600 mb-1 block font-mono">PEMBERDAYAAN EKONOMI KREATIF (UMKM)</span>
-              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Pasar Kreatif <span className="font-serif italic text-emerald-600">RT 02</span></h2>
-              <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">Etalase digital unit usaha milik warga Huntap Tondo 2 yang diverifikasi dan aktif.</p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {umkm.slice(0, 4).map((shop, sidx) => (
-                <div key={sidx} className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-colors">
-                  <div className="relative">
-                    {shop.image ? (
-                      <SmartImage 
-                        src={shop.image} 
-                        alt={shop.name}
-                        className="h-36 w-full object-cover animate-none" 
-                        width={400}
-                      />
-                    ) : (
-                      <div className="h-36 bg-slate-100 flex items-center justify-center text-slate-400 font-extrabold uppercase text-xs font-mono border-b border-slate-100">
-                        WARUNG WARGA 02
-                      </div>
-                    )}
-                    <span className="absolute top-3 right-3 bg-emerald-550 bg-emerald-500 text-white text-[9px] font-semibold uppercase px-2.5 py-1 rounded-lg tracking-wider font-mono shadow-sm">
-                      {shop.category}
-                    </span>
-                  </div>
-                  <div className="p-5 flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-905 text-slate-950 tracking-tight leading-snug line-clamp-1 mb-1">{shop.name}</h3>
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4 font-semibold">{shop.description}</p>
-                    </div>
-                    <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-[10px] text-slate-400 font-bold font-mono">
-                      <span>OWNER: {shop.owner}</span>
-                      {shop.contact && <span className="text-emerald-600 font-extrabold">{shop.contact}</span>}
-                    </div>
-                  </div>
-                </div>
               ))}
             </div>
+          </div>
 
-            <div className="mt-6 text-center">
-              <button 
-                onClick={() => navigate('/umkm')}
-                className="inline-flex items-center gap-2 text-xs font-extrabold text-emerald-600 hover:text-emerald-800 transition-colors uppercase tracking-wider cursor-pointer"
-              >
-                MASUK PASAR UMKM DIGITAL WARGA ({totalUMKMCount} Unit Terdaftar)
-                <ArrowUpRight size={16} />
-              </button>
-            </div>
-          </section>
-        )}
-
-        {/* STRUKTUR ORGANISASI KELUARGA BESAR */}
-        <section className="mb-16">
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <span className="text-[10px] uppercase font-semibold tracking-widest text-emerald-600 mb-1 block font-mono">STRUKTUR KEBERSAMAAN</span>
-              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
-                Amanah Kepengurusan <span className="font-serif italic text-emerald-600">RT 02</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 font-semibold font-serif">Aparatur pengurus pilihan warga yang senantiasa mengutamakan transparansi dan pelayanan santun.</p>
-            </div>
-            
-            {officials.length > 0 && (
-              <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-3.5 py-1.5 rounded-xl font-semibold uppercase font-mono tracking-widest shadow-sm">
-                {officials.length} Petugas Terdaftar
-              </span>
+          {/* Tab Content Display */}
+          <div className="pt-2">
+            {activeGeoTab === 'hunian' && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-150">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Kavling</p>
+                  <p className="text-2xl font-black text-slate-900 mt-1 font-mono">{houses.length}</p>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">Blok C5 s/d C12</p>
+                </div>
+                <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Rumah Berpenghuni</p>
+                  <p className="text-2xl font-black text-emerald-900 mt-1 font-mono">{occupiedHouses}</p>
+                  <p className="text-[11px] text-emerald-700 font-medium mt-0.5">Tingkat Huni {houses.length > 0 ? Math.round((occupiedHouses / houses.length) * 100) : 0}%</p>
+                </div>
+                <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Membuka Usaha</p>
+                  <p className="text-2xl font-black text-amber-900 mt-1 font-mono">{businessHouses || umkm.length}</p>
+                  <p className="text-[11px] text-amber-700 font-medium mt-0.5">UMKM mandiri aktif</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-150">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Unit Cadangan / Kosong</p>
+                  <p className="text-2xl font-black text-slate-700 mt-1 font-mono">{emptyHouses}</p>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">Siap huni / mutasi</p>
+                </div>
+              </div>
             )}
+
+            {activeGeoTab === 'demografi' && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">Total Jiwa Terdata</p>
+                  <p className="text-2xl font-black text-indigo-900 mt-1 font-mono">{totalOccupants}</p>
+                  <p className="text-[11px] text-indigo-700 font-medium mt-0.5">{demoStats.males} Pria &bull; {demoStats.females} Wanita</p>
+                </div>
+                <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Usia Produktif (15-59)</p>
+                  <p className="text-2xl font-black text-blue-900 mt-1 font-mono">{demoStats.productive}</p>
+                  <p className="text-[11px] text-blue-700 font-medium mt-0.5">Pilar kemandirian wilayah</p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-150">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Rasio Jenis Kelamin</p>
+                  <p className="text-2xl font-black text-slate-900 mt-1 font-mono">{demoStats.sexRatio}</p>
+                  <p className="text-[11px] text-slate-500 font-medium mt-0.5">Indeks seimbang</p>
+                </div>
+                <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Rasio Ketergantungan</p>
+                  <p className="text-2xl font-black text-amber-900 mt-1 font-mono">{demoStats.depRatio}%</p>
+                  <p className="text-[11px] text-amber-700 font-medium mt-0.5">Standar BPS kondusif</p>
+                </div>
+              </div>
+            )}
+
+            {activeGeoTab === 'kerentanan' && (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 bg-rose-50/60 rounded-2xl border border-rose-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-rose-700">Balita &amp; Anak-Anak</p>
+                  <p className="text-2xl font-black text-rose-900 mt-1 font-mono">{babyToddlerCount} Jiwa</p>
+                  <p className="text-[11px] text-rose-700 font-medium mt-0.5">Sasaran imunisasi Posyandu berkala</p>
+                </div>
+                <div className="p-4 bg-purple-50/60 rounded-2xl border border-purple-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700">Lansia (Senior &gt;60 Thn)</p>
+                  <p className="text-2xl font-black text-purple-900 mt-1 font-mono">{elderlyCount} Jiwa</p>
+                  <p className="text-[11px] text-purple-700 font-medium mt-0.5">Prioritas evakuasi tanggap bencana</p>
+                </div>
+                <div className="p-4 bg-teal-50/60 rounded-2xl border border-teal-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-teal-700">Ibu Hamil Terdata</p>
+                  <p className="text-2xl font-black text-teal-900 mt-1 font-mono">{pregnantCount} Jiwa</p>
+                  <p className="text-[11px] text-teal-700 font-medium mt-0.5">Pemantauan gizi dan nutrisi</p>
+                </div>
+              </div>
+            )}
+
+            {activeGeoTab === 'layanan' && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-blue-700">Surat Pengantar</p>
+                  <p className="text-2xl font-black text-blue-900 mt-1 font-mono">{processedLetters}</p>
+                  <p className="text-[11px] text-blue-700 font-medium mt-0.5">Diproses tuntas secara digital</p>
+                </div>
+                <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Aduan Warga Tuntas</p>
+                  <p className="text-2xl font-black text-emerald-900 mt-1 font-mono">{resolvedReports}</p>
+                  <p className="text-[11px] text-emerald-700 font-medium mt-0.5">Terselesaikan secara musyawarah</p>
+                </div>
+                <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700">Pusat Bantuan &amp; FAQ</p>
+                  <p className="text-2xl font-black text-amber-900 mt-1 font-mono">13 BAB</p>
+                  <p className="text-[11px] text-amber-700 font-medium mt-0.5">Peraturan &amp; SOP resmi RT</p>
+                </div>
+                <div className="p-4 bg-indigo-50/60 rounded-2xl border border-indigo-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700">Portal Warga</p>
+                  <p className="text-2xl font-black text-indigo-900 mt-1 font-mono">24/7</p>
+                  <p className="text-[11px] text-indigo-700 font-medium mt-0.5">Layanan mandiri real-time</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* 3. AMANAH KEPENGURUSAN RT 02 */}
+        <section className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+            <div>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-600 block mb-1">
+                STRUKTUR KEBERSAMAAN
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Amanah Kepengurusan <span className="text-emerald-600">RT 02</span>
+              </h2>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Aparatur pengurus pilihan warga yang senantiasa mengutamakan transparansi dan pelayanan santun.
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {coreStructure.map((member, idx) => (
-              <motion.div 
+              <div 
                 key={idx}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:scale-[1.01] transition-colors"
+                className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-2xs flex flex-col justify-between hover:shadow-md transition-shadow"
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] bg-slate-100 text-slate-700 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider font-mono">
+                    <span className="text-[10px] bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-bold uppercase tracking-wider font-mono">
                       {member.role}
                     </span>
-                    <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-emerald-200" />
                   </div>
-                  
-                  <h3 className="text-lg sm:text-xl font-semibold text-slate-950 tracking-tight mb-2">
+
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight mb-2">
                     {member.name}
                   </h3>
-                  
-                  <p className="text-xs italic text-slate-500 leading-relaxed font-semibold mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-center">
+
+                  <p className="text-xs italic text-slate-500 leading-relaxed font-medium mb-5 bg-slate-50 p-3.5 rounded-2xl border border-slate-100 text-center">
                     {member.phrase}
                   </p>
-                  
-                  <div className="space-y-2.5 mb-6">
-                    <p className="text-[10px] uppercase font-semibold text-slate-400 tracking-widest mb-1.5 font-mono">PANDUAN TUGAS UTAMA</p>
+
+                  <div className="space-y-2 mb-4">
+                    <p className="text-[10px] uppercase font-bold text-slate-400 tracking-widest font-mono">FOKUS TUGAS</p>
                     {member.tasks.map((task, tidx) => (
                       <div key={tidx} className="flex items-start gap-2">
-                        <CheckCircle2 size={13} className="text-emerald-500 mt-1 flex-shrink-0" />
-                        <span className="text-xs text-slate-655 text-slate-600 font-semibold leading-normal">{task}</span>
+                        <span className="text-emerald-500 font-bold text-xs mt-0.5">&bull;</span>
+                        <span className="text-xs text-slate-600 font-medium leading-relaxed">{task}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {member.phone && (
-                  <div className="border-t border-slate-100 pt-4 mt-2">
-                    <p className="text-[10px] text-slate-450 text-slate-400 font-semibold uppercase tracking-wider font-mono">TELEPON RESPONS</p>
-                    <p className="text-xs font-mono font-semibold text-slate-750 text-slate-705 text-slate-700 mt-1">{member.phone}</p>
+                  <div className="border-t border-slate-100 pt-3 mt-2">
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">Kontak Siaga</p>
+                    <p className="text-xs font-mono font-bold text-slate-800 mt-0.5">{member.phone}</p>
                   </div>
                 )}
-              </motion.div>
+              </div>
             ))}
           </div>
 
-          {/* ADDITIONAL FIRESTORE OFFICIALS EXPANSION */}
-          {officials.length > 0 && (
-            <div className="mt-12 pt-8 border-t border-slate-200/80">
-              <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-widest mb-6 flex items-center gap-2 font-mono">
-                <Users size={18} className="text-indigo-650 text-indigo-600" />
-                STAF BIDANG PEMBANTU LAINNYA (DIVERIFIKASI DATABASE)
+          {/* Staf Pendukung jika ada */}
+          {officials.length > 3 && (
+            <div className="pt-4">
+              <h3 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3 font-mono flex items-center gap-2">
+                <Users size={15} className="text-indigo-600" />
+                <span>Koordinator &amp; Petugas Bidang Khusus</span>
               </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {officials
                   .filter(o => !['Ketua RT', 'Sekretaris', 'Bendahara'].some(title => o.role.toLowerCase().includes(title.toLowerCase())))
                   .map((off, oidx) => (
-                    <div key={oidx} className="flex items-center gap-3.5 p-4 bg-white rounded-2xl border border-slate-105 border-slate-200/60 shadow-sm hover:border-slate-350 transition-colors">
-                      {off.photo ? (
-                        <SmartImage 
-                          src={off.photo} 
-                          alt={off.name} 
-                          className="h-10 w-10 rounded-full object-cover border border-slate-200 overflow-hidden shrink-0 animate-none" 
-                          width={100}
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded-full bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs uppercase border border-indigo-100">
-                          {off.name.substring(0,2)}
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-xs font-semibold text-slate-950 leading-none">{off.name}</p>
-                        <p className="text-[10px] text-indigo-605 text-indigo-600 font-semibold uppercase tracking-wider mt-1.5">{off.role}</p>
-                        {off.phone && <p className="text-[10px] text-slate-400 font-mono mt-0.5">{off.phone}</p>}
+                    <div key={oidx} className="p-3 bg-white rounded-2xl border border-slate-200/80 shadow-2xs flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-xs uppercase border border-indigo-100 shrink-0">
+                        {off.name.substring(0, 2)}
+                      </div>
+                      <div className="truncate">
+                        <p className="text-xs font-bold text-slate-900 truncate">{off.name}</p>
+                        <p className="text-[10px] text-indigo-600 font-medium truncate">{off.role}</p>
                       </div>
                     </div>
-                ))}
+                  ))}
               </div>
             </div>
           )}
         </section>
 
-        {/* DONASI SOSIAL & KEGIATAN AKTIF IN ACTION */}
-        {donationCampaigns.length > 0 && (
-          <section className="mb-16">
-            <div className="mb-6">
-              <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-1 block font-mono">MEMBANGUN SOLIDARITAS SOSIAL</span>
-              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">Aksi Solidaritas &amp; <span className="font-serif italic text-indigo-605 text-indigo-600">Donasi Swadaya</span></h2>
-              <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-0.5">Program sosial kemanusiaan, takziah musibah, dan pembangunan fasilitas yang sedang berjalan.</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {donationCampaigns.slice(0, 3).map((camp, cidx) => {
-                const target = camp.targetAmount || 0;
-                const percent = target > 0 ? Math.min(100, Math.round((camp.currentAmount / target) * 100)) : 0;
-                return (
-                  <div key={cidx} className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between hover:shadow-md transition-colors">
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[9px] bg-indigo-55 bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg font-semibold tracking-wider uppercase font-mono">
-                          {camp.type}
-                        </span>
-                        <span className={`h-2 w-2 rounded-full ${camp.status === 'Aktif' ? 'bg-emerald-500 ' : 'bg-slate-400'}`} />
-                      </div>
-
-                      <h3 className="text-sm font-semibold text-slate-950 hover:text-indigo-650 transition-colors mb-1 line-clamp-1">{camp.title}</h3>
-                      <p className="text-xs text-slate-500 leading-relaxed font-semibold mb-4 line-clamp-2">{camp.description}</p>
-                    </div>
-
-                    <div className="border-t border-slate-100 pt-4 space-y-2">
-                      <div className="flex justify-between text-[10px] font-bold font-mono">
-                        <span className="text-slate-400">TERKUMPUL</span>
-                        <span className="text-slate-900">
-                          {percent}% ({camp.currentAmount.toLocaleString('id-ID')} / {target > 0 ? target.toLocaleString('id-ID') : '∞'})
-                        </span>
-                      </div>
-                      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${percent}%` }} />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-4 text-center">
-              <button 
-                onClick={() => navigate('/donasi')}
-                className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors uppercase tracking-wider cursor-pointer"
-              >
-                Akses Portal Donasi Selengkapnya ({donationCampaigns.length} Kampanye)
-                <ArrowUpRight size={16} />
-              </button>
-            </div>
-          </section>
-        )}
-
-        {/* DETAIL APLIKASI TERAS RT 02 (THE APP EXPLANATION & WALKTHROUGH) */}
-        <section className="mb-16">
-          <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-xl relative overflow-hidden">
-            {/* Ambient Background decoration */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
-            
-            <div className="relative z-10">
-              <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-400 mb-2 block font-mono">DOKUMENTASI SISTEM &amp; PENJELASAN INTEGRASI</span>
-              <h2 className="text-2xl sm:text-4xl font-semibold text-white hover:text-indigo-200 transition-colors tracking-tight">
-                Mengenal Platform Digital <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-emerald-300 font-serif italic">TERAS RT 02</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-400 font-semibold mt-2 max-w-3xl leading-relaxed mb-8">
-                TERAS RT 02 (Sistem Informasi &amp; Transparansi Huntap Tondo 2) adalah platform cerdas satu-pintu (one-stop digital portal) yang menggabungkan basis data rukun tetangga, birokrasi persuratan mandiri, pelaporan insiden darurat, monitoring kebencanaan aktif, dan asisten kependudukan berbasis AI guna melayani warga secara responsif, amanah, dan terintegrasi 24 jam.
-              </p>
-
-              {/* Core System Capabilities Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                {/* Module 1: Surat & Birokrasi */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-indigo-500/50 transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl w-fit mb-4">
-                      <FileText size={20} />
-                    </div>
-                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">1. Administrasi Surat</h3>
-                    <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
-                      Sistem layanan pengajuan surat pengantar domisili, surat keterangan tidak mampu (SKTM), dsb., secara digital mandiri. Warga dapat memonitor proses persetujuan (approval) admin secara transparan, mempercepat birokrasi, dan menghemat dokumen kertas (paperless).
-                    </p>
-                  </div>
-                  <div className="text-[10px] text-indigo-400 font-bold font-mono mt-4 border-t border-white/5 pt-2">
-                    ✓ STATUS PELACAKAN SEKETIKA
-                  </div>
-                </div>
-
-                {/* Module 2: Inventaris RT */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-emerald-500/50 transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl w-fit mb-4">
-                      <Archive size={20} />
-                    </div>
-                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">2. Inventaris Bersama</h3>
-                    <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
-                      Semua aset fisik RT seperti tenda darurat, kursi lipat, gerobak, sound system, hingga peralatan gotong royong terdata detail dari segi jumlah total, sisa ketersediaan, hingga kondisi fisik ("Baik" / "Rusak"). Membantu warga melakukan booking pinjam alat secara tertib.
-                    </p>
-                  </div>
-                  <div className="text-[10px] text-emerald-400 font-bold font-mono mt-4 border-t border-white/5 pt-2">
-                    ✓ MINIMALISIR KONFLIK PINJAMAN
-                  </div>
-                </div>
-
-                {/* Module 3: Lapor & Pengaduan */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-rose-500/50 transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl w-fit mb-4">
-                      <AlertTriangle size={20} />
-                    </div>
-                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">3. Aduan &amp; Investigasi</h3>
-                    <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
-                      Warga dapat melayangkan laporan masalah lingkungan seperti jalan rusak, tumpukan sampah, sengketa, hingga lampu jalan padam langsung dari HP. Dilengkapi tingkat urgensi (Rendah/Sedang/Gawat) dan status pengawasan (Diproses, Diselidiki, Selesai).
-                    </p>
-                  </div>
-                  <div className="text-[10px] text-rose-400 font-bold font-mono mt-4 border-t border-white/5 pt-2">
-                    ✓ OPERASIONAL CEPAT TANGGAP
-                  </div>
-                </div>
-
-                {/* Module 4: ChatBot AI & Asisten */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-amber-500/50 transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl w-fit mb-4">
-                      <Lightbulb size={20} />
-                    </div>
-                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">4. Smart ChatBot AI</h3>
-                    <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
-                      Asisten virtual yang ditenagai oleh kecerdasan buatan Gemini API. Siap memberikan respons instan 24/7 kepada warga mengenai sisa kas RT, nama-nama pengurus, jadwal ronda malam ini, draf pengumuman kegiatan, hingga rujukan langkah mitigasi pertama saat gempa.
-                    </p>
-                  </div>
-                  <div className="text-[10px] text-amber-400 font-bold font-mono mt-4 border-t border-white/5 pt-2">
-                    ✓ LAYANAN ASSISTANT 24 JAM
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Sub-section: Interaktivitas Data Map & Kebencanaan */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                
-                {/* Left Card: Database Mapping & Bansos */}
-                <div className="p-6 bg-white/5 rounded-2xl border border-white/10 flex flex-col sm:flex-row gap-4 items-start hover:border-indigo-500/30 transition-colors">
-                  <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl flex-shrink-0">
-                    <Map size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-1">Pemetaan Sosial &amp; Akurasi Bansos</h4>
-                    <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
-                      Kami merancang visualisasi peta hunian per blok wilayah RT 02 secara akurat. Sistem ini bukan hanya mencatat siapa penghuni rumah, namun menganalisis tingkat ekonomi (Pra-Sejahtera, Sejahtera, Mampu) warga secara objektif. Ini sangat krusial dalam mengambil keputusan penyaluran bantuan sosial (Bansos PKH, BLT, BPNT) agar tepat sasaran tanpa adanya kecemburuan sosial.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Right Card: Safeguard & Panic Button */}
-                <div className="p-6 bg-white/5 rounded-2xl border border-white/10 flex flex-col sm:flex-row gap-4 items-start hover:border-rose-500/30 transition-colors">
-                  <div className="p-3 bg-rose-500/10 text-rose-400 rounded-xl flex-shrink-0">
-                    <Smartphone size={24} className="" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-1">Panic Button &amp; Mitigasi Sesar Swadaya</h4>
-                    <p className="text-xs text-slate-400 font-medium leading-relaxed text-justify">
-                      Menyadari letak geografis Huntap Tondo II yang berimpitan di atas patahan sesar aktif Palu-Koro, aplikasi ini dilengkapi fitur Panic Button instan. Ketika ditekan oleh warga dalam bahaya (gempa bumi, kebakaran, aksi pencurian, darurat medis), alarm bersuara kencang akan bersinkronisasi langsung ke dashboard petugas ronda dan memicu pengamanan terpadu seketika.
-                    </p>
-                  </div>
-                </div>
-
-              </div>
-              
-              <div className="mt-8 pt-6 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <span className="text-[10px] font-bold text-slate-400 tracking-widest font-mono uppercase">
-                  ✓ DIKEMBANGKAN MANDIRI OLEH WARGA, UNTUK WARGA RT 02 HUNTAP TONDO II
-                </span>
-                
-                <div className="flex gap-3">
-                  <button 
-                    onClick={() => navigate('/rules')}
-                    className="px-4 py-2 bg-white/5 text-slate-300 hover:bg-white/10 rounded-xl text-xs font-semibold uppercase transition-colors tracking-wider border border-white/10 whitespace-nowrap"
-                  >
-                    Aturan &amp; Tata Tertib RT
-                  </button>
-                  <button 
-                    onClick={() => navigate('/services')}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold uppercase transition-colors tracking-wider whitespace-nowrap shadow-md active:scale-95"
-                  >
-                    Akses Menu Layanan
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* PENJELASAN MENDALAM: TANTANGAN RIIL YANG KAMI SELESAIKAN */}
-        <section className="mb-16">
-          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-sm">
-            <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-2 block font-mono">LATAR BELAKANG &AMP; URGENSI SOLUSI</span>
-            <h3 className="text-xl sm:text-3xl font-semibold text-slate-900 tracking-tight mb-8 leading-tight">
-              Tantangan Riil Kemasyarakatan yang <span className="font-serif italic text-indigo-600">Kami Selesaikan</span>
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex gap-4">
-                <div className="h-10 w-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100">
-                  <FileText size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">1. Birokrasi Fisik yang Lamban &amp; Berbelit</h4>
-                  <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                    Secara konvensional, warga Huntap yang membutuhkan surat pengantar RT harus mencari keberadaan ketua RT secara fisik ke rumahnya, menulis draf manual, dan menunggu berhari-hari karena ketidakcocokan waktu luang. TERAS RT 02 meremajakan birokrasi ini menjadi serba digital: ajukan lewat HP, disetujui dalam hitungan menit, tanpa kertas.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="h-10 w-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0 border border-amber-100">
-                  <Database size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">2. Krisis Kepercayaan &amp; Ketidakjelasan Kas Swadaya</h4>
-                  <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                    Kecurigaan penyalahgunaan keuangan rukun tetangga sering kali memicu keretakan rukun bertetangga. Dengan modul Transparansi Kas Terpadu, setiap uang masuk dari iuran warga dan pemakaian untuk kepentingan umum (seperti perbaikan gorong-gorong atau sumbangan kedukaan) terarsip akurat di database cloud dan dapat dipantau oleh siapa saja kapan saja.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="h-10 w-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100">
-                  <Map size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">3. Ambiguitas Akurasi Pendistribusian Bantuan Sosial (Bansos)</h4>
-                  <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                    Program bantuan darurat pemerintah rawan salah sasaran akibat tumpang tindih status ekonomi keluarga yang tidak tervalidasi secara objektif. Melalui peta hunian digital berdasar status sosial, pengurus memiliki draf peta demografi yang transparan demi memastikan warga kakek-nenek, yatim, atau dhuafa yang layak memperoleh haknya terlebih dahulu.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="h-10 w-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0 border border-rose-100">
-                  <BadgeAlert size={18} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wide">4. Kekosongan Sistem Peringatan Kebencanaan Lokal</h4>
-                  <p className="text-xs text-slate-500 font-semibold leading-relaxed mt-1 text-justify">
-                    Berdiri di atas pemukiman pasca-bencana tsunami Palu, ketidaksiapan mitigasi mandiri warga dapat berakibat fatal saat sesar Palu-Koro kembali bergeliat. Aplikasi ini mengintegrasikan rujukan mandiri siaga lindu, titik kaku evakuasi luar ruang, laporan aduan bahaya lingkungan, hingga integrasi kontak respons cepat dalam satu genggaman.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 flex items-center gap-3.5 mt-8">
-              <CheckCircle2 size={22} className="text-indigo-600 flex-shrink-0" />
-              <p className="text-[11px] font-extrabold text-slate-700 leading-normal">
-                Sinergi modernitas teknologi cloud berpadu kearifan gotong-royong demi mewujudkan RT Percontohan Tangguh Bencana pertama di Kota Palu.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* TATA NILAI & KERANGKA STRATEGIS PORTAL TERAS RT 02 */}
-        <section className="mb-20" id="core-values-section">
-          <div className="mb-12 text-center max-w-2xl mx-auto">
-            <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-1 block font-mono">PONDASI UTAMA &amp; VISI JANGKA PANJANG</span>
-            <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight">
-              Pondasi &amp; <span className="font-serif italic text-indigo-600">Arah Gerak RT 02</span>
+        {/* 4. VISI, MISI & SASARAN STRATEGIS */}
+        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-2xs space-y-6">
+          <div className="border-b border-slate-100 pb-4">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-indigo-600 block mb-1">
+              ARAH PENGEMBANGAN LINGKUNGAN
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Visi, Misi &amp; Sasaran Strategis
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-2">Struktur tata luhur nilai, cita-cita bersama, sasaran strategis, serta rencana jangka panjang kepengurusan rukun tetangga Huntap Tondo 2.</p>
           </div>
 
-          <div className="space-y-20">
-            {/* A. NILAI-NILAI UTAMA */}
-            <div className="border-t border-slate-100 pt-10" id="section-nilai-utama">
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian A</span>
-                  <span className="text-xs text-slate-400 font-semibold font-mono">• TATA NILAI UTAMA</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
-                  Nilai-Nilai Utama <span className="font-serif italic text-indigo-600">Portal Teras RT 02</span>
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Lima tata nilai luhur dasar kemasyarakatan dan tata kelola pelayanan warga Huntap Tondo 2.</p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Visi */}
+            <div className="p-6 bg-gradient-to-br from-indigo-50/70 via-indigo-50/30 to-white rounded-3xl border border-indigo-100 space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-600 text-white rounded-full text-[10px] font-bold uppercase tracking-wider font-mono">
+                VISI LINGKUNGAN
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6" id="strategic-content-nilai">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 w-fit mb-4">
-                      <Lock size={20} />
-                    </div>
-                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Transparansi Mutlak</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Keterbukaan penuh pada seluruh aliran iuran kas rukun tetangga, dokumen kebijakan, serta penyaluran bantuan sosial secara real-time demi rasa saling percaya.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-3 rounded-2xl bg-amber-50 text-amber-600 w-fit mb-4">
-                      <Award size={20} />
-                    </div>
-                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Integritas Amanah</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Sikap jujur, adil, dan integritas tinggi pengurus RT dalam menjalankan roda organisasi pelayanan kependudukan warga Huntap dengan pengorganisasian amanah.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-3 rounded-2xl bg-emerald-50 text-emerald-600 w-fit mb-4">
-                      <HeartHandshake size={20} />
-                    </div>
-                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Gotong Royong</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Menjaga tradisi luhur tolong-menolong, solidaritas sosial tinggi, gotong-royong swadaya, serta bahu-membahu dalam menghadapi musibah suka maupun duka.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-3 rounded-2xl bg-blue-50 text-blue-600 w-fit mb-4">
-                      <Users size={20} />
-                    </div>
-                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Inklusivitas Adil</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Memberikan pelayanan dan perhatian adil merata bagi seluruh keluarga tanpa diskriminasi latar belakang suku, ras, gender, keyakinan, maupun taraf ekonomi keluarga.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex flex-col justify-between">
-                  <div>
-                    <div className="p-3 rounded-2xl bg-rose-50 text-rose-600 w-fit mb-4">
-                      <Shield size={20} />
-                    </div>
-                    <h4 className="text-sm font-semibold text-slate-950 uppercase tracking-tight mb-2">Ketangguhan Siaga</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Kesiapsiagaan penuh, tanggap darurat bencana, pengamanan pencegahan aktif, serta ketahanan mitigasi wilayah mandiri rukun tetangga di atas jalur sesar.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <p className="text-sm sm:text-base font-bold text-slate-800 leading-relaxed italic">
+                "Terwujudnya Rukun Tetangga 002 Huntap Tondo 2 yang berdaya, mandiri, rukun, aman dari ancaman bencana, serta terdepan dalam keterbukaan informasi dan pelayanan digital."
+              </p>
             </div>
 
-            {/* B. VISI & MISI */}
-            <div className="border-t border-slate-100 pt-10" id="section-visi-misi">
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian B</span>
-                  <span className="text-xs text-slate-400 font-semibold font-mono">• VISI &amp; MISI</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
-                  Visi &amp; Misi <span className="font-serif italic text-indigo-600">Rukun Tetangga 02</span>
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Cita-cita luhur dan panduan langkah operasional kepengurusan jangka panjang.</p>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8" id="strategic-content-visi-misi">
-                <div className="lg:col-span-5 bg-gradient-to-br from-indigo-600 to-indigo-800 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-indigo-900 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-white/10 rounded-xl">
-                        <Globe size={18} />
-                      </div>
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-indigo-200 font-mono">VISI UTAMA</span>
-                    </div>
-                    <h4 className="text-lg sm:text-2xl font-semibold text-white mb-4 tracking-tight leading-normal">
-                      "Mewujudkan Harmoni Huntap Tondo 2 Sebagai <span className="font-serif italic text-indigo-200">Pemukiman Digital Mandiri</span> yang Unggul, Transparan, Solider, Akuntabel, dan Siaga Bencana"
-                    </h4>
-                    <p className="text-xs text-indigo-200/90 font-medium leading-relaxed text-justify">
-                      Visi luhur yang memandu langkah kita dalam mendirikan lingkungan hunian berbasis teknologi tinggi, kreatif sosiologis, dan bersahabat erat dalam gotong-royong harmonis di Sulawesi Tengah.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
-                  <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-4 block font-mono">MISI STRATEGIS</span>
-                  <h4 className="text-lg font-semibold text-slate-900 tracking-tight mb-4">Langkah Utama yang <span className="font-serif italic text-indigo-600">Terbimbing Nyata</span></h4>
-
-                  <div className="space-y-4">
-                    <div className="flex gap-4">
-                      <span className="h-6 w-6 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-[10px] font-semibold font-mono flex-shrink-0">PM 1</span>
-                      <div>
-                        <h5 className="text-xs font-semibold text-slate-900 uppercase">Pelayanan Birokrasi Cepat</h5>
-                        <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
-                          Mengotomatisasi surat menyurat satu pintu dan rekapitulasi domisili warga secara mandiri guna menghemat waktu warga.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <span className="h-6 w-6 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-[10px] font-semibold font-mono flex-shrink-0">PM 2</span>
-                      <div>
-                        <h5 className="text-xs font-semibold text-slate-900 uppercase">Akuntabilitas &amp; Transparansi Kas</h5>
-                        <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
-                          Mencatat dan mengumumkan mutasi kas rukun tetangga seketika (real-time) melalui aplikasi demi membangun integritas.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <span className="h-6 w-6 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-[10px] font-semibold font-mono flex-shrink-0">PM 3</span>
-                      <div>
-                        <h5 className="text-xs font-semibold text-slate-900 uppercase">Pemberdayaan Ekonomi Kreatif Warga</h5>
-                        <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
-                          Mempromosikan UMKM lokal warga, bank sampah digital ekonomis, serta pasar swadaya sebagai pondasi finansial keluarga huni.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4">
-                      <span className="h-6 w-6 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center text-[10px] font-semibold font-mono flex-shrink-0">PM 4</span>
-                      <div>
-                        <h5 className="text-xs font-semibold text-slate-900 uppercase">Sinergi Mitigasi Bencana &amp; Keamanan</h5>
-                        <p className="text-[11px] text-slate-500 font-semibold leading-relaxed mt-0.5">
-                          Memelihara pemetaan hunian, koordinasi pos ronda malam, pos tanggap darurat gempa, serta asisten AI pintar siaga bencana.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+            {/* 4 Sasaran Strategis */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <span className="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">1</span>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">Birokrasi Cepat &amp; Paperless</h4>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed">Pengurusan surat pengantar dan pendataan KK mandiri satu pintu tanpa repot antre.</p>
                 </div>
               </div>
-            </div>
 
-            {/* C. TUJUAN STRATEGIS */}
-            <div className="border-t border-slate-100 pt-10" id="section-tujuan">
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian C</span>
-                  <span className="text-xs text-slate-400 font-semibold font-mono">• TARGET CAPAIAN</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
-                  Tujuan Strategis <span className="font-serif italic text-indigo-600">RT 02</span>
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Garis arah bagi program-program sosial, ketahanan bencana, dan pemberdayaan ekonomi.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6" id="strategic-content-tujuan">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex gap-4">
-                  <div className="p-3.5 rounded-2xl bg-indigo-50 text-indigo-600 h-fit">
-                    <FileText size={22} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-tight mb-2">1. Mewujudkan Birokrasi Adaptif &amp; Modern</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Menyajikan mekanisme administrasi kesuratan rukun tetangga yang ringkas, efektif, terbebas dari kesalahan manual, tumpukan kertas fisik, ataupun pungutan liar.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex gap-4">
-                  <div className="p-3.5 rounded-2xl bg-amber-50 text-amber-600 h-fit">
-                    <Users size={22} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-tight mb-2">2. Menumbuhkan Rasa Saling Percaya</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Membangun ikatan sosial yang sehat dan harmoni melalui keterbukaan pelaporan kas publik tanpa celah manipulasi demi kedamaian lingkungan bersama.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex gap-4">
-                  <div className="p-3.5 rounded-2xl bg-emerald-50 text-emerald-600 h-fit">
-                    <ShoppingBag size={22} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-tight mb-2">3. Mengakselerasi Kesejahteraan Finansial</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Memicu keaktifan roda pasar swadaya mikro warga Huntap, memperluas jangkauan niaga UMKM, dan mendatangkan nilai ekonomis dari pemilahan bank sampah secara teratur.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors flex gap-4">
-                  <div className="p-3.5 rounded-2xl bg-rose-50 text-rose-600 h-fit">
-                    <Shield size={22} />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-tight mb-2">4. Meminimalkan Dampak Kebencanaan</h4>
-                    <p className="text-xs text-slate-500 font-semibold leading-relaxed text-justify">
-                      Meningkatkan kesiapsiagaan darurat lindu secara mandiri, mengarahkan peta titik kumpul secara cepat, koordinasi komunikasi darurat, dan menjaga keselamatan pengamanan warga.
-                    </p>
-                  </div>
+              <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <span className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs flex items-center justify-center shrink-0">2</span>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">Transparansi Finansial Mutlak</h4>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed">Pencatatan kas dan iuran swadaya yang dapat diakses terbuka oleh setiap warga.</p>
                 </div>
               </div>
-            </div>
 
-            {/* D. SASARAN 5 TAHUN KEDEPAN */}
-            <div className="border-t border-slate-100 pt-10" id="section-sasaran">
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian D</span>
-                  <span className="text-xs text-slate-400 font-semibold font-mono">• METRIK INDIKATOR</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
-                  Sasaran 5 Tahun Kedepan <span className="font-serif italic text-indigo-600">(Strategic Targets)</span>
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Key Performance Indicators (KPI) kebersamaan yang ingin dicapai pengurus RT 02 dalam jangka menengah.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6" id="strategic-content-sasaran">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-semibold text-indigo-600/20 font-mono tracking-tight">S-1</span>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">100% Pelayanan Digital</h4>
-                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                      Layanan administrasi, rekapitulasi KK, dan usulan korespondensi beralih penuh seutuhnya ke Teras RT 02.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-semibold text-amber-600/20 font-mono tracking-tight">S-2</span>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Nol Masalah Rekonsiliasi</h4>
-                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                      Sistem penarikan iuran, laporan pengeluaran, dan audit saldo kas tercapai 100% transparan dengan akurasi mutlak.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-semibold text-emerald-600/20 font-mono tracking-tight">S-3</span>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">UMKM Naik Kelas</h4>
-                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                      Minimal 90% pelaku niaga warga Huntap Tondo 2 terdaftar, memiliki lapak digital, dan mendapatkan pembeli konstan.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-semibold text-rose-600/20 font-mono tracking-tight">S-4</span>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Desa Siaga Bencana</h4>
-                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                      Mewujudkan percontohan kerukunan rukun tetangga dengan mitigasi lindu berstandar tangguh bencana tingkat nasional.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
-                  <span className="text-[36px] font-semibold text-blue-600/20 font-mono tracking-tight">S-5</span>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2">Mandiri Finansial</h4>
-                    <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
-                      Terciptanya ketahanan kas mandiri operasional rukun tetangga yang diperoleh secara ekologis via bank sampah terpadu warga.
-                    </p>
-                  </div>
+              <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 font-bold text-xs flex items-center justify-center shrink-0">3</span>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">Pemberdayaan UMKM &amp; Bank Sampah</h4>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed">Mendorong perputaran ekonomi keluarga warga melalui katalog usaha dan pilah sampah bernilai.</p>
                 </div>
               </div>
-            </div>
 
-            {/* E. MOTTO & SLOGAN JUANG */}
-            <div className="border-t border-slate-100 pt-10" id="section-motto">
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian E</span>
-                  <span className="text-xs text-slate-400 font-semibold font-mono">• SLOGAN JUANG</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
-                  Motto &amp; Slogan <span className="font-serif italic text-indigo-600">RT 02</span>
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Singkatan luhur dan esensi identitas keguyuban rukun tetangga di Huntap Tondo 2.</p>
-              </div>
-
-              <div className="bg-indigo-950 text-white rounded-3xl p-6 sm:p-10 shadow-lg border border-indigo-900" id="strategic-content-motto">
-                <div className="text-center mb-8">
-                  <span className="text-[10px] text-indigo-400 font-semibold tracking-widest font-mono uppercase">MOTTO &amp; SLOGAN JUANG KITA</span>
-                  <h3 className="text-2xl sm:text-4xl font-extrabold text-white mt-2 mb-3 tracking-tight font-sans">
-                    "TERAS RT 02"
-                  </h3>
-                  <div className="h-1 w-20 bg-indigo-500 mx-auto rounded-full mb-4" />
-                  <p className="text-sm font-extrabold text-indigo-300 tracking-wider uppercase">
-                    Teknologi • Ekraf • Rukun • Aman • Sinergi
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mt-8">
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-semibold text-indigo-400 font-mono">T</span>
-                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">TEKNOLOGI</h4>
-                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
-                      Inovasi platform digital sebagai tiang penopang utama pelayanan administrasi satu pintu yang efektif.
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-semibold text-amber-400 font-mono">E</span>
-                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">EKRAF</h4>
-                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
-                      Ekonomi kreatif mandiri melalui swadaya UMKM dan pemilahan bank sampah digital bernilai tinggi.
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-semibold text-emerald-400 font-mono">R</span>
-                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">RUKUN</h4>
-                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
-                      Interaksi kemasyarakatan yang tulus, damai, pemaaf, saling asih, serta menjunjung tinggi tenggang rasa.
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-semibold text-rose-400 font-mono">A</span>
-                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">AMAN</h4>
-                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
-                      Keamanan pemukiman yang terjaga, tanggap ronda bersama, serta siaga mitigasi gempa sesar aktif.
-                    </p>
-                  </div>
-
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition-colors">
-                    <span className="text-xl font-semibold text-blue-400 font-mono">S</span>
-                    <h4 className="text-xs font-semibold text-white uppercase mt-1 mb-1 tracking-wider">SINERGI</h4>
-                    <p className="text-[10px] text-indigo-200/80 font-medium leading-relaxed">
-                      Kolaborasi erat nan selaras antara para pengurus, seluruh KK warga huni, akademisi, dan pemerintah.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* F. RENCANA JANGKA PANJANG */}
-            <div className="border-t border-slate-100 pt-10" id="section-rencana">
-              <div className="mb-8">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] font-mono font-semibold uppercase text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">Bagian F</span>
-                  <span className="text-xs text-slate-400 font-semibold font-mono">• LINIMASA ROADMAP</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
-                  Rencana Jangka Panjang <span className="font-serif italic text-indigo-600">(10-Year Roadmap)</span>
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-500 font-semibold mt-1">Linimasa tiga tahap utama pelaksanaan visi jangka panjang digitalisasi, kemandirian ekonomi, dan ketangguhan lingkungan Huntap Tondo 2 dalam kurun waktu 10 tahun.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6" id="strategic-content-rencana">
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-indigo-50 text-indigo-600 text-[9px] font-semibold font-mono rounded-bl-2xl uppercase">Tahap 1</div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2 mt-2">Fondasi &amp; Digitalisasi</h4>
-                    <div className="text-[10px] text-indigo-600 font-semibold tracking-widest font-mono mb-3 uppercase">Tahun 1 - 3 (2026 - 2028)</div>
-                    <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
-                      <li>Migrasi data kependudukan terenkripsi dan integrasi penuh blok hunian.</li>
-                      <li>Pembiasaan iuran kas terjadwal transparan berbasis web secara periodik.</li>
-                      <li>Aktivasi asisten konsultasi AI Siaga Bencana dan pemetaan risiko darurat.</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-amber-50 text-amber-600 text-[9px] font-semibold font-mono rounded-bl-2xl uppercase">Tahap 2</div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2 mt-2">Pemberdayaan &amp; Ekonomi Mandiri</h4>
-                    <div className="text-[10px] text-amber-600 font-semibold tracking-widest font-mono mb-3 uppercase">Tahun 4 - 6 (2029 - 2031)</div>
-                    <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
-                      <li>Inisiasi Bank Sampah digital terintegrasi iuran kas sosial warga.</li>
-                      <li>Inkubasi bisnis swadaya, standarisasi, dan digitalisasi UMKM Huntap.</li>
-                      <li>Pembangunan infrastruktur bersama ramah lingkungan &amp; energi mandiri.</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-colors relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 py-1.5 px-3 bg-rose-50 text-rose-600 text-[9px] font-semibold font-mono rounded-bl-2xl uppercase">Tahap 3</div>
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-2 mt-2">Ketangguhan &amp; Kepemimpinan Regional</h4>
-                    <div className="text-[10px] text-rose-600 font-semibold tracking-widest font-mono mb-3 uppercase">Tahun 7 - 10 (2032 - 2035)</div>
-                    <ul className="space-y-1.5 text-[11px] text-slate-500 font-semibold list-disc pl-4 leading-relaxed">
-                      <li>Penyediaan hidran mandiri, jalur evakuasi pintar, dan kelengkapan darurat tangguh.</li>
-                      <li>Replikasi model tata kelola Smart RT berskala kota/nasional secara open-source.</li>
-                      <li>Penciptaan ekosistem belajar digital jangka panjang berkelanjutan bagi anak-anak Huntap.</li>
-                    </ul>
-                  </div>
+              <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-bold text-xs flex items-center justify-center shrink-0">4</span>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900">Ketahanan Lingkungan &amp; Mitigasi Gempa</h4>
+                  <p className="text-[11px] text-slate-500 font-medium leading-relaxed">Pemeliharaan jalur evakuasi, siskamling ronda malam aktif, dan informasi gempa BMKG.</p>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* MITIGASI GEMPA & SIAGA BENCHMARK AREA */}
-        <section className="mb-16 bg-gradient-to-br from-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-10 text-white shadow-xl">
+        {/* 5. KONTAK & LOKASI SEKRETARIAT (DATA AKURAT BLOK C10 NO. 8) */}
+        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-2xs">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <span className="text-[10px] text-indigo-400 font-extrabold tracking-widest font-mono uppercase block mb-2">POS LAJU SESAR AKTIF MITIGASI</span>
-              <h2 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight">Pos Siaga &amp; <span className="font-serif italic text-indigo-300">Titik Evakuasi Warga</span></h2>
-              <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
-                Mengingat Huntap Tondo II berdiri di radius proksimitas pengaruh letupan tektonik Sesar Palu-Koro yang aktif secara berulang, kami membangun kesiapsiagaan darurat terdigitalisasi secara saksama.
-              </p>
-              
-              <div className="mt-6 space-y-4 font-semibold text-xs text-slate-200">
-                <div className="flex items-start gap-3">
-                  <div className="p-1.5 bg-white/10 rounded-lg text-rose-450 mt-0.5">
-                    <BadgeAlert size={16} className="text-rose-405 text-rose-400" />
-                  </div>
-                  <div>
-                    <p className="text-white font-extrabold">Titik Kumpul Evakuasi Utama</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Area Terbuka Jalan Utama Huntap Tondo 2.</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="p-1.5 bg-white/10 rounded-lg text-emerald-400 mt-0.5">
-                    <Globe size={16} className="text-emerald-405" />
-                  </div>
-                  <div>
-                    <p className="text-white font-extrabold">Sistem Digital Mitigasi</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Notifikasi gempa langsung memotong jaringan (intercept) sistem BMKG.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm flex flex-col justify-between h-full">
-              <h4 className="text-xs font-semibold text-rose-400 tracking-wider uppercase font-mono mb-4">Petunjuk Keselamatan Sebaran Sesar</h4>
-              <ul className="space-y-2.5 text-[11px] text-slate-300 font-medium leading-relaxed list-disc pl-4">
-                <li>Saat lindu terasa, segera beralih menuju kolong meja kokoh atau lindungi kepala Anda dengan bantal/buku tebal.</li>
-                <li>Setelah getaran reda, segera evakuasi keluarga secara beruntun lewat pintu keluar darurat luar rumah menuju area jalan utama yang terbuka.</li>
-                <li>Haramkan mempercayai kabar burung desas-desus non-resmi BMKG atau isu tsunami tsunami palsu.</li>
-                <li>Tekan tombol **PANIC BUTTON** merah di bagian bawah dashboard jika Anda atau tetangga terjebak reruntuhan.</li>
-              </ul>
-              
-              <button 
-                onClick={() => navigate('/peta?tab=gempa')}
-                className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs tracking-wider uppercase rounded-xl transition-colors shadow-md active:scale-95 cursor-pointer"
-              >
-                <Activity size={14} className="" />
-                MASUK PANEL MONITOR GEMPA AKTIF (BMKG)
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* HUBUNGI & LOKASI SEKRETARIAT */}
-        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <span className="text-[10px] uppercase font-semibold tracking-widest text-indigo-600 mb-1 block font-mono">KONTAK RESMI &amp; SARANA LAYANAN</span>
-              <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mb-4">
-                Sekretariat RT 02 <span className="font-serif italic text-indigo-600">Huntap Tondo 2</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed font-semibold mb-6">
-                Butuh legalitas verifikasi kependudukan, pengurusan berkas fisik, konsultasi usaha, atau rujukan swadaya? Kami membuka pintu pelayanan langsung dengan senang hati.
-              </p>
-              
-              <div className="space-y-4">
-                <div className="flex items-start gap-3.5">
-                  <div className="p-1 bg-red-50 text-red-500 rounded-lg mt-0.5">
-                    <MapPin size={16} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-900">Alamat Korespondensi</p>
-                    <p className="text-xs text-slate-505 text-slate-500 mt-1 font-semibold leading-relaxed">
-                      Blok B No. 42, Hunian Tetap (Huntap) Tondo II, RT 02 / RW 05, Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu, Sulawesi Tengah.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3.5">
-                  <div className="p-1 bg-emerald-50 text-emerald-500 rounded-lg mt-0.5">
-                    <Phone size={16} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-900">Saluran Telepon Siaga</p>
-                    <p className="text-xs text-slate-505 font-mono font-bold text-slate-800 mt-1 hover:text-emerald-700 transition-colors">
-                      +62 822-9333-2802 (Hotline Utama Pengaduan)
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3.5">
-                  <div className="p-1 bg-blue-50 text-blue-500 rounded-lg mt-0.5">
-                    <Calendar size={16} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-slate-900">Jam Layanan Kantor Sekretariat</p>
-                    <p className="text-xs text-slate-505 text-slate-500 mt-1 font-semibold">
-                      Setiap Hari Kerja (Senin s/d Jumat) Pukul 19.00 - 21.00 WITA.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gradient-to-br from-slate-50 to-indigo-50/20 rounded-3xl border border-slate-100 flex flex-col justify-between h-full">
-              <div className="text-center lg:text-left mb-6">
-                <h4 className="text-xs font-semibold text-slate-950 tracking-tight uppercase">Sistem Tata Kelola TERAS DIgital</h4>
-                <p className="text-xs text-slate-500 mt-1.5 leading-relaxed font-semibold">
-                  Situs dan platform mandiri ini dikembangkan dalam mewujudkan tata pemukiman cerdas. Apabila Anda menemukan kejanggalan integrasi kependudukan Anda, silakan hubungi admin pengembang langsung.
+            <div className="space-y-5">
+              <div>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-600 block mb-1 font-mono">
+                  LAYANAN RESMI RT
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  Sekretariat RT 002 <span className="text-indigo-600">RW 020</span>
+                </h2>
+                <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                  Kami membuka pintu koordinasi dan layanan langsung bagi warga yang membutuhkan legalitas dokumen fisik, konsultasi lingkungan, atau pengaduan warga.
                 </p>
               </div>
 
-              <div className="space-y-2.5">
-                <button 
-                  onClick={() => navigate('/services?tab=lapor')}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs tracking-wider uppercase rounded-xl transition-colors shadow-md active:scale-95 cursor-pointer"
+              <div className="space-y-3.5">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-rose-50 text-rose-600 rounded-xl mt-0.5">
+                    <MapPin size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">Alamat Kantor Sekretariat</p>
+                    <p className="text-xs text-slate-600 mt-0.5 leading-relaxed font-medium">
+                      Blok C10 No. 8, Hunian Tetap (Huntap) Tondo 2, RT 002 / RW 020, Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu, Sulawesi Tengah.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl mt-0.5">
+                    <Phone size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">Saluran Komunikasi Resmi</p>
+                    <p className="text-xs font-mono font-bold text-slate-700 mt-0.5">
+                      +62 822-9333-2802 (Ketua RT / Hotline Pengaduan)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-50 text-blue-600 rounded-xl mt-0.5">
+                    <Clock size={16} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900">Waktu Pelayanan Administrasi Fisik</p>
+                    <p className="text-xs text-slate-600 mt-0.5 font-medium">
+                      Senin s/d Jumat pukul 19.00 - 21.00 WITA (Layanan digital via web 24 jam).
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions Panel */}
+            <div className="p-6 bg-slate-50 rounded-3xl border border-slate-200/80 space-y-4">
+              <div>
+                <h4 className="text-sm font-extrabold text-slate-900">Pusat Layanan Warga</h4>
+                <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                  Semua layanan dapat diakses langsung secara online tanpa harus menunggu jam kantor buka.
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <button
+                  onClick={() => navigate('/services?tab=surat')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-colors shadow-2xs cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <Activity size={14} />
-                    AJUKAN PENGADUAN / LAPORKAN KEJADIAN
+                    <FileText size={15} />
+                    <span>Ajukan Surat Pengantar Mandiri</span>
                   </span>
                   <ChevronRight size={14} />
                 </button>
 
-                <button 
-                  onClick={() => navigate('/services?tab=surat')}
-                  className="w-full flex items-center justify-between gap-3 px-4 py-3.5 bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-150 border-indigo-100 font-extrabold text-xs tracking-wider uppercase rounded-xl transition-colors shadow-sm active:scale-95 cursor-pointer"
+                <button
+                  onClick={() => navigate('/services?tab=lapor')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                 >
-                  <span>PENGAJUAN PINJAM ALAT / SURAT RT</span>
+                  <span className="flex items-center gap-2">
+                    <Activity size={15} className="text-rose-600" />
+                    <span>Laporkan Aduan / Kerusakan Fasilitas</span>
+                  </span>
+                  <ChevronRight size={14} />
+                </button>
+
+                <button
+                  onClick={() => navigate('/info')}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-slate-100 text-slate-800 border border-slate-200 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Globe size={15} className="text-emerald-600" />
+                    <span>Transparansi Kas &amp; Jadwal Ronda</span>
+                  </span>
                   <ChevronRight size={14} />
                 </button>
               </div>

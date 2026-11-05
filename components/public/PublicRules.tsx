@@ -19,7 +19,7 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
   const [mainTab, setMainTab] = useState<'rules' | 'minutes'>(tabFromUrl === 'minutes' ? 'minutes' : 'rules');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [expandedRules, setExpandedRules] = useState<Record<string, boolean>>({});
+  const [expandedRules, setExpandedRules] = useState<Record<string, boolean>>({ "Administrasi Kependudukan": true });
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
   
   // Meeting Minutes States (Real-Time from Firestore)
@@ -175,7 +175,7 @@ export const PublicRules: React.FC<PublicRulesProps> = ({ pdfConfig }) => {
         "Penyetoran sampah anorganik yang telah terpilah dapat dilakukan secara berkala melalui sistem Bank Sampah RT 02 Teras Warga guna ditimbang dan dikonversi menjadi saldo rekening kas digital milik masing-masing warga.",
         "Tanggung jawab kebersihan jalan, pemotongan rumput liar, serta pembuangan sedimen pasir/lumpur dari dalam selokan air di depan unit rumah berada pada pemilik atau penghuni rumah yang bersangkutan.",
         "Dilarang keras membuang puntung rokok, bungkus plastik, popok bayi, minyak goreng bekas, sisa renovasi beton, atau limbah berbahaya lainnya ke dalam saluran drainase/selokan lingkungan RT 02.",
-        "Warga wajib menampung sampah domestik basah harian di dalam tong sampah tertutup rapat di area halaman rumah, dan hanya mengeluarkannya ke depan pagar pada pagi hari jadwal pengangkutan armada sampah (setiap Senin dan Kamis).",
+        "Warga wajib menampung sampah domestik basah harian di dalam tong sampah tertutup rapat di area halaman rumah, dan hanya mengeluarkannya ke depan pagar pada pagi hari jadwal pengangkutan armada sampah (setiap Selasa dan Sabtu).",
         "Tindakan membuang sampah sembarangan atau membakar sampah plastik di pekarangan luar yang menyebabkan kepulan asap beracun bagi tetangga akan diberikan sanksi administrasi sosial.",
         "Pengelola kontrakan/kost wajib menyediakan minimal 1 (satu) tong sampah kapasitas sedang untuk tiap-tiap unit hunian sewa.",
         "Warga dilarang membiarkan botol bekas berisi air tergenang di pekarangan luar guna mencegah jentik nyamuk demam berdarah (DBD)."
