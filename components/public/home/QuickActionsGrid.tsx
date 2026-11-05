@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  User, FileText, Shield, Building, UserPlus, BookOpen, 
-  ShoppingCart, Megaphone, Scale, Wrench, Zap, AlertTriangle, 
+  User, FileText, Shield, Building, UserPlus, 
+  ShoppingCart, Megaphone, Wrench, Zap, AlertTriangle, 
   PhoneCall, CheckSquare 
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -45,6 +45,24 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
       link: '/services' 
     },
     { 
+      label: 'Daftar Warga', 
+      category: 'admin' as ServiceCategory,
+      icon: UserPlus, 
+      bg: 'bg-[#f5f3ff]', 
+      color: 'text-[#7c3aed]', 
+      border: 'border-purple-100/90',
+      link: '/register' 
+    },
+    { 
+      label: 'Lapor RT', 
+      category: 'admin' as ServiceCategory,
+      icon: AlertTriangle, 
+      bg: 'bg-[#fff1f2]', 
+      color: 'text-[#e11d48]', 
+      border: 'border-rose-100/90',
+      action: onOpenReport 
+    },
+    { 
       label: 'Lapor Tamu', 
       category: 'security' as ServiceCategory,
       icon: Shield, 
@@ -67,66 +85,6 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
       badgeColor: 'bg-emerald-600'
     },
     { 
-      label: 'Daftar Warga', 
-      category: 'admin' as ServiceCategory,
-      icon: UserPlus, 
-      bg: 'bg-[#f5f3ff]', 
-      color: 'text-[#7c3aed]', 
-      border: 'border-purple-100/90',
-      link: '/register' 
-    },
-    { 
-      label: 'Buku Saku', 
-      category: 'admin' as ServiceCategory,
-      icon: BookOpen, 
-      bg: 'bg-[#f0f2fe]', 
-      color: 'text-[#4f46e5]', 
-      border: 'border-indigo-100/90',
-      link: '/welcome',
-      badge: 'Panduan',
-      badgeColor: 'bg-indigo-600'
-    },
-    { 
-      label: 'UMKM Warga', 
-      category: 'community' as ServiceCategory,
-      icon: ShoppingCart, 
-      bg: 'bg-[#ecfdf5]', 
-      color: 'text-[#059669]', 
-      border: 'border-emerald-100/90',
-      link: '/umkm',
-      badge: 'Katalog',
-      badgeColor: 'bg-emerald-600'
-    },
-    { 
-      label: 'Warta RT', 
-      category: 'community' as ServiceCategory,
-      icon: Megaphone, 
-      bg: 'bg-[#eff6ff]', 
-      color: 'text-[#2563eb]', 
-      border: 'border-blue-100/90',
-      link: '/info' 
-    },
-    { 
-      label: 'Peraturan RT', 
-      category: 'admin' as ServiceCategory,
-      icon: Scale, 
-      bg: 'bg-[#f0fdf4]', 
-      color: 'text-[#16a34a]', 
-      border: 'border-emerald-100/90',
-      link: '/rules',
-      badge: '13 BAB',
-      badgeColor: 'bg-emerald-600'
-    },
-    { 
-      label: 'Jasa Warga', 
-      category: 'community' as ServiceCategory,
-      icon: Wrench, 
-      bg: 'bg-[#fffbeb]', 
-      color: 'text-[#d97706]', 
-      border: 'border-amber-100/90',
-      action: onOpenSkills
-    },
-    { 
       label: 'Siaga Utilitas', 
       category: 'security' as ServiceCategory,
       icon: Zap, 
@@ -136,15 +94,6 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
       action: onOpenOutage,
       badge: 'PLN/Air',
       badgeColor: 'bg-sky-600'
-    },
-    { 
-      label: 'Lapor RT', 
-      category: 'admin' as ServiceCategory,
-      icon: AlertTriangle, 
-      bg: 'bg-[#fff1f2]', 
-      color: 'text-[#e11d48]', 
-      border: 'border-rose-100/90',
-      action: onOpenReport 
     },
     { 
       label: 'Kontak Darurat', 
@@ -160,6 +109,35 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
       },
       badge: '24 Jam',
       badgeColor: 'bg-rose-600'
+    },
+    { 
+      label: 'UMKM Warga', 
+      category: 'community' as ServiceCategory,
+      icon: ShoppingCart, 
+      bg: 'bg-[#ecfdf5]', 
+      color: 'text-[#059669]', 
+      border: 'border-emerald-100/90',
+      link: '/umkm',
+      badge: 'Katalog',
+      badgeColor: 'bg-emerald-600'
+    },
+    { 
+      label: 'Jasa Warga', 
+      category: 'community' as ServiceCategory,
+      icon: Wrench, 
+      bg: 'bg-[#fffbeb]', 
+      color: 'text-[#d97706]', 
+      border: 'border-amber-100/90',
+      action: onOpenSkills
+    },
+    { 
+      label: 'Info Kas RT', 
+      category: 'community' as ServiceCategory,
+      icon: Megaphone, 
+      bg: 'bg-[#eff6ff]', 
+      color: 'text-[#2563eb]', 
+      border: 'border-blue-100/90',
+      link: '/info' 
     },
     { 
       label: '5 Pilar STBM', 
@@ -225,8 +203,8 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
         </div>
       </div>
 
-      {/* Grid Layout with Friendly Colors */}
-      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-y-5 gap-x-2.5 sm:gap-x-4 md:gap-x-5 w-full">
+      {/* Symmetrical 12-Item Grid (4x3 Mobile, 6x2 Desktop) */}
+      <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-6 gap-y-5 gap-x-2.5 sm:gap-x-4 md:gap-x-5 w-full">
         {filteredQuickActions.map((action) => {
           const Icon = action.icon;
           return (

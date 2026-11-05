@@ -1,22 +1,12 @@
 import { 
-  House, 
-  GuestReport, 
-  UpdateRequest, 
   Report, 
-  LetterRequest, 
-  CommunitySkill, 
-  UtilityOutage, 
-  WaterMeterReading, 
-  WaterUtilitySettings, 
-  STBMRecord 
+  CommunitySkill
 } from '../../../types';
 
 export type DashboardActiveTab = 
   | 'eid' 
   | 'water' 
   | 'points' 
-  | 'skills' 
-  | 'outages' 
   | 'letters' 
   | 'update' 
   | 'guests' 

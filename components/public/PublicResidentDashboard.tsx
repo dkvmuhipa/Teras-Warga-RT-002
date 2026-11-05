@@ -17,8 +17,6 @@ import {
   PaymentStatus, 
   Report, 
   LetterRequest, 
-  CommunitySkill, 
-  UtilityOutage, 
   WaterMeterReading, 
   WaterUtilitySettings, 
   STBMRecord 
@@ -34,7 +32,6 @@ import {
   OperationType,
   subscribeToPdfConfig,
   validateResidentAccess,
-  subscribeToCollection,
   subscribeToHouseWaterMeterReadings,
   addWaterMeterReading,
   subscribeToSettings,
@@ -43,10 +40,9 @@ import {
   subscribeToSTBMRecords
 } from '../../services/databaseService';
 import { generateIuranReceiptPDF } from '../../services/pdfService';
-import { UtilityOutageTrackerModal } from './UtilityOutageTrackerModal';
 
 // Modular Dashboard Subcomponents
-import { DashboardActiveTab, SkillFormData, ReportFormData } from './dashboard/types';
+import { DashboardActiveTab, ReportFormData } from './dashboard/types';
 import { ResidentLoginGate } from './dashboard/ResidentLoginGate';
 import { ResidentHeader } from './dashboard/ResidentHeader';
 import { ResidentEidTab } from './dashboard/tabs/ResidentEidTab';
@@ -56,17 +52,16 @@ import { ResidentUpdateDataTab } from './dashboard/tabs/ResidentUpdateDataTab';
 import { ResidentGuestsTab } from './dashboard/tabs/ResidentGuestsTab';
 import { ResidentReportsTab } from './dashboard/tabs/ResidentReportsTab';
 import { ResidentPointsTab } from './dashboard/tabs/ResidentPointsTab';
-import { ResidentSkillsTab } from './dashboard/tabs/ResidentSkillsTab';
-import { ResidentOutagesTab } from './dashboard/tabs/ResidentOutagesTab';
 import { ResidentStbmTab } from './dashboard/tabs/ResidentStbmTab';
 import { ResidentIuranModal } from './dashboard/modals/ResidentIuranModal';
 import { ResidentReportModal } from './dashboard/modals/ResidentReportModal';
 import { ResidentWaterModal } from './dashboard/modals/ResidentWaterModal';
-import { ResidentSkillModal } from './dashboard/modals/ResidentSkillModal';
 
 interface PublicResidentDashboardProps {
   houses: House[];
 }
+
+const VALID_TABS: DashboardActiveTab[] = ['eid', 'water', 'points', 'letters', 'update', 'guests', 'reports', 'stbm'];
 
 export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = ({ houses }) => {
   const [searchParams] = useSearchParams();
@@ -77,35 +72,21 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   );
   const [rememberSession, setRememberSession] = useState(false);
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
-  const [isOutageModalOpen, setIsOutageModalOpen] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [tempHouseId, setTempHouseId] = useState('');
   const [pinError, setPinError] = useState(false);
   
   const [activeTab, setActiveTab] = useState<DashboardActiveTab>(
-    (tabParam && ['eid', 'water', 'points', 'skills', 'outages', 'letters', 'update', 'guests', 'reports', 'stbm'].includes(tabParam)) 
-      ? tabParam 
-      : 'eid'
+    (tabParam && VALID_TABS.includes(tabParam)) ? tabParam : 'eid'
   );
 
   useEffect(() => {
-    if (tabParam && ['eid', 'water', 'points', 'skills', 'outages', 'letters', 'update', 'guests', 'reports', 'stbm'].includes(tabParam)) {
+    if (tabParam && VALID_TABS.includes(tabParam)) {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
 
   const [stbmRecord, setStbmRecord] = useState<STBMRecord | null>(null);
-  const [communitySkills, setCommunitySkills] = useState<CommunitySkill[]>([]);
-  const [utilityOutages, setUtilityOutages] = useState<UtilityOutage[]>([]);
-  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
-  const [skillForm, setSkillForm] = useState<SkillFormData>({
-    category: 'Pertukangan & Bangunan',
-    title: '',
-    description: '',
-    phone: '',
-    rateInfo: ''
-  });
-
   const [guestReports, setGuestReports] = useState<GuestReport[]>([]);
   const [updateRequests, setUpdateRequests] = useState<UpdateRequest[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
@@ -242,8 +223,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
   useEffect(() => {
     const unsubPdfConfig = subscribeToPdfConfig(setPdfConfig);
-    const unsubSkills = subscribeToCollection('communitySkills', (data) => setCommunitySkills(data as CommunitySkill[]));
-    const unsubOutages = subscribeToCollection('utilityOutages', (data) => setUtilityOutages(data as UtilityOutage[]));
     const unsubSettings = subscribeToSettings((data) => {
       if (data?.waterUtility) {
         setWaterUtilityConfig({
@@ -262,8 +241,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
     return () => {
       unsubPdfConfig();
-      unsubSkills();
-      unsubOutages();
       unsubSettings();
     };
   }, []);
@@ -559,7 +536,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isIuranModalOpen, setIsIuranModalOpen] = useState(false);
-  const [isVotingModalOpen, setIsVotingModalOpen] = useState(false);
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
   const [selectedReportDetail, setSelectedReportDetail] = useState<Report | null>(null);
   const [reportForm, setReportForm] = useState<ReportFormData>({
@@ -715,7 +691,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
     }
   };
 
-  if (!selectedHouseId && activeTab !== 'skills' && activeTab !== 'outages') {
+  if (!selectedHouseId) {
     return (
       <ResidentLoginGate
         houses={houses}
@@ -741,7 +717,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
         greeting={greeting}
         handleLogout={handleLogout}
         setActiveTab={setActiveTab}
-        setIsVotingModalOpen={setIsVotingModalOpen}
         setIsReportModalOpen={setIsReportModalOpen}
         setIsIuranModalOpen={setIsIuranModalOpen}
         activeTab={activeTab}
@@ -861,30 +836,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           />
         )}
 
-        {activeTab === 'skills' && (
-          <ResidentSkillsTab
-            communitySkills={communitySkills}
-            currentHouse={currentHouse}
-            onOpenAddSkillModal={() => {
-              setSkillForm({
-                category: 'Pertukangan & Bangunan',
-                title: '',
-                description: '',
-                phone: currentHouse?.phone || '',
-                rateInfo: ''
-              });
-              setIsAddSkillModalOpen(true);
-            }}
-          />
-        )}
-
-        {activeTab === 'outages' && (
-          <ResidentOutagesTab
-            utilityOutages={utilityOutages}
-            onOpenOutageModal={() => setIsOutageModalOpen(true)}
-          />
-        )}
-
         {activeTab === 'stbm' && (
           <ResidentStbmTab
             currentHouse={currentHouse}
@@ -901,15 +852,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
       </AnimatePresence>
 
       {/* Modals */}
-      <ResidentSkillModal
-        isOpen={isAddSkillModalOpen}
-        onClose={() => setIsAddSkillModalOpen(false)}
-        skillForm={skillForm}
-        setSkillForm={setSkillForm}
-        currentHouse={currentHouse}
-        selectedHouseId={selectedHouseId}
-      />
-
       <ResidentIuranModal
         isOpen={isIuranModalOpen}
         onClose={() => setIsIuranModalOpen(false)}
@@ -954,13 +896,6 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
           isSubmittingWater={isSubmittingWater}
         />
       )}
-
-      {/* Utility Outage Tracker Modal */}
-      <UtilityOutageTrackerModal 
-        isOpen={isOutageModalOpen}
-        onClose={() => setIsOutageModalOpen(false)}
-        outages={utilityOutages}
-      />
     </div>
   );
 };

@@ -697,22 +697,13 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
 
     const formattedMutationHouseId = formatHouseId(mutationHouseId);
     
-    // Check Waste Retribution (Mandatory in Palu City)
+    // Check Waste Retribution (Informative reminder without blocking citizen mutation reports)
     const retribution = await checkWasteRetribution(formattedMutationHouseId);
     if (!retribution.paid) {
-      if (retribution.isMandatory) {
-        toast.warning("PELAPORAN DITANGGUHKAN", {
-          description: `Pembayaran Retribusi Sampah & Air untuk bulan ${retribution.month} belum tercatat. Sesuai peraturan, iuran wajib dilunasi paling lambat tanggal 20 setiap bulannya. Silakan hubungi petugas atau Ketua RT.`,
-          duration: 10000
-        });
-        return;
-      } else {
-        // Information only, not blocking
-        toast.info("INFORMASI TAGIHAN", {
-          description: `Tagihan Sampah & Air bulan ${retribution.month} sudah tersedia. Batas pelunasan adalah tanggal 20. Mohon segera melakukan pembayaran agar tidak menghambat pelaporan di akhir bulan.`,
-          duration: 8000
-        });
-      }
+      toast.info("INFORMASI IURAN LINGKUNGAN", {
+        description: `Tagihan Iuran Sampah & Air untuk bulan ${retribution.month || 'berjalan'} belum tercatat. Laporan mutasi Anda tetap diproses. Mohon luangkan waktu untuk menyelesaikan iuran lingkungan.`,
+        duration: 8000
+      });
     }
 
     const mutationData = {

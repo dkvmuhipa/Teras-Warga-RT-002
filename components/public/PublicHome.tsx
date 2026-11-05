@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Calendar, ChevronRight, ArrowRight, ShieldCheck, 
-  BookOpen, Scale, Zap
+  BookOpen, Scale, Zap, MapPin, Home
 } from 'lucide-react';
 import { 
   House, Announcement, Report, Official, RondaSchedule, 
@@ -12,7 +12,6 @@ import {
 import { HeroSection } from '../HeroSection';
 import { DigitalSummary } from './DigitalSummary';
 import { ServiceStats } from '../ServiceStats';
-import { HouseMap } from '../HouseMap';
 import { SmartImage } from '../SmartImage';
 import { useFinancial } from '../../context/FinancialContext';
 import { useTenant } from '../../context/TenantContext';
@@ -23,7 +22,6 @@ import { UtilityOutageTrackerModal } from './UtilityOutageTrackerModal';
 import { QuickActionsGrid } from './home/QuickActionsGrid';
 import { HouseBillChecker } from './home/HouseBillChecker';
 import { WasteCleanlinessWidget } from './home/WasteCleanlinessWidget';
-import { SpotlightAgenda } from './home/SpotlightAgenda';
 import { AnnouncementsFeed } from './home/AnnouncementsFeed';
 import { NightPatrolWidget } from './home/NightPatrolWidget';
 import { QuickReportModal } from './home/QuickReportModal';
@@ -43,7 +41,7 @@ interface PublicHomeProps {
 }
 
 export const PublicHome: React.FC<PublicHomeProps> = ({ 
-  houses, announcements, ronda, reports, letters, officials, gallery, activePatrol, mapPoints
+  houses, announcements, ronda, reports, letters, gallery, activePatrol
 }) => {
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement>(null);
@@ -85,6 +83,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
   };
 
   const activeOutage = utilityOutages.find(o => o.status === 'Ongoing');
+  const occupiedCount = houses.filter(h => h.status === 'Occupied').length;
 
   return (
     <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-4 sm:py-6 md:py-8 space-y-8 sm:space-y-10 mb-20 relative">
@@ -173,7 +172,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         </div>
       </div>
 
-      {/* 1. Quick Actions - Layanan Warga Terpadu Grid */}
+      {/* 1. Quick Actions - Layanan Warga Terpadu Grid (12 Inti) */}
       <QuickActionsGrid 
         onOpenReport={() => setIsReportModalOpen(true)}
         onOpenSkills={() => setIsSkillsModalOpen(true)}
@@ -288,24 +287,43 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         />
       </div>
 
-      {/* 7. Interactive Map Section */}
-      <div className="w-full bg-white/70 backdrop-blur-md p-3.5 rounded-[2.5rem] shadow-sm border border-slate-200/80">
-        <HouseMap 
-          houses={houses} 
-          isAdmin={false} 
-          reports={reports} 
-          officials={officials} 
-          mapPoints={mapPoints}
-          onReportHouse={(house: House) => navigate(`/services?tab=lapor&houseId=${house.id}`)} 
-        />
+      {/* 7. Compact Peta Wilayah & Mitigasi Gateway (Replaces Heavy Full Map Render on Home) */}
+      <div 
+        onClick={() => navigate('/peta')}
+        className="w-full cursor-pointer bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-900 text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xs hover:border-indigo-500/40 transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group"
+      >
+        <div className="flex items-start sm:items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 flex items-center justify-center shrink-0">
+            <MapPin size={26} />
+          </div>
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-[10px] font-bold uppercase tracking-wider">
+                Digital Twin RT 02
+              </span>
+              <span className="text-xs font-mono tabular-nums text-slate-400">
+                <Home size={12} className="inline mr-1 text-emerald-400" />
+                {occupiedCount} / {houses.length} Unit Dihuni (Blok C5–C12)
+              </span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+              Peta Interaktif Wilayah &amp; Mitigasi Kawasan
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-2xl">
+              Telusuri denah kavling rumah Blok C5–C12, titik pos siskamling, hidran darurat, jalur evakuasi bencana, serta pantauan gempa BMKG secara langsung.
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="w-full md:w-auto shrink-0 px-5 py-3 bg-indigo-600 group-hover:bg-indigo-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm"
+        >
+          <span>Buka Peta Kawasan</span>
+          <ArrowRight size={15} />
+        </button>
       </div>
 
-      {/* 8. Spotlight Agenda Terdekat */}
-      <div>
-        <SpotlightAgenda announcements={announcements} />
-      </div>
-
-      {/* 9. Warta Warga & Night Patrol Feed */}
+      {/* 8. Warta Warga & Night Patrol Feed */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         <div className="lg:col-span-2">
           <AnnouncementsFeed announcements={announcements} />
@@ -316,7 +334,7 @@ export const PublicHome: React.FC<PublicHomeProps> = ({
         </div>
       </div>
 
-      {/* 10. Gallery Warga */}
+      {/* 9. Gallery Warga */}
       <div className="bg-white/90 backdrop-blur-md p-5 sm:p-7 md:p-8 rounded-3xl border border-slate-200/80 shadow-xs">
         <div className="flex items-center justify-between mb-6 px-1">
           <h3 className="text-lg font-bold text-slate-900 tracking-tight">Galeri <span className="text-indigo-600">Warga</span></h3>

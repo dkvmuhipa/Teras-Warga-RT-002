@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
-  User, ChevronDown, LayoutGrid, Wallet, Users, Info, Download, X, Smartphone, Sparkles, HelpCircle,
-  FileText, AlertTriangle, Home, ShoppingBag, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, Package, ShieldAlert, UserPlus, Menu, Wrench, Zap, MapPin, Building, History, Heart, ShieldCheck, Building2
+  User, ChevronDown, LayoutGrid, Wallet, Users, Info, X, Sparkles, HelpCircle,
+  FileText, AlertTriangle, Home, Trash2, Store, LineChart, Scale, Activity, Calendar, BookOpen, ShieldAlert, UserPlus, Menu, MapPin, Building, History, Heart, ShieldCheck, Building2
 } from 'lucide-react';
-import { RT_NAME, Logo } from '../constants';
-import { Button } from './ui/Button';
+import { Logo } from '../constants';
 import { NotificationCenter } from './NotificationCenter';
-import { TenantSwitcher } from './TenantSwitcher';
-import { useTenant } from '../context/TenantContext';
 import { AppNotification } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -20,7 +17,6 @@ interface PublicHeaderProps {
 }
 
 export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMarkRead, onDeleteNotification, onDeleteAllNotifications }) => {
-  const { currentTenant } = useTenant();
   const navigate = useNavigate();
   const location = useLocation();
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -87,14 +83,14 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
         note: 'RT 002 / RW 020'
       },
       items: [
+        { path: '/info', label: 'Info Kas & Transparansi', desc: 'Transparansi saldo kas, iuran, siskamling & utilitas', icon: LineChart, color: 'text-sky-600 bg-sky-50/80 border-sky-150' },
         { path: '/dokumen', label: 'Pusat Arsip & Dokumen', desc: 'SK resmi kepengurusan, edaran publik & blangko formulir', icon: FileText, color: 'text-indigo-600 bg-indigo-50/80 border-indigo-150' },
-        { path: '/info', label: 'Info Kas & Transparansi', desc: 'Transparansi saldo kas, agenda & utilitas umum', icon: LineChart, color: 'text-sky-600 bg-sky-50/80 border-sky-150' },
         { path: '/rules', label: 'Peraturan RT 02', desc: 'Tata tertib resmi bermukim di Huntap Tondo 2', icon: Scale, color: 'text-slate-700 bg-slate-50/80 border-slate-150' },
         { path: '/peta', label: 'Peta Wilayah & Mitigasi', desc: 'Denah kavling hunian, jalur evakuasi & live BMKG', icon: MapPin, color: 'text-rose-600 bg-rose-50/80 border-rose-150' },
         { path: '/kegiatan', label: 'Jadwal Agenda', desc: 'Kalender kerja bakti, siskamling & pertemuan', icon: Calendar, color: 'text-emerald-600 bg-emerald-50/80 border-emerald-150' },
-        { path: '/about', label: 'Tentang Kami', desc: 'Sejarah, struktur kepengurusan RT & visi misi', icon: Building2, color: 'text-amber-600 bg-amber-50/80 border-amber-150' },
-        { path: '/faq', label: 'E-FAQ & Panduan', desc: 'Panduan mandiri penyelesaian kendala harian', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/80 border-violet-150' },
+        { path: '/about', label: 'Profil & Demografi RT', desc: 'Statistik kependudukan, struktur pengurus & visi misi', icon: Building2, color: 'text-amber-600 bg-amber-50/80 border-amber-150' },
         { path: '/welcome', label: 'Buku Saku Warga Baru', desc: 'Panduan adaptasi, kontak penting & aturan lingkungan', icon: BookOpen, color: 'text-indigo-600 bg-indigo-50/80 border-indigo-150' },
+        { path: '/faq', label: 'E-FAQ & Panduan', desc: 'Panduan mandiri penyelesaian kendala harian', icon: HelpCircle, color: 'text-violet-600 bg-violet-50/80 border-violet-150' },
       ]
     }
   ];
@@ -115,7 +111,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
               <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
                 <Logo showText={true} imageSize="h-8 md:h-10" />
               </div>
-              <TenantSwitcher variant="public" />
             </div>
             
             <div className="flex items-center gap-2">
@@ -282,15 +277,6 @@ export const PublicHeader: React.FC<PublicHeaderProps> = ({ notifications, onMar
                 transition={{ duration: 0.18, ease: "easeOut" }}
                 className="lg:hidden absolute left-0 right-0 top-full bg-white/98 backdrop-blur-2xl border-b border-slate-200 shadow-2xl z-[100] max-h-[calc(100dvh-5rem)] pb-12 sm:pb-6 overflow-y-auto p-4 sm:p-6"
               >
-                {/* Mobile Tenant Switcher banner */}
-                <div className="mb-4 p-3 bg-slate-50 border border-slate-200/90 rounded-2xl flex items-center justify-between">
-                  <div className="min-w-0 pr-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Wilayah RT Aktif</p>
-                    <p className="text-xs font-semibold text-slate-800 truncate">{currentTenant.name}</p>
-                  </div>
-                  <TenantSwitcher variant="compact" />
-                </div>
-
                 {/* Quick Home, Resident Portal & Admin Shortcuts */}
                 <div className="grid grid-cols-3 gap-2 mb-6">
                   <button
