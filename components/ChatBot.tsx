@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, X, Bot, User, Loader2, Sparkles, RefreshCw } from 'lucide-react';
+import { MessageSquare, Send, X, Bot, User, Loader2, Sparkles, RefreshCw, Sliders, Cpu, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { askRit } from '../services/geminiService';
+import { getLocalAiStatus, getOllamaConfig, setOllamaConfig, LocalAiStatus } from '../services/localAiService';
 import { Announcement, RondaSchedule, Official, House, CashFlow, Report } from '../types';
 import { RT_NAME } from '../constants';
 
@@ -45,7 +46,30 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
     }
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const [showAiConfig, setShowAiConfig] = useState(false);
+  const [aiStatus, setAiStatus] = useState<LocalAiStatus | null>(null);
+  const [ollamaUrlInput, setOllamaUrlInput] = useState(() => getOllamaConfig().url);
+  const [ollamaModelInput, setOllamaModelInput] = useState(() => getOllamaConfig().model);
+  const [configSaved, setConfigSaved] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      getLocalAiStatus().then(setAiStatus).catch(() => {});
+    }
+  }, [isOpen]);
+
+  const handleSaveOllamaConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setOllamaConfig(ollamaUrlInput, ollamaModelInput);
+    const updated = await getLocalAiStatus();
+    setAiStatus(updated);
+    setConfigSaved(true);
+    setTimeout(() => {
+      setConfigSaved(false);
+      setShowAiConfig(false);
+    }, 1200);
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -175,16 +199,15 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
 
   return (
     <>
-      {/* Trigger floating button with unread beacon */}
+      {/* Trigger floating button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-20 right-4 md:bottom-10 md:right-10 z-[60] p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center border-2 border-white/80 ${
+        className={`fixed bottom-20 right-4 md:bottom-10 md:right-10 z-[60] p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 flex items-center justify-center border-2 border-white/80 cursor-pointer ${
           isOpen 
             ? 'bg-slate-900 text-white shadow-slate-900/40 rotate-180' 
-            : 'bg-gradient-to-r from-indigo-600 via-sky-600 to-cyan-500 text-white hover:shadow-indigo-500/50 animate-pulse'
+            : 'bg-gradient-to-r from-indigo-600 via-sky-600 to-cyan-500 text-white hover:shadow-indigo-500/50'
         }`}
-        style={{ animationDuration: '3s' }}
-        aria-label="Tanya Asisten AI"
+        aria-label="Tanya Asisten AI Lokal"
       >
         {isOpen ? (
           <X size={26} />
@@ -192,7 +215,6 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
           <div className="relative flex items-center justify-center">
             <MessageSquare size={24} fill="currentColor" />
             <span className="absolute -top-1.5 -right-1.5 flex h-3.5 w-3.5">
-              <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border border-white"></span>
             </span>
           </div>
@@ -210,30 +232,37 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
             className="fixed bottom-22 sm:bottom-24 right-3 sm:right-6 md:bottom-28 md:right-10 z-[95] w-[calc(100vw-1.5rem)] sm:w-[380px] max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col"
             style={{ height: '520px', maxHeight: 'calc(100dvh - 7rem)' }}
           >
-            {/* Header branding with online dots */}
+            {/* Header branding with Local AI Engine status */}
             <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-cyan-500 p-4 shrink-0 flex items-center justify-between text-white shadow-md relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
               
-              <div className="flex items-center gap-3 z-10">
-                <div className="bg-white/10 p-2.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner flex items-center justify-center">
-                  <Bot size={22} className="text-white animate-pulse" />
+              <div className="flex items-center gap-3 z-10 min-w-0">
+                <div className="bg-white/10 p-2.5 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner flex items-center justify-center shrink-0">
+                  <Bot size={22} className="text-white" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h3 className="font-extrabold text-[14px] tracking-wide text-white">Rit - Asisten Cerdas</h3>
-                    <span className="bg-white/25 text-[9px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5 scale-90">
-                      <Sparkles size={8} className="text-amber-300 animate-spin" style={{ animationDuration: '6s' }} /> AI
+                    <h3 className="font-extrabold text-[14px] tracking-wide text-white truncate">Rit - Asisten AI Lokal</h3>
+                    <span className="bg-white/25 text-[9px] px-1.5 py-0.5 rounded-full font-bold flex items-center gap-0.5 shrink-0">
+                      <Cpu size={9} className="text-amber-300" /> LOKAL
                     </span>
                   </div>
-                  <p className="text-[10px] text-sky-100 flex items-center gap-1 font-medium mt-0.5">
-                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_5px_#34d399]"></span>
-                    Aktif Melayani Warga
+                  <p className="text-[10px] text-sky-100 flex items-center gap-1 font-medium mt-0.5 truncate">
+                    <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full shrink-0"></span>
+                    <span className="truncate">{aiStatus ? `${aiStatus.label} (${aiStatus.modelName})` : 'AI Lokal: RAG Data RT Real-Time'}</span>
                   </p>
                 </div>
               </div>
 
-              {/* Utility reset action button */}
-              <div className="flex items-center gap-1 z-10">
+              {/* Utility config & reset action buttons */}
+              <div className="flex items-center gap-1 z-10 shrink-0">
+                <button
+                  onClick={() => setShowAiConfig(!showAiConfig)}
+                  title="Pengaturan Mesin AI Lokal (Ollama / Chrome AI)"
+                  className={`p-2 rounded-xl hover:bg-white/10 active:scale-95 transition-all text-white/95 cursor-pointer ${showAiConfig ? 'bg-white/20' : ''}`}
+                >
+                  <Sliders size={15} />
+                </button>
                 <button
                   onClick={handleResetChat}
                   title="Segarkan Chat"
@@ -249,6 +278,54 @@ export const ChatBot: React.FC<ChatBotProps> = ({ announcements, ronda, official
                 </button>
               </div>
             </div>
+
+            {/* Collapsible Local AI Engine Configuration Panel */}
+            {showAiConfig && (
+              <form onSubmit={handleSaveOllamaConfig} className="p-3.5 bg-slate-900 text-white border-b border-slate-800 space-y-2.5 text-xs shrink-0">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-amber-300 flex items-center gap-1.5 text-[11px]">
+                    <Cpu size={13} /> Mesin Hybrid AI Lokal (3-Lapis)
+                  </span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    100% Tanpa Biaya API
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  Otomatis memakai <strong>TerasRAG Live Data</strong> (0 MB, semua HP warga), <strong>Chrome Gemini Nano</strong>, atau <strong>Ollama Lokal</strong> jika aktif.
+                </p>
+                <div className="grid grid-cols-1 gap-2 pt-1">
+                  <div>
+                    <label className="text-[10px] text-slate-400 font-bold block mb-0.5">Endpoint Ollama Lokal (Opsional):</label>
+                    <input
+                      type="text"
+                      value={ollamaUrlInput}
+                      onChange={(e) => setOllamaUrlInput(e.target.value)}
+                      placeholder="http://localhost:11434"
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white font-mono text-[11px] focus:outline-none focus:border-sky-400"
+                    />
+                  </div>
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <label className="text-[10px] text-slate-400 font-bold block mb-0.5">Model Ollama:</label>
+                      <input
+                        type="text"
+                        value={ollamaModelInput}
+                        onChange={(e) => setOllamaModelInput(e.target.value)}
+                        placeholder="qwen2.5:3b"
+                        className="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white font-mono text-[11px] focus:outline-none focus:border-sky-400"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-[11px] flex items-center gap-1 cursor-pointer shrink-0"
+                    >
+                      {configSaved ? <Check size={12} /> : null}
+                      <span>{configSaved ? 'Tersimpan' : 'Uji & Simpan'}</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
 
             {/* Chat Body messages area */}
             <div className="flex-1 overflow-y-auto p-4 bg-slate-50/50 space-y-4 custom-scrollbar">
