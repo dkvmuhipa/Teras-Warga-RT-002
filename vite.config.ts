@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => {
       VitePWA({
         registerType: 'prompt',
         injectRegister: 'script',
-        includeAssets: ['logo-rt.svg', 'robots.txt', 'sitemap.xml', 'firebase-messaging-sw.js'],
+        includeAssets: ['logo-rt.svg', 'robots.txt', 'sitemap.xml', 'llms.txt', 'firebase-messaging-sw.js'],
         workbox: {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
           globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],

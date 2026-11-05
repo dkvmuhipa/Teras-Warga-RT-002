@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
-import { AlertTriangle, Loader2, Home, FileText, MapPin, Phone, Clock, ShieldCheck, Compass } from 'lucide-react';
+import { AlertTriangle, Loader2, Home, FileText, MapPin, Phone, Clock, ShieldCheck, Compass, Share2 } from 'lucide-react';
+import { CAMPAIGN_ROUTE_MAP, sharePortalSocial } from './src/utils/shareUtils';
 
 // Destructure React Router DOM components
 const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams, Navigate } = ReactRouterDOM;
@@ -88,6 +89,25 @@ const ROUTE_SEO_META: Record<string, { title: string; description: string; noind
 
 const ScrollToTop: React.FC<{ onPathChange?: (path: string) => void }> = ({ onPathChange }) => {
   const { pathname, hash } = useLocation();
+  const navigate = useNavigate();
+
+  // SEM & QR Code Clean Landing Parameter Redirect (?go=surat, ?go=umkm, ?target=peta, etc.)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const goTarget = (params.get('go') || params.get('target') || params.get('menu') || '').toLowerCase().trim();
+    if (goTarget && CAMPAIGN_ROUTE_MAP[goTarget]) {
+      const targetRoute = CAMPAIGN_ROUTE_MAP[goTarget];
+      // Clean ?go= from query string while preserving hash navigation
+      params.delete('go');
+      params.delete('target');
+      params.delete('menu');
+      const remainingSearch = params.toString();
+      const cleanUrl = `${window.location.pathname}${remainingSearch ? `?${remainingSearch}` : ''}#${targetRoute}`;
+      window.history.replaceState(null, '', cleanUrl);
+      navigate(targetRoute, { replace: true });
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const cleanPath = pathname === '' ? '/' : pathname;
@@ -923,18 +943,38 @@ return (
                                             <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-900 font-mono">
                                                 Sekretariat RT 002
                                             </h4>
-                                            <p className="flex items-start gap-2">
+                                            <a
+                                                href="https://www.google.com/maps?q=-0.851176,119.904426"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-start gap-2 hover:text-indigo-600 transition-colors"
+                                            >
                                                 <MapPin size={14} className="text-rose-500 shrink-0 mt-0.5" />
-                                                <span>Blok C10 No. 8, Huntap Tondo 2, Kel. Tondo, Kota Palu</span>
-                                            </p>
-                                            <p className="flex items-center gap-2 font-mono">
+                                                <span>Jl. Pue Lombe Blok C10 No. 8, Huntap Tondo 2, Kel. Tondo, Kota Palu</span>
+                                            </a>
+                                            <a
+                                                href="https://wa.me/6285961194621"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 font-mono hover:text-emerald-600 transition-colors"
+                                            >
                                                 <Phone size={14} className="text-emerald-600 shrink-0" />
-                                                <span>+62 822-9333-2802</span>
-                                            </p>
+                                                <span>+62 859-6119-4621 (Bpk. Irfan Arianto)</span>
+                                            </a>
                                             <p className="flex items-center gap-2">
                                                 <Clock size={14} className="text-indigo-600 shrink-0" />
                                                 <span>Senin – Jumat, 19.00 – 21.00 WITA</span>
                                             </p>
+                                            <div className="pt-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => sharePortalSocial('beranda')}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 text-[11px] font-bold transition-colors cursor-pointer"
+                                                >
+                                                    <Share2 size={13} />
+                                                    <span>Bagikan Portal ke WhatsApp</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 

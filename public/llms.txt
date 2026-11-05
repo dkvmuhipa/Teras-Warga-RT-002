@@ -1,0 +1,36 @@
+# TERAS Warga RT 002 / RW 020 — Huntap Tondo 2, Kota Palu
+
+> Portal Resmi Sistem Informasi Pelayanan Mandiri, Administrasi Kependudukan, Transparansi Keuangan, Keamanan Siskamling, Bank Sampah, UMKM Warga, dan Mitigasi Bencana Rukun Tetangga 002 / Rukun Warga 020 (RT 002 / RW 020), Kawasan Hunian Tetap (Huntap) Tondo 2, Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu, Provinsi Sulawesi Tengah, Indonesia.
+
+## Identitas & Lokasi Wilayah
+- **Nama Resmi:** Rukun Tetangga 002 / Rukun Warga 020 (RT 002 / RW 020) Huntap Tondo 2
+- **Nama Platform:** TERAS Warga RT 002 (Teknologi, Ekonomi Kreatif, Rukun, Aman, Sinergi)
+- **Alamat Sekretariat:** Jl. Pue Lombe Blok C10 No. 8, Kawasan Hunian Tetap (Huntap) Tondo 2, RT 002 / RW 020, Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu, Sulawesi Tengah 94119
+- **Koordinat Geografis:** `-0.851176, 119.904426` ([Buka di Google Maps](https://www.google.com/maps?q=-0.851176,119.904426))
+- **Cakupan Blok Hunian:** Blok C5, Blok C6, Blok C7, Blok C8, Blok C9, Blok C10, Blok C11, dan Blok C12
+- **Ketua RT 002:** Bpk. Irfan Arianto (Blok C10 No. 8)
+- **Kontak Resmi / WhatsApp Sekretariat:** +62 859-6119-4621
+- **Zona Waktu:** WITA (Waktu Indonesia Tengah / UTC+8)
+- **URL Portal Produksi:** https://terasrt02.vercel.app/
+
+## Jadwal & Ketentuan Utama Lingkungan RT 002
+- **Pengangkutan Sampah Rumah Tangga:** Rutin setiap hari **Selasa dan Sabtu** pukul 06:00 – 10:00 WITA.
+- **Bank Sampah Digital RT 002:** Penimbangan dan tabungan sampah anorganik terpilah setiap hari Sabtu pagi pukul 08:00 – 11:30 WITA.
+- **Siskamling / Ronda Malam:** Bergilir setiap malam pukul 22:00 – 04:00 WITA sesuai jadwal blok. Warga yang berhalangan wajib konfirmasi H-1 / tukar jadwal di aplikasi atau kontribusi kas keamanan Rp 50.000.
+- **Wajib Lapor Tamu Menginap:** Tamu luar yang menginap lebih dari **1x24 jam** wajib dilaporkan secara digital melalui menu Lapor Tamu.
+- **Pendaftaran Warga Baru / Kontrakan:** Warga baru atau penyewa rumah wajib melapor maksimal **3x24 jam** sejak menempati hunian.
+- **Pembayaran Iuran Bulanan:** Dibayarkan secara tunai melalui Bendahara RT 002 disertai bukti kuitansi PDF resmi ber-QR Code dari sistem Teras Warga.
+
+## Direktori Layanan & Tautan Portal Publik
+- [Beranda Utama](https://terasrt02.vercel.app/): Ringkasan layanan cepat, pengumuman terbaru, cuaca lokal Tondo, dan statistik hunian.
+- [Layanan Persuratan & Pengaduan Online](https://terasrt02.vercel.app/#/services) (`?go=surat`): Pengajuan surat pengantar RT (KTP, KK, Domisili, SKTM, Usaha, Kematian), pelaporan keluhan fasilitas, dan lapor tamu menginap 1x24 jam.
+- [Pusat Informasi, Transparansi Kas & Siskamling](https://terasrt02.vercel.app/#/info) (`?go=info`): Laporan arus kas masuk/keluar real-time, jadwal ronda malam, agenda warga, dan papan pengumuman.
+- [Peta Blok Interaktif, Jalur Evakuasi & Monitor Gempa BMKG](https://terasrt02.vercel.app/#/peta) (`?go=peta`): Peta geospasial kavling Blok C5–C12, titik kumpul evakuasi, dan pantauan seismik Sesar Palu-Koro dari BMKG.
+- [Profil Resmi & Struktur Pengurus RT 002](https://terasrt02.vercel.app/#/about) (`?go=tentang`): Visi-misi TERAS, statistik demografi warga, struktur pengurus RT 002, dan peta Sekretariat Blok C10 No. 8.
+- [Peraturan Lingkungan & Arsip Notula Musyawarah](https://terasrt02.vercel.app/#/rules) (`?go=aturan`): Tata tertib ketertiban umum, keamanan, kebersihan, penghuni kontrakan, serta arsip keputusan musyawarah warga.
+- [Pasar UMKM & Direktori Jasa Warga](https://terasrt02.vercel.app/#/umkm) (`?go=umkm`): Katalog usaha kuliner, warung, dan keahlian jasa warga RT 002 dengan pemesanan langsung via WhatsApp.
+- [Bank Sampah Digital](https://terasrt02.vercel.app/#/sampah) (`?go=sampah`): Daftar harga sampah daur ulang dan buku tabungan sampah warga.
+- [Posyandu & Kesehatan Lingkungan](https://terasrt02.vercel.app/#/kesehatan) (`?go=kesehatan`): Jadwal Posyandu Balita, Posbindu Lansia, dan edukasi kesehatan keluarga.
+- [Donasi & Solidaritas Sosial Warga](https://terasrt02.vercel.app/#/donasi) (`?go=donasi`): Penggalangan dana sosial, santunan duka, dan gotong royong pembangunan fasilitas RT 002.
+- [Tanya Jawab / FAQ Layanan RT 002](https://terasrt02.vercel.app/#/faq) (`?go=faq`): Panduan lengkap administrasi surat, iuran, keamanan, dan fasilitas umum.
+- [Buku Saku Warga Baru (Welcome Kit)](https://terasrt02.vercel.app/#/welcome) (`?go=panduan`): Panduan orientasi lengkap bagi warga baru di lingkungan RT 002 Huntap Tondo 2.
