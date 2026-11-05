@@ -131,6 +131,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
+            if (id.includes('vite/preload-helper') || id.includes('commonjsHelpers')) return 'vendor';
             if (id.includes('node_modules')) {
               if (id.includes('firebase')) return 'firebase';
               if (id.includes('recharts') || id.includes('d3')) return 'charts';

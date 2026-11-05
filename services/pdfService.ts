@@ -7,7 +7,7 @@ import { LetterRequest, PdfConfig, House, PaymentStatus, Report, PopulationRepor
 import { DEFAULT_PDF_CONFIG } from "../constants";
 import { getActivePdfConfig } from "./tenantService";
 import { isMonthMatch, getIndonesianMonthYear } from "../src/utils/dateUtils";
-import { naturalSortBlockAndNumber } from "./excelService";
+import { naturalSortBlockAndNumber } from "../src/utils/driveAndSortUtils";
 
 // Override jsPDF setFont prototype to replace "times" with "helvetica" for a clean, modern look
 const originalSetFont = jsPDF.prototype.setFont;
@@ -6013,7 +6013,7 @@ export const generateSocialAidHandoverPDF = async (aid: SocialAidItem, customCon
     const blockB = parseCode(b.block || '');
     if (blockA.letter !== blockB.letter) return blockA.letter.localeCompare(blockB.letter);
     if (blockA.num !== blockB.num) return blockA.num - blockB.num;
-    return (a.number || 0) - (b.number || 0);
+    return (Number(a.number) || 0) - (Number(b.number) || 0);
   });
 
   const tableBody = sortedRecipients.map((r, idx) => {

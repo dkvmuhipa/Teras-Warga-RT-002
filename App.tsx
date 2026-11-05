@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
+import { Toaster, toast } from 'sonner';
 import { AlertTriangle, Loader2, Home, FileText, MapPin, Phone, Clock, ShieldCheck, Compass } from 'lucide-react';
 
 // Destructure React Router DOM components
@@ -816,13 +817,9 @@ return (
                                         officials={officials} 
                                         houses={houses} 
                                         umkm={umkm} 
-                                        ronda={ronda} 
                                         cashFlow={cashFlow} 
                                         reports={reports}
                                         letters={letters}
-                                        inventory={inventory}
-                                        events={events}
-                                                                                donationCampaigns={donationCampaigns}
                                     />
                                 } />
                                 {/* Route Aliases */}

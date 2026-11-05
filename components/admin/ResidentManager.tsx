@@ -1677,7 +1677,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     
     if (message) {
       try {
-        const result = await sendWhatsAppViaGateway(house.phone, message);
+        const result = await sendWhatsAppViaGateway(house.phone || '', message);
         if (result?.success) {
           toast.success(`Pesan berhasil dikirim ke ${house.headOfFamily}`);
         } else {

@@ -66,11 +66,11 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
     const members = house.familyMembers || [];
     const hasElderly = members.some(m => {
       const age = calculateAge(m.birthDate);
-      return age >= 60 || m.familyRelation === 'Orang Tua' || m.familyRelation === 'Mertua';
+      return age >= 60 || m.relation === 'Orang Tua' || m.relation === 'Mertua';
     });
     const hasToddler = members.some(m => {
       const age = calculateAge(m.birthDate);
-      return (age > 0 && age <= 5) || m.familyRelation === 'Balita';
+      return age > 0 && age <= 5;
     });
     const aidReceivedCount = aidPrograms.filter(prog => 
       prog.recipients?.some(r => r.houseId === house.id && r.status === 'Diterima')
@@ -103,7 +103,7 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
         const blockB = parseCode(b.block);
         if (blockA.letter !== blockB.letter) return blockA.letter.localeCompare(blockB.letter);
         if (blockA.num !== blockB.num) return blockA.num - blockB.num;
-        return (a.number || 0) - (b.number || 0);
+        return (Number(a.number) || 0) - (Number(b.number) || 0);
       });
   }, [houses]);
 

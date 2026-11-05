@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ImageIcon, FileText, Loader2, ExternalLink, ZoomIn, ZoomOut, RotateCw, Download, Copy, Check, X, Maximize2, Minimize2 } from 'lucide-react';
-import { getDriveThumbnail, getDriveId } from '../services/pdfService';
+import { getDriveThumbnail, getDriveId } from '../src/utils/driveAndSortUtils';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 

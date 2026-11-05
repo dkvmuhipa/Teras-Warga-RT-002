@@ -216,7 +216,7 @@ export interface OccupancyHistoryRecord {
   startDate: string;
   endDate?: string;
   headOfFamily: string;
-  residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
+  residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Rumah Kosong';
   occupantsCount: number;
   notes?: string;
   movedReason?: 'Pindah Keluar' | 'Beli Rumah Baru' | 'Sewa Selesai' | 'Lainnya';
@@ -232,7 +232,7 @@ export interface House {
   birthDate?: string;
   occupants: number;
   status: 'Occupied' | 'Empty' | 'Business' | 'Visiting';
-  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga'; // NEW: Status Kepenghunian (Tetap, Sewa, Rumah Keluarga)
+  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Rumah Kosong'; // NEW: Status Kepenghunian (Tetap, Sewa, Rumah Keluarga, Rumah Kosong)
   ownerName?: string; // NEW: Nama Pemilik Rumah (jika berbeda dengan penghuni)
   ownerPhone?: string; // NEW: Kontak Pemilik Rumah
   ownerAddress?: string; // NEW: Alamat Pemilik Rumah
@@ -390,7 +390,7 @@ export interface OccupantHistoryItem {
   kkNumber?: string;
   phone?: string;
   occupants?: number;
-  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
+  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Rumah Kosong';
   startDate?: string;
   endDate: string;
   moveOutReason: 'Pindah Keluar (Tanpa Pamit)' | 'Pindah Keluar (Resmi)' | 'Selesai Kontrak/Sewa' | 'Pindah Rumah Lain' | 'Lainnya';
@@ -422,7 +422,7 @@ export interface ResidentRegistration {
   number: string;
   phone: string;
   status: 'Occupied' | 'Empty' | 'Business' | 'Visiting';
-  residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
+  residenceType: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Rumah Kosong';
   occupants: number;
   kkNumber?: string;
   education?: string;
@@ -977,7 +977,7 @@ export interface PopulationChangeLog {
     reasonForMoving?: string;
     familyCount?: number;
     familyMembers?: { name: string; relationship: string; nik?: string }[];
-    residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
+    residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Rumah Kosong';
     religion?: string;
     vulnerability?: string[];
     kkNumber?: string;
@@ -1308,7 +1308,7 @@ export interface UpdateRequest {
   birthDate?: string;
   phone: string;
   occupants: number;
-  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga';
+  residenceType?: 'Tetap' | 'Sewa' | 'Rumah Keluarga' | 'Rumah Kosong';
   nik?: string;
   kkNumber?: string;
   maritalStatus?: 'Belum Kawin' | 'Kawin' | 'Cerai Hidup' | 'Cerai Mati';
@@ -1688,13 +1688,16 @@ export interface SocialAidRecipient {
   houseId: string; // e.g. "C10-08"
   headOfFamily: string; // e.g. "Ahmad Fauzi"
   block: string;
-  number: number;
+  number: number | string;
   phone?: string;
   isPraSejahtera?: boolean;
   isPKH?: boolean;
   isBLT?: boolean;
   isBPNT?: boolean;
   status: 'Menunggu' | 'Diterima';
+  paymentStatus?: 'Belum Bayar' | 'Lunas';
+  paidAt?: string;
+  paymentMethod?: 'Tunai' | 'QRIS' | 'Kas RT';
   receivedAt?: string; // ISO timestamp
   receivedBy?: string; // Nama pengambil
   notes?: string;
@@ -1704,7 +1707,7 @@ export interface SocialAidItem {
   id: string;
   tenantId?: string;
   title: string; // e.g. "Sembako Murah Dinas Perdagangan Kota Palu"
-  category: 'Sembako Murah' | 'Beras Bulog' | 'BLT / Tunai' | 'Nutrisi Balita & Lansia' | 'Kesehatan & Sanitasi' | 'Lainnya';
+  category: 'Sembako Murah' | 'Sembako Murah Pemda' | 'Beras Bulog' | 'Beras Pangan Bulog' | 'BLT / Tunai' | 'BLT / Bantuan Tunai' | 'Nutrisi Balita & Lansia' | 'Kesehatan & Sanitasi' | 'Bantuan CSR & Donatur' | 'Lainnya';
   source: string; // e.g. "Dinas Perindag Kota Palu", "Kelurahan Tondo / Bulog", "Kemensos RI"
   totalQuota: number;
   unit: string; // e.g. "Paket Dus", "Karung 10kg", "Kupon Sembako"

@@ -325,7 +325,7 @@ export const MOCK_FAQ: FAQItem[] = [
     id: '2', 
     category: 'lingkungan',
     question: 'Kapan jadwal pembuangan dan pengambilan sampah rutin dilakukan?', 
-    answer: 'Pengambilan sampah domestik rumah tangga non-B3 (sampah dapur/basah) dilakukan rutin setiap hari Senin, Rabu, dan Jumat pagi mulai jam 07:00 hingga 10:00 oleh petugas kebersihan dinas lingkungan hidup. Warga diimbau untuk membungkus sampah dengan rapat di dalam kantong plastik hitam tebal sebelum menaruhnya di tong sampah depan rumah masing-masing demi mencegah bau menyengat dan gangguan hewan liar.' 
+    answer: 'Pengambilan sampah domestik rumah tangga non-B3 (sampah dapur/basah) dilakukan rutin setiap hari Selasa dan Sabtu pagi mulai pukul 06:00 hingga 10:00 WITA oleh petugas kebersihan lingkungan RT 002. Warga diimbau untuk membungkus sampah dengan rapat di dalam kantong plastik sebelum menaruhnya di tempat sampah depan rumah masing-masing demi mencegah bau menyengat dan gangguan hewan liar.' 
   },
   { 
     id: '3', 
@@ -391,7 +391,7 @@ export const MOCK_FAQ: FAQItem[] = [
     id: '13', 
     category: 'keamanan',
     question: 'Bagaimana aturan dan konsekuensi jika warga berhalangan ikut ronda malam?', 
-    answer: 'Setiap warga laki-laki yang telah dewasa wajib mengikuti ronda malam sesuai jadwal bergilir yang ditentukan di menu "Keamanan & Ronda". Jika Anda berhalangan hadir karena urusan dinas ke luar kota, sakit, atau alasan krusial lainnya, Anda wajib mengajukan pertukaran jadwal (Swap Ronda) kepada warga lain melalui fitur "Tukar Jadwal" di aplikasi ini minimal 1 hari sebelumnya, atau membayar kontribusi pengganti sebesar Rp 25.000 ke kas ronda melalui Bendahara untuk mendukung dana konsumsi tim ronda malam.' 
+    answer: ' Setiap warga kepala keluarga / perwakilan rumah wajib mengikuti ronda malam (Siskamling) sesuai jadwal bergilir yang ditentukan di menu "Keamanan & Ronda". Jika Anda berhalangan hadir karena tugas dinas luar kota, sakit, atau alasan mendesak lainnya, Anda wajib mengonfirmasi ke Koordinator Keamanan dan mengajukan pertukaran jadwal (Swap Ronda) melalui aplikasi minimal 1 hari sebelumnya, atau dikenakan kontribusi pengganti sebesar Rp 50.000 ke kas keamanan RT 002 untuk operasional dan konsumsi regu ronda malam.' 
   },
   { 
     id: '14', 
@@ -403,7 +403,7 @@ export const MOCK_FAQ: FAQItem[] = [
     id: '15', 
     category: 'sosial',
     question: 'Bagaimana jadwal pelaksanaan Posyandu Balita serta Posbindu Lansia?', 
-    answer: 'Kegiatan Posyandu Terpadu untuk pemantauan tumbuh kembang Balita (timbang badan, imunisasi, PMT balon) serta Posbindu Lansia (cek tensi darah, gula darah, kolesterol, konsultasi kesehatan) diadakan secara serempak setiap bulan di hari Sabtu pekan kedua, bertempat di Gedung Balai Pertemuan RT 02 mulai pukul 08:30 - 13:00 WIB. Informasi pengingat secara berkala mengenai hal ini akan otomatis dikomunikasikan melalui notifikasi pengumuman dari aplikasi H-2 pelaksanaan.' 
+    answer: 'Kegiatan Posyandu Terpadu untuk pemantauan tumbuh kembang Balita (timbang badan, imunisasi, PMT balita) serta Posbindu Lansia (cek tensi darah, gula darah, kolesterol, konsultasi kesehatan) diadakan secara rutin setiap bulan bertempat di Pos Pelayanan Terpadu / Sekretariat RT 002 mulai pukul 08:30 - 12:00 WITA. Informasi pengingat jadwal pelaksanaan akan diumumkan melalui papan informasi digital aplikasi dan grup WhatsApp warga H-2 pelaksanaan.' 
   },
   { 
     id: '16', 

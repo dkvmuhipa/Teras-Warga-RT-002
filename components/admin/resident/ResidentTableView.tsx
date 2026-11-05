@@ -25,7 +25,8 @@ import {
   Hash,
   Coins,
   Search,
-  CheckCircle2
+  CheckCircle2,
+  Home
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
