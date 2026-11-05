@@ -13,7 +13,7 @@ import {
   deleteTenantInMemory,
   syncTenantsFromRemote
 } from '../services/tenantService';
-import { setActiveTenantScope, addTenantToDb, updateTenantInDb, deleteTenantFromDb, subscribeToTenants } from '../services/databaseService';
+import { setActiveTenantScope, addTenantToDb, updateTenantInDb, deleteTenantFromDb, subscribeToTenants, setSupervisionReadOnlyMode, checkIsPlatformAdminInDb } from '../services/databaseService';
 import { auth, db } from '../services/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -30,9 +30,12 @@ const resolveInitialTenant = (): Tenant => {
   }
 
   try {
-    // 1. Check URL Search Params (?rt=rt02-tondo or ?tenant=tondo-rw20-rt02)
+    // 1. Check URL Search Params (?rt=rt02-tondo or ?tenant=tondo-rw20-rt02) OR Hash Query Params (#/?rt=...)
     const urlParams = new URLSearchParams(window.location.search);
-    const rtParam = urlParams.get('rt') || urlParams.get('tenant');
+    const hashStr = window.location.hash || '';
+    const hashQueryIdx = hashStr.indexOf('?');
+    const hashParams = hashQueryIdx !== -1 ? new URLSearchParams(hashStr.slice(hashQueryIdx + 1).split('#')[0]) : null;
+    const rtParam = urlParams.get('rt') || urlParams.get('tenant') || hashParams?.get('rt') || hashParams?.get('tenant');
     if (rtParam) {
       const bySlug = getTenantBySlug(rtParam);
       if (bySlug) resolved = bySlug;
@@ -73,10 +76,16 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [allLoadedTenants, setAllLoadedTenants] = useState<Tenant[]>(() => getAllTenants());
   const [isSuperAdmin, setIsSuperAdmin] = useState<boolean>(() => isSuperAdminEmail(auth.currentUser?.email));
 
-  // Sync auth state with Super Admin privileges
+  // Sync auth state with Super Admin privileges (including Dynamic RBAC in Firestore platform_admins)
   useEffect(() => {
     const unsubAuth = onAuthStateChanged(auth, async (user) => {
-      const superStatus = isSuperAdminEmail(user?.email);
+      let superStatus = isSuperAdminEmail(user?.email);
+      if (!superStatus && user?.email) {
+        const dynAdmin = await checkIsPlatformAdminInDb(user.email);
+        if (dynAdmin) {
+          superStatus = true;
+        }
+      }
       setIsSuperAdmin(superStatus);
 
       // Auto-switch to assigned RT tenant if non-superadmin logs in as an official
@@ -283,11 +292,16 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const isSupervising = useMemo(() => isSuperAdmin && !!supervisingTenant, [isSuperAdmin, supervisingTenant]);
 
+  useEffect(() => {
+    setSupervisionReadOnlyMode(isSupervising);
+  }, [isSupervising]);
+
   const startSupervision = (tenant: Tenant) => {
     if (!isSuperAdmin) {
       toast.error('Mode Supervisi hanya dapat diakses oleh Super Admin');
       return;
     }
+    setSupervisionReadOnlyMode(true);
     setSupervisingTenant(tenant);
     setCurrentTenant(tenant);
     setActiveTenantScope(tenant.id);
@@ -305,6 +319,7 @@ export const TenantProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   const stopSupervision = () => {
     const defaultTenant = getTenantById(DEFAULT_TENANT_ID);
+    setSupervisionReadOnlyMode(false);
     setSupervisingTenant(null);
     setCurrentTenant(defaultTenant);
     setActiveTenantScope(defaultTenant.id);

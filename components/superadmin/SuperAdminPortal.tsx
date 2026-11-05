@@ -33,8 +33,13 @@ import {
   logPlatformAuditEvent,
   clearSystemAuditLogs,
   calculateFleetAggregates,
-  subscribeToFleetPanicAlerts
+  subscribeToFleetPanicAlerts,
+  subscribeToPlatformAdmins,
+  savePlatformAdminToDb,
+  deletePlatformAdminFromDb,
+  PlatformAdminEntry
 } from '../../services/databaseService';
+import { useConfirm } from '../../context/ConfirmContext';
 
 import { TenantRegistrationModal } from '../TenantRegistrationModal';
 import { BulkTenantOnboardModal } from './BulkTenantOnboardModal';
@@ -162,21 +167,20 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   const [newBroadcastPriority, setNewBroadcastPriority] = useState<'info' | 'warning' | 'urgent' | 'maintenance'>('info');
   const [newBroadcastTarget, setNewBroadcastTarget] = useState<string>('all');
 
-  // Dynamic Platform Admins State
-  const [platformAdmins, setPlatformAdmins] = useState<Array<{
-    email: string;
-    role: 'super_admin' | 'kelurahan_officer' | 'support_agent';
-    name: string;
-    addedAt: string;
-  }>>([
-    { email: 'lurah.tondo@palukota.go.id', role: 'kelurahan_officer', name: 'Bpk. Lurah Tondo', addedAt: '12 Okt 2026' },
-    { email: 'sekretaris.kelurahan@palukota.go.id', role: 'kelurahan_officer', name: 'Sekretariat Kelurahan Tondo', addedAt: '14 Okt 2026' },
-    { email: 'helpdesk.huntap@palukota.go.id', role: 'support_agent', name: 'Tim Helpdesk Huntap', addedAt: '15 Okt 2026' }
-  ]);
+  // Dynamic Platform Admins State (Synced with Cloud Firestore platform_admins)
+  const confirm = useConfirm();
+  const [platformAdmins, setPlatformAdmins] = useState<PlatformAdminEntry[]>([]);
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [newAdminRole, setNewAdminRole] = useState<'super_admin' | 'kelurahan_officer' | 'support_agent'>('kelurahan_officer');
   const [newAdminName, setNewAdminName] = useState('');
   const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+
+  useEffect(() => {
+    const unsubAdmins = subscribeToPlatformAdmins((remoteAdmins) => {
+      setPlatformAdmins(remoteAdmins);
+    });
+    return () => unsubAdmins();
+  }, []);
 
   // Close AddAdminModal on Escape
   useEffect(() => {
@@ -189,7 +193,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showAddAdminModal]);
 
-  const handleAddPlatformAdmin = (e: React.FormEvent) => {
+  const handleAddPlatformAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAdminEmail.trim()) return;
     const cleanEmail = newAdminEmail.trim().toLowerCase();
@@ -197,24 +201,41 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
       toast.error('Email ini sudah terdaftar sebagai pengurus platform!');
       return;
     }
-    const newEntry = {
+    const newEntry: PlatformAdminEntry = {
       email: cleanEmail,
       role: newAdminRole,
       name: newAdminName.trim() || 'Aparatur Wilayah',
       addedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
     };
-    setPlatformAdmins(prev => [...prev, newEntry]);
-    logAuditEvent('Tambah Administrator Wilayah', 'security', 'all', `Menambahkan ${cleanEmail} sebagai ${newAdminRole}`);
-    setNewAdminEmail('');
-    setNewAdminName('');
-    setShowAddAdminModal(false);
-    toast.success(`Akun ${cleanEmail} berhasil ditambahkan dengan hak akses ${newAdminRole}!`);
+    try {
+      await savePlatformAdminToDb(newEntry);
+      setPlatformAdmins(prev => (prev.some(a => a.email === cleanEmail) ? prev : [...prev, newEntry]));
+      logAuditEvent('Tambah Administrator Wilayah', 'security', 'all', `Menambahkan ${cleanEmail} sebagai ${newAdminRole}`);
+      setNewAdminEmail('');
+      setNewAdminName('');
+      setShowAddAdminModal(false);
+      toast.success(`Akun ${cleanEmail} berhasil disimpan ke Cloud dengan hak akses ${newAdminRole}!`);
+    } catch (err: any) {
+      toast.error('Gagal menyimpan administrator ke Cloud Firestore');
+    }
   };
 
-  const handleRemovePlatformAdmin = (email: string) => {
-    setPlatformAdmins(prev => prev.filter(a => a.email !== email));
-    logAuditEvent('Cabut Akses Administrator', 'security', 'all', `Mencabut akses ${email}`);
-    toast.info(`Akses untuk ${email} telah dicabut.`);
+  const handleRemovePlatformAdmin = async (email: string) => {
+    const isConfirmed = await confirm({
+      title: 'Cabut Akses Administrator Wilayah',
+      message: `Apakah Anda yakin ingin mencabut hak akses platform untuk ${email}?`,
+      confirmLabel: 'Cabut Akses',
+      isDanger: true
+    });
+    if (!isConfirmed) return;
+    try {
+      await deletePlatformAdminFromDb(email);
+      setPlatformAdmins(prev => prev.filter(a => a.email !== email));
+      logAuditEvent('Cabut Akses Administrator', 'security', 'all', `Mencabut akses ${email}`);
+      toast.info(`Akses untuk ${email} telah dicabut dari Cloud Firestore.`);
+    } catch {
+      toast.error('Gagal mencabut akses administrator');
+    }
   };
 
 
@@ -467,7 +488,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   // Copy quick public link
   const copyPublicLink = (slugOrId: string) => {
     const origin = window.location.origin + window.location.pathname;
-    const url = `${origin}#/?rt=${slugOrId}`;
+    const url = `${origin}?rt=${slugOrId}#/`;
     navigator.clipboard.writeText(url);
     toast.success('Link Portal Publik berhasil disalin ke clipboard');
   };
@@ -475,7 +496,7 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
   // Copy citizen registration link
   const copyRegisterLink = (slugOrId: string) => {
     const origin = window.location.origin + window.location.pathname;
-    const url = `${origin}#/?rt=${slugOrId}#register`;
+    const url = `${origin}?rt=${slugOrId}&go=daftar`;
     navigator.clipboard.writeText(url);
     toast.success('Link Pendaftaran Warga Baru berhasil disalin ke clipboard');
   };
@@ -2086,7 +2107,13 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
 
                 <button
                   onClick={async () => {
-                    if (window.confirm('Bersihkan jejak audit platform di Cloud Firestore?')) {
+                    const isConfirmed = await confirm({
+                      title: 'Bersihkan Log Audit Platform',
+                      message: 'Bersihkan seluruh jejak audit platform di Cloud Firestore?',
+                      confirmLabel: 'Bersihkan Log',
+                      isDanger: true
+                    });
+                    if (isConfirmed) {
                       await clearSystemAuditLogs();
                       toast.success('Log audit platform telah dibersihkan dari Firestore');
                     }
@@ -2220,7 +2247,11 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
                 </div>
 
                 <div className="space-y-2 mt-3">
-                  {platformAdmins.map((adm) => {
+                  {platformAdmins.length === 0 ? (
+                    <div className="p-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center text-xs text-slate-500">
+                      Belum ada administrator wilayah tambahan di Cloud Firestore. Klik <strong>+ Tambah Admin</strong> untuk memberikan akses ke Staf Kelurahan atau Tim Helpdesk.
+                    </div>
+                  ) : platformAdmins.map((adm) => {
                     const roleBadges = {
                       super_admin: 'bg-emerald-100 text-emerald-800 border-emerald-300',
                       kelurahan_officer: 'bg-indigo-100 text-indigo-800 border-indigo-300',
@@ -2384,12 +2415,24 @@ export const SuperAdminPortal: React.FC<SuperAdminPortalProps> = ({
           <CivicAnalyticsTab 
             tenants={availableTenants} 
             fleetAggregates={fleetAggregates}
+            allHouses={allHouses}
           />
         )}
 
         {/* TAB 12: TELEMETRI & KESEHATAN SISTEM CLOUD */}
         {activeTab === 'telemetry' && (
-          <SystemTelemetryTab />
+          <SystemTelemetryTab
+            fleetCounts={{
+              tenants: availableTenants.length,
+              houses: allHouses.length,
+              cashFlows: allCashFlow.length,
+              officials: allOfficials.length,
+              reports: allReports.length,
+              letters: allLetters.length,
+              tickets: allTickets.length,
+              auditLogs: auditLogs.length
+            }}
+          />
         )}
       </main>
 

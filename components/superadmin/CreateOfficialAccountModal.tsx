@@ -11,6 +11,7 @@ import {
   deleteAdminAccount 
 } from '../../services/authAdminService';
 import { updateOfficialInDb, addOfficialToDb } from '../../services/databaseService';
+import { useConfirm } from '../../context/ConfirmContext';
 import { toast } from 'sonner';
 
 export interface OfficialAccountTarget {
@@ -38,6 +39,7 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
   target,
   onSuccess
 }) => {
+  const confirm = useConfirm();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('Ketua RT');
@@ -96,10 +98,12 @@ export const CreateOfficialAccountModal: React.FC<CreateOfficialAccountModalProp
     const targetEmail = target.email || email;
     if (!targetEmail) return;
 
-    const confirmed = window.confirm(
-      `Apakah Anda yakin ingin menghapus akun login untuk ${target.name} (${targetEmail})?\n\n` +
-      `Pengurus ini tidak akan bisa login lagi ke portal admin RT.`
-    );
+    const confirmed = await confirm({
+      title: 'Hapus Akun Login Pengurus',
+      message: `Apakah Anda yakin ingin menghapus akun login untuk ${target.name} (${targetEmail})? Pengurus ini tidak akan bisa login lagi ke portal admin RT.`,
+      confirmLabel: 'Hapus Akun',
+      isDanger: true
+    });
     if (!confirmed) return;
 
     setIsDeleting(true);

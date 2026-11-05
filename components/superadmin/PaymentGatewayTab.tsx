@@ -32,20 +32,24 @@ export const PaymentGatewayTab: React.FC<PaymentGatewayTabProps> = ({
 }) => {
   // Derive records directly from live tenants in Firestore
   const records: TenantGatewayRecord[] = useMemo(() => {
-    return tenants.map((t, idx) => {
-      const gw = t.paymentGateway;
+    return tenants.map((t) => {
+      const rawGw = t.paymentGateway;
+      const isLegacyMock =
+        t.id === 'tondo-rw20-rt02' &&
+        rawGw &&
+        (rawGw.accountNumber === '01-02-004589-1' || rawGw.merchantNmid === 'ID1020260981244');
+      const gw = isLegacyMock ? undefined : rawGw;
       const isPilot = t.id === 'tondo-rw20-rt02';
-      const isSecond = idx === 1;
 
       return {
         tenantId: t.id,
         tenantName: t.name,
-        bankName: gw?.bankName || (isPilot ? 'Bank BPD Sulteng' : 'Belum Dikonfigurasi'),
-        accountNumber: gw?.accountNumber || (isPilot ? '01-02-004589-1' : '-'),
-        accountHolder: gw?.accountHolder || `KAS ${t.name.toUpperCase()}`,
-        qrisStatus: gw?.qrisStatus || (isPilot ? 'active' : 'manual_cash'),
-        merchantNmid: gw?.merchantNmid || (isPilot ? 'ID1020260981244' : undefined),
-        digitalRate: gw?.digitalRate ?? (isPilot ? 88 : 0)
+        bankName: gw?.bankName || (isPilot ? 'Tunai Mandiri (Bendahara RT)' : 'Tunai Mandiri (Belum Ada Rekening)'),
+        accountNumber: gw?.accountNumber || '-',
+        accountHolder: gw?.accountHolder || (isPilot ? 'AISYAH (BENDAHARA RT 002)' : `BENDAHARA ${t.name.toUpperCase()}`),
+        qrisStatus: gw?.qrisStatus || 'manual_cash',
+        merchantNmid: gw?.merchantNmid || undefined,
+        digitalRate: gw?.digitalRate ?? 0
       };
     });
   }, [tenants]);

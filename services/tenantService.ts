@@ -37,12 +37,12 @@ export const INITIAL_TENANTS: Tenant[] = [
       kasFee: 20000,
     },
     paymentGateway: {
-      bankName: 'Bank BPD Sulteng',
-      accountNumber: '01-02-004589-1',
-      accountHolder: 'KAS RT 002 HUNTAP TONDO 2',
-      qrisStatus: 'active',
-      merchantNmid: 'ID1020260981244',
-      digitalRate: 88
+      bankName: 'Tunai Mandiri (Bendahara RT)',
+      accountNumber: '-',
+      accountHolder: 'AISYAH (BENDAHARA RT 002)',
+      qrisStatus: 'manual_cash',
+      merchantNmid: undefined,
+      digitalRate: 0
     },
     status: 'active',
     modules: {
@@ -77,6 +77,22 @@ export const mergeTenantData = (base: Tenant, patch: Partial<Tenant>): Tenant =>
     if (val !== undefined && val !== null && val !== '') {
       (merged as any)[key] = val;
     }
+  }
+  // Auto-clean legacy dummy paymentGateway on RT 002 (100% Cash via Treasurer)
+  if (
+    merged.id === DEFAULT_TENANT_ID &&
+    merged.paymentGateway &&
+    (merged.paymentGateway.accountNumber === '01-02-004589-1' ||
+     merged.paymentGateway.merchantNmid === 'ID1020260981244')
+  ) {
+    merged.paymentGateway = {
+      bankName: 'Tunai Mandiri (Bendahara RT)',
+      accountNumber: '-',
+      accountHolder: 'AISYAH (BENDAHARA RT 002)',
+      qrisStatus: 'manual_cash',
+      merchantNmid: undefined,
+      digitalRate: 0
+    };
   }
   return merged;
 };

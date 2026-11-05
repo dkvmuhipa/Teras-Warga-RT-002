@@ -11,15 +11,15 @@
 import { db, auth, isFirebaseConfigured } from "./firebaseConfig";
 import { 
   collection, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
+  addDoc as fbAddDoc, 
+  updateDoc as fbUpdateDoc, 
+  deleteDoc as fbDeleteDoc, 
   doc, 
   onSnapshot,
   query,
   getDocs,
   getDoc,
-  setDoc,
+  setDoc as fbSetDoc,
   writeBatch,
   orderBy,
   limit,
@@ -48,6 +48,62 @@ import { toast } from "sonner";
 import { DEFAULT_TENANT_ID, matchesTenant, updateTenantInMemory } from "./tenantService";
 
 export { OperationType, isFirebaseConfigured };
+
+// Supervision Read-Only Guard for Super Admin Inspection Mode
+const SUPERADMIN_ALLOWED_WRITE_COLS = new Set([
+  "tenants",
+  "systemBroadcasts",
+  "system_broadcasts",
+  "systemAuditLogs",
+  "system_audit_events",
+  "globalLetterTemplates",
+  "letter_templates",
+  "letterTemplates",
+  "platform_admins",
+  "platformAdmins",
+  "supportTickets",
+  "support_tickets",
+  "fcmTokens"
+]);
+
+let supervisionReadOnlyActive = false;
+
+export const setSupervisionReadOnlyMode = (active: boolean) => {
+  supervisionReadOnlyActive = active;
+};
+
+export const isSupervisionReadOnlyMode = (): boolean => supervisionReadOnlyActive;
+
+const assertSupervisionWritable = (ref: any) => {
+  if (!supervisionReadOnlyActive) return;
+  const path: string = ref?.path || "";
+  const colName = path.split("/")[0] || "";
+  if (SUPERADMIN_ALLOWED_WRITE_COLS.has(colName)) return;
+  toast.warning("Aksi Diblokir: Mode Supervisi Read-Only", {
+    description: "Sesi inspeksi Super Admin dikunci agar tidak mengubah atau menghapus data internal RT."
+  });
+  throw new Error("SUPERVISION_READ_ONLY: Mutasi data RT diblokir dalam Mode Supervisi.");
+};
+
+const addDoc: typeof fbAddDoc = ((ref: any, data: any) => {
+  assertSupervisionWritable(ref);
+  return fbAddDoc(ref, data);
+}) as any;
+
+const updateDoc: typeof fbUpdateDoc = ((ref: any, ...args: any[]) => {
+  assertSupervisionWritable(ref);
+  return (fbUpdateDoc as any)(ref, ...args);
+}) as any;
+
+const deleteDoc: typeof fbDeleteDoc = ((ref: any) => {
+  assertSupervisionWritable(ref);
+  return fbDeleteDoc(ref);
+}) as any;
+
+const setDoc: typeof fbSetDoc = ((ref: any, data: any, options?: any) => {
+  assertSupervisionWritable(ref);
+  return options !== undefined ? fbSetDoc(ref, data, options) : fbSetDoc(ref, data);
+}) as any;
 
 // Multi-Tenant Active Scope & Filter
 let activeTenantScope: string = DEFAULT_TENANT_ID;
@@ -5303,5 +5359,74 @@ export const updateRecipientPaymentAndReceipt = async (
   } catch (error) {
     handleFirestoreError(error, OperationType.UPDATE, `${SOCIAL_AID_COL}/${aidId}/recipients`);
     throw error;
+  }
+};
+
+// --- DYNAMIC PLATFORM ADMINS (KELURAHAN & SUPER ADMIN RBAC) ---
+export const PLATFORM_ADMINS_COL = "platform_admins";
+
+export interface PlatformAdminEntry {
+  email: string;
+  role: 'super_admin' | 'kelurahan_officer' | 'support_agent';
+  name: string;
+  addedAt: string;
+}
+
+export const subscribeToPlatformAdmins = (callback: (admins: PlatformAdminEntry[]) => void) => {
+  if (!isFirebaseConfigured || !db) {
+    callback([]);
+    return () => {};
+  }
+  try {
+    const q = query(collection(db, PLATFORM_ADMINS_COL));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({
+        ...docSnap.data(),
+        email: docSnap.data().email || docSnap.id
+      } as PlatformAdminEntry));
+      callback(data);
+    }, (error) => {
+      if (error?.code !== 'permission-denied') {
+        console.warn("Firestore platform_admins subscription notice:", error);
+      }
+      callback([]);
+    });
+    return () => {
+      try { unsubscribe(); } catch (e) {}
+    };
+  } catch (err) {
+    callback([]);
+    return () => {};
+  }
+};
+
+export const savePlatformAdminToDb = async (entry: PlatformAdminEntry): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  const cleanEmail = entry.email.trim().toLowerCase();
+  const docRef = doc(db, PLATFORM_ADMINS_COL, cleanEmail);
+  await setDoc(docRef, deepSanitize({
+    ...entry,
+    email: cleanEmail,
+    updatedAt: new Date().toISOString()
+  }), { merge: true });
+};
+
+export const deletePlatformAdminFromDb = async (email: string): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  const cleanEmail = email.trim().toLowerCase();
+  await deleteDoc(doc(db, PLATFORM_ADMINS_COL, cleanEmail));
+};
+
+export const checkIsPlatformAdminInDb = async (email?: string | null): Promise<PlatformAdminEntry | null> => {
+  if (!email || !isFirebaseConfigured || !db) return null;
+  try {
+    const cleanEmail = email.trim().toLowerCase();
+    const docSnap = await getDoc(doc(db, PLATFORM_ADMINS_COL, cleanEmail));
+    if (docSnap.exists()) {
+      return docSnap.data() as PlatformAdminEntry;
+    }
+    return null;
+  } catch {
+    return null;
   }
 };

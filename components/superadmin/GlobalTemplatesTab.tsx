@@ -253,7 +253,7 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
                     RUKUN TETANGGA 002 / RUKUN WARGA 020
                   </div>
                   <div className="text-[10px] text-slate-600 font-sans mt-0.5">
-                    Kompleks Huntap Tondo 2, Kelurahan Tondo, Kota Palu, Sulawesi Tengah 94119
+                    Jl. Pue Lombe Blok C10-08 Huntap Tondo 2, Kelurahan Tondo, Kota Palu, Sulawesi Tengah 94119
                   </div>
                 </div>
 
@@ -262,7 +262,7 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
                     {selectedTemplate.title}
                   </div>
                   <div className="text-[10px] font-sans text-slate-500">
-                    Nomor: 045 / {selectedTemplate.code} / RT.02-RW.20 / X / 2026
+                    Nomor: 045 / {selectedTemplate.code} / RT.02-RW.20 / {new Date().getFullYear()}
                   </div>
                 </div>
 
@@ -277,12 +277,12 @@ export const GlobalTemplatesTab: React.FC<GlobalTemplatesTabProps> = ({
                 <div className="flex justify-between pt-4 font-sans text-[11px]">
                   <div></div>
                   <div className="text-center">
-                    <div>Palu, 16 Oktober 2026</div>
+                    <div>Palu, {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
                     <div className="font-bold mt-1">Ketua RT 002</div>
                     <div className="h-12 flex items-center justify-center italic text-slate-400 text-[10px]">
                       (Tanda Tangan Digital)
                     </div>
-                    <div className="font-bold underline">Bpk. M. Irfan</div>
+                    <div className="font-bold underline">Bpk. IRFAN ARIANTO</div>
                   </div>
                 </div>
               </div>

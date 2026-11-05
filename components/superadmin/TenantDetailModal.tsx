@@ -15,6 +15,7 @@ import {
   Official
 } from '../../types';
 import { useTenant } from '../../context/TenantContext';
+import { useConfirm } from '../../context/ConfirmContext';
 import { matchesTenant } from '../../services/tenantService';
 import { CreateOfficialAccountModal, OfficialAccountTarget } from './CreateOfficialAccountModal';
 import { deleteAdminAccount } from '../../services/authAdminService';
@@ -62,6 +63,7 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
   onDelete
 }) => {
   const { updateTenant, deleteTenant, startSupervision, availableTenants } = useTenant();
+  const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState<'info' | 'officials' | 'fees' | 'modules' | 'links' | 'operations'>('operations');
 
   const [isEditing, setIsEditing] = useState(false);
@@ -262,8 +264,8 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
 
   if (!isOpen || !tenant) return null;
 
-  const publicUrl = `${window.location.origin}${window.location.pathname}#/?rt=${tenant.slug || tenant.id}`;
-  const registerUrl = `${window.location.origin}${window.location.pathname}#/?rt=${tenant.slug || tenant.id}#register`;
+  const publicUrl = `${window.location.origin}${window.location.pathname}?rt=${tenant.slug || tenant.id}#/`;
+  const registerUrl = `${window.location.origin}${window.location.pathname}?rt=${tenant.slug || tenant.id}&go=daftar`;
 
   const handleCopy = (text: string, type: 'public' | 'register' | 'admin') => {
     navigator.clipboard.writeText(text);
@@ -300,7 +302,11 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
       }));
       toast.success('Preset Modul & Tarif RT 002 (Percontohan) disalin ke form! Klik "Simpan Perubahan" untuk konfirmasi.');
     } else {
-      const confirmApply = window.confirm(`Terapkan preset standar RT 002 (semua modul aktif & tarif standar) ke ${tenant.name}?`);
+      const confirmApply = await confirm({
+        title: 'Terapkan Preset RT 002',
+        message: `Terapkan preset standar RT 002 (semua modul aktif & tarif standar) ke ${tenant.name}?`,
+        confirmLabel: 'Terapkan Preset'
+      });
       if (!confirmApply) return;
 
       setIsSaving(true);
@@ -869,9 +875,12 @@ export const TenantDetailModal: React.FC<TenantDetailModalProps> = ({
                     <button
                       type="button"
                       onClick={async () => {
-                        const confirmed = window.confirm(
-                          `Apakah Anda yakin ingin menghapus akun login untuk Ketua RT (${liveChairman.email})?\n\nAkses masuk portal admin RT akan dicabut.`
-                        );
+                        const confirmed = await confirm({
+                          title: 'Hapus Akun Login Ketua RT',
+                          message: `Apakah Anda yakin ingin menghapus akun login untuk Ketua RT (${liveChairman.email})? Akses masuk portal admin RT akan dicabut.`,
+                          confirmLabel: 'Hapus Akun',
+                          isDanger: true
+                        });
                         if (!confirmed) return;
                         try {
                           await deleteAdminAccount({

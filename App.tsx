@@ -198,6 +198,7 @@ import { subscribeToMapPoints, subscribeToCollection,
   subscribeToNotifications,
   subscribeToGallery,
   subscribeToDocuments,
+  checkIsPlatformAdminInDb,
   subscribeToDonationCampaigns,
   subscribeToUpdateRequests,
   subscribeToWasteDeposits,
@@ -571,8 +572,13 @@ export const App = () => {
       setIsAdmin(!!user);
       if (user && user.email) {
         try {
-          // Check if Super Admin first
+          // Check if Super Admin first (hardcoded root emails or Dynamic RBAC in platform_admins)
           if (isSuperAdminEmail(user.email)) {
+            setAdminRole(Role.SUPER_ADMIN);
+            return;
+          }
+          const dynPlatformAdmin = await checkIsPlatformAdminInDb(user.email);
+          if (dynPlatformAdmin) {
             setAdminRole(Role.SUPER_ADMIN);
             return;
           }
@@ -737,25 +743,27 @@ return (
                 <Route path="/admin" element={adminElement} />
                 <Route path="/admin/*" element={adminElement} />
                 <Route path="/master" element={
-                    <ErrorBoundary>
-                        <React.Suspense fallback={
-                            <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-8 font-sans">
-                                <div className="relative flex items-center justify-center mb-4">
-                                    <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-                                    <Loader2 className="absolute text-indigo-600 animate-pulse" size={24} />
+                    <AdminRouteWrapper isAdmin={isAdmin} onLogin={() => setIsAdmin(true)}>
+                        <ErrorBoundary>
+                            <React.Suspense fallback={
+                                <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-8 font-sans">
+                                    <div className="relative flex items-center justify-center mb-4">
+                                        <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                                        <Loader2 className="absolute text-indigo-600 animate-pulse" size={24} />
+                                    </div>
+                                    <h3 className="text-slate-800 font-black text-sm tracking-wide uppercase">Memuat Portal Master RW</h3>
+                                    <p className="text-slate-400 text-xs mt-1">Mengoptimalkan akses super admin...</p>
                                 </div>
-                                <h3 className="text-slate-800 font-black text-sm tracking-wide uppercase">Memuat Portal Master RW</h3>
-                                <p className="text-slate-400 text-xs mt-1">Mengoptimalkan akses super admin...</p>
-                            </div>
-                        }>
-                            <MasterDashboard 
-                                houses={houses} 
-                                cashFlow={cashFlow} 
-                                announcements={announcements} 
-                                reports={reports} 
-                            />
-                        </React.Suspense>
-                    </ErrorBoundary>
+                            }>
+                                <MasterDashboard 
+                                    houses={houses} 
+                                    cashFlow={cashFlow} 
+                                    announcements={announcements} 
+                                    reports={reports} 
+                                />
+                            </React.Suspense>
+                        </ErrorBoundary>
+                    </AdminRouteWrapper>
                 }/>
                 <Route path="/rw-admin" element={<Navigate to="/master" replace />} />
                 <Route path="/superadmin" element={

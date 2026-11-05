@@ -204,7 +204,7 @@ export const MasterDashboard: React.FC<MasterDashboardProps> = ({
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
                 <span>Masukkan PIN Master RW</span>
-                <span className="text-[10px] font-medium text-slate-400">Default: 999888</span>
+                <span className="text-[10px] font-medium text-slate-400">Otorisasi Pengurus RW</span>
               </label>
               <div className="relative">
                 <input
@@ -228,7 +228,7 @@ export const MasterDashboard: React.FC<MasterDashboardProps> = ({
               </div>
               {pinError && (
                 <p className="text-[11px] font-semibold text-rose-600 mt-1.5 flex items-center gap-1 justify-center">
-                  <AlertCircle size={13} /> PIN salah. Silakan coba kembali (default: 999888).
+                  <AlertCircle size={13} /> PIN tidak valid. Silakan periksa kembali PIN Master RW Anda.
                 </p>
               )}
             </div>
