@@ -1,20 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-import { Toaster, toast } from 'sonner';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Home, FileText, Megaphone, AlertTriangle, User, Users, Menu, X, 
-  LayoutDashboard, Send, Bot, Trash2, Clock, CheckCircle, XCircle, Search, Edit2, Plus,
-  Shield, Phone, Wallet, Moon, Sun, CloudRain, 
-  LogOut, Download, Package, ShoppingBag,
-  ArrowUpRight, ArrowDownRight, ShieldCheck, FileDown, Target, HelpCircle, Map as MapIcon,
-  Briefcase, Store, Archive, History, BarChart3, Grid, List, Upload, Printer,
-  RefreshCw, Calendar, DollarSign, Settings, Filter, Heart, Baby, Smile, GraduationCap, Accessibility, Key, MessageCircle, ImageIcon, AlertCircle, Wrench, ChevronRight,
-  Database, Lock, Eye, EyeOff, Save, Trash, Sparkles, Loader2, CheckSquare, Bell, Vote, PieChart, LocateFixed, ShoppingCart, Wand2,
-  Wifi, WifiOff
-} from 'lucide-react';
-import { CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area, XAxis, YAxis } from 'recharts';
+import { AlertTriangle, Loader2, Home, FileText, MapPin, Phone, Clock, ShieldCheck, Compass } from 'lucide-react';
 
 // Destructure React Router DOM components
 const { HashRouter, Routes, Route, useNavigate, useLocation, useSearchParams, Navigate } = ReactRouterDOM;
@@ -141,11 +128,6 @@ const ScrollToTop = () => {
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Logo, generateHouses, MOCK_ANNOUNCEMENTS, MOCK_UMKM, MOCK_RONDA, MOCK_CASHFLOW, MOCK_GALLERY, MOCK_FAQ, MOCK_DOCUMENTS, INITIAL_OFFICIALS, DEFAULT_PDF_CONFIG, MOCK_INVENTORY, INITIAL_REPORTS, MOCK_RONDA_LOGS, MOCK_BILLS, MOCK_EVENTS, CHECKPOINTS, MOCK_MAP_POINTS, isSuperAdminEmail } from '@/constants';
 import { House, Announcement, News, Report, LetterRequest, PaymentStatus, UMKM, CashFlow, Official, RondaSchedule, PdfConfig, InventoryItem, AppNotification, RondaCheckLog, GalleryItem, FAQItem, Document, Bill, PopulationReport, PopulationChangeLog, RondaSwapRequest, AppEvent, MapPoint, PatrolSession, ResidentRegistration, DonationCampaign, UpdateRequest, RondaAttendance, Role } from './types';
-import { HouseMap } from './components/HouseMap';
-import { SmartImage } from './components/SmartImage';
-import { generateAnnouncementDraft, generateDashboardSummary } from './services/geminiService';
-import { generateSuratPengantar, generateResidentReportPDF } from './services/pdfService';
-import { sendWhatsAppMessage, formatAnnouncementForWhatsApp } from './services/whatsappService';
 import { AdminRouteWrapper } from './components/AdminComponents';
 const AdminDashboard = React.lazy(() => import('./components/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 const MasterDashboard = React.lazy(() => import('./components/master/MasterDashboard').then(m => ({ default: m.MasterDashboard })));
@@ -155,13 +137,11 @@ import { useConfirm } from './context/ConfirmContext';
 import { useTenant } from './context/TenantContext';
 import { getPdfConfigForTenant } from './services/tenantService';
 const ResidentRegistrationForm = React.lazy(() => import('./components/ResidentRegistrationForm').then(m => ({ default: m.ResidentRegistrationForm })));
-import { GuestReportForm } from './components/GuestReportForm';
 const ChatBot = React.lazy(() => import('./components/ChatBot').then(m => ({ default: m.ChatBot })));
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { PWAStatusHandler } from './components/PWAStatusHandler';
 import { SystemBroadcastBanner } from './components/common/SystemBroadcastBanner';
 import { PublicHeader } from './components/PublicHeader';
-import { HeroSection } from './components/HeroSection';
 import { PublicHome } from './components/public/PublicHome';
 const PublicServices = React.lazy(() => import('./components/public/PublicServices').then(m => ({ default: m.PublicServices })));
 const PublicVerification = React.lazy(() => import('./components/public/PublicVerification').then(m => ({ default: m.PublicVerification })));
@@ -179,13 +159,11 @@ const PublicFAQ = React.lazy(() => import('./components/public/PublicFAQ').then(
 const PublicRules = React.lazy(() => import('./components/public/PublicRules').then(m => ({ default: m.PublicRules })));
 const PublicAbout = React.lazy(() => import('./components/public/PublicAbout').then(m => ({ default: m.PublicAbout })));
 const PublicWelcomeKit = React.lazy(() => import('./components/public/PublicWelcomeKit').then(m => ({ default: m.PublicWelcomeKit })));
-import { NotificationCenter } from './components/NotificationCenter';
 import { NotificationToast } from './components/NotificationToast';
 import { PanicButton } from './components/PanicButton';
 import { PushNotificationManager } from './components/PushNotificationManager';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { Button } from './components/ui/Button';
-import { Card } from './components/ui/Card';
 import { Modal } from './components/ui/Modal';
 
 // Firebase imports
@@ -758,6 +736,7 @@ return (
                 }/>
                 <Route path="*" element={
                     <>
+                        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[200] focus:px-4 focus:py-2.5 focus:bg-slate-900 focus:text-white focus:rounded-xl focus:text-xs focus:font-bold focus:shadow-lg">Langsung ke Konten Utama</a>
                         <PublicHeader 
                             notifications={notifications} 
                             onMarkRead={markNotificationAsRead} 
@@ -784,7 +763,7 @@ return (
                                 }
                             }}
                         />
-                        <div className="pb-24 md:pb-0">
+                        <main id="main-content" className="pb-24 md:pb-0">
                             <React.Suspense fallback={
                                 <div className="min-h-[50vh] flex flex-col items-center justify-center p-8 font-sans">
                                     <div className="w-10 h-10 border-3 border-indigo-100 border-t-indigo-600 rounded-full animate-spin mb-3"></div>
@@ -843,12 +822,105 @@ return (
                                         letters={letters}
                                         inventory={inventory}
                                         events={events}
-                                        donationCampaigns={donationCampaigns}
+                                                                                donationCampaigns={donationCampaigns}
                                     />
+                                } />
+                                {/* Route Aliases */}
+                                <Route path="/tentang" element={<Navigate to="/about" replace />} />
+                                <Route path="/aturan" element={<Navigate to="/rules" replace />} />
+                                <Route path="/bantuan" element={<Navigate to="/faq" replace />} />
+                                <Route path="/bank-sampah" element={<Navigate to="/sampah" replace />} />
+                                <Route path="/siskamling" element={<Navigate to="/info" replace />} />
+                                {/* 404 Catch-All Route */}
+                                <Route path="*" element={
+                                    <div className="max-w-xl mx-auto px-4 py-16 sm:py-24 text-center font-sans">
+                                        <div className="w-16 h-16 rounded-3xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto mb-5 shadow-2xs">
+                                            <Compass size={32} />
+                                        </div>
+                                        <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-600 font-mono text-[11px] font-bold uppercase tracking-wider">
+                                            404 • Halaman Tidak Ditemukan
+                                        </span>
+                                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-3 mb-2 tracking-tight">
+                                            Alamat Halaman Tidak Tersedia
+                                        </h1>
+                                        <p className="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed mb-6">
+                                            Halaman yang Anda tuju mungkin telah dipindahkan atau alamat tautan kurang tepat. Silakan kembali ke Beranda atau pilih layanan utama di bawah ini.
+                                        </p>
+                                        <div className="flex flex-wrap items-center justify-center gap-3">
+                                            <a
+                                                href="#/"
+                                                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-xs"
+                                            >
+                                                <Home size={14} />
+                                                <span>Kembali ke Beranda</span>
+                                            </a>
+                                            <a
+                                                href="#/services"
+                                                className="px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-2"
+                                            >
+                                                <FileText size={14} className="text-indigo-600" />
+                                                <span>Layanan Surat &amp; Aduan</span>
+                                            </a>
+                                        </div>
+                                    </div>
                                 } />
                             </Routes>
                             </React.Suspense>
-                        </div>
+
+                            {/* Global Public Footer */}
+                            <footer className="mt-16 border-t border-slate-200/80 bg-white/90 backdrop-blur-xs text-slate-600 font-sans">
+                                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                                        <div className="space-y-2.5">
+                                            <div className="inline-flex items-center gap-2 text-slate-900 font-black text-sm tracking-tight">
+                                                <ShieldCheck size={18} className="text-indigo-600" />
+                                                <span>TERAS Warga RT 002 / RW 020</span>
+                                            </div>
+                                            <p className="text-xs text-slate-500 leading-relaxed">
+                                                Sistem Informasi &amp; Pelayanan Mandiri Warga Kawasan Hunian Tetap (Huntap) Tondo 2, Blok C5 s/d C12, Kelurahan Tondo, Kecamatan Mantikulore, Kota Palu.
+                                            </p>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-900 font-mono">
+                                                Akses Cepat Warga
+                                            </h4>
+                                            <div className="grid grid-cols-2 gap-1.5 text-xs font-semibold text-slate-600">
+                                                <a href="#/services" className="hover:text-indigo-600 transition-colors">Layanan Surat</a>
+                                                <a href="#/info" className="hover:text-indigo-600 transition-colors">Transparansi Kas</a>
+                                                <a href="#/peta" className="hover:text-indigo-600 transition-colors">Peta &amp; Gempa</a>
+                                                <a href="#/rules" className="hover:text-indigo-600 transition-colors">Peraturan RT</a>
+                                                <a href="#/umkm" className="hover:text-indigo-600 transition-colors">UMKM Warga</a>
+                                                <a href="#/faq" className="hover:text-indigo-600 transition-colors">Pusat Bantuan</a>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2 text-xs text-slate-500">
+                                            <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-900 font-mono">
+                                                Sekretariat RT 002
+                                            </h4>
+                                            <p className="flex items-start gap-2">
+                                                <MapPin size={14} className="text-rose-500 shrink-0 mt-0.5" />
+                                                <span>Blok C10 No. 8, Huntap Tondo 2, Kel. Tondo, Kota Palu</span>
+                                            </p>
+                                            <p className="flex items-center gap-2 font-mono">
+                                                <Phone size={14} className="text-emerald-600 shrink-0" />
+                                                <span>+62 822-9333-2802</span>
+                                            </p>
+                                            <p className="flex items-center gap-2">
+                                                <Clock size={14} className="text-indigo-600 shrink-0" />
+                                                <span>Senin – Jumat, 19.00 – 21.00 WITA</span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-8 pt-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400 font-medium">
+                                        <span>&copy; {new Date().getFullYear()} Pengurus RT 002 / RW 020 Huntap Tondo 2 Palu. Teknologi &bull; Ekraf &bull; Rukun &bull; Aman &bull; Sinergi.</span>
+                                        <a href="#/welcome" className="text-indigo-600 hover:underline font-semibold">Buku Saku Warga Baru &rarr;</a>
+                                    </div>
+                                </div>
+                            </footer>
+                        </main>
                         <React.Suspense fallback={null}>
                             <ChatBot announcements={announcements} ronda={ronda} officials={officials} houses={houses} cashFlow={cashFlow} reports={reports} settings={settings} />
                         </React.Suspense>
