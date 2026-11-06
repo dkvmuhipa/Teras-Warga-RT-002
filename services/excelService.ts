@@ -68,6 +68,242 @@ export const naturalSortBlockAndNumber = (
   return 0;
 };
 
+/**
+ * GENERATE FORMULIR VERIFIKASI PENGHUNIAN & FISIK HUNTAP (FORMAT RESMI BPBD KOTA PALU) EXCEL
+ * Format dengan merge header 2 tingkat, border tegas, dan checklist otomatis.
+ */
+export const generateBPBDVerificationExcel = async (houses: House[], tenant?: Tenant) => {
+  const { rtLabel, fullTitle } = getExcelTenantMeta(tenant);
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Verifikasi BPBD Huntap');
+
+  // Title rows
+  worksheet.mergeCells('A1:S1');
+  const title1 = worksheet.getCell('A1');
+  title1.value = 'PEMERINTAH KOTA PALU - BADAN PENANGGULANGAN BENCANA DAERAH (BPBD)';
+  title1.font = { name: 'Calibri', size: 13, bold: true, color: { argb: 'FF0F172A' } };
+  title1.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.mergeCells('A2:S2');
+  const title2 = worksheet.getCell('A2');
+  title2.value = `FORMULIR VERIFIKASI PENGHUNIAN DAN KONDISI FISIK HUNIAN TETAP (HUNTAP) - ${fullTitle.toUpperCase()}`;
+  title2.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FF1E293B' } };
+  title2.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.mergeCells('A3:S3');
+  const title3 = worksheet.getCell('A3');
+  title3.value = `Kawasan: Huntap Tondo 2, Kelurahan Tondo, Kecamatan Mantikulore | Dicetak: ${new Date().toLocaleString('id-ID')} WITA`;
+  title3.font = { name: 'Calibri', size: 9, italic: true, color: { argb: 'FF64748B' } };
+  title3.alignment = { horizontal: 'center', vertical: 'middle' };
+
+  worksheet.addRow([]); // Blank row at row 4
+
+  // Row 5: Top Level Headers
+  // Columns:
+  // A: No (Row 5 & 6)
+  // B: Nama Pemilik / Penerima Bantuan (Row 5 & 6)
+  // C: Blok (Row 5 & 6)
+  // D: Nomor Unit Rumah (Row 5 & 6)
+  // E: Nama Penghuni / Kepala Keluarga (Row 5 & 6)
+  // F: Hubungan dengan Pemilik / Penerima (Row 5 & 6)
+  // G: No. HP (Row 5 & 6)
+  // H-L: Status Penghunian (Row 5 span H-L, Row 6: Jual, Sewa, Kosong, Alih Fungsi, Perubahan Bentuk)
+  // M: Jumlah Penghuni (Orang) (Row 5 & 6)
+  // N-P: Kondisi Bangunan (Row 5 span N-P, Row 6: Baik, Terlantar, Tidak Terawat)
+  // Q-R: Sertifikasi (Row 5 span Q-R, Row 6: Ya, Tidak)
+  // S: Catatan / Potensi Tindak Lanjut (Row 5 & 6)
+
+  worksheet.mergeCells('A5:A6');
+  worksheet.getCell('A5').value = 'No.';
+  
+  worksheet.mergeCells('B5:B6');
+  worksheet.getCell('B5').value = 'Nama Pemilik / Penerima Bantuan';
+
+  worksheet.mergeCells('C5:C6');
+  worksheet.getCell('C5').value = 'Blok';
+
+  worksheet.mergeCells('D5:D6');
+  worksheet.getCell('D5').value = 'Nomor Unit Rumah';
+
+  worksheet.mergeCells('E5:E6');
+  worksheet.getCell('E5').value = 'Nama Penghuni / Kepala Keluarga';
+
+  worksheet.mergeCells('F5:F6');
+  worksheet.getCell('F5').value = 'Hubungan dengan Pemilik / Penerima';
+
+  worksheet.mergeCells('G5:G6');
+  worksheet.getCell('G5').value = 'No. HP';
+
+  worksheet.mergeCells('H5:L5');
+  worksheet.getCell('H5').value = 'Status Penghunian';
+
+  worksheet.mergeCells('M5:M6');
+  worksheet.getCell('M5').value = 'Jumlah Penghuni (Orang)';
+
+  worksheet.mergeCells('N5:P5');
+  worksheet.getCell('N5').value = 'Kondisi Bangunan';
+
+  worksheet.mergeCells('Q5:R5');
+  worksheet.getCell('Q5').value = 'Sertifikasi';
+
+  worksheet.mergeCells('S5:S6');
+  worksheet.getCell('S5').value = 'Catatan / Potensi Tindak Lanjut';
+
+  // Row 6 Subheaders
+  worksheet.getCell('H6').value = 'Jual';
+  worksheet.getCell('I6').value = 'Sewa';
+  worksheet.getCell('J6').value = 'Kosong';
+  worksheet.getCell('K6').value = 'Alih Fungsi';
+  worksheet.getCell('L6').value = 'Perubahan Bentuk';
+
+  worksheet.getCell('N6').value = 'Baik';
+  worksheet.getCell('O6').value = 'Terlantar';
+  worksheet.getCell('P6').value = 'Tidak Terawat';
+
+  worksheet.getCell('Q6').value = 'Ya';
+  worksheet.getCell('R6').value = 'Tidak';
+
+  // Style Header rows 5 and 6
+  const headerFill: ExcelJS.Fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFF1F5F9' } // Slate 100
+  };
+
+  const headerBorder: Partial<ExcelJS.Borders> = {
+    top: { style: 'thin', color: { argb: 'FF334155' } },
+    left: { style: 'thin', color: { argb: 'FF334155' } },
+    bottom: { style: 'thin', color: { argb: 'FF334155' } },
+    right: { style: 'thin', color: { argb: 'FF334155' } }
+  };
+
+  for (let r = 5; r <= 6; r++) {
+    const row = worksheet.getRow(r);
+    row.height = 24;
+    for (let c = 1; c <= 19; c++) {
+      const cell = row.getCell(c);
+      cell.fill = headerFill;
+      cell.font = { name: 'Calibri', size: 9, bold: true, color: { argb: 'FF0F172A' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      cell.border = headerBorder;
+    }
+  }
+
+  // Sort houses naturally
+  const sortedHouses = [...houses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
+
+  let rowIndex = 7;
+  sortedHouses.forEach((h, idx) => {
+    const owner = (h.ownerName || h.headOfFamily || '-').toUpperCase();
+    const resident = (h.headOfFamily || h.residentName || '-').toUpperCase();
+
+    let relation = h.ownerRelationship || '';
+    if (!relation) {
+      if (h.status === 'Empty') relation = 'Rumah Kosong';
+      else if (h.residenceType === 'Tetap' || (!h.ownerName || h.ownerName === h.headOfFamily)) relation = 'Pemilik Langsung';
+      else if (h.residenceType === 'Sewa') relation = 'Penyewa / Kontrak';
+      else if (h.residenceType === 'Rumah Keluarga') relation = 'Keluarga / Kerabat';
+      else relation = 'Penghuni';
+    }
+
+    const phone = h.phone || h.ownerPhone || '-';
+
+    const isSewa = h.residenceType === 'Sewa';
+    const isKosong = h.status === 'Empty';
+    const isAlihFungsi = h.status === 'Business' || Boolean(h.hasBusiness);
+    const isPerubahanBentuk = Boolean(h.hasStructuralModification);
+    const isJual = h.occupancyHistory?.some(o => o.movedReason === 'Beli Rumah Baru') || false;
+
+    const condition = h.buildingCondition || (isKosong ? 'Tidak Terawat' : 'Baik');
+    const isBaik = condition === 'Baik';
+    const isTerlantar = condition === 'Terlantar';
+    const isTidakTerawat = condition === 'Tidak Terawat';
+
+    const cert = h.certificateStatus || 'Ya';
+    const certYa = cert === 'Ya';
+    const certTidak = cert === 'Tidak';
+
+    const notes = h.specialNotes || (isKosong ? 'Unit belum dihuni' : isAlihFungsi ? `Usaha ${h.businessName || ''}` : '-');
+
+    const row = worksheet.addRow([
+      idx + 1,
+      owner,
+      h.block || '-',
+      h.number || '-',
+      isKosong ? '-' : resident,
+      relation,
+      phone,
+      isJual ? 'V' : '',
+      isSewa ? 'V' : '',
+      isKosong ? 'V' : '',
+      isAlihFungsi ? 'V' : '',
+      isPerubahanBentuk ? 'V' : '',
+      isKosong ? 0 : (h.occupants || 1),
+      isBaik ? 'V' : '',
+      isTerlantar ? 'V' : '',
+      isTidakTerawat ? 'V' : '',
+      certYa ? 'V' : '',
+      certTidak ? 'V' : '',
+      notes
+    ]);
+
+    row.height = 20;
+
+    const isEven = idx % 2 === 0;
+    const rowFillColor = isEven ? 'FFFFFFFF' : 'FFF8FAFC';
+
+    for (let c = 1; c <= 19; c++) {
+      const cell = row.getCell(c);
+      cell.font = { name: 'Calibri', size: 9, color: { argb: 'FF1E293B' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowFillColor } };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        bottom: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        left: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+        right: { style: 'thin', color: { argb: 'FFE2E8F0' } },
+      };
+
+      // Centers for codes and checklists
+      if ([1, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].includes(c)) {
+        cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        if ([8, 9, 10, 11, 12, 14, 15, 16, 17, 18].includes(c) && cell.value === 'V') {
+          cell.font = { name: 'Calibri', size: 10, bold: true, color: { argb: 'FF0284C7' } };
+        }
+      } else {
+        cell.alignment = { horizontal: 'left', vertical: 'middle' };
+      }
+    }
+
+    rowIndex++;
+  });
+
+  // Auto Column widths
+  worksheet.getColumn(1).width = 6;   // No
+  worksheet.getColumn(2).width = 30;  // Pemilik
+  worksheet.getColumn(3).width = 8;   // Blok
+  worksheet.getColumn(4).width = 12;  // No Unit
+  worksheet.getColumn(5).width = 30;  // Penghuni
+  worksheet.getColumn(6).width = 24;  // Hubungan
+  worksheet.getColumn(7).width = 18;  // No HP
+  worksheet.getColumn(8).width = 8;   // Jual
+  worksheet.getColumn(9).width = 8;   // Sewa
+  worksheet.getColumn(10).width = 9;  // Kosong
+  worksheet.getColumn(11).width = 13; // Alih Fungsi
+  worksheet.getColumn(12).width = 16; // Perubahan Bentuk
+  worksheet.getColumn(13).width = 14; // Jml Orang
+  worksheet.getColumn(14).width = 9;  // Baik
+  worksheet.getColumn(15).width = 11; // Terlantar
+  worksheet.getColumn(16).width = 13; // Tidak Terawat
+  worksheet.getColumn(17).width = 8;  // Sertif Ya
+  worksheet.getColumn(18).width = 8;  // Sertif Tidak
+  worksheet.getColumn(19).width = 35; // Catatan
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const filename = `Formulir_Verifikasi_BPBD_Huntap_${rtLabel.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+  saveAs(blob, filename);
+};
+
 export const generateProfessionalExcel = async (houses: House[], selectedCols?: string[], tenant?: Tenant) => {
   const { rtLabel, fullTitle } = getExcelTenantMeta(tenant);
   const workbook = new ExcelJS.Workbook();

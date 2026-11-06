@@ -36,7 +36,8 @@ import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRe
 import { OccupantTransitionModal } from './resident/OccupantTransitionModal';
 import { HouseMap } from '../HouseMap';
 import { 
-  generateResidentReportPDF, 
+  generateResidentReportPDF,
+  generateBPBDVerificationReportPDF, 
   generateIuranReceiptPDF,
   generatePBBReportPDF,
   generateResidentStatsReportPDF,
@@ -69,7 +70,7 @@ import {
   handleFirestoreError,
   OperationType
 } from '../../services/databaseService';
-import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel } from '../../services/excelService';
+import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel, generateBPBDVerificationExcel } from '../../services/excelService';
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -479,16 +480,28 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     generateExcelTemplate(currentTenant);
   };
 
+  const [isBpbdTemplateSelected, setIsBpbdTemplateSelected] = useState(false);
+
   const handlePerformExport = async () => {
     setIsGenerating(true);
     const resolvedHouses = exportTarget === 'all' ? houses : filteredHouses;
     try {
-      if (exportFormat === 'excel') {
-        await generateProfessionalExcel(resolvedHouses, selectedExportCols, currentTenant);
-        toast.success(`Berhasil mengunduh Excel berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
+      if (isBpbdTemplateSelected) {
+        if (exportFormat === 'excel') {
+          await generateBPBDVerificationExcel(resolvedHouses, currentTenant);
+          toast.success(`Berhasil mengunduh Formulir Verifikasi BPBD (Excel) untuk ${resolvedHouses.length} unit huntap!`);
+        } else {
+          await generateBPBDVerificationReportPDF(resolvedHouses, pdfConfig);
+          toast.success(`Berhasil mencetak Formulir Verifikasi BPBD (PDF Resmi) untuk ${resolvedHouses.length} unit huntap!`);
+        }
       } else {
-        await generateResidentReportPDF(resolvedHouses, pdfConfig, selectedExportCols);
-        toast.success(`Berhasil mencetak PDF berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
+        if (exportFormat === 'excel') {
+          await generateProfessionalExcel(resolvedHouses, selectedExportCols, currentTenant);
+          toast.success(`Berhasil mengunduh Excel berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
+        } else {
+          await generateResidentReportPDF(resolvedHouses, pdfConfig, selectedExportCols);
+          toast.success(`Berhasil mencetak PDF berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
+        }
       }
       setIsExportModalOpen(false);
     } catch (error) {
@@ -2429,7 +2442,23 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     <label className="block text-xs font-semibold text-slate-650 uppercase tracking-wider">3. Pilih Kolom Untuk Diekspor</label>
                     <div className="flex gap-2">
                       <button 
-                        onClick={() => setSelectedExportCols(['block', 'number', 'headOfFamily', 'phone', 'status', 'residenceType', 'occupants', 'isVerified'])}
+                        onClick={() => {
+                          setIsBpbdTemplateSelected(true);
+                        }}
+                        className={`px-2 py-0.5 rounded-lg text-[10px] uppercase font-bold transition-all ${
+                          isBpbdTemplateSelected 
+                            ? 'bg-rose-600 text-white shadow-xs' 
+                            : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
+                        }`}
+                      >
+                        ★ Format BPBD Huntap
+                      </button>
+                      <span className="text-slate-300 text-xs">|</span>
+                      <button 
+                        onClick={() => {
+                          setIsBpbdTemplateSelected(false);
+                          setSelectedExportCols(['block', 'number', 'headOfFamily', 'phone', 'status', 'residenceType', 'occupants', 'isVerified']);
+                        }}
                         className="text-[10px] uppercase font-semibold text-indigo-600 hover:text-indigo-800"
                       >
                         Bawaan

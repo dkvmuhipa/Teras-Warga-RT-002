@@ -2426,6 +2426,274 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     doc.save(`Data_Warga_${rtSuffix}_${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
+/**
+ * GENERATE FORMULIR VERIFIKASI KEPENGHUNIAN & FISIK HUNTAP (FORMAT RESMI BPBD KOTA PALU)
+ * Menggunakan jspdf-autotable dengan nested headers 2-tingkat persis seperti blanko fisik BPBD.
+ * Anti-overlapping (tanpa teks bertumpuk), presisi tinggi, dan siap cetak A4 Landscape.
+ */
+export const generateBPBDVerificationReportPDF = async (houses: House[], customConfig?: PdfConfig) => {
+    const config = customConfig || getActivePdfConfig();
+
+    const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+        compress: true
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 10;
+    const centerX = pageWidth / 2;
+
+    let logoData = '';
+    try {
+        logoData = await getImageData(config.logo);
+    } catch (e) {
+        console.error(e);
+    }
+
+    const drawHeader = (isFirstPage: boolean) => {
+        if (isFirstPage) {
+            if (logoData) {
+                doc.addImage(logoData, 'PNG', margin, 7, 16, 20);
+            }
+
+            doc.setFont("times", "bold");
+            doc.setFontSize(12);
+            doc.setTextColor(15, 23, 42);
+            doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 11, { align: "center" });
+            doc.setFontSize(10.5);
+            doc.text(`BADAN PENANGGULANGAN BENCANA DAERAH (BPBD) / KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 16, { align: "center" });
+            doc.setFontSize(9.5);
+            doc.text(`FORMULIR VERIFIKASI PENGHUNIAN & FISIK HUNIAN TETAP (HUNTAP) - ${config.rtName}`, centerX, 21, { align: "center" });
+
+            doc.setFont("times", "normal");
+            doc.setFontSize(8);
+            doc.setTextColor(71, 85, 105);
+            doc.text(`Kawasan: Huntap Tondo 2 | Waktu Cetak: ${new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })} WITA`, centerX, 25.5, { align: "center" });
+
+            doc.setDrawColor(30, 41, 59);
+            doc.setLineWidth(0.6);
+            doc.line(margin, 28, pageWidth - margin, 28);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 29, pageWidth - margin, 29);
+        } else {
+            doc.setFont("times", "bold");
+            doc.setFontSize(8);
+            doc.setTextColor(100, 116, 139);
+            doc.text(`FORMULIR VERIFIKASI BPBD HUNTAP TONDO 2 | ${config.rtName} (Lanjutan)`, margin, 9);
+            doc.setTextColor(0);
+            doc.setDrawColor(203, 213, 225);
+            doc.setLineWidth(0.2);
+            doc.line(margin, 11, pageWidth - margin, 11);
+        }
+    };
+
+    drawHeader(true);
+
+    // Sort houses naturally by block & number (C5 -> C12)
+    const sortedHouses = [...houses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
+
+    // Multi-row nested header definition
+    const head = [
+        [
+            { content: 'No.', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Nama Pemilik / Penerima Bantuan', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Blok', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Nomor Unit Rumah', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Nama Penghuni / Kepala Keluarga', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Hubungan dengan Pemilik / Penerima', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'No. HP', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Status Penghunian', colSpan: 5, styles: { halign: 'center' } },
+            { content: 'Jumlah Penghuni (Orang)', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Kondisi Bangunan', colSpan: 3, styles: { halign: 'center' } },
+            { content: 'Sertifikasi', colSpan: 2, styles: { halign: 'center' } },
+            { content: 'Catatan / Potensi Tindak Lanjut', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+        ],
+        [
+            // Sub-kolom Status Penghunian
+            { content: 'Jual', styles: { halign: 'center' } },
+            { content: 'Sewa', styles: { halign: 'center' } },
+            { content: 'Kosong', styles: { halign: 'center' } },
+            { content: 'Alih Fungsi', styles: { halign: 'center' } },
+            { content: 'Perubahan Bentuk', styles: { halign: 'center' } },
+            // Sub-kolom Kondisi Bangunan
+            { content: 'Baik', styles: { halign: 'center' } },
+            { content: 'Terlantar', styles: { halign: 'center' } },
+            { content: 'Tidak Terawat', styles: { halign: 'center' } },
+            // Sub-kolom Sertifikasi
+            { content: 'Ya', styles: { halign: 'center' } },
+            { content: 'Tidak', styles: { halign: 'center' } }
+        ]
+    ];
+
+    // Build row data mapping from House
+    const body = sortedHouses.map((h, idx) => {
+        const owner = (h.ownerName || h.headOfFamily || '-').toUpperCase();
+        const resident = (h.headOfFamily || h.residentName || '-').toUpperCase();
+
+        // Hubungan dengan pemilik
+        let relation = h.ownerRelationship || '';
+        if (!relation) {
+            if (h.status === 'Empty') relation = 'Rumah Kosong';
+            else if (h.residenceType === 'Tetap' || (!h.ownerName || h.ownerName === h.headOfFamily)) relation = 'Pemilik Langsung';
+            else if (h.residenceType === 'Sewa') relation = 'Penyewa / Kontrak';
+            else if (h.residenceType === 'Rumah Keluarga') relation = 'Keluarga / Kerabat';
+            else relation = 'Penghuni';
+        }
+
+        const phone = h.phone || h.ownerPhone || '-';
+
+        // Checklist Status Penghunian
+        const isSewa = h.residenceType === 'Sewa';
+        const isKosong = h.status === 'Empty';
+        const isAlihFungsi = h.status === 'Business' || Boolean(h.hasBusiness);
+        const isPerubahanBentuk = Boolean(h.hasStructuralModification);
+        const isJual = h.occupancyHistory?.some(o => o.movedReason === 'Beli Rumah Baru') || false;
+
+        // Kondisi Bangunan
+        const condition = h.buildingCondition || (isKosong ? 'Tidak Terawat' : 'Baik');
+        const isBaik = condition === 'Baik';
+        const isTerlantar = condition === 'Terlantar';
+        const isTidakTerawat = condition === 'Tidak Terawat';
+
+        // Sertifikasi
+        const cert = h.certificateStatus || 'Ya';
+        const certYa = cert === 'Ya';
+        const certTidak = cert === 'Tidak';
+
+        const notes = h.specialNotes || (isKosong ? 'Unit belum dihuni pemilik' : isAlihFungsi ? `Digunakan usaha ${h.businessName || ''}` : '-');
+
+        return [
+            (idx + 1).toString(),
+            owner,
+            h.block || '-',
+            h.number || '-',
+            isKosong ? '-' : resident,
+            relation,
+            phone,
+            isJual ? 'V' : '',
+            isSewa ? 'V' : '',
+            isKosong ? 'V' : '',
+            isAlihFungsi ? 'V' : '',
+            isPerubahanBentuk ? 'V' : '',
+            isKosong ? '0' : (h.occupants || 1).toString(),
+            isBaik ? 'V' : '',
+            isTerlantar ? 'V' : '',
+            isTidakTerawat ? 'V' : '',
+            certYa ? 'V' : '',
+            certTidak ? 'V' : '',
+            notes
+        ];
+    });
+
+    autoTable(doc, {
+        head: head as any,
+        body: body,
+        startY: 32,
+        margin: { left: margin, right: margin, bottom: 22 },
+        theme: 'grid',
+        tableWidth: 'auto',
+        styles: {
+            font: 'times',
+            fontSize: 7,
+            cellPadding: 1,
+            lineColor: [100, 116, 139],
+            lineWidth: 0.15,
+            textColor: [15, 23, 42],
+            overflow: 'linebreak'
+        },
+        headStyles: {
+            fillColor: [241, 245, 249],
+            textColor: [15, 23, 42],
+            fontStyle: 'bold',
+            fontSize: 7.2,
+            lineWidth: 0.2,
+            lineColor: [51, 65, 85]
+        },
+        columnStyles: {
+            0: { cellWidth: 7, halign: 'center' },   // No
+            1: { cellWidth: 26 },                   // Pemilik
+            2: { cellWidth: 8, halign: 'center' },   // Blok
+            3: { cellWidth: 10, halign: 'center' },  // No Unit
+            4: { cellWidth: 26 },                   // Penghuni
+            5: { cellWidth: 22 },                   // Hubungan
+            6: { cellWidth: 18, halign: 'center' },  // HP
+            7: { cellWidth: 8, halign: 'center', fontStyle: 'bold' },  // Jual
+            8: { cellWidth: 8, halign: 'center', fontStyle: 'bold' },  // Sewa
+            9: { cellWidth: 9, halign: 'center', fontStyle: 'bold' },  // Kosong
+            10: { cellWidth: 11, halign: 'center', fontStyle: 'bold' }, // Alih Fungsi
+            11: { cellWidth: 13, halign: 'center', fontStyle: 'bold' }, // Perubahan Bentuk
+            12: { cellWidth: 10, halign: 'center' }, // Jml Orang
+            13: { cellWidth: 8, halign: 'center', fontStyle: 'bold' }, // Baik
+            14: { cellWidth: 11, halign: 'center', fontStyle: 'bold' }, // Terlantar
+            15: { cellWidth: 12, halign: 'center', fontStyle: 'bold' }, // Tdk Terawat
+            16: { cellWidth: 7, halign: 'center', fontStyle: 'bold' },  // Sertif Ya
+            17: { cellWidth: 8, halign: 'center', fontStyle: 'bold' },  // Sertif Tidak
+            18: { cellWidth: 'auto' }                // Catatan
+        },
+        alternateRowStyles: {
+            fillColor: [250, 250, 250]
+        },
+        didDrawPage: (data) => {
+            if (data.pageNumber > 1) {
+                drawHeader(false);
+            }
+        }
+    });
+
+    let finalY = (doc as any).lastAutoTable?.finalY || 150;
+
+    // Check space for signature
+    if (finalY > pageHeight - 45) {
+        doc.addPage();
+        drawHeader(false);
+        finalY = 18;
+    } else {
+        finalY += 6;
+    }
+
+    const signX = pageWidth - 60;
+    doc.setFont("times", "normal");
+    doc.setFontSize(8.5);
+    doc.text(`Palu, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`, signX, finalY, { align: "center" });
+    finalY += 4.5;
+    doc.text(`Ketua ${config.rtName}`, signX, finalY, { align: "center" });
+
+    const signSpaceY = finalY + 1;
+    finalY += 19;
+
+    doc.setFont("times", "bold");
+    doc.text(config.rtChairman, signX, finalY, { align: "center" });
+    doc.line(signX - 25, finalY + 0.8, signX + 25, finalY + 0.8);
+
+    try {
+        if (config.signature) {
+            const signImg = await getImageData(config.signature);
+            if (signImg) doc.addImage(signImg, 'PNG', signX - 14, signSpaceY + 1, 28, 16);
+        }
+        if (config.stamp) {
+            const stampImg = await getImageData(config.stamp);
+            if (stampImg) doc.addImage(stampImg, 'PNG', signX - 25, signSpaceY - 1, 18, 18);
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
+    // Page Numbers
+    const totalPages = doc.getNumberOfPages();
+    for (let j = 1; j <= totalPages; j++) {
+        doc.setPage(j);
+        doc.setFontSize(7.5);
+        doc.setFont("times", "normal");
+        doc.setTextColor(140);
+        doc.text(`Lampiran Dokumen Resmi Verifikasi BPBD Huntap Tondo 2 | Halaman ${j} dari ${totalPages}`, pageWidth - margin, pageHeight - 5, { align: "right" });
+    }
+
+    doc.save(`Formulir_Verifikasi_BPBD_Huntap_${config.rtName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+};
+
 export const generateIuranReceiptPDF = async (payment: any, customConfig?: PdfConfig) => {
     const config = customConfig || getActivePdfConfig();
     const doc = new jsPDF({ 
