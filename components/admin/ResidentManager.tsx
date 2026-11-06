@@ -30,7 +30,7 @@ import {
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon, ChevronDown, Settings, MoreVertical, FileClock, FileEdit,
-  ShieldAlert, Briefcase, ArrowLeft, Sliders
+  ShieldAlert, Briefcase, ArrowLeft, Sliders, Check, FileSpreadsheet, Sparkles, ShieldCheck
 } from 'lucide-react';
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role, OccupantHistoryItem } from '../../types';
 import { OccupantTransitionModal } from './resident/OccupantTransitionModal';
@@ -158,8 +158,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   
   // Custom Export States
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'excel' | 'pdf'>('excel');
+  const [exportFormat, setExportFormat] = useState<'excel' | 'pdf'>('pdf');
   const [exportTarget, setExportTarget] = useState<'all' | 'filtered'>('all');
+  const [exportTemplate, setExportTemplate] = useState<'default' | 'bpbd' | 'ktp' | 'umkm' | 'pdam' | 'custom'>('default');
   const [selectedExportCols, setSelectedExportCols] = useState<string[]>([
     'block', 'number', 'headOfFamily', 'phone', 'status', 'residenceType', 'occupants', 'isVerified'
   ]);
@@ -501,7 +502,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     setIsGenerating(true);
     const resolvedHouses = exportTarget === 'all' ? houses : filteredHouses;
     try {
-      if (isBpbdTemplateSelected) {
+      if (exportTemplate === 'bpbd' || isBpbdTemplateSelected) {
         if (exportFormat === 'excel') {
           await generateBPBDVerificationExcel(resolvedHouses, currentTenant);
           toast.success(`Berhasil mengunduh Formulir Verifikasi BPBD (Excel) untuk ${resolvedHouses.length} unit huntap!`);
@@ -2445,81 +2446,231 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         />
       )}
 
-      {/* Customizable Export Modal */}
+      {/* Customizable Export & Print PDF Modal */}
       <AnimatePresence>
         {isExportModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
               transition={{ duration: 0.2 }}
-              className="relative w-full max-w-4xl bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden p-8 flex flex-col my-8"
+              className="relative w-full max-w-5xl bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden p-6 sm:p-8 flex flex-col my-6 max-h-[92vh]"
             >
               {/* Close Button */}
               <button 
                 onClick={() => setIsExportModalOpen(false)}
-                className="absolute top-6 right-6 p-2 bg-slate-100 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition-colors"
+                className="absolute top-5 right-5 p-2 bg-slate-100 text-slate-400 hover:text-slate-700 rounded-full hover:bg-slate-200 transition-colors z-10"
+                aria-label="Tutup Modal"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
 
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                  <Download size={24} />
+              {/* Header Modal Dinamis */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-100">
+                <div className="flex items-center gap-3">
+                  <div className={`p-3 rounded-2xl flex items-center justify-center ${
+                    exportFormat === 'pdf' 
+                      ? 'bg-rose-50 text-rose-600 border border-rose-100' 
+                      : 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                  }`}>
+                    {exportFormat === 'pdf' ? <Printer size={24} /> : <FileSpreadsheet size={24} />}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg sm:text-xl font-extrabold text-slate-850">
+                        {exportFormat === 'pdf' ? 'Cetak Dokumen Resmi (PDF)' : 'Ekspor Spreadsheet (Excel)'}
+                      </h3>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        exportFormat === 'pdf' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
+                      }`}>
+                        {exportFormat === 'pdf' ? 'Siap Cetak' : 'Data Tabular'}
+                      </span>
+                    </div>
+                    <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
+                      {exportFormat === 'pdf' 
+                        ? 'Pengaturan cetak lengkap dengan kop resmi RT 002 / RW 01, Kelurahan Tondo, Kota Palu.' 
+                        : 'Unduh file spreadsheet format .xlsx untuk backup data dan olah tabel lanjutan.'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-extrabold text-slate-800">Kustomisasi Ekspor Data</h3>
-                  <p className="text-slate-500 text-sm">Pilih format, lingkup data, dan kolom yang ingin Anda tampilkan.</p>
+
+                {/* Tab Switcher Format: PDF vs Excel */}
+                <div className="inline-flex p-1 bg-slate-100 rounded-2xl border border-slate-200/80 self-start sm:self-auto shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setExportFormat('pdf')}
+                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      exportFormat === 'pdf'
+                        ? 'bg-white text-rose-700 shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Printer size={13} className="text-rose-600" />
+                    <span>Dokumen PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExportFormat('excel')}
+                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      exportFormat === 'excel'
+                        ? 'bg-white text-emerald-700 shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <FileSpreadsheet size={13} className="text-emerald-600" />
+                    <span>Spreadsheet Excel</span>
+                  </button>
                 </div>
               </div>
 
-              <hr className="border-slate-100 my-4" />
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">1. Format Dokumen</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() => setExportFormat('excel')}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border text-center transition-colors ${
-                          exportFormat === 'excel'
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm'
-                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="text-emerald-500 text-xl font-bold">EXCEL</div>
-                        <span className="text-[10px] font-bold">Spreadsheet (.xlsx)</span>
-                      </button>
-                      <button
-                        onClick={() => setExportFormat('pdf')}
-                        className={`flex flex-col items-center gap-2 p-3 rounded-2xl border text-center transition-colors ${
-                          exportFormat === 'pdf'
-                            ? 'border-rose-500 bg-rose-50 text-rose-800 shadow-sm'
-                            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="text-rose-600 text-xl font-bold">PDF</div>
-                        <span className="text-[10px] font-bold">Laporan (.pdf)</span>
-                      </button>
-                    </div>
+              {/* Main Content Area (Scrollable if needed) */}
+              <div className="overflow-y-auto pr-1 space-y-6 flex-1 max-h-[calc(88vh-180px)]">
+                {/* 1. Pemilihan Template Siap Pakai */}
+                <div>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      1. Pilih Format / Template Laporan
+                    </label>
+                    <span className="text-[11px] text-slate-400 font-medium">Klik salah satu template di bawah</span>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">2. Lingkup Data</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                    {[
+                      {
+                        id: 'default',
+                        icon: '🏛️',
+                        title: 'Daftar Induk Warga RT 002',
+                        desc: 'Standar resmi RT 002: Blok, No, Kepala Keluarga, Pemilik, HP, Status, Jiwa & Ket.',
+                        badge: 'Rekomendasi',
+                        badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                        onClick: () => {
+                          setExportTemplate('default');
+                          setIsBpbdTemplateSelected(false);
+                          setSelectedExportCols(['block', 'number', 'headOfFamily', 'phone', 'ownerName', 'ownerPhone', 'status', 'residenceType', 'occupants', 'isVerified']);
+                        }
+                      },
+                      {
+                        id: 'bpbd',
+                        icon: '📋',
+                        title: 'Formulir Verifikasi BPBD Huntap',
+                        desc: 'Format Berita Acara BPBD Kota Palu 16 kolom matriks (Status, Fisik, Sertifikasi, Renovasi).',
+                        badge: 'Format Resmi Pemkot',
+                        badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
+                        onClick: () => {
+                          setExportTemplate('bpbd');
+                          setIsBpbdTemplateSelected(true);
+                        }
+                      },
+                      {
+                        id: 'ktp',
+                        icon: '🪪',
+                        title: 'Kependudukan & KTP Domisili',
+                        desc: 'Pencocokan NIK, No. KK, status kesesuaian KTP domisili Pue Lombe & alamat KTP.',
+                        badge: 'Kelurahan',
+                        badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                        onClick: () => {
+                          setExportTemplate('ktp');
+                          setIsBpbdTemplateSelected(false);
+                          setSelectedExportCols(['block', 'number', 'headOfFamily', 'nik', 'kkNumber', 'ktpStatus', 'addressKtp', 'gender', 'occupants']);
+                        }
+                      },
+                      {
+                        id: 'umkm',
+                        icon: '🏪',
+                        title: 'Katalog Usaha & UMKM Warga',
+                        desc: 'Rekap pelaku usaha warga RT 002, kategori bisnis, lokasi lapak, dan kontak WhatsApp.',
+                        badge: 'Ekonomi',
+                        badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+                        onClick: () => {
+                          setExportTemplate('umkm');
+                          setIsBpbdTemplateSelected(false);
+                          setSelectedExportCols(['block', 'number', 'headOfFamily', 'phone', 'businessName', 'businessCategory', 'businessLocation', 'businessPhone']);
+                        }
+                      },
+                      {
+                        id: 'pdam',
+                        icon: '💧',
+                        title: 'Inventaris Meteran Air PDAM',
+                        desc: 'Pengawasan sambungan air bersih, nomor seri meteran resmi, dan kondisi jaringan fisik.',
+                        badge: 'Fasilitas',
+                        badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+                        onClick: () => {
+                          setExportTemplate('pdam');
+                          setIsBpbdTemplateSelected(false);
+                          setSelectedExportCols(['block', 'number', 'headOfFamily', 'phone', 'pdamStatus', 'pdamMeterNumber', 'status']);
+                        }
+                      },
+                      {
+                        id: 'custom',
+                        icon: '⚙️',
+                        title: 'Kustomisasi Kolom Bebas',
+                        desc: 'Pilih kombinasi kolom data kependudukan secara spesifik sesuai keperluan Anda.',
+                        badge: 'Fleksibel',
+                        badgeColor: 'bg-slate-100 text-slate-700 border-slate-200',
+                        onClick: () => {
+                          setExportTemplate('custom');
+                          setIsBpbdTemplateSelected(false);
+                        }
+                      }
+                    ].map((tpl) => {
+                      const isSelected = (exportTemplate === tpl.id) || (tpl.id === 'bpbd' && isBpbdTemplateSelected);
+                      return (
+                        <div
+                          key={tpl.id}
+                          onClick={tpl.onClick}
+                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-left flex flex-col justify-between ${
+                            isSelected 
+                              ? 'border-indigo-600 bg-indigo-50/70 shadow-sm ring-2 ring-indigo-500/20' 
+                              : 'border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/70'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-lg">{tpl.icon}</span>
+                              <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold border ${tpl.badgeColor}`}>
+                                {tpl.badge}
+                              </span>
+                            </div>
+                            <h4 className="text-xs font-bold text-slate-800 leading-snug">{tpl.title}</h4>
+                            <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{tpl.desc}</p>
+                          </div>
+                          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-[10px] font-semibold text-slate-400">
+                              {tpl.id === 'bpbd' ? 'Format Baku (16 Kolom)' : tpl.id === 'custom' ? 'Kustom Manual' : 'Template Terkonfigurasi'}
+                            </span>
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                              isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white'
+                            }`}>
+                              {isSelected && <Check size={10} className="stroke-[3]" />}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. Lingkup Target Data (Filter Scope) */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+                  <div className="md:col-span-4 bg-slate-50/70 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      2. Lingkup Baris Data
+                    </label>
+
                     <div className="space-y-2">
                       <button
+                        type="button"
                         onClick={() => setExportTarget('all')}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-colors ${
+                        className={`w-full flex items-center justify-between p-3 rounded-xl border text-left transition-colors cursor-pointer ${
                           exportTarget === 'all'
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-950 font-bold'
-                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                            ? 'border-indigo-500 bg-white text-indigo-950 font-bold shadow-xs'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'
                         }`}
                       >
                         <div>
-                          <div className="text-xs">Semua Warga</div>
-                          <div className="text-[10px] text-slate-500 font-normal">Seluruh data yang terdaftar ({houses.length} baris)</div>
+                          <div className="text-xs font-bold">Semua Warga Terdaftar</div>
+                          <div className="text-[10px] text-slate-500 font-normal">Seluruh unit rumah ({houses.length} unit)</div>
                         </div>
                         <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${exportTarget === 'all' ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300'}`}>
                           {exportTarget === 'all' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
@@ -2527,208 +2678,251 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       </button>
 
                       <button
+                        type="button"
                         onClick={() => setExportTarget('filtered')}
                         disabled={filteredHouses.length === 0}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-colors ${
+                        className={`w-full flex items-center justify-between p-3 rounded-xl border text-left transition-colors cursor-pointer ${
                           exportTarget === 'filtered'
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-950 font-bold'
-                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50'
+                            ? 'border-indigo-500 bg-white text-indigo-950 font-bold shadow-xs'
+                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100 disabled:opacity-50'
                         }`}
                       >
                         <div>
-                          <div className="text-xs">Filter Aktif</div>
-                          <div className="text-[10px] text-slate-500 font-normal font-sans">Sesuai filter pencarian ({filteredHouses.length} baris)</div>
+                          <div className="text-xs font-bold">Sesuai Filter &amp; Pencarian</div>
+                          <div className="text-[10px] text-slate-500 font-normal">Hasil filter aktif saat ini ({filteredHouses.length} unit)</div>
                         </div>
                         <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${exportTarget === 'filtered' ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300'}`}>
                           {exportTarget === 'filtered' && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                         </div>
                       </button>
                     </div>
-                  </div>
-                </div>
 
-                <div className="md:col-span-2 flex flex-col border border-slate-100 rounded-3xl bg-slate-50/50 p-5">
-                  <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
-                    <label className="block text-xs font-semibold text-slate-650 uppercase tracking-wider">3. Pilih Kolom Untuk Diekspor</label>
-                    <div className="flex gap-2">
-                      <button 
-                        onClick={() => {
-                          setIsBpbdTemplateSelected(true);
-                        }}
-                        className={`px-2 py-0.5 rounded-lg text-[10px] uppercase font-bold transition-all ${
-                          isBpbdTemplateSelected 
-                            ? 'bg-rose-600 text-white shadow-xs' 
-                            : 'bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200'
-                        }`}
-                      >
-                        ★ Format BPBD Huntap
-                      </button>
-                      <span className="text-slate-300 text-xs">|</span>
-                      <button 
-                        onClick={() => {
-                          setIsBpbdTemplateSelected(false);
-                          setSelectedExportCols(['block', 'number', 'headOfFamily', 'phone', 'status', 'residenceType', 'occupants', 'isVerified']);
-                        }}
-                        className="text-[10px] uppercase font-semibold text-indigo-600 hover:text-indigo-800"
-                      >
-                        Bawaan
-                      </button>
-                      <span className="text-slate-300 text-xs">|</span>
-                      <button 
-                        onClick={() => setSelectedExportCols([
-                          'block', 'number', 'headOfFamily', 'phone', 
-                          'businessName', 'businessCategory', 'businessLocation', 'businessPhone'
-                        ])}
-                        className="text-[10px] uppercase font-semibold text-amber-600 hover:text-amber-800"
-                      >
-                        Khusus UMKM
-                      </button>
-                      <span className="text-slate-300 text-xs">|</span>
-                      <button 
-                        onClick={() => setSelectedExportCols([
-                          'block', 'number', 'headOfFamily', 'phone', 
-                          'ktpStatus', 'addressKtp'
-                        ])}
-                        className="text-[10px] uppercase font-semibold text-emerald-600 hover:text-emerald-800"
-                      >
-                        Khusus KTP
-                      </button>
-                      <span className="text-slate-300 text-xs">|</span>
-                      <button 
-                        onClick={() => setSelectedExportCols([
-                          'block', 'number', 'headOfFamily', 'phone', 'ownerName', 'ownerPhone',
-                          'status', 'residenceType', 'joiningDate', 'gender', 'birthDate', 'religion',
-                          'ktpStatus', 'addressKtp',
-                          'occupants', 'education', 'jobCategory', 'economicStatus', 
-                          'hasBusiness', 'businessName', 'businessCategory', 'businessLocation', 'businessPhone', 'isUmkmRegistered',
-                          'isVerified', 'accessCode'
-                        ])}
-                        className="text-[10px] uppercase font-semibold text-indigo-600 hover:text-indigo-800"
-                      >
-                        Semua
-                      </button>
-                      <span className="text-slate-300 text-xs">|</span>
-                      <button 
-                        onClick={() => setSelectedExportCols(['block', 'number'])}
-                        className="text-[10px] uppercase font-semibold text-rose-600 hover:text-rose-800"
-                      >
-                        Kosongkan
-                      </button>
+                    {/* Live Preview Info Box */}
+                    <div className="mt-3 p-3 bg-white rounded-xl border border-slate-200/80 space-y-1.5 text-xs">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                        <Sparkles size={13} className="text-indigo-600" />
+                        <span>Ringkasan Cetak:</span>
+                      </div>
+                      <div className="text-[11px] text-slate-600 space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Total Baris:</span>
+                          <span className="font-bold text-slate-800 font-mono">
+                            {exportTarget === 'all' ? houses.length : filteredHouses.length} Unit
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Format Kertas:</span>
+                          <span className="font-semibold text-slate-700">A4 Landscape</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Kop Surat:</span>
+                          <span className="font-semibold text-slate-700">Resmi RT 002 Tondo</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Tanda Tangan:</span>
+                          <span className="font-semibold text-emerald-600">Ketua RT 002</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="overflow-y-auto max-h-[250px] pr-2 space-y-4 font-sans">
-                    {[
-                      { name: 'Dasar', items: [
-                        { id: 'block', label: 'Blok' },
-                        { id: 'number', label: 'No Rumah' },
-                        { id: 'headOfFamily', label: 'Kepala Keluarga' },
-                        { id: 'joiningDate', label: 'Mulai Menempati' },
-                        { id: 'status', label: 'Status Hunian' },
-                        { id: 'residenceType', label: 'Status Kepenghunian' }
-                      ]},
-                      { name: 'Kontak', items: [
-                        { id: 'phone', label: 'No Telepon' },
-                        { id: 'ownerName', label: 'Pemilik Rumah' },
-                        { id: 'ownerPhone', label: 'Kontak Pemilik' }
-                      ]},
-                      { name: 'Kependudukan & KTP', items: [
-                        { id: 'ktpStatus', label: 'Status KTP' },
-                        { id: 'addressKtp', label: 'Alamat Sesuai KTP' },
-                        { id: 'gender', label: 'Jenis Kelamin' },
-                        { id: 'birthDate', label: 'Tgl Lahir' },
-                        { id: 'religion', label: 'Agama' },
-                        { id: 'occupants', label: 'Jumlah Jiwa' }
-                      ]},
-                      { name: 'Usaha & UMKM Warga', items: [
-                        { id: 'hasBusiness', label: 'Memiliki Usaha' },
-                        { id: 'businessName', label: 'Nama Usaha/Toko' },
-                        { id: 'businessCategory', label: 'Kategori Usaha' },
-                        { id: 'businessLocation', label: 'Lokasi Usaha' },
-                        { id: 'businessPhone', label: 'WhatsApp Usaha' },
-                        { id: 'isUmkmRegistered', label: 'Katalog UMKM' }
-                      ]},
-                      { name: 'Pelengkap', items: [
-                        { id: 'education', label: 'Pendidikan' },
-                        { id: 'jobCategory', label: 'Pekerjaan' },
-                        { id: 'economicStatus', label: 'Status Ekonomi' }
-                      ]},
-                      { name: 'Sistem', items: [
-                        { id: 'isVerified', label: 'Status Verifikasi' },
-                        { id: 'accessCode', label: 'KODE AKSES (PIN)' }
-                      ]}
-                    ].map((group) => {
-                      return (
-                        <div key={group.name} className="space-y-1.5">
-                          <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{group.name}</h4>
-                          <div className="grid grid-cols-2 gap-2">
-                            {group.items.map((col) => {
-                              const isChecked = selectedExportCols.includes(col.id);
-                              const isMandatory = ['block', 'number'].includes(col.id);
-                              return (
-                                <button
-                                  key={col.id}
-                                  onClick={() => {
-                                    if (isMandatory) return;
-                                    if (isChecked) {
-                                      setSelectedExportCols(selectedExportCols.filter(c => c !== col.id));
-                                    } else {
-                                      setSelectedExportCols([...selectedExportCols, col.id]);
-                                    }
-                                  }}
-                                  className={`flex items-center gap-2 px-3 py-2 text-xs rounded-xl border text-left transition-colors ${
-                                    isChecked
-                                      ? 'bg-white border-indigo-200 text-slate-800 shadow-sm font-semibold'
-                                      : 'bg-slate-100/55 border-slate-200 text-slate-500 hover:bg-slate-150'
-                                  }`}
-                                >
-                                  <div className={`w-3.5 h-3.5 rounded flex items-center justify-center border text-[9px] text-white ${
-                                    isChecked ? 'bg-indigo-600 border-indigo-600' : 'border-slate-300 bg-white'
-                                  }`}>
-                                    {isChecked && '✓'}
-                                  </div>
-                                  <span className="truncate">{col.label} {isMandatory && <span className="text-rose-450 font-normal">*</span>}</span>
-                                </button>
-                              );
-                            })}
+                  {/* 3. Panel Kolom (Khusus Template Non-BPBD atau Kustom) */}
+                  <div className="md:col-span-8 flex flex-col border border-slate-200/80 rounded-2xl bg-slate-50/50 p-4">
+                    {exportTemplate === 'bpbd' || isBpbdTemplateSelected ? (
+                      <div className="flex flex-col items-center justify-center h-full text-center p-6 bg-white rounded-xl border border-amber-200/80 space-y-3">
+                        <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl border border-amber-200 flex items-center justify-center">
+                          <ShieldCheck size={24} />
+                        </div>
+                        <div className="max-w-md">
+                          <h4 className="text-sm font-bold text-slate-800">Format Baku Formulir Verifikasi BPBD</h4>
+                          <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                            Template ini menggunakan struktur <strong>16 kolom matriks resmi</strong> sesuai standar Berita Acara Pendataan Hunian Tetap BPBD Kota Palu (Pemilik, Blok, Unit, Penghuni, Hubungan, HP, Status Hunian: Jual/Sewa/Kosong/Alih Fungsi/Perubahan Bentuk, Jiwa, Kondisi Fisik, Sertifikasi, dan Catatan Potensi Tindak Lanjut).
+                          </p>
+                        </div>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold">
+                          <Check size={12} className="stroke-[3]" /> Seluruh 16 Kolom BPBD Otomatis Diterapkan
+                        </span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-slate-200 pb-2">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                            3. Kolom yang Ditampilkan ({selectedExportCols.length} Dipilih)
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <button 
+                              type="button"
+                              onClick={() => setSelectedExportCols([
+                                'block', 'number', 'headOfFamily', 'phone', 'ownerName', 'ownerPhone',
+                                'status', 'residenceType', 'occupants', 'isVerified'
+                              ])}
+                              className="text-[10px] px-2 py-0.5 rounded font-bold text-indigo-600 hover:bg-indigo-50 border border-indigo-200"
+                            >
+                              Bawaan
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => setSelectedExportCols([
+                                'block', 'number', 'headOfFamily', 'nik', 'kkNumber', 'phone', 'ownerName', 'ownerPhone', 'ownerRelationship',
+                                'status', 'residenceType', 'joiningDate', 'gender', 'birthDate', 'religion',
+                                'ktpStatus', 'addressKtp', 'buildingCondition', 'certificateStatus', 'hasStructuralModification',
+                                'pdamStatus', 'pdamMeterNumber',
+                                'occupants', 'education', 'jobCategory', 'economicStatus', 
+                                'hasBusiness', 'businessName', 'businessCategory', 'businessLocation', 'businessPhone',
+                                'isVerified', 'accessCode'
+                              ])}
+                              className="text-[10px] px-2 py-0.5 rounded font-bold text-slate-600 hover:bg-slate-100 border border-slate-200"
+                            >
+                              Pilih Semua
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => setSelectedExportCols(['block', 'number', 'headOfFamily'])}
+                              className="text-[10px] px-2 py-0.5 rounded font-bold text-rose-600 hover:bg-rose-50 border border-rose-200"
+                            >
+                              Minimal
+                            </button>
                           </div>
                         </div>
-                      );
-                    })}
+
+                        <div className="overflow-y-auto max-h-[280px] pr-2 space-y-4 font-sans">
+                          {[
+                            { name: 'Data Dasar Hunian', items: [
+                              { id: 'block', label: 'Blok' },
+                              { id: 'number', label: 'No Rumah' },
+                              { id: 'headOfFamily', label: 'Kepala Keluarga' },
+                              { id: 'joiningDate', label: 'Mulai Menempati' },
+                              { id: 'status', label: 'Status Hunian' },
+                              { id: 'residenceType', label: 'Status Kepenghunian' }
+                            ]},
+                            { name: 'Kependudukan & KTP', items: [
+                              { id: 'nik', label: 'NIK (16 Digit)' },
+                              { id: 'kkNumber', label: 'Nomor Kartu Keluarga' },
+                              { id: 'ktpStatus', label: 'Status KTP' },
+                              { id: 'addressKtp', label: 'Alamat Sesuai KTP' },
+                              { id: 'gender', label: 'Jenis Kelamin' },
+                              { id: 'birthDate', label: 'Tanggal Lahir' },
+                              { id: 'religion', label: 'Agama' },
+                              { id: 'occupants', label: 'Jumlah Jiwa (Penghuni)' }
+                            ]},
+                            { name: 'Kontak & Legalitas Pemilik', items: [
+                              { id: 'phone', label: 'No Telepon/WA' },
+                              { id: 'ownerName', label: 'Pemilik Rumah (SK)' },
+                              { id: 'ownerPhone', label: 'Kontak Pemilik' },
+                              { id: 'ownerRelationship', label: 'Hubungan dgn Pemilik' }
+                            ]},
+                            { name: 'Fisik Bangunan & Verifikasi Huntap', items: [
+                              { id: 'buildingCondition', label: 'Kondisi Bangunan' },
+                              { id: 'certificateStatus', label: 'Status Sertifikasi' },
+                              { id: 'hasStructuralModification', label: 'Perubahan Bentuk Fisik' }
+                            ]},
+                            { name: 'Fasilitas & Meteran Air PDAM', items: [
+                              { id: 'pdamStatus', label: 'Status Meteran PDAM' },
+                              { id: 'pdamMeterNumber', label: 'Nomor Seri Meteran' }
+                            ]},
+                            { name: 'Usaha & UMKM Warga', items: [
+                              { id: 'hasBusiness', label: 'Memiliki Usaha' },
+                              { id: 'businessName', label: 'Nama Usaha / Lapak' },
+                              { id: 'businessCategory', label: 'Kategori Usaha' },
+                              { id: 'businessLocation', label: 'Lokasi Usaha' },
+                              { id: 'businessPhone', label: 'WhatsApp Usaha' }
+                            ]},
+                            { name: 'Sosial & Ekonomi', items: [
+                              { id: 'education', label: 'Pendidikan Terakhir' },
+                              { id: 'jobCategory', label: 'Pekerjaan' },
+                              { id: 'economicStatus', label: 'Status Ekonomi' }
+                            ]},
+                            { name: 'Administrasi & Keamanan', items: [
+                              { id: 'isVerified', label: 'Status Verifikasi' },
+                              { id: 'accessCode', label: 'Kode Akses Warga (PIN)' }
+                            ]}
+                          ].map((group) => (
+                            <div key={group.name} className="space-y-1.5">
+                              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{group.name}</h4>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                                {group.items.map((col) => {
+                                  const isChecked = selectedExportCols.includes(col.id);
+                                  const isMandatory = ['block', 'number'].includes(col.id);
+                                  return (
+                                    <button
+                                      key={col.id}
+                                      type="button"
+                                      onClick={() => {
+                                        if (isMandatory) return;
+                                        setExportTemplate('custom');
+                                        if (isChecked) {
+                                          setSelectedExportCols(selectedExportCols.filter(c => c !== col.id));
+                                        } else {
+                                          setSelectedExportCols([...selectedExportCols, col.id]);
+                                        }
+                                      }}
+                                      className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-xl border text-left transition-colors cursor-pointer ${
+                                        isChecked
+                                          ? 'bg-white border-indigo-300 text-slate-800 shadow-2xs font-semibold'
+                                          : 'bg-slate-100/60 border-slate-200 text-slate-500 hover:bg-white'
+                                      }`}
+                                    >
+                                      <div className={`w-3.5 h-3.5 rounded flex items-center justify-center border text-[9px] ${
+                                        isChecked ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-white'
+                                      }`}>
+                                        {isChecked && '✓'}
+                                      </div>
+                                      <span className="truncate">{col.label} {isMandatory && <span className="text-rose-500">*</span>}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-auto flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
-                <div className="text-[11px] text-slate-400 max-w-sm">
-                  {exportFormat === 'pdf' ? (
-                    <span className="flex items-center gap-1 text-amber-600">
-                      <ShieldAlert size={12} className="shrink-0" />
-                      Orientasi PDF diatur landscape A4 dengan skala lebar serasi.
-                    </span>
-                  ) : (
-                    <span className="text-slate-500 font-sans">
-                      Excel akan disusun secara optimal dengan pewarnaan visual modern.
-                    </span>
-                  )}
+              {/* Modal Footer / Actions */}
+              <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
+                  <ShieldAlert size={14} className="text-amber-500 shrink-0" />
+                  <span>
+                    Dokumen dicetak atas nama <strong>Pengurus RT 002 / RW 01</strong> Kelurahan Tondo dengan titimangsa resmi.
+                  </span>
                 </div>
 
-                <div className="flex gap-3 w-full sm:w-auto">
+                <div className="flex gap-2.5 w-full sm:w-auto">
                   <button
+                    type="button"
                     onClick={() => setIsExportModalOpen(false)}
-                    className="flex-1 sm:flex-initial px-6 py-3 border border-slate-200 rounded-2xl text-xs font-semibold uppercase tracking-wider text-slate-600 hover:bg-slate-55 transition-colors"
+                    className="flex-1 sm:flex-initial px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
                   >
                     Batal
                   </button>
                   <button
+                    type="button"
                     onClick={handlePerformExport}
-                    disabled={isGenerating || selectedExportCols.length === 0}
-                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-8 py-3 rounded-2xl text-xs font-semibold uppercase tracking-wider text-white shadow-lg shadow-2xs transition-colors ${
-                      isGenerating ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-2xs'
+                    disabled={isGenerating || (selectedExportCols.length === 0 && !isBpbdTemplateSelected && exportTemplate !== 'bpbd')}
+                    className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-white shadow-md transition-all cursor-pointer ${
+                      isGenerating 
+                        ? 'bg-slate-400 cursor-not-allowed' 
+                        : exportFormat === 'pdf' 
+                          ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/20 active:scale-95' 
+                          : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20 active:scale-95'
                     }`}
                   >
-                    {isGenerating ? 'Memproses...' : 'Ekspor Laporan'}
-                    <ChevronRight size={14} />
+                    {isGenerating ? (
+                      <span>Menyiapkan Dokumen...</span>
+                    ) : exportFormat === 'pdf' ? (
+                      <>
+                        <Printer size={15} />
+                        <span>Cetak PDF Sekarang</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download size={15} />
+                        <span>Unduh Excel Sekarang</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>

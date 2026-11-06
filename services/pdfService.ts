@@ -2103,7 +2103,15 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         { id: 'businessLocation', label: "LOKASI USAHA", baseWidth: 20 },
         { id: 'businessPhone', label: "WA USAHA", baseWidth: 22 },
         { id: 'ktpStatus', label: "STATUS KTP", baseWidth: 26 },
-        { id: 'addressKtp', label: "ALAMAT SESUAI KTP", baseWidth: 42 }
+        { id: 'addressKtp', label: "ALAMAT SESUAI KTP", baseWidth: 42 },
+        { id: 'nik', label: "NIK", baseWidth: 32 },
+        { id: 'kkNumber', label: "NO. KK", baseWidth: 32 },
+        { id: 'ownerRelationship', label: "HUB. PEMILIK", baseWidth: 24 },
+        { id: 'buildingCondition', label: "KONDISI FISIK", baseWidth: 20 },
+        { id: 'certificateStatus', label: "SERTIFIKAT", baseWidth: 16 },
+        { id: 'hasStructuralModification', label: "RENOVASI", baseWidth: 16 },
+        { id: 'pdamStatus', label: "METERAN AIR", baseWidth: 22 },
+        { id: 'pdamMeterNumber', label: "NO. METERAN", baseWidth: 24 }
     ];
 
     let selectedDefs = allPdfCols;
@@ -2242,13 +2250,41 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
             if (header.id === 'addressKtp') {
                 return h.addressKtp || '-';
             }
+            if (header.id === 'nik') {
+                return h.nik || '-';
+            }
+            if (header.id === 'kkNumber') {
+                return h.kkNumber || '-';
+            }
+            if (header.id === 'ownerRelationship') {
+                return h.ownerRelationship || (h.residenceType === 'Tetap' ? 'Diri Sendiri' : '-');
+            }
+            if (header.id === 'buildingCondition') {
+                return h.buildingCondition || 'Baik';
+            }
+            if (header.id === 'certificateStatus') {
+                return h.certificateStatus || 'Tidak';
+            }
+            if (header.id === 'hasStructuralModification') {
+                return h.hasStructuralModification ? 'Ya' : 'Tidak';
+            }
+            if (header.id === 'pdamStatus') {
+                return h.pdamStatus || 'Terpasang';
+            }
+            if (header.id === 'pdamMeterNumber') {
+                return h.pdamMeterNumber || '-';
+            }
             return (val?.toString() || '-');
         });
 
         rowData.forEach((text, idx) => {
             const hDef = headers[idx];
             const w = hDef.w;
-            const centerKeys = ['no', 'block', 'number', 'gender', 'birthDate', 'religion', 'status', 'residenceType', 'occupants', 'isVerified', 'joiningDate', 'businessLocation', 'ktpStatus'];
+            const centerKeys = [
+                'no', 'block', 'number', 'gender', 'birthDate', 'religion', 'status', 
+                'residenceType', 'occupants', 'isVerified', 'joiningDate', 'businessLocation', 
+                'ktpStatus', 'buildingCondition', 'certificateStatus', 'hasStructuralModification', 'pdamStatus'
+            ];
             const align = centerKeys.includes(hDef.id) ? "center" : "left";
             const xPos = align === "center" ? currX + (w / 2) : currX + 2;
             
