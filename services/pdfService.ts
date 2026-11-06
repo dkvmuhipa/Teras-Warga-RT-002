@@ -2456,41 +2456,47 @@ export const generateBPBDVerificationReportPDF = async (houses: House[], customC
     const drawHeader = (isFirstPage: boolean) => {
         if (isFirstPage) {
             if (logoData) {
-                doc.addImage(logoData, 'PNG', margin, 7, 16, 20);
+                doc.addImage(logoData, 'PNG', margin, 10, 20, 26);
             }
 
             doc.setFont("times", "bold");
-            doc.setFontSize(12);
-            doc.setTextColor(15, 23, 42);
-            doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 11, { align: "center" });
-            doc.setFontSize(10.5);
-            doc.text(`BADAN PENANGGULANGAN BENCANA DAERAH (BPBD) / KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 16, { align: "center" });
-            doc.setFontSize(9.5);
-            doc.text(`FORMULIR VERIFIKASI PENGHUNIAN & FISIK HUNIAN TETAP (HUNTAP) - ${config.rtName}`, centerX, 21, { align: "center" });
-
+            doc.setFontSize(13);
+            doc.setTextColor(0);
+            doc.text(`PEMERINTAH KOTA ${config.kota || 'PALU'}`, centerX, 14, { align: "center" });
+            doc.text(`KECAMATAN ${config.kecamatan || 'MANTIKULORE'}`, centerX, 20, { align: "center" });
+            doc.text(`KELURAHAN ${config.kelurahan || 'TONDO'}`, centerX, 26, { align: "center" });
+            doc.text(`PENGURUS ${config.rtName}`, centerX, 32, { align: "center" });
             doc.setFont("times", "normal");
-            doc.setFontSize(8);
-            doc.setTextColor(71, 85, 105);
-            doc.text(`Kawasan: Huntap Tondo 2 | Waktu Cetak: ${new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })} WITA`, centerX, 25.5, { align: "center" });
+            doc.setFontSize(9.5);
+            doc.text(`Alamat : ${config.rtAddress}`, centerX, 37.5, { align: "center" });
 
-            doc.setDrawColor(30, 41, 59);
-            doc.setLineWidth(0.6);
-            doc.line(margin, 28, pageWidth - margin, 28);
+            doc.setDrawColor(0);
+            doc.setLineWidth(0.8);
+            doc.line(margin, 41, pageWidth - margin, 41);
             doc.setLineWidth(0.2);
-            doc.line(margin, 29, pageWidth - margin, 29);
+            doc.line(margin, 42, pageWidth - margin, 42);
         } else {
             doc.setFont("times", "bold");
-            doc.setFontSize(8);
+            doc.setFontSize(8.5);
             doc.setTextColor(100, 116, 139);
-            doc.text(`FORMULIR VERIFIKASI BPBD HUNTAP TONDO 2 | ${config.rtName} (Lanjutan)`, margin, 9);
+            doc.text(`PENGURUS ${config.rtName} | FORMULIR VERIFIKASI BPBD HUNTAP (Lanjutan)`, margin, 11);
             doc.setTextColor(0);
             doc.setDrawColor(203, 213, 225);
             doc.setLineWidth(0.2);
-            doc.line(margin, 11, pageWidth - margin, 11);
+            doc.line(margin, 13, pageWidth - margin, 13);
         }
     };
 
     drawHeader(true);
+
+    // Judul Dokumen & Tanggal Cetak (Persis posisi seperti Daftar Induk Warga)
+    doc.setFont("times", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(0);
+    doc.text("FORMULIR VERIFIKASI PENGHUNIAN & FISIK HUNIAN TETAP (HUNTAP)", centerX, 48, { align: "center" });
+    doc.setFontSize(8);
+    doc.setFont("times", "normal");
+    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, pageWidth - margin, 48, { align: "right" });
 
     // Sort houses naturally by block & number (C5 -> C12)
     const sortedHouses = [...houses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
@@ -2591,7 +2597,7 @@ export const generateBPBDVerificationReportPDF = async (houses: House[], customC
     autoTable(doc, {
         head: head as any,
         body: body,
-        startY: 32,
+        startY: 52,
         margin: { left: margin, right: margin, bottom: 22 },
         theme: 'grid',
         tableWidth: 'auto',
