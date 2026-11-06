@@ -30,7 +30,7 @@ import {
   Users, Home, X, Phone, Shield, Calendar, MapPin, Activity,
   ChevronRight, CreditCard, Mail, User, DollarSign, LayoutList, FileText, Printer,
   PieChart as PieChartIcon, ChevronDown, Settings, MoreVertical, FileClock, FileEdit,
-  ShieldAlert, Briefcase, ArrowLeft
+  ShieldAlert, Briefcase, ArrowLeft, Sliders
 } from 'lucide-react';
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role, OccupantHistoryItem } from '../../types';
 import { OccupantTransitionModal } from './resident/OccupantTransitionModal';
@@ -106,7 +106,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   initialViewMode = 'grid'
 }) => {
   const confirm = useConfirm();
-  const { currentTenant } = useTenant();
+  const { currentTenant, isSupervising } = useTenant();
   const prompt = usePrompt();
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'mutations' | 'requests' | 'health' | 'guests' | 'officials'>('grid');
   
@@ -1846,76 +1846,156 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                 <motion.div 
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  className="absolute right-0 mt-3 w-64 bg-white/90 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl z-20 overflow-hidden ring-1 ring-black/5"
+                  className="absolute right-0 mt-3 w-72 max-h-[82vh] overflow-y-auto bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-2xl z-20 ring-1 ring-black/5 divide-y divide-slate-100"
                 >
-                  <div className="p-3 space-y-1.5">
-                    <div className="px-3 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em]">Aksi Massal</div>
+                  {/* Bagian 1: Pintas Cepat BPBD Huntap */}
+                  <div className="p-2.5 space-y-1 bg-rose-50/40">
+                    <div className="px-3 py-1.5 text-[8.5px] font-black text-rose-700 uppercase tracking-[0.2em] flex items-center justify-between">
+                      <span>Verifikasi BPBD Huntap</span>
+                      <span className="text-[7.5px] bg-rose-600 text-white px-1.5 py-0.5 rounded-full font-bold">Resmi</span>
+                    </div>
                     <button 
-                      onClick={() => { handleGenerateAllPins(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
-                      disabled={isGenerating}
+                      onClick={async () => { 
+                        setIsActionMenuOpen(false);
+                        try {
+                          await generateBPBDVerificationReportPDF(filteredHouses, pdfConfig);
+                          toast.success(`Cetak formulir verifikasi BPBD (${filteredHouses.length} unit) berhasil!`);
+                        } catch (e) {
+                          toast.error('Gagal mencetak formulir BPBD.');
+                        }
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-800 hover:bg-white hover:text-rose-700 hover:shadow-xs rounded-xl transition-all"
                     >
-                      <div className="p-2 bg-amber-50 text-amber-500 rounded-xl group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                        <Shield size={14} />
+                      <div className="p-1.5 bg-rose-100 text-rose-700 rounded-lg shrink-0">
+                        <FileText size={13} />
                       </div>
-                      <span>{isGenerating ? 'Memproses...' : 'Otokit PIN'}</span>
+                      <div className="flex-1 truncate">
+                        <p className="truncate">Cetak Blanko BPBD (PDF)</p>
+                        <p className="text-[8.5px] text-slate-400 font-normal lowercase">header 2-tingkat anti-overlap</p>
+                      </div>
                     </button>
                     <button 
-                      onClick={() => { handleCleanupPlaceholders(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-rose-600 hover:shadow-sm rounded-2xl transition-colors"
+                      onClick={async () => { 
+                        setIsActionMenuOpen(false);
+                        try {
+                          await generateBPBDVerificationExcel(filteredHouses, currentTenant);
+                          toast.success(`Unduh formulir verifikasi BPBD Excel (${filteredHouses.length} unit) berhasil!`);
+                        } catch (e) {
+                          toast.error('Gagal mengunduh Excel BPBD.');
+                        }
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-800 hover:bg-white hover:text-rose-700 hover:shadow-xs rounded-xl transition-all"
                     >
-                      <div className="p-2 bg-rose-50 text-rose-500 rounded-xl group-hover:bg-rose-500 group-hover:text-white transition-colors">
-                        <Trash2 size={14} />
+                      <div className="p-1.5 bg-rose-100 text-rose-700 rounded-lg shrink-0">
+                        <Download size={13} />
                       </div>
-                      <span>Reset Awal</span>
+                      <div className="flex-1 truncate">
+                        <p className="truncate">Blanko BPBD (Excel)</p>
+                        <p className="text-[8.5px] text-slate-400 font-normal lowercase">checklist centang & merge header</p>
+                      </div>
                     </button>
-                    
-                    <div className="h-px bg-slate-100 mx-3 my-2"></div>
-                    <div className="px-3 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em]">Impor & Ekspor</div>
+                  </div>
+
+                  {/* Bagian 2: Impor & Ekspor Data */}
+                  <div className="p-2.5 space-y-1">
+                    <div className="px-3 py-1.5 text-[8.5px] font-bold text-slate-400 uppercase tracking-[0.2em]">Impor & Ekspor</div>
                     
                     <button 
                       onClick={() => { 
                         handleDownloadTemplate(); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-xl transition-colors"
                     >
-                      <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
-                        <FileText size={14} />
+                      <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
+                        <FileText size={13} />
                       </div>
                       <span>Unduh Template Excel</span>
                     </button>
-                    
+
                     <button 
                       onClick={() => { 
-                        setExportTarget('all');
-                        setIsExportModalOpen(true);
+                        if (isSupervising) {
+                          toast.info('Fitur unggah data terkunci dalam Mode Supervisi (Read-Only).');
+                          return;
+                        }
+                        fileInputRef.current?.click(); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-colors"
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider rounded-xl transition-colors ${
+                        isSupervising ? 'opacity-50 cursor-not-allowed text-slate-400' : 'text-slate-700 hover:bg-slate-50 hover:text-indigo-600'
+                      }`}
+                      disabled={isUploading || isSupervising}
                     >
-                      <div className="p-2 bg-emerald-50 text-emerald-500 rounded-xl">
-                        <Download size={14} />
+                      <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
+                        <Upload size={13} />
                       </div>
-                      <span>Ekspor Data (Semua Warga)</span>
+                      <span>{isUploading ? 'Mengunggah...' : 'Unggah Data Excel'}</span>
                     </button>
                     
                     <button 
                       onClick={() => { 
+                        setIsBpbdTemplateSelected(false);
                         setExportTarget('filtered');
                         setIsExportModalOpen(true);
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
-                      disabled={filteredHouses.length === 0}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:bg-slate-50 hover:text-indigo-600 rounded-xl transition-colors"
                     >
-                      <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
-                        <Download size={14} />
+                      <div className="p-1.5 bg-slate-100 text-slate-600 rounded-lg shrink-0">
+                        <Sliders size={13} />
                       </div>
-                      <span>Ekspor Data (Filter Aktif)</span>
+                      <span>Kustomisasi Kolom Ekspor</span>
                     </button>
-                    <div className="h-px bg-slate-100 mx-3 my-2"></div>
-                    <div className="px-3 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em]">Laporan PBB</div>
+                  </div>
+
+                  {/* Bagian 3: Aksi Massal */}
+                  <div className="p-2.5 space-y-1">
+                    <div className="px-3 py-1.5 text-[8.5px] font-bold text-slate-400 uppercase tracking-[0.2em]">Aksi Massal</div>
+                    <button 
+                      onClick={() => { 
+                        if (isSupervising) {
+                          toast.info('Pembuatan PIN terkunci dalam Mode Supervisi (Read-Only).');
+                          return;
+                        }
+                        handleGenerateAllPins(); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider rounded-xl transition-colors ${
+                        isSupervising ? 'opacity-50 cursor-not-allowed text-slate-400' : 'text-slate-700 hover:bg-amber-50 hover:text-amber-700'
+                      }`}
+                      disabled={isGenerating || isSupervising}
+                    >
+                      <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+                        <Shield size={13} />
+                      </div>
+                      <span>{isGenerating ? 'Memproses...' : 'Buat PIN Massal'}</span>
+                    </button>
+
+                    <button 
+                      onClick={() => { 
+                        if (isSupervising) {
+                          toast.info('Pembersihan data terkunci dalam Mode Supervisi (Read-Only).');
+                          return;
+                        }
+                        handleCleanupPlaceholders(); 
+                        setIsActionMenuOpen(false); 
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider rounded-xl transition-colors ${
+                        isSupervising ? 'opacity-50 cursor-not-allowed text-slate-400' : 'text-slate-700 hover:bg-rose-50 hover:text-rose-700'
+                      }`}
+                      disabled={isSupervising}
+                    >
+                      <div className="p-1.5 bg-rose-50 text-rose-600 rounded-lg shrink-0">
+                        <Trash2 size={13} />
+                      </div>
+                      <span>Bersihkan Placeholder</span>
+                    </button>
+                  </div>
+
+                  {/* Bagian 4: Laporan PBB & Utilitas */}
+                  <div className="p-2.5 space-y-1">
+                    <div className="px-3 py-1.5 text-[8.5px] font-bold text-slate-400 uppercase tracking-[0.2em]">Laporan Pajak & Utilitas</div>
                     
                     <button 
                       onClick={() => { 
@@ -1923,50 +2003,23 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         generatePBBReportPDF(filteredHouses, year, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-amber-600 hover:shadow-sm rounded-2xl transition-colors"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:bg-amber-50 hover:text-amber-700 rounded-xl transition-colors"
                     >
-                      <div className="p-2 bg-amber-50 text-amber-500 rounded-xl">
-                        <Printer size={14} />
+                      <div className="p-1.5 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+                        <Printer size={13} />
                       </div>
-                      <span>Cetak PBB (Filter Aktif)</span>
+                      <span>Rekap PBB (Filter Aktif)</span>
                     </button>
-
-                    <button 
-                      onClick={() => { 
-                        const year = new Date().getFullYear().toString();
-                        const takenOnly = houses.filter(h => h.status === 'Occupied' && h.pbbStatus === 'Sudah Diambil');
-                        generatePBBReportPDF(takenOnly, year, pdfConfig); 
-                        setIsActionMenuOpen(false); 
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:text-emerald-600 hover:shadow-sm rounded-2xl transition-colors pl-10"
-                    >
-                      <span>PBB Sudah Diambil</span>
-                    </button>
-
-                    <button 
-                      onClick={() => { 
-                        const year = new Date().getFullYear().toString();
-                        const notTakenOnly = houses.filter(h => h.status === 'Occupied' && h.pbbStatus !== 'Sudah Diambil');
-                        generatePBBReportPDF(notTakenOnly, year, pdfConfig); 
-                        setIsActionMenuOpen(false); 
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-[9px] font-bold uppercase tracking-widest text-slate-600 hover:bg-white hover:text-rose-600 hover:shadow-sm rounded-2xl transition-colors pl-10"
-                    >
-                      <span>PBB Belum Diambil</span>
-                    </button>
-
-                    <div className="h-px bg-slate-100 mx-3 my-2"></div>
-                    <div className="px-3 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em]">Laporan Iuran</div>
 
                     <button 
                       onClick={() => { 
                         generateBillReportPDF(houses, iuranPayments, 'Air', selectedMonth, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-blue-600 hover:shadow-sm rounded-2xl transition-colors"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-colors"
                     >
-                      <div className="p-2 bg-blue-50 text-blue-500 rounded-xl">
-                        <Droplets size={14} />
+                      <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg shrink-0">
+                        <Droplets size={13} />
                       </div>
                       <span>Laporan Iuran Air</span>
                     </button>
@@ -1976,34 +2029,25 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         generateBillReportPDF(houses, iuranPayments, 'Sampah', selectedMonth, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-orange-600 hover:shadow-sm rounded-2xl transition-colors"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:bg-orange-50 hover:text-orange-700 rounded-xl transition-colors"
                     >
-                      <div className="p-2 bg-orange-50 text-orange-500 rounded-xl">
-                        <Trash size={14} />
+                      <div className="p-1.5 bg-orange-50 text-orange-600 rounded-lg shrink-0">
+                        <Trash size={13} />
                       </div>
                       <span>Laporan Iuran Sampah</span>
                     </button>
+
                     <button 
                       onClick={() => { 
                         generateResidentStatsReportPDF(houses, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 rounded-xl transition-colors"
                     >
-                      <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
-                        <Activity size={14} />
+                      <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
+                        <Activity size={13} />
                       </div>
                       <span>Cetak Statistik Warga</span>
-                    </button>
-                    <button 
-                      onClick={() => { fileInputRef.current?.click(); setIsActionMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold uppercase tracking-widest text-slate-700 hover:bg-white hover:text-indigo-600 hover:shadow-sm rounded-2xl transition-colors"
-                      disabled={isUploading}
-                    >
-                      <div className="p-2 bg-indigo-50 text-indigo-500 rounded-xl">
-                        <Upload size={14} />
-                      </div>
-                      <span>Unggah Data</span>
                     </button>
                   </div>
                 </motion.div>
