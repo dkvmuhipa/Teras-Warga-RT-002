@@ -342,6 +342,7 @@ export interface House {
   
   // Ronda Management
   rondaExempt?: boolean; // NEW: Pengecualian Ronda (Lansia, Sakit, dll)
+  rondaExemptReason?: string; // Alasan Pengecualian Ronda
   rondaPoints?: number; // NEW: Sistem Poin Keaktifan
   rondaDutyCount?: number; // NEW: Jumlah Tugas dalam sebulan/periode
   rondaLastDuty?: string; // NEW: Tanggal Tugas Terakhir (ISO)

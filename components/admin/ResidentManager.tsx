@@ -283,7 +283,22 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     generateMutationLog: true,
     familyMembers: [] as { id?: string; name: string; relation: 'Suami' | 'Istri' | 'Anak' | 'Menantu' | 'Cucu' | 'Orang Tua' | 'Mertua' | 'Saudara' | 'Keponakan' | 'Kakek/Nenek' | 'Pembantu' | 'Famili Lain'; nik?: string; birthDate?: string; gender?: 'Laki-laki' | 'Perempuan'; job?: string }[],
     useManualDemographics: false,
-    accessCode: ''
+    accessCode: '',
+    pdamStatus: 'Terpasang' as 'Terpasang' | 'Belum Terpasang' | 'Hilang' | 'Bermasalah / Rusak' | 'Dalam Proses Pengajuan',
+    pdamMeterNumber: '',
+    pdamLostDate: '',
+    pdamNotes: '',
+    pdamInstallDate: '',
+    pdamSubmissionDate: '',
+    tags: [] as string[],
+    wasteTier: undefined as 'Umum' | 'PKH' | 'PNS' | undefined,
+    rondaExemptReason: '',
+    rondaPoints: 0,
+    rondaDutyCount: 0,
+    ownerRelationship: '',
+    buildingCondition: 'Baik' as 'Baik' | 'Terlantar' | 'Tidak Terawat',
+    certificateStatus: 'Tidak' as 'Ya' | 'Tidak' | 'Dalam Proses',
+    hasStructuralModification: false
   });
 
   // State dialog deteksi transisi pergantian penghuni
@@ -932,7 +947,22 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       generateMutationLog: true,
       familyMembers: [],
       useManualDemographics: false,
-      accessCode: ''
+      accessCode: '',
+      pdamStatus: 'Terpasang',
+      pdamMeterNumber: '',
+      pdamLostDate: '',
+      pdamNotes: '',
+      pdamInstallDate: '',
+      pdamSubmissionDate: '',
+      tags: [],
+      wasteTier: undefined,
+      rondaExemptReason: '',
+      rondaPoints: 0,
+      rondaDutyCount: 0,
+      ownerRelationship: '',
+      buildingCondition: 'Baik',
+      certificateStatus: 'Tidak',
+      hasStructuralModification: false
     });
     setEditingHouseId(null);
   };
@@ -1177,7 +1207,22 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       generateMutationLog: false,
       familyMembers: (house.familyMembers || []).map(m => ({ ...m, id: m.id || Math.random().toString(36).substr(2, 9) })),
       useManualDemographics: house.useManualDemographics || false,
-      accessCode: house.accessCode || ''
+      accessCode: house.accessCode || '',
+      pdamStatus: house.pdamStatus || 'Terpasang',
+      pdamMeterNumber: house.pdamMeterNumber || '',
+      pdamLostDate: house.pdamLostDate || '',
+      pdamNotes: house.pdamNotes || '',
+      pdamInstallDate: house.pdamInstallDate || '',
+      pdamSubmissionDate: house.pdamSubmissionDate || '',
+      tags: house.tags || [],
+      wasteTier: house.wasteTier,
+      rondaExemptReason: house.rondaExemptReason || '',
+      rondaPoints: house.rondaPoints || 0,
+      rondaDutyCount: house.rondaDutyCount || 0,
+      ownerRelationship: house.ownerRelationship || '',
+      buildingCondition: house.buildingCondition || 'Baik',
+      certificateStatus: house.certificateStatus || 'Tidak',
+      hasStructuralModification: house.hasStructuralModification || false
     });
     setIsModalOpen(true);
   };
@@ -1495,13 +1540,34 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
   const handleSaveHouse = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSupervising) {
+      toast.warning('Mode Supervisi: Tidak dapat menyimpan perubahan data warga.');
+      return;
+    }
     try {
-      const houseId = formatHouseId(`${formData.block}-${formData.number}`);
+      const cleanBlock = (formData.block || '').trim().toUpperCase();
+      const cleanNumber = (formData.number || '').trim().toUpperCase();
+      if (!cleanBlock || !cleanNumber) {
+        toast.error('Blok dan Nomor Unit Rumah wajib diisi.');
+        return;
+      }
+
+      const houseId = formatHouseId(`${cleanBlock}-${cleanNumber}`);
+      if (editingHouseId && editingHouseId !== houseId && houses.some(h => h.id === houseId)) {
+        toast.error(`Unit ${houseId} sudah terdaftar! Gunakan nomor unit lain atau edit langsung unit ${houseId}.`);
+        return;
+      }
+
       const oldHouse = editingHouseId ? houses.find(h => h.id === editingHouseId) : houses.find(h => h.id === houseId);
+      const minOccupants = formData.status === 'Empty' ? 0 : Math.max(formData.occupants || 1, 1 + (formData.familyMembers?.length || 0));
       
       const data = {
+        ...(oldHouse || {}),
         ...formData,
         id: houseId,
+        block: cleanBlock,
+        number: cleanNumber,
+        occupants: minOccupants,
         location: oldHouse?.location || { x: 0, y: 0 },
         // Ketika status penghuni adalah Tetap, pastikan nama pemilik (ownerName) sinkron dengan Kepala Keluarga (nama di SK)
         ownerName: formData.residenceType === 'Tetap'

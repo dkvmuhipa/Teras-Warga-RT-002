@@ -268,7 +268,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             }`}
                           >
                             <ShieldCheck size={11} className="stroke-[2]" />
-                            <span>Tersahkankan</span>
+                            <span>Terverifikasi</span>
                           </button>
                           
                           <button
@@ -977,24 +977,6 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 })}
                               </div>
                             </div>
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              <span className="text-[9px] text-slate-400 font-medium mr-1">Rekomendasi:</span>
-                              {['Pemuda', 'Dokter', 'Donatur', 'Keamanan', 'VaksinBooster', 'VaksinLengkap'].map((rec) => (
-                                <button
-                                  key={rec}
-                                  type="button"
-                                  onClick={() => {
-                                    const current = formData.tags || [];
-                                    if (!current.includes(rec)) {
-                                      setFormData({ ...formData, tags: [...current, rec] });
-                                    }
-                                  }}
-                                  className="text-[9px] px-1.5 py-0.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-500 rounded border border-slate-200/60 font-medium transition-colors"
-                                >
-                                  +{rec}
-                                </button>
-                              ))}
-                            </div>
                           </div>
                        </div>
 
@@ -1065,6 +1047,109 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               value={formData.pdamNotes || ''} 
                               onChange={(v: any) => setFormData({...formData, pdamNotes: v})} 
                             />
+                          </div>
+                       </div>
+
+                       {/* Seksi Data Verifikasi BPBD & Fisik Hunian Tetap */}
+                       <div className="bg-white p-5 border border-amber-200/80 rounded-xl shadow-xs">
+                          <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-amber-100">
+                            <div className="w-8 h-8 bg-amber-50 border border-amber-200 rounded-lg flex-shrink-0 flex items-center justify-center text-amber-700">
+                              <ShieldCheck size={15} />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-800">Verifikasi BPBD &amp; Fisik Unit</h3>
+                              <p className="text-[10px] text-slate-400">Parameter laporan resmi BPBD Kota Palu</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3.5">
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                                Hubungan Penghuni dengan Pemilik/SK
+                              </label>
+                              <div className="relative">
+                                <select
+                                  value={formData.ownerRelationship || (formData.residenceType === 'Tetap' ? 'Diri Sendiri' : '')}
+                                  onChange={e => setFormData({ ...formData, ownerRelationship: e.target.value })}
+                                  className="w-full px-3 py-2 bg-white hover:border-slate-300 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 outline-none focus:ring-1 focus:ring-indigo-100 focus:border-indigo-500 transition-colors appearance-none pr-8 cursor-pointer"
+                                >
+                                  <option value="">-- Pilih Hubungan --</option>
+                                  <option value="Diri Sendiri">Diri Sendiri (Pemilik Sah / Penerima Bantuan)</option>
+                                  <option value="Istri">Istri</option>
+                                  <option value="Suami">Suami</option>
+                                  <option value="Anak">Anak</option>
+                                  <option value="Orang Tua">Orang Tua / Mertua</option>
+                                  <option value="Saudara / Kerabat">Saudara / Kerabat</option>
+                                  <option value="Penyewa">Penyewa (Sewa / Kontrak)</option>
+                                  <option value="Pembeli">Pembeli (Alih Kepemilikan / Jual)</option>
+                                  <option value="Penjaga Rumah">Penjaga Rumah / Menumpang</option>
+                                  <option value="Lainnya">Lainnya</option>
+                                </select>
+                                <ChevronRight size={14} className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Kondisi Bangunan</label>
+                              <div className="grid grid-cols-3 gap-1.5">
+                                {[
+                                  { id: 'Baik', label: 'Baik', activeClass: 'bg-emerald-600 text-white border-emerald-600' },
+                                  { id: 'Terlantar', label: 'Terlantar', activeClass: 'bg-amber-600 text-white border-amber-600' },
+                                  { id: 'Tidak Terawat', label: 'Tdk Terawat', activeClass: 'bg-rose-600 text-white border-rose-600' }
+                                ].map((cond) => (
+                                  <button
+                                    key={cond.id}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, buildingCondition: cond.id as any })}
+                                    className={`py-1.5 px-2 rounded-lg text-[11px] font-bold border transition-colors text-center cursor-pointer ${
+                                      (formData.buildingCondition || 'Baik') === cond.id
+                                        ? cond.activeClass
+                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-white'
+                                    }`}
+                                  >
+                                    {cond.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-700 mb-1.5">Status Sertifikasi</label>
+                              <div className="grid grid-cols-2 gap-2">
+                                {[
+                                  { id: 'Ya', label: 'Sertifikat (Ya)', activeClass: 'bg-emerald-600 text-white border-emerald-600' },
+                                  { id: 'Tidak', label: 'Belum Ada (Tidak)', activeClass: 'bg-slate-800 text-white border-slate-800' }
+                                ].map((cert) => (
+                                  <button
+                                    key={cert.id}
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, certificateStatus: cert.id as any })}
+                                    className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-colors text-center cursor-pointer ${
+                                      (formData.certificateStatus || 'Tidak') === cert.id
+                                        ? cert.activeClass
+                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-white'
+                                    }`}
+                                  >
+                                    {cert.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="pt-2 border-t border-slate-100">
+                              <label className="flex items-center gap-2.5 p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-white transition-colors cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                                  checked={formData.hasStructuralModification || false}
+                                  onChange={e => setFormData({ ...formData, hasStructuralModification: e.target.checked })}
+                                />
+                                <div className="text-left">
+                                  <span className="block text-xs font-bold text-slate-800">Perubahan Bentuk Bangunan</span>
+                                  <span className="block text-[10px] text-slate-500">Centang jika unit telah mengalami renovasi struktural</span>
+                                </div>
+                              </label>
+                            </div>
                           </div>
                        </div>
 

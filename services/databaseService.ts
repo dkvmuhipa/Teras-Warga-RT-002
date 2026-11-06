@@ -1817,7 +1817,7 @@ export const addHouse = async (houseData: any) => {
     cleanData.updatedAt = now;
 
     if (cleanData.id) {
-       await setDoc(doc(db, HOUSES_COL, cleanData.id), cleanData);
+       await setDoc(doc(db, HOUSES_COL, cleanData.id), cleanData, { merge: true });
     } else {
        await addDoc(collection(db, HOUSES_COL), cleanData);
     }
