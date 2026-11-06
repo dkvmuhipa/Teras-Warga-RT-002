@@ -1727,7 +1727,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     >
       {/* Header & Actions */}
       {!isStandaloneSubModule && (
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+        <div className="relative z-40 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
         <motion.div variants={itemVariants} className="w-full md:w-auto">
           <h2 className="text-3xl font-semibold text-slate-900 tracking-tight flex items-center gap-2.5">
             Data Warga
@@ -1737,7 +1737,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
             Administrasi kependudukan &amp; sistem pemantauan hunian {currentTenant ? `RT ${currentTenant.rt}` : 'RT'}
           </p>
         </motion.div>
-        <motion.div variants={itemVariants} className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-2.5 w-full md:w-auto overflow-x-auto pb-1 sm:pb-0">
+        <motion.div variants={itemVariants} className="relative z-40 flex flex-wrap items-center gap-2 sm:gap-2.5 w-full md:w-auto overflow-visible">
           {selectedIds.size > 0 && (
             <div className="flex items-center gap-2 pr-3 border-r border-slate-200">
               <button 
@@ -1842,11 +1842,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
             {isActionMenuOpen && (
               <>
-                <div className="fixed inset-0 z-10" onClick={() => setIsActionMenuOpen(false)}></div>
+                <div className="fixed inset-0 z-40" onClick={() => setIsActionMenuOpen(false)}></div>
                 <motion.div 
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  className="absolute right-0 mt-3 w-72 max-h-[82vh] overflow-y-auto bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-2xl z-20 ring-1 ring-black/5 divide-y divide-slate-100"
+                  className="absolute right-0 mt-3 w-72 max-h-[82vh] overflow-y-auto bg-white/95 backdrop-blur-xl border border-slate-200/80 rounded-3xl shadow-2xl z-50 ring-1 ring-black/5 divide-y divide-slate-100"
                 >
                   {/* Bagian 1: Pintas Cepat BPBD Huntap */}
                   <div className="p-2.5 space-y-1 bg-rose-50/40">
