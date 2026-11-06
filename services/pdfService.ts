@@ -2527,12 +2527,13 @@ export const generateBPBDVerificationReportPDF = async (houses: House[], customC
 
     // Judul Dokumen & Tanggal Cetak (Persis posisi seperti Daftar Induk Warga)
     doc.setFont("times", "bold");
-    doc.setFontSize(11);
+    doc.setFontSize(10.5);
     doc.setTextColor(0);
-    doc.text("FORMULIR VERIFIKASI PENGHUNIAN & FISIK HUNIAN TETAP (HUNTAP)", centerX, 48, { align: "center" });
-    doc.setFontSize(8);
+    doc.text("FORMULIR VERIFIKASI PENGHUNIAN & FISIK HUNIAN TETAP (HUNTAP)", centerX, 47, { align: "center" });
+    doc.setFontSize(7.5);
     doc.setFont("times", "normal");
-    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, pageWidth - margin, 48, { align: "right" });
+    doc.setTextColor(71, 85, 105);
+    doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, pageWidth - margin, 47, { align: "right" });
 
     // Sort houses naturally by block & number (C5 -> C12)
     const sortedHouses = [...houses].sort((a, b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
@@ -2541,32 +2542,32 @@ export const generateBPBDVerificationReportPDF = async (houses: House[], customC
     const head = [
         [
             { content: 'No.', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
-            { content: 'Nama Pemilik / Penerima Bantuan', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Nama Pemilik /\nPenerima Bantuan', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
             { content: 'Blok', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
-            { content: 'Nomor Unit Rumah', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
-            { content: 'Nama Penghuni / Kepala Keluarga', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
-            { content: 'Hubungan dengan Pemilik / Penerima', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Nomor\nUnit', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Nama Penghuni /\nKepala Keluarga', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Hubungan dgn\nPemilik/SK', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
             { content: 'No. HP', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
-            { content: 'Status Penghunian', colSpan: 5, styles: { halign: 'center' } },
-            { content: 'Jumlah Penghuni (Orang)', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
-            { content: 'Kondisi Bangunan', colSpan: 3, styles: { halign: 'center' } },
-            { content: 'Sertifikasi', colSpan: 2, styles: { halign: 'center' } },
-            { content: 'Catatan / Potensi Tindak Lanjut', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Status Penghunian', colSpan: 5, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Jumlah\nPenghuni\n(Jiwa)', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Kondisi Bangunan', colSpan: 3, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Sertifikasi', colSpan: 2, styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Catatan / Potensi\nTindak Lanjut', rowSpan: 2, styles: { valign: 'middle', halign: 'center' } },
         ],
         [
             // Sub-kolom Status Penghunian
-            { content: 'Jual', styles: { halign: 'center' } },
-            { content: 'Sewa', styles: { halign: 'center' } },
-            { content: 'Kosong', styles: { halign: 'center' } },
-            { content: 'Alih Fungsi', styles: { halign: 'center' } },
-            { content: 'Perubahan Bentuk', styles: { halign: 'center' } },
+            { content: 'Jual', styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Sewa', styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Kosong', styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Alih\nFungsi', styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Perubahan\nBentuk', styles: { valign: 'middle', halign: 'center' } },
             // Sub-kolom Kondisi Bangunan
-            { content: 'Baik', styles: { halign: 'center' } },
-            { content: 'Terlantar', styles: { halign: 'center' } },
-            { content: 'Tidak Terawat', styles: { halign: 'center' } },
+            { content: 'Baik', styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Terlantar', styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Tidak\nTerawat', styles: { valign: 'middle', halign: 'center' } },
             // Sub-kolom Sertifikasi
-            { content: 'Ya', styles: { halign: 'center' } },
-            { content: 'Tidak', styles: { halign: 'center' } }
+            { content: 'Ya', styles: { valign: 'middle', halign: 'center' } },
+            { content: 'Tidak', styles: { valign: 'middle', halign: 'center' } }
         ]
     ];
 
@@ -2633,50 +2634,53 @@ export const generateBPBDVerificationReportPDF = async (houses: House[], customC
     autoTable(doc, {
         head: head as any,
         body: body,
-        startY: 52,
+        startY: 50.5,
         margin: { left: margin, right: margin, bottom: 22 },
         theme: 'grid',
         tableWidth: 'auto',
         styles: {
             font: 'times',
-            fontSize: 7,
-            cellPadding: 1,
+            fontSize: 6.8,
+            cellPadding: { top: 1.2, right: 0.8, bottom: 1.2, left: 0.8 },
             lineColor: [100, 116, 139],
             lineWidth: 0.15,
             textColor: [15, 23, 42],
-            overflow: 'linebreak'
+            overflow: 'linebreak',
+            valign: 'middle'
         },
         headStyles: {
             fillColor: [241, 245, 249],
             textColor: [15, 23, 42],
             fontStyle: 'bold',
-            fontSize: 7.2,
+            fontSize: 6.8,
+            cellPadding: { top: 1.2, right: 0.5, bottom: 1.2, left: 0.5 },
             lineWidth: 0.2,
-            lineColor: [51, 65, 85]
+            lineColor: [51, 65, 85],
+            valign: 'middle'
         },
         columnStyles: {
-            0: { cellWidth: 7, halign: 'center' },   // No
-            1: { cellWidth: 26 },                   // Pemilik
+            0: { cellWidth: 6, halign: 'center' },   // No
+            1: { cellWidth: 25 },                   // Pemilik
             2: { cellWidth: 8, halign: 'center' },   // Blok
-            3: { cellWidth: 10, halign: 'center' },  // No Unit
-            4: { cellWidth: 26 },                   // Penghuni
-            5: { cellWidth: 22 },                   // Hubungan
-            6: { cellWidth: 18, halign: 'center' },  // HP
+            3: { cellWidth: 11, halign: 'center' },  // Nomor Unit
+            4: { cellWidth: 25 },                   // Penghuni
+            5: { cellWidth: 21 },                   // Hubungan
+            6: { cellWidth: 16, halign: 'center' },  // HP
             7: { cellWidth: 8, halign: 'center', fontStyle: 'bold' },  // Jual
             8: { cellWidth: 8, halign: 'center', fontStyle: 'bold' },  // Sewa
-            9: { cellWidth: 9, halign: 'center', fontStyle: 'bold' },  // Kosong
-            10: { cellWidth: 11, halign: 'center', fontStyle: 'bold' }, // Alih Fungsi
-            11: { cellWidth: 13, halign: 'center', fontStyle: 'bold' }, // Perubahan Bentuk
-            12: { cellWidth: 10, halign: 'center' }, // Jml Orang
-            13: { cellWidth: 8, halign: 'center', fontStyle: 'bold' }, // Baik
-            14: { cellWidth: 11, halign: 'center', fontStyle: 'bold' }, // Terlantar
-            15: { cellWidth: 12, halign: 'center', fontStyle: 'bold' }, // Tdk Terawat
-            16: { cellWidth: 7, halign: 'center', fontStyle: 'bold' },  // Sertif Ya
-            17: { cellWidth: 8, halign: 'center', fontStyle: 'bold' },  // Sertif Tidak
-            18: { cellWidth: 'auto' }                // Catatan
+            9: { cellWidth: 11, halign: 'center', fontStyle: 'bold' }, // Kosong
+            10: { cellWidth: 13, halign: 'center', fontStyle: 'bold' }, // Alih Fungsi
+            11: { cellWidth: 16, halign: 'center', fontStyle: 'bold' }, // Perubahan Bentuk
+            12: { cellWidth: 13, halign: 'center' }, // Jumlah Penghuni
+            13: { cellWidth: 9, halign: 'center', fontStyle: 'bold' },  // Baik
+            14: { cellWidth: 13, halign: 'center', fontStyle: 'bold' }, // Terlantar
+            15: { cellWidth: 14, halign: 'center', fontStyle: 'bold' }, // Tidak Terawat
+            16: { cellWidth: 8, halign: 'center', fontStyle: 'bold' },  // Sertif Ya
+            17: { cellWidth: 10, halign: 'center', fontStyle: 'bold' }, // Sertif Tidak
+            18: { cellWidth: 42 }                   // Catatan / Potensi Tindak Lanjut
         },
         alternateRowStyles: {
-            fillColor: [250, 250, 250]
+            fillColor: [250, 252, 255]
         },
         didDrawPage: (data) => {
             if (data.pageNumber > 1) {
