@@ -2081,37 +2081,37 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
     
     // Configurable PDF Column Definitions
     const allPdfCols = [
-        { id: 'block', label: "BLOK", baseWidth: 10 },
-        { id: 'number', label: "NO RUMAH", baseWidth: 14 },
-        { id: 'headOfFamily', label: "NAMA KEPALA KELUARGA (PENGHUNI)", baseWidth: 50 },
-        { id: 'gender', label: "L/P", baseWidth: 8 },
-        { id: 'birthDate', label: "TGL LAHIR", baseWidth: 18 },
-        { id: 'religion', label: "AGAMA", baseWidth: 14 },
-        { id: 'ownerName', label: "PEMILIK RUMAH", baseWidth: 45 },
-        { id: 'ownerPhone', label: "TLP PEMILIK", baseWidth: 24 },
-        { id: 'phone', label: "TELEPON", baseWidth: 24 },
-        { id: 'status', label: "STATUS", baseWidth: 16 },
-        { id: 'residenceType', label: "KEPENGHUNIAN", baseWidth: 18 },
-        { id: 'occupants', label: "JIWA", baseWidth: 8 },
-        { id: 'education', label: "PENDIDIKAN", baseWidth: 16 },
-        { id: 'jobCategory', label: "PEKERJAAN", baseWidth: 25 },
-        { id: 'economicStatus', label: "EKONOMI", baseWidth: 16 },
-        { id: 'isVerified', label: "KET", baseWidth: 12 },
-        { id: 'joiningDate', label: "MENEMPATI", baseWidth: 18 },
-        { id: 'businessName', label: "NAMA USAHA/UMKM", baseWidth: 32 },
-        { id: 'businessCategory', label: "BIDANG USAHA", baseWidth: 22 },
-        { id: 'businessLocation', label: "LOKASI USAHA", baseWidth: 20 },
-        { id: 'businessPhone', label: "WA USAHA", baseWidth: 22 },
-        { id: 'ktpStatus', label: "STATUS KTP", baseWidth: 26 },
-        { id: 'addressKtp', label: "ALAMAT SESUAI KTP", baseWidth: 42 },
-        { id: 'nik', label: "NIK", baseWidth: 32 },
-        { id: 'kkNumber', label: "NO. KK", baseWidth: 32 },
-        { id: 'ownerRelationship', label: "HUB. PEMILIK", baseWidth: 24 },
-        { id: 'buildingCondition', label: "KONDISI FISIK", baseWidth: 20 },
-        { id: 'certificateStatus', label: "SERTIFIKAT", baseWidth: 16 },
-        { id: 'hasStructuralModification', label: "RENOVASI", baseWidth: 16 },
-        { id: 'pdamStatus', label: "METERAN AIR", baseWidth: 22 },
-        { id: 'pdamMeterNumber', label: "NO. METERAN", baseWidth: 24 }
+        { id: 'block', label: "BLOK", baseWidth: 10, halign: 'center' },
+        { id: 'number', label: "NO. RUMAH", baseWidth: 12, halign: 'center' },
+        { id: 'headOfFamily', label: "NAMA KEPALA KELUARGA (PENGHUNI)", baseWidth: 42, halign: 'left' },
+        { id: 'gender', label: "L/P", baseWidth: 8, halign: 'center' },
+        { id: 'birthDate', label: "TGL LAHIR", baseWidth: 16, halign: 'center' },
+        { id: 'religion', label: "AGAMA", baseWidth: 14, halign: 'center' },
+        { id: 'ownerName', label: "PEMILIK RUMAH", baseWidth: 36, halign: 'left' },
+        { id: 'ownerPhone', label: "NO. HP PEMILIK", baseWidth: 22, halign: 'center' },
+        { id: 'phone', label: "TELEPON / WA", baseWidth: 22, halign: 'center' },
+        { id: 'status', label: "STATUS HUNIAN", baseWidth: 18, halign: 'center' },
+        { id: 'residenceType', label: "KEPENGHUNIAN", baseWidth: 18, halign: 'center' },
+        { id: 'occupants', label: "JIWA", baseWidth: 9, halign: 'center' },
+        { id: 'education', label: "PENDIDIKAN", baseWidth: 16, halign: 'center' },
+        { id: 'jobCategory', label: "PEKERJAAN", baseWidth: 22, halign: 'left' },
+        { id: 'economicStatus', label: "EKONOMI", baseWidth: 16, halign: 'center' },
+        { id: 'isVerified', label: "STATUS DATA", baseWidth: 14, halign: 'center' },
+        { id: 'joiningDate', label: "MENEMPATI", baseWidth: 16, halign: 'center' },
+        { id: 'businessName', label: "NAMA USAHA", baseWidth: 28, halign: 'left' },
+        { id: 'businessCategory', label: "BIDANG USAHA", baseWidth: 22, halign: 'left' },
+        { id: 'businessLocation', label: "LOKASI USAHA", baseWidth: 18, halign: 'center' },
+        { id: 'businessPhone', label: "WA USAHA", baseWidth: 20, halign: 'center' },
+        { id: 'ktpStatus', label: "STATUS KTP", baseWidth: 22, halign: 'center' },
+        { id: 'addressKtp', label: "ALAMAT KTP", baseWidth: 38, halign: 'left' },
+        { id: 'nik', label: "NIK", baseWidth: 30, halign: 'center' },
+        { id: 'kkNumber', label: "NO. KK", baseWidth: 30, halign: 'center' },
+        { id: 'ownerRelationship', label: "HUB. PEMILIK", baseWidth: 20, halign: 'center' },
+        { id: 'buildingCondition', label: "KONDISI FISIK", baseWidth: 18, halign: 'center' },
+        { id: 'certificateStatus', label: "SERTIFIKAT", baseWidth: 16, halign: 'center' },
+        { id: 'hasStructuralModification', label: "RENOVASI", baseWidth: 16, halign: 'center' },
+        { id: 'pdamStatus', label: "METERAN AIR", baseWidth: 18, halign: 'center' },
+        { id: 'pdamMeterNumber', label: "NO. METERAN", baseWidth: 22, halign: 'center' }
     ];
 
     let selectedDefs = allPdfCols;
@@ -2123,225 +2123,223 @@ export const generateResidentReportPDF = async (houses: House[], customConfig?: 
         selectedDefs = [allPdfCols[0], allPdfCols[1], allPdfCols[2], allPdfCols[9], allPdfCols[11]];
     }
 
-    const noWidth = 8;
-    const availableWidth = contentWidth - noWidth;
-    const totalBaseWidth = selectedDefs.reduce((sum, c) => sum + c.baseWidth, 0);
-
-    const headers = [
-        { id: 'no', label: "NO", w: noWidth },
-        ...selectedDefs.map(c => ({
-            id: c.id,
-            label: c.label,
-            w: (c.baseWidth / totalBaseWidth) * availableWidth
-        }))
-    ];
-
-    const drawTableHeader = (startY: number) => {
-        doc.setFillColor(30, 41, 59);
-        doc.rect(margin, startY - 5, contentWidth, 8, 'F');
-        doc.setTextColor(255);
-        doc.setFont("times", "bold");
-        doc.setFontSize(9);
-        
-        let currX = margin;
-        headers.forEach(h => {
-            doc.text(h.label, currX + (h.w / 2), startY, { align: "center" });
-            currX += h.w;
-        });
-        doc.setTextColor(0);
+    // Explicit friendly line-broken labels for narrow table headers
+    const colLabels: Record<string, string> = {
+        block: "BLOK",
+        number: "NO.\nRUMAH",
+        headOfFamily: "KEPALA KELUARGA\n(PENGHUNI)",
+        gender: "L/P",
+        birthDate: "TGL LAHIR",
+        religion: "AGAMA",
+        ownerName: "PEMILIK RUMAH",
+        ownerPhone: "NO. HP PEMILIK",
+        phone: "TELEPON / WA",
+        status: "STATUS\nHUNIAN",
+        residenceType: "KEPENG-\nHUNIAN",
+        occupants: "JIWA",
+        education: "PENDIDIKAN",
+        jobCategory: "PEKERJAAN",
+        economicStatus: "EKONOMI",
+        isVerified: "STATUS\nDATA",
+        joiningDate: "MENEMPATI",
+        businessName: "NAMA USAHA",
+        businessCategory: "BIDANG USAHA",
+        businessLocation: "LOKASI USAHA",
+        businessPhone: "WA USAHA",
+        ktpStatus: "STATUS\nKTP",
+        addressKtp: "ALAMAT SESUAI KTP",
+        nik: "NIK",
+        kkNumber: "NO. KK",
+        ownerRelationship: "HUBUNGAN\nPEMILIK",
+        buildingCondition: "KONDISI\nFISIK",
+        certificateStatus: "SERTIFIKAT",
+        hasStructuralModification: "RENOVASI",
+        pdamStatus: "METERAN\nAIR",
+        pdamMeterNumber: "NO. METERAN"
     };
 
-    drawTableHeader(y);
-    y += 8;
+    const headers = [
+        'NO',
+        ...selectedDefs.map(c => colLabels[c.id] || c.label)
+    ];
 
+    // Determine font sizes and paddings adaptively based on column count
+    const colCount = selectedDefs.length + 1;
+    let tableFontSize = 7.5;
+    let headFontSize = 8;
+    let cellPad = { top: 1.5, right: 1, bottom: 1.5, left: 1 };
+    if (colCount > 12) {
+        tableFontSize = 6.2;
+        headFontSize = 6.8;
+        cellPad = { top: 1, right: 0.6, bottom: 1, left: 0.6 };
+    } else if (colCount > 8) {
+        tableFontSize = 7;
+        headFontSize = 7.5;
+        cellPad = { top: 1.2, right: 0.8, bottom: 1.2, left: 0.8 };
+    }
+
+    // Build column widths and alignments proportionally across contentWidth
+    const noBaseWidth = 7;
+    const totalBaseWidth = selectedDefs.reduce((sum, c) => sum + c.baseWidth, 0) + noBaseWidth;
+    const colStyles: Record<number, any> = {
+        0: { cellWidth: (noBaseWidth / totalBaseWidth) * contentWidth, halign: 'center' }
+    };
+    selectedDefs.forEach((col, idx) => {
+        colStyles[idx + 1] = {
+            cellWidth: (col.baseWidth / totalBaseWidth) * contentWidth,
+            halign: (col as any).halign || 'left'
+        };
+    });
+
+    // Build sorted table body with block separators
     const sortedHouses = [...houses].sort((a,b) => naturalSortBlockAndNumber(a.block, a.number, b.block, b.number));
-
+    const tableBody: any[] = [];
     let currentBlock = '';
     let residentNo = 0;
 
-    sortedHouses.forEach((h, i) => {
+    sortedHouses.forEach((h) => {
         const houseBlock = (h.block || '').toUpperCase();
         if (houseBlock !== currentBlock) {
             currentBlock = houseBlock;
-            
-            // Check for page break before drawing block separator
-            if (y > pageHeight - 20) {
-                doc.addPage();
-                drawHeader(false);
-                y = 22;
-                drawTableHeader(y);
-                y += 8;
-            }
-            
-            // Block section header row
-            doc.setFillColor(241, 245, 249); // slate-100 background
-            doc.rect(margin, y - 5, contentWidth, 7, 'F');
-            
-            doc.setFont("times", "bold");
-            doc.setFontSize(9);
-            doc.setTextColor(15, 23, 42); // slate-900
-            doc.text(`BLOK ${houseBlock}`, margin + 4, y);
-            
-            doc.setDrawColor(203, 213, 225); // slate-300
-            doc.setLineWidth(0.3);
-            doc.line(margin, y + 2, pageWidth - margin, y + 2);
-            
-            y += 7;
-        }
-
-        if (y > pageHeight - 20) {
-            doc.addPage();
-            drawHeader(false);
-            y = 22;
-            drawTableHeader(y);
-            y += 8;
+            tableBody.push([
+                {
+                    content: `BLOK ${houseBlock}`,
+                    colSpan: headers.length,
+                    styles: {
+                        fillColor: [241, 245, 249],
+                        textColor: [15, 23, 42],
+                        fontStyle: 'bold',
+                        halign: 'left',
+                        cellPadding: { top: 1.6, bottom: 1.6, left: 2 }
+                    }
+                }
+            ]);
         }
 
         residentNo++;
+        const row = [residentNo.toString()];
 
-        // Zebra striping
-        if (residentNo % 2 !== 0) {
-            doc.setFillColor(248, 250, 252);
-            doc.rect(margin, y - 5, contentWidth, 7, 'F');
-        }
-
-        doc.setFont("times", "normal");
-        doc.setFontSize(8.5);
-        
-        let currX = margin;
-        const rowData = headers.map((header) => {
-            if (header.id === 'no') return residentNo.toString();
-            
+        selectedDefs.forEach(header => {
             const val = h[header.id as keyof House];
             if (header.id === 'status') {
-                return h.status === 'Occupied' ? 'DIHUNI' : h.status === 'Empty' ? 'KOSONG' : h.status === 'Business' ? 'USAHA' : 'MENGUNJUNGI';
+                row.push(h.status === 'Occupied' ? 'DIHUNI' : h.status === 'Empty' ? 'KOSONG' : h.status === 'Business' ? 'USAHA' : 'MENGUNJUNGI');
+            } else if (header.id === 'isVerified') {
+                row.push(h.isVerified ? 'VERIF' : 'PENDING');
+            } else if (header.id === 'headOfFamily' || header.id === 'ownerName') {
+                row.push((val?.toString() || '-').toUpperCase());
+            } else if (header.id === 'occupants') {
+                row.push((h.occupants || 0).toString());
+            } else if (header.id === 'residenceType') {
+                row.push(h.status === 'Empty' ? '-' : (val?.toString() || '-'));
+            } else if (header.id === 'joiningDate') {
+                row.push(h.joiningDate ? h.joiningDate.split('T')[0] : (h.createdAt ? h.createdAt.split('T')[0] : '-'));
+            } else if (header.id === 'businessName') {
+                row.push((h.businessName || (h.hasBusiness ? 'Ada Usaha' : '-')).toUpperCase());
+            } else if (header.id === 'businessCategory') {
+                row.push(h.businessCategory || '-');
+            } else if (header.id === 'businessLocation') {
+                row.push(h.businessLocation || '-');
+            } else if (header.id === 'businessPhone') {
+                row.push(h.businessPhone || h.phone || '-');
+            } else if (header.id === 'ktpStatus') {
+                row.push(h.ktpStatus || (h.addressKtp && (h.addressKtp.toLowerCase().includes('tondo') || h.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai' : (h.addressKtp ? 'Luar Wilayah' : '-')));
+            } else if (header.id === 'addressKtp') {
+                row.push(h.addressKtp || '-');
+            } else if (header.id === 'nik') {
+                row.push(h.nik || '-');
+            } else if (header.id === 'kkNumber') {
+                row.push(h.kkNumber || '-');
+            } else if (header.id === 'ownerRelationship') {
+                row.push(h.ownerRelationship || (h.residenceType === 'Tetap' ? 'Diri Sendiri' : '-'));
+            } else if (header.id === 'buildingCondition') {
+                row.push(h.buildingCondition || 'Baik');
+            } else if (header.id === 'certificateStatus') {
+                row.push(h.certificateStatus || 'Tidak');
+            } else if (header.id === 'hasStructuralModification') {
+                row.push(h.hasStructuralModification ? 'Ya' : 'Tidak');
+            } else if (header.id === 'pdamStatus') {
+                row.push(h.pdamStatus || 'Terpasang');
+            } else if (header.id === 'pdamMeterNumber') {
+                row.push(h.pdamMeterNumber || '-');
+            } else {
+                row.push(val?.toString() || '-');
             }
-            if (header.id === 'isVerified') {
-                return h.isVerified ? 'VERIF' : 'PENDING';
-            }
-            if (header.id === 'headOfFamily' || header.id === 'ownerName') {
-                return (val?.toString() || '-').toUpperCase();
-            }
-            if (header.id === 'occupants') {
-                return (h.occupants || 0).toString();
-            }
-            if (header.id === 'residenceType') {
-                if (h.status === 'Empty') return '-';
-                return (val?.toString() || '-');
-            }
-            if (header.id === 'joiningDate') {
-                return h.joiningDate ? h.joiningDate.split('T')[0] : (h.createdAt ? h.createdAt.split('T')[0] : '-');
-            }
-            if (header.id === 'businessName') {
-                return (h.businessName || (h.hasBusiness ? 'Ada Usaha' : '-')).toUpperCase();
-            }
-            if (header.id === 'businessCategory') {
-                return h.businessCategory || '-';
-            }
-            if (header.id === 'businessLocation') {
-                return h.businessLocation || '-';
-            }
-            if (header.id === 'businessPhone') {
-                return h.businessPhone || h.phone || '-';
-            }
-            if (header.id === 'ktpStatus') {
-                return h.ktpStatus || (h.addressKtp && (h.addressKtp.toLowerCase().includes('tondo') || h.addressKtp.toLowerCase().includes('pue lombe')) ? 'Sesuai' : (h.addressKtp ? 'Luar Wilayah' : '-'));
-            }
-            if (header.id === 'addressKtp') {
-                return h.addressKtp || '-';
-            }
-            if (header.id === 'nik') {
-                return h.nik || '-';
-            }
-            if (header.id === 'kkNumber') {
-                return h.kkNumber || '-';
-            }
-            if (header.id === 'ownerRelationship') {
-                return h.ownerRelationship || (h.residenceType === 'Tetap' ? 'Diri Sendiri' : '-');
-            }
-            if (header.id === 'buildingCondition') {
-                return h.buildingCondition || 'Baik';
-            }
-            if (header.id === 'certificateStatus') {
-                return h.certificateStatus || 'Tidak';
-            }
-            if (header.id === 'hasStructuralModification') {
-                return h.hasStructuralModification ? 'Ya' : 'Tidak';
-            }
-            if (header.id === 'pdamStatus') {
-                return h.pdamStatus || 'Terpasang';
-            }
-            if (header.id === 'pdamMeterNumber') {
-                return h.pdamMeterNumber || '-';
-            }
-            return (val?.toString() || '-');
         });
 
-        rowData.forEach((text, idx) => {
-            const hDef = headers[idx];
-            const w = hDef.w;
-            const centerKeys = [
-                'no', 'block', 'number', 'gender', 'birthDate', 'religion', 'status', 
-                'residenceType', 'occupants', 'isVerified', 'joiningDate', 'businessLocation', 
-                'ktpStatus', 'buildingCondition', 'certificateStatus', 'hasStructuralModification', 'pdamStatus'
-            ];
-            const align = centerKeys.includes(hDef.id) ? "center" : "left";
-            const xPos = align === "center" ? currX + (w / 2) : currX + 2;
-            
-            // Set default font and text color
-            doc.setFont("times", "normal");
-            doc.setTextColor(51, 65, 85); // Slate-700
-            
-            // Highlight Status Hunian
-            if (hDef.id === 'status') {
-                if (text === 'DIHUNI') {
-                    doc.setFont("times", "bold");
-                    doc.setTextColor(2, 132, 199); // Sky-700
-                } else if (text === 'KOSONG') {
-                    doc.setFont("times", "bold");
-                    doc.setTextColor(100, 116, 139); // Slate-500
-                } else if (text === 'USAHA') {
-                    doc.setFont("times", "bold");
-                    doc.setTextColor(217, 119, 6); // Amber-600
-                }
-            }
-            
-            // Highlight Keberadaan / Kepenghunian Rumah (residenceType)
-            if (hDef.id === 'residenceType') {
-                if (text === 'Tetap') {
-                    doc.setFont("times", "bold");
-                    doc.setTextColor(15, 118, 110); // Teal-700
-                } else if (text === 'Kontrak' || text === 'Sewa' || text === 'Kost') {
-                    doc.setFont("times", "bold");
-                    doc.setTextColor(180, 83, 9); // Amber-700
-                } else if (text === 'Keluarga' || text === 'Rumah Keluarga') {
-                    doc.setFont("times", "bold");
-                    doc.setTextColor(79, 70, 229); // Indigo-600
-                }
-            }
-
-            let truncatedText = text;
-            if (doc.getTextWidth(text) > w - 2) {
-                // Handle splitting and truncation nicely to context width
-                truncatedText = doc.splitTextToSize(text, w - 4)[0];
-                if (text.length > truncatedText.length) {
-                    truncatedText = truncatedText.substring(0, Math.max(2, truncatedText.length - 2)) + "..";
-                }
-            }
-            doc.text(truncatedText, xPos, y, { align: align as any });
-            currX += w;
-        });
-
-        // Reset default style after row
-        doc.setFont("times", "normal");
-        doc.setTextColor(0);
-
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.1);
-        doc.line(margin, y + 2, pageWidth - margin, y + 2);
-        
-        y += 7;
+        tableBody.push(row);
     });
+
+    autoTable(doc, {
+        head: [headers],
+        body: tableBody,
+        startY: 57,
+        margin: { left: margin, right: margin, bottom: 20 },
+        theme: 'grid',
+        tableWidth: 'auto',
+        styles: {
+            font: 'times',
+            fontSize: tableFontSize,
+            cellPadding: cellPad,
+            lineColor: [226, 232, 240],
+            lineWidth: 0.1,
+            textColor: [51, 65, 85],
+            valign: 'middle',
+            overflow: 'linebreak'
+        },
+        headStyles: {
+            fillColor: [30, 41, 59], // Slate 900
+            textColor: [255, 255, 255],
+            fontStyle: 'bold',
+            fontSize: headFontSize,
+            halign: 'center',
+            valign: 'middle',
+            lineWidth: 0.1,
+            lineColor: [51, 65, 85]
+        },
+        columnStyles: colStyles,
+        alternateRowStyles: {
+            fillColor: [248, 250, 252]
+        },
+        didParseCell: (data) => {
+            if (data.section === 'body') {
+                const colIdx = data.column.index;
+                if (colIdx > 0) {
+                    const colDef = selectedDefs[colIdx - 1];
+                    const text = String(data.cell.raw || '');
+                    if (colDef?.id === 'status') {
+                        if (text === 'DIHUNI') {
+                            data.cell.styles.textColor = [2, 132, 199];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (text === 'KOSONG') {
+                            data.cell.styles.textColor = [100, 116, 139];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (text === 'USAHA') {
+                            data.cell.styles.textColor = [217, 119, 6];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    } else if (colDef?.id === 'residenceType') {
+                        if (text === 'Tetap') {
+                            data.cell.styles.textColor = [15, 118, 110];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (text === 'Kontrak' || text === 'Sewa' || text === 'Kost') {
+                            data.cell.styles.textColor = [180, 83, 9];
+                            data.cell.styles.fontStyle = 'bold';
+                        } else if (text === 'Keluarga' || text === 'Rumah Keluarga') {
+                            data.cell.styles.textColor = [79, 70, 229];
+                            data.cell.styles.fontStyle = 'bold';
+                        }
+                    }
+                }
+            }
+        },
+        didDrawPage: (data) => {
+            if (data.pageNumber > 1) {
+                drawHeader(false);
+            }
+        }
+    });
+
+    y = (doc as any).lastAutoTable?.finalY || 150;
 
     // Statistics / Summary Block (Rekapitulasi Data Status Hunian & Kepenghunian)
     if (y > pageHeight - 105) {
