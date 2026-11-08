@@ -80,6 +80,93 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
     return '';
   }, [matchedHouse]);
 
+  // Profile Completeness Score (0 - 100%)
+  const completenessScore = useMemo(() => {
+    if (formData.status === 'Empty') {
+      let score = 50;
+      if (formData.block && formData.number) score += 30;
+      if (formData.ownerRelationship || formData.specialNotes) score += 20;
+      return Math.min(100, score);
+    }
+    let filled = 0;
+    const checks = [
+      Boolean(formData.headOfFamily && formData.headOfFamily.trim() && formData.headOfFamily !== 'Rumah Kosong'),
+      Boolean(formData.block && formData.number),
+      Boolean(formData.nik && formData.nik.toString().replace(/\D/g, '').length === 16),
+      Boolean(formData.kkNumber && formData.kkNumber.toString().replace(/\D/g, '').length === 16),
+      Boolean(formData.phone && formData.phone.trim()),
+      Boolean(formData.birthDate),
+      Boolean(formData.birthPlace),
+      Boolean(formData.addressKtp && formData.addressKtp.trim()),
+      Boolean(formData.religion),
+      Boolean(formData.jobCategory || formData.job),
+      Boolean(formData.education),
+      Boolean(formData.ownerRelationship),
+      Boolean(formData.pdamStatus)
+    ];
+    checks.forEach(c => { if (c) filled++; });
+    return Math.round((filled / checks.length) * 100);
+  }, [formData]);
+
+  // Sync Age Group Demographics from birthDate of Head & Family Members
+  const syncDemographicsFromDates = () => {
+    let babies = 0;
+    let toddlers = 0;
+    let children = 0;
+    let teenagers = 0;
+    let adults = 0;
+    let elderly = 0;
+
+    const currentYear = new Date().getFullYear();
+
+    // 1. Head of Family
+    if (formData.status !== 'Empty' && formData.birthDate) {
+      const birthYear = new Date(formData.birthDate).getFullYear();
+      if (!isNaN(birthYear) && birthYear > 1900 && birthYear <= currentYear) {
+        const age = currentYear - birthYear;
+        if (age <= 1) babies++;
+        else if (age <= 5) toddlers++;
+        else if (age <= 12) children++;
+        else if (age <= 18) teenagers++;
+        else if (age >= 60) elderly++;
+        else adults++;
+      }
+    }
+
+    // 2. Family Members
+    (formData.familyMembers || []).forEach((m: any) => {
+      if (m.birthDate) {
+        const birthYear = new Date(m.birthDate).getFullYear();
+        if (!isNaN(birthYear) && birthYear > 1900 && birthYear <= currentYear) {
+          const age = currentYear - birthYear;
+          if (age <= 1) babies++;
+          else if (age <= 5) toddlers++;
+          else if (age <= 12) children++;
+          else if (age <= 18) teenagers++;
+          else if (age >= 60) elderly++;
+          else adults++;
+        }
+      }
+    });
+
+    const calculatedOccupants = formData.status === 'Empty' 
+      ? 0 
+      : 1 + (formData.familyMembers?.length || 0);
+
+    setFormData((prev: any) => ({
+      ...prev,
+      babyCount: babies,
+      toddlerCount: toddlers,
+      childCount: children,
+      teenagerCount: teenagers,
+      adultCount: adults,
+      elderlyCount: elderly,
+      occupants: prev.occupants && prev.occupants > 0 ? prev.occupants : calculatedOccupants
+    }));
+
+    toast.success(`Demografi usia disinkronkan: ${babies + toddlers + children + teenagers + adults + elderly} jiwa terhitung dari tanggal lahir.`);
+  };
+
   const validateTab = (tab: 'basic' | 'demographics' | 'family') => {
     const isAdmin = role === Role.ADMIN;
 
@@ -92,20 +179,26 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
     }
 
     if (tab === 'basic') {
-      const requiredFields = [
-        { key: 'headOfFamily', label: 'Kepala Keluarga / Penghuni' },
-        { key: 'nik', label: 'NIK' },
-        { key: 'kkNumber', label: 'Nomor KK' },
-        { key: 'gender', label: 'Jenis Kelamin' },
-        { key: 'birthPlace', label: 'Tempat Lahir' },
-        { key: 'birthDate', label: 'Tanggal Lahir' },
-        { key: 'addressKtp', label: 'Alamat KTP' },
-        { key: 'block', label: 'Blok' },
-        { key: 'number', label: 'Nomor' },
-        { key: 'joiningDate', label: 'Tanggal Mulai Menempati' }
-      ];
+      if (!formData.block || !formData.number) {
+        toast.error('Blok dan Nomor Rumah wajib diisi.');
+        return false;
+      }
 
-      if (!isAdmin) {
+      if (!formData.headOfFamily || !formData.headOfFamily.trim()) {
+        toast.error('Nama Kepala Keluarga / Penghuni wajib diisi.');
+        return false;
+      }
+
+      // If new resident registration, enforce required fields
+      if (!editingHouseId && !isAdmin) {
+        const requiredFields = [
+          { key: 'gender', label: 'Jenis Kelamin' },
+          { key: 'birthPlace', label: 'Tempat Lahir' },
+          { key: 'birthDate', label: 'Tanggal Lahir' },
+          { key: 'addressKtp', label: 'Alamat KTP' },
+          { key: 'joiningDate', label: 'Tanggal Mulai Menempati' }
+        ];
+
         for (const field of requiredFields) {
           if (!formData[field.key]) {
             toast.error(`Field "${field.label}" wajib diisi.`);
@@ -114,8 +207,9 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
         }
       }
 
-      if (formData.nik && formData.nik.trim()) {
-        const cleanNik = formData.nik.trim().replace(/\D/g, '');
+      // NIK validation (only enforce 16 digits if filled, or if new registration)
+      if (formData.nik && formData.nik.toString().trim() && formData.nik.toString().trim() !== '-') {
+        const cleanNik = formData.nik.toString().trim().replace(/\D/g, '');
         if (cleanNik.length !== 16) {
           toast.error('NIK Kepala Keluarga harus 16 digit angka.');
           return false;
@@ -125,20 +219,30 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
           toast.error(`NIK Kepala Keluarga sudah terdaftar atas nama ${dupCheck.residentName} (${dupCheck.role}) di Unit ${dupCheck.houseId}.`);
           return false;
         }
+      } else if (!editingHouseId) {
+        toast.error('NIK Kepala Keluarga wajib 16 digit angka untuk pendaftaran baru.');
+        return false;
       }
 
-      if (formData.kkNumber && formData.kkNumber.trim() && formData.kkNumber.trim().length !== 16) {
-        toast.error('Nomor KK harus 16 digit.');
+      // KK Number validation
+      if (formData.kkNumber && formData.kkNumber.toString().trim() && formData.kkNumber.toString().trim() !== '-') {
+        const cleanKk = formData.kkNumber.toString().trim().replace(/\D/g, '');
+        if (cleanKk.length !== 16) {
+          toast.error('Nomor KK harus 16 digit angka.');
+          return false;
+        }
+      } else if (!editingHouseId) {
+        toast.error('Nomor KK wajib 16 digit angka untuk pendaftaran baru.');
         return false;
       }
     } else if (tab === 'demographics') {
-      const requiredFields = [
-        { key: 'education', label: 'Pendidikan' },
-        { key: 'jobCategory', label: 'Kategori Pekerjaan' },
-        { key: 'religion', label: 'Agama' }
-      ];
+      if (!editingHouseId && !isAdmin) {
+        const requiredFields = [
+          { key: 'education', label: 'Pendidikan' },
+          { key: 'jobCategory', label: 'Kategori Pekerjaan' },
+          { key: 'religion', label: 'Agama' }
+        ];
 
-      if (!isAdmin) {
         for (const field of requiredFields) {
           if (!formData[field.key]) {
             toast.error(`Field "${field.label}" wajib diisi.`);
@@ -200,37 +304,78 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
       title={editingHouseId ? "Edit Profil Warga" : "Pendaftaran Warga Baru"} 
       maxWidth="max-w-4xl"
       stickyHeader={
-        <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 w-full max-w-md mx-auto items-center gap-1.5 shadow-2xs">
-          {[
-            { id: 'basic', label: 'Identitas', icon: User },
-            { id: 'demographics', label: 'Profil', icon: ShieldCheck },
-            { id: 'family', label: 'Keluarga', icon: Users }
-          ].map((tab, idx) => (
-            <button 
-              key={tab.id}
-              type="button"
-              onClick={() => {
-                if (tab.id === 'basic') setActiveFormTab('basic');
-                else if (tab.id === 'demographics') {
-                   if (validateTab('basic')) setActiveFormTab('demographics');
-                } else if (tab.id === 'family') {
-                   if (validateTab('basic') && validateTab('demographics')) setActiveFormTab('family');
-                }
-              }}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-colors cursor-pointer ${
-                activeFormTab === tab.id 
-                  ? 'bg-white text-indigo-600 shadow-xs border border-slate-200/60 font-semibold' 
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'
-              }`}
-            >
-              <tab.icon size={13} className={activeFormTab === tab.id ? 'text-indigo-600' : 'text-slate-400'} />
-              <span>{tab.label}</span>
-            </button>
-          ))}
+        <div className="flex flex-col gap-2 w-full max-w-2xl mx-auto">
+          {editingHouseId && (
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md font-mono font-bold text-slate-800 bg-white border border-slate-200 shadow-2xs">
+                  Blok {formData.block || '-'}-{formData.number || '-'}
+                </span>
+                <span className="font-bold text-slate-700 truncate max-w-[150px] sm:max-w-xs">
+                  {formData.status === 'Empty' ? 'Rumah Kosong' : (formData.headOfFamily || 'Tanpa Nama')}
+                </span>
+                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                  formData.status === 'Empty' 
+                    ? 'bg-slate-200 text-slate-600' 
+                    : formData.residenceType === 'Sewa' 
+                      ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                      : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                }`}>
+                  {formData.status === 'Empty' ? 'Kosong' : (formData.residenceType || 'Tetap')}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1 text-[11px] text-slate-500 font-semibold">
+                  <span>Kelengkapan:</span>
+                  <strong className={completenessScore >= 80 ? 'text-emerald-600' : completenessScore >= 50 ? 'text-amber-600' : 'text-rose-600'}>
+                    {completenessScore}%
+                  </strong>
+                </div>
+                <div className="w-16 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-300 ${
+                      completenessScore >= 80 ? 'bg-emerald-500' : completenessScore >= 50 ? 'bg-amber-500' : 'bg-rose-500'
+                    }`}
+                    style={{ width: `${completenessScore}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex bg-slate-50 p-1.5 rounded-2xl border border-slate-100 w-full max-w-md mx-auto items-center gap-1.5 shadow-2xs">
+            {[
+              { id: 'basic', label: '1. Identitas', icon: User },
+              { id: 'demographics', label: '2. Profil', icon: ShieldCheck },
+              { id: 'family', label: '3. Keluarga', icon: Users }
+            ].map((tab) => (
+              <button 
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  if (tab.id === 'basic') setActiveFormTab('basic');
+                  else if (tab.id === 'demographics') {
+                     if (editingHouseId || validateTab('basic')) setActiveFormTab('demographics');
+                  } else if (tab.id === 'family') {
+                     if (editingHouseId || (validateTab('basic') && validateTab('demographics'))) setActiveFormTab('family');
+                  }
+                }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold tracking-tight transition-colors cursor-pointer ${
+                  activeFormTab === tab.id 
+                    ? 'bg-white text-indigo-600 shadow-xs border border-slate-200/60 font-semibold' 
+                    : 'text-slate-500 hover:text-slate-800 hover:bg-white/60'
+                }`}
+              >
+                <tab.icon size={13} className={activeFormTab === tab.id ? 'text-indigo-600' : 'text-slate-400'} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       }
     >
-      <form onSubmit={onFormSubmit} className="space-y-6">
+      <form onSubmit={onFormSubmit} noValidate className="space-y-6">
         <div className="min-h-[480px]">
           <AnimatePresence mode="wait">
             {activeFormTab === 'basic' && (
@@ -241,9 +386,35 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                 exit={{ opacity: 0, y: -15 }}
                 className="space-y-5 animate-fade-in"
               >
+                {/* Quick Jump Anchors for Tab 1 */}
+                <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-50 border border-slate-200/70 rounded-xl text-[11px] font-bold text-slate-600">
+                  <span className="text-[9px] uppercase tracking-wider text-slate-400 pl-1">Lompat Ke:</span>
+                  {[
+                    { label: 'Data Diri', target: 'sec-personal' },
+                    { label: 'Domisili & Jiwa', target: 'sec-domisili' },
+                    { label: 'Verifikasi BPBD', target: 'sec-bpbd' },
+                    { label: 'Air PDAM & Tag', target: 'sec-pdam' },
+                    { label: 'PBB & PIN', target: 'sec-pbb' }
+                  ].map((pill) => (
+                    <button
+                      key={pill.target}
+                      type="button"
+                      onClick={() => {
+                        const el = document.getElementById(pill.target);
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-indigo-50 hover:text-indigo-600 text-slate-600 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
+                    >
+                      {pill.label}
+                    </button>
+                  ))}
+                </div>
+
                 {/* Main Identity Section */}
                 <div className="space-y-5">
-                  <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
+                  <div id="sec-personal" className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs scroll-mt-24">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6 pb-4 border-b border-slate-100">
                       <div className="flex items-center gap-2.5">
                          <div className="w-8 h-8 bg-slate-50 text-slate-700 border border-slate-200 rounded-lg flex items-center justify-center">
@@ -500,7 +671,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                   {/* Residence Info & Contact Access Grid */}
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                     {/* Residence details block */}
-                    <div className="lg:col-span-7 bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
+                    <div id="sec-domisili" className="lg:col-span-7 bg-white p-5 border border-slate-200 rounded-xl shadow-xs scroll-mt-24">
                        <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
                           <div className="w-8 h-8 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-700">
                             <Home size={14} />
@@ -669,6 +840,55 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                               </div>
                             </div>
                           )}
+
+                          {/* Kontrol Cepat Jumlah Penghuni (Jiwa) */}
+                          <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                              <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                <Users size={13} className="text-indigo-600" />
+                                <span>Jumlah Penghuni (Jiwa)</span>
+                              </label>
+                              {formData.familyMembers?.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const autoOccupants = formData.status === 'Empty' ? 0 : 1 + (formData.familyMembers?.length || 0);
+                                    setFormData({ ...formData, occupants: autoOccupants });
+                                    toast.success(`Jumlah penghuni diset dari KK: ${autoOccupants} Jiwa`);
+                                  }}
+                                  className="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 bg-indigo-100/70 hover:bg-indigo-100 px-2 py-0.5 rounded-md border border-indigo-200 transition-colors cursor-pointer"
+                                >
+                                  Hitung Otomatis dari KK ({formData.familyMembers.length + 1} Jiwa)
+                                </button>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, occupants: Math.max(0, (formData.occupants || (formData.status === 'Empty' ? 0 : 1)) - 1) })}
+                                className="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-bold flex items-center justify-center cursor-pointer border border-slate-200 shadow-2xs"
+                              >
+                                -
+                              </button>
+                              <input
+                                type="number"
+                                min={0}
+                                value={formData.occupants ?? (formData.status === 'Empty' ? 0 : 1)}
+                                onChange={(e) => setFormData({ ...formData, occupants: Math.max(0, parseInt(e.target.value) || 0) })}
+                                className="w-20 text-center py-1 px-2 bg-white border border-slate-200 rounded-lg text-xs font-bold font-mono text-slate-800 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-100"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, occupants: (formData.occupants || (formData.status === 'Empty' ? 0 : 1)) + 1 })}
+                                className="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 text-slate-700 font-bold flex items-center justify-center cursor-pointer border border-slate-200 shadow-2xs"
+                              >
+                                +
+                              </button>
+                              <span className="text-xs text-slate-500 font-medium ml-1">
+                                Jiwa {formData.status === 'Empty' ? '(Unit Belum Dihuni)' : 'tinggal di unit ini'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
                         {/* --- KONDISI 1: STATUS TETAP (PEMILIK SESUAI SK) --- */}
@@ -981,7 +1201,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                        </div>
 
                        {/* Seksi Status Meteran PDAM Kota Palu */}
-                       <div className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs">
+                       <div id="sec-pdam" className="bg-white p-5 border border-slate-200 rounded-xl shadow-xs scroll-mt-24">
                           <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-slate-100">
                             <div className="w-8 h-8 bg-blue-50 border border-blue-200 rounded-lg flex-shrink-0 flex items-center justify-center text-blue-600">
                               <Droplets size={14} />
@@ -1051,7 +1271,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                        </div>
 
                        {/* Seksi Data Verifikasi BPBD & Fisik Hunian Tetap */}
-                       <div className="bg-white p-5 border border-amber-200/80 rounded-xl shadow-xs">
+                       <div id="sec-bpbd" className="bg-white p-5 border border-amber-200/80 rounded-xl shadow-xs scroll-mt-24">
                           <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-amber-100">
                             <div className="w-8 h-8 bg-amber-50 border border-amber-200 rounded-lg flex-shrink-0 flex items-center justify-center text-amber-700">
                               <ShieldCheck size={15} />
@@ -1115,16 +1335,17 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
 
                             <div>
                               <label className="block text-xs font-semibold text-slate-700 mb-1.5">Status Sertifikasi</label>
-                              <div className="grid grid-cols-2 gap-2">
+                              <div className="grid grid-cols-3 gap-1.5">
                                 {[
                                   { id: 'Ya', label: 'Sertifikat (Ya)', activeClass: 'bg-emerald-600 text-white border-emerald-600' },
-                                  { id: 'Tidak', label: 'Belum Ada (Tidak)', activeClass: 'bg-slate-800 text-white border-slate-800' }
+                                  { id: 'Tidak', label: 'Belum Ada', activeClass: 'bg-slate-800 text-white border-slate-800' },
+                                  { id: 'Dalam Proses', label: 'Dalam Proses', activeClass: 'bg-amber-600 text-white border-amber-600' }
                                 ].map((cert) => (
                                   <button
                                     key={cert.id}
                                     type="button"
                                     onClick={() => setFormData({ ...formData, certificateStatus: cert.id as any })}
-                                    className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-colors text-center cursor-pointer ${
+                                    className={`py-1.5 px-1.5 rounded-lg text-[11px] font-bold border transition-colors text-center cursor-pointer truncate ${
                                       (formData.certificateStatus || 'Tidak') === cert.id
                                         ? cert.activeClass
                                         : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-white'
@@ -1150,11 +1371,80 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 </div>
                               </label>
                             </div>
+
+                            {/* Live BPBD Report Matrix Preview */}
+                            <div className="p-2.5 bg-amber-50/70 border border-amber-200/70 rounded-xl space-y-1.5">
+                              <span className="block text-[9px] font-bold text-amber-800 uppercase tracking-wider">Indikator Kolom Formulir BPBD (Live Preview):</span>
+                              <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
+                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${formData.ownerRelationship === 'Pembeli' ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                  {formData.ownerRelationship === 'Pembeli' ? '✓ Jual' : '○ Jual'}
+                                </span>
+                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${(formData.residenceType === 'Sewa' || formData.ownerRelationship === 'Penyewa') ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                  {(formData.residenceType === 'Sewa' || formData.ownerRelationship === 'Penyewa') ? '✓ Sewa' : '○ Sewa'}
+                                </span>
+                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${formData.status === 'Empty' ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                  {formData.status === 'Empty' ? '✓ Kosong' : '○ Kosong'}
+                                </span>
+                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${formData.status === 'Business' ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                  {formData.status === 'Business' ? '✓ Alih Fungsi' : '○ Alih Fungsi'}
+                                </span>
+                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${formData.hasStructuralModification ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                  {formData.hasStructuralModification ? '✓ Perubahan Bentuk' : '○ Perubahan Bentuk'}
+                                </span>
+                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${(formData.buildingCondition === 'Terlantar' || formData.buildingCondition === 'Tidak Terawat') ? 'bg-rose-600 text-white border-rose-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                  {formData.buildingCondition === 'Terlantar' ? '✓ Terlantar' : formData.buildingCondition === 'Tidak Terawat' ? '✓ Tdk Terawat' : '○ Kondisi: Baik'}
+                                </span>
+                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${formData.certificateStatus === 'Ya' ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs' : formData.certificateStatus === 'Dalam Proses' ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                  {formData.certificateStatus === 'Ya' ? '✓ Sertifikat: Ya' : formData.certificateStatus === 'Dalam Proses' ? '⏳ Sertifikat: Proses' : '○ Sertifikat: Belum'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Catatan / Potensi Tindak Lanjut BPBD */}
+                            <div className="pt-2 border-t border-amber-100 space-y-1.5">
+                              <div className="flex flex-wrap items-center justify-between gap-1.5">
+                                <label className="text-xs font-semibold text-slate-700">Catatan / Potensi Tindak Lanjut BPBD</label>
+                                <span className="text-[10px] text-amber-700 font-medium">Klik template cepat:</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {[
+                                  'Dihuni sesuai SK penerima',
+                                  'Unit dikontrakkan/sewa',
+                                  'Alih kepemilikan (jual beli)',
+                                  'Rumah kosong belum berpenghuni',
+                                  'Perubahan fisik / renovasi',
+                                  'Perlu peninjauan lapangan BPBD'
+                                ].map((tpl) => (
+                                  <button
+                                    key={tpl}
+                                    type="button"
+                                    onClick={() => {
+                                      const current = (formData.specialNotes || '').trim();
+                                      const separator = current && !current.endsWith('.') && !current.endsWith(';') ? '; ' : ' ';
+                                      setFormData({
+                                        ...formData,
+                                        specialNotes: current ? `${current}${separator}${tpl}` : tpl
+                                      });
+                                    }}
+                                    className="text-[10px] font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                                  >
+                                    + {tpl}
+                                  </button>
+                                ))}
+                              </div>
+                              <textarea
+                                rows={2}
+                                value={formData.specialNotes ?? ''}
+                                onChange={e => setFormData({ ...formData, specialNotes: e.target.value })}
+                                placeholder="Tuliskan catatan khusus kondisi unit, tindak lanjut BPBD, atau kronologi penghunian..."
+                                className="w-full text-xs font-medium text-slate-800 bg-white border border-slate-200 rounded-lg p-2.5 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-200 resize-none transition-colors"
+                              />
+                            </div>
                           </div>
                        </div>
 
                        {/* Portal Access PIN code block */}
-                       <div className="bg-[#0f172a] p-5 border border-slate-800 rounded-xl text-white shadow-xs relative overflow-hidden">
+                       <div id="sec-pbb" className="bg-[#0f172a] p-5 border border-slate-800 rounded-xl text-white shadow-xs relative overflow-hidden scroll-mt-24">
                           <div className="flex items-center gap-2 mb-4">
                               <div className="w-8 h-8 bg-white/10 rounded-lg border border-white/5 flex-shrink-0 flex items-center justify-center text-indigo-400">
                                 <Shield size={14} />
@@ -1785,23 +2075,34 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                   </div>
 
                   <div className="mt-6 pt-5 border-t border-slate-100">
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                       <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                         <AlertCircle size={14} className="text-slate-400" /> Demografi & Status Rentan
                       </h4>
-                      <button 
-                        type="button"
-                        onClick={() => setFormData({ ...formData, useManualDemographics: !formData.useManualDemographics })}
-                        className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors border text-[10px] uppercase font-bold tracking-wider ${
-                          formData.useManualDemographics 
-                            ? 'bg-amber-50 border-amber-200 text-amber-700 shadow-xs' 
-                            : 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-xs'
-                        }`}
-                      >
-                        <span className="text-[9px] font-bold">
-                          {formData.useManualDemographics ? 'Input Manual' : 'Kalkulasi Otomatis'}
-                        </span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={syncDemographicsFromDates}
+                          className="flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors border text-[10px] font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200 shadow-xs cursor-pointer active:scale-95"
+                          title="Hitung ulang kelompok usia dari tanggal lahir Kepala Keluarga & anggota keluarga"
+                        >
+                          <RefreshCw size={11} className="stroke-[2.5]" />
+                          <span>Sinkronkan Usia</span>
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setFormData({ ...formData, useManualDemographics: !formData.useManualDemographics })}
+                          className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors border text-[10px] uppercase font-bold tracking-wider cursor-pointer ${
+                            formData.useManualDemographics 
+                              ? 'bg-amber-50 border-amber-200 text-amber-700 shadow-xs' 
+                              : 'bg-indigo-50 border-indigo-200 text-indigo-700 shadow-xs'
+                          }`}
+                        >
+                          <span className="text-[9px] font-bold">
+                            {formData.useManualDemographics ? 'Input Manual' : 'Kalkulasi Otomatis'}
+                          </span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -2208,14 +2509,32 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                 // Auto recalculate vulnerability demographics counters
                                 let babies = 0;
                                 let toddlers = 0;
+                                let children = 0;
+                                let teenagers = 0;
+                                let adults = 0;
                                 let elderly = 0;
+                                const currentYear = new Date().getFullYear();
+
+                                // Include Head of Family
+                                if (formData.status !== 'Empty' && formData.birthDate) {
+                                  const age = currentYear - new Date(formData.birthDate).getFullYear();
+                                  if (age <= 1) babies++;
+                                  else if (age <= 5) toddlers++;
+                                  else if (age <= 12) children++;
+                                  else if (age <= 18) teenagers++;
+                                  else if (age >= 60) elderly++;
+                                  else adults++;
+                                }
                                 
                                 newMembers.forEach(m => {
                                   if (m.birthDate) {
-                                    const age = new Date().getFullYear() - new Date(m.birthDate).getFullYear();
+                                    const age = currentYear - new Date(m.birthDate).getFullYear();
                                     if (age <= 1) babies++;
                                     else if (age <= 5) toddlers++;
+                                    else if (age <= 12) children++;
+                                    else if (age <= 18) teenagers++;
                                     else if (age >= 60) elderly++;
+                                    else adults++;
                                   }
                                 });
 
@@ -2224,7 +2543,11 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                   familyMembers: newMembers,
                                   babyCount: babies,
                                   toddlerCount: toddlers,
-                                  elderlyCount: elderly
+                                  childCount: children,
+                                  teenagerCount: teenagers,
+                                  adultCount: adults,
+                                  elderlyCount: elderly,
+                                  occupants: newMembers.length + (formData.status === 'Empty' ? 0 : 1)
                                 });
                               }}
                             />
@@ -2283,32 +2606,46 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
             )}
           </div>
 
-          <div className="flex gap-3 items-center">
+          <div className="flex flex-wrap gap-2.5 items-center">
             <button 
               type="button" 
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-rose-500 transition-colors uppercase tracking-wide"
+              className="px-3.5 py-2 text-xs font-semibold text-slate-400 hover:text-rose-500 transition-colors uppercase tracking-wide cursor-pointer"
             >
               Batalkan
             </button>
+
+            {/* In Edit Mode, always allow instant save from ANY tab */}
+            {editingHouseId && (
+              <button 
+                type="submit" 
+                className="px-5 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                title="Simpan seluruh perubahan profil warga sekarang"
+              >
+                <ShieldCheck size={14} />
+                <span>Simpan Perubahan</span>
+              </button>
+            )}
+
+            {/* Next Tab button if not in last tab */}
             {activeFormTab !== 'family' ? (
               <button 
                 type="button"
                 onClick={handleNext}
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 shadow-xs"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer active:scale-95"
               >
-                <span>Lanjutkan</span>
+                <span>Tab Berikutnya</span>
                 <ChevronRight size={13} />
               </button>
-            ) : (
+            ) : !editingHouseId ? (
               <button 
                 type="submit" 
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-xs flex items-center gap-1.5"
+                className="px-5 py-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <ShieldCheck size={14} />
-                <span>{editingHouseId ? 'Simpan Perubahan' : 'Finalisasi Data'}</span>
+                <span>Finalisasi Data</span>
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       </form>
