@@ -407,7 +407,7 @@ async function startServer() {
         }
 
         if (!authUserDeleted && authErrorDetails) {
-          console.warn([Firebase Admin] User  could not be removed from Firebase Auth: );
+          console.warn(`⚠️ [Firebase Admin] User ${cleanEmail} could not be removed from Firebase Auth: ${authErrorDetails}`);
         }
 
         // 2. Unlink or clean in Firestore officials
