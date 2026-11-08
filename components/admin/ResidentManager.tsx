@@ -35,14 +35,7 @@ import {
 import { House, Report, Official, CashFlow, PdfConfig, PaymentStatus, ResidentRegistration, Bill, Role, OccupantHistoryItem } from '../../types';
 import { OccupantTransitionModal } from './resident/OccupantTransitionModal';
 import { HouseMap } from '../HouseMap';
-import { 
-  generateResidentReportPDF,
-  generateBPBDVerificationReportPDF, 
-  generateIuranReceiptPDF,
-  generatePBBReportPDF,
-  generateResidentStatsReportPDF,
-  generateBillReportPDF
-} from '../../services/pdfService';
+// PDF service imported dynamically
 import { 
   batchUpdateHouses, 
   deleteHouseFromDb, 
@@ -70,7 +63,9 @@ import {
   handleFirestoreError,
   OperationType
 } from '../../services/databaseService';
-import { generateExcelTemplate, parseExcelFile, generateProfessionalExcel, generateBPBDVerificationExcel } from '../../services/excelService';
+// Lazy loaded report & document services to minimize initial chunk size
+const getPdfService = () => import('../../services/pdfService');
+const getExcelService = () => import('../../services/excelService');
 import { sendWhatsAppViaGateway } from '../../services/whatsappService';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -492,11 +487,17 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     }
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
+    const { generateExcelTemplate } = await getExcelService();
     generateExcelTemplate(currentTenant);
   };
 
   const [isBpbdTemplateSelected, setIsBpbdTemplateSelected] = useState(false);
+
+  const handleGenerateIuranReceiptPDF = async (payment: any, config: PdfConfig) => {
+    const { generateIuranReceiptPDF } = await getPdfService();
+    generateIuranReceiptPDF(payment, config);
+  };
 
   const handlePerformExport = async () => {
     setIsGenerating(true);
@@ -504,17 +505,21 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     try {
       if (exportTemplate === 'bpbd' || isBpbdTemplateSelected) {
         if (exportFormat === 'excel') {
+          const { generateBPBDVerificationExcel } = await getExcelService();
           await generateBPBDVerificationExcel(resolvedHouses, currentTenant);
           toast.success(`Berhasil mengunduh Formulir Verifikasi BPBD (Excel) untuk ${resolvedHouses.length} unit huntap!`);
         } else {
+          const { generateBPBDVerificationReportPDF } = await getPdfService();
           await generateBPBDVerificationReportPDF(resolvedHouses, pdfConfig);
           toast.success(`Berhasil mencetak Formulir Verifikasi BPBD (PDF Resmi) untuk ${resolvedHouses.length} unit huntap!`);
         }
       } else {
         if (exportFormat === 'excel') {
+          const { generateProfessionalExcel } = await getExcelService();
           await generateProfessionalExcel(resolvedHouses, selectedExportCols, currentTenant);
           toast.success(`Berhasil mengunduh Excel berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
         } else {
+          const { generateResidentReportPDF } = await getPdfService();
           await generateResidentReportPDF(resolvedHouses, pdfConfig, selectedExportCols);
           toast.success(`Berhasil mencetak PDF berisi ${selectedExportCols.length} kolom untuk ${resolvedHouses.length} warga!`);
         }
@@ -575,6 +580,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
     setIsUploading(true);
     try {
+      const { parseExcelFile } = await getExcelService();
       const parsedData = await parseExcelFile(file);
       const previewRows: any[] = [];
       let addCount = 0;
@@ -1646,6 +1652,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       else if (filterStatus === 'disability') matchesStatus = !!(h.isDisability || h.isOrphan);
       else if (filterStatus === 'ktp_local') matchesStatus = h.ktpStatus === 'Sesuai Domisili' || (!h.ktpStatus && !!h.addressKtp && (h.addressKtp.toLowerCase().includes('tondo') || h.addressKtp.toLowerCase().includes('pue lombe')));
       else if (filterStatus === 'ktp_external') matchesStatus = h.ktpStatus === 'Luar Wilayah (Belum Mutasi)' || (!h.ktpStatus && (!h.addressKtp || (!h.addressKtp.toLowerCase().includes('tondo') && !h.addressKtp.toLowerCase().includes('pue lombe'))));
+      else if (filterStatus === 'bpbd_certified') matchesStatus = h.certificateStatus === 'Ya';
+      else if (filterStatus === 'bpbd_uncertified') matchesStatus = h.certificateStatus === 'Tidak' || !h.certificateStatus;
+      else if (filterStatus === 'bpbd_unverified') matchesStatus = !h.certificateStatus || !h.buildingCondition || !h.ownerRelationship;
 
       let matchesResidenceType = true;
       if (filterResidenceType !== 'all') {
@@ -1925,6 +1934,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       onClick={async () => { 
                         setIsActionMenuOpen(false);
                         try {
+                          const { generateBPBDVerificationReportPDF } = await getPdfService();
                           await generateBPBDVerificationReportPDF(filteredHouses, pdfConfig);
                           toast.success(`Cetak formulir verifikasi BPBD (${filteredHouses.length} unit) berhasil!`);
                         } catch (e) {
@@ -1945,6 +1955,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                       onClick={async () => { 
                         setIsActionMenuOpen(false);
                         try {
+                          const { generateBPBDVerificationExcel } = await getExcelService();
                           await generateBPBDVerificationExcel(filteredHouses, currentTenant);
                           toast.success(`Unduh formulir verifikasi BPBD Excel (${filteredHouses.length} unit) berhasil!`);
                         } catch (e) {
@@ -2065,8 +2076,9 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     <div className="px-3 py-1.5 text-[8.5px] font-bold text-slate-400 uppercase tracking-[0.2em]">Laporan Pajak & Utilitas</div>
                     
                     <button 
-                      onClick={() => { 
+                      onClick={async () => { 
                         const year = new Date().getFullYear().toString();
+                        const { generatePBBReportPDF } = await getPdfService();
                         generatePBBReportPDF(filteredHouses, year, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
@@ -2079,7 +2091,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     </button>
 
                     <button 
-                      onClick={() => { 
+                      onClick={async () => { 
+                        const { generateBillReportPDF } = await getPdfService();
                         generateBillReportPDF(houses, iuranPayments, 'Air', selectedMonth, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
@@ -2092,7 +2105,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     </button>
 
                     <button 
-                      onClick={() => { 
+                      onClick={async () => { 
+                        const { generateBillReportPDF } = await getPdfService();
                         generateBillReportPDF(houses, iuranPayments, 'Sampah', selectedMonth, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
@@ -2105,7 +2119,8 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                     </button>
 
                     <button 
-                      onClick={() => { 
+                      onClick={async () => { 
+                        const { generateResidentStatsReportPDF } = await getPdfService();
                         generateResidentStatsReportPDF(houses, pdfConfig); 
                         setIsActionMenuOpen(false); 
                       }}
@@ -2285,7 +2300,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <ResidentIuranManager 
             houses={houses}
             searchTerm={searchTerm}
-            generateIuranReceiptPDF={generateIuranReceiptPDF}
+            generateIuranReceiptPDF={handleGenerateIuranReceiptPDF}
             pdfConfig={pdfConfig}
             deleteIuranPaymentFromDb={deleteIuranPaymentFromDb}
             setEditingPayment={setEditingPayment}

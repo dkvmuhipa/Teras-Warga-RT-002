@@ -219,6 +219,9 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
                     <option value="disability">♿ Kelompok Rentan (Disabilitas/Yatim)</option>
                     <option value="ktp_local">🪪 KTP Setempat (Sesuai Domisili)</option>
                     <option value="ktp_external">🪪 KTP Luar (Belum Mutasi)</option>
+                    <option value="bpbd_certified">📜 BPBD: Bersertifikat</option>
+                    <option value="bpbd_uncertified">⚠️ BPBD: Belum Bersertifikat</option>
+                    <option value="bpbd_unverified">📋 BPBD: Data Belum Lengkap</option>
                   </select>
                 </FilterGroup>
 

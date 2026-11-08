@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { House, PaymentStatus } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
-import { generateResidentCardPDF } from '../../../services/pdfService';
+// PDF service loaded on-demand for optimized bundle performance
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { isValidWhatsAppNumber } from '../../../services/whatsappService';
@@ -63,6 +63,17 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
 }) => {
   const { getPaymentStatus, getArrearsForHouse } = useFinancial();
   const { currentTenant } = useTenant();
+
+  const handlePrintResidentCard = async (house: House) => {
+    try {
+      toast.info('Menyiapkan Kartu Warga Digital PDF...');
+      const { generateResidentCardPDF } = await import('../../../services/pdfService');
+      await generateResidentCardPDF(house);
+    } catch (err) {
+      console.error('Error generating resident card PDF:', err);
+      toast.error('Gagal mencetak kartu warga.');
+    }
+  };
   const [sortField, setSortField] = useState<'number' | 'headOfFamily' | 'occupants' | 'arrears' | 'pbbStatus' | 'residenceType' | 'status'>('number');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [collapsedBlocks, setCollapsedBlocks] = useState<Set<string>>(new Set());
@@ -387,7 +398,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                 </p>
                               )}
                               {house.status === 'Occupied' && (
-                                <div className="mt-0.5">
+                                <div className="mt-0.5 flex flex-wrap items-center gap-1">
                                   <span 
                                     className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded border ${
                                       (house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe'))))
@@ -399,6 +410,26 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                     <span>🪪</span>
                                     <span>{(house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')))) ? (currentTenant ? `KTP RT ${currentTenant.rt}` : 'KTP Lokal') : 'KTP Luar'}</span>
                                   </span>
+
+                                  {/* BPBD Huntap Certificate Status Quick Indicator & Toggle */}
+                                  <button
+                                    type="button"
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      const nextCert = house.certificateStatus === 'Ya' ? 'Tidak' : 'Ya';
+                                      await handleUpdateHouse(house.id, { certificateStatus: nextCert });
+                                      toast.success(`Sertifikat BPBD No. ${house.number}: ${nextCert === 'Ya' ? 'Bersertifikat' : 'Belum Bersertifikat'}`);
+                                    }}
+                                    className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded border transition-colors hover:opacity-80 active:scale-95 ${
+                                      house.certificateStatus === 'Ya'
+                                        ? 'bg-teal-50 text-teal-700 border-teal-200'
+                                        : 'bg-amber-50/90 text-amber-800 border-amber-200'
+                                    }`}
+                                    title={`Status Sertifikat BPBD: ${house.certificateStatus === 'Ya' ? 'Bersertifikat (Klik untuk ubah)' : 'Belum Bersertifikat (Klik untuk ubah)'}`}
+                                  >
+                                    <span>{house.certificateStatus === 'Ya' ? '📜' : '⚠️'}</span>
+                                    <span>{house.certificateStatus === 'Ya' ? 'Sertifikat' : 'Belum Sertifikat'}</span>
+                                  </button>
                                 </div>
                               )}
                             </div>
@@ -544,7 +575,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         <td className="px-5 py-4.5 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button 
-                              onClick={() => generateResidentCardPDF(house)} 
+                              onClick={() => handlePrintResidentCard(house)} 
                               className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition-colors rounded-lg shadow-3xs"
                               title="Cetak Kartu Warga Digital RT 02 (PDF)"
                             >
@@ -634,6 +665,26 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                   <Users size={10} className="text-slate-400" /> {house.occupants} Jiwa
                                 </span>
                               ) : null}
+                            </div>
+                            {/* Mobile BPBD Indicator */}
+                            <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  const nextCert = house.certificateStatus === 'Ya' ? 'Tidak' : 'Ya';
+                                  await handleUpdateHouse(house.id, { certificateStatus: nextCert });
+                                  toast.success(`Sertifikat BPBD No. ${house.number}: ${nextCert === 'Ya' ? 'Bersertifikat' : 'Belum Bersertifikat'}`);
+                                }}
+                                className={`inline-flex items-center gap-1 text-[8.5px] font-bold px-1.5 py-0.5 rounded border transition-colors ${
+                                  house.certificateStatus === 'Ya'
+                                    ? 'bg-teal-50 text-teal-700 border-teal-200'
+                                    : 'bg-amber-50 text-amber-800 border-amber-200'
+                                }`}
+                              >
+                                <span>{house.certificateStatus === 'Ya' ? '📜' : '⚠️'}</span>
+                                <span>{house.certificateStatus === 'Ya' ? 'Sertifikat BPBD' : 'Belum Sertifikat'}</span>
+                              </button>
                             </div>
                           </div>
                         </div>

@@ -16,7 +16,7 @@ import { openWhatsAppShare } from '../../../services/whatsappService';
 interface ResidentIuranManagerProps {
   houses: House[];
   searchTerm: string;
-  generateIuranReceiptPDF: (payment: any, config: PdfConfig) => void;
+  generateIuranReceiptPDF: (payment: any, config: PdfConfig) => void | Promise<void>;
   pdfConfig: PdfConfig;
   deleteIuranPaymentFromDb: (id: string) => Promise<void>;
   setEditingPayment: (payment: any) => void;
