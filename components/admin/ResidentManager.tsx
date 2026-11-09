@@ -1136,8 +1136,10 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       headOfFamily: house.headOfFamily,
       gender: house.gender || 'Laki-laki',
       birthDate: house.birthDate || '',
-      ownerName: house.ownerName || '', // NEW: Populate ownerName
-      ownerPhone: house.ownerPhone || '', // NEW: Populate ownerPhone
+      ownerName: (house.ownerName && house.ownerName.trim() !== '' && house.ownerName.trim() !== '-')
+        ? house.ownerName.trim()
+        : (house.headOfFamily && !house.headOfFamily.toLowerCase().startsWith('rumah kosong') && !house.headOfFamily.toLowerCase().startsWith('warga ') ? house.headOfFamily.trim() : ''),
+      ownerPhone: (house.ownerPhone && house.ownerPhone.trim() !== '-') ? house.ownerPhone.trim() : '',
       block: house.block,
       number: house.number,
       phone: house.phone || '',
@@ -1576,10 +1578,12 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
         number: cleanNumber,
         occupants: minOccupants,
         location: oldHouse?.location || { x: 0, y: 0 },
-        // Ketika status penghuni adalah Tetap, pastikan nama pemilik (ownerName) sinkron dengan Kepala Keluarga (nama di SK)
-        ownerName: formData.residenceType === 'Tetap'
-          ? (formData.headOfFamily || formData.ownerName || oldHouse?.ownerName || '')
-          : (formData.ownerName || oldHouse?.ownerName || ''),
+        // Pastikan Nama Pemilik SK (ownerName) tetap terjaga meskipun penghuni adalah keluarga/penyewa/pasangan KK
+        ownerName: (formData.ownerName && formData.ownerName.trim() !== '' && formData.ownerName.trim() !== '-')
+          ? formData.ownerName.trim()
+          : (oldHouse?.ownerName && oldHouse.ownerName.trim() !== '' && oldHouse.ownerName.trim() !== '-')
+            ? oldHouse.ownerName.trim()
+            : (formData.residenceType === 'Tetap' ? (formData.headOfFamily || '') : (oldHouse?.headOfFamily || '')),
         joiningDate: formData.joiningDate 
           ? formData.joiningDate.split('T')[0] 
           : (oldHouse?.joiningDate ? oldHouse.joiningDate.split('T')[0] : (oldHouse?.createdAt ? oldHouse.createdAt.split('T')[0] : new Date().toISOString().split('T')[0])),

@@ -507,17 +507,21 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                               onChange={(e) => {
                                 const newType = e.target.value as any;
                                 const updates: any = { residenceType: newType };
-                                if (newType === 'Tetap') {
-                                  const skName = (house.ownerName && house.ownerName.trim() !== '' && house.ownerName !== '-')
-                                    ? house.ownerName.trim()
-                                    : house.headOfFamily;
-                                  if (skName && skName !== house.headOfFamily) {
-                                    updates.headOfFamily = skName;
-                                  }
-                                  updates.ownerName = updates.headOfFamily || skName || house.headOfFamily;
+                                const existingSk = (house.ownerName && house.ownerName.trim() !== '' && house.ownerName !== '-')
+                                  ? house.ownerName.trim()
+                                  : house.headOfFamily;
+                                if (existingSk && (!house.ownerName || house.ownerName === '-')) {
+                                  updates.ownerName = existingSk;
+                                }
+                                if (newType === 'Sewa' && (!house.ownerRelationship || house.ownerRelationship === 'Diri Sendiri')) {
+                                  updates.ownerRelationship = 'Penyewa';
+                                } else if (newType === 'Rumah Keluarga' && (!house.ownerRelationship || house.ownerRelationship === 'Diri Sendiri' || house.ownerRelationship === 'Penyewa')) {
+                                  updates.ownerRelationship = 'Saudara / Kerabat';
+                                } else if (newType === 'Tetap' && house.ownerRelationship === 'Penyewa') {
+                                  updates.ownerRelationship = 'Diri Sendiri';
                                 }
                                 handleUpdateHouse(house.id, updates);
-                                toast.info(`Status Kepemilikan RT No. ${house.number} diset ke ${newType}${updates.headOfFamily ? ` (Kepala Keluarga diselaraskan dengan SK: ${updates.headOfFamily})` : ''}`);
+                                toast.info(`Status Kepenghunian No. ${house.number} diubah ke ${newType} (Pemilik SK: ${existingSk || '-'})`);
                               }}
                               className="appearance-none w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-extrabold text-[10px] rounded-xl px-2.5 py-1.5 pr-6 border border-slate-200 outline-none cursor-pointer focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-colors shadow-3xs"
                             >
@@ -757,17 +761,21 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                             onChange={(e) => {
                               const newType = e.target.value as any;
                               const updates: any = { residenceType: newType };
-                              if (newType === 'Tetap') {
-                                const skName = (house.ownerName && house.ownerName.trim() !== '' && house.ownerName !== '-')
-                                  ? house.ownerName.trim()
-                                  : house.headOfFamily;
-                                if (skName && skName !== house.headOfFamily) {
-                                  updates.headOfFamily = skName;
-                                }
-                                updates.ownerName = updates.headOfFamily || skName || house.headOfFamily;
+                              const existingSk = (house.ownerName && house.ownerName.trim() !== '' && house.ownerName !== '-')
+                                ? house.ownerName.trim()
+                                : house.headOfFamily;
+                              if (existingSk && (!house.ownerName || house.ownerName === '-')) {
+                                updates.ownerName = existingSk;
+                              }
+                              if (newType === 'Sewa' && (!house.ownerRelationship || house.ownerRelationship === 'Diri Sendiri')) {
+                                updates.ownerRelationship = 'Penyewa';
+                              } else if (newType === 'Rumah Keluarga' && (!house.ownerRelationship || house.ownerRelationship === 'Diri Sendiri' || house.ownerRelationship === 'Penyewa')) {
+                                updates.ownerRelationship = 'Saudara / Kerabat';
+                              } else if (newType === 'Tetap' && house.ownerRelationship === 'Penyewa') {
+                                updates.ownerRelationship = 'Diri Sendiri';
                               }
                               handleUpdateHouse(house.id, updates);
-                              toast.info(`Status Kepemilikan diset ke ${newType}${updates.headOfFamily ? ` (Kepala Keluarga diselaraskan dengan SK: ${updates.headOfFamily})` : ''}`);
+                              toast.info(`Status Kepenghunian diset ke ${newType} (Pemilik SK: ${existingSk || '-'})`);
                             }}
                             className="w-full appearance-none bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 font-semibold text-[10px] rounded-xl px-2.5 py-2 pr-6 outline-none cursor-pointer shadow-3xs"
                           >
