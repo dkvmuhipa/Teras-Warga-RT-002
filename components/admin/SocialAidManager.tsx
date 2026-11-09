@@ -135,8 +135,13 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
     const liveBLT = Boolean(live.isBLT);
     const liveBPNT = Boolean(live.isBPNT);
 
+    const updatedReceivedBy = (r.status === 'Diterima' && (!r.receivedBy || r.receivedBy === r.headOfFamily))
+      ? liveHead
+      : r.receivedBy;
+
     const isDiffFromSnapshot =
       r.headOfFamily !== liveHead ||
+      (r.receivedBy || '') !== (updatedReceivedBy || '') ||
       (r.phone || '') !== livePhone ||
       Boolean(r.isPraSejahtera) !== livePraSejahtera ||
       Boolean(r.isPKH) !== livePKH ||
@@ -146,6 +151,7 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
     return {
       ...r,
       headOfFamily: liveHead,
+      receivedBy: updatedReceivedBy,
       block: liveBlock,
       number: liveNumber,
       phone: livePhone,
@@ -160,48 +166,55 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
     };
   };
 
+  // Hydrate all aid programs with real-time resident data
+  const hydratedAidPrograms = useMemo(() => {
+    return aidPrograms.map(prog => ({
+      ...prog,
+      recipients: (prog.recipients || []).map(hydrateRecipient)
+    }));
+  }, [aidPrograms, housesById]);
+
   // Current selected program (with real-time hydrated recipients from houses)
   const currentAid = useMemo(() => {
     if (!selectedAidId) return null;
-    const raw = aidPrograms.find(a => a.id === selectedAidId);
-    if (!raw) return null;
-    return {
-      ...raw,
-      recipients: (raw.recipients || []).map(hydrateRecipient)
-    };
-  }, [aidPrograms, selectedAidId, housesById]);
+    return hydratedAidPrograms.find(a => a.id === selectedAidId) || null;
+  }, [hydratedAidPrograms, selectedAidId]);
 
-  // Auto-sync updated resident profiles back to Firestore social_aid document in real time
+  // Auto-sync updated resident profiles (name, phone, aid flags) across all programs back to Firestore in real time
   useEffect(() => {
-    if (!currentAid || !selectedAidId) return;
-    const hasOutdatedSnapshot = (currentAid.recipients || []).some((r: any) => r.isDiffFromSnapshot);
-    if (!hasOutdatedSnapshot) return;
+    if (housesById.size === 0 || hydratedAidPrograms.length === 0) return;
+    const programsToSync = hydratedAidPrograms.filter(prog =>
+      (prog.recipients || []).some((r: any) => r.isDiffFromSnapshot)
+    );
+    if (programsToSync.length === 0) return;
 
     const timer = setTimeout(async () => {
-      try {
-        const cleanRecipients: SocialAidRecipient[] = (currentAid.recipients || []).map((r: any) => ({
-          houseId: r.houseId,
-          headOfFamily: r.headOfFamily,
-          block: r.block,
-          number: r.number,
-          phone: r.phone || '',
-          isPraSejahtera: Boolean(r.isPraSejahtera),
-          isPKH: Boolean(r.isPKH),
-          isBLT: Boolean(r.isBLT),
-          isBPNT: Boolean(r.isBPNT),
-          status: r.status,
-          ...(r.receivedAt ? { receivedAt: r.receivedAt } : {}),
-          ...(r.receivedBy ? { receivedBy: r.receivedBy } : {}),
-          ...(r.notes ? { notes: r.notes } : {})
-        }));
-        await updateSocialAidInDb(selectedAidId, { recipients: cleanRecipients });
-      } catch (err) {
-        console.warn('Auto-sync social aid recipients warning:', err);
+      for (const prog of programsToSync) {
+        try {
+          const cleanRecipients: SocialAidRecipient[] = (prog.recipients || []).map((r: any) => ({
+            houseId: r.houseId,
+            headOfFamily: r.headOfFamily,
+            block: r.block,
+            number: r.number,
+            phone: r.phone || '',
+            isPraSejahtera: Boolean(r.isPraSejahtera),
+            isPKH: Boolean(r.isPKH),
+            isBLT: Boolean(r.isBLT),
+            isBPNT: Boolean(r.isBPNT),
+            status: r.status,
+            ...(r.receivedAt ? { receivedAt: r.receivedAt } : {}),
+            ...(r.receivedBy ? { receivedBy: r.receivedBy } : {}),
+            ...(r.notes ? { notes: r.notes } : {})
+          }));
+          await updateSocialAidInDb(prog.id, { recipients: cleanRecipients });
+        } catch (err) {
+          console.warn('Auto-sync social aid recipients warning:', err);
+        }
       }
     }, 800);
 
     return () => clearTimeout(timer);
-  }, [currentAid, selectedAidId]);
+  }, [hydratedAidPrograms, housesById]);
 
   // Detect newly flagged Gov Aid / Priority households from Data Warga that are not yet in currentAid
   const unaddedPriorityHouses = useMemo(() => {
