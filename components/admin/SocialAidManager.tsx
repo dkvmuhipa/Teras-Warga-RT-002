@@ -14,7 +14,7 @@ import {
   deleteSocialAidFromDb,
   toggleRecipientReceiptStatus 
 } from '../../services/databaseService';
-import { generateSocialAidHandoverPDF } from '../../services/pdfService';
+// PDF service loaded dynamically on print
 import { calculateAge } from '../../src/utils/dateUtils';
 import { openWhatsApp } from '../../services/whatsappService';
 import { toast } from 'sonner';
@@ -107,11 +107,152 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
       });
   }, [houses]);
 
-  // Current selected program
+  // Map of live houses by ID for instant real-time lookup
+  const housesById = useMemo(() => {
+    const map = new Map<string, House>();
+    houses.forEach(h => map.set(h.id, h));
+    return map;
+  }, [houses]);
+
+  // Helper to hydrate a recipient with real-time House data
+  const hydrateRecipient = (r: SocialAidRecipient): SocialAidRecipient & {
+    liveResidenceType?: string;
+    liveOwnerName?: string;
+    liveHouseStatus?: string;
+    isDiffFromSnapshot?: boolean;
+  } => {
+    const live = housesById.get(r.houseId);
+    if (!live) return r;
+
+    const liveHead = (live.headOfFamily && live.headOfFamily.trim() !== '' && live.headOfFamily !== 'Rumah Kosong')
+      ? live.headOfFamily
+      : r.headOfFamily;
+    const livePhone = live.phone || r.phone || '';
+    const liveBlock = live.block || r.block;
+    const liveNumber = live.number || r.number;
+    const livePraSejahtera = live.economicStatus === 'Pra-Sejahtera';
+    const livePKH = Boolean(live.isPKH);
+    const liveBLT = Boolean(live.isBLT);
+    const liveBPNT = Boolean(live.isBPNT);
+
+    const isDiffFromSnapshot =
+      r.headOfFamily !== liveHead ||
+      (r.phone || '') !== livePhone ||
+      Boolean(r.isPraSejahtera) !== livePraSejahtera ||
+      Boolean(r.isPKH) !== livePKH ||
+      Boolean(r.isBLT) !== liveBLT ||
+      Boolean(r.isBPNT) !== liveBPNT;
+
+    return {
+      ...r,
+      headOfFamily: liveHead,
+      block: liveBlock,
+      number: liveNumber,
+      phone: livePhone,
+      isPraSejahtera: livePraSejahtera,
+      isPKH: livePKH,
+      isBLT: liveBLT,
+      isBPNT: liveBPNT,
+      liveResidenceType: live.residenceType || 'Tetap',
+      liveOwnerName: live.ownerName || '',
+      liveHouseStatus: live.status || 'Occupied',
+      isDiffFromSnapshot
+    };
+  };
+
+  // Current selected program (with real-time hydrated recipients from houses)
   const currentAid = useMemo(() => {
     if (!selectedAidId) return null;
-    return aidPrograms.find(a => a.id === selectedAidId) || null;
-  }, [aidPrograms, selectedAidId]);
+    const raw = aidPrograms.find(a => a.id === selectedAidId);
+    if (!raw) return null;
+    return {
+      ...raw,
+      recipients: (raw.recipients || []).map(hydrateRecipient)
+    };
+  }, [aidPrograms, selectedAidId, housesById]);
+
+  // Auto-sync updated resident profiles back to Firestore social_aid document in real time
+  useEffect(() => {
+    if (!currentAid || !selectedAidId) return;
+    const hasOutdatedSnapshot = (currentAid.recipients || []).some((r: any) => r.isDiffFromSnapshot);
+    if (!hasOutdatedSnapshot) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const cleanRecipients: SocialAidRecipient[] = (currentAid.recipients || []).map((r: any) => ({
+          houseId: r.houseId,
+          headOfFamily: r.headOfFamily,
+          block: r.block,
+          number: r.number,
+          phone: r.phone || '',
+          isPraSejahtera: Boolean(r.isPraSejahtera),
+          isPKH: Boolean(r.isPKH),
+          isBLT: Boolean(r.isBLT),
+          isBPNT: Boolean(r.isBPNT),
+          status: r.status,
+          ...(r.receivedAt ? { receivedAt: r.receivedAt } : {}),
+          ...(r.receivedBy ? { receivedBy: r.receivedBy } : {}),
+          ...(r.notes ? { notes: r.notes } : {})
+        }));
+        await updateSocialAidInDb(selectedAidId, { recipients: cleanRecipients });
+      } catch (err) {
+        console.warn('Auto-sync social aid recipients warning:', err);
+      }
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [currentAid, selectedAidId]);
+
+  // Detect newly flagged Gov Aid / Priority households from Data Warga that are not yet in currentAid
+  const unaddedPriorityHouses = useMemo(() => {
+    if (!currentAid) return [];
+    const existingIds = new Set((currentAid.recipients || []).map(r => r.houseId));
+    return sortedHouses.filter(h => {
+      if (existingIds.has(h.id)) return false;
+      return Boolean(h.isPKH || h.isBLT || h.isBPNT || h.economicStatus === 'Pra-Sejahtera' || h.isBansosLain);
+    });
+  }, [currentAid, sortedHouses]);
+
+  const handleAddMissingPriorityHouses = async () => {
+    if (!currentAid || unaddedPriorityHouses.length === 0) return;
+    try {
+      const newRecipients: SocialAidRecipient[] = unaddedPriorityHouses.map(house => ({
+        houseId: house.id,
+        headOfFamily: house.headOfFamily || 'Warga RT 02',
+        block: house.block || 'C',
+        number: house.number || 0,
+        phone: house.phone || '',
+        isPraSejahtera: house.economicStatus === 'Pra-Sejahtera',
+        isPKH: Boolean(house.isPKH),
+        isBLT: Boolean(house.isBLT),
+        isBPNT: Boolean(house.isBPNT),
+        status: 'Menunggu'
+      }));
+      const merged = [...(currentAid.recipients || []).map((r: any) => ({
+        houseId: r.houseId,
+        headOfFamily: r.headOfFamily,
+        block: r.block,
+        number: r.number,
+        phone: r.phone || '',
+        isPraSejahtera: Boolean(r.isPraSejahtera),
+        isPKH: Boolean(r.isPKH),
+        isBLT: Boolean(r.isBLT),
+        isBPNT: Boolean(r.isBPNT),
+        status: r.status,
+        ...(r.receivedAt ? { receivedAt: r.receivedAt } : {}),
+        ...(r.receivedBy ? { receivedBy: r.receivedBy } : {}),
+        ...(r.notes ? { notes: r.notes } : {})
+      })), ...newRecipients];
+
+      await updateSocialAidInDb(currentAid.id, {
+        recipients: merged,
+        totalQuota: Math.max(currentAid.totalQuota || 0, merged.length)
+      });
+      toast.success(`${newRecipients.length} KK kategori Bansos/Prioritas baru berhasil disinkronkan ke program ini!`);
+    } catch (err: any) {
+      toast.error('Gagal menambahkan warga prioritas: ' + err.message);
+    }
+  };
 
   // Executive Metrics
   const metrics = useMemo(() => {
@@ -776,7 +917,10 @@ _Pengurus RT 002 Huntap Tondo 2_`;
 
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => generateSocialAidHandoverPDF(currentAid, pdfConfig)}
+              onClick={async () => {
+                const { generateSocialAidHandoverPDF } = await import('../../services/pdfService');
+                generateSocialAidHandoverPDF(currentAid, pdfConfig);
+              }}
               className="px-3.5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
               title="Cetak Berita Acara & Daftar Tanda Terima PDF"
             >
@@ -875,14 +1019,37 @@ _Pengurus RT 002 Huntap Tondo 2_`;
             </div>
           </div>
 
+          {/* Real-Time Sync Banner for Newly Added Vulnerable/Bansos Residents */}
+          {unaddedPriorityHouses.length > 0 && currentAidStats.pct < 100 && (
+            <div className="p-3.5 bg-amber-50/90 border border-amber-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-2.5 text-xs text-amber-900">
+                <RefreshCw size={15} className="text-amber-600 shrink-0 mt-0.5 sm:mt-0" />
+                <div>
+                  <span className="font-bold">Sinkronisasi Data Warga Real-Time:</span> Terdapat <strong>{unaddedPriorityHouses.length} KK</strong> kategori Bansos (PKH/BLT/BPNT/Pra-Sejahtera) di Data Warga yang belum masuk ke daftar penerima program ini.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleAddMissingPriorityHouses}
+                className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-colors shrink-0 cursor-pointer shadow-2xs flex items-center gap-1.5 w-fit"
+              >
+                <Plus size={14} />
+                <span>Masukkan {unaddedPriorityHouses.length} KK ke Program Ini</span>
+              </button>
+            </div>
+          )}
+
           {/* Recipient Checklist Workspace (Full Width Table) */}
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <UserCheck size={18} className="text-emerald-600" />
                 <h3 className="text-base sm:text-lg font-black text-slate-900 tracking-tight">
                   Daftar Warga Penerima Bantuan ({currentAid.recipients?.length || 0} KK)
                 </h3>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <RefreshCw size={10} /> Live Sync Data Warga
+                </span>
               </div>
 
               {/* Filters for Recipients inside this program */}
@@ -957,7 +1124,28 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                           </td>
 
                           <td className="py-3 px-3.5 font-bold text-slate-900">
-                            <div>{r.headOfFamily}</div>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span>{r.headOfFamily}</span>
+                              {(r as any).liveHouseStatus === 'Empty' && (
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-extrabold bg-rose-100 text-rose-700 border border-rose-200">
+                                  ⚠️ Rumah Kosong
+                                </span>
+                              )}
+                              {(r as any).liveResidenceType && (r as any).liveResidenceType !== 'Tetap' && (
+                                <span className={`px-1.5 py-0.2 rounded text-[9px] font-bold border ${
+                                  (r as any).liveResidenceType === 'Sewa'
+                                    ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                    : 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                                }`}>
+                                  {(r as any).liveResidenceType === 'Sewa' ? '🔑 Penyewa' : '👨‍👩‍👧 Keluarga'}
+                                </span>
+                              )}
+                            </div>
+                            {(r as any).liveOwnerName && (r as any).liveOwnerName !== r.headOfFamily && (
+                              <div className="text-[10px] text-slate-500 font-medium mt-0.5">
+                                Pemilik SK: <span className="font-bold text-slate-700">{(r as any).liveOwnerName}</span>
+                              </div>
+                            )}
                             {r.phone && <div className="text-[10px] text-slate-400 font-mono mt-0.5">{r.phone}</div>}
                           </td>
 
