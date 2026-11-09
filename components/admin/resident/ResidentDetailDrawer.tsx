@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'motion/react';
 import { 
   X, Phone, MapPin, FileText, CreditCard, DollarSign, 
   LayoutList, Droplets, Trash2, Users, Activity, Shield, User,
   ShieldCheck, Calendar, AlertCircle, Printer, Home, Bike, Car, Key,
   CheckSquare, Waves, Recycle, Sparkles, MessageCircle, ExternalLink,
-  Check, AlertTriangle, Store, Clock
+  Check, AlertTriangle, Store, Clock, Award, Hammer, Gift
 } from 'lucide-react';
-import { House, PaymentStatus, STBMRecord } from '../../../types';
+import { House, PaymentStatus, STBMRecord, SocialAidItem } from '../../../types';
 import { useFinancial } from '../../../context/FinancialContext';
-import { subscribeToSTBMRecords, saveSTBMRecord } from '../../../services/databaseService';
+import { subscribeToSTBMRecords, saveSTBMRecord, subscribeToSocialAid, updateHouseData } from '../../../services/databaseService';
 import { toast } from 'sonner';
 import { KartuKeluargaModal } from './KartuKeluargaModal';
 import { CivicScoreBadge } from '../../community/CivicScoreBadge';
@@ -40,6 +40,61 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
   const [isKkModalOpen, setIsKkModalOpen] = useState(false);
   const [stbmRecord, setStbmRecord] = useState<STBMRecord | null>(null);
   const [isSavingSTBM, setIsSavingSTBM] = useState(false);
+  const [isUpdatingBPBD, setIsUpdatingBPBD] = useState(false);
+  const [aidPrograms, setAidPrograms] = useState<SocialAidItem[]>([]);
+
+  // Subscribe to real-time Social Aid programs to display recipient history for this house
+  useEffect(() => {
+    if (!selectedResident) return;
+    const unsub = subscribeToSocialAid(setAidPrograms);
+    return () => unsub();
+  }, [selectedResident?.id]);
+
+  const houseAidHistory = useMemo(() => {
+    if (!selectedResident) return [];
+    const normKey = `${(selectedResident.block || '').trim().toUpperCase()}-${String(selectedResident.number ?? '').trim().padStart(2, '0')}`;
+    return aidPrograms
+      .map(prog => {
+        const rec = (prog.recipients || []).find(r => {
+          const rKey = `${(r.block || '').trim().toUpperCase()}-${String(r.number ?? '').trim().padStart(2, '0')}`;
+          return r.houseId === selectedResident.id || rKey === normKey;
+        });
+        if (!rec) return null;
+        return {
+          id: prog.id,
+          title: prog.title,
+          category: prog.category,
+          distributionDate: prog.distributionDate,
+          unit: prog.unit || 'Paket',
+          status: rec.status,
+          receivedAt: rec.receivedAt,
+          receivedBy: rec.receivedBy
+        };
+      })
+      .filter(Boolean) as Array<{
+        id: string;
+        title: string;
+        category: string;
+        distributionDate: string;
+        unit: string;
+        status: 'Menunggu' | 'Diterima';
+        receivedAt?: string;
+        receivedBy?: string;
+      }>;
+  }, [aidPrograms, selectedResident]);
+
+  const handleQuickUpdateHouse = async (updates: Partial<House>, successMsg: string) => {
+    if (!selectedResident || isUpdatingBPBD) return;
+    setIsUpdatingBPBD(true);
+    try {
+      await updateHouseData(selectedResident.id, updates);
+      toast.success(successMsg);
+    } catch (e) {
+      toast.error('Gagal menyimpan perubahan cepat.');
+    } finally {
+      setIsUpdatingBPBD(false);
+    }
+  };
 
   // Subscribe to real-time STBM records for this specific house
   useEffect(() => {
@@ -184,15 +239,30 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                    <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[9px] font-bold uppercase tracking-wider">
-                      Terverifikasi
-                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickUpdateHouse(
+                        { isVerified: !selectedResident.isVerified },
+                        selectedResident.isVerified ? 'Status warga diubah ke Belum Verifikasi.' : 'Data warga berhasil diverifikasi!'
+                      )}
+                      title="Klik untuk mengubah status verifikasi data warga"
+                      className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border cursor-pointer transition-colors ${
+                        selectedResident.isVerified
+                          ? 'bg-[#e8faf0] border-emerald-200 text-[#059669] hover:bg-emerald-100'
+                          : 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100'
+                      }`}
+                    >
+                      {selectedResident.isVerified ? '✓ Terverifikasi' : 'Belum Verifikasi'}
+                    </button>
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
                       isFullyPaid 
                         ? 'bg-[#e8faf0] border-emerald-100 text-[#059669]' 
                         : 'bg-[#fff1f2] border-rose-100 text-[#e11d48]'
                     }`}>
                       {isFullyPaid ? 'Lunas' : 'Tunggak'}
+                    </span>
+                    <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                      {selectedResident.residenceType || 'Tetap'}
                     </span>
                   </div>
                   <h2 className="text-base sm:text-lg font-semibold text-slate-800 tracking-tight truncate">{selectedResident.headOfFamily}</h2>
@@ -377,11 +447,29 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       </div>
                     )}
                   </div>
-                  {selectedResident.residenceType !== 'Tetap' && (
-                    <div className="col-span-2">
-                      <DetailItem icon={<Key size={13} />} label="Pemilik Rumah" value={`${selectedResident.ownerName || '-'}${selectedResident.ownerPhone ? ` (${selectedResident.ownerPhone})` : ''}`} noTruncate />
+                  <div className="col-span-2 p-3 bg-indigo-50/40 rounded-2xl border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                        <Key size={15} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-800 block">
+                          Pemilik Sah di SK Huntap
+                        </span>
+                        <p className="text-xs font-extrabold text-slate-800">
+                          {selectedResident.ownerName || selectedResident.headOfFamily || '-'}
+                          {selectedResident.ownerPhone ? (
+                            <span className="text-slate-500 font-mono font-semibold"> ({selectedResident.ownerPhone})</span>
+                          ) : null}
+                        </p>
+                      </div>
                     </div>
-                  )}
+                    <div className="flex items-center gap-1.5 self-end sm:self-center">
+                      <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-white border border-indigo-200 text-indigo-800">
+                        Hubungan: {selectedResident.ownerRelationship || (selectedResident.residenceType === 'Sewa' ? 'Penyewa / Kontrak' : selectedResident.residenceType === 'Rumah Keluarga' ? 'Keluarga / Kerabat' : (selectedResident.ownerName && selectedResident.ownerName.trim().toUpperCase() !== selectedResident.headOfFamily.trim().toUpperCase() ? 'Pasangan / Keluarga' : 'Pemilik Sendiri'))}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Kendaraan Terparkir Breakdown */}
@@ -402,6 +490,144 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <span className="text-[10px] text-slate-400 font-semibold pl-0.5">
                       ({(selectedResident.twoWheelCount || 0) + (selectedResident.fourWheelCount || 0) > 0 ? (selectedResident.twoWheelCount || 0) + (selectedResident.fourWheelCount || 0) : (selectedResident.vehicleCount || 0)} unit)
                     </span>
+                  </div>
+                </div>
+              </section>
+
+              {/* Group: Pendataan Fisik & Sertifikat BPBD (Huntap Tondo 2) */}
+              <section className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-100 shadow-xs relative overflow-hidden">
+                <div className="flex items-center justify-between gap-2 mb-3.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 bg-amber-50 text-amber-600 border border-amber-100 rounded-xl flex items-center justify-center shrink-0">
+                      <Award size={14} />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Verifikasi Aset & Sertifikat BPBD</h4>
+                      <p className="text-[10px] text-slate-400 font-medium">Klik tombol di bawah untuk pembaruan cepat status sertifikat & fisik bangunan</p>
+                    </div>
+                  </div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                    selectedResident.certificateStatus === 'Ya'
+                      ? 'bg-[#e8faf0] text-[#059669] border-emerald-200'
+                      : selectedResident.certificateStatus === 'Dalam Proses'
+                        ? 'bg-sky-50 text-sky-700 border-sky-200'
+                        : 'bg-amber-50 text-amber-700 border-amber-200'
+                  }`}>
+                    {selectedResident.certificateStatus === 'Ya'
+                      ? 'Bersertifikat ✓'
+                      : selectedResident.certificateStatus === 'Dalam Proses'
+                        ? 'Proses Sertifikat'
+                        : 'Belum Sertifikat'}
+                  </span>
+                </div>
+
+                <div className="space-y-3">
+                  {/* 1. Status Sertifikat Huntap */}
+                  <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Status Sertifikat Kepemilikan</p>
+                      <p className="text-xs font-extrabold text-slate-800 mt-0.5">
+                        {selectedResident.certificateStatus === 'Ya'
+                          ? 'Sudah Menerima Sertifikat Hak Milik'
+                          : selectedResident.certificateStatus === 'Dalam Proses'
+                            ? 'Dalam Proses Pengurusan BPBD / BPN'
+                            : 'Belum Menerima Sertifikat (Masih SK Huntap)'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {(['Ya', 'Dalam Proses', 'Tidak'] as const).map((statusOpt) => {
+                        const currentCert = selectedResident.certificateStatus || 'Tidak';
+                        const isActive = currentCert === statusOpt;
+                        return (
+                          <button
+                            key={statusOpt}
+                            type="button"
+                            disabled={isUpdatingBPBD}
+                            onClick={() => handleQuickUpdateHouse(
+                              { certificateStatus: statusOpt },
+                              `Status sertifikat kavling ${selectedResident.block}-${selectedResident.number} diubah ke "${statusOpt}".`
+                            )}
+                            className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer border ${
+                              isActive
+                                ? statusOpt === 'Ya'
+                                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                                  : statusOpt === 'Dalam Proses'
+                                    ? 'bg-sky-600 text-white border-sky-600 shadow-2xs'
+                                    : 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            {statusOpt === 'Ya' ? 'Sudah (Ya)' : statusOpt === 'Dalam Proses' ? 'Proses' : 'Belum'}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 2. Kondisi Fisik Bangunan */}
+                  <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Kondisi Fisik Bangunan</p>
+                      <p className="text-xs font-extrabold text-slate-800 mt-0.5">
+                        {selectedResident.buildingCondition || 'Baik'}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1 shrink-0">
+                      {(['Baik', 'Rusak Ringan', 'Rusak Sedang', 'Rusak Berat'] as const).map((condOpt) => {
+                        const currentCond = selectedResident.buildingCondition || 'Baik';
+                        const isActive = currentCond === condOpt;
+                        return (
+                          <button
+                            key={condOpt}
+                            type="button"
+                            disabled={isUpdatingBPBD}
+                            onClick={() => handleQuickUpdateHouse(
+                              { buildingCondition: condOpt },
+                              `Kondisi bangunan ${selectedResident.block}-${selectedResident.number} diperbarui ke "${condOpt}".`
+                            )}
+                            className={`px-2 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer border ${
+                              isActive
+                                ? condOpt === 'Baik'
+                                  ? 'bg-emerald-600 text-white border-emerald-600'
+                                  : condOpt === 'Rusak Ringan'
+                                    ? 'bg-amber-500 text-white border-amber-500'
+                                    : 'bg-rose-600 text-white border-rose-600'
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            {condOpt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 3. Status Modifikasi / Renovasi Bangunan */}
+                  <div className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Hammer size={14} className="text-slate-400 shrink-0" />
+                      <div>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Bentuk Fisik / Renovasi</p>
+                        <p className="text-xs font-extrabold text-slate-800 mt-0.5">
+                          {selectedResident.hasStructuralModification ? 'Sudah Dimodifikasi / Tambah Bangunan' : 'Standar Asli Huntap PUPR'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={isUpdatingBPBD}
+                      onClick={() => handleQuickUpdateHouse(
+                        { hasStructuralModification: !selectedResident.hasStructuralModification },
+                        `Status modifikasi bangunan ${selectedResident.block}-${selectedResident.number} diperbarui.`
+                      )}
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer border shrink-0 ${
+                        selectedResident.hasStructuralModification
+                          ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100'
+                          : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {selectedResident.hasStructuralModification ? 'Ada Modifikasi' : 'Standar Asli'}
+                    </button>
                   </div>
                 </div>
               </section>
@@ -492,7 +718,15 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                   <div className="col-span-2">
                     <DetailItem label="Tempat, Tgl Lahir" value={`${selectedResident.birthPlace || '-'}, ${selectedResident.birthDate ? new Date(selectedResident.birthDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}`} noTruncate />
                   </div>
-                  <DetailItem label="Pekerjaan" value={selectedResident.jobCategory || '-'} />
+                  <DetailItem
+                    label="Pekerjaan"
+                    value={
+                      selectedResident.job && selectedResident.jobCategory && selectedResident.job !== selectedResident.jobCategory
+                        ? `${selectedResident.job} (${selectedResident.jobCategory})`
+                        : (selectedResident.job || selectedResident.jobCategory || '-')
+                    }
+                    noTruncate
+                  />
                   <DetailItem label="Pendidikan Terakhir" value={selectedResident.education || '-'} />
                   <DetailItem label="Agama" value={selectedResident.religion || '-'} />
                   <DetailItem label="Status Perkawinan" value={selectedResident.maritalStatus || 'Belum Kawin'} />
@@ -871,31 +1105,73 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                 </div>
               </section>
 
-              {/* Vulnerability Section */}
-              {(selectedResident.isPKH || selectedResident.isBLT || selectedResident.isBPNT || selectedResident.isBansosLain || selectedResident.isDisability || selectedResident.isOrphan) && (
+              {/* Vulnerability & Social Aid Section */}
+              {(selectedResident.isPKH || selectedResident.isBLT || selectedResident.isBPNT || selectedResident.isBansosLain || selectedResident.economicStatus === 'Pra-Sejahtera' || selectedResident.isDisability || selectedResident.isOrphan || houseAidHistory.length > 0) && (
                 <section className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-100 shadow-xs relative">
-                  <div className="flex items-center gap-2.5 mb-4">
-                    <div className="w-7 h-7 bg-[#fff1f2] text-rose-600 rounded-xl flex items-center justify-center shrink-0">
-                      <Shield size={14} />
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 bg-[#fff1f2] text-rose-600 rounded-xl flex items-center justify-center shrink-0">
+                        <Gift size={14} />
+                      </div>
+                      <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Kesejahteraan & Bansos</h4>
                     </div>
-                    <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">Kesejahteraan & Bansos</h4>
+                    {houseAidHistory.length > 0 && (
+                      <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                        {houseAidHistory.filter(h => h.status === 'Diterima').length}x Menerima Bantuan RT
+                      </span>
+                    )}
                   </div>
                   
                   <div className="flex flex-wrap gap-1.5">
+                    {selectedResident.economicStatus === 'Pra-Sejahtera' && <BansosBadge label="Keluarga Pra-Sejahtera" />}
                     {selectedResident.isPKH && <BansosBadge label="Penerima PKH" />}
                     {selectedResident.isBLT && <BansosBadge label="Bansos BLT" />}
                     {selectedResident.isBPNT && <BansosBadge label="Rastra BPNT" />}
                     {selectedResident.isBansosLain && <BansosBadge label={selectedResident.bansosLainName || 'BANSOS'} />}
                   </div>
 
-                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {(selectedResident.pregnantCount || 0) > 0 && <VulnerabilityStat count={selectedResident.pregnantCount || 0} label="Ibu Hamil" />}
                     {(selectedResident.elderlyCount || 0) > 0 && <VulnerabilityStat count={selectedResident.elderlyCount || 0} label="Lansia (60+)" />}
                     {(selectedResident.babyCount || 0) > 0 && <VulnerabilityStat count={selectedResident.babyCount || 0} label="Bayi (0-12 M)" />}
                     {(selectedResident.toddlerCount || 0) > 0 && <VulnerabilityStat count={selectedResident.toddlerCount || 0} label="Balita" />}
                     {(selectedResident.childCount || 0) > 0 && <VulnerabilityStat count={selectedResident.childCount || 0} label="Anak" />}
                     {(selectedResident.widowCount || 0) > 0 && <VulnerabilityStat count={selectedResident.widowCount || 0} label="Janda / Duda" />}
+                    {(selectedResident.isDisability || (selectedResident.disabilityCount || 0) > 0) && (
+                      <VulnerabilityStat count={selectedResident.disabilityCount || 1} label="Disabilitas" />
+                    )}
+                    {(selectedResident.isOrphan || (selectedResident.orphanCount || 0) > 0) && (
+                      <VulnerabilityStat count={selectedResident.orphanCount || 1} label="Yatim / Piatu" />
+                    )}
                   </div>
+
+                  {houseAidHistory.length > 0 && (
+                    <div className="mt-4 pt-3.5 border-t border-slate-100 space-y-2">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                        Riwayat Penyaluran Bantuan & Sembako RT
+                      </p>
+                      <div className="space-y-2">
+                        {houseAidHistory.map(item => (
+                          <div key={item.id} className="p-3 bg-slate-50/80 border border-slate-100 rounded-2xl flex items-center justify-between gap-2">
+                            <div>
+                              <p className="text-xs font-extrabold text-slate-800">{item.title}</p>
+                              <p className="text-[10px] text-slate-500 font-medium mt-0.5">
+                                {item.category} • {item.distributionDate ? new Date(item.distributionDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                                {item.receivedBy ? ` • Penerima: ${item.receivedBy}` : ''}
+                              </p>
+                            </div>
+                            <span className={`px-2.5 py-1 rounded-xl text-[10px] font-bold shrink-0 border ${
+                              item.status === 'Diterima'
+                                ? 'bg-[#e8faf0] text-[#059669] border-emerald-200'
+                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}>
+                              {item.status === 'Diterima' ? '✓ Sudah Diterima' : 'Menunggu Ambil'}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </section>
               )}
             </div>

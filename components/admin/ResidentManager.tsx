@@ -2426,7 +2426,11 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           <ResidentDetailDrawer 
             isOpen={isDrawerOpen}
             onClose={() => setIsDrawerOpen(false)}
-            selectedResident={selectedResident}
+            selectedResident={
+              selectedResident
+                ? (houses.find(h => h.id === selectedResident.id || (h.block === selectedResident.block && String(h.number) === String(selectedResident.number))) || selectedResident)
+                : null
+            }
             selectedMonth={selectedMonth}
             openPayModal={openPayModal}
             setSelectedHouseForBills={setSelectedHouseForBills}
