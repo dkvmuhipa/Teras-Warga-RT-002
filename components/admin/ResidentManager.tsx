@@ -59,6 +59,7 @@ import {
   markPopulationLogsAsGenerated,
   unmarkPopulationLogsAsGenerated,
   setDocumentInCollection,
+  syncHouseToSocialAidPrograms,
   logAction,
   handleFirestoreError,
   OperationType
@@ -1303,12 +1304,14 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
 
         // Simpan data rumah
         await addHouse(data);
+        await syncHouseToSocialAidPrograms(data, editingHouseId || undefined);
         await logAction('Update Warga', `Update data warga di rumah ${houseId}`);
         if (selectedResident?.id === editingHouseId) {
           setSelectedResident({ ...selectedResident, ...data, id: houseId } as House);
         }
       } else {
         await addHouse(data);
+        await syncHouseToSocialAidPrograms(data);
         await logAction('Tambah Warga', `Tambah data warga baru di rumah ${houseId}`);
       }
 

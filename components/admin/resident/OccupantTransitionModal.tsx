@@ -29,7 +29,7 @@ export const OccupantTransitionModal: React.FC<OccupantTransitionModalProps> = (
   newFormData,
   onConfirm
 }) => {
-  const [selectedAction, setSelectedAction] = useState<'move_out' | 'typo_fix'>('move_out');
+  const [selectedAction, setSelectedAction] = useState<'move_out' | 'typo_fix'>('typo_fix');
   const [moveOutReason, setMoveOutReason] = useState<OccupantHistoryItem['moveOutReason']>('Pindah Keluar (Tanpa Pamit)');
   const [moveOutDate, setMoveOutDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [moveOutNotes, setMoveOutNotes] = useState<string>('Pindah tanpa pamit/lapor ke pengurus RT, digantikan oleh penghuni baru.');

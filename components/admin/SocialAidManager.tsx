@@ -62,6 +62,87 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
   const [blockFilter, setBlockFilter] = useState('all');
   const [recipientCategoryFilter, setRecipientCategoryFilter] = useState<'all' | 'priority' | 'unreceived' | 'pkh'>('all');
 
+  const normalizeUnitKey = (block?: string, number?: string | number) => {
+    return `${(block || '').trim().toUpperCase()}-${String(number ?? '').trim().padStart(2, '0')}`;
+  };
+
+  // Map of live houses by ID AND by normalized Block-Number for instant real-time lookup (survives ID migrations)
+  const housesLookup = useMemo(() => {
+    const byId = new Map<string, House>();
+    const byUnitKey = new Map<string, House>();
+    houses.forEach(h => {
+      byId.set(h.id, h);
+      if (h.block && h.number !== undefined) {
+        byUnitKey.set(normalizeUnitKey(h.block, h.number), h);
+      }
+    });
+    return { byId, byUnitKey };
+  }, [houses]);
+
+  // Helper to hydrate a recipient with real-time House data (matching by houseId OR block-number)
+  const hydrateRecipient = (r: SocialAidRecipient): SocialAidRecipient & {
+    liveResidenceType?: string;
+    liveOwnerName?: string;
+    liveHouseStatus?: string;
+    isDiffFromSnapshot?: boolean;
+  } => {
+    const unitKey = normalizeUnitKey(r.block, r.number);
+    const live = housesLookup.byId.get(r.houseId) || housesLookup.byUnitKey.get(unitKey);
+    if (!live) return r;
+
+    const liveId = live.id || r.houseId;
+    const liveHead = (live.headOfFamily && live.headOfFamily.trim() !== '' && live.headOfFamily !== 'Rumah Kosong')
+      ? live.headOfFamily
+      : r.headOfFamily;
+    const livePhone = live.phone || r.phone || '';
+    const liveBlock = live.block || r.block;
+    const liveNumber = live.number || r.number;
+    const livePraSejahtera = live.economicStatus === 'Pra-Sejahtera';
+    const livePKH = Boolean(live.isPKH);
+    const liveBLT = Boolean(live.isBLT);
+    const liveBPNT = Boolean(live.isBPNT);
+
+    const updatedReceivedBy = (r.status === 'Diterima' && (!r.receivedBy || r.receivedBy === r.headOfFamily))
+      ? liveHead
+      : r.receivedBy;
+
+    const isDiffFromSnapshot =
+      r.houseId !== liveId ||
+      r.headOfFamily !== liveHead ||
+      (r.receivedBy || '') !== (updatedReceivedBy || '') ||
+      (r.phone || '') !== livePhone ||
+      Boolean(r.isPraSejahtera) !== livePraSejahtera ||
+      Boolean(r.isPKH) !== livePKH ||
+      Boolean(r.isBLT) !== liveBLT ||
+      Boolean(r.isBPNT) !== liveBPNT;
+
+    return {
+      ...r,
+      houseId: liveId,
+      headOfFamily: liveHead,
+      receivedBy: updatedReceivedBy,
+      block: liveBlock,
+      number: liveNumber,
+      phone: livePhone,
+      isPraSejahtera: livePraSejahtera,
+      isPKH: livePKH,
+      isBLT: liveBLT,
+      isBPNT: liveBPNT,
+      liveResidenceType: live.residenceType || 'Tetap',
+      liveOwnerName: live.ownerName || '',
+      liveHouseStatus: live.status || 'Occupied',
+      isDiffFromSnapshot
+    };
+  };
+
+  // Hydrate all aid programs with real-time resident data
+  const hydratedAidPrograms = useMemo(() => {
+    return aidPrograms.map(prog => ({
+      ...prog,
+      recipients: (prog.recipients || []).map(hydrateRecipient)
+    }));
+  }, [aidPrograms, housesLookup]);
+
   const getHouseAidProfile = (house: House) => {
     const members = house.familyMembers || [];
     const hasElderly = members.some(m => {
@@ -72,8 +153,12 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
       const age = calculateAge(m.birthDate);
       return age > 0 && age <= 5;
     });
-    const aidReceivedCount = aidPrograms.filter(prog => 
-      prog.recipients?.some(r => r.houseId === house.id && r.status === 'Diterima')
+    const houseUnitKey = normalizeUnitKey(house.block, house.number);
+    const aidReceivedCount = hydratedAidPrograms.filter(prog => 
+      prog.recipients?.some(r => {
+        const rUnitKey = normalizeUnitKey(r.block, r.number);
+        return (r.houseId === house.id || rUnitKey === houseUnitKey) && r.status === 'Diterima';
+      })
     ).length;
     const isGovAid = Boolean(house.isPKH || house.isBLT || house.isBPNT || house.economicStatus === 'Pra-Sejahtera' || house.isBansosLain);
     return { hasElderly, hasToddler, aidReceivedCount, isGovAid };
@@ -107,82 +192,15 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
       });
   }, [houses]);
 
-  // Map of live houses by ID for instant real-time lookup
-  const housesById = useMemo(() => {
-    const map = new Map<string, House>();
-    houses.forEach(h => map.set(h.id, h));
-    return map;
-  }, [houses]);
-
-  // Helper to hydrate a recipient with real-time House data
-  const hydrateRecipient = (r: SocialAidRecipient): SocialAidRecipient & {
-    liveResidenceType?: string;
-    liveOwnerName?: string;
-    liveHouseStatus?: string;
-    isDiffFromSnapshot?: boolean;
-  } => {
-    const live = housesById.get(r.houseId);
-    if (!live) return r;
-
-    const liveHead = (live.headOfFamily && live.headOfFamily.trim() !== '' && live.headOfFamily !== 'Rumah Kosong')
-      ? live.headOfFamily
-      : r.headOfFamily;
-    const livePhone = live.phone || r.phone || '';
-    const liveBlock = live.block || r.block;
-    const liveNumber = live.number || r.number;
-    const livePraSejahtera = live.economicStatus === 'Pra-Sejahtera';
-    const livePKH = Boolean(live.isPKH);
-    const liveBLT = Boolean(live.isBLT);
-    const liveBPNT = Boolean(live.isBPNT);
-
-    const updatedReceivedBy = (r.status === 'Diterima' && (!r.receivedBy || r.receivedBy === r.headOfFamily))
-      ? liveHead
-      : r.receivedBy;
-
-    const isDiffFromSnapshot =
-      r.headOfFamily !== liveHead ||
-      (r.receivedBy || '') !== (updatedReceivedBy || '') ||
-      (r.phone || '') !== livePhone ||
-      Boolean(r.isPraSejahtera) !== livePraSejahtera ||
-      Boolean(r.isPKH) !== livePKH ||
-      Boolean(r.isBLT) !== liveBLT ||
-      Boolean(r.isBPNT) !== liveBPNT;
-
-    return {
-      ...r,
-      headOfFamily: liveHead,
-      receivedBy: updatedReceivedBy,
-      block: liveBlock,
-      number: liveNumber,
-      phone: livePhone,
-      isPraSejahtera: livePraSejahtera,
-      isPKH: livePKH,
-      isBLT: liveBLT,
-      isBPNT: liveBPNT,
-      liveResidenceType: live.residenceType || 'Tetap',
-      liveOwnerName: live.ownerName || '',
-      liveHouseStatus: live.status || 'Occupied',
-      isDiffFromSnapshot
-    };
-  };
-
-  // Hydrate all aid programs with real-time resident data
-  const hydratedAidPrograms = useMemo(() => {
-    return aidPrograms.map(prog => ({
-      ...prog,
-      recipients: (prog.recipients || []).map(hydrateRecipient)
-    }));
-  }, [aidPrograms, housesById]);
-
   // Current selected program (with real-time hydrated recipients from houses)
   const currentAid = useMemo(() => {
     if (!selectedAidId) return null;
     return hydratedAidPrograms.find(a => a.id === selectedAidId) || null;
   }, [hydratedAidPrograms, selectedAidId]);
 
-  // Auto-sync updated resident profiles (name, phone, aid flags) across all programs back to Firestore in real time
+  // Auto-sync updated resident profiles (name, houseId migration, phone, aid flags) across all programs back to Firestore in real time
   useEffect(() => {
-    if (housesById.size === 0 || hydratedAidPrograms.length === 0) return;
+    if (housesLookup.byId.size === 0 || hydratedAidPrograms.length === 0) return;
     const programsToSync = hydratedAidPrograms.filter(prog =>
       (prog.recipients || []).some((r: any) => r.isDiffFromSnapshot)
     );
@@ -211,17 +229,19 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
           console.warn('Auto-sync social aid recipients warning:', err);
         }
       }
-    }, 800);
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [hydratedAidPrograms, housesById]);
+  }, [hydratedAidPrograms, housesLookup]);
 
   // Detect newly flagged Gov Aid / Priority households from Data Warga that are not yet in currentAid
   const unaddedPriorityHouses = useMemo(() => {
     if (!currentAid) return [];
     const existingIds = new Set((currentAid.recipients || []).map(r => r.houseId));
+    const existingUnitKeys = new Set((currentAid.recipients || []).map(r => normalizeUnitKey(r.block, r.number)));
     return sortedHouses.filter(h => {
-      if (existingIds.has(h.id)) return false;
+      const unitKey = normalizeUnitKey(h.block, h.number);
+      if (existingIds.has(h.id) || existingUnitKeys.has(unitKey)) return false;
       return Boolean(h.isPKH || h.isBLT || h.isBPNT || h.economicStatus === 'Pra-Sejahtera' || h.isBansosLain);
     });
   }, [currentAid, sortedHouses]);
@@ -269,9 +289,9 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
 
   // Executive Metrics
   const metrics = useMemo(() => {
-    const totalPrograms = aidPrograms.length;
-    const totalQuotaAll = aidPrograms.reduce((acc, a) => acc + (a.totalQuota || (a.recipients?.length || 0)), 0);
-    const totalDistributedAll = aidPrograms.reduce((acc, a) => {
+    const totalPrograms = hydratedAidPrograms.length;
+    const totalQuotaAll = hydratedAidPrograms.reduce((acc, a) => acc + (a.totalQuota || (a.recipients?.length || 0)), 0);
+    const totalDistributedAll = hydratedAidPrograms.reduce((acc, a) => {
       const received = (a.recipients || []).filter(r => r.status === 'Diterima').length;
       return acc + received;
     }, 0);
@@ -285,11 +305,11 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
       pendingHandover,
       completionRate
     };
-  }, [aidPrograms]);
+  }, [hydratedAidPrograms]);
 
   // Filtered Programs List
   const filteredPrograms = useMemo(() => {
-    return aidPrograms.filter(a => {
+    return hydratedAidPrograms.filter(a => {
       const matchSearch = a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         a.source.toLowerCase().includes(searchQuery.toLowerCase()) ||
         a.category.toLowerCase().includes(searchQuery.toLowerCase());
@@ -304,7 +324,7 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
 
       return matchSearch && matchStatus;
     });
-  }, [aidPrograms, searchQuery, statusFilter]);
+  }, [hydratedAidPrograms, searchQuery, statusFilter]);
 
   // Handlers for Views
   const handleOpenCreateForm = () => {
@@ -328,6 +348,7 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
   const handleOpenEditForm = (aid: SocialAidItem, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setEditingAidId(aid.id);
+    setSelectedAidId(aid.id);
     setFormTitle(aid.title);
     setFormCategory(aid.category as any);
     setFormSource(aid.source);
@@ -335,7 +356,11 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
     setFormUnit(aid.unit || 'Paket');
     setFormDistributionDate(aid.distributionDate ? aid.distributionDate.slice(0, 10) : new Date().toISOString().slice(0, 10));
     setFormNotes(aid.notes || '');
-    setSelectedHouseIds((aid.recipients || []).map(r => r.houseId));
+    const resolvedIds = (aid.recipients || []).map(r => {
+      const live = housesLookup.byId.get(r.houseId) || housesLookup.byUnitKey.get(normalizeUnitKey(r.block, r.number));
+      return live ? live.id : r.houseId;
+    });
+    setSelectedHouseIds(Array.from(new Set(resolvedIds)));
     setViewMode('form');
   };
 
@@ -364,30 +389,39 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
     }
 
     try {
-      // Map selected house ids to recipient records
-      const existingRecipientsMap = new Map<string, SocialAidRecipient>();
-      if (editingAidId && currentAid?.recipients) {
-        currentAid.recipients.forEach(r => existingRecipientsMap.set(r.houseId, r));
+      // Look up target program directly by editingAidId so it never fails even if opened from list view
+      const targetAid = editingAidId
+        ? (hydratedAidPrograms.find(a => a.id === editingAidId) || aidPrograms.find(a => a.id === editingAidId))
+        : null;
+
+      const existingById = new Map<string, SocialAidRecipient>();
+      const existingByUnitKey = new Map<string, SocialAidRecipient>();
+      if (targetAid?.recipients) {
+        targetAid.recipients.forEach(r => {
+          existingById.set(r.houseId, r);
+          existingByUnitKey.set(normalizeUnitKey(r.block, r.number), r);
+        });
       }
 
       const recipients: SocialAidRecipient[] = selectedHouseIds.map(hId => {
-        const house = sortedHouses.find(h => h.id === hId);
-        const existing = existingRecipientsMap.get(hId);
+        const house = housesLookup.byId.get(hId) || sortedHouses.find(h => h.id === hId);
+        const unitKey = house ? normalizeUnitKey(house.block, house.number) : '';
+        const existing = existingById.get(hId) || (unitKey ? existingByUnitKey.get(unitKey) : undefined);
 
         return {
-          houseId: hId,
+          houseId: house?.id || hId,
           headOfFamily: house?.headOfFamily || existing?.headOfFamily || 'Warga RT 02',
           block: house?.block || existing?.block || 'C',
           number: house?.number || existing?.number || 0,
           phone: house?.phone || existing?.phone || '',
-          isPraSejahtera: house?.economicStatus === 'Pra-Sejahtera' || existing?.isPraSejahtera,
-          isPKH: house?.isPKH || existing?.isPKH,
-          isBLT: house?.isBLT || existing?.isBLT,
-          isBPNT: house?.isBPNT || existing?.isBPNT,
+          isPraSejahtera: house ? house.economicStatus === 'Pra-Sejahtera' : Boolean(existing?.isPraSejahtera),
+          isPKH: house ? Boolean(house.isPKH) : Boolean(existing?.isPKH),
+          isBLT: house ? Boolean(house.isBLT) : Boolean(existing?.isBLT),
+          isBPNT: house ? Boolean(house.isBPNT) : Boolean(existing?.isBPNT),
           status: existing?.status || 'Menunggu',
-          receivedAt: existing?.receivedAt,
-          receivedBy: existing?.receivedBy,
-          notes: existing?.notes
+          ...(existing?.receivedAt ? { receivedAt: existing.receivedAt } : {}),
+          ...(existing?.receivedBy ? { receivedBy: existing.receivedBy } : {}),
+          ...(existing?.notes ? { notes: existing.notes } : {})
         };
       });
 
@@ -400,7 +434,7 @@ export const SocialAidManager: React.FC<SocialAidManagerProps> = ({ houses, pdfC
         distributionDate: formDistributionDate,
         notes: formNotes.trim(),
         recipients,
-        status: editingAidId && currentAid ? currentAid.status : 'Berjalan'
+        status: targetAid ? targetAid.status : 'Berjalan'
       };
 
       if (editingAidId) {

@@ -5276,6 +5276,86 @@ export const deleteSocialAidFromDb = async (id: string): Promise<void> => {
   }
 };
 
+const normalizeAidUnitKey = (block?: string, number?: string | number) => {
+  return `${(block || '').trim().toUpperCase()}-${String(number ?? '').trim().padStart(2, '0')}`;
+};
+
+export const syncHouseToSocialAidPrograms = async (
+  houseData: Partial<House> & { id: string },
+  oldHouseId?: string
+): Promise<void> => {
+  if (!isFirebaseConfigured || !db) return;
+  try {
+    const targetUnitKey = normalizeAidUnitKey(houseData.block, houseData.number);
+    const snap = await getDocs(collection(db, SOCIAL_AID_COL));
+    if (snap.empty) return;
+
+    for (const docSnap of snap.docs) {
+      const aidData = docSnap.data() as SocialAidItem;
+      const recipients = aidData.recipients || [];
+      let hasChanges = false;
+
+      const updatedRecipients = recipients.map(r => {
+        const rUnitKey = normalizeAidUnitKey(r.block, r.number);
+        const isMatch =
+          r.houseId === houseData.id ||
+          (oldHouseId && r.houseId === oldHouseId) ||
+          (targetUnitKey !== '-00' && rUnitKey === targetUnitKey);
+
+        if (!isMatch) return r;
+
+        const nextHead = (houseData.headOfFamily && houseData.headOfFamily.trim() !== '' && houseData.headOfFamily !== 'Rumah Kosong')
+          ? houseData.headOfFamily.trim()
+          : r.headOfFamily;
+        const nextReceivedBy = (r.status === 'Diterima' && (!r.receivedBy || r.receivedBy === r.headOfFamily))
+          ? nextHead
+          : r.receivedBy;
+        const nextPhone = houseData.phone !== undefined ? (houseData.phone || '') : (r.phone || '');
+        const nextPra = houseData.economicStatus !== undefined ? (houseData.economicStatus === 'Pra-Sejahtera') : Boolean(r.isPraSejahtera);
+        const nextPKH = houseData.isPKH !== undefined ? Boolean(houseData.isPKH) : Boolean(r.isPKH);
+        const nextBLT = houseData.isBLT !== undefined ? Boolean(houseData.isBLT) : Boolean(r.isBLT);
+        const nextBPNT = houseData.isBPNT !== undefined ? Boolean(houseData.isBPNT) : Boolean(r.isBPNT);
+
+        if (
+          r.houseId !== houseData.id ||
+          r.headOfFamily !== nextHead ||
+          (r.receivedBy || '') !== (nextReceivedBy || '') ||
+          (r.phone || '') !== nextPhone ||
+          Boolean(r.isPraSejahtera) !== nextPra ||
+          Boolean(r.isPKH) !== nextPKH ||
+          Boolean(r.isBLT) !== nextBLT ||
+          Boolean(r.isBPNT) !== nextBPNT
+        ) {
+          hasChanges = true;
+          return {
+            ...r,
+            houseId: houseData.id,
+            headOfFamily: nextHead,
+            ...(nextReceivedBy ? { receivedBy: nextReceivedBy } : {}),
+            block: houseData.block || r.block,
+            number: houseData.number || r.number,
+            phone: nextPhone,
+            isPraSejahtera: nextPra,
+            isPKH: nextPKH,
+            isBLT: nextBLT,
+            isBPNT: nextBPNT
+          };
+        }
+        return r;
+      });
+
+      if (hasChanges) {
+        await updateDoc(doc(db, SOCIAL_AID_COL, docSnap.id), deepSanitize({
+          recipients: updatedRecipients,
+          updatedAt: new Date().toISOString()
+        }));
+      }
+    }
+  } catch (error) {
+    console.warn('Warning syncing house to social_aid programs:', error);
+  }
+};
+
 export const toggleRecipientReceiptStatus = async (
   aidId: string, 
   houseId: string, 
@@ -5288,10 +5368,13 @@ export const toggleRecipientReceiptStatus = async (
     const snap = await getDoc(docRef);
     if (!snap.exists()) return;
     const currentData = snap.data() as SocialAidItem;
+    const normalizedTarget = houseId.trim().toUpperCase();
     const updatedRecipients = (currentData.recipients || []).map(r => {
-      if (r.houseId === houseId) {
+      const rUnitKey = normalizeAidUnitKey(r.block, r.number);
+      if (r.houseId === houseId || rUnitKey === normalizedTarget) {
         return {
           ...r,
+          houseId: houseId,
           status: (isReceived ? 'Diterima' : 'Menunggu') as any,
           receivedAt: isReceived ? new Date().toISOString() : undefined,
           receivedBy: isReceived ? (receivedBy || r.headOfFamily) : undefined
@@ -5332,13 +5415,16 @@ export const updateRecipientPaymentAndReceipt = async (
     const snap = await getDoc(docRef);
     if (!snap.exists()) return;
     const currentData = snap.data() as SocialAidItem;
+    const normalizedTarget = houseId.trim().toUpperCase();
     const updatedRecipients = (currentData.recipients || []).map(r => {
-      if (r.houseId === houseId) {
+      const rUnitKey = normalizeAidUnitKey(r.block, r.number);
+      if (r.houseId === houseId || rUnitKey === normalizedTarget) {
         const nextStatus = updates.status !== undefined ? updates.status : r.status;
         const nextPaymentStatus = updates.paymentStatus !== undefined ? updates.paymentStatus : r.paymentStatus;
         return {
           ...r,
           ...updates,
+          houseId: houseId,
           status: nextStatus,
           paymentStatus: nextPaymentStatus,
           receivedAt: nextStatus === 'Diterima' ? (r.receivedAt || new Date().toISOString()) : undefined,
