@@ -20,6 +20,7 @@ import {
   ChevronDown,
   ArrowUpDown,
   ChevronUp,
+  Shield,
   ShieldCheck,
   ShieldAlert,
   Hash,
