@@ -537,7 +537,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                     <div className="flex items-center gap-1 shrink-0">
                       {(['Ya', 'Dalam Proses', 'Tidak'] as const).map((statusOpt) => {
                         const currentCert = selectedResident.certificateStatus || 'Tidak';
-                        const isActive = currentCert === statusOpt;
+                        const isActive = currentCert === statusOpt || (statusOpt === 'Tidak' && currentCert === 'Belum');
                         return (
                           <button
                             key={statusOpt}
@@ -573,7 +573,7 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-1 shrink-0">
-                      {(['Baik', 'Rusak Ringan', 'Rusak Sedang', 'Rusak Berat'] as const).map((condOpt) => {
+                      {(['Baik', 'Terlantar', 'Tidak Terawat'] as const).map((condOpt) => {
                         const currentCond = selectedResident.buildingCondition || 'Baik';
                         const isActive = currentCond === condOpt;
                         return (
@@ -585,11 +585,11 @@ export const ResidentDetailDrawer: React.FC<ResidentDetailDrawerProps> = ({
                               { buildingCondition: condOpt },
                               `Kondisi bangunan ${selectedResident.block}-${selectedResident.number} diperbarui ke "${condOpt}".`
                             )}
-                            className={`px-2 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer border ${
+                            className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-colors cursor-pointer border ${
                               isActive
                                 ? condOpt === 'Baik'
                                   ? 'bg-emerald-600 text-white border-emerald-600'
-                                  : condOpt === 'Rusak Ringan'
+                                  : condOpt === 'Terlantar'
                                     ? 'bg-amber-500 text-white border-amber-500'
                                     : 'bg-rose-600 text-white border-rose-600'
                                 : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'

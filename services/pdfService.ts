@@ -2587,11 +2587,11 @@ export const generateBPBDVerificationReportPDF = async (houses: House[], customC
         const phone = h.phone || h.ownerPhone || '-';
 
         // Checklist Status Penghunian
-        const isSewa = h.residenceType === 'Sewa';
+        const isSewa = h.residenceType === 'Sewa' || h.ownerRelationship === 'Penyewa';
         const isKosong = h.status === 'Empty';
         const isAlihFungsi = h.status === 'Business' || Boolean(h.hasBusiness);
         const isPerubahanBentuk = Boolean(h.hasStructuralModification);
-        const isJual = h.occupancyHistory?.some(o => o.movedReason === 'Beli Rumah Baru') || false;
+        const isJual = Boolean(h.ownerRelationship?.toLowerCase().includes('pembeli') || h.occupancyHistory?.some(o => o.movedReason === 'Beli Rumah Baru'));
 
         // Kondisi Bangunan
         const condition = h.buildingCondition || (isKosong ? 'Tidak Terawat' : 'Baik');
@@ -2599,12 +2599,16 @@ export const generateBPBDVerificationReportPDF = async (houses: House[], customC
         const isTerlantar = condition === 'Terlantar';
         const isTidakTerawat = condition === 'Tidak Terawat';
 
-        // Sertifikasi
+        // Sertifikasi (Ya / Tidak / Dalam Proses)
         const cert = h.certificateStatus || 'Ya';
         const certYa = cert === 'Ya';
-        const certTidak = cert === 'Tidak';
+        const certTidak = cert === 'Tidak' || cert === 'Belum';
 
-        const notes = h.specialNotes || (isKosong ? 'Unit belum dihuni pemilik' : isAlihFungsi ? `Digunakan usaha ${h.businessName || ''}` : '-');
+        const notes = h.specialNotes || (
+            isKosong ? 'Unit belum dihuni pemilik' : 
+            isAlihFungsi ? `Digunakan usaha ${h.businessName || ''}` : 
+            cert === 'Dalam Proses' ? 'Sertifikat dalam proses BPN' : '-'
+        );
 
         return [
             (idx + 1).toString(),

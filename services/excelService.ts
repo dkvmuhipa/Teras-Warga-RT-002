@@ -208,11 +208,11 @@ export const generateBPBDVerificationExcel = async (houses: House[], tenant?: Te
 
     const phone = h.phone || h.ownerPhone || '-';
 
-    const isSewa = h.residenceType === 'Sewa';
+    const isSewa = h.residenceType === 'Sewa' || h.ownerRelationship === 'Penyewa';
     const isKosong = h.status === 'Empty';
     const isAlihFungsi = h.status === 'Business' || Boolean(h.hasBusiness);
     const isPerubahanBentuk = Boolean(h.hasStructuralModification);
-    const isJual = h.occupancyHistory?.some(o => o.movedReason === 'Beli Rumah Baru') || false;
+    const isJual = Boolean(h.ownerRelationship?.toLowerCase().includes('pembeli') || h.occupancyHistory?.some(o => o.movedReason === 'Beli Rumah Baru'));
 
     const condition = h.buildingCondition || (isKosong ? 'Tidak Terawat' : 'Baik');
     const isBaik = condition === 'Baik';
@@ -221,9 +221,13 @@ export const generateBPBDVerificationExcel = async (houses: House[], tenant?: Te
 
     const cert = h.certificateStatus || 'Ya';
     const certYa = cert === 'Ya';
-    const certTidak = cert === 'Tidak';
+    const certTidak = cert === 'Tidak' || cert === 'Belum';
 
-    const notes = h.specialNotes || (isKosong ? 'Unit belum dihuni' : isAlihFungsi ? `Usaha ${h.businessName || ''}` : '-');
+    const notes = h.specialNotes || (
+      isKosong ? 'Unit belum dihuni' : 
+      isAlihFungsi ? `Usaha ${h.businessName || ''}` : 
+      cert === 'Dalam Proses' ? 'Sertifikat dalam proses BPN' : '-'
+    );
 
     const row = worksheet.addRow([
       idx + 1,

@@ -1370,7 +1370,7 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                                   <option value="Orang Tua">Orang Tua / Mertua</option>
                                   <option value="Saudara / Kerabat">Saudara / Kerabat</option>
                                   <option value="Penyewa">Penyewa (Sewa / Kontrak)</option>
-                                  <option value="Pembeli">Pembeli (Alih Kepemilikan / Jual)</option>
+                                  <option value="Pembeli (Alih Hak)">Pembeli (Alih Kepemilikan / Jual)</option>
                                   <option value="Penjaga Rumah">Penjaga Rumah / Menumpang</option>
                                   <option value="Lainnya">Lainnya</option>
                                 </select>
@@ -1445,8 +1445,8 @@ export const AddEditResidentModal: React.FC<AddEditResidentModalProps> = ({
                             <div className="p-2.5 bg-amber-50/70 border border-amber-200/70 rounded-xl space-y-1.5">
                               <span className="block text-[9px] font-bold text-amber-800 uppercase tracking-wider">Indikator Kolom Formulir BPBD (Live Preview):</span>
                               <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
-                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${formData.ownerRelationship === 'Pembeli' ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
-                                  {formData.ownerRelationship === 'Pembeli' ? '✓ Jual' : '○ Jual'}
+                                <span className={`px-2 py-0.5 rounded-md border transition-colors ${Boolean(formData.ownerRelationship?.includes('Pembeli')) ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
+                                  {Boolean(formData.ownerRelationship?.includes('Pembeli')) ? '✓ Jual' : '○ Jual'}
                                 </span>
                                 <span className={`px-2 py-0.5 rounded-md border transition-colors ${(formData.residenceType === 'Sewa' || formData.ownerRelationship === 'Penyewa') ? 'bg-amber-600 text-white border-amber-600 shadow-2xs' : 'bg-white text-slate-400 border-slate-200'}`}>
                                   {(formData.residenceType === 'Sewa' || formData.ownerRelationship === 'Penyewa') ? '✓ Sewa' : '○ Sewa'}

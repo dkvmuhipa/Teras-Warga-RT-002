@@ -961,19 +961,25 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                     type="button"
                                     onClick={async (e) => {
                                       e.stopPropagation();
-                                      const nextCert = house.certificateStatus === 'Ya' ? 'Tidak' : 'Ya';
+                                      const nextCert = (house.certificateStatus === 'Ya')
+                                        ? 'Dalam Proses'
+                                        : (house.certificateStatus === 'Dalam Proses')
+                                          ? 'Tidak'
+                                          : 'Ya';
                                       await handleUpdateHouse(house.id, { certificateStatus: nextCert });
-                                      toast.success(`Sertifikat BPBD No. ${house.number}: ${nextCert === 'Ya' ? 'Bersertifikat' : 'Belum Bersertifikat'}`);
+                                      toast.success(`Sertifikat BPBD No. ${house.number}: ${nextCert === 'Ya' ? 'Bersertifikat' : nextCert === 'Dalam Proses' ? 'Dalam Proses' : 'Belum Ada'}`);
                                     }}
                                     className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded border transition-colors hover:opacity-80 active:scale-95 ${
                                       house.certificateStatus === 'Ya'
                                         ? 'bg-teal-50 text-teal-700 border-teal-200'
-                                        : 'bg-amber-50/90 text-amber-800 border-amber-200'
+                                        : house.certificateStatus === 'Dalam Proses'
+                                          ? 'bg-sky-50 text-sky-700 border-sky-200'
+                                          : 'bg-amber-50/90 text-amber-800 border-amber-200'
                                     }`}
-                                    title={`Status Sertifikat BPBD: ${house.certificateStatus === 'Ya' ? 'Bersertifikat (Klik untuk ubah)' : 'Belum Bersertifikat (Klik untuk ubah)'}`}
+                                    title={`Status Sertifikat BPBD: ${house.certificateStatus === 'Ya' ? 'Bersertifikat' : house.certificateStatus === 'Dalam Proses' ? 'Dalam Proses BPN' : 'Belum Ada'} (Klik untuk rotasi)`}
                                   >
-                                    <span>{house.certificateStatus === 'Ya' ? '📜' : '⚠️'}</span>
-                                    <span>{house.certificateStatus === 'Ya' ? 'Sertifikat' : 'Belum Sertifikat'}</span>
+                                    <span>{house.certificateStatus === 'Ya' ? '📜' : house.certificateStatus === 'Dalam Proses' ? '⏳' : '⚠️'}</span>
+                                    <span>{house.certificateStatus === 'Ya' ? 'Sertifikat' : house.certificateStatus === 'Dalam Proses' ? 'Proses BPN' : 'Belum Sertifikat'}</span>
                                   </button>
                                 </div>
                               )}
@@ -1221,18 +1227,24 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                 type="button"
                                 onClick={async (e) => {
                                   e.stopPropagation();
-                                  const nextCert = house.certificateStatus === 'Ya' ? 'Tidak' : 'Ya';
+                                  const nextCert = (house.certificateStatus === 'Ya')
+                                    ? 'Dalam Proses'
+                                    : (house.certificateStatus === 'Dalam Proses')
+                                      ? 'Tidak'
+                                      : 'Ya';
                                   await handleUpdateHouse(house.id, { certificateStatus: nextCert });
-                                  toast.success(`Sertifikat BPBD No. ${house.number}: ${nextCert === 'Ya' ? 'Bersertifikat' : 'Belum Bersertifikat'}`);
+                                  toast.success(`Sertifikat BPBD No. ${house.number}: ${nextCert === 'Ya' ? 'Bersertifikat' : nextCert === 'Dalam Proses' ? 'Dalam Proses' : 'Belum Ada'}`);
                                 }}
                                 className={`inline-flex items-center gap-1 text-[8.5px] font-bold px-1.5 py-0.5 rounded border transition-colors ${
                                   house.certificateStatus === 'Ya'
                                     ? 'bg-teal-50 text-teal-700 border-teal-200'
-                                    : 'bg-amber-50 text-amber-800 border-amber-200'
+                                    : house.certificateStatus === 'Dalam Proses'
+                                      ? 'bg-sky-50 text-sky-700 border-sky-200'
+                                      : 'bg-amber-50 text-amber-800 border-amber-200'
                                 }`}
                               >
-                                <span>{house.certificateStatus === 'Ya' ? '📜' : '⚠️'}</span>
-                                <span>{house.certificateStatus === 'Ya' ? 'Sertifikat BPBD' : 'Belum Sertifikat'}</span>
+                                <span>{house.certificateStatus === 'Ya' ? '📜' : house.certificateStatus === 'Dalam Proses' ? '⏳' : '⚠️'}</span>
+                                <span>{house.certificateStatus === 'Ya' ? 'Sertifikat BPBD' : house.certificateStatus === 'Dalam Proses' ? 'Proses BPN' : 'Belum Sertifikat'}</span>
                               </button>
                             </div>
                           </div>
@@ -1320,30 +1332,32 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                           <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-extrabold uppercase tracking-wider text-slate-600">Sertifikat:</span>
                             <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-3xs">
-                              {(['Ya', 'Dalam Proses', 'Belum'] as const).map((opt) => {
-                                const current = house.certificateStatus || 'Belum';
-                                const active = (opt === 'Dalam Proses' && current === 'Dalam Proses') ||
-                                               (opt === 'Ya' && current === 'Ya') ||
-                                               (opt === 'Belum' && (current === 'Belum' || current === 'Tidak'));
+                              {[
+                                { id: 'Ya', label: 'Ya' },
+                                { id: 'Dalam Proses', label: 'Proses' },
+                                { id: 'Tidak', label: 'Belum' }
+                              ].map((opt) => {
+                                const current = house.certificateStatus || 'Tidak';
+                                const active = (current === opt.id) || (opt.id === 'Tidak' && current === 'Belum');
                                 return (
                                   <button
-                                    key={opt}
+                                    key={opt.id}
                                     type="button"
                                     onClick={() => {
-                                      handleUpdateHouse(house.id, { certificateStatus: opt });
-                                      toast.success(`Sertifikat No. ${house.number}: ${opt}`);
+                                      handleUpdateHouse(house.id, { certificateStatus: opt.id as any });
+                                      toast.success(`Sertifikat No. ${house.number}: ${opt.label}`);
                                     }}
                                     className={`flex-1 py-1 rounded text-[9px] font-extrabold transition-all ${
                                       active
-                                        ? opt === 'Ya'
+                                        ? opt.id === 'Ya'
                                           ? 'bg-emerald-600 text-white shadow-xs'
-                                          : opt === 'Dalam Proses'
+                                          : opt.id === 'Dalam Proses'
                                           ? 'bg-amber-500 text-white shadow-xs'
                                           : 'bg-rose-500 text-white shadow-xs'
                                         : 'text-slate-500 hover:text-slate-800'
                                     }`}
                                   >
-                                    {opt === 'Dalam Proses' ? 'Proses' : opt}
+                                    {opt.label}
                                   </button>
                                 );
                               })}

@@ -1661,7 +1661,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
       else if (filterStatus === 'ktp_external') matchesStatus = h.ktpStatus === 'Luar Wilayah (Belum Mutasi)' || (!h.ktpStatus && (!h.addressKtp || (!h.addressKtp.toLowerCase().includes('tondo') && !h.addressKtp.toLowerCase().includes('pue lombe'))));
       else if (filterStatus === 'bpbd_certified') matchesStatus = h.certificateStatus === 'Ya';
       else if (filterStatus === 'bpbd_process') matchesStatus = h.certificateStatus === 'Dalam Proses';
-      else if (filterStatus === 'bpbd_uncertified') matchesStatus = h.certificateStatus === 'Tidak' || !h.certificateStatus;
+      else if (filterStatus === 'bpbd_uncertified') matchesStatus = h.certificateStatus === 'Tidak' || h.certificateStatus === 'Belum' || !h.certificateStatus;
       else if (filterStatus === 'bpbd_unverified') matchesStatus = !h.certificateStatus || !h.buildingCondition || !h.ownerRelationship;
 
       let matchesResidenceType = true;
