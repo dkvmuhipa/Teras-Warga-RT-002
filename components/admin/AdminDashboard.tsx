@@ -159,11 +159,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const { weather } = useWeather();
   // navigate already declared above
 
-  // Real-time clock for WITA (GMT+8)
+  // Real-time clock for WITA (GMT+8) - update every 30s since only HH:MM is displayed
   React.useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
-    }, 1000);
+    }, 30000);
     return () => clearInterval(timer);
   }, []);
 
@@ -747,67 +747,38 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
 
           {/* Center / Right Operational Capsule & Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Live Operational Capsule: WITA Real-Time Clock */}
-            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100/70 hover:bg-slate-100/90 border border-slate-200/70 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition-colors select-none shrink-0 whitespace-nowrap">
-              <Clock size={13} className="text-indigo-600 stroke-[2.5px] shrink-0" />
-              <span className="font-mono tracking-tight text-slate-800 font-extrabold text-xs">
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100/70 border border-slate-200/70 rounded-xl text-xs font-bold text-slate-700 select-none shrink-0 whitespace-nowrap">
+              <Clock size={12} className="text-indigo-600 stroke-[2.5px] shrink-0" />
+              <span className="font-mono tabular-nums tracking-tight text-slate-800 font-extrabold text-xs">
                 {currentTime.toLocaleTimeString('id-ID', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit' })}
               </span>
-              <span className="text-[10px] font-mono font-medium text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded">WITA</span>
+              <span className="text-[10px] font-mono font-medium text-slate-500">WITA</span>
             </div>
-
-            {/* Live Operational Capsule: Palu City Weather & ISPU KLHK */}
-            {weather && (
-              <div className="hidden 2xl:flex items-center gap-2 px-2.5 py-1.5 bg-sky-50/70 hover:bg-sky-50 border border-sky-100/80 rounded-2xl text-xs font-bold text-sky-900 shadow-2xs transition-colors select-none shrink-0 whitespace-nowrap">
-                <Sun size={13} className="text-amber-500 stroke-[2.5px] shrink-0" />
-                <span className="font-extrabold text-xs">{weather.temp}°C</span>
-                <span className="text-sky-200">•</span>
-                <span className="text-xs text-sky-800 flex items-center gap-1 font-bold">
-                  ISPU <span className="font-semibold text-emerald-600">{weather.aqi}</span>
-                </span>
-              </div>
-            )}
 
             {/* Active Panic Alert Badge */}
             {activePanicAlerts.length > 0 && (
               <button 
                 onClick={() => setActiveTab('facilities')}
-                className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 border border-rose-600 rounded-xl px-3 py-1.5 cursor-pointer text-white transition-colors shrink-0 whitespace-nowrap"
+                className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 border border-rose-600 rounded-xl px-2.5 py-1.5 cursor-pointer text-white transition-colors shrink-0 whitespace-nowrap"
                 title="Ada panggilan darurat aktif!"
               >
-                <AlertTriangle size={15} className="shrink-0" />
-                <div className="hidden sm:block text-left">
-                  <p className="text-[10px] font-medium leading-none mb-0.5 text-rose-100">Panggilan Darurat</p>
-                  <p className="text-xs font-semibold leading-none">{activePanicAlerts.length} Laporan</p>
-                </div>
+                <AlertTriangle size={14} className="shrink-0" />
+                <span className="text-xs font-bold">{activePanicAlerts.length} Darurat</span>
               </button>
-            )}
-
-            {/* Active Patrol Badge */}
-            {activePatrol && (
-              <div className="hidden 2xl:flex items-center gap-2 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 shrink-0 whitespace-nowrap">
-                <div className="relative shrink-0 flex items-center">
-                  <ShieldCheck size={16} className="text-emerald-600" />
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-medium text-slate-500 leading-none mb-0.5">Siskamling aktif</p>
-                  <p className="text-xs font-semibold text-slate-800 leading-none">{activePatrol.officerName} • {Math.round((activePatrol.visitedCheckpoints.length / CHECKPOINTS.length) * 100)}%</p>
-                </div>
-              </div>
             )}
 
             {/* Spotlight Command Palette Launcher Button */}
             <button
               onClick={() => setIsSpotlightOpen(true)}
-              className="hidden sm:flex items-center gap-2 bg-slate-100/70 hover:bg-slate-100 border border-slate-200/70 rounded-2xl px-2.5 md:px-3 py-1.5 md:py-2 text-slate-500 hover:text-slate-800 text-xs font-semibold shadow-2xs transition-colors group shrink-0 whitespace-nowrap"
-              title="Buka Command Palette (Ctrl+K atau ⌘K)"
+              className="hidden sm:flex items-center gap-2 bg-slate-100/70 hover:bg-slate-100 border border-slate-200/70 rounded-xl px-2.5 md:px-3 py-1.5 text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors group shrink-0 whitespace-nowrap cursor-pointer"
+              title="Buka Pencarian Cepat & Command Palette (Ctrl+K)"
             >
-              <Search size={14} className="group-hover:text-indigo-600 transition-colors stroke-[2.2px] shrink-0" />
-              <span className="hidden xl:inline text-slate-500 font-medium">Cari modul...</span>
-              <span className="xl:hidden text-slate-500 font-medium">Cari</span>
-              <kbd className="ml-1 flex items-center gap-0.5 bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-lg text-[10px] font-semibold shadow-2xs group-hover:border-indigo-200 group-hover:text-indigo-600 shrink-0">
+              <Search size={13} className="group-hover:text-indigo-600 transition-colors stroke-[2.2px] shrink-0" />
+              <span className="hidden lg:inline text-slate-500 font-medium">Cari modul / warga...</span>
+              <span className="lg:hidden text-slate-500 font-medium">Cari</span>
+              <kbd className="ml-0.5 flex items-center gap-0.5 bg-white border border-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md text-[10px] font-semibold group-hover:border-indigo-200 group-hover:text-indigo-600 shrink-0">
                 <Command size={10} /> K
               </kbd>
             </button>
@@ -815,7 +786,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             {/* Mobile Search Button */}
             <button
               onClick={() => setIsSpotlightOpen(true)}
-              className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors shrink-0"
+              className="sm:hidden min-w-[40px] min-h-[40px] flex items-center justify-center p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors shrink-0"
               title="Cari Cepat (Ctrl+K)"
               aria-label="Cari Cepat"
             >
@@ -823,44 +794,43 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </button>
             
             {/* Notification, Support & User Profile */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-1.5">
               <button
                 type="button"
                 onClick={() => setShowSupportTicketModal(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-colors cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/80 text-indigo-700 rounded-xl text-xs font-bold transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                 title="Buka Pusat Bantuan & Tiket Super Admin"
               >
-                <HelpCircle size={15} className="text-indigo-600 shrink-0" />
-                <span className="hidden md:inline xl:hidden">Bantuan</span>
-                <span className="hidden xl:inline">Bantuan Super Admin</span>
+                <HelpCircle size={14} className="text-indigo-600 shrink-0" />
+                <span className="hidden lg:inline">Bantuan</span>
               </button>
 
               <button 
                 onClick={() => setActiveTab('notifications')}
-                className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 sm:p-2.5 text-slate-500 hover:bg-slate-100 rounded-2xl transition-colors relative shrink-0 ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
+                className={`min-w-[40px] min-h-[40px] flex items-center justify-center p-2 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors relative shrink-0 cursor-pointer ${activeTab === 'notifications' ? 'bg-indigo-50 text-indigo-600' : ''}`}
                 title="Lihat Notifikasi"
                 aria-label="Notifikasi"
               >
-                <Bell size={18} />
+                <Bell size={17} />
                 {notifications.length > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-indigo-600 border-2 border-white rounded-full"></span>
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-600 border border-white rounded-full"></span>
                 )}
               </button>
               
-              <div className="h-6 w-px bg-slate-200 mx-0.5 hidden md:block shrink-0"></div>
+              <div className="h-5 w-px bg-slate-200 mx-0.5 hidden md:block shrink-0"></div>
               
-              <div className="flex items-center gap-2 sm:gap-2.5 pl-0.5 sm:pl-1 shrink-0">
-                <div className="hidden lg:block text-right min-w-0 max-w-[130px] xl:max-w-[200px]">
-                  <p className="text-xs font-semibold text-slate-900 leading-tight truncate whitespace-nowrap" title={`Admin ${currentTenant ? currentTenant.name : RT_NAME}`}>
+              <div className="flex items-center gap-2 pl-0.5 shrink-0">
+                <div className="hidden lg:block text-right min-w-0 max-w-[140px]">
+                  <p className="text-xs font-semibold text-slate-900 leading-tight truncate" title={`Admin ${currentTenant ? currentTenant.name : RT_NAME}`}>
                     Admin {currentTenant ? currentTenant.name : RT_NAME}
                   </p>
-                  <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider mt-0.5 truncate whitespace-nowrap">
+                  <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider truncate">
                     {role}
                   </p>
                 </div>
-                <div className="relative group shrink-0">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-xs ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white">
-                    <User size={16} />
+                <div className="relative shrink-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-2xs">
+                    <User size={15} />
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></span>
                 </div>
@@ -870,7 +840,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-3 sm:p-5 md:p-8 pb-24 md:pb-32 custom-scrollbar">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5 pb-24 md:pb-20 custom-scrollbar">
           <div className="max-w-7xl 2xl:max-w-screen-2xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
@@ -972,6 +942,54 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
                 {/* Results Section */}
                 <div className="max-h-[60vh] overflow-y-auto p-3 space-y-4 custom-scrollbar">
+                  {/* Pencarian Cepat Warga (Muncul saat mengetik >= 2 karakter) */}
+                  {spotlightQuery.trim().length >= 2 && (() => {
+                    const q = spotlightQuery.trim().toLowerCase();
+                    const matchedHouses = houses.filter(h => 
+                      (h.headOfFamily || '').toLowerCase().includes(q) ||
+                      (h.ownerName || '').toLowerCase().includes(q) ||
+                      `${h.block}-${h.number}`.toLowerCase().includes(q) ||
+                      (h.number || '').toLowerCase().includes(q) ||
+                      (h.phone || '').includes(q)
+                    ).slice(0, 5);
+
+                    if (matchedHouses.length === 0) return null;
+
+                    return (
+                      <div>
+                        <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider px-3 mb-1.5">
+                          Hasil Pencarian Warga ({matchedHouses.length})
+                        </p>
+                        <div className="space-y-1">
+                          {matchedHouses.map(h => (
+                            <button
+                              key={h.id}
+                              onClick={() => {
+                                setActiveTab('residents');
+                                setIsSpotlightOpen(false);
+                                setSpotlightQuery('');
+                              }}
+                              className="w-full flex items-center justify-between p-2.5 rounded-2xl text-left hover:bg-emerald-50/70 transition-colors cursor-pointer"
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <span className="px-2 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-bold font-mono tabular-nums shrink-0">
+                                  {h.block}-{h.number}
+                                </span>
+                                <div className="min-w-0">
+                                  <p className="text-xs md:text-sm font-bold text-slate-800 truncate">{h.headOfFamily || h.ownerName || 'Rumah Kosong'}</p>
+                                  <p className="text-[11px] text-slate-400 truncate">
+                                    {h.status === 'Occupied' ? 'Dihuni' : 'Kosong'} • {h.residenceType || 'Tetap'} {h.phone ? `• ${h.phone}` : ''}
+                                  </p>
+                                </div>
+                              </div>
+                              <CornerDownLeft size={14} className="text-slate-300 shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   {/* Modul Navigasi */}
                   <div>
                     <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-1.5">

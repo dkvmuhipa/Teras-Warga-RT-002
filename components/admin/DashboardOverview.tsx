@@ -631,173 +631,87 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </AnimatePresence>
       </motion.div>
 
-      {/* Executive Environmental & 5-Pilar STBM Health Hub */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {/* Card 1: 5 Pilar STBM & Sanitasi Huntap Tondo 2 */}
+      {/* Compact Environmental & 5-Pilar STBM Strip */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Card 1: 5 Pilar STBM & Sanitasi */}
         <motion.div 
           variants={itemVariants}
-          className="bg-white rounded-3xl p-5 md:p-6 text-slate-800 shadow-xs border border-slate-100 relative overflow-hidden flex flex-col justify-between"
+          className="bg-white rounded-2xl p-4 text-slate-800 shadow-2xs border border-slate-200/80 flex flex-col justify-between gap-3"
         >
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-[#e8faf0] text-[#059669] flex items-center justify-center shrink-0 shadow-2xs">
-                  <ShieldCheck size={20} className="stroke-[2.2]" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm md:text-base font-extrabold tracking-tight text-slate-900">5 Pilar STBM & ODF</h3>
-                    <span className="text-xs font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-0.5 rounded-full">
-                      Kemenkes RI
-                    </span>
-                  </div>
-                  <p className="text-slate-500 text-xs font-medium">Sanitasi Total Berbasis Masyarakat Huntap Tondo 2</p>
-                </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#e8faf0] text-[#059669] flex items-center justify-center shrink-0">
+                <ShieldCheck size={18} className="stroke-[2.2]" />
               </div>
-              <button 
-                onClick={() => onTabChange('stbm')}
-                className="text-xs font-extrabold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 px-3 py-1.5 rounded-xl transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
-              >
-                Detail <ArrowRight size={13} />
-              </button>
-            </div>
-
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-2 md:gap-3 py-1">
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-xs uppercase font-bold text-slate-400 block">Status BABS</span>
-                <span className="text-base md:text-lg font-extrabold text-emerald-600 mt-0.5 block">100% ODF</span>
-                <span className="text-xs text-slate-500 font-medium">Bebas Buang Air Besar</span>
-              </div>
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-xs uppercase font-bold text-slate-400 block">Kavling Terdata</span>
-                <span className="text-base md:text-lg font-extrabold text-slate-900 mt-0.5 block">{stbmRecords.length || houses.length} KK</span>
-                <span className="text-xs text-slate-500 font-medium">129 Huntap PUPR</span>
-              </div>
-              <div className={`border rounded-2xl p-2.5 text-center ${stbmIssuesCount > 0 ? 'bg-rose-50/80 border-rose-100' : 'bg-emerald-50/80 border-emerald-100'}`}>
-                <span className="text-xs uppercase font-bold text-slate-400 block">Tindak Lanjut</span>
-                <span className={`text-base md:text-lg font-extrabold mt-0.5 block ${stbmIssuesCount > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                  {stbmIssuesCount > 0 ? `${stbmIssuesCount} Butuh TL` : '0 Nihil (Prima)'}
-                </span>
-                <span className="text-xs text-slate-500 font-medium">{stbmIssuesCount > 0 ? 'Perlu Intervensi' : 'Semua Normal'}</span>
+              <div>
+                <h3 className="text-sm font-extrabold tracking-tight text-slate-900">5 Pilar STBM &amp; ODF</h3>
+                <p className="text-slate-500 text-[11px] font-medium">Sanitasi lingkungan Huntap Tondo 2</p>
               </div>
             </div>
+            <button 
+              onClick={() => onTabChange('stbm')}
+              className="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 px-2.5 py-1 rounded-xl transition-colors flex items-center gap-1 shrink-0 cursor-pointer"
+            >
+              Detail <ArrowRight size={12} />
+            </button>
+          </div>
 
-            {/* Pillar Snapshot Pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs font-bold text-slate-600">
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl">
-                <Check size={12} className="text-emerald-600 shrink-0 stroke-[2.5]" />
-                <span className="truncate">P1: Biotank PUPR</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl">
-                <Check size={12} className="text-emerald-600 shrink-0 stroke-[2.5]" />
-                <span className="truncate">P2: CTPS Air Mengalir</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl">
-                <Check size={12} className="text-emerald-600 shrink-0 stroke-[2.5]" />
-                <span className="truncate">P3: PAMM-RT Masak</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl">
-                <Check size={12} className="text-emerald-600 shrink-0 stroke-[2.5]" />
-                <span className="truncate">P4: Pilah Sampah</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl">
-                <Check size={12} className="text-emerald-600 shrink-0 stroke-[2.5]" />
-                <span className="truncate">P5: SPALDT Tertutup</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-100 px-2 py-1 rounded-xl">
-                <Sparkles size={12} className="text-emerald-600 shrink-0" />
-                <span className="truncate">Posyandu Aktif</span>
-              </div>
+          <div className="grid grid-cols-3 gap-2 font-mono tabular-nums">
+            <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-2 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Status BABS</span>
+              <span className="text-sm font-extrabold text-emerald-600 mt-0.5 block">100% ODF</span>
+            </div>
+            <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-2 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Terdata</span>
+              <span className="text-sm font-extrabold text-slate-900 mt-0.5 block">{stbmRecords.length || houses.length} KK</span>
+            </div>
+            <div className={`border rounded-xl p-2 text-center ${stbmIssuesCount > 0 ? 'bg-rose-50/80 border-rose-100' : 'bg-emerald-50/80 border-emerald-100'}`}>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Tindak Lanjut</span>
+              <span className={`text-sm font-extrabold mt-0.5 block ${stbmIssuesCount > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                {stbmIssuesCount > 0 ? `${stbmIssuesCount} Unit` : '0 Nihil'}
+              </span>
             </div>
           </div>
         </motion.div>
 
-        {/* Card 2: Stasiun Cuaca & Kualitas Udara Real-time Huntap Tondo 2 */}
+        {/* Card 2: Stasiun Cuaca & Kualitas Udara */}
         <motion.div 
           variants={itemVariants}
-          className="bg-white rounded-3xl p-5 md:p-6 text-slate-800 shadow-xs border border-slate-100 relative overflow-hidden flex flex-col justify-between"
+          className="bg-white rounded-2xl p-4 text-slate-800 shadow-2xs border border-slate-200/80 flex flex-col justify-between gap-3"
         >
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-[#edf7ff] text-[#0284c7] flex items-center justify-center shrink-0 shadow-2xs">
-                  <Sun size={20} className="stroke-[2.2]" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm md:text-base font-extrabold tracking-tight text-slate-900">Stasiun Cuaca Huntap Tondo 2</h3>
-                    <span className="text-xs font-extrabold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Live Sensor
-                    </span>
-                  </div>
-                  <p className="text-slate-500 text-xs font-medium">Huntap Tondo 2 (-0.8917, 119.8707)</p>
-                </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#edf7ff] text-[#0284c7] flex items-center justify-center shrink-0">
+                <Sun size={18} className="stroke-[2.2]" />
               </div>
-              <div className="text-right">
-                <span className="text-xs text-slate-400 font-bold block">Standar RI</span>
-                <span className="text-xs font-extrabold text-sky-600 uppercase">ISPU KLHK</span>
+              <div>
+                <h3 className="text-sm font-extrabold tracking-tight text-slate-900">Cuaca &amp; ISPU Huntap Tondo 2</h3>
+                <p className="text-slate-500 text-[11px] font-medium truncate">
+                  {weather?.condition || 'Cerah'} • {weather?.alertMessage || 'Udara sehat & kondusif'}
+                </p>
               </div>
             </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-100 px-2 py-0.5 rounded-full shrink-0">
+              Live
+            </span>
+          </div>
 
-            {/* Weather Metrics Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 py-1">
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-xs uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
-                  <Sun size={11} className="text-amber-500" /> Suhu
-                </span>
-                <span className="text-base md:text-lg font-extrabold text-slate-900 mt-0.5 block">
-                  {weather ? `${weather.temp}°C` : '31°C'}
-                </span>
-                <span className="text-xs text-slate-500 font-medium truncate block">
-                  {weather?.condition || 'Cerah'}
-                </span>
-              </div>
-
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-xs uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
-                  <Droplets size={11} className="text-sky-500" /> Humid
-                </span>
-                <span className="text-base md:text-lg font-extrabold text-sky-600 mt-0.5 block">
-                  {weather ? `${weather.humidity}%` : '74%'}
-                </span>
-                <span className="text-xs text-slate-500 font-medium truncate block">Relatif (RH)</span>
-              </div>
-
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-xs uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
-                  <Wind size={11} className="text-teal-500" /> Angin
-                </span>
-                <span className="text-base md:text-lg font-extrabold text-teal-600 mt-0.5 block">
-                  {weather ? `${weather.windSpeed} km/h` : '12 km/h'}
-                </span>
-                <span className="text-xs text-slate-500 font-medium truncate block">Lembah Palu</span>
-              </div>
-
-              <div className="bg-slate-50/80 border border-slate-100 rounded-2xl p-2.5 text-center">
-                <span className="text-xs uppercase font-bold text-slate-400 flex items-center justify-center gap-1">
-                  <Activity size={11} className="text-emerald-500" /> ISPU
-                </span>
-                <span className="text-base md:text-lg font-extrabold text-emerald-600 mt-0.5 block">
-                  {weather ? weather.aqi : 28}
-                </span>
-                <span className="text-xs font-extrabold uppercase text-emerald-600 truncate block">
-                  {weather?.aqiLabel || 'Baik'}
-                </span>
-              </div>
+          <div className="grid grid-cols-4 gap-2 font-mono tabular-nums">
+            <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-2 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Suhu</span>
+              <span className="text-sm font-extrabold text-slate-900 mt-0.5 block">{weather ? `${weather.temp}°C` : '31°C'}</span>
             </div>
-
-            {/* Health / Environmental Advisory Note */}
-            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-2.5 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-slate-600">
-                <Compass size={14} className="text-sky-500 shrink-0" />
-                <span className="text-xs font-medium leading-relaxed truncate">
-                  {weather?.alertMessage || 'Kualitas udara ISPU dalam kondisi Sehat dan kondusif.'}
-                </span>
-              </div>
-              <span className="text-xs text-slate-400 font-bold shrink-0 ml-2">
-                PM2.5: {weather?.pm2_5 ? `${weather.pm2_5} µg/m³` : 'Normal'}
-              </span>
+            <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-2 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Humid</span>
+              <span className="text-sm font-extrabold text-sky-600 mt-0.5 block">{weather ? `${weather.humidity}%` : '74%'}</span>
+            </div>
+            <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-2 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block font-sans">Angin</span>
+              <span className="text-sm font-extrabold text-teal-600 mt-0.5 block">{weather ? `${weather.windSpeed}km/h` : '12km/h'}</span>
+            </div>
+            <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-2 text-center">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block font-sans">ISPU</span>
+              <span className="text-sm font-extrabold text-emerald-600 mt-0.5 block">{weather ? weather.aqi : 28}</span>
             </div>
           </div>
         </motion.div>
