@@ -191,109 +191,80 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Mode Switcher: Tampilan Standar vs Mode Sensus Cepat BPBD */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 p-4 bg-white rounded-2xl border border-slate-200/90 shadow-xs">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 px-4 py-2.5 bg-white rounded-2xl border border-slate-200/90 shadow-xs">
+        <div className="flex items-center gap-2.5">
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
             isBPBDMode 
-              ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-white border-amber-600 shadow-sm' 
+              ? 'bg-gradient-to-br from-amber-500 to-amber-600 text-white border-amber-600 shadow-2xs' 
               : 'bg-indigo-50 text-indigo-600 border-indigo-100'
           }`}>
-            {isBPBDMode ? <ClipboardCheck size={20} className="stroke-[2.5]" /> : <Layers size={20} className="stroke-[2.5]" />}
+            {isBPBDMode ? <ClipboardCheck size={16} className="stroke-[2.5]" /> : <Layers size={16} className="stroke-[2.5]" />}
           </div>
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-extrabold text-slate-800 tracking-tight">
-                {isBPBDMode ? 'Mode Sensus Cepat BPBD & Huntap' : 'Tabel Manajemen Data Warga'}
+              <h4 className="text-xs sm:text-sm font-extrabold text-slate-800 tracking-tight truncate">
+                {isBPBDMode ? 'Mode Sensus BPBD & Huntap' : 'Tabel Data Warga'}
               </h4>
-              {isBPBDMode && (
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
-                  SENSUS AKTIF
-                </span>
-              )}
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 font-mono tabular-nums">
+                {filteredHouses.length} Unit
+              </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+            <p className="text-[10.5px] text-slate-400 font-medium truncate">
               {isBPBDMode 
-                ? 'Verifikasi langsung Sertifikat BPN, Kondisi Fisik, Perubahan Bentuk, & SK Huntap dalam 1 klik tanpa modal' 
-                : 'Tampilan standar untuk administrasi kependudukan, kontak, dan iuran warga bulanan'}
+                ? 'Klik pill status untuk simpan instan ke server' 
+                : 'Klik header kolom untuk mengurutkan data'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-end md:self-auto">
-          <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => {
-                setIsBPBDMode(false);
-                toast.info('Beralih ke Tampilan Standar (Iuran & Administrasi)');
-              }}
-              className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                !isBPBDMode 
-                  ? 'bg-white text-indigo-700 shadow-xs font-extrabold' 
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Home size={13} />
-              <span>Standar</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsBPBDMode(true);
-                toast.success('Mode Sensus Cepat BPBD & Huntap diaktifkan!');
-              }}
-              className={`px-3.5 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
-                isBPBDMode 
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-extrabold' 
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <ClipboardCheck size={13} />
-              <span>Sensus BPBD</span>
-            </button>
-          </div>
+        <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold self-end sm:self-auto shrink-0">
+          <button
+            type="button"
+            onClick={() => {
+              setIsBPBDMode(false);
+              toast.info('Beralih ke Tampilan Standar');
+            }}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              !isBPBDMode 
+                ? 'bg-white text-indigo-700 shadow-xs font-extrabold' 
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Home size={13} />
+            <span>Standar</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setIsBPBDMode(true);
+              toast.success('Mode Sensus Cepat BPBD diaktifkan!');
+            }}
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              isBPBDMode 
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs font-extrabold' 
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <ClipboardCheck size={13} />
+            <span>Sensus BPBD</span>
+          </button>
         </div>
       </div>
 
-      {/* 2. BPBD Live Verification Progress Strip (When in BPBD Mode) */}
+      {/* 2. BPBD Live Verification Progress Strip (Compact 1-Row) */}
       {isBPBDMode && (
-        <div className="p-4 bg-gradient-to-br from-amber-50/90 via-orange-50/50 to-amber-50/90 border border-amber-200/90 rounded-2xl shadow-xs space-y-3 animate-fade-in">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2 text-xs font-extrabold text-amber-950">
-              <Sparkles size={14} className="text-amber-600 shrink-0" />
-              <span>Progres Sensus BPBD &amp; Fisik Huntap RT 02 (Total {bpbdStats.total} Unit Terfilter)</span>
-            </div>
-            <span className="text-[10px] font-semibold text-amber-800">
-              💡 Ubah status langsung pada tombol di tabel, data otomatis tersimpan ke server.
-            </span>
+        <div className="px-3.5 py-2.5 bg-amber-50/80 border border-amber-200/80 rounded-2xl flex flex-wrap items-center justify-between gap-2 text-[11px]">
+          <div className="flex items-center gap-1.5 font-extrabold text-amber-950">
+            <Sparkles size={13} className="text-amber-600 shrink-0" />
+            <span>Progres Sensus:</span>
           </div>
-
-          {/* Metric Chips */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-            <div className="bg-white/90 border border-emerald-200 p-2.5 rounded-xl shadow-2xs">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase">Sertifikat (Ya)</span>
-              <span className="text-sm font-extrabold text-emerald-700 font-mono tabular-nums">{bpbdStats.certified} Unit</span>
-            </div>
-            <div className="bg-white/90 border border-amber-200 p-2.5 rounded-xl shadow-2xs">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase">Dalam Proses</span>
-              <span className="text-sm font-extrabold text-amber-700 font-mono tabular-nums">{bpbdStats.inProcess} Unit</span>
-            </div>
-            <div className="bg-white/90 border border-slate-200 p-2.5 rounded-xl shadow-2xs">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase">Belum Sertifikat</span>
-              <span className="text-sm font-extrabold text-slate-700 font-mono tabular-nums">{bpbdStats.uncertified} Unit</span>
-            </div>
-            <div className="bg-white/90 border border-emerald-200 p-2.5 rounded-xl shadow-2xs">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase">Kondisi Baik</span>
-              <span className="text-sm font-extrabold text-emerald-700 font-mono tabular-nums">{bpbdStats.goodCond} Unit</span>
-            </div>
-            <div className="bg-white/90 border border-rose-200 p-2.5 rounded-xl shadow-2xs">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase">Terlantar/Tdk Rawat</span>
-              <span className="text-sm font-extrabold text-rose-700 font-mono tabular-nums">{bpbdStats.abandoned + bpbdStats.disrepair} Unit</span>
-            </div>
-            <div className="bg-white/90 border border-violet-200 p-2.5 rounded-xl shadow-2xs">
-              <span className="block text-[10px] font-bold text-slate-400 uppercase">Renovasi Fisik</span>
-              <span className="text-sm font-extrabold text-violet-700 font-mono tabular-nums">{bpbdStats.structuralMod} Unit</span>
-            </div>
+          <div className="flex flex-wrap items-center gap-1.5 font-mono tabular-nums">
+            <span className="px-2 py-0.5 rounded-lg bg-white border border-emerald-200 text-emerald-700 font-bold">Sertifikat: {bpbdStats.certified}</span>
+            <span className="px-2 py-0.5 rounded-lg bg-white border border-amber-200 text-amber-700 font-bold">Proses: {bpbdStats.inProcess}</span>
+            <span className="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-slate-600 font-bold">Belum: {bpbdStats.uncertified}</span>
+            <span className="px-2 py-0.5 rounded-lg bg-white border border-emerald-200 text-emerald-700 font-bold">Baik: {bpbdStats.goodCond}</span>
+            <span className="px-2 py-0.5 rounded-lg bg-white border border-rose-200 text-rose-700 font-bold">Terlantar/Rusak: {bpbdStats.abandoned + bpbdStats.disrepair}</span>
+            <span className="px-2 py-0.5 rounded-lg bg-white border border-indigo-200 text-indigo-700 font-bold">Renovasi: {bpbdStats.structuralMod}</span>
           </div>
         </div>
       )}
@@ -568,7 +539,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                     </tr>
                   ) : (
                     <tr className="border-b border-slate-200/80 bg-slate-50/95 backdrop-blur-md">
-                      <th className="px-3 py-3.5 w-10 text-center">
+                      <th className="px-3 py-3 w-10 text-center">
                         <input 
                           type="checkbox" 
                           className="w-4 h-4 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer"
@@ -576,52 +547,32 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                           checked={selectedIds.size === filteredHouses.length && filteredHouses.length > 0} 
                         />
                       </th>
-                      <th className="px-3 py-3.5 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('headOfFamily')}>
+                      <th className="px-3.5 py-3 w-28 group cursor-pointer hover:bg-slate-100/60 transition-colors" onClick={() => handleSort('number')}>
                         <div className="flex items-center gap-1">
-                          <span>Nama Kepala Keluarga / Pemilik</span>
-                          {renderSortIcon('headOfFamily')}
-                        </div>
-                      </th>
-                      <th className="px-3 py-3.5 w-24 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('number')}>
-                        <div className="flex items-center gap-1">
-                          <span>No. Rumah</span>
+                          <span>Unit &amp; Status</span>
                           {renderSortIcon('number')}
                         </div>
                       </th>
-                      <th className="px-3 py-3.5">Kontak WhatsApp</th>
-                      <th className="px-3 py-3.5 w-16 text-center cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('occupants')}>
-                        <div className="flex items-center justify-center gap-1">
-                          <span>Jiwa</span>
-                          {renderSortIcon('occupants')}
+                      <th className="px-3.5 py-3 group cursor-pointer hover:bg-slate-100/60 transition-colors" onClick={() => handleSort('headOfFamily')}>
+                        <div className="flex items-center gap-1">
+                          <span>Penghuni &amp; Kontak</span>
+                          {renderSortIcon('headOfFamily')}
                         </div>
                       </th>
-                      <th className="px-3 py-3.5 w-28 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('pbbStatus')}>
+                      <th className="px-3.5 py-3 w-36 group cursor-pointer hover:bg-slate-100/60 transition-colors" onClick={() => handleSort('residenceType')}>
                         <div className="flex items-center gap-1">
-                          <span>SPPT PBB</span>
-                          {renderSortIcon('pbbStatus')}
-                        </div>
-                      </th>
-                      <th className="px-3 py-3.5 w-32 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('residenceType')}>
-                        <div className="flex items-center gap-1">
-                          <span>Jenis Hak</span>
+                          <span>Kepenghunian</span>
                           {renderSortIcon('residenceType')}
                         </div>
                       </th>
-                      <th className="px-3 py-3.5 w-24 group cursor-pointer hover:bg-slate-50/50 transition-colors" onClick={() => handleSort('status')}>
+                      <th className="px-3.5 py-3 w-36 text-center font-semibold">Iuran ({selectedMonth})</th>
+                      <th className="px-3.5 py-3 w-36 group cursor-pointer hover:bg-slate-100/60 transition-colors" onClick={() => handleSort('arrears')}>
                         <div className="flex items-center gap-1">
-                          <span>Status</span>
-                          {renderSortIcon('status')}
-                        </div>
-                      </th>
-                      <th className="px-3 py-3.5 w-24 text-center font-semibold">S. Sampah</th>
-                      <th className="px-3 py-3.5 w-24 text-center font-semibold">S. Air</th>
-                      <th className="px-3 py-3.5 w-24 text-center group cursor-pointer hover:bg-slate-50/50 transition-colors font-semibold" onClick={() => handleSort('arrears')}>
-                        <div className="flex items-center justify-center gap-1">
-                          <span>Tunggakan</span>
+                          <span>Tunggakan &amp; PBB</span>
                           {renderSortIcon('arrears')}
                         </div>
                       </th>
-                      <th className="px-3 py-3.5 w-28 text-right font-semibold">Aksi Panel</th>
+                      <th className="px-3.5 py-3 w-32 text-right font-semibold">Aksi</th>
                     </tr>
                   )}
                 </thead>
@@ -877,34 +828,58 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                         className={`transition-colors duration-150 group ${
                           isSelected 
                             ? 'bg-indigo-50/30 hover:bg-indigo-50/45 border-l-4 border-l-indigo-600' 
-                            : 'hover:bg-slate-50/40'
+                            : 'hover:bg-slate-50/50'
                         }`}
                       >
-                        {/* Checkbox */}
-                        <td className="px-5 py-4.5 text-center">
+                        {/* 1. Checkbox */}
+                        <td className="px-3 py-3 text-center">
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 rounded-lg border-slate-350 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer transition-colors"
+                            className="w-4 h-4 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500/20 focus:ring-offset-0 cursor-pointer"
                             checked={isSelected} 
                             onChange={() => handleSelectOne(house.id)} 
                           />
                         </td>
 
-                        {/* Citizen Name & Verification Quick-Action */}
-                        <td className="px-5 py-4.5">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-semibold text-xs shrink-0 border uppercase shadow-3xs transition-transform group-hover:scale-105 ${
+                        {/* 2. Unit & Occupancy Status */}
+                        <td className="px-3.5 py-3">
+                          <div className="flex flex-col items-start gap-1">
+                            <span className="font-mono font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-lg text-xs">
+                              No. {house.number}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold border uppercase tracking-wider ${
+                              house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' : 
+                              house.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' : 
+                              house.status === 'Business' ? 'bg-purple-50 text-purple-700 border-purple-200/60' :
+                              'bg-sky-50 text-sky-700 border-sky-200/60'
+                            }`}>
+                              {house.status === 'Occupied' ? 'Dihuni' : 
+                               house.status === 'Empty' ? 'Kosong' : 
+                               house.status === 'Business' ? 'Usaha' : 'Visit'}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* 3. Penghuni & Kontak */}
+                        <td className="px-3.5 py-3">
+                          <div className="flex items-start gap-2.5">
+                            <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 border uppercase mt-0.5 ${
                               house.status === 'Occupied' 
-                                ? 'bg-gradient-to-br from-indigo-50 to-indigo-100/40 text-indigo-600 border-indigo-100' 
+                                ? 'bg-indigo-50 text-indigo-600 border-indigo-100' 
                                 : 'bg-slate-50 text-slate-400 border-slate-200'
                             }`}>
                               {house.headOfFamily ? house.headOfFamily.charAt(0) : <User size={13} />}
                             </div>
-                            <div>
-                              <div className="flex items-center gap-1.5 max-w-[220px]">
-                                <span className="font-extrabold text-slate-800 text-sm truncate">{house.headOfFamily || 'KOSONG (KOSONGAN)'}</span>
-                                
-                                {/* Dynamic Interactive Official Verification Shield Badge */}
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => openDetail(house)}
+                                  className="font-extrabold text-slate-800 hover:text-indigo-600 text-xs sm:text-sm truncate max-w-[200px] text-left cursor-pointer transition-colors"
+                                  title="Klik untuk buka profil lengkap"
+                                >
+                                  {house.headOfFamily || 'KOSONG'}
+                                </button>
                                 {house.isVerified ? (
                                   <button 
                                     onClick={async (e) => {
@@ -912,8 +887,8 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                       await handleUpdateHouse(house.id, { isVerified: false });
                                       toast.info(`Status verifikasi ${house.headOfFamily || 'Rumah'} dinonaktifkan.`);
                                     }}
-                                    className="text-blue-600 hover:text-rose-600 transition-colors focus:outline-none focus:scale-110 active:scale-95 shrink-0"
-                                    title="Telah Terverifikasi RT 02 (Klik untuk batalkan verifikasi)"
+                                    className="text-blue-600 hover:text-rose-600 transition-colors shrink-0 cursor-pointer"
+                                    title="Terverifikasi RT 02 (Klik untuk batalkan)"
                                   >
                                     <ShieldCheck size={14} className="fill-blue-50 stroke-blue-600 stroke-[2.5]" />
                                   </button>
@@ -924,210 +899,150 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                       await handleUpdateHouse(house.id, { isVerified: true });
                                       toast.success(`Warga ${house.headOfFamily || 'Rumah'} terverifikasi resmi!`);
                                     }}
-                                    className="text-slate-300 hover:text-emerald-600 transition-colors focus:outline-none focus:scale-110 active:scale-95 shrink-0"
-                                    title="Belum Diverifikasi RT (Klik untuk verifikasi resmi instan)"
+                                    className="text-slate-300 hover:text-emerald-600 transition-colors shrink-0 cursor-pointer"
+                                    title="Belum Diverifikasi (Klik untuk verifikasi instan)"
                                   >
                                     <ShieldAlert size={14} className="stroke-[2.5]" />
                                   </button>
                                 )}
                               </div>
-                              {house.ownerName && house.ownerName !== house.headOfFamily && (
-                                <p className="text-[10px] font-bold text-slate-450 truncate mt-0.5 tracking-wide uppercase">
-                                  PEMILIK: <span className="text-slate-500 font-extrabold">{house.ownerName}</span>
-                                </p>
-                              )}
-                              {(house.hasBusiness || house.businessName) && (
-                                <p className="text-[10px] font-bold text-amber-700 truncate mt-0.5 tracking-wide flex items-center gap-1">
-                                  <span>🏪</span>
-                                  <span>{house.businessName || 'Usaha / UMKM'}</span>
-                                </p>
-                              )}
-                              {house.status === 'Occupied' && (
-                                <div className="mt-0.5 flex flex-wrap items-center gap-1">
-                                  <span 
-                                    className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded border ${
-                                      (house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe'))))
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200/70'
-                                        : 'bg-amber-50 text-amber-700 border-amber-200/70'
-                                    }`}
-                                    title={house.addressKtp ? `Alamat KTP: ${house.addressKtp}` : `Status KTP: ${house.ktpStatus || 'Belum Terdata'}`}
-                                  >
-                                    <span>🪪</span>
-                                    <span>{(house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')))) ? (currentTenant ? `KTP RT ${currentTenant.rt}` : 'KTP Lokal') : 'KTP Luar'}</span>
+
+                              <div className="flex flex-wrap items-center gap-2 mt-0.5 text-[10.5px]">
+                                {isValidWhatsAppNumber(house.phone) ? (
+                                  <span className="text-slate-500 font-mono tabular-nums flex items-center gap-1">
+                                    <Phone size={10} className="text-slate-400" />
+                                    {house.phone}
                                   </span>
-                                </div>
-                              )}
+                                ) : (
+                                  <span className="text-slate-300 italic text-[10px]">Belum ada HP</span>
+                                )}
+                                {house.ownerName && house.ownerName !== house.headOfFamily && (
+                                  <span className="text-[10px] font-semibold text-slate-400 truncate max-w-[140px]">
+                                    • Pemilik: {house.ownerName}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </td>
 
-                        {/* House Number */}
-                        <td className="px-5 py-4.5">
-                          <span className="font-mono font-semibold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-lg text-xs shadow-3xs">
-                            No. {house.number}
-                          </span>
-                        </td>
-
-                        {/* Telephone / WhatsApp contact */}
-                        <td className="px-5 py-4.5">
-                          {isValidWhatsAppNumber(house.phone) ? (
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-slate-700 font-bold tracking-wide">{house.phone}</span>
-                              {onSendWhatsApp && (
-                                <button 
-                                  onClick={() => onSendWhatsApp(house)} 
-                                  className="p-1 px-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 hover:text-emerald-700 rounded-lg border border-emerald-100/40 transition-colors flex items-center gap-0.5 active:scale-90"
-                                  title="Kirim Pesan WhatsApp"
-                                >
-                                  <MessageCircle size={13} className="stroke-[2.5]" />
-                                </button>
-                              )}
+                        {/* 4. Kepenghunian (Jenis Hak + Jiwa) */}
+                        <td className="px-3.5 py-3">
+                          <div className="flex flex-col gap-1.5">
+                            <div className="relative inline-block w-28">
+                              <select
+                                value={house.residenceType || 'Tetap'}
+                                onChange={(e) => {
+                                  const newType = e.target.value as any;
+                                  const updates: any = { residenceType: newType };
+                                  const existingSk = (house.ownerName && house.ownerName.trim() !== '' && house.ownerName !== '-')
+                                    ? house.ownerName.trim()
+                                    : house.headOfFamily;
+                                  if (existingSk && (!house.ownerName || house.ownerName === '-')) {
+                                    updates.ownerName = existingSk;
+                                  }
+                                  if (newType === 'Sewa' && (!house.ownerRelationship || house.ownerRelationship === 'Diri Sendiri')) {
+                                    updates.ownerRelationship = 'Penyewa';
+                                  } else if (newType === 'Rumah Keluarga' && (!house.ownerRelationship || house.ownerRelationship === 'Diri Sendiri' || house.ownerRelationship === 'Penyewa')) {
+                                    updates.ownerRelationship = 'Saudara / Kerabat';
+                                  } else if (newType === 'Tetap' && house.ownerRelationship === 'Penyewa') {
+                                    updates.ownerRelationship = 'Diri Sendiri';
+                                  }
+                                  handleUpdateHouse(house.id, updates);
+                                  toast.info(`Status Kepenghunian No. ${house.number} diubah ke ${newType}`);
+                                }}
+                                className="appearance-none w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-[10px] rounded-lg px-2 py-1 pr-5 border border-slate-200 outline-none cursor-pointer"
+                              >
+                                <option value="Tetap">🏡 Pribadi</option>
+                                <option value="Sewa">🔑 Sewa</option>
+                                <option value="Rumah Keluarga">👨‍👩‍👦 Keluarga</option>
+                              </select>
+                              <ChevronDown size={10} className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 stroke-[2.5]" />
                             </div>
-                          ) : (
-                            <span className="text-slate-300 hover:text-slate-400 transition-colors italic text-[11px] font-normal cursor-help" title="Gunakan tombol edit di kanan untuk mengisi no. HP warga">- Belum Ada HP -</span>
-                          )}
-                        </td>
-
-                        {/* Occupants Account (Jiwa) */}
-                        <td className="px-5 py-4.5 text-center">
-                          <div className="inline-flex items-center justify-center gap-1 text-slate-700 font-semibold bg-slate-50 border border-slate-205 w-11 h-6 rounded-lg shadow-3xs">
-                            <Users size={11} className="text-indigo-500 stroke-[2.5]" />
-                            <span className="text-[10px]">{house.occupants || 0}</span>
+                            <span className="text-[10px] font-semibold text-slate-500 flex items-center gap-1 font-mono tabular-nums">
+                              <Users size={10} className="text-indigo-500" />
+                              {house.occupants || 0} Jiwa
+                            </span>
                           </div>
                         </td>
 
-                        {/* PBB status quick change */}
-                        <td className="px-5 py-4.5">
-                          <button 
-                            onClick={() => {
-                              const newStatus = house.pbbStatus === 'Sudah Diambil' ? 'Belum Diambil' : 'Sudah Diambil';
-                              const year = house.pbbYear || new Date().getFullYear().toString();
-                              handleUpdateHouse(house.id, { pbbStatus: newStatus, pbbYear: year });
-                              toast.success(`Administrasi SPPT PBB No. ${house.number} diubah ke: ${newStatus}`);
-                            }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-semibold border transition-colors active:scale-95 shadow-3xs hover:-translate-y-0.5 ${
-                              house.pbbStatus === 'Sudah Diambil' 
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100/55' 
-                                : 'bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100/55'
-                            }`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${house.pbbStatus === 'Sudah Diambil' ? 'bg-emerald-500 ' : 'bg-amber-500'}`} />
-                            <span>{house.pbbStatus === 'Sudah Diambil' ? 'Diambil' : 'Belum'}</span>
-                          </button>
-                          <div className="flex items-center gap-1 mt-1 flex-wrap">
-                            {house.pbbProofAtRt === 'Ada di RT' && (
-                              <span className="text-[8px] font-extrabold px-1.5 py-0.2 rounded bg-sky-50 text-sky-700 border border-sky-100" title="Bukti PBB sudah ada di tangan RT">Bukti RT</span>
-                            )}
-                            {house.pbbPaymentStatus === 'Lunas' && (
-                              <span className="text-[8px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-100" title="Pembayaran PBB Lunas">Lunas</span>
-                            )}
+                        {/* 5. Iuran Bulan Ini (Sampah & Air) */}
+                        <td className="px-3.5 py-3">
+                          <div className="flex flex-col items-center gap-1">
+                            <div className="flex items-center justify-between w-full max-w-[125px] text-[10px]">
+                              <span className="text-slate-400 font-semibold">Sampah</span>
+                              <PaymentIndicator status={statusSampah} service="Sampah" />
+                            </div>
+                            <div className="flex items-center justify-between w-full max-w-[125px] text-[10px]">
+                              <span className="text-slate-400 font-semibold">Air</span>
+                              <PaymentIndicator status={statusAir} service="Air" />
+                            </div>
                           </div>
                         </td>
 
-                        {/* Ownership Type */}
-                        <td className="px-5 py-4.5">
-                          <div className="relative inline-block w-28">
-                            <select
-                              value={house.residenceType || 'Tetap'}
-                              onChange={(e) => {
-                                const newType = e.target.value as any;
-                                const updates: any = { residenceType: newType };
-                                const existingSk = (house.ownerName && house.ownerName.trim() !== '' && house.ownerName !== '-')
-                                  ? house.ownerName.trim()
-                                  : house.headOfFamily;
-                                if (existingSk && (!house.ownerName || house.ownerName === '-')) {
-                                  updates.ownerName = existingSk;
-                                }
-                                if (newType === 'Sewa' && (!house.ownerRelationship || house.ownerRelationship === 'Diri Sendiri')) {
-                                  updates.ownerRelationship = 'Penyewa';
-                                } else if (newType === 'Rumah Keluarga' && (!house.ownerRelationship || house.ownerRelationship === 'Diri Sendiri' || house.ownerRelationship === 'Penyewa')) {
-                                  updates.ownerRelationship = 'Saudara / Kerabat';
-                                } else if (newType === 'Tetap' && house.ownerRelationship === 'Penyewa') {
-                                  updates.ownerRelationship = 'Diri Sendiri';
-                                }
-                                handleUpdateHouse(house.id, updates);
-                                toast.info(`Status Kepenghunian No. ${house.number} diubah ke ${newType} (Pemilik SK: ${existingSk || '-'})`);
-                              }}
-                              className="appearance-none w-full bg-slate-50 hover:bg-slate-100 text-slate-700 font-extrabold text-[10px] rounded-xl px-2.5 py-1.5 pr-6 border border-slate-200 outline-none cursor-pointer focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition-colors shadow-3xs"
-                            >
-                              <option value="Tetap">🏡 Tetap/Pribadi</option>
-                              <option value="Sewa">🔑 Sewa/Kontrak</option>
-                              <option value="Rumah Keluarga">👨‍👩‍👦 Keluarga</option>
-                            </select>
-                            <ChevronDown size={10} className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 stroke-[2.5]" />
-                          </div>
-                        </td>
-
-                        {/* Occupancy Status */}
-                        <td className="px-5 py-4.5">
-                          <span className={`px-2.5 py-1 rounded-xl text-[10px] font-semibold border uppercase tracking-wider shadow-4xs ${
-                            house.status === 'Occupied' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 
-                            house.status === 'Empty' ? 'bg-slate-50 text-slate-505 border-slate-200' : 
-                            house.status === 'Business' ? 'bg-purple-50 text-purple-700 border-purple-150' :
-                            'bg-sky-50 text-sky-700 border-sky-150'
-                          }`}>
-                            {house.status === 'Occupied' ? 'Dihuni' : 
-                             house.status === 'Empty' ? 'Kosong' : 
-                             house.status === 'Business' ? 'Usaha' : 'Visit'}
-                          </span>
-                        </td>
-
-                        {/* Waste Fee (Sampah) */}
-                        <td className="px-5 py-4.5 text-center">
-                          <div className="flex justify-center">
-                            <PaymentIndicator status={statusSampah} service="Sampah" />
-                          </div>
-                        </td>
-
-                        {/* Water Fee (Air) */}
-                        <td className="px-5 py-4.5 text-center">
-                          <div className="flex justify-center">
-                            <PaymentIndicator status={statusAir} service="Air" />
-                          </div>
-                        </td>
-
-                        {/* Total Arrears (Tunggakan) */}
-                        <td className="px-5 py-4.5 text-center">
-                          <div className="flex justify-center">
+                        {/* 6. Tunggakan & PBB */}
+                        <td className="px-3.5 py-3">
+                          <div className="flex flex-col items-start gap-1">
                             {arrears.length > 0 ? (
-                              <span className="flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 text-rose-650 text-[10px] font-semibold rounded-xl shadow-4xs">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 border border-rose-200/70 text-rose-700 text-[10px] font-bold rounded-lg font-mono tabular-nums">
                                 <Coins size={10} />
-                                <span>{arrears.length} Bulan</span>
+                                {arrears.length} Bln Nunggak
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 border border-emerald-100/50 text-emerald-605 bg-emerald-50/20 text-[9px] font-semibold uppercase tracking-widest rounded-lg">Lunas</span>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 border border-emerald-200/60 text-emerald-700 bg-emerald-50 text-[9.5px] font-bold uppercase tracking-wider rounded-lg">
+                                <CheckCircle2 size={10} /> Lunas
+                              </span>
                             )}
+                            <button 
+                              onClick={() => {
+                                const newStatus = house.pbbStatus === 'Sudah Diambil' ? 'Belum Diambil' : 'Sudah Diambil';
+                                const year = house.pbbYear || new Date().getFullYear().toString();
+                                handleUpdateHouse(house.id, { pbbStatus: newStatus, pbbYear: year });
+                                toast.success(`SPPT PBB No. ${house.number}: ${newStatus}`);
+                              }}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[9.5px] font-semibold border transition-colors cursor-pointer ${
+                                house.pbbStatus === 'Sudah Diambil' 
+                                  ? 'bg-slate-50 text-emerald-700 border-emerald-200/70 hover:bg-emerald-50' 
+                                  : 'bg-amber-50/70 text-amber-700 border-amber-200/70 hover:bg-amber-100/70'
+                              }`}
+                              title="Klik untuk ubah status SPPT PBB"
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${house.pbbStatus === 'Sudah Diambil' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                              PBB: {house.pbbStatus === 'Sudah Diambil' ? 'Diambil' : 'Belum'}
+                            </button>
                           </div>
                         </td>
 
-                        {/* Administrative Actions Panel */}
-                        <td className="px-5 py-4.5 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button 
-                              onClick={() => handlePrintResidentCard(house)} 
-                              className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition-colors rounded-lg shadow-3xs"
-                              title="Cetak Kartu Warga Digital RT 02 (PDF)"
-                            >
-                              <FileText size={14} className="stroke-[2.5] text-emerald-600" />
-                            </button>
+                        {/* 7. Aksi */}
+                        <td className="px-3.5 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {isValidWhatsAppNumber(house.phone) && onSendWhatsApp && (
+                              <button 
+                                onClick={() => onSendWhatsApp(house)} 
+                                className="p-1.5 text-emerald-600 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 transition-colors rounded-lg cursor-pointer"
+                                title="Kirim WhatsApp"
+                              >
+                                <MessageCircle size={13} className="stroke-[2.5]" />
+                              </button>
+                            )}
                             <button 
                               onClick={() => openDetail(house)} 
-                              className="p-1.5 text-slate-400 hover:text-indigo-650 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-150 transition-colors rounded-lg shadow-3xs"
-                              title="Tampilkan Info Profile Detail"
+                              className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 border border-slate-100 hover:border-indigo-200 transition-colors rounded-lg cursor-pointer"
+                              title="Lihat Detail"
                             >
-                              <Eye size={14} className="stroke-[2.5]" />
+                              <Eye size={13} className="stroke-[2.5]" />
                             </button>
                             <button 
                               onClick={() => handleOpenEdit(house)} 
-                              className="p-1.5 text-slate-400 hover:text-amber-655 hover:bg-amber-50 border border-slate-100 hover:border-amber-150 transition-colors rounded-lg shadow-3xs"
-                              title="Edit Biodata Rumah"
+                              className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 border border-slate-100 hover:border-amber-200 transition-colors rounded-lg cursor-pointer"
+                              title="Edit Data"
                             >
                               <Edit2 size={13} className="stroke-[2.5]" />
                             </button>
                             <button 
                               onClick={() => handleDelete(house.id)} 
-                              className="p-1.5 text-slate-400 hover:text-rose-650 hover:bg-rose-50 border border-slate-100 hover:border-rose-150 transition-colors rounded-lg shadow-3xs"
-                              title="Hapus Data Hunian"
+                              className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-100 hover:border-rose-200 transition-colors rounded-lg cursor-pointer"
+                              title="Hapus"
                             >
                               <Trash2 size={13} className="stroke-[2.5]" />
                             </button>
