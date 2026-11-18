@@ -1,10 +1,9 @@
-import { CivicScoreBadge } from '../community/CivicScoreBadge';
 import React from 'react';
 import { House, PaymentStatus, Bill } from '../../types';
 import { 
   Phone, CheckCircle, DollarSign, Edit2, AlertCircle, 
   MessageCircle, MapPin, ShieldCheck, FileText, Users, 
-  Copy, ArrowRight, Building2, HeartHandshake, Shield
+  Copy, ArrowRight, Building2
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
@@ -27,33 +26,32 @@ interface ResidentCardProps {
 }
 
 export const ResidentCard: React.FC<ResidentCardProps> = ({ 
-  house, bills, onOpenDetail, onOpenEdit, onDelete, onOpenBills, onOpenPay, onSendWhatsApp,
-  onUpdatePBB,
-  dynamicStatusAir, dynamicStatusSampah, arrears = []
+  house, onOpenDetail, onOpenEdit, onOpenPay, onSendWhatsApp,
+  onUpdatePBB, dynamicStatusAir, dynamicStatusSampah, arrears = []
 }) => {
   const { currentTenant } = useTenant();
   const rtDisplayName = currentTenant ? `Pengurus RT ${currentTenant.rt} / RW ${currentTenant.rw}` : 'Pengurus RT';
   const statusAir = dynamicStatusAir || house.paymentStatusAir;
   const statusSampah = dynamicStatusSampah || house.paymentStatusSampah;
-
   const isDuesPaid = statusAir === PaymentStatus.PAID && statusSampah === PaymentStatus.PAID;
 
-  // Compute demographic & posyandu metrics
   const occupantsCount = Math.max(house.occupants || 1, 1 + (house.familyMembers?.length || 0));
-  const hasBabyOrToddler = Boolean((house.babyCount && house.babyCount > 0) || (house.toddlerCount && house.toddlerCount > 0) || house.hasBaby || house.hasToddler);
-  const toddlerTotal = (house.babyCount || 0) + (house.toddlerCount || 0);
-  const hasElderly = Boolean((house.elderlyCount && house.elderlyCount > 0) || house.hasElderly);
-  const hasPregnant = Boolean((house.pregnantCount && house.pregnantCount > 0) || house.hasPregnant);
-
   const rawPhone = (house.phone || '').trim();
   const digits = rawPhone.replace(/\D/g, '');
   const hasValidPhone = Boolean(rawPhone && rawPhone !== '-' && rawPhone !== '0' && digits.length >= 8);
+
+  const isKtpLocal = house.ktpStatus === 'Sesuai Domisili' || (
+    !house.ktpStatus && house.addressKtp && (
+      house.addressKtp.toLowerCase().includes('tondo') || 
+      house.addressKtp.toLowerCase().includes('pue lombe')
+    )
+  );
 
   const handleCopyPhone = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (hasValidPhone) {
       navigator.clipboard.writeText(rawPhone);
-      toast.success('Nomor telepon disalin ke clipboard!');
+      toast.success('Nomor telepon disalin!');
     }
   };
 
@@ -77,264 +75,171 @@ export const ResidentCard: React.FC<ResidentCardProps> = ({
   return (
     <motion.div 
       layout
-      whileHover={{ y: -3 }}
-      className="relative bg-white p-5 md:p-6 rounded-[2rem] border border-slate-200/80 shadow-2xs hover:border-indigo-400/50 hover:shadow-xl hover:shadow-2xs transition-colors duration-300 group overflow-hidden flex flex-col justify-between select-none"
+      whileHover={{ y: -2 }}
+      className="relative bg-white p-4 rounded-3xl border border-slate-200/80 shadow-2xs hover:border-indigo-400/50 hover:shadow-md transition-colors duration-200 flex flex-col justify-between select-none"
     >
-      {/* Ambient background glow */}
-      
-
       <div>
         {/* Header: Identity Section */}
-        <div className="flex justify-between items-start mb-3 relative z-10">
-          <div className="flex items-center gap-3.5 min-w-0">
-            {/* Refined Squircle Avatar */}
-            <div className="relative shrink-0">
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-semibold text-base shadow-xs transition-colors ${
-                house.status === 'Occupied' 
-                  ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-500/20 ring-offset-2 ring-offset-white' 
-                  : house.status === 'Visiting'
-                  ? 'bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-2xs'
-                  : 'bg-slate-100 text-slate-400 border border-slate-200'
-              }`}>
-                {house.headOfFamily && house.headOfFamily !== '-' 
-                  ? house.headOfFamily.charAt(0).toUpperCase() 
-                  : <MapPin size={18} className="text-slate-400" />}
-              </div>
-              {house.isVerified && (
-                <div className="absolute -bottom-1 -right-1 bg-white p-0.5 rounded-full shadow-xs">
-                  <div className="bg-emerald-500 text-white p-0.5 rounded-full">
-                    <ShieldCheck size={11} strokeWidth={3} />
-                  </div>
-                </div>
-              )}
+        <div className="flex items-start gap-3 mb-3">
+          <div className="relative shrink-0">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-2xs ${
+              house.status === 'Occupied' 
+                ? 'bg-indigo-600 text-white' 
+                : house.status === 'Visiting'
+                ? 'bg-sky-500 text-white'
+                : 'bg-slate-100 text-slate-400 border border-slate-200'
+            }`}>
+              {house.headOfFamily && house.headOfFamily !== '-' 
+                ? house.headOfFamily.charAt(0).toUpperCase() 
+                : <MapPin size={16} className="text-slate-400" />}
             </div>
+            {house.isVerified && (
+              <div className="absolute -bottom-1 -right-1 bg-white p-0.5 rounded-full shadow-2xs">
+                <div className="bg-emerald-500 text-white p-0.5 rounded-full">
+                  <ShieldCheck size={9} strokeWidth={3} />
+                </div>
+              </div>
+            )}
+          </div>
 
-            {/* Name & Residence details */}
-            <div className="min-w-0 flex-1">
-              <h4 className="font-extrabold text-slate-900 text-sm tracking-tight truncate leading-snug">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <h4 className="font-extrabold text-slate-900 text-sm tracking-tight truncate">
                 {house.headOfFamily && house.headOfFamily !== '-' ? house.headOfFamily : (house.ownerName ? `Hunian: ${house.ownerName}` : 'Rumah Kosong')}
               </h4>
-              <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">
-                {house.ownerName && house.ownerName !== house.headOfFamily ? `Pemilik: ${house.ownerName}` : (currentTenant ? `Keluarga RT ${currentTenant.rt}` : 'Keluarga Warga')}
+              <span className="px-2 py-0.5 bg-slate-900 text-white rounded-lg text-[10px] font-bold font-mono tabular-nums shrink-0">
+                {house.block}-{house.number}
+              </span>
+            </div>
+
+            {house.ownerName && house.ownerName !== house.headOfFamily && (
+              <p className="text-[10.5px] text-slate-400 font-medium truncate mt-0.5">
+                Pemilik: {house.ownerName}
               </p>
-              
-              {/* Civic Score Honor Badge */}
-              <div className="mt-2.5">
-                <CivicScoreBadge house={house} size="sm" showDetails={false} />
-              </div>
+            )}
 
-              {/* Status Pill Badges */}
-              <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                <span className="px-2.5 py-0.5 bg-slate-900 text-white rounded-full text-[9px] font-extrabold uppercase tracking-wider shadow-2xs border border-slate-800">
-                  Blok {house.block}-{house.number}
-                </span>
-                
-                <span className={`text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${
-                  house.status === 'Occupied' ? 'bg-[#e8faf0] text-[#059669] border-emerald-100/80' :
-                  house.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' :
-                  house.status === 'Business' ? 'bg-purple-50 text-purple-700 border-purple-200/80' :
-                  'bg-[#edf7ff] text-[#0284c7] border-sky-100/80'
+            {/* Compact Status Badges (Max 3-4 clean pills) */}
+            <div className="flex flex-wrap items-center gap-1 mt-1.5">
+              <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border ${
+                house.status === 'Occupied' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/70' :
+                house.status === 'Empty' ? 'bg-slate-100 text-slate-500 border-slate-200' :
+                house.status === 'Business' ? 'bg-purple-50 text-purple-700 border-purple-200/70' :
+                'bg-sky-50 text-sky-700 border-sky-200/70'
+              }`}>
+                {house.status === 'Occupied' ? 'Dihuni' : 
+                 house.status === 'Empty' ? 'Kosong' : 
+                 house.status === 'Business' ? 'Usaha' : 'Singgah'}
+              </span>
+
+              {house.residenceType && (
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border ${
+                  house.residenceType === 'Sewa' ? 'bg-amber-50 text-amber-700 border-amber-200/70' : 'bg-indigo-50 text-indigo-700 border-indigo-200/70'
                 }`}>
-                  {house.status === 'Occupied' ? 'Dihuni' : 
-                   house.status === 'Empty' ? 'Kosong' : 
-                   house.status === 'Business' ? 'Usaha' : 'Mengunjungi'}
+                  {house.residenceType === 'Rumah Keluarga' ? 'Keluarga' : house.residenceType}
                 </span>
+              )}
 
-                {house.residenceType && (
-                  <span className={`text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${
-                    house.residenceType === 'Tetap' ? 'bg-[#f0f2fe] text-[#4f46e5] border-indigo-100/80' :
-                    house.residenceType === 'Sewa' ? 'bg-[#fff4eb] text-[#ea580c] border-amber-100/80' :
-                    'bg-[#f0f2fe] text-[#4f46e5] border-indigo-100/80'
-                  }`}>
-                    {house.residenceType === 'Rumah Keluarga' ? 'Keluarga' : house.residenceType}
-                  </span>
-                )}
+              {house.status === 'Occupied' && (
+                <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md text-[9px] font-bold font-mono tabular-nums">
+                  <Users size={9} /> {occupantsCount} Jiwa
+                </span>
+              )}
 
-                {(house.hasBusiness || house.businessName) && (
-                  <span 
-                    className="text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider border bg-[#fff4eb] text-[#ea580c] border-amber-100/80 flex items-center gap-1 shadow-2xs"
-                    title={`Usaha Warga: ${house.businessName || 'Aktif'}`}
-                  >
-                    <Building2 size={10} className="text-[#ea580c]" />
-                    <span className="truncate max-w-[110px]">{house.businessName || 'UMKM'}</span>
-                  </span>
-                )}
+              {house.status === 'Occupied' && (
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-md border ${
+                  isKtpLocal ? 'bg-emerald-50 text-emerald-700 border-emerald-200/70' : 'bg-amber-50 text-amber-700 border-amber-200/70'
+                }`}>
+                  {isKtpLocal ? 'KTP Lokal' : 'KTP Luar'}
+                </span>
+              )}
 
-                {house.status === 'Occupied' && (
-                  <span 
-                    className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider border flex items-center gap-1 shadow-2xs ${
-                      (house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe'))))
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
-                        : 'bg-amber-50 text-amber-700 border-amber-200/80'
-                    }`}
-                    title={house.addressKtp ? `Alamat KTP: ${house.addressKtp}` : `Status KTP: ${house.ktpStatus || 'Belum Terdata'}`}
-                  >
-                    <FileText size={10} />
-                    <span>{(house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')))) ? 'KTP RT 02' : 'KTP Luar'}</span>
-                  </span>
-                )}
-              </div>
+              {(house.hasBusiness || house.businessName) && (
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-md border bg-amber-50 text-amber-700 border-amber-200/70 inline-flex items-center gap-1">
+                  <Building2 size={9} />
+                  <span className="truncate max-w-[90px]">{house.businessName || 'UMKM'}</span>
+                </span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Demographic & Posyandu Priority Micro-Bar (Full Information) */}
-        {house.status === 'Occupied' && (
-          <div className="flex flex-wrap items-center gap-1.5 mb-3 pt-2.5 border-t border-slate-100/90 text-[10px] font-bold text-slate-600 relative z-10">
-            <span className="flex items-center gap-1 bg-slate-100/80 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200/70">
-              <Users size={11} className="text-indigo-600 stroke-[2.5]" />
-              <span>{occupantsCount} Jiwa</span>
-            </span>
-
-            {hasBabyOrToddler && (
-              <span className="flex items-center gap-1 bg-purple-50 text-purple-700 px-2 py-0.5 rounded-lg border border-purple-200/70 font-extrabold">
-                <Users size={11} className="text-purple-600" />
-                <span>{toddlerTotal > 0 ? `${toddlerTotal} Balita` : 'Balita'}</span>
-              </span>
-            )}
-
-            {hasElderly && (
-              <span className="flex items-center gap-1 bg-teal-50 text-teal-700 px-2 py-0.5 rounded-lg border border-teal-200/70 font-extrabold">
-                <HeartHandshake size={11} className="text-teal-600" />
-                <span>{house.elderlyCount ? `${house.elderlyCount} Lansia` : 'Lansia'}</span>
-              </span>
-            )}
-
-            {hasPregnant && (
-              <span className="flex items-center gap-1 bg-pink-50 text-pink-700 px-2 py-0.5 rounded-lg border border-pink-200/70 font-extrabold">
-                <Shield size={11} className="text-pink-600" />
-                <span>Bumil</span>
-              </span>
-            )}
-
-            {house.twoWheelCount && house.twoWheelCount > 0 ? (
-              <span className="hidden sm:inline-flex items-center gap-1 bg-slate-50 text-slate-600 px-2 py-0.5 rounded-lg border border-slate-200/60 text-[9px]">🛵 {house.twoWheelCount}
-              </span>
-            ) : null}
-          </div>
-        )}
-
-        {/* Info Stats Section: Dual Financial Widget */}
-        <div className="grid grid-cols-2 gap-2.5 mb-3 relative z-10">
-          <div className={`p-3 rounded-2xl border transition-colors ${
-            isDuesPaid 
-              ? 'bg-[#e8faf0] border-emerald-100/80 text-[#059669]' 
-              : 'bg-[#fff1f2] border-rose-100/80 text-[#e11d48]'
+        {/* Compact Financial & PBB Summary Strip */}
+        <div className="grid grid-cols-3 gap-1.5 mb-2.5 p-2 rounded-2xl bg-slate-50/90 border border-slate-200/70 text-[10px]">
+          <div className={`px-2 py-1.5 rounded-xl border ${
+            isDuesPaid ? 'bg-emerald-50/80 border-emerald-200/60 text-emerald-700' : 'bg-rose-50/80 border-rose-200/60 text-rose-700'
           }`}>
-            <p className="text-[9px] font-extrabold uppercase tracking-widest opacity-80 mb-1">Status Iuran</p>
-            <div className="flex items-center gap-1.5">
-              <span className={`w-2 h-2 rounded-full ${isDuesPaid ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] ' : 'bg-rose-500'}`} />
-              <p className="text-xs font-extrabold">
-                {isDuesPaid ? 'Lunas' : 'Menunggak'}
-              </p>
-            </div>
+            <p className="text-[8.5px] font-bold uppercase opacity-75">Iuran</p>
+            <p className="font-extrabold truncate">{isDuesPaid ? 'Lunas' : 'Belum'}</p>
           </div>
-          <div className="p-3 bg-slate-50/80 border border-slate-200/70 rounded-2xl">
-            <p className="text-[9px] font-extrabold uppercase tracking-widest text-slate-400 mb-1">Tunggakan</p>
-            <p className={`text-xs font-extrabold font-mono ${arrears.length > 0 ? 'text-[#e11d48]' : 'text-[#059669] flex items-center gap-1'}`}>
-              {arrears.length > 0 ? `${arrears.length} Bulan` : <><span>Nihil</span> <CheckCircle size={11} /></>}
+
+          <div className="px-2 py-1.5 rounded-xl bg-white border border-slate-200/70">
+            <p className="text-[8.5px] font-bold uppercase text-slate-400">Tunggakan</p>
+            <p className={`font-extrabold font-mono tabular-nums truncate ${arrears.length > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
+              {arrears.length > 0 ? `${arrears.length} Bln` : 'Nihil ✓'}
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onUpdatePBB?.(house); }}
+            className={`px-2 py-1.5 rounded-xl border text-left transition-colors cursor-pointer ${
+              house.pbbStatus === 'Sudah Diambil'
+                ? 'bg-emerald-50/70 border-emerald-200/70 text-emerald-700 hover:bg-emerald-100/70'
+                : 'bg-amber-50/70 border-amber-200/70 text-amber-800 hover:bg-amber-100/70'
+            }`}
+            title="Klik untuk ubah status PBB"
+          >
+            <p className="text-[8.5px] font-bold uppercase opacity-75 flex items-center gap-0.5">
+              <FileText size={8} /> PBB
+            </p>
+            <p className="font-extrabold truncate flex items-center gap-0.5">
+              {house.pbbStatus === 'Sudah Diambil' ? 'Diambil' : 'Belum'}
+              {house.pbbStatus === 'Sudah Diambil' ? <CheckCircle size={9} /> : <AlertCircle size={9} />}
+            </p>
+          </button>
         </div>
 
-        {/* PBB Status Tracking */}
-        {house.status === 'Occupied' && (
-          <div className="mb-3 relative z-10">
-            <button 
-              onClick={(e) => { e.stopPropagation(); onUpdatePBB?.(house); }}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl border transition-colors duration-200 ${
-                house.pbbStatus === 'Sudah Diambil' 
-                  ? 'bg-emerald-50/70 text-emerald-700 border-emerald-200/70 hover:bg-emerald-100/80' 
-                  : 'bg-amber-50/70 text-amber-800 border-amber-200/70 hover:bg-amber-100/80'
-              }`}
-              title="Klik untuk memperbarui status tanda terima PBB"
-            >
-              <div className="flex items-center gap-2">
-                <FileText size={14} className={house.pbbStatus === 'Sudah Diambil' ? 'text-emerald-600' : 'text-amber-600'} />
-                <div className="text-left">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <p className="text-[8px] font-bold uppercase tracking-wider text-slate-400">PBB {house.pbbYear || new Date().getFullYear()}</p>
-                    {house.pbbPaymentStatus === 'Lunas' && (
-                      <span className="text-[8px] font-semibold text-emerald-700 bg-emerald-100/80 px-1 rounded">LUNAS</span>
-                    )}
-                    {house.pbbProofAtRt === 'Ada di RT' && (
-                      <span className="text-[8px] font-semibold text-sky-700 bg-sky-100/80 px-1 rounded">BUKTI DI RT</span>
-                    )}
-                  </div>
-                  <p className="text-[10px] font-extrabold uppercase leading-none mt-0.5">{house.pbbStatus || 'Belum Diambil'}</p>
-                </div>
-              </div>
-              <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-md border flex items-center gap-1 ${
-                house.pbbStatus === 'Sudah Diambil' 
-                  ? 'bg-white/80 text-emerald-800 border-emerald-200' 
-                  : 'bg-white/80 text-amber-800 border-amber-200'
-              }`}>
-                {house.pbbStatus === 'Sudah Diambil' ? <CheckCircle size={10} /> : <AlertCircle size={10} />}
-                <span>Ubah</span>
-              </span>
-            </button>
+        {/* Slim Contact Row */}
+        <div className="flex items-center justify-between px-2.5 py-1.5 mb-3 bg-slate-50/70 border border-slate-200/60 rounded-xl gap-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Phone size={12} className="text-slate-400 shrink-0" />
+            <span className={`text-[11px] truncate font-mono tabular-nums ${hasValidPhone ? 'font-bold text-slate-700' : 'text-slate-400 italic font-sans'}`}>
+              {hasValidPhone ? rawPhone : 'Belum ada HP'}
+            </span>
           </div>
-        )}
-
-        {/* Contact Quick Link Bar */}
-        <div className="mb-4 relative z-10">
-          <div className="flex items-center justify-between p-2.5 bg-slate-50/90 border border-slate-200/70 rounded-2xl transition-colors hover:bg-slate-100/70 gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <Phone size={13} className="text-slate-400 shrink-0" />
-              {hasValidPhone ? (
-                <span className="text-[11px] font-bold text-slate-800 tracking-tight truncate font-mono">
-                  {rawPhone}
-                </span>
-              ) : (
-                <span className="text-[11px] font-medium text-slate-400 italic truncate">
-                  Belum ada kontak HP
-                </span>
-              )}
+          {hasValidPhone && (
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={handleCopyPhone}
+                className="p-1 rounded-lg bg-white hover:bg-slate-200/70 text-slate-500 border border-slate-200/80 transition-colors cursor-pointer"
+                title="Salin Nomor HP"
+              >
+                <Copy size={11} />
+              </button>
+              <button 
+                onClick={handleWhatsAppClick} 
+                className="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200/80 transition-colors flex items-center gap-1 text-[10px] font-bold cursor-pointer"
+                title="Hubungi via WhatsApp"
+              >
+                <MessageCircle size={11} className="stroke-[2.5]" />
+                <span>WA</span>
+              </button>
             </div>
-            <div className="flex items-center gap-1.5 shrink-0">
-              {hasValidPhone ? (
-                <>
-                  <button
-                    onClick={handleCopyPhone}
-                    className="p-1.5 rounded-xl bg-white hover:bg-slate-200/70 text-slate-500 border border-slate-200/80 transition-colors shadow-2xs cursor-pointer"
-                    title="Salin Nomor HP"
-                    aria-label="Salin Nomor HP"
-                  >
-                    <Copy size={12} />
-                  </button>
-                  <button 
-                    onClick={handleWhatsAppClick} 
-                    className="px-2.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white border border-emerald-200/80 transition-colors flex items-center gap-1.5 text-xs font-bold shadow-2xs cursor-pointer"
-                    title="Hubungi via WhatsApp"
-                    aria-label="Hubungi via WhatsApp"
-                  >
-                    <MessageCircle size={13} className="stroke-[2.5]" />
-                    <span>WhatsApp</span>
-                  </button>
-                </>
-              ) : (
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded-lg border border-slate-200/60 select-none">
-                  Tanpa Kontak
-                </span>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Modern Executive Action Buttons */}
-      <div className="flex items-center gap-2 pt-3.5 border-t border-slate-100/90 relative z-10 mt-auto">
+      {/* Action Buttons */}
+      <div className="flex items-center gap-1.5 pt-2.5 border-t border-slate-100 mt-auto">
         <button 
           onClick={() => onOpenDetail(house)} 
-          className="flex-1 py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs uppercase tracking-wider transition-colors active:scale-[0.98] shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+          className="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition-colors active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          <span>Detail Warga</span>
-          <ArrowRight size={13} className="stroke-[2.5]" />
+          <span>Detail</span>
+          <ArrowRight size={12} className="stroke-[2.5]" />
         </button>
-        <div className="flex gap-1.5">
-          <IconButton icon={<DollarSign size={16} />} onClick={() => onOpenPay(house)} color="emerald" title="Bayar Iuran Kas" />
-          <IconButton icon={<Edit2 size={15} />} onClick={() => onOpenEdit(house)} color="slate" title="Edit Data Warga" />
-        </div>
+        <IconButton icon={<DollarSign size={14} />} onClick={() => onOpenPay(house)} color="emerald" title="Bayar Iuran Kas" />
+        <IconButton icon={<Edit2 size={14} />} onClick={() => onOpenEdit(house)} color="slate" title="Edit Data Warga" />
       </div>
     </motion.div>
   );
@@ -351,10 +256,10 @@ const IconButton = ({ icon, onClick, color = 'slate', title }: { icon: any, onCl
   return (
     <button 
       onClick={(e) => { e.stopPropagation(); onClick(); }}
-      className={`min-w-[42px] min-h-[42px] flex items-center justify-center rounded-2xl border transition-colors duration-200 shadow-2xs active:scale-95 cursor-pointer ${themes[color]}`}
+      className={`w-9 h-9 flex items-center justify-center rounded-xl border transition-colors duration-200 active:scale-95 cursor-pointer ${themes[color]}`}
       title={title}
     >
-      {React.cloneElement(icon as React.ReactElement, { size: 16, className: 'stroke-[2.4px]' })}
+      {React.cloneElement(icon as React.ReactElement, { size: 15, className: 'stroke-[2.3px]' })}
     </button>
   );
 };

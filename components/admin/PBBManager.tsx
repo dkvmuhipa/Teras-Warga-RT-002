@@ -387,9 +387,9 @@ export const PBBManager: React.FC<PBBManagerProps> = ({ houses = [], pdfConfig }
   const isFilterActive = searchQuery || filterBlock !== 'ALL' || filterProofAtRt !== 'ALL' || filterPayment !== 'ALL' || filterSpptAtRt !== 'ALL' || filterTaken !== 'ALL';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Banner & Context */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs relative overflow-hidden">
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/80 shadow-xs relative overflow-hidden">
         
         
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 relative z-10">

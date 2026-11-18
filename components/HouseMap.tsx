@@ -1057,6 +1057,18 @@ const HouseCard: React.FC<HouseCardProps> = ({
     const isStbmLayerActive = activeLayers.includes('STBM');
 
     const getHouseColor = () => {
+        if (activeLayers.includes('BPBD_Cert')) {
+          if (house.certificateStatus === 'Ya') return "bg-emerald-100 border-emerald-500 text-emerald-900";
+          if (house.certificateStatus === 'Dalam Proses') return "bg-amber-100 border-amber-500 text-amber-900";
+          return "bg-rose-100 border-rose-500 text-rose-900";
+        }
+        if (activeLayers.includes('BPBD_Cond')) {
+          const cond = house.buildingCondition || (house.status === 'Empty' ? 'Tidak Terawat' : 'Baik');
+          if (cond === 'Baik') return "bg-emerald-100 border-emerald-500 text-emerald-900";
+          if (cond === 'Terlantar') return "bg-amber-100 border-amber-500 text-amber-900";
+          return "bg-rose-100 border-rose-500 text-rose-900";
+        }
+
         if (showHeatmap) {
           const occupants = isHouseTrulyOccupied(house) ? (house.occupants || 1) : (house.occupants || 0);
           if (occupants > 5) return "bg-rose-500 border-rose-700 text-white";
@@ -1725,6 +1737,57 @@ export const HouseMap: React.FC<HouseMapProps> = ({ houses, isAdmin, reports = [
             </div>
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Orientasi Utara</span>
           </div>
+
+          {/* BPBD Huntap Color Mode (Admin Only) */}
+          {isAdmin && (
+            <div className="bg-amber-50/70 p-3.5 rounded-2xl border border-amber-200/80 space-y-2.5">
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-800 flex items-center gap-1.5">
+                <span>📋 Mode Warna Sensus BPBD</span>
+              </h4>
+              <div className="grid grid-cols-3 gap-1 bg-white p-1 rounded-xl border border-amber-200/70 text-[10px] font-bold">
+                <button
+                  type="button"
+                  onClick={() => setActiveLayers(prev => prev.filter(l => l !== 'BPBD_Cert' && l !== 'BPBD_Cond'))}
+                  className={`py-1.5 px-2 rounded-lg transition-colors cursor-pointer ${
+                    !activeLayers.includes('BPBD_Cert') && !activeLayers.includes('BPBD_Cond')
+                      ? 'bg-indigo-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  Hunian
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveLayers(prev => [...prev.filter(l => l !== 'BPBD_Cond' && l !== 'BPBD_Cert'), 'BPBD_Cert'])}
+                  className={`py-1.5 px-2 rounded-lg transition-colors cursor-pointer ${
+                    activeLayers.includes('BPBD_Cert')
+                      ? 'bg-amber-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  Sertifikat
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveLayers(prev => [...prev.filter(l => l !== 'BPBD_Cert' && l !== 'BPBD_Cond'), 'BPBD_Cond'])}
+                  className={`py-1.5 px-2 rounded-lg transition-colors cursor-pointer ${
+                    activeLayers.includes('BPBD_Cond')
+                      ? 'bg-amber-600 text-white shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  Kondisi
+                </button>
+              </div>
+              {(activeLayers.includes('BPBD_Cert') || activeLayers.includes('BPBD_Cond')) && (
+                <div className="flex flex-wrap gap-2 text-[9.5px] font-bold pt-1">
+                  <span className="flex items-center gap-1 text-emerald-800"><span className="w-2.5 h-2.5 rounded bg-emerald-400 border border-emerald-600 inline-block" /> {activeLayers.includes('BPBD_Cert') ? 'Ya' : 'Baik'}</span>
+                  <span className="flex items-center gap-1 text-amber-800"><span className="w-2.5 h-2.5 rounded bg-amber-400 border border-amber-600 inline-block" /> {activeLayers.includes('BPBD_Cert') ? 'Proses' : 'Terlantar'}</span>
+                  <span className="flex items-center gap-1 text-rose-800"><span className="w-2.5 h-2.5 rounded bg-rose-400 border border-rose-600 inline-block" /> {activeLayers.includes('BPBD_Cert') ? 'Belum' : 'Tdk Terawat'}</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Filter Layer Section (Admin Only) */}
           {isAdmin && (

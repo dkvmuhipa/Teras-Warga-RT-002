@@ -17,6 +17,7 @@ import { ResidentDetailDrawer } from './resident/ResidentDetailDrawer';
 import { AddEditResidentModal, PaymentModal, EditPaymentModal } from './resident/ResidentModals';
 import { ResidentStats } from './resident/ResidentStats';
 import { ResidentControls } from './resident/ResidentControls';
+import { ExcelImportModal } from './resident/ExcelImportModal';
 import { useFinancial } from '../../context/FinancialContext';
 import { PopulationReportManager } from './PopulationReportManager';
 import { UpdateRequestManager } from './UpdateRequestManager';
@@ -105,6 +106,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
   const { currentTenant, isSupervising } = useTenant();
   const prompt = usePrompt();
   const [viewMode, setViewMode] = useState<'grid' | 'table' | 'map' | 'iuran' | 'registrations' | 'analytics' | 'mutations' | 'requests' | 'health' | 'guests' | 'officials'>('grid');
+  const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
   
   useEffect(() => {
     if (initialViewMode) {
@@ -1980,6 +1982,21 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
                         <p className="text-[8.5px] text-slate-400 font-normal lowercase">checklist centang & merge header</p>
                       </div>
                     </button>
+                    <button 
+                      onClick={() => { 
+                        setIsActionMenuOpen(false);
+                        setIsExcelImportOpen(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-slate-800 hover:bg-white hover:text-emerald-700 hover:shadow-xs rounded-xl transition-all"
+                    >
+                      <div className="p-1.5 bg-emerald-100 text-emerald-700 rounded-lg shrink-0">
+                        <Upload size={13} />
+                      </div>
+                      <div className="flex-1 truncate">
+                        <p className="truncate">Import / Update Excel</p>
+                        <p className="text-[8.5px] text-slate-400 font-normal lowercase">rekonsiliasi &amp; preview diff</p>
+                      </div>
+                    </button>
                   </div>
 
                   {/* Bagian 2: Impor & Ekspor Data */}
@@ -3191,6 +3208,13 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
           </div>
         )}
       </AnimatePresence>
+
+      <ExcelImportModal
+        isOpen={isExcelImportOpen}
+        onClose={() => setIsExcelImportOpen(false)}
+        houses={houses}
+        onUpdateHouse={updateHouseData}
+      />
     </motion.div>
   );
 };

@@ -55,14 +55,13 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { currentTenant } = useTenant();
 
-  // Persistent expanded groups state (Default all groups expanded)
-  const defaultExpandedGroups = ["Pusat Kendali", "Kependudukan", "Layanan & Pelaporan", "Operasional & Keuangan", "Sistem"];
+  // Persistent expanded groups state (Default to daily core groups for cleaner navigation)
+  const defaultExpandedGroups = ["Pusat Kendali", "Kependudukan"];
   const [expandedGroups, setExpandedGroups] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('rt02_admin_expanded_groups_v2');
+      const saved = localStorage.getItem('rt02_admin_expanded_groups_v3');
       if (saved) return JSON.parse(saved);
-      // Clean legacy key if present
-      localStorage.removeItem('rt02_admin_expanded_groups');
+      localStorage.removeItem('rt02_admin_expanded_groups_v2');
       return defaultExpandedGroups;
     } catch {
       return defaultExpandedGroups;
@@ -74,7 +73,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
     setExpandedGroups(prev => {
       const next = prev.includes(title) ? prev.filter(t => t !== title) : [...prev, title];
       try {
-        localStorage.setItem('rt02_admin_expanded_groups_v2', JSON.stringify(next));
+        localStorage.setItem('rt02_admin_expanded_groups_v3', JSON.stringify(next));
       } catch (e) {}
       return next;
     });
@@ -160,6 +159,14 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
       ] 
     }
   ];
+
+  // Auto-expand the group containing the active tab
+  useEffect(() => {
+    const ownerGroup = navGroups.find(g => g.items.some(i => i.id === activeTab));
+    if (ownerGroup && !expandedGroups.includes(ownerGroup.title)) {
+      setExpandedGroups(prev => [...prev, ownerGroup.title]);
+    }
+  }, [activeTab]);
 
   // Filter navGroups based on tenant modules, role, and search term
   const filteredNavGroups = navGroups.map(group => {
@@ -361,7 +368,7 @@ export const AdminSidebar: React.FC<SidebarProps> = ({
                 )}
                 
                 <AnimatePresence initial={false}>
-                  {(isCollapsed || expandedGroups.includes(group.title)) && (
+                  {(isCollapsed || searchTerm.trim().length > 0 || expandedGroups.includes(group.title)) && (
                     <motion.div 
                       initial={isCollapsed ? false : { height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
