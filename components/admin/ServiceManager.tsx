@@ -792,15 +792,15 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-8"
+      className="space-y-4"
     >
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
             {initialTab === 'reports' ? 'Aspirasi & Pengaduan Warga' : 'Persuratan RT'}
           </h2>
-          <p className="text-sm sm:text-base text-slate-500 font-medium mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
             {initialTab === 'reports' 
               ? 'Pusat pengawasan, penanganan keluhan, dan aspirasi warga RT 02.'
               : 'Pusat pengelolaan surat pengantar warga, surat himbauan resmi, dan dokumen keluar.'}
@@ -922,55 +922,51 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         </div>
       </div>
 
-      {/* Summary Analytics Card Widget */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
-        {/* KPI: Surat Menunggu */}
-        <div className="bg-[#fff4eb] border border-amber-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-colors hover:translate-y-[-2px]">
-          <div className="w-11 h-11 rounded-2xl bg-white text-[#ea580c] flex items-center justify-center shadow-2xs shrink-0">
-            <Clock size={19} className="stroke-[2.5]" />
+      {/* Compact Summary Analytics Card Widget */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="bg-[#fff4eb] border border-amber-100/80 p-3 sm:p-3.5 rounded-2xl shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white text-[#ea580c] flex items-center justify-center shadow-2xs shrink-0">
+            <Clock size={16} className="stroke-[2.5]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-extrabold text-[#ea580c] tracking-widest uppercase truncate">Surat Pending</p>
-            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none mt-1">
+            <p className="text-[10px] font-extrabold text-[#ea580c] tracking-wider uppercase truncate">Surat Pending</p>
+            <h4 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-none mt-0.5 font-mono tabular-nums">
               {letters.filter(l => l.status === 'Menunggu' || l.status === 'Pending').length}
             </h4>
           </div>
         </div>
 
-        {/* KPI: Surat Disetujui */}
-        <div className="bg-[#e8faf0] border border-emerald-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-colors hover:translate-y-[-2px]">
-          <div className="w-11 h-11 rounded-2xl bg-white text-[#059669] flex items-center justify-center shadow-2xs shrink-0">
-            <CheckCircle2 size={19} className="stroke-[2.5]" />
+        <div className="bg-[#e8faf0] border border-emerald-100/80 p-3 sm:p-3.5 rounded-2xl shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white text-[#059669] flex items-center justify-center shadow-2xs shrink-0">
+            <CheckCircle2 size={16} className="stroke-[2.5]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-extrabold text-[#059669] tracking-widest uppercase truncate">Surat Disetujui</p>
-            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none mt-1">
+            <p className="text-[10px] font-extrabold text-[#059669] tracking-wider uppercase truncate">Surat Disetujui</p>
+            <h4 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-none mt-0.5 font-mono tabular-nums">
               {letters.filter(l => l.status === 'Disetujui' || l.status === 'Approved').length}
             </h4>
           </div>
         </div>
 
-        {/* KPI: Aduan Baru */}
-        <div className="bg-[#fff1f2] border border-rose-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-colors hover:translate-y-[-2px]">
-          <div className="w-11 h-11 rounded-2xl bg-white text-[#e11d48] flex items-center justify-center shadow-2xs shrink-0">
-            <AlertTriangle size={19} className="stroke-[2.5]" />
+        <div className="bg-[#fff1f2] border border-rose-100/80 p-3 sm:p-3.5 rounded-2xl shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white text-[#e11d48] flex items-center justify-center shadow-2xs shrink-0">
+            <AlertTriangle size={16} className="stroke-[2.5]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-extrabold text-[#e11d48] tracking-widest uppercase truncate">Aduan Baru</p>
-            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none mt-1">
+            <p className="text-[10px] font-extrabold text-[#e11d48] tracking-wider uppercase truncate">Aduan Baru</p>
+            <h4 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-none mt-0.5 font-mono tabular-nums">
               {reports.filter(r => r.status === 'Baru').length}
             </h4>
           </div>
         </div>
 
-        {/* KPI: Aduan Diproses */}
-        <div className="bg-[#edf7ff] border border-sky-100/80 p-4 sm:p-5 rounded-3xl shadow-sm flex items-center gap-3.5 sm:gap-4 transition-colors hover:translate-y-[-2px]">
-          <div className="w-11 h-11 rounded-2xl bg-white text-[#0284c7] flex items-center justify-center shadow-2xs shrink-0">
-            <RefreshCw size={19} className="stroke-[2.5]" />
+        <div className="bg-[#edf7ff] border border-sky-100/80 p-3 sm:p-3.5 rounded-2xl shadow-2xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-white text-[#0284c7] flex items-center justify-center shadow-2xs shrink-0">
+            <RefreshCw size={16} className="stroke-[2.5]" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-extrabold text-[#0284c7] tracking-widest uppercase truncate">Laporan Diproses</p>
-            <h4 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-none mt-1">
+            <p className="text-[10px] font-extrabold text-[#0284c7] tracking-wider uppercase truncate">Laporan Diproses</p>
+            <h4 className="text-lg sm:text-xl font-extrabold text-slate-900 leading-none mt-0.5 font-mono tabular-nums">
               {reports.filter(r => r.status === 'Diproses').length}
             </h4>
           </div>

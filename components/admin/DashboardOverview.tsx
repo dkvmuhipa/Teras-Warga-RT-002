@@ -229,12 +229,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-8"
+      className="space-y-5"
     >
       {/* Executive Modern Command Center Hero Banner matching reference design */}
       <motion.div 
         variants={itemVariants} 
-        className="relative overflow-hidden bg-white rounded-3xl md:rounded-[2.5rem] p-5 sm:p-7 md:p-8 shadow-sm border border-slate-100"
+        className="relative overflow-hidden bg-white rounded-3xl p-4 sm:p-6 shadow-xs border border-slate-100"
       >
         {/* Quiet Background Texture */}
         <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
@@ -798,121 +798,6 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <span className="text-xs text-slate-400 font-bold shrink-0 ml-2">
                 PM2.5: {weather?.pm2_5 ? `${weather.pm2_5} µg/m³` : 'Normal'}
               </span>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3 md:gap-4">
-        {/* Warga Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('residents')}>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 bg-[#f0f2fe] text-[#4f46e5] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
-                <Users size={20} className="stroke-[2.2]" />
-              </div>
-              <span className="hidden xs:block text-xs font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Demografi</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-baseline gap-1 md:gap-2">
-                <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">{totalResidents}</h3>
-                <span className="text-xs md:text-xs font-extrabold text-slate-400 uppercase">Jiwa</span>
-              </div>
-              <div className="flex items-baseline gap-1 md:gap-2">
-                <h3 className="text-sm md:text-base font-extrabold text-[#4f46e5] font-mono tabular-nums">{occupiedHouses}</h3>
-                <span className="text-xs md:text-xs font-bold text-slate-400">KK Terdaftar</span>
-              </div>
-            </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
-              <span className="text-emerald-600 font-extrabold flex items-center gap-1"><CheckCircle2 size={12} /> Terverifikasi</span>
-              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-indigo-600 transition-colors" />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Keuangan Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 bg-[#e8faf0] text-[#059669] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
-                <DollarSign size={20} className="stroke-[2.2]" />
-              </div>
-              <span className="hidden xs:block text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Saldo Kas</span>
-            </div>
-            <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">Rp{(balance / 1000000).toFixed(1)}jt</h3>
-            </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span className="text-emerald-600 font-extrabold flex items-center gap-0.5"><TrendingUp size={12} /> +{(income / 1000000).toFixed(1)}jt</span>
-              <span className="text-rose-500 font-bold flex items-center gap-0.5"><TrendingDown size={12} /> -{(expense / 1000000).toFixed(1)}jt</span>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Laporan Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('services')}>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 bg-[#fff1f2] text-[#e11d48] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
-                <AlertTriangle size={20} className="stroke-[2.2]" />
-              </div>
-              <span className="hidden xs:block text-xs font-extrabold text-rose-700 bg-rose-50 border border-rose-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Aduan</span>
-            </div>
-            <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">{newReports}</h3>
-              <span className="text-xs md:text-xs font-extrabold text-rose-600 uppercase">Perlu Tindakan</span>
-            </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-500">
-              <span className="flex items-center gap-1"><Activity size={12} className="" /> Tindak Lanjut</span>
-              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-rose-600 transition-colors" />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Tamu Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('guests')}>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 bg-[#fff4eb] text-[#ea580c] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
-                <ShieldAlert size={20} className="stroke-[2.2]" />
-              </div>
-              <span className="hidden xs:block text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Log Tamu</span>
-            </div>
-            <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">{activeGuests}</h3>
-              <span className="text-xs md:text-xs font-extrabold text-amber-600 uppercase">Tamu Aktif</span>
-            </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
-              <span className="flex items-center gap-1"><Clock size={12} /> Wajib 1x24 Jam</span>
-              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-amber-600 transition-colors" />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Retribusi Sampah Card */}
-        <motion.div variants={itemVariants} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 shadow-xs hover:shadow-md transition-colors group relative overflow-hidden cursor-pointer" onClick={() => onTabChange('finance')}>
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 bg-[#edf7ff] text-[#0284c7] rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
-                <Trash2 size={20} className="stroke-[2.2]" />
-              </div>
-              <span className="hidden xs:block text-xs font-extrabold text-sky-700 bg-sky-50 border border-sky-100/70 px-2.5 py-1 rounded-full uppercase tracking-wider">Retribusi</span>
-            </div>
-            <div className="flex items-baseline gap-1 md:gap-2">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight font-mono tabular-nums">{wastePaymentPercentage}%</h3>
-              <span className="text-xs md:text-xs font-extrabold text-sky-600 uppercase">Tercapai</span>
-            </div>
-            {/* Visual Progress Bar */}
-            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden mt-2">
-              <div 
-                className="bg-indigo-600 h-full rounded-full transition-colors duration-300" 
-                style={{ width: `${Math.min(wastePaymentPercentage, 100)}%` }} 
-              />
-            </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-sky-600">
-              <span>{paidWasteCount} dari {totalOccupiedHouses} Rumah</span>
-              <ArrowRight size={14} className="text-slate-300 group-hover:translate-x-1 group-hover:text-sky-600 transition-colors" />
             </div>
           </div>
         </motion.div>

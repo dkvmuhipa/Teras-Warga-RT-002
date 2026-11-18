@@ -45,6 +45,7 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
   }, [initialSubTab]);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [showChart, setShowChart] = useState(false);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 
   useEffect(() => {
@@ -374,82 +375,91 @@ export const FinanceManager: React.FC<FinanceManagerProps> = ({
         </div>
       </div>
 
-      {/* Summary Cards with Pastel Glassmorphic System */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-        {/* Total Saldo (Mint/Emerald) */}
+      {/* Compact Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <motion.div 
           variants={itemVariants}
-          className="bg-[#e8faf0] border border-emerald-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-colors hover:translate-y-[-2px] relative overflow-hidden sm:col-span-2 lg:col-span-1"
+          className="bg-[#e8faf0] border border-emerald-100/80 p-3.5 sm:p-4 rounded-2xl shadow-2xs flex items-center gap-3"
         >
-          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#059669] shadow-2xs shrink-0">
-            <Wallet size={22} className="stroke-[2.5]" />
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#059669] shadow-2xs shrink-0">
+            <Wallet size={18} className="stroke-[2.5]" />
           </div>
-          <div className="relative z-10 min-w-0">
-            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#059669] mb-1">Total Saldo Kas</p>
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#065f46] tracking-tight truncate font-mono tabular-nums">
-              Rp {balance.toLocaleString()}
+          <div className="min-w-0">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#059669]">Total Saldo Kas</p>
+            <h3 className="text-lg sm:text-xl font-extrabold text-[#065f46] tracking-tight truncate font-mono tabular-nums">
+              Rp {balance.toLocaleString('id-ID')}
             </h3>
           </div>
         </motion.div>
 
-        {/* Total Pemasukan (Lavender/Indigo) */}
         <motion.div 
           variants={itemVariants}
-          className="bg-[#f0f2fe] border border-indigo-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-colors hover:translate-y-[-2px] relative overflow-hidden"
+          className="bg-[#f0f2fe] border border-indigo-100/80 p-3.5 sm:p-4 rounded-2xl shadow-2xs flex items-center gap-3"
         >
-          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#4f46e5] shadow-2xs shrink-0">
-            <ArrowUpRight size={22} className="stroke-[2.5]" />
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#4f46e5] shadow-2xs shrink-0">
+            <ArrowUpRight size={18} className="stroke-[2.5]" />
           </div>
-          <div className="relative z-10 min-w-0">
-            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#4f46e5] mb-1">Total Pemasukan</p>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate font-mono tabular-nums">
-              Rp {totalIncome.toLocaleString()}
+          <div className="min-w-0">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#4f46e5]">Total Pemasukan</p>
+            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight truncate font-mono tabular-nums">
+              Rp {totalIncome.toLocaleString('id-ID')}
             </h3>
           </div>
         </motion.div>
 
-        {/* Total Pengeluaran (Peach/Amber) */}
         <motion.div 
           variants={itemVariants}
-          className="bg-[#fff4eb] border border-amber-100/80 p-5 sm:p-6 rounded-3xl md:rounded-[2.5rem] shadow-sm flex items-center gap-4 transition-colors hover:translate-y-[-2px] relative overflow-hidden"
+          className="bg-[#fff4eb] border border-amber-100/80 p-3.5 sm:p-4 rounded-2xl shadow-2xs flex items-center gap-3"
         >
-          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs shrink-0">
-            <ArrowDownRight size={22} className="stroke-[2.5]" />
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs shrink-0">
+            <ArrowDownRight size={18} className="stroke-[2.5]" />
           </div>
-          <div className="relative z-10 min-w-0">
-            <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#ea580c] mb-1">Total Pengeluaran</p>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate font-mono tabular-nums">
-              Rp {totalExpense.toLocaleString()}
+          <div className="min-w-0">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#ea580c]">Total Pengeluaran</p>
+            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight truncate font-mono tabular-nums">
+              Rp {totalExpense.toLocaleString('id-ID')}
             </h3>
           </div>
         </motion.div>
       </div>
 
-      {/* Charts Section */}
-      <motion.div variants={itemVariants} className="bg-white p-4 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-100 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <h3 className="text-lg sm:text-xl font-semibold text-slate-900 flex items-center gap-2"><TrendingUp size={20} className="text-indigo-600"/> Analitik Arus Kas</h3>
-          <div className="flex gap-3">
-             <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Income</span>
-             <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500"><div className="w-2 h-2 rounded-full bg-rose-500"></div> Expense</span>
+      {/* Collapsible Charts Section */}
+      <motion.div variants={itemVariants} className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-100 shadow-2xs">
+        <div className="flex items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => setShowChart(!showChart)}
+            className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-800 hover:text-indigo-600 transition-colors cursor-pointer"
+          >
+            <TrendingUp size={16} className="text-indigo-600"/>
+            <span>Grafik Analitik Arus Kas (6 Bulan Terakhir)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowChart(!showChart)}
+            className="px-3 py-1 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-[11px] font-bold text-slate-600 transition-colors cursor-pointer"
+          >
+            {showChart ? 'Sembunyikan Grafik' : 'Tampilkan Grafik'}
+          </button>
+        </div>
+        {showChart && (
+          <div className="h-[220px] sm:h-[260px] w-full mt-4 pt-3 border-t border-slate-100">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}} tickFormatter={(val) => `Rp${val/1000}k`} />
+                <Tooltip 
+                  cursor={{fill: '#f8fafc'}}
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '12px' }}
+                  labelStyle={{ fontWeight: 'bold', color: '#1e293b', marginBottom: '4px' }}
+                />
+                <Bar dataKey="Income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
+                <Bar dataKey="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        </div>
-        <div className="h-[250px] sm:h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 600, fill: '#94a3b8'}} tickFormatter={(val) => `Rp${val/1000}k`} />
-              <Tooltip 
-                cursor={{fill: '#f8fafc'}}
-                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '12px' }}
-                labelStyle={{ fontWeight: 'bold', color: '#1e293b', marginBottom: '4px' }}
-              />
-              <Bar dataKey="Income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />
-              <Bar dataKey="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={20} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        )}
       </motion.div>
 
       {/* Table Section */}
