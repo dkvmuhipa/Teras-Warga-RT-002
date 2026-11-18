@@ -384,7 +384,7 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
       )}
 
       {/* Dynamic & Interactive Modern Quick Sort Pill-tray for ALL Devices */}
-      <div className="bg-slate-50/50 backdrop-blur-md rounded-2xl border border-slate-150 p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="md:hidden bg-slate-50/50 backdrop-blur-md rounded-2xl border border-slate-150 p-3 flex flex-col items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 bg-indigo-50 border border-indigo-100/65 rounded-xl flex items-center justify-center text-indigo-605 shadow-sm shrink-0">
             <ArrowUpDown size={14} className="stroke-[2.5]" />
@@ -955,32 +955,6 @@ export const ResidentTableView: React.FC<ResidentTableViewProps> = ({
                                     <span>🪪</span>
                                     <span>{(house.ktpStatus === 'Sesuai Domisili' || (!house.ktpStatus && house.addressKtp && (house.addressKtp.toLowerCase().includes('tondo') || house.addressKtp.toLowerCase().includes('pue lombe')))) ? (currentTenant ? `KTP RT ${currentTenant.rt}` : 'KTP Lokal') : 'KTP Luar'}</span>
                                   </span>
-
-                                  {/* BPBD Huntap Certificate Status Quick Indicator & Toggle */}
-                                  <button
-                                    type="button"
-                                    onClick={async (e) => {
-                                      e.stopPropagation();
-                                      const nextCert = (house.certificateStatus === 'Ya')
-                                        ? 'Dalam Proses'
-                                        : (house.certificateStatus === 'Dalam Proses')
-                                          ? 'Tidak'
-                                          : 'Ya';
-                                      await handleUpdateHouse(house.id, { certificateStatus: nextCert });
-                                      toast.success(`Sertifikat BPBD No. ${house.number}: ${nextCert === 'Ya' ? 'Bersertifikat' : nextCert === 'Dalam Proses' ? 'Dalam Proses' : 'Belum Ada'}`);
-                                    }}
-                                    className={`inline-flex items-center gap-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded border transition-colors hover:opacity-80 active:scale-95 ${
-                                      house.certificateStatus === 'Ya'
-                                        ? 'bg-teal-50 text-teal-700 border-teal-200'
-                                        : house.certificateStatus === 'Dalam Proses'
-                                          ? 'bg-sky-50 text-sky-700 border-sky-200'
-                                          : 'bg-amber-50/90 text-amber-800 border-amber-200'
-                                    }`}
-                                    title={`Status Sertifikat BPBD: ${house.certificateStatus === 'Ya' ? 'Bersertifikat' : house.certificateStatus === 'Dalam Proses' ? 'Dalam Proses BPN' : 'Belum Ada'} (Klik untuk rotasi)`}
-                                  >
-                                    <span>{house.certificateStatus === 'Ya' ? '📜' : house.certificateStatus === 'Dalam Proses' ? '⏳' : '⚠️'}</span>
-                                    <span>{house.certificateStatus === 'Ya' ? 'Sertifikat' : house.certificateStatus === 'Dalam Proses' ? 'Proses BPN' : 'Belum Sertifikat'}</span>
-                                  </button>
                                 </div>
                               )}
                             </div>

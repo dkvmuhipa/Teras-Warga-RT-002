@@ -108,7 +108,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
           {/* Collapsible Selector Toggle for Mobile Filters */}
           <button
             onClick={() => setShowFiltersMobile(!showFiltersMobile)}
-            className={`lg:hidden flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-colors active:scale-95 shrink-0 ${
+            className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-2xl border transition-colors active:scale-95 shrink-0 cursor-pointer ${
               showFiltersMobile || activeFiltersCount > 0
                 ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-extrabold shadow-sm'
                 : 'bg-white border-slate-200 text-slate-600 font-bold hover:bg-slate-50'
@@ -159,8 +159,8 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
 
       {/* 2. Responsive Filters Block */}
       <AnimatePresence initial={false}>
-        {(showFiltersMobile || !showFiltersMobile) && (
-          <div className={`${showFiltersMobile ? 'block' : 'hidden lg:block'}`}>
+        {showFiltersMobile && (
+          <div>
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -170,7 +170,7 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal size={14} className="text-indigo-650" />
-                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-widest">Prameter Filter Lanjutan</h4>
+                  <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-widest">Filter Lanjutan</h4>
                 </div>
                 {activeFiltersCount > 0 && (
                   <button 
@@ -271,25 +271,26 @@ export const ResidentControls: React.FC<ResidentControlsProps> = ({
         )}
       </AnimatePresence>
 
-      {/* 3. Dynamic Interactive Info / Badge Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between px-4 py-3 bg-slate-50/70 border border-slate-100 rounded-2xl text-[10px] font-semibold text-slate-550 uppercase tracking-widest shadow-xs">
-        <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 rounded-full bg-emerald-500 shrink-0"></span>
-          <span>
-            Filter Aktif: <span className="text-indigo-600 bg-white border border-slate-100 px-2 py-0.5 rounded-lg shadow-xs overflow-hidden max-w-[150px] inline-block truncate align-bottom font-semibold">{filterStatus === 'all' ? 'semua warga' : filterStatus}</span>
-          </span>
-        </div>
-        <div className="flex items-center justify-between sm:justify-end gap-3.5 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/55">
-          <div className="flex -space-x-1 overflow-hidden">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[7px] font-semibold text-indigo-600 shadow-xs uppercase">RT</div>
-            ))}
+      {/* 3. Active Filter Pill Bar (Only shown when filters are active) */}
+      {activeFiltersCount > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-indigo-50/70 border border-indigo-100 rounded-2xl text-[11px] font-semibold text-indigo-800">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="flex h-2 w-2 rounded-full bg-indigo-500 shrink-0"></span>
+            <span>Filter aktif:</span>
+            {filterStatus !== 'all' && <span className="bg-white border border-indigo-200 px-2 py-0.5 rounded-lg text-[10px] font-bold">{filterStatus}</span>}
+            {filterResidenceType !== 'all' && <span className="bg-white border border-indigo-200 px-2 py-0.5 rounded-lg text-[10px] font-bold">{filterResidenceType}</span>}
+            {filterBlock !== 'all' && <span className="bg-white border border-indigo-200 px-2 py-0.5 rounded-lg text-[10px] font-bold">Blok {filterBlock}</span>}
+            {sortBy !== 'block' && <span className="bg-white border border-indigo-200 px-2 py-0.5 rounded-lg text-[10px] font-bold">Urut: {sortBy}</span>}
           </div>
-          <span className="text-right">
-            terverifikasi: <span className="text-slate-800 font-extrabold">142 Keluarga</span>
-          </span>
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className="text-[10px] font-bold text-rose-600 hover:text-rose-700 bg-white border border-rose-200 px-2.5 py-1 rounded-xl transition-colors cursor-pointer"
+          >
+            Reset Filter
+          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 };

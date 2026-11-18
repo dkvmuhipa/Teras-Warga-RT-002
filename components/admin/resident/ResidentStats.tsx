@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Users, Home, ShieldCheck, UserMinus, Activity, Sparkles } from 'lucide-react';
+import { Users, Home, ShieldCheck, UserMinus } from 'lucide-react';
 
 interface ResidentStatsProps {
   totalResidents: number;
@@ -23,169 +23,103 @@ export const ResidentStats: React.FC<ResidentStatsProps> = ({
   ktpExternalCount = 0,
   onFilterKtp
 }) => {
+  const localPct = Math.round((ktpLocalCount / (occupiedHouses || 1)) * 100);
+  const externalPct = Math.round((ktpExternalCount / (occupiedHouses || 1)) * 100);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-12 gap-5">
-      {/* Executive Light Hero Card */}
-      <motion.div 
-        variants={itemVariants}
-        whileHover={{ y: -3 }}
-        className="md:col-span-2 xl:col-span-6 bg-gradient-to-br from-indigo-50/90 via-white to-slate-50/80 p-7 md:p-8 rounded-[2.5rem] border border-indigo-100/80 shadow-sm flex flex-col justify-between group transition-colors relative overflow-hidden"
-      >
-        <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/10 transition-colors duration-700"></div>
-        
-        <div className="relative z-10 flex justify-between items-start mb-6">
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
-              <span className="text-[10px] font-semibold text-indigo-700 uppercase tracking-[0.25em]">Smart Citizen Database</span>
-            </div>
-            <p className="text-xs font-semibold text-slate-400">Pusat Terpadu Kependudukan RT 02</p>
+    <motion.div 
+      variants={itemVariants}
+      className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-3 sm:p-4"
+    >
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-2.5 sm:gap-3 items-center">
+        {/* Populasi */}
+        <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-indigo-50/50 border border-indigo-100/70">
+          <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <Users size={16} />
           </div>
-          <div className="p-3 bg-white border border-indigo-100/80 rounded-2xl shadow-sm text-indigo-600 group-hover:scale-105 transition-transform">
-            <Users size={20} />
-          </div>
-        </div>
-
-        <div className="relative z-10">
-          <div className="flex items-end gap-3.5">
-            <h3 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-slate-900 leading-none">{totalResidents}</h3>
-            <div className="mb-0.5">
-              <span className="block text-indigo-600 font-extrabold text-[10px] uppercase tracking-widest mb-0.5">Populasi Resmi</span>
-              <span className="block text-slate-800 font-extrabold text-base uppercase tracking-tight leading-none">Jiwa Terdaftar</span>
-            </div>
-          </div>
-          
-          <div className="mt-6 pt-5 border-t border-slate-200/60 flex flex-wrap gap-6 text-[10px] font-bold text-slate-500">
-             <div className="flex items-center gap-1.5">
-               <ShieldCheck size={14} className="text-indigo-600" />
-               <span>{verifiedCount} Jiwa Terverifikasi Admin</span>
-             </div>
-             <div className="flex items-center gap-1.5">
-               <Activity size={14} className="text-emerald-600" />
-               <span>Integrasi Real-time Warga</span>
-             </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Verified Citizens Card */}
-      <motion.div 
-        variants={itemVariants} 
-        whileHover={{ y: -3 }}
-        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-indigo-200 transition-colors relative overflow-hidden"
-      >
-        <div className="relative z-10 flex justify-between items-start mb-6">
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-sm">
-            <ShieldCheck size={20} />
-          </div>
-          <span className="text-[9px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100/80 px-2.5 py-1 rounded-full uppercase tracking-wider">Valid</span>
-        </div>
-        <div className="relative z-10">
-          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Verifikasi Admin</p>
-          <h3 className="text-3xl font-extrabold text-slate-900 leading-none">{verifiedCount} <span className="text-xs font-bold text-slate-400">Jiwa</span></h3>
-        </div>
-      </motion.div>
-
-      {/* Occupied Houses Card */}
-      <motion.div 
-        variants={itemVariants} 
-        whileHover={{ y: -3 }}
-        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-emerald-200 transition-colors relative overflow-hidden"
-      >
-        <div className="relative z-10 flex justify-between items-start mb-6">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 group-hover:bg-emerald-600 group-hover:text-white transition-colors shadow-sm">
-            <Home size={20} />
-          </div>
-          <span className="text-[9px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100/80 px-2.5 py-1 rounded-full uppercase tracking-wider">Aktif</span>
-        </div>
-        <div className="relative z-10">
-          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Hunian Terisi</p>
-          <h3 className="text-3xl font-extrabold text-slate-900 leading-none">{occupiedHouses} <span className="text-xs font-bold text-slate-400">Unit</span></h3>
-        </div>
-      </motion.div>
-
-      {/* Empty Houses Card */}
-      <motion.div 
-        variants={itemVariants} 
-        whileHover={{ y: -3 }}
-        className="md:col-span-1 xl:col-span-2 bg-white p-6 rounded-[2.5rem] border border-slate-200/80 shadow-sm flex flex-col justify-between group hover:shadow-md hover:border-slate-300 transition-colors relative overflow-hidden"
-      >
-        <div className="relative z-10 flex justify-between items-start mb-6">
-          <div className="p-3 bg-slate-100 text-slate-500 rounded-2xl border border-slate-200 group-hover:bg-slate-900 group-hover:text-white transition-colors shadow-sm">
-            <UserMinus size={20} />
-          </div>
-          <span className="text-[9px] font-extrabold text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full uppercase tracking-wider">Kosong</span>
-        </div>
-        <div className="relative z-10">
-          <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Hunian Kosong</p>
-          <h3 className="text-3xl font-extrabold text-slate-900 leading-none">{emptyHouses} <span className="text-xs font-bold text-slate-400">Unit</span></h3>
-        </div>
-      </motion.div>
-
-      {/* Disdukcapil KTP Population Compliance Widget */}
-      <motion.div
-        variants={itemVariants}
-        className="col-span-1 md:col-span-4 xl:col-span-12 bg-white/90 backdrop-blur-sm p-4 sm:p-5 rounded-[2rem] border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100/80 text-indigo-600 flex items-center justify-center shrink-0 shadow-2xs">
-            <span className="text-lg">🪪</span>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">
-                Status Kesesuaian KTP Warga RT 02 (Laporan Disdukcapil / Kelurahan)
-              </h4>
-              <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                {occupiedHouses} KK Dihuni
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 font-medium">
-              Monitoring ketertiban mutasi kependudukan warga Huntap Tondo 2 Jl. Pue Lombe. Klik untuk filter cepat data warga.
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider truncate">Total Warga</p>
+            <p className="text-lg font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+              {totalResidents} <span className="text-[11px] font-semibold text-slate-500 font-sans">Jiwa</span>
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto shrink-0">
-          {/* KTP Setempat Button */}
-          <button
-            type="button"
-            onClick={() => onFilterKtp?.('ktp_local')}
-            className="flex-1 md:flex-none flex items-center justify-between md:justify-start gap-2.5 px-3.5 py-2 rounded-xl bg-emerald-50/80 hover:bg-emerald-100/80 border border-emerald-200/80 text-emerald-800 transition-colors cursor-pointer active:scale-95 text-left group"
-            title="Klik untuk filter warga KTP Setempat RT 02"
-          >
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span className="text-xs font-semibold">KTP Setempat (RT 02)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-semibold text-emerald-900">{ktpLocalCount}</span>
-              <span className="text-[10px] font-bold text-emerald-600 bg-white/80 px-1.5 py-0.5 rounded-md border border-emerald-200">
-                {Math.round((ktpLocalCount / (occupiedHouses || 1)) * 100)}%
-              </span>
-            </div>
-          </button>
-
-          {/* KTP Luar Wilayah Button */}
-          <button
-            type="button"
-            onClick={() => onFilterKtp?.('ktp_external')}
-            className="flex-1 md:flex-none flex items-center justify-between md:justify-start gap-2.5 px-3.5 py-2 rounded-xl bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200/80 text-amber-800 transition-colors cursor-pointer active:scale-95 text-left group"
-            title="Klik untuk filter warga KTP Luar Wilayah (Belum Mutasi)"
-          >
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className="text-xs font-semibold">Luar Wilayah (Belum Mutasi)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-semibold text-amber-900">{ktpExternalCount}</span>
-              <span className="text-[10px] font-bold text-amber-600 bg-white/80 px-1.5 py-0.5 rounded-md border border-amber-200">
-                {Math.round((ktpExternalCount / (occupiedHouses || 1)) * 100)}%
-              </span>
-            </div>
-          </button>
+        {/* Terverifikasi */}
+        <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50/70 border border-slate-200/60">
+          <div className="w-9 h-9 rounded-xl bg-white text-indigo-600 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
+            <ShieldCheck size={16} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate">Terverifikasi</p>
+            <p className="text-lg font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+              {verifiedCount} <span className="text-[11px] font-semibold text-slate-400 font-sans">Jiwa</span>
+            </p>
+          </div>
         </div>
-      </motion.div>
-    </div>
+
+        {/* Hunian Terisi */}
+        <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-emerald-50/50 border border-emerald-100/70">
+          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+            <Home size={16} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider truncate">Hunian Terisi</p>
+            <p className="text-lg font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+              {occupiedHouses} <span className="text-[11px] font-semibold text-slate-500 font-sans">Unit</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Hunian Kosong */}
+        <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50/70 border border-slate-200/60">
+          <div className="w-9 h-9 rounded-xl bg-white text-slate-500 border border-slate-200 flex items-center justify-center shrink-0 shadow-2xs">
+            <UserMinus size={16} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider truncate">Kosong</p>
+            <p className="text-lg font-extrabold text-slate-900 font-mono tabular-nums leading-tight">
+              {emptyHouses} <span className="text-[11px] font-semibold text-slate-400 font-sans">Unit</span>
+            </p>
+          </div>
+        </div>
+
+        {/* KTP Setempat (Quick Filter) */}
+        <button
+          type="button"
+          onClick={() => onFilterKtp?.('ktp_local')}
+          className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-emerald-50/70 hover:bg-emerald-100/70 border border-emerald-200/70 text-left transition-colors cursor-pointer active:scale-[0.99]"
+          title="Klik untuk filter warga KTP Setempat RT 02"
+        >
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider truncate flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              KTP Lokal
+            </p>
+            <p className="text-base font-extrabold text-emerald-950 font-mono tabular-nums leading-tight mt-0.5">
+              {ktpLocalCount} <span className="text-[10px] font-bold text-emerald-700">({localPct}%)</span>
+            </p>
+          </div>
+        </button>
+
+        {/* KTP Luar Wilayah (Quick Filter) */}
+        <button
+          type="button"
+          onClick={() => onFilterKtp?.('ktp_external')}
+          className="flex items-center justify-between gap-2 p-2.5 rounded-2xl bg-amber-50/70 hover:bg-amber-100/70 border border-amber-200/70 text-left transition-colors cursor-pointer active:scale-[0.99]"
+          title="Klik untuk filter warga KTP Luar Wilayah"
+        >
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wider truncate flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+              KTP Luar
+            </p>
+            <p className="text-base font-extrabold text-amber-950 font-mono tabular-nums leading-tight mt-0.5">
+              {ktpExternalCount} <span className="text-[10px] font-bold text-amber-700">({externalPct}%)</span>
+            </p>
+          </div>
+        </button>
+      </div>
+    </motion.div>
   );
 };
