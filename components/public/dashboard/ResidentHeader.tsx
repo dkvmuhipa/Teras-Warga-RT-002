@@ -57,20 +57,16 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
 
   return (
     <>
-      {/* Modern Civic Hero Header */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-slate-800/80 p-6 md:p-8 text-white shadow-xl shadow-indigo-950/20 mb-6">
-        {/* Ambient Glows */}
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="flex items-start md:items-center gap-4">
+      {/* Compact Civic Hero Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-slate-800/80 p-4 sm:p-5 text-white shadow-lg mb-4">
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="flex items-start md:items-center gap-3.5">
             {/* Avatar Initials / Icon */}
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xl font-semibold shadow-lg shadow-indigo-500/25 border border-white/20 shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-base font-bold shadow-md border border-white/20 shrink-0">
               {currentHouse?.headOfFamily ? (
                 currentHouse.headOfFamily.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
               ) : (
-                <User size={28} />
+                <User size={22} />
               )}
             </div>
 
@@ -78,7 +74,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
               {/* Contextual Greeting & Date */}
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${greeting.color}`}>
-                  <GreetingIcon size={12} />
+                  <GreetingIcon size={11} />
                   <span>{greeting.text}</span>
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">
@@ -87,12 +83,12 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
               </div>
 
               {/* Title & House Block */}
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                   {currentHouse?.headOfFamily ? currentHouse.headOfFamily : (selectedHouseId ? 'Warga RT 02' : 'Portal Layanan Warga')}
                 </h2>
                 {selectedHouseId && (
-                  <span className="px-3 py-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-xl text-xs font-semibold uppercase tracking-widest text-indigo-200 border border-white/15">
+                  <span className="px-2.5 py-0.5 bg-white/10 rounded-lg text-xs font-bold font-mono tabular-nums text-indigo-200 border border-white/15">
                     Blok {currentHouse?.block}-{currentHouse?.number}
                   </span>
                 )}
@@ -100,65 +96,60 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
 
               {/* Status Pills */}
               {selectedHouseId && (
-                <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-semibold">
-                    <Home size={12} className="text-indigo-400" />
-                    <span>Status: <strong>{currentHouse?.residenceType || 'Tetap'}</strong></span>
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-xs">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[10.5px] font-semibold">
+                    <Home size={11} className="text-indigo-400" />
+                    <span>{currentHouse?.residenceType || 'Tetap'}</span>
                   </span>
-                  <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg border text-[11px] font-semibold ${
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10.5px] font-semibold ${
                     currentHouse?.isVerified 
                       ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' 
                       : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
                   }`}>
-                    <CheckCircle size={12} />
-                    <span>{currentHouse?.isVerified ? 'Data KK Terverifikasi' : 'Perlu Verifikasi KK'}</span>
+                    <CheckCircle size={11} />
+                    <span>{currentHouse?.isVerified ? 'KK Terverifikasi' : 'Perlu Verifikasi KK'}</span>
                   </span>
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[11px] font-semibold">
-                    <Shield size={12} className="text-sky-400" />
-                    <span>{currentHouse?.rondaExempt ? 'Bebas Ronda Siskamling' : 'Wajib Ronda Aktif'}</span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-[10.5px] font-semibold">
+                    <Shield size={11} className="text-sky-400" />
+                    <span>{currentHouse?.rondaExempt ? 'Bebas Ronda' : 'Wajib Ronda'}</span>
                   </span>
-                </div>
-              )}
-
-              {currentHouse && (
-                <div className="pt-1">
-                  <CivicScoreBadge house={currentHouse} size="sm" />
+                  {currentHouse && <CivicScoreBadge house={currentHouse} size="sm" showDetails={false} />}
                 </div>
               )}
             </div>
           </div>
 
           {/* Sesi & Quick Modal Controls */}
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end pt-3 md:pt-0 border-t border-white/10 md:border-t-0">
+          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end pt-2.5 md:pt-0 border-t border-white/10 md:border-t-0">
             {selectedHouseId ? (
               <>
                 <button
                   onClick={() => setIsIuranModalOpen(true)}
-                  className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 transition-colors cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 transition-colors cursor-pointer"
                 >
-                  <CreditCard size={14} />
+                  <CreditCard size={13} />
                   <span>Rincian Iuran</span>
                 </button>
                 <button
                   onClick={() => setIsReportModalOpen(true)}
-                  className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 transition-colors cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 transition-colors cursor-pointer"
                 >
-                  <AlertTriangle size={14} />
+                  <AlertTriangle size={13} />
                   <span>Buat Aduan</span>
                 </button>
                 <button 
                   onClick={handleLogout}
-                  className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider bg-white/10 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/40 border border-white/15 transition-colors cursor-pointer text-slate-300"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-rose-500/20 hover:text-rose-300 hover:border-rose-500/40 border border-white/15 transition-colors cursor-pointer text-slate-300"
                   title="Keluar dari sesi warga"
                 >
-                  <LogOut size={14} />
+                  <LogOut size={13} />
                   <span>Keluar</span>
                 </button>
               </>
             ) : (
               <button 
                 onClick={() => setActiveTab('eid')}
-                className="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-semibold uppercase tracking-widest hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-colors cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-sm transition-colors cursor-pointer"
               >
                 <QrCode size={14} /> Masuk Portal Warga (PIN)
               </button>
@@ -168,7 +159,7 @@ export const ResidentHeader: React.FC<ResidentHeaderProps> = ({
       </div>
 
       {/* Tabs with Dynamic Badges */}
-      <div className="flex items-center gap-2 bg-slate-100/90 p-1.5 border border-slate-200/60 rounded-3xl mb-8 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-1.5 bg-slate-100/90 p-1.5 border border-slate-200/60 rounded-2xl mb-5 overflow-x-auto no-scrollbar">
         {[
           { id: 'eid', label: 'E-ID & Profil', shortLabel: 'E-ID', icon: QrCode, badge: null, badgeColor: '' },
           { 

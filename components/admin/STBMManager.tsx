@@ -351,66 +351,57 @@ export const STBMManager: React.FC<STBMManagerProps> = ({ houses }) => {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16">
-      {/* 1. EXECUTIVE HEADER BANNER */}
-      <div className="relative overflow-hidden bg-slate-900 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 text-white shadow-sm border border-slate-800">
-        {/* Ambient Decorative Lighting */}
-        
-
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3">
-            {/* Meta Tags */}
+    <div className="space-y-4 max-w-7xl mx-auto pb-12">
+      {/* 1. COMPACT EXECUTIVE HEADER BANNER */}
+      <div className="relative overflow-hidden bg-slate-900 rounded-3xl p-4 sm:p-5 text-white shadow-sm border border-slate-800">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="space-y-1.5">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-[11px] font-bold tracking-wide uppercase backdrop-blur-md">
-                <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
-                Dinas Kesehatan Kota Palu & Kelurahan Tondo
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full text-[10px] font-bold tracking-wide uppercase">
+                <CheckSquare className="w-3 h-3 text-emerald-400" />
+                Dinkes Kota Palu &amp; Kel. Tondo
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 text-slate-200 border border-white/15 rounded-full text-[11px] font-semibold backdrop-blur-md">
-                RT 002 / RW 020 Huntap Tondo 2
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-800/80 text-emerald-400 border border-emerald-500/30 rounded-full text-[10px] font-mono">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                {syncStatus === 'syncing' ? 'Menyinkronkan...' : 'Cloud Firestore Aktif'}
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-800/80 text-emerald-400 border border-emerald-500/30 rounded-full text-[10px] font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                {syncStatus === 'syncing' ? 'Menyinkronkan...' : 'Cloud Aktif'}
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-white flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
               <span>Pendataan 5 Pilar STBM</span>
-              <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-500 text-slate-950 rounded-lg uppercase tracking-wider">
+              <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-500 text-slate-950 rounded-md uppercase tracking-wider">
                 100% ODF
               </span>
             </h1>
 
-            <p className="text-emerald-100/80 text-xs sm:text-sm max-w-3xl leading-relaxed">
-              Instrumen pengawasan sanitasi lingkungan berbasis masyarakat merujuk <strong>Permenkes No. 3 Tahun 2014</strong>. 
-              Memantau status Stop BABS, Cuci Tangan Pakai Sabun, PAMM-RT, pemilahan sampah TPS3R, serta pengolahan air limbah domestik terpusat (SPALDT).
+            <p className="text-emerald-100/80 text-xs max-w-2xl">
+              Monitoring Stop BABS, CTPS, PAMM-RT, pemilahan sampah TPS3R, dan air limbah SPALDT (Permenkes No. 3/2014).
             </p>
           </div>
 
-          {/* Header Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
               onClick={handleAutoFillHuntap}
               disabled={isSaving}
-              className="px-4 py-2.5 bg-emerald-800/60 hover:bg-emerald-700/80 text-emerald-100 border border-emerald-500/40 rounded-xl text-xs font-bold transition-colors shadow-sm flex items-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer backdrop-blur-md"
+              className="px-3.5 py-2 bg-emerald-800/60 hover:bg-emerald-700/80 text-emerald-100 border border-emerald-500/40 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 active:scale-95 disabled:opacity-50 cursor-pointer"
               title="Terapkan spesifikasi sanitasi baku Huntap Tondo 2 ke seluruh kavling"
             >
-              <Sparkles className="w-4 h-4 text-amber-300" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               <span>{isSaving ? 'Menyimpan...' : 'Setel Standar Huntap'}</span>
             </button>
 
             <button
               onClick={handleExportExcel}
               disabled={isExporting}
-              className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-xs font-semibold uppercase tracking-wider transition-colors shadow-lg shadow-2xs flex items-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 active:scale-95 disabled:opacity-50 cursor-pointer"
             >
-              <FileSpreadsheet className="w-4 h-4 text-slate-950" />
-              <span>{isExporting ? 'Mengunduh...' : 'Unduh Excel Resmi'}</span>
+              <FileSpreadsheet className="w-3.5 h-3.5 text-slate-950" />
+              <span>{isExporting ? 'Mengunduh...' : 'Unduh Excel'}</span>
             </button>
 
             <button
               onClick={handlePrint}
-              className="p-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs transition-colors active:scale-95 cursor-pointer"
+              className="p-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl text-xs transition-colors active:scale-95 cursor-pointer"
               title="Cetak formulir laporan"
             >
               <Printer className="w-4 h-4" />

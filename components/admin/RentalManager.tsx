@@ -728,49 +728,47 @@ _Pengurus RT 002 Huntap Tondo 2_`;
   };
 
   return (
-    <div className="space-y-6 text-left">
-      {/* Header Banner */}
-      <div className="bg-slate-900 rounded-3xl md:rounded-[2.5rem] p-6 sm:p-8 text-white relative overflow-hidden shadow-sm border border-slate-800">
-        
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold uppercase tracking-widest">
-              <Building size={12} className="text-indigo-400" />
+    <div className="space-y-4 text-left">
+      {/* Compact Header Banner */}
+      <div className="bg-slate-900 rounded-3xl p-4 sm:p-5 text-white relative overflow-hidden shadow-sm border border-slate-800">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[10px] font-semibold uppercase tracking-wider">
+              <Building size={11} className="text-indigo-400" />
               <span>Pengawasan &amp; Registrasi Hunian Sewa</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white font-serif">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
               Buku Registrasi Kontrakan &amp; Rumah Sewa
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
-              Pusat monitoring tertib hunian sewa RT 002 Huntap Tondo 2. Menghubungkan kontak pemilik asli (induk semang) dengan data penyewa aktif, periode masa kontrak, dan verifikasi berkas KTP/KK.
+            <p className="text-xs text-slate-300 font-medium">
+              Monitoring tertib hunian sewa RT 002, kontak pemilik asli, masa kontrak, dan verifikasi KTP/KK penyewa.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={handleSyncDbHouses}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 rounded-2xl text-[11px] font-semibold uppercase tracking-wider shadow-lg shadow-2xs active:scale-95 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
               title="Sinkronkan seluruh data rumah sewa dari basis data kependudukan RT 02 ke buku kontrak"
             >
-              <Sparkles size={14} className="text-slate-950" />
-              <span>Sinkronkan Data Warga Real</span>
+              <Sparkles size={13} />
+              <span>Sinkron Warga</span>
             </button>
 
             <button
               onClick={handleBatchSyncToResidents}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-indigo-600/60 hover:bg-indigo-600 text-white rounded-2xl text-[11px] font-semibold uppercase tracking-wider border border-indigo-400/30 active:scale-95 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600/70 hover:bg-indigo-600 text-white rounded-xl text-[11px] font-bold border border-indigo-400/30 transition-colors cursor-pointer"
               title="Sinkronkan seluruh data kontrakan ini ke Buku Induk Kependudukan Warga RT 02"
             >
-              <RefreshCw size={14} />
-              <span>Sinkronkan ke Data Warga</span>
+              <RefreshCw size={13} />
+              <span>Ke Buku Induk</span>
             </button>
 
             <button
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-[11px] font-semibold uppercase tracking-wider border border-white/10 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[11px] font-bold border border-white/10 transition-colors cursor-pointer"
             >
-              <Download size={14} />
+              <Download size={13} />
               <span>CSV</span>
             </button>
 
@@ -779,87 +777,82 @@ _Pengurus RT 002 Huntap Tondo 2_`;
                 setSelectedRentalForPrint(filteredRentals[0] || rentals[0]);
                 setIsPrintModalOpen(true);
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-[11px] font-semibold uppercase tracking-wider border border-white/10 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[11px] font-bold border border-white/10 transition-colors cursor-pointer"
             >
-              <Printer size={14} />
+              <Printer size={13} />
               <span>Cetak A4</span>
             </button>
 
             <button
               onClick={() => handleOpenAdd()}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-2xl text-[11px] font-semibold uppercase tracking-wider shadow-lg shadow-2xs active:scale-95 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl text-[11px] font-bold transition-colors cursor-pointer"
             >
-              <Plus size={15} />
+              <Plus size={14} />
               <span>Tambah Sewa</span>
             </button>
           </div>
         </div>
 
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-white/10">
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Rumah Kontrakan</span>
-            <span className="text-xl font-semibold text-white mt-0.5 block">{stats.totalHouses} Unit</span>
+        {/* Compact Quick Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 pt-3.5 border-t border-white/10 font-mono tabular-nums">
+          <div className="p-2.5 bg-white/5 rounded-xl border border-white/10">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Total Kontrakan</span>
+            <span className="text-lg font-bold text-white mt-0.5 block">{stats.totalHouses} Unit</span>
           </div>
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Penyewa Aktif (Total Jiwa)</span>
-            <span className="text-xl font-semibold text-emerald-400 mt-0.5 block">
+          <div className="p-2.5 bg-white/5 rounded-xl border border-white/10">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Penyewa Aktif</span>
+            <span className="text-lg font-bold text-emerald-400 mt-0.5 block">
               {stats.activeTenants} KK ({stats.totalOccupants} Jiwa)
             </span>
           </div>
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Kontrak Segera Berakhir</span>
-            <span className="text-xl font-semibold text-amber-400 mt-0.5 block">{stats.expiringSoon} Unit</span>
+          <div className="p-2.5 bg-white/5 rounded-xl border border-white/10">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Segera Berakhir</span>
+            <span className="text-lg font-bold text-amber-400 mt-0.5 block">{stats.expiringSoon} Unit</span>
           </div>
-          <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Lapor Mandiri Baru</span>
-            <span className={`text-xl font-semibold mt-0.5 block ${stats.pendingVerification > 0 ? 'text-rose-400 ' : 'text-slate-300'}`}>
+          <div className="p-2.5 bg-white/5 rounded-xl border border-white/10">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-sans">Lapor Mandiri</span>
+            <span className={`text-lg font-bold mt-0.5 block ${stats.pendingVerification > 0 ? 'text-rose-400' : 'text-slate-300'}`}>
               {stats.pendingVerification} Menunggu
             </span>
           </div>
         </div>
 
-        {/* Breakdown Komposisi Hunian: Keluarga vs Individu vs Rumah Kerabat */}
-        <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2.5 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Komposisi Hunian:</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
+        {/* Breakdown Komposisi Hunian */}
+        <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Filter Kategori:</span>
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={() => setFilterCategory(filterCategory === 'KELUARGA' ? 'ALL' : 'KELUARGA')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-semibold transition-colors cursor-pointer ${
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] font-semibold transition-colors cursor-pointer ${
                 filterCategory === 'KELUARGA'
-                  ? 'bg-emerald-500 text-slate-950 shadow-md shadow-2xs'
+                  ? 'bg-emerald-500 text-slate-950'
                   : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30'
               }`}
-              title="Klik untuk filter hanya hunian keluarga"
             >
-              <Users size={12} />
-              <span>👨‍👩‍👧 Dihuni Keluarga: {stats.familyCount} Unit</span>
+              <Users size={11} />
+              <span>Keluarga ({stats.familyCount})</span>
             </button>
             <button
               onClick={() => setFilterCategory(filterCategory === 'INDIVIDU' ? 'ALL' : 'INDIVIDU')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-semibold transition-colors cursor-pointer ${
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] font-semibold transition-colors cursor-pointer ${
                 filterCategory === 'INDIVIDU'
-                  ? 'bg-blue-500 text-white shadow-md shadow-2xs'
+                  ? 'bg-blue-500 text-white'
                   : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30'
               }`}
-              title="Klik untuk filter hanya hunian individu/kos"
             >
-              <User size={12} />
-              <span>Individu / Kos: {stats.individualCount} Unit</span>
+              <User size={11} />
+              <span>Individu / Kos ({stats.individualCount})</span>
             </button>
             <button
               onClick={() => setFilterCategory(filterCategory === 'RUMAH_KELUARGA' ? 'ALL' : 'RUMAH_KELUARGA')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-[11px] font-semibold transition-colors cursor-pointer ${
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10.5px] font-semibold transition-colors cursor-pointer ${
                 filterCategory === 'RUMAH_KELUARGA'
-                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-2xs'
+                  ? 'bg-amber-500 text-slate-950'
                   : 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30'
               }`}
-              title="Klik untuk filter hanya rumah kerabat / keluarga"
             >
-              <Home size={12} />
-              <span>Rumah Kerabat: {stats.relativeHouseCount} Unit</span>
+              <Home size={11} />
+              <span>Rumah Kerabat ({stats.relativeHouseCount})</span>
             </button>
           </div>
         </div>

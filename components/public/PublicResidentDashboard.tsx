@@ -710,7 +710,7 @@ export const PublicResidentDashboard: React.FC<PublicResidentDashboardProps> = (
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
+    <div className="max-w-7xl mx-auto px-4 py-5 space-y-5 animate-fade-in">
       <ResidentHeader
         currentHouse={currentHouse}
         selectedHouseId={selectedHouseId}
