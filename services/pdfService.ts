@@ -1533,7 +1533,9 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
   const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
   const currentYear = new Date().getFullYear();
   const cleanRtTag = config.rtName ? config.rtName.replace(/\s+/g, '') : 'RT.02/RW.020';
-  const nomorSurat = letter.letterNumber || `.../${cleanRtTag}/${currentMonthRoman}/${currentYear}`;
+  const rawNomor = letter.letterNumber || `.../${cleanRtTag}/${currentMonthRoman}/${currentYear}`;
+  // Bersihkan tanda kurung nyasar pada nomor surat (misal: SRBB(/017 -> SRBB/017)
+  const nomorSurat = rawNomor.replace(/\(\//g, '/').replace(/[()]/g, '');
   doc.text(`Nomor : ${nomorSurat}`, centerX, 57, { align: "center" });
 
   let cursorY = 66;

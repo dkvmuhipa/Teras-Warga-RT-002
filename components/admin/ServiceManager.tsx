@@ -167,6 +167,33 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
     }
   }, [letters, officialLetters, pdfConfig, setPdfConfig]);
   
+  // Helper generator kode nomor surat standar & bersih (bebas tanda kurung / karakter aneh)
+  const getCleanLetterCode = (typeStr: string): string => {
+    if (!typeStr) return 'SP';
+    const t = typeStr.toUpperCase();
+    if (t.includes('BULOG') || t.includes('BERAS')) return 'SRBB';
+    if (t.includes('NIKAH') || t.includes('N1')) return 'SPN';
+    if (t.includes('USAHA') || t.includes('SKDU')) return 'SKU';
+    if (t.includes('TIDAK MAMPU') || t.includes('SKTM')) return 'SKTM';
+    if (t.includes('DOMISILI')) return 'SKD';
+    if (t.includes('KEMATIAN')) return 'SKK';
+    if (t.includes('KELAHIRAN')) return 'SKL';
+    if (t.includes('PINDAH')) return 'SKP';
+    if (t.includes('WARIS')) return 'SKW';
+    if (t.includes('BERKELAKUAN BAIK') || t.includes('SKCK')) return 'SKBB';
+    if (t.includes('KERAMAIAN')) return 'SIK';
+    if (t.includes('KTP')) return 'SP-KTP';
+    if (t.includes('KK')) return 'SP-KK';
+
+    // Fallback: ambil huruf pertama hanya dari karakter alfanumerik (buang tanda kurung, garis miring, strip, dll.)
+    const cleanWords = typeStr
+      .replace(/[^a-zA-Z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 0);
+    const code = cleanWords.map(w => w[0].toUpperCase()).join('');
+    return code || 'SP';
+  };
+
   // Admin Form State
   const [adminForm, setAdminForm] = useState<Partial<LetterRequest>>({
     type: 'Surat Pengantar KTP',
@@ -257,13 +284,10 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
         const nextNum = maxNum + 1;
         const paddedNum = nextNum.toString().padStart(3, '0');
         
-        const words = selectedLetter.type.split(' ').filter(w => w.length > 0);
-        let letterCode = words.map(w => w[0].toUpperCase()).join('');
-        if (!letterCode) letterCode = 'S';
-        
+        const letterCode = getCleanLetterCode(selectedLetter.type);
         setLetterNumberInput(`${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
       } else if (selectedLetter.letterNumber) {
-        setLetterNumberInput(selectedLetter.letterNumber);
+        setLetterNumberInput(selectedLetter.letterNumber.replace(/\(\//g, '/').replace(/[()]/g, ''));
       }
     }
   }, [selectedLetter, pdfConfig.lastLetterNumber, pdfConfig.rtName, letters, officialLetters]);
@@ -294,10 +318,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       const nextNum = maxNum + 1;
       const paddedNum = nextNum.toString().padStart(3, '0');
       
-      const words = (adminForm.type || '').split(' ').filter(w => w.length > 0);
-      let letterCode = words.map(w => w[0].toUpperCase()).join('');
-      if (!letterCode) letterCode = 'S';
-      
+      const letterCode = getCleanLetterCode(adminForm.type || '');
       setAdminLetterNumber(`${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`);
     }
   }, [isCreatingLetter, adminForm.type, pdfConfig.lastLetterNumber, pdfConfig.rtName, letters, officialLetters]);
@@ -441,10 +462,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
       const currentMonthRoman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][new Date().getMonth()];
       const currentYear = new Date().getFullYear();
       
-      const words = (editLetterData.type || selectedLetter.type || 'S').split(' ').filter(w => w.length > 0);
-      let letterCode = words.map(w => w[0].toUpperCase()).join('');
-      if (!letterCode) letterCode = 'S';
-      
+      const letterCode = getCleanLetterCode(editLetterData.type || selectedLetter.type || 'S');
       const suggestedNumber = `${letterCode}/${paddedNum}/${pdfConfig.rtName.replace(/\s/g, '')}/${currentMonthRoman}/${currentYear}`;
       setLetterNumberInput(suggestedNumber);
       
