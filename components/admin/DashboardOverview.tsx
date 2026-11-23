@@ -365,10 +365,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   <AlertTriangle size={12} className="text-amber-500" />
                 </div>
                 <div className="text-base font-black font-mono tabular-nums text-slate-900">
-                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length + residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + newReports} <span className="text-[10px] font-sans font-bold text-slate-500">Item</span>
+                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length + residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + newReports} <span className="text-[10px] font-sans font-bold text-slate-500">Item</span>
                 </div>
                 <p className="text-[10px] text-amber-600 font-bold truncate mt-0.5">
-                  {newReports} Aduan · {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Surat
+                  {newReports} Aduan · {letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length} Surat
                 </p>
               </div>
             </div>
@@ -391,7 +391,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             </p>
           </div>
           <span className="text-xs font-bold font-mono px-3 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 w-fit">
-            {(residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length + newReports)} Item Menunggu
+            {(residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length + newReports)} Item Menunggu
           </span>
         </div>
 
@@ -403,12 +403,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-700">Permohonan Surat</span>
-                <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold font-mono ${letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
-                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Baru
+                <span className={`px-2.5 py-0.5 rounded-md text-xs font-bold font-mono ${letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length > 0 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  {letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length} Baru
                 </span>
               </div>
               <div className="text-xl font-extrabold font-mono tabular-nums text-slate-900">
-                {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length} Pengantar
+                {letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length} Pengantar
               </div>
               <p className="text-xs text-slate-600">
                 Verifikasi berkas &amp; tanda tangan elektronik surat warga.
@@ -556,7 +556,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             onClick={() => onTabChange('services')}
             className="bg-[#fff4eb] hover:bg-[#ffe6d4] border border-amber-100/70 rounded-2xl p-2.5 sm:p-3.5 flex flex-col items-center justify-center text-center gap-2 transition-colors shadow-2xs cursor-pointer group relative"
           >
-            {letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length > 0 && (
+            {letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length > 0 && (
               <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500" />
             )}
             <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white flex items-center justify-center text-[#ea580c] shadow-2xs group-hover:scale-105 transition-transform shrink-0">
@@ -867,7 +867,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
               <span className="text-xs font-extrabold text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-1 rounded-full uppercase tracking-wider">
                 {residentRegistrations.filter(r => r.approvalStatus === 'Pending').length + 
-                 letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length + 
+                 letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length + 
                  guestReports.filter(g => g.status === 'Active' || (g.status as any) === 'Pending').length} Butuh Aksi
               </span>
             </div>
@@ -899,7 +899,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
               {/* Item 2: Pengajuan Surat Pengantar */}
               {(() => {
-                const pendingLetters = letters.filter(l => l.status === 'Pending' || l.status === 'Baru').length;
+                const pendingLetters = letters.filter(l => l.status === 'Pending' || l.status === 'Baru' || l.status === 'Menunggu').length;
                 return (
                   <div 
                     onClick={() => onTabChange('services')}

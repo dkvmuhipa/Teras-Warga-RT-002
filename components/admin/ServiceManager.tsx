@@ -1457,6 +1457,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                               type="button"
                               onClick={() => {
                                 const defaultTemplates = [
+                                  { type: 'Surat Rekomendasi Bantuan Beras (Bulog)', suggestion: 'Bahwa yang bersangkutan adalah benar warga yang berdomisili sah di lingkungan RT kami dan berdasarkan verifikasi lingkungan tergolong KELUARGA LAYAK & MEMBUTUHKAN sebagai pengganti Penerima Bantuan Pangan Beras Cadangan Pemerintah (Bulog) di Kantor Kelurahan Tondo.' },
                                   { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
                                   { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
                                   { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
@@ -1493,6 +1494,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
 
                         <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1 custom-scrollbar">
                           {(pdfConfig.letterTemplates && pdfConfig.letterTemplates.length > 0 ? pdfConfig.letterTemplates : [
+                            { type: 'Surat Rekomendasi Bantuan Beras (Bulog)', suggestion: 'Bahwa yang bersangkutan adalah benar warga yang berdomisili sah di lingkungan RT kami dan berdasarkan verifikasi lingkungan tergolong KELUARGA LAYAK & MEMBUTUHKAN sebagai pengganti Penerima Bantuan Pangan Beras Cadangan Pemerintah (Bulog) di Kantor Kelurahan Tondo.' },
                             { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
                             { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
                             { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
@@ -2489,6 +2491,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           onChange={e => setEditLetterData({...editLetterData, type: e.target.value})}
                         >
                           {(pdfConfig.letterTemplates || [
+                            { type: 'Surat Rekomendasi Bantuan Beras (Bulog)' },
                             { type: 'Surat Pengantar' },
                             { type: 'Surat Pengantar KTP' },
                             { type: 'Surat Pengantar KK' },
@@ -2517,6 +2520,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                           type="button"
                           onClick={() => {
                             const defaultTemplates = [
+                              { type: 'Surat Rekomendasi Bantuan Beras (Bulog)', suggestion: 'Bahwa yang bersangkutan adalah benar warga yang berdomisili sah di lingkungan RT kami dan berdasarkan verifikasi lingkungan tergolong KELUARGA LAYAK & MEMBUTUHKAN sebagai pengganti Penerima Bantuan Pangan Beras Cadangan Pemerintah (Bulog) di Kantor Kelurahan Tondo.' },
                               { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
                               { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
                               { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
@@ -3032,6 +3036,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       onChange={e=>setAdminForm({...adminForm, type: e.target.value})}
                     >
                       {(pdfConfig.letterTemplates || [
+                        { type: 'Surat Rekomendasi Bantuan Beras (Bulog)' },
                         { type: 'Surat Pengantar' },
                         { type: 'Surat Pengantar KTP' },
                         { type: 'Surat Pengantar KK' },
@@ -3074,6 +3079,7 @@ export const ServiceManager: React.FC<ServiceManagerProps> = ({
                       type="button"
                       onClick={() => {
                         const defaultTemplates = [
+                          { type: 'Surat Rekomendasi Bantuan Beras (Bulog)', suggestion: 'Bahwa yang bersangkutan adalah benar warga yang berdomisili sah di lingkungan RT kami dan berdasarkan verifikasi lingkungan tergolong KELUARGA LAYAK & MEMBUTUHKAN sebagai pengganti Penerima Bantuan Pangan Beras Cadangan Pemerintah (Bulog) di Kantor Kelurahan Tondo.' },
                           { type: 'Surat Pengantar', suggestion: 'Surat ini diberikan untuk keperluan kelengkapan administrasi sebagai persyaratan [Sebutkan Keperluan, cth: melamar pekerjaan di PT. XYZ / pendaftaran sekolah / dll].' },
                           { type: 'Surat Pengantar KTP', suggestion: 'Surat pengantar ini dibuat sebagai kelengkapan administrasi dalam rangka permohonan pembuatan Kartu Tanda Penduduk (KTP) baru / perpanjangan KTP yang bersangkutan di tingkat Kelurahan/Kecamatan.' },
                           { type: 'Surat Pengantar KK', suggestion: 'Surat pengantar ini dibuat sebagai persyaratan untuk keperluan administrasi pengurusan / perubahan data / pembuatan Kartu Keluarga (KK) baru di tingkat Kelurahan.' },
