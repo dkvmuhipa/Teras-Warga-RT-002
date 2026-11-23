@@ -287,6 +287,12 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     } else if (tab && ['surat', 'lapor', 'tamu', 'mutasi', 'sewa', 'history'].includes(tab)) {
       setActiveTab(tab as any);
     }
+
+    const typeParam = searchParams.get('type') || searchParams.get('surat');
+    if (typeParam && (typeParam.toLowerCase().includes('bulog') || typeParam.toLowerCase().includes('beras'))) {
+      setRequestType('Surat Rekomendasi Bantuan Beras (Bulog)');
+      setActiveTab('surat');
+    }
   }, [searchParams]);
   
   // Form States
@@ -344,6 +350,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
     acc[curr.type] = curr.suggestion;
     return acc;
   }, {} as Record<string, string>) || {
+    'Surat Rekomendasi Bantuan Beras (Bulog)': 'Surat rekomendasi resmi Ketua RT sebagai prasyarat kuota pengganti penerima bantuan pangan beras cadangan pemerintah (Bulog) di Kantor Kelurahan Tondo.',
     'Surat Pengantar': 'Surat pengantar umum untuk berbagai keperluan administratif.',
     'Surat Pengantar KTP': 'Persyaratan permohonan pembuatan KTP baru / perpanjangan KTP di Kantor Kelurahan.',
     'Surat Pengantar KK': 'Persyaratan perubahan data Kartu Keluarga / penambahan anggota keluarga baru.',
@@ -361,6 +368,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   };
 
   const letterRequirements: Record<string, string[]> = {
+    'Surat Rekomendasi Bantuan Beras (Bulog)': ['Fotokopi Kartu Keluarga (KK)', 'KTP Asli Pemohon/Kepala Keluarga'],
     'Surat Pengantar': ['Fotokopi KTP', 'Fotokopi KK'],
     'Surat Pengantar KTP': ['Fotokopi Kartu Keluarga (KK)', 'KTP Lama (jika perpanjangan)', 'Pas Foto 3x4 (2 lembar)'],
     'Surat Pengantar KK': ['KK Asli', 'Surat Pindah (jika warga baru)', 'Akta Kelahiran/Nikah (jika tambah anggota)'],
@@ -382,6 +390,7 @@ export const PublicServices: React.FC<PublicServicesProps> = ({ pdfConfig, house
   const [lastLetterSubmissionTime, setLastLetterSubmissionTime] = useState<number>(0);
 
   const estimatedTimes: Record<string, string> = {
+    'Surat Rekomendasi Bantuan Beras (Bulog)': 'Prioritas (Hari Ini s.d. 17.00)',
     'Surat Pengantar': '1x24 Jam',
     'Surat Pengantar KTP': '1x24 Jam',
     'Surat Pengantar KK': '1-2 Hari Kerja',

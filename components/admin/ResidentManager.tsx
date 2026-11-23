@@ -296,7 +296,7 @@ export const ResidentManager: React.FC<ResidentManagerProps> = ({
     rondaDutyCount: 0,
     ownerRelationship: '',
     buildingCondition: 'Baik' as 'Baik' | 'Terlantar' | 'Tidak Terawat',
-    certificateStatus: 'Tidak' as 'Ya' | 'Tidak' | 'Dalam Proses',
+    certificateStatus: 'Tidak' as 'Ya' | 'Tidak' | 'Dalam Proses' | 'Belum',
     hasStructuralModification: false
   });
 

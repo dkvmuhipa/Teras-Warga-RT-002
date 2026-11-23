@@ -254,7 +254,7 @@ export interface House {
   // Format Khusus Verifikasi BPBD / Hunian Tetap (Huntap)
   ownerRelationship?: string; // Hubungan Penghuni dengan Pemilik/Penerima Bantuan (e.g. Pemilik Langsung, Anak, Penyewa, Famili)
   buildingCondition?: 'Baik' | 'Terlantar' | 'Tidak Terawat'; // Kondisi Bangunan Huntap
-  certificateStatus?: 'Ya' | 'Tidak' | 'Dalam Proses'; // Kepemilikan Sertifikat Huntap (ATR/BPN)
+  certificateStatus?: 'Ya' | 'Tidak' | 'Dalam Proses' | 'Belum'; // Kepemilikan Sertifikat Huntap (ATR/BPN)
   hasStructuralModification?: boolean; // Perubahan Bentuk / Alih Fungsi Fisik Bangunan Huntap
   
   // Smart Tagging & Occupancy History

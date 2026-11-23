@@ -1506,6 +1506,7 @@ export const generateSuratPengantar = async (letter: LetterRequest, customConfig
 
   const getDocumentTitle = (type: string) => {
     const t = type.toUpperCase();
+    if (t.includes('BULOG') || t.includes('BERAS') || t.includes('REKOMENDASI')) return "SURAT REKOMENDASI PENGANTAR";
     if (t.includes('KERAMAIAN')) return "SURAT IZIN KERAMAIAN";
     if (t.includes('NIKAH') || t.includes('N1')) return "SURAT PENGANTAR NIKAH (MODEL N1 - N4)";
     if (t.includes('USAHA') || t.includes('SKDU')) return "SURAT KETERANGAN DOMISILI USAHA (SKDU)";
